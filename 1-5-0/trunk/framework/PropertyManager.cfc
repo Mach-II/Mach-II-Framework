@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-$Id: PropertyManager.cfc 4516 2006-09-30 20:55:17Z pfarrell $
+$Id$
 
 Created version: 1.0.0
 Updated version: 1.1.1

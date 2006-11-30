@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
-$Id: XmlValidationException.cfc $
+$Id$
 
 Created version: 1.1.0
 --->

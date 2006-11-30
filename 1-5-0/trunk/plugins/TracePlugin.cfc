@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Peter J. Farrell (pjf@maestropublishing.com)
-$Id: TracePlugin.cfc 4496 2006-09-22 06:52:18Z pfarrell $
+$Id$
 
 Created version: 1.1.0
 Updated version: 1.1.1

@@ -15,10 +15,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-$Id: mach-ii.cfm 4785 2006-11-07 00:21:43Z pfarrell $
+$Id$
 
 Created version: 1.0.1
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 - Added XML configuration file validation parameters. (bedwards)

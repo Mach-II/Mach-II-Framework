@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-$Id: PluginManager.cfc 4466 2006-09-15 16:43:50Z pfarrell $
+$Id$
 
 Created version: 1.0.0
 Updated version: 1.1.0

@@ -16,10 +16,10 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Peter J. Farrell (pjf@maestropublishing.com)
-$Id: mach-ii.cfc 4785 2006-11-07 00:21:43Z pfarrell $
+$Id$
 
 Created version: 1.1.1
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Acknowledgement:
 Thank you to eCivis, Inc. for being the driving force behind 

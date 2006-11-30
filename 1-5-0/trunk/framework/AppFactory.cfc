@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-$Id: AppFactory.cfc 4352 2006-08-29 20:35:15Z pfarrell $
+$Id$
 
 Created version: 1.0.0
 Updated version: 1.1.1

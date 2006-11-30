@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
-$Id: Plugin.cfc 4352 2006-08-29 20:35:15Z pfarrell $
+$Id$
 
 Created version: 1.0.0
 Updated version: 1.1.0

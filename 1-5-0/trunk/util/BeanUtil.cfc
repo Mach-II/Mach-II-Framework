@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
-$Id: BeanUtil.cfc 4352 2006-08-29 20:35:15Z pfarrell $
+$Id$
 
 Notes:
 Beans are expected to follow the standard Java bean pattern of having

@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
-$Id: EventArgsInvoker.cfc 100 2005-09-11 19:38:28Z bedwards $
+$Id$
 
 Created version: 1.1.0
 Update version: 1.1.1
