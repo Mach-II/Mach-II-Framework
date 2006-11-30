@@ -1,0 +1,90 @@
+------------------------------------------------
+    __  ___           __          ________
+   /  |/  /___ ______/ /_        /  _/  _/
+  / /|_/ / __ `/ ___/ __ \______ / / / /  
+ / /  / / /_/ / /__/ / / /_____// /_/ /   
+/_/  /_/\__,_/\___/_/ /_/     /___/___/  
+
+Version 1.1.1
+$Id: CHANGELOG 4814 2006-11-15 05:09:41Z pfarrell $
+------------------------------------------------
+
+------------------------------------------------
+ _                         
+/ |_  _.._  _  _   |  _  _ 
+\_| |(_|| |(_|(/_  |_(_)(_|
+            _|           _|
+------------------------------------------------
+Bug Fixes
+------------------------------------------------
+* Fixed ContentArg append bug
+Since the ContentArg is placed in the event object you must copy that arg or 
+the entire event object when announcing new events! This is expected behavior.
+
+* Fixed redirect encoding bug
+The redirect command did not URLEncodeFormat incoming event arguments.
+
+* Fixed non-critical listener invoker mismatched argument name bug
+
+* Fixed postProcess event name displayed in TracePlugin.cfc
+PostProcess now reads "Core Process"
+
+* Fixed strange "No Event-Handler Defined" exception bug
+Mach-II threw an exception when the event name was "". If the event name is "", the
+default event is announced as expected.
+
+* Fixed framework loaded twice on initial startup bug
+Framework loaded itself twice on inital startup when config mode is 1 (always)
+
+* Fixed resultValue error bug
+When a listener method returns void and the developer specified a ResultArg/Key, an 
+exception of "The ResultValue variable is not defined." is thrown.  This occurs because 
+ColdFusion deletes the var'ed ResultValue variable in the invoker if a listner method 
+return a Java null or returns void.  A better error is now thrown instead of the useless
+exception that ColdFusion was giving.
+
+------------------------------------------------
+Improvements / Enhancements
+------------------------------------------------
+* Ensured that isPropertyDefined() method was used by framework instead of using 
+deprecated hasProperty() method.
+
+* Improved granular control of trace output in TracePlugin by allowing dynamic parameters
+
+* Improved display quality and added additional data in TracePlugin
+The trace plugin now displays the request event name, Mach-II version number and timestamp.
+
+* Improved <redirect> command limitations
+Allows the possibility of redirecting to another url without appending event. For example, 
+<redirect url="http://www.google.com"/> would redirect to http://www.google.com?event= in 
+1.1.0.  If no event name is defined, Mach-II will now not append a blank event name.
+
+* Improved load time on initial application load or reloads by about 25%
+
+* Added a method that returns version number of framework
+Call getPropertyManager().getVersion() in any listener, filter, plugin or view to get the 
+version number.  Check out the Mach-II FAQs for more information on the version numbering 
+system.
+
+* Added enhancement to turn of trace output on a per request basis.
+This enhancement is important for AJAX integration. See the file header in the 
+TracePlugin.cfc for more information.
+
+* Added better ColdSpring plugin integration
+Added getListenerNames(), getFilterNames() and getPluginNames() methods for even easier
+ColdSpring plugin integration.
+
+* Added an enhancement to get the event name that started the request lifecycle 
+Call getRequestName() method on the event object to get the event that started the request 
+lifecycle. This also works with exception events. This does not work with redirects since 
+ColdFusion aborts the request before it processes the cflocation.
+
+* Added Application.cfc support (new bootstrapper)
+You can now leverage Application.cfc features such as onSessionStart/End and 
+onApplicationStart/End with Mach-II. See the Mach-II FAQs for more information on 
+implementing on using the new bootstrapper. This feature is only available on ColdFusion 
+MX 7+. NewAltanta BlueDragon 7 is in beta at the time of this release and thus this
+is an untested feature on BlueDragon.  Check out the updated Mach-II Skeleton for
+working code with the new Application.cfc support.
+
+* Lots of other small things...

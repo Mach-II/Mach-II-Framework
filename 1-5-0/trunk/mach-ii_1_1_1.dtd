@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!--
+License:
+Copyright 2006 Mach-II Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright: Mach-II Corporation
+$Id: mach-ii_1_1_1.dtd 4785 2006-11-07 00:21:43Z pfarrell $
+
+Created version: 1.0.0
+Updated version: 1.1.1
+
+Notes:
+The DTD for the Mach-II Application Configuration File, Version 1.1.1.
+
+To support validation of the configuration file, include one of the
+following DOCTYPE elements at the beginning (after the "xml" declaration):
+
+<!DOCTYPE mach-ii PUBLIC
+	"-//Mach-II//DTD Mach-II Configuration 1.1.1//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_1_1.dtd">
+
+<!DOCTYPE mach-ii SYSTEM
+	"http://localhost:8500/MachII/mach-ii_1_1_1.dtd">
+-->
+
+<!--
+	"mach-ii"
+		version - the version of the DTD being used for configuration
+-->
+<!ELEMENT mach-ii (properties?, listeners?, event-filters?, event-handlers?, page-views?, plugins?)>
+<!ATTLIST mach-ii 
+	version CDATA #IMPLIED
+>
+
+<!--
+	The "properties" element defines properties to configure the Mach-II application framework.
+	Several properties are recommended to be defined for every project.
+	Properties are referenced by name.
+	
+	Properties that should be defined:
+		defaultEvent - the event for the framework to handle if one is not specified in a new request
+		exceptionEvent - the event to announce if there's an unhandled exception
+		maxEvents - the maximum number of events to process for a single request
+		eventVariable - the name of the request parameter (form or url) that will define the event
+		applicationRoot - the path to the application's folder relative to the web-server root (i.e. '/SampleApp')
+		argumentsPrecedence - form | url : which to favor for conflicting request parameters
+	
+	"property"
+		name - the name of the property
+		value - the value of the property
+-->
+<!ELEMENT properties (property*)>
+<!ELEMENT property EMPTY>
+<!ATTLIST property 
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED
+>
+
+<!--
+	The "listeners" element defines all of the listeners to be registered with the framework.
+	Listeners are the components that contain application logic.
+	Listeners are referenced by name.
+	
+	"listener"
+		name - the name of the listener
+		type - the type of the listener (fully qualified path)
+	
+	"invoker"
+		type - the type of the invoker (fully qualified path)
+-->
+<!ELEMENT listeners (listener*)>
+<!ELEMENT listener (invoker?, parameters?)>
+<!ATTLIST listener 
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+>
+<!ELEMENT invoker EMPTY>
+<!ATTLIST invoker 
+	type CDATA #REQUIRED
+>
+
+<!--
+	The "event-filters" element defines all of the event-filters to be registered with the framework.
+	Event-filters can manipulate events and can abort/continue event processing.
+	Event-filters are referenced by name.
+	
+	"event-filter"
+		name - the name of the event-filter
+		type - the type of the event-filter (fully qualified path)
+-->
+<!ELEMENT event-filters (event-filter*)>
+<!ELEMENT event-filter (parameters?)>
+<!ATTLIST event-filter 
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+>
+
+<!--
+	The "event-handlers" element defines all of the logical elements for handling an event.
+	Event-handlers are referenced by the event property (target event name).
+	
+	"event-handler"
+		event - the name of the event to handle
+		access - the access attribute of the event handler (public|private)
+-->
+<!ELEMENT event-handlers (event-handler*)>
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect)*>
+<!ATTLIST event-handler 
+	event CDATA #REQUIRED 
+	access (public|private) "public"
+>
+
+<!--
+	The "page-views" element defines all of the views to be registered with the framework.
+	Views are referenced by name.
+	
+	"page-view"
+		name - the name of the view
+		page - relative path to the view file
+-->
+<!ELEMENT page-views (page-view*)>
+<!ELEMENT page-view EMPTY>
+<!ATTLIST page-view 
+	name CDATA #REQUIRED
+	page CDATA #REQUIRED
+>
+
+<!--
+	The "plugins" element defines all of the plugins to be registered with the framework.
+	Plugins are referenced by name.
+	
+	"plugin"
+		name - the name of the plugin
+		type - the type of the plugin (fully qualified path)
+-->
+<!ELEMENT plugins (plugin*)>
+<!ELEMENT plugin (parameters?)>
+<!ATTLIST plugin 
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+>
+
+
+<!--
+	Event-Handler tags.
+-->
+<!--
+	A "filter" element will apply an event-filter to the current event being handled.
+		name - the name of the filter being referenced
+-->
+<!ELEMENT filter (parameter*)>
+<!ATTLIST filter 
+	name CDATA #REQUIRED
+>
+
+<!--
+	An "notify" element will invoke a listener's method using the event and its arguments.
+		listener - the name of the listener being referenced
+		method - the name of the listener method to invoke
+		[resultKey] - the key to store the result of the method call in
+		[resultArg] - the event arg to store the result of the method call in
+-->
+<!ELEMENT notify EMPTY>
+<!ATTLIST notify 
+	listener CDATA #REQUIRED
+	method CDATA #REQUIRED
+	resultKey CDATA #IMPLIED
+	resultArg CDATA #IMPLIED
+>
+
+<!--
+	An "event-arg" element will set an argument in the current event being handled.
+	Either value or variable should be defined.
+		name - the name of the arg to set in the event
+		value - the value of the arg to set in the event
+		variable - a variable to set as the value in the event
+-->
+<!ELEMENT event-arg EMPTY>
+<!ATTLIST event-arg 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	variable CDATA #IMPLIED
+>
+
+<!--
+	An "event-mapping" element will set a temporary mapping in the framework that
+	will map one event (if announced) to another.
+		event - the name of the event to map
+		mapping - the name of the event to map to
+-->
+<!ELEMENT event-mapping EMPTY>
+<!ATTLIST event-mapping 
+	event CDATA #REQUIRED
+	mapping CDATA #REQUIRED
+>
+
+<!--
+	A "view-page" element will invoke a view and optionally store the generated 
+	content instead of outputting it.
+		name - the name of the view being referenced
+		[contentKey] - the key to store the content produced in (instead of outputting directly)
+		[contentArg] - the event arg to store the content produced in (instead of outputting directly)
+		[append] - whether to append content to the content key (or overwrite it)
+-->
+<!ELEMENT view-page EMPTY>
+<!ATTLIST view-page 
+	name CDATA #REQUIRED
+	contentKey CDATA #IMPLIED
+	contentArg CDATA #IMPLIED
+	append CDATA #IMPLIED
+>
+
+<!--
+	An "announce" element will broadcast an event to registered listeners.
+		event - the event name to announce
+		copyEventArgs - whether or not to copy the event args of the current event into the event being announced
+-->
+<!ELEMENT announce EMPTY>
+<!ATTLIST announce
+	event CDATA #REQUIRED
+	copyEventArgs (true|false) "true"
+>
+
+<!--
+	An "event-bean" element will create a bean in the event and populate the
+	bean with properties from the event.
+		name - the name of the bean in the event
+		type - the type of the bean to create
+		[fields] - the fields in the event to set in the bean
+-->
+<!ELEMENT event-bean EMPTY>
+<!ATTLIST event-bean
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+	fields CDATA #IMPLIED
+>
+
+<!--
+	A "redirect" element will send a redirect.
+		event - the event the redirect will announce
+		url - the url to redirect to
+		args - a comma-delimited list of event args to attach to the redirect url
+-->
+<!ELEMENT redirect EMPTY>
+<!ATTLIST redirect
+	event CDATA #IMPLIED
+	url CDATA #IMPLIED
+	args CDATA #IMPLIED
+>
+
+
+<!--
+	Broadly used tags.
+-->
+<!--
+	"parameters"
+		name - the name of the parameter
+		value - the value of the parameter
+-->
+<!ELEMENT parameters (parameter*)>
+<!ELEMENT parameter EMPTY>
+<!ATTLIST parameter 
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED
+>
