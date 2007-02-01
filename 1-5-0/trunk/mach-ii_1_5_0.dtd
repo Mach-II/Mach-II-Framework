@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!--
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Copyright: Mach-II Corporation
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 The DTD for the Mach-II Application Configuration File, Version 1.1.1.
@@ -28,11 +28,11 @@ To support validation of the configuration file, include one of the
 following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!DOCTYPE mach-ii PUBLIC
-	"-//Mach-II//DTD Mach-II Configuration 1.1.1//EN"
-	"http://www.mach-ii.com/dtds/mach-ii_1_1_1.dtd">
+	"-//Mach-II//DTD Mach-II Configuration 1.5.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_5_0.dtd">
 
 <!DOCTYPE mach-ii SYSTEM
-	"http://localhost:8500/MachII/mach-ii_1_1_1.dtd">
+	"http://localhost:8500/MachII/mach-ii_1_5_0.dtd">
 -->
 
 <!--
@@ -116,10 +116,23 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		access - the access attribute of the event handler (public|private)
 -->
 <!ELEMENT event-handlers (event-handler*)>
-<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect)*>
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
+>
+
+<!--
+	The "subroutine-handlers" element defines all of the logical elements for handling an subroutine.
+	Subroutine-handlers are referenced by the subroutine property (target subroutine name).
+	
+	"subroutine-handler"
+		subroutine - the name of the subroutine to handle
+-->
+<!ELEMENT subroutine-handlers (subroutine-handler*)>
+<!ELEMENT subroutine-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
+<!ATTLIST subroutine-handler 
+	subroutine CDATA #REQUIRED 
 >
 
 <!--
@@ -260,6 +273,14 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	args CDATA #IMPLIED
 >
 
+<!--
+	A "execute" element will execute a subroutine.
+		name - the name of the filter being referenced
+-->
+<!ELEMENT execute (parameter*)>
+<!ATTLIST execute 
+	subroutine CDATA #REQUIRED
+>
 
 <!--
 	Broadly used tags.
