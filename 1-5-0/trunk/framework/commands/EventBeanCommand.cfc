@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="EventBeanCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for creating and populating a bean in the current event.">
+	hint="An Command for creating and populating a bean in the current event.">
 	
 	<!---
 	PROPERTIES

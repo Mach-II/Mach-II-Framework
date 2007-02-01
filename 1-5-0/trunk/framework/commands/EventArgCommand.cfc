@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="EventArgCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for putting an event arg into the current event.">
+	hint="An Command for putting an event arg into the current event.">
 	
 	<!---
 	PROPERTIES

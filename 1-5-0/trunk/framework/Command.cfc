@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.5.0
 
 Mach-II Component:
-Base EventCommand component.
+Base Command component.
 --->
 <cfcomponent 
-	displayname="EventCommand"
+	displayname="Command"
 	output="false"
-	hint="Base EventCommand component.">
+	hint="Base Command component.">
 	
 	<!---
 	PROPERTIES
@@ -37,7 +37,7 @@ Base EventCommand component.
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="EventCommand" output="false"
+	<cffunction name="init" access="public" returntype="Command" output="false"
 		hint="Used by the framework for initialization.">
 		<cfreturn this />
 	</cffunction>

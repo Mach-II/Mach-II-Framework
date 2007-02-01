@@ -22,9 +22,9 @@ Created version: 1.1.0
 --->
 <cfcomponent 
 	displayname="RedirectCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for redirecting.">
+	hint="An Command for redirecting.">
 	
 	<!---
 	PROPERTIES

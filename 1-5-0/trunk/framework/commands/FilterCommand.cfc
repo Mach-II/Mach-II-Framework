@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="FilterCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for processing an EventFilter.">
+	hint="An Command for processing an EventFilter.">
 	
 	<!---
 	PROPERTIES

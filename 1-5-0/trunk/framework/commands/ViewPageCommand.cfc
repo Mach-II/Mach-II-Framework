@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="ViewPageCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for processing a view.">
+	hint="An Command for processing a view.">
 	
 	<!---
 	PROPERTIES

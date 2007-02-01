@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="AnnounceCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for announcing an event.">
+	hint="An Command for announcing an event.">
 	
 	<!---
 	PROPERTIES

@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="EventMappingCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for setting up an event mapping for an event handler.">
+	hint="An Command for setting up an event mapping for an event handler.">
 	
 	<!---
 	PROPERTIES

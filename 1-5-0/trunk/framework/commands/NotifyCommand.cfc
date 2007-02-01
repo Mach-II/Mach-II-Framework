@@ -23,9 +23,9 @@ Updated version: 1.1.0
 --->
 <cfcomponent 
 	displayname="NotifyCommand" 
-	extends="MachII.framework.EventCommand"
+	extends="MachII.framework.Command"
 	output="false"
-	hint="An EventCommand for notifying a Listener.">
+	hint="An Command for notifying a Listener.">
 	
 	<!---
 	PROPERTIES
