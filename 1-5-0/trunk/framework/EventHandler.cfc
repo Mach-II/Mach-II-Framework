@@ -61,8 +61,8 @@ Updated version: 1.1.0
 	</cffunction>
 	
 	<cffunction name="addCommand" access="public" returntype="void" output="false"
-		hint="Adds an EventCommand.">
-		<cfargument name="command" type="MachII.framework.EventCommand" required="true" />
+		hint="Adds an Command.">
+		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
 	</cffunction>
 	
