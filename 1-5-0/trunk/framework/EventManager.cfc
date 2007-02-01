@@ -49,7 +49,7 @@ Updated version: 1.1.0
 		<cfset var eventHandler = "" />
 		<cfset var eventAccess = "" />
 		<cfset var eventName = "" />
-		<cfset var eventCommand = "" />
+		<cfset var command = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -74,8 +74,8 @@ Updated version: 1.1.0
 	  
 			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 			    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-				<cfset eventCommand = createEventCommand(commandNode) />
-				<cfset eventHandler.addCommand(eventCommand) />
+				<cfset command = createEventCommand(commandNode) />
+				<cfset eventHandler.addCommand(command) />
 			</cfloop>
 			
 			<cfset addEventHandler(eventName, eventHandler) />
@@ -103,7 +103,7 @@ Updated version: 1.1.0
 			<cfthrow type="MachII.framework.EventHandlerAlreadyDefined"
 				message="An EventHandler with name '#arguments.eventName#' is already registered." />
 		<cfelse>
-			<cfset variables.handlers[eventName] = eventHandler />
+			<cfset variables.handlers[arguments.eventName] = arguments.eventHandler />
 		</cfif>
 	</cffunction>
 	
