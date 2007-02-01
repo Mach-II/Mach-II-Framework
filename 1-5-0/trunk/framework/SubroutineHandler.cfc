@@ -66,15 +66,4 @@ Updated version: 1.5.0
 		<cfset ArrayAppend(variables.commands, arguments.command) />
 	</cffunction>
 	
-	<!---
-	ACCESSORS
-	--->
-	<cffunction name="setAccess" access="public" returntype="void" output="false">
-		<cfargument name="access" type="string" required="true" />
-		<cfset variables.access = arguments.access />
-	</cffunction>
-	<cffunction name="getAccess" access="public" returntype="string" output="false">
-		<cfreturn variables.access />
-	</cffunction>
-	
 </cfcomponent>
