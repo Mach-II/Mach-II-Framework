@@ -58,6 +58,7 @@ Notes:
 		<cfset var propertyManager = "" />
 		<cfset var listenerManager = "" />
 		<cfset var filterManager = "" />
+		<cfset var subroutineManager = "" />
 		<cfset var eventManager = "" />
 		<cfset var viewManager = "" />
 		<cfset var pluginManager = "" />
@@ -97,7 +98,7 @@ Notes:
 		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager. 
-		Creation order is important: propertyManager first, listenerManager and filterManager before eventManager. 
+		Creation order is important: propertyManager first, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
 		<cfset propertyManager = CreateObject('component', 'MachII.framework.PropertyManager') />
 		<cfset propertyManager.init(configXML, appManager, arguments.version) />
@@ -110,7 +111,11 @@ Notes:
 		<cfset filterManager = CreateObject('component', 'MachII.framework.FilterManager') />
 		<cfset filterManager.init(configXML, appManager) />
 		<cfset appManager.setFilterManager(filterManager) />
-		
+
+		<cfset subroutineManager = CreateObject('component', 'MachII.framework.SubroutineManager') />
+		<cfset subroutineManager.init(configXML, appManager) />
+		<cfset appManager.setSubroutineManager(subroutineManager) />
+				
 		<cfset eventManager = CreateObject('component', 'MachII.framework.EventManager') />
 		<cfset eventManager.init(configXML, appManager) />
 		<cfset appManager.setEventManager(eventManager) />

@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.propertyManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.filterManager = "" />
+	<cfset variables.subroutineManager = "" />
 	<cfset variables.eventManager = "" />
 	<cfset variables.pluginManager = "" />
 	<cfset variables.viewManager = "" />
@@ -57,6 +58,7 @@ Notes:
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
 		<cfset getFilterManager().configure() />
+		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
 	</cffunction>
@@ -106,6 +108,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getFilterManager" access="public" returntype="MachII.framework.FilterManager" output="false">
 		<cfreturn variables.filterManager />
+	</cffunction>
+
+	<cffunction name="setSubroutineManager" access="public" returntype="void" output="false">
+		<cfargument name="subroutineManager" type="MachII.framework.SubroutineManager" required="true" />
+		<cfset variables.subroutineManager = arguments.subroutineManager />
+	</cffunction>
+	<cffunction name="getSubroutineManager" access="public" returntype="MachII.framework.SubroutineManager" output="false">
+		<cfreturn variables.subroutineManager />
 	</cffunction>
 
 	<cffunction name="setListenerManager" access="public" returntype="void" output="false">

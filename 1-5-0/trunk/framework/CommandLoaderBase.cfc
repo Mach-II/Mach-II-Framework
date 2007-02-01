@@ -72,6 +72,8 @@ Updated version: 1.5.0
 		<cfset var listener = "" />
 		<cfset var eventName = "" />
 		<cfset var copyEventArgs = 0 />
+		<cfset var subroutineName = "" />
+		<cfset var subroutine= "" />
 		<cfset var viewName = "" />
 		<cfset var contentKey = "" />
 		<cfset var contentArg = "" />
@@ -136,6 +138,11 @@ Updated version: 1.5.0
 			<cfset mappingName = commandNode.xmlAttributes['mapping'] />
 			<cfset command = CreateObject('component', 'MachII.framework.commands.EventMappingCommand') />
 			<cfset command.init(mappingEventName, mappingName) />
+		<!--- execute --->
+		<cfelseif commandNode.xmlName EQ "execute">
+			<cfset subroutineName = commandNode.xmlAttributes['subroutine'] />
+			<cfset command = CreateObject('component', 'MachII.framework.commands.ExecuteCommand') />
+			<cfset command.init(subroutineName, variables.subroutineMgr) />
 		<!--- filter --->
 		<cfelseif commandNode.xmlName EQ "filter">
 			<cfset filterName = commandNode.xmlAttributes['name'] />

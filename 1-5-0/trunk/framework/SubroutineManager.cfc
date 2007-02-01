@@ -34,6 +34,7 @@ Updated version: 1.5.0
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
+	<cfset variables.subroutineMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -56,28 +57,30 @@ Updated version: 1.5.0
 		<cfset setAppManager(arguments.appManager) />
 		
 		<!--- Set temps. --->
-		<cfset variables.listenerMgr = arguments.appManager.getListenerManager() />
-		<cfset variables.filterMgr = arguments.appManager.getFilterManager() />
+		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
+		<cfset variables.filterMgr = getAppManager().getFilterManager() />
+		<cfset variables.subroutineMgr = this />
 
 		<cfset eventNodes = XMLSearch(configXML,"//subroutine-handlers/subroutine-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
-			<cfset subroutineName = eventNodes[i].xmlAttributes['name'] />\
+			<cfset subroutineName = eventNodes[i].xmlAttributes['name'] />
 			
 			<cfset subroutineHandler = CreateObject('component', 'MachII.framework.SubroutineHandler') />
 			<cfset subroutineHandler.init() />
 	  
 			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 			    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-				<cfset command = createSubroutineCommand(commandNode) />
+				<cfset command = createCommand(commandNode) />
 				<cfset subroutineHandler.addCommand(command) />
 			</cfloop>
 			
-			<cfset addSubroutineHandler(eventName, subroutineHandler) />
+			<cfset addSubroutineHandler(subroutineName, subroutineHandler) />
 		</cfloop>
 		
 		<!--- Clear temps. --->
 		<cfset variables.listenerMgr = "" />
 		<cfset variables.filterMgr = "" />
+		<cfset variables.subroutineMgr = "" />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"
@@ -119,7 +122,7 @@ Updated version: 1.5.0
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="getSubroutineHandler" access="public" returntype="MachII.framework.EventHandler"
+	<cffunction name="getSubroutineHandler" access="public" returntype="MachII.framework.SubroutineHandler"
 		hint="Returns the SubroutineHandler for the named Subroutine.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
