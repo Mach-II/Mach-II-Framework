@@ -19,7 +19,7 @@ Author: Peter J. Farrell (pjf@maestropublishing.com)
 $Id$
 
 Created version: 1.1.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Description:
 A robust plugin that traces the execution of events and displays the trace
@@ -33,6 +33,7 @@ Usage:
 		<parameter name="highlightLongTimings" value="[numeric]" />
 		<parameter name="fileName" value="[string]" />
 		<parameter name="suppressTraceArg" value="[string]" />
+		<parameter name="debugModeOnly" value="[boolean]" />
 	</parameters>
 </plugin>
 
@@ -103,6 +104,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	<cfset variables.instance.highlightLongTimings = 250 />
 	<cfset variables.instance.fileName = "MachIITrace" />
 	<cfset variables.instance.suppressTraceArg = "suppressTrace" />
+	<cfset variables.instance.debugModeOnly = FALSE />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -180,6 +182,13 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				<cfset setSuppressTraceArg(params.suppressTraceArg) />
 			</cfif>
 		</cfif>
+		<cfif StructKeyExists(params, "debugModeOnly")>
+			<cfif NOT len(params.debugModeOnly)>
+				<cfset throwUsageException("The TracePlugin {debugOnlyMode} parameter must not be blank. Please set a boolean value.", "debugOnlyMode=[blank]") />
+			<cfelse>
+				<cfset setDebugModeOnly(params.debugModeOnly)>
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -192,7 +201,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var event = arguments.eventContext.getNextEvent() />
 		
 		<!--- Set the if we should trace this request or temporarily suppress it --->
-		<cfif NOT getTraceMode() IS "none">
+		<cfif NOT getTraceMode() IS "none" AND ((getDebugModeOnly() AND isDebugMode()) OR NOT getDebugModeOnly())>
 			<cfset setTraceRequest(TRUE) />
 		<cfelse>
 			<cfset setTraceRequest(FALSE) />
@@ -512,6 +521,14 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	<cffunction name="getTraceMode" access="private" returntype="string" output="false">
 		<cfreturn variables.instance.traceMode />
+	</cffunction>
+	
+	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false">
+		<cfargument name="debugModeOnly" type="string" required="true" />
+		<cfset variables.instance.debugModeOnly = arguments.debugModeOnly />
+	</cffunction>
+	<cffunction name="getDebugModeOnly" access="private" returntype="string" output="false">
+		<cfreturn variables.instance.debugModeOnly />
 	</cffunction>
 
 	<cffunction name="setDisplayCommented" access="private" returntype="void" output="false">
