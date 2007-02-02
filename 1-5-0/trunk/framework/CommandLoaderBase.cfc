@@ -166,7 +166,7 @@ Updated version: 1.5.0
 			<cfelse>
 				<cfset beanFields = '' />
 			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes['reinit'])>
+			<cfif StructKeyExists(commandNode.xmlAttributes, 'reinit')>
 				<cfset reinit = commandNode.xmlAttributes['reinit'] />
 			<cfelse>
 				<cfset reinit = TRUE />
