@@ -21,3 +21,7 @@ Bug Fixes
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+
+* Subroutines
+Added a new XML construct to support subroutines and a related command to 
+execute a subroutine (2007-02-02 pfarrell)
