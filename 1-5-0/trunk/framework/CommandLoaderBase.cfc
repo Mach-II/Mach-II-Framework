@@ -81,6 +81,7 @@ Updated version: 1.5.0
 		<cfset var beanName = "" />
 		<cfset var beanType = "" />
 		<cfset var beanFields = "" />
+		<cfset var reinit = "" />
 		<cfset var redirectUrl = "" />
 		<cfset var k = 0 />
 
@@ -165,8 +166,13 @@ Updated version: 1.5.0
 			<cfelse>
 				<cfset beanFields = '' />
 			</cfif>
+			<cfif StructKeyExists(commandNode.xmlAttributes['reinit'])>
+				<cfset reinit = commandNode.xmlAttributes['reinit'] />
+			<cfelse>
+				<cfset reinit = TRUE />
+			</cfif>
 			<cfset command = CreateObject('component', 'MachII.framework.commands.EventBeanCommand') />
-			<cfset command.init(beanName, beanType, beanFields) />
+			<cfset command.init(beanName, beanType, beanFields, reinit) />
 		<!--- redirect --->
 		<cfelseif commandNode.xmlName EQ "redirect">
 			<cfset paramName = getAppManager().getPropertyManager().getProperty('eventParameter','event') />

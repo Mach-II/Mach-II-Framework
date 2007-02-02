@@ -33,6 +33,7 @@ Updated version: 1.1.0
 	<cfset variables.beanName = "" />
 	<cfset variables.beanType = "" />
 	<cfset variables.beanFields = "" />
+	<cfset variables.reinit = "" />
 	<cfset variables.beanUtil = "" />
 	
 	<!---
@@ -43,10 +44,12 @@ Updated version: 1.1.0
 		<cfargument name="beanName" type="string" required="true" />
 		<cfargument name="beanType" type="string" required="true" />
 		<cfargument name="beanFields" type="string" required="true" />
+		<cfargument name="reinit" type="boolean" required="true" />
 		
 		<cfset setBeanName(arguments.beanName) />
 		<cfset setBeanType(arguments.beanType) />
 		<cfset setBeanFields(arguments.beanFields) />
+		<cfset setReinit(arguments.reinit) />
 		
 		<cfset setBeanUtil( CreateObject('component','MachII.util.BeanUtil').init() ) />
 		
@@ -103,6 +106,14 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="isBeanFieldsDefined" access="public" returntype="boolean" output="false">
 		<cfreturn NOT getBeanFields() EQ '' />
+	</cffunction>
+	
+	<cffunction name="setReinit" access="private" returntype="void" output="false">
+		<cfargument name="reinit" type="boolean" required="true" />
+		<cfset variables.reinit = arguments.reinit />
+	</cffunction>
+	<cffunction name="getReinit" access="private" returntype="boolean" output="false">
+		<cfreturn variables.reinit />
 	</cffunction>
 	
 	<cffunction name="setBeanUtil" access="private" returntype="void" output="false">
