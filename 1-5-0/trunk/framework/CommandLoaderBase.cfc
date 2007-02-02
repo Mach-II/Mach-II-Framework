@@ -54,159 +54,230 @@ Updated version: 1.5.0
 		<cfargument name="commandNode" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var filterName = "" />
-		<cfset var filterParams = 0 />
-		<cfset var paramNodes = 0 />
-		<cfset var paramName = "" />
-		<cfset var paramValue = "" />
-		<cfset var filter = "" />
-		<cfset var argName = "" />
-		<cfset var argValue = "" />
-		<cfset var argVariable = "" />
-		<cfset var mappingEventName = "" />
-		<cfset var mappingName = "" />
-		<cfset var notifyListener = 0 />
-		<cfset var notifyMethod = "" />
-		<cfset var notifyResultKey = "" />
-		<cfset var notifyResultArg = "" />
-		<cfset var listener = "" />
-		<cfset var eventName = "" />
-		<cfset var copyEventArgs = 0 />
-		<cfset var subroutineName = "" />
-		<cfset var subroutine= "" />
-		<cfset var viewName = "" />
-		<cfset var contentKey = "" />
-		<cfset var contentArg = "" />
-		<cfset var appendContent = 0 />
-		<cfset var beanName = "" />
-		<cfset var beanType = "" />
-		<cfset var beanFields = "" />
-		<cfset var reinit = "" />
-		<cfset var redirectUrl = "" />
-		<cfset var k = 0 />
 
 		<!--- Optimized: If/elseif blocks are faster than switch/case --->
 		<!--- view-page --->
-		<cfif commandNode.xmlName EQ "view-page">
-			<cfset viewName = commandNode.xmlAttributes['name'] />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'contentKey')>
-				<cfset contentKey = commandNode.xmlAttributes['contentKey'] />
-			<cfelse>
-				<cfset contentKey = '' />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'contentArg')>
-				<cfset contentArg = commandNode.xmlAttributes['contentArg'] />
-			<cfelse>
-				<cfset contentArg = '' />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'append')>
-				<cfset appendContent = commandNode.xmlAttributes['append'] />
-			<cfelse>
-				<cfset appendContent = '' />
-			</cfif>
-			<cfset command = CreateObject('component', 'MachII.framework.commands.ViewPageCommand') />
-			<cfset command.init(viewName, contentKey, contentArg, appendContent) />
+		<cfif arguments.commandNode.xmlName EQ "view-page">
+			<cfset command = setupViewPage(arguments.commandNode) />
 		<!--- notify --->
-		<cfelseif commandNode.xmlName EQ "notify">
-			<cfset notifyListener = commandNode.xmlAttributes['listener'] />
-			<cfset notifyMethod = commandNode.xmlAttributes['method'] />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'resultKey')>
-				<cfset notifyResultKey = commandNode.xmlAttributes['resultKey'] />
-			<cfelse>
-				<cfset notifyResultKey = '' />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'resultArg')>
-				<cfset notifyResultArg = commandNode.xmlAttributes['resultArg'] />
-			<cfelse>
-				<cfset notifyResultArg = '' />
-			</cfif>
-			<cfset listener = variables.listenerMgr.getListener(notifyListener) />
-			<cfset command = CreateObject('component', 'MachII.framework.commands.NotifyCommand') />
-			<cfset command.init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
+		<cfelseif arguments.commandNode.xmlName EQ "notify">
+			<cfset command = setupNotify(arguments.commandNode) />
 		<!--- announce --->
-		<cfelseif commandNode.xmlName EQ "announce">
-			<cfset eventName = commandNode.xmlAttributes['event'] />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'copyEventArgs')>
-				<cfset copyEventArgs = commandNode.xmlAttributes['copyEventArgs'] />
-			<cfelse>
-				<cfset copyEventArgs = true />
-			</cfif>
-			<cfset command = CreateObject('component', 'MachII.framework.commands.AnnounceCommand') />
-			<cfset command.init(eventName, copyEventArgs) />
+		<cfelseif arguments.commandNode.xmlName EQ "announce">
+			<cfset command = setupAnnounce(arguments.commandNode) />
 		<!--- event-mapping --->
-		<cfelseif commandNode.xmlName EQ "event-mapping">
-			<cfset mappingEventName = commandNode.xmlAttributes['event'] />
-			<cfset mappingName = commandNode.xmlAttributes['mapping'] />
-			<cfset command = CreateObject('component', 'MachII.framework.commands.EventMappingCommand') />
-			<cfset command.init(mappingEventName, mappingName) />
+		<cfelseif arguments.commandNode.xmlName EQ "event-mapping">
+			<cfset command = setupEventMapping(arguments.commandNode) />
 		<!--- execute --->
-		<cfelseif commandNode.xmlName EQ "execute">
-			<cfset subroutineName = commandNode.xmlAttributes['subroutine'] />
-			<cfset command = CreateObject('component', 'MachII.framework.commands.ExecuteCommand') />
-			<cfset command.init(subroutineName) />
+		<cfelseif arguments.commandNode.xmlName EQ "execute">
+			<cfset command = setupExecute(arguments.commandNode) />
 		<!--- filter --->
-		<cfelseif commandNode.xmlName EQ "filter">
-			<cfset filterName = commandNode.xmlAttributes['name'] />
-			<cfset filterParams = StructNew() />
-			<cfset paramNodes = commandNode.xmlChildren />
-			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="k">
-				<cfset paramName = paramNodes[k].xmlAttributes['name'] />
-				<cfset paramValue = paramNodes[k].xmlAttributes['value'] />
-				<cfset filterParams[paramName] = paramValue />
-			</cfloop>
-			<cfset filter = variables.filterMgr.getFilter(filterName) />
-			<cfset command = CreateObject('component', 'MachII.framework.commands.FilterCommand') />
-			<cfset command.init(filter, filterParams) />
+		<cfelseif arguments.commandNode.xmlName EQ "filter">
+			<cfset command = setupFilter(arguments.commandNode) />
 		<!--- event-bean --->
-		<cfelseif commandNode.xmlName EQ "event-bean">
-			<cfset beanName = commandNode.xmlAttributes['name'] />
-			<cfset beanType = commandNode.xmlAttributes['type'] />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'fields')>
-				<cfset beanFields = commandNode.xmlAttributes['fields'] />
-			<cfelse>
-				<cfset beanFields = '' />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'reinit')>
-				<cfset reinit = commandNode.xmlAttributes['reinit'] />
-			<cfelse>
-				<cfset reinit = TRUE />
-			</cfif>
-			<cfset command = CreateObject('component', 'MachII.framework.commands.EventBeanCommand') />
-			<cfset command.init(beanName, beanType, beanFields, reinit) />
+		<cfelseif arguments.commandNode.xmlName EQ "event-bean">
+			<cfset command = setupEventBean(arguments.commandNode) />
 		<!--- redirect --->
-		<cfelseif commandNode.xmlName EQ "redirect">
-			<cfset paramName = getAppManager().getPropertyManager().getProperty('eventParameter','event') />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'event')>
-				<cfset eventName = commandNode.xmlAttributes['event'] />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'url')>
-				<cfset redirectUrl = commandNode.xmlAttributes['url'] />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'args')>
-				<cfset argVariable = commandNode.xmlAttributes['args'] />
-			</cfif>
-			<cfset command = CreateObject('component', 'MachII.framework.commands.RedirectCommand') />
-			<cfset command.init(eventName,paramName,redirectUrl,argVariable) />
+		<cfelseif arguments.commandNode.xmlName EQ "redirect">
+			<cfset command = setupRedirect(arguments.commandNode) />
 		<!--- event-arg --->
-		<cfelseif commandNode.xmlName EQ "event-arg">
-			<cfset argName = commandNode.xmlAttributes['name'] />
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'value')>
-				<cfset argValue = commandNode.xmlAttributes['value'] />
-			<cfelse>
-				<cfset argValue = "" />
-			</cfif>
-			<cfif StructKeyExists(commandNode.xmlAttributes, 'variable')>
-				<cfset argVariable = commandNode.xmlAttributes['variable'] />
-			<cfelse>
-				<cfset argVariable = "" />
-			</cfif>
-			<cfset command = CreateObject('component', 'MachII.framework.commands.EventArgCommand') />
-			<cfset command.init(argName, argValue, argVariable) />	
+		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
+			<cfset command = setupEventArg(arguments.commandNode) />
 		<!--- default/unrecognized command --->
 		<cfelse>
-			<cfset command = CreateObject('component', 'MachII.framework.command') />
-			<cfset command.init() />
+			<cfset command = setupDefault(arguments.commandNode) />
 		</cfif>
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="setupViewPage" access="private" returntype="MachII.framework.commands.ViewPageCommand" output="false"
+		hint="Setups a view-page command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var viewName = arguments.commandNode.xmlAttributes["name"] />
+		<cfset var contentKey = "" />
+		<cfset var contentArg = "" />
+		<cfset var appendContent = "" />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "contentKey")>
+			<cfset contentKey = commandNode.xmlAttributes["contentKey"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "contentArg")>
+			<cfset contentArg = commandNode.xmlAttributes["contentArg"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "append")>
+			<cfset appendContent = arguments.commandNode.xmlAttributes["append"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.ViewPageCommand").init(viewName, contentKey, contentArg, appendContent) />
+		
+		<cfreturn command />
+	</cffunction>
+
+	<cffunction name="setupNotify" access="private" returntype="MachII.framework.commands.NotifyCommand" output="false"
+		hint="Setups a notify command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var notifyListener = arguments.commandNode.xmlAttributes["listener"] />
+		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
+		<cfset var notifyResultKey = "" />
+		<cfset var notifyResultArg = "" />
+		<cfset var listener = "" />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
+			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
+			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
+		</cfif>
+		<cfset listener = variables.listenerMgr.getListener(notifyListener) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupAnnounce" access="private" returntype="MachII.framework.commands.AnnounceCommand" output="false"
+		hint="Setups an announce command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var eventName = arguments.commandNode.xmlAttributes["event"] />
+		<cfset var copyEventArgs = true />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "copyEventArgs")>
+			<cfset copyEventArgs = arguments.commandNode.xmlAttributes["copyEventArgs"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupEventMapping" access="private" returntype="MachII.framework.commands.EventMappingCommand" output="false"
+		hint="Setups an event-mapping command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var mappingEventName = arguments.commandNode.xmlAttributes["event"] />
+		<cfset var mappingName = arguments.commandNode.xmlAttributes["mapping"] />
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(mappingEventName, mappingName) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupExecute" access="private" returntype="MachII.framework.commands.ExecuteCommand" output="false"
+		hint="Setups an execute command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var subroutineName = arguments.commandNode.xmlAttributes["subroutine"] />
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.ExecuteCommand").init(subroutineName) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupFilter" access="private" returntype="MachII.framework.commands.FilterCommand" output="false"
+		hint="Setups a filter command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var filterName = arguments.commandNode.xmlAttributes["name"] />
+		<cfset var filterParams = StructNew() />
+		<cfset var paramNodes = arguments.commandNode.xmlChildren />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
+		<cfset var filter = "" />
+		<cfset var i = "" />
+
+		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
+			<cfset paramName = paramNodes[i].xmlAttributes["name"] />
+			<cfset paramValue = paramNodes[i].xmlAttributes["value"] />
+			<cfset filterParams[paramName] = paramValue />
+		</cfloop>
+		<cfset filter = variables.filterMgr.getFilter(filterName) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filter, filterParams) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupEventBean" access="private" returntype="MachII.framework.commands.EventBeanCommand" output="false"
+		hint="Setups a event-bean command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var beanName = "" />
+		<cfset var beanType = "" />
+		<cfset var beanFields = "" />
+		<cfset var reinit = true />
+
+		<cfset beanName = arguments.commandNode.xmlAttributes["name"] />
+		<cfset beanType = arguments.commandNode.xmlAttributes["type"] />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "fields")>
+			<cfset beanFields = arguments.commandNode.xmlAttributes["fields"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "reinit")>
+			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit) />
+
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupRedirect" access="private" returntype="MachII.framework.commands.RedirectCommand" output="false"
+		hint="Setups a redirect command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var paramName = "" />
+		<cfset var eventName = "" />
+		<cfset var redirectUrl = "" />
+		<cfset var argVariable = "" />
+
+		<cfset paramName = getAppManager().getPropertyManager().getProperty("eventParameter","event") />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "event")>
+			<cfset eventName = arguments.commandNode.xmlAttributes["event"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "url")>
+			<cfset redirectUrl = arguments.commandNode.xmlAttributes["url"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
+			<cfset argVariable = arguments.commandNode.xmlAttributes["args"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName,paramName,redirectUrl,argVariable) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupEventArg" access="private" returntype="MachII.framework.commands.EventArgCommand" output="false"
+		hint="Setups an event-arg command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var argValue = "" />
+		<cfset var argVariable = "" />
+		<cfset var command = "" />
+		
+		<cfset argName = arguments.commandNode.xmlAttributes["name"] />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
+			<cfset argValue = arguments.commandNode.xmlAttributes["value"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "variable")>
+			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupDefault" access="private" returntype="MachII.framework.command" output="false"
+		hint="Setups a default command.">
+		
+		<cfset var command = CreateObject("component", "MachII.framework.command").init() />
 		
 		<cfreturn command />
 	</cffunction>
