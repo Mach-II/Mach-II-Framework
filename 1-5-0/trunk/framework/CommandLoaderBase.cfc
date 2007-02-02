@@ -142,7 +142,7 @@ Updated version: 1.5.0
 		<cfelseif commandNode.xmlName EQ "execute">
 			<cfset subroutineName = commandNode.xmlAttributes['subroutine'] />
 			<cfset command = CreateObject('component', 'MachII.framework.commands.ExecuteCommand') />
-			<cfset command.init(subroutineName, variables.subroutineMgr) />
+			<cfset command.init(subroutineName) />
 		<!--- filter --->
 		<cfelseif commandNode.xmlName EQ "filter">
 			<cfset filterName = commandNode.xmlAttributes['name'] />

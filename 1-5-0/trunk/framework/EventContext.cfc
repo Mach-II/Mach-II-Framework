@@ -104,6 +104,27 @@ Notes:
 		</cftry>
 	</cffunction>
 	
+	<cffunction name="executeSubroutine" access="public" returntype="void" output="true"
+		hint="Executes a subroutine.">
+		<cfargument name="subroutineName" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfset var subroutineHandler = "" />
+		<cfset var exception = "" />
+		
+		<cftry>
+			<!--- Get the subroutine handler --->		
+			<cfset subroutineHandler = getAppManager().getSubroutineManager().getSubroutineHandler(arguments.subroutineName) />
+			<!--- Execute the subroutine --->
+			<cfset subroutineHandler.handleSubroutine(arguments.event, this) />
+					
+			<cfcatch>
+				<cfset exception = wrapException(cfcatch) />
+				<cfset handleException(exception, true) />
+			</cfcatch>
+		</cftry>
+	</cffunction>
+	
 	<cffunction name="setCurrentEvent" access="private" returntype="void" output="false">
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="true" />
 		<cfset variables.currentEvent = arguments.currentEvent />

@@ -34,7 +34,6 @@ Updated version: 1.5.0
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
-	<cfset variables.subroutineMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -59,7 +58,6 @@ Updated version: 1.5.0
 		<!--- Set temps. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
-		<cfset variables.subroutineMgr = this />
 
 		<cfset eventNodes = XMLSearch(configXML,"//subroutine-handlers/subroutine-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
@@ -80,7 +78,6 @@ Updated version: 1.5.0
 		<!--- Clear temps. --->
 		<cfset variables.listenerMgr = "" />
 		<cfset variables.filterMgr = "" />
-		<cfset variables.subroutineMgr = "" />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"
@@ -101,24 +98,6 @@ Updated version: 1.5.0
 				message="An SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
 		<cfelse>
 			<cfset variables.handlers[arguments.subroutineName] = arguments.subroutineHandler />
-		</cfif>
-	</cffunction>
-	
-	<cffunction name="createSubroutine" access="public" returntype="MachII.framework.Event" output="true"
-		hint="Creates an subroutine instance.">
-		<cfargument name="subroutineName" type="string" required="true" />
-		<cfargument name="subroutineArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="subroutineType" type="string" required="false" default="MachII.framework.Event" />
-		
-		<cfset var event = "" />
-		
-		<cfif isEventDefined(arguments.eventName)>
-			<cfset event = CreateObject('component', arguments.eventType) />
-			<cfset event.init(arguments.eventName, arguments.eventArgs) />
-			<cfreturn event />
-		<cfelse>
-			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-				message="EventHandler for event '#arguments.eventName#' is not defined." />
 		</cfif>
 	</cffunction>
 	

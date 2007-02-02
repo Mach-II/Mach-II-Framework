@@ -35,7 +35,6 @@ Updated version: 1.1.0
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
-	<cfset variables.subroutineMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -60,7 +59,6 @@ Updated version: 1.1.0
 		<!--- Set temps. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
-		<cfset variables.subroutineMgr = getAppManager().getSubroutineManager() />
 
 		<cfset eventNodes = XMLSearch(configXML,"//event-handlers/event-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">

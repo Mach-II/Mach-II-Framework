@@ -31,7 +31,6 @@ Updated version: 1.5.0
 	PROPERTIES
 	--->
 	<cfset variables.subroutineName = "" />
-	<cfset variables.subroutineManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -39,10 +38,8 @@ Updated version: 1.5.0
 	<cffunction name="init" access="public" returntype="ExecuteCommand" output="false"
 		hint="Used by the framework for initialization.">
 		<cfargument name="subroutineName" type="string" required="true" />
-		<cfargument name="subroutineManager" type="MachII.framework.SubroutineManager" require="true" />
 		
 		<cfset setSubroutineName(arguments.subroutineName) />
-		<cfset setSubroutineManager(arguments.subroutineManager) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -55,9 +52,7 @@ Updated version: 1.5.0
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset var subroutineHandler = getSubroutineManager().getSubroutineHandler(getSubroutineName()) />
-		
-		<cfset subroutineHandler.handleSubroutine(arguments.event, arguments.eventContext) />
+		<cfset arguments.eventContext.executeSubroutine(getSubroutineName(), arguments.event) />
 		
 		<cfreturn true />
 	</cffunction>
@@ -71,14 +66,6 @@ Updated version: 1.5.0
 	</cffunction>
 	<cffunction name="getSubroutineName" access="private" returntype="string" output="false">
 		<cfreturn variables.subroutineName />
-	</cffunction>
-	
-	<cffunction name="setSubroutineManager" access="private" returntype="void" output="false">
-		<cfargument name="subroutineManager" type="MachII.framework.subroutineManager" required="true" />
-		<cfset variables.subroutineManager = arguments.subroutineManager />
-	</cffunction>
-	<cffunction name="getSubroutineManager" access="private" returntype="MachII.framework.SubroutineManager" output="false">
-		<cfreturn variables.subroutineManager />
 	</cffunction>
 
 </cfcomponent>
