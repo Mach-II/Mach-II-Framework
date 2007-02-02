@@ -59,7 +59,7 @@ Updated version: 1.5.0
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset eventNodes = XMLSearch(configXML,"//subroutine-handlers/subroutine-handler") />
+		<cfset eventNodes = XMLSearch(configXML,"//subroutines/subroutine") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset subroutineName = eventNodes[i].xmlAttributes['name'] />
 			
