@@ -51,7 +51,7 @@ Updated version: 1.5.0
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
-		<cfargument name="commandNode" required="true" />
+		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
 
@@ -91,9 +91,6 @@ Updated version: 1.5.0
 		<cfreturn command />
 	</cffunction>
 	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
 	<cffunction name="setupViewPage" access="private" returntype="MachII.framework.commands.ViewPageCommand" output="false"
 		hint="Setups a view-page command.">
 		<cfargument name="commandNode" type="any" required="true" />
@@ -127,7 +124,7 @@ Updated version: 1.5.0
 		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var notifyResultKey = "" />
 		<cfset var notifyResultArg = "" />
-		<cfset var listener = "" />
+		<cfset var listener = variables.listenerMgr.getListener(notifyListener) />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
 			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
@@ -135,7 +132,6 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
 			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
-		<cfset listener = variables.listenerMgr.getListener(notifyListener) />
 		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
 		
 		<cfreturn command />
@@ -192,7 +188,7 @@ Updated version: 1.5.0
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filter = "" />
+		<cfset var filter = variables.filterMgr.getFilter(filterName) /> />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
@@ -200,7 +196,6 @@ Updated version: 1.5.0
 			<cfset paramValue = paramNodes[i].xmlAttributes["value"] />
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
-		<cfset filter = variables.filterMgr.getFilter(filterName) />
 		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filter, filterParams) />
 		
 		<cfreturn command />
@@ -211,13 +206,11 @@ Updated version: 1.5.0
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var beanName = "" />
-		<cfset var beanType = "" />
+		<cfset var beanName = arguments.commandNode.xmlAttributes["name"] />
+		<cfset var beanType = arguments.commandNode.xmlAttributes["type"] />
 		<cfset var beanFields = "" />
 		<cfset var reinit = true />
-
-		<cfset beanName = arguments.commandNode.xmlAttributes["name"] />
-		<cfset beanType = arguments.commandNode.xmlAttributes["type"] />
+		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "fields")>
 			<cfset beanFields = arguments.commandNode.xmlAttributes["fields"] />
 		</cfif>
@@ -234,12 +227,11 @@ Updated version: 1.5.0
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var paramName = "" />
 		<cfset var eventName = "" />
 		<cfset var redirectUrl = "" />
 		<cfset var argVariable = "" />
-
-		<cfset paramName = getAppManager().getPropertyManager().getProperty("eventParameter","event") />
+		<cfset var paramName = getAppManager().getPropertyManager().getProperty("eventParameter", "event") />
+		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "event")>
 			<cfset eventName = arguments.commandNode.xmlAttributes["event"] />
 		</cfif>
@@ -249,7 +241,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
 			<cfset argVariable = arguments.commandNode.xmlAttributes["args"] />
 		</cfif>
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName,paramName,redirectUrl,argVariable) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, paramName, redirectUrl, argVariable) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -258,11 +250,11 @@ Updated version: 1.5.0
 		hint="Setups an event-arg command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
+		<cfset var command = "" />
 		<cfset var argValue = "" />
 		<cfset var argVariable = "" />
-		<cfset var command = "" />
+		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
 		
-		<cfset argName = arguments.commandNode.xmlAttributes["name"] />
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
 			<cfset argValue = arguments.commandNode.xmlAttributes["value"] />
 		</cfif>
