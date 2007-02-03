@@ -63,24 +63,24 @@ Notes:
 		<cfset var pluginParams = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
 		<!--- Scoped argument variable - configXML --->
 		<cfset xnPlugins = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
 		<cfloop index="i" from="1" to="#ArrayLen(xnPlugins)#">
-			<cfset pluginName = xnPlugins[i].XmlAttributes['name'] />
-			<cfset pluginType = xnPlugins[i].XmlAttributes['type'] />
+			<cfset pluginName = xnPlugins[i].XmlAttributes["name"] />
+			<cfset pluginType = xnPlugins[i].XmlAttributes["type"] />
 			
 			<!--- for each plugin, parse all the parameters --->
 			<cfset pluginParams = StructNew() />
 			<cfset xnParams = XMLSearch(xnPlugins[i], "./parameters/parameter") />
 			<cfloop index="j" from="1" to="#ArrayLen(xnParams)#">
-				<cfset paramName = xnParams[j].XmlAttributes['name'] />
-				<cfset paramValue = xnParams[j].XmlAttributes['value'] />
+				<cfset paramName = xnParams[j].XmlAttributes["name"] />
+				<cfset paramValue = xnParams[j].XmlAttributes["value"] />
 				
 				<cfset StructInsert(pluginParams, paramName, paramValue, true) />
 			</cfloop>
 			
-			<cfset plugin = CreateObject('component', pluginType) />
-			<cfset plugin.init(arguments.appManager, pluginParams) />
+			<cfset plugin = CreateObject("component", pluginType).init(arguments.appManager, pluginParams) />
 			<cfset addPlugin(pluginName, plugin) />
 		</cfloop>
 				
@@ -90,6 +90,7 @@ Notes:
 		hint="Configures each of the registered Plugins.">
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
+		
 		<cfloop index="i" from="1" to="#variables.nPlugins#">
 			<cfset aPlugin = variables.pluginArray[i] />
 			<cfset aPlugin.configure() />
@@ -115,6 +116,7 @@ Notes:
 		hint="Registers a plugin with the specified name.">
 		<cfargument name="pluginName" type="string" required="true" />
 		<cfargument name="plugin" type="MachII.framework.Plugin" required="true" />
+		
 		<cfset var i = 0 />
 		<cfset var pointName = 0 />
 		<cfset var pluginRegisteredPoints = listToArray(findPluginPoints(arguments.plugin)) />		
@@ -151,6 +153,7 @@ Notes:
 		hint="preProcess() is called for each new EventContext once before event processing begins.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" 
 			hint="The EventContext of the processing." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.preProcessPlugins)#">
@@ -162,6 +165,7 @@ Notes:
 		hint="preEvent() is called for each announced Event before it is handled.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.preEventPlugins)#">
@@ -173,6 +177,7 @@ Notes:
 		hint="postEvent() is called for each announced Event after it has been handled.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.postEventPlugins)#">
@@ -184,6 +189,7 @@ Notes:
 		hint="preView() is called for each announced Event after it has been handled.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.preViewPlugins)#">
@@ -195,6 +201,7 @@ Notes:
 		hint="postView() is called for each announced Event after it has been handled.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.postViewPlugins)#">
@@ -206,6 +213,7 @@ Notes:
 		hint="postProcess() is called for each new EventContext once after event processing completes.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" 
 			hint="The EventContext of the processing." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.postProcessPlugins)#">
@@ -219,6 +227,7 @@ Notes:
 			hint="The EventContext under which the exception was thrown/caught." />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception object." />
+		
 		<cfset var i = 0 />
 		
 		<cfloop index="i" from="1" to="#arrayLen(variables.handleExceptionPlugins)#">
@@ -232,6 +241,7 @@ Notes:
 	<cffunction name="findPluginPoints" access="private" returntype="string" output="false"
 		hint="Finds the registered plugin points in a plugin.">
 		<cfargument name="plugin" type="MachII.framework.Plugin" required="true" />		
+		
 		<cfset var md = getMetaData(arguments.plugin) />
 		<cfset var pointArray = arraynew(1) />
 		<cfset var returnList = "" />
@@ -259,6 +269,7 @@ Notes:
 		hint="Gathers meta data about a plugin.">
 		<cfargument name="metadata" type="struct" required="true" />
 		<cfargument name="points" type="array" required="true" />
+		
 		<cfset var i = 0 />
 
 		<cfif structKeyExists(arguments.metadata, "extends") and arguments.metadata.extends.name neq "MachII.framework.Plugin">
