@@ -54,9 +54,10 @@ the rest of the framework. (pfarrell)
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="The initial set of configuration parameters." />
 		
+		<!--- PropertyManager be in set after AppManager --->
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setParameters(arguments.parameters) />
 		<cfset setPropertyManager(getAppManager().getPropertyManager()) />
+		<cfset setParameters(arguments.parameters) />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -96,7 +97,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="defaultValue" type="string" required="false" default=""
 			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
 		<cfif isParameterDefined(arguments.name)>
-			<cfreturn variables.parameters[arguments.name] />
+			<cfreturn resolveValue(arguments.name) />
 		<cfelse>
 			<cfreturn arguments.defaultValue />
 		</cfif>
@@ -128,21 +129,56 @@ the rest of the framework. (pfarrell)
 			hint="The value to store in the property." />
 		<cfreturn getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
 	</cffunction>
-	
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="resolveValue" access="private" returntype="any" output="false"
+		hint="Auto resolves placeholders values in parameters.">
+		<cfargument name="parameterName" type="string" required="true"
+			hint="The parameter name." />
+		
+		<cfset var propertyName = "" />
+		<cfset var value = variables.parameters[arguments.parameterName] />
+		
+		<!--- Auto resolve ${} parameters --->
+		<cfif REFindNoCase("\${(.)*?}", value)>
+			<cfset propertyName = Mid(value, 3, Len(value) -3) />
+			<cfif getPropertyManager().isPropertyDefined(propertyName)>
+				<cfset value = getProperty(propertyName) />
+			<cfelse>
+				<cfthrow type="MachII.framework.ProperyNotDefinedForAutoResolvedParameter" 
+					message="The required property is not defined for an auto resolved parameter named '#arguments.parameterName#'." />
+			</cfif>
+		</cfif>
+		
+		<cfreturn value />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
+		
 		<cfset var key = "" />
+		
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, parameters[key]) />
 		</cfloop>
 	</cffunction>
 	<cffunction name="getParameters" access="public" returntype="struct" output="false"
 		hint="Gets the full set of configuration parameters for the component.">
-		<cfreturn variables.parameters />
+		
+		<cfset var key = "" />
+		<cfset var resolvedParameters = StructNew() />
+		
+		<cfloop collection="#variables.parameters#" item="key">
+			<cfset resolvedParameters[key] = resolveValue(key) />
+		</cfloop>
+		
+		<cfreturn resolvedParameters />
 	</cffunction>
 	
 	<cffunction name="setAppManager" access="private" returntype="void" output="false"
