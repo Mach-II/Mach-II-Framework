@@ -18,6 +18,10 @@ $Id$
 Bug Fixes
 ------------------------------------------------
 
+* Plugin Manager Metadata Bug
+Fixed bug when plugin or components that they extend have no functions inside of
+the hierarchy. (2007-02-04 pfarrell)
+
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
