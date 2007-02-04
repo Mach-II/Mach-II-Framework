@@ -23,8 +23,9 @@ Improvements / Enhancements
 ------------------------------------------------
 
 * Trace Plugin
-We have added granular support to suppress trace output by adding a parameter
-that only shows debugging if ColdFusion's debugging mode is on.
+We have added better event more granular parameters to suppress trace output 
+by adding a parameter that only shows debugging if ColdFusion's debugging 
+mode is on. (2007-02-02 kwiersma)
 
 * Subroutines
 Added a new XML construct to support subroutines and a related command to 
@@ -38,4 +39,4 @@ This allows you use placeholders to have dynamic parameter values. For example:
 
 The ${serverMode} corresponds to a property named "serverMode".  Mach-II will
 automatically get the property's value at runtime and replace parameter's value
-with the result of the property.
+with the result of the property. (2007-02-03 pfarrell)
