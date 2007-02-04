@@ -116,13 +116,13 @@ the rest of the framework. (pfarrell)
 	</cffunction>
 
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
-		hint="Gets the specified property - this is just a shortcut for getAppManager().getPropertyManager().getProperty()">
+		hint="Gets the specified property - this is just a shortcut for getPropertyManager().getProperty()">
 		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to return."/>
 		<cfreturn getPropertyManager().getProperty(arguments.propertyName) />
 	</cffunction>
 	<cffunction name="setProperty" access="public" returntype="any" output="false"
-		hint="Sets the specified property - this is just a shortcut for getAppManager().getPropertyManager().setProperty()">
+		hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
 		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to set."/>
 		<cfargument name="propertyValue" type="any" required="true" 
@@ -174,6 +174,7 @@ the rest of the framework. (pfarrell)
 		<cfset var key = "" />
 		<cfset var resolvedParameters = StructNew() />
 		
+		<!--- Get values and resolve placeholders --->
 		<cfloop collection="#variables.parameters#" item="key">
 			<cfset resolvedParameters[key] = resolveValue(key) />
 		</cfloop>
