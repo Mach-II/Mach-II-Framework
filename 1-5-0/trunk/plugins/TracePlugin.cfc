@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-Author: Peter J. Farrell (pjf@maestropublishing.com)
+Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.1.0
@@ -38,10 +38,7 @@ Usage:
 </plugin>
 
 The {traceMode} value must be either "display", "file", "both" or "none" or a reference 
-to a variable in the Mach-II properties.  To dynamically set this parameter's value on 
-application startup/reload, reference "${YourPropertyName}" as the value of this 
-parameter. For example, if your property is named "traceMode", the parameter would 
-look like <parameter name="traceMode" value="${traceMode}"/>.
+to a variable in the Mach-II properties.
 
 If the parameter is not defined, the trace mode value will default to "display".
 - "Display" mode will display the trace information on screen.
@@ -50,11 +47,7 @@ If the parameter is not defined, the trace mode value will default to "display".
 - "None" will not perform a trace. No trace information will be gathered.
 
 The {displayComemented} value is boolean or a reference to a variable in the 
-Mach-II properties.  To dynamically set this parameter's value on application 
-startup/reload, reference "${YourPropertyName}" as the value of this parameter. 
-For example, if your property is named "traceMode", the parameter would look 
-like <parameter name="displayCommented" value="${displayCommented}"/>. This 
-parameter only applies to "display" or "both" trace modes.
+Mach-II properties.
 
 If the parameter is not defined, the display commented value will default to FALSE.
 - "true" will place the trace information in HTML comments and can useful if you do
@@ -114,82 +107,49 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the plugin.">
-		<cfset var params = getParameters() />
-		<cfset var tempTraceMode = "" />
-		<cfset var tempDisplayCommented = "" />
 
 		<!--- Check and set the plugin parameters --->
-		<cfif StructKeyExists(params, "traceMode")>
-			<cfset tempTraceMode = params.traceMode />
-			
-			<!--- If dynamic property variable --->
-			<cfif REFindNoCase("\${(.)*?}", tempTraceMode)>
-				<!--- Get the property name --->
-				<cfset tempTraceMode = Mid(tempTraceMode, 3, Len(tempTraceMode) -3) />
-				<!--- Set the mode if it exists in the properties --->
-				<cfif NOT getPropertyManager().isPropertyDefined(tempTraceMode)>
-					<cfset throwUsageException("The {traceMode} parameter dynamic property cannot be found in the properties.",
-								"Please check that the '#tempTraceMode#' property is available.") />
-				<cfelse>
-					<cfset tempTraceMode = getProperty(tempTraceMode) />
-				</cfif>
-			</cfif>
-			
+		<cfif isParameterDefined("traceMode")>			
 			<!--- Check and set --->
-			<cfif NOT ListFindNoCase("display,file,both,none", tempTraceMode)>
-				<cfset throwUsageException("The TracePlugin {traceMode} parameter must be display, file, both or none.", "traceMode=#tempTraceMode#") />
+			<cfif NOT ListFindNoCase("display,file,both,none", getParameter("traceMode"))>
+				<cfset throwUsageException("The TracePlugin {traceMode} parameter must be display, file, both or none.", "traceMode=#getParameter("traceMode")#") />
 			<cfelse>
-				<cfset setTraceMode(tempTraceMode) />
+				<cfset setTraceMode(getParameter("traceMode")) />
 			</cfif>
 		</cfif>
-		<cfif StructKeyExists(params, "displayCommented")>
-			<cfset tempDisplayCommented = params.displayCommented />
-
-			<!--- If dynamic property variable --->
-			<cfif REFindNoCase("\${(.)*?}", tempDisplayCommented)>
-				<!--- Get the property name --->
-				<cfset tempDisplayCommented = Mid(tempDisplayCommented, 3, Len(tempDisplayCommented) -3) />
-				<!--- Set the mode if it exists in the properties --->
-				<cfif NOT getPropertyManager().isPropertyDefined(tempDisplayCommented)>
-					<cfset throwUsageException("The {displayCommented} parameter dynamic property cannot be found in the properties.",
-								"Please check that the '#tempDisplayCommented#' property is available.") />
-				<cfelse>
-					<cfset tempDisplayCommented = getProperty(tempDisplayCommented) />
-				</cfif>
-			</cfif>
-		
-			<cfif NOT isBoolean(tempDisplayCommented)>
-				<cfset throwUsageException("The TracePlugin {displayCommented} parameter must be a boolean value.", "displayCommented=#params.displayCommented#") />
+		<cfif isParameterDefined("displayCommented")>		
+			<cfif NOT IsBoolean(getParameter("displayCommented"))>
+				<cfset throwUsageException("The TracePlugin {displayCommented} parameter must be a boolean value.", "displayCommented=#getParameter("displayCommented")#") />
 			<cfelse>
-				<cfset setDisplayCommented(tempDisplayCommented) />
+				<cfset setDisplayCommented(getParameter("displayCommented")) />
 			</cfif>
 		</cfif>
-		<cfif StructKeyExists(params, "highlightLongTimings")>
-			<cfif NOT len(params.highlightLongTimings) OR NOT isTrueNumeric(params.highlightLongTimings)>
-				<cfset throwUsageException("The TracePlugin {highlightLongTimings} parameter must be a numeric value.", "highlightLongTimings=#params.highlightLongTimings#") />
+		<cfif isParameterDefined("highlightLongTimings")>
+			<cfif NOT Len(getParameter("highlightLongTimings")) OR NOT IsTrueNumeric(getParameter("highlightLongTimings"))>
+				<cfset throwUsageException("The TracePlugin {highlightLongTimings} parameter must be a numeric value.", "highlightLongTimings=#getParameter("highlightLongTimings")#") />
 			<cfelse>
-				<cfset setHighlightLongTimings(params.highlightLongTimings) />
+				<cfset setHighlightLongTimings(getParameter("highlightLongTimings")) />
 			</cfif>
 		</cfif>
-		<cfif StructKeyExists(params, "fileName")>
-			<cfif NOT len(params.fileName)>
+		<cfif isParameterDefined("fileName")>
+			<cfif NOT Len(getParameter("fileName"))>
 				<cfset throwUsageException("The TracePlugin {fileName} parameter must not be blank. Please set a file name.", "fileName=[blank]") />
 			<cfelse>
-				<cfset setFilename(params.fileName) />
+				<cfset setFilename(getParameter("fileName")) />
 			</cfif>
 		</cfif>
-		<cfif StructKeyExists(params, "suppressTraceArg")>
-			<cfif NOT len(params.suppressTraceArg)>
+		<cfif isParameterDefined("suppressTraceArg")>
+			<cfif NOT Len(getParameter("suppressTraceArg"))>
 				<cfset throwUsageException("The TracePlugin {suppressTraceArg} parameter must not be blank. Please set an argument name.", "suppressTraceArg=[blank]") />
 			<cfelse>
-				<cfset setSuppressTraceArg(params.suppressTraceArg) />
+				<cfset setSuppressTraceArg(getParameter("suppressTraceArg")) />
 			</cfif>
 		</cfif>
-		<cfif StructKeyExists(params, "debugModeOnly")>
-			<cfif NOT len(params.debugModeOnly)>
+		<cfif isParameterDefined("debugModeOnly")>
+			<cfif NOT Len(getParameterName("debugModeOnly"))>
 				<cfset throwUsageException("The TracePlugin {debugOnlyMode} parameter must not be blank. Please set a boolean value.", "debugOnlyMode=[blank]") />
 			<cfelse>
-				<cfset setDebugModeOnly(params.debugModeOnly)>
+				<cfset setDebugModeOnly(getParameterName("debugModeOnly"))>
 			</cfif>
 		</cfif>
 	</cffunction>
