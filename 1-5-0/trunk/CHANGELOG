@@ -22,6 +22,20 @@ Bug Fixes
 Improvements / Enhancements
 ------------------------------------------------
 
+* Trace Plugin
+We have added granular support to suppress trace output by adding a parameter
+that only shows debugging if ColdFusion's debugging mode is on.
+
 * Subroutines
 Added a new XML construct to support subroutines and a related command to 
 execute a subroutine (2007-02-02 pfarrell)
+
+* Auto-Resolve Placeholder as Parameter Values
+Built-in auto-resolution of ${} syntax of placeholders in parameters values.
+This allows you use placeholders to have dynamic parameter values. For example:
+
+<parameter name="mode" value="${serverMode}"/>
+
+The ${serverMode} corresponds to a property named "serverMode".  Mach-II will
+automatically get the property's value at runtime and replace parameter's value
+with the result of the property.

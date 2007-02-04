@@ -75,6 +75,9 @@ The {suppressTraceArg} value is the name of event arg to check if the trace
 should be temporarily be suppressed. If the parameter is not defined, the
 suppress trace arg the plugin will check will default to "suppressTrace".
 
+The {debugModeOnly} value allows the trace to be shown only if ColdFusion's
+debugging is turned on.
+
 Notes:
 Log files are created using <cflog> in the standard ColdFusion log directory
 (WEB-INF/cfusion/logs/).  For more details, see Macromedia's livedocs about
