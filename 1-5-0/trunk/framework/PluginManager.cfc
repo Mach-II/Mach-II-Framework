@@ -73,7 +73,7 @@ Notes:
 			<!--- for each plugin, parse all the parameters --->
 			<cfset pluginParams = StructNew() />
 			<cfset xnParams = XMLSearch(xnPlugins[i], "./parameters/parameter") />
-			<cfloop index="j" from="1" to="#ArrayLen(xnParams)#">
+			<cfloop from="1" to="#ArrayLen(xnParams)#" index="j">
 				<cfset paramName = xnParams[j].XmlAttributes["name"] />
 				<cfset paramValue = xnParams[j].XmlAttributes["value"] />
 				
@@ -91,7 +91,7 @@ Notes:
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#variables.nPlugins#">
+		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
 			<cfset aPlugin.configure() />
 		</cfloop>
@@ -119,7 +119,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		<cfset var pointName = 0 />
-		<cfset var pluginRegisteredPoints = listToArray(findPluginPoints(arguments.plugin)) />		
+		<cfset var pluginRegisteredPoints = ListToArray(findPluginPoints(arguments.plugin)) />		
 
 		<cfif isPluginDefined(arguments.pluginName)>
 			<cfthrow type="MachII.framework.PluginAlreadyDefined"
@@ -131,10 +131,10 @@ Notes:
 			<cfset variables.pluginArray[variables.nPlugins] = arguments.plugin />
 			
 			<!--- add references to this plugin for each registered point --->
-			<cfloop index="i" from="1" to="#arraylen(pluginRegisteredPoints)#">
+			<cfloop from="1" to="#ArrayLen(pluginRegisteredPoints)#" index="i">
 				<cfset pointName = pluginRegisteredPoints[i] />
-				<cfif structKeyExists(variables,pointName & "Plugins")>
-					<cfset arrayAppend(variables[pointName & "Plugins" ], arguments.plugin) />
+				<cfif StructKeyExists(variables,pointName & "Plugins")>
+					<cfset ArrayAppend(variables[pointName & "Plugins" ], arguments.plugin) />
 				</cfif>
 			</cfloop>
 		</cfif>
@@ -156,7 +156,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.preProcessPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -168,7 +168,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.preEventPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -180,7 +180,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.postEventPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -192,7 +192,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.preViewPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -204,7 +204,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.postViewPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -216,7 +216,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.postProcessPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
 	</cffunction>
@@ -230,7 +230,7 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#arrayLen(variables.handleExceptionPlugins)#">
+		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
 	</cffunction>
@@ -242,25 +242,28 @@ Notes:
 		hint="Finds the registered plugin points in a plugin.">
 		<cfargument name="plugin" type="MachII.framework.Plugin" required="true" />		
 		
-		<cfset var md = getMetaData(arguments.plugin) />
-		<cfset var pointArray = arraynew(1) />
+		<cfset var md = GetMetaData(arguments.plugin) />
+		<cfset var pointArray = ArrayNew(1) />
 		<cfset var returnList = "" />
 		<cfset var i = 0 />
 				
 		<!--- recursively search the plugin's parents for plugin points --->
-		<cfset pointArray = gatherPluginMetaData(md,pointArray) />
+		<cfset pointArray = gatherPluginMetaData(md, pointArray) />
 		
-		<!--- then pull function names defined in this plugin --->
-		<cfloop index="i" from="1" to="#arraylen(md.functions)#">
-			<cfset arrayAppend(pointArray, md.functions[i].name) />
-		</cfloop>
-		
-		<!--- remove duplicates --->
-		<cfloop index="i" from="1" to="#arraylen(pointArray)#">
-			<cfif not listFindNoCase(returnList, pointArray[i])>
-				<cfset returnList = listAppend(returnList, pointArray[i]) />
-			</cfif>
-		</cfloop>
+		<!--- Make sure there are functions to transverse --->
+		<cfif StructKeyExists(md, "functions")>
+			<!--- then pull function names defined in this plugin --->
+			<cfloop from="1" to="#ArrayLen(md.functions)#" index="i">
+				<cfset ArrayAppend(pointArray, md.functions[i].name) />
+			</cfloop>
+			
+			<!--- remove duplicates --->
+			<cfloop from="1" to="#ArrayLen(pointArray)#" index="i">
+				<cfif not ListFindNoCase(returnList, pointArray[i])>
+					<cfset returnList = ListAppend(returnList, pointArray[i]) />
+				</cfif>
+			</cfloop>
+		</cfif>
 		
 		<cfreturn returnList />	
 	</cffunction>
@@ -272,10 +275,13 @@ Notes:
 		
 		<cfset var i = 0 />
 
-		<cfif structKeyExists(arguments.metadata, "extends") and arguments.metadata.extends.name neq "MachII.framework.Plugin">
-			<cfloop index="i" from="1" to="#arraylen(arguments.metadata.extends.functions)#">
-				<cfset arrayAppend(arguments.points, arguments.metadata.extends.functions[i].name) />
-			</cfloop>
+		<cfif StructKeyExists(arguments.metadata, "extends") and arguments.metadata.extends.name neq "MachII.framework.Plugin">
+			<!--- Make sure there are function to transverse --->
+			<cfif StructKeyExists(arguments.metadata.extends, "fuctions")>
+				<cfloop from="1" to="#ArrayLen(arguments.metadata.extends.functions)#" index="i">
+					<cfset ArrayAppend(arguments.points, arguments.metadata.extends.functions[i].name) />
+				</cfloop>
+			</cfif>
 			<cfset gatherPluginMetaData(arguments.metadata.extends, arguments.points) />
 		</cfif>
 		
