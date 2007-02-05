@@ -44,3 +44,11 @@ This allows you use placeholders to have dynamic parameter values. For example:
 The ${serverMode} corresponds to a property named "serverMode".  Mach-II will
 automatically get the property's value at runtime and replace parameter's value
 with the result of the property. (2007-02-03 pfarrell)
+
+* Event-Bean Command
+Added new optional attribute called "reinit" which defaults to true if
+not defined in the command. If "reinit" is false, the even-bean command will 
+not re-initialize the bean, but get it from the Event object.  This allows you
+to reuse beans and repopulate, whereas the old functionality would overwrite 
+the original bean and you would loose all the data contained within. This feature
+enhancement is backwards compatible with 1.1.1. (2007-02-05 pfarrell)

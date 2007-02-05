@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.3
-Updated version: 1.1.0
+Updated version: 1.5.0
 --->
 <cfcomponent 
 	displayname="EventBeanCommand" 
@@ -51,7 +51,7 @@ Updated version: 1.1.0
 		<cfset setBeanFields(arguments.beanFields) />
 		<cfset setReinit(arguments.reinit) />
 		
-		<cfset setBeanUtil( CreateObject('component','MachII.util.BeanUtil').init() ) />
+		<cfset setBeanUtil(CreateObject("component", "MachII.util.BeanUtil").init()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -65,15 +65,27 @@ Updated version: 1.1.0
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var bean = "" />
+		<cfset var reinit = TRUE />
 		
-		<cfif isBeanFieldsDefined()>
-			<cfset bean = getBeanUtil().createBean(getBeanType()) />
-			<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
+		<!--- If reinit is FALSE, get the bean from the event --->
+		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName())>
+			<cfset bean = arguments.event.getArg(getBeanName()) />
+			
+			<cfif isBeanFieldsDefined()>
+				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
+			<cfelse>
+				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs()) />
+			</cfif>
 		<cfelse>
-			<cfset bean = getBeanUtil().createBean(getBeanType(), arguments.event.getArgs()) />
+			<cfif isBeanFieldsDefined()>
+				<cfset bean = getBeanUtil().createBean(getBeanType()) />
+				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
+			<cfelse>
+				<cfset bean = getBeanUtil().createBean(getBeanType(), arguments.event.getArgs()) />
+			</cfif>			
+
+			<cfset arguments.event.setArg(getBeanName(), bean, getBeanType()) />
 		</cfif>
-		
-		<cfset arguments.event.setArg(getBeanName(), bean, getBeanType()) />
 		
 		<cfreturn true />
 	</cffunction>

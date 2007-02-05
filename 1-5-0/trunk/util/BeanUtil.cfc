@@ -47,9 +47,9 @@ arguments).
 		<cfargument name="initArgs" type="struct" required="false" 
 			hint="Optional. The set of arguments to pass to the init() function as an argument collection." />
 		
-		<cfset var bean = CreateObject('component', arguments.beanType) />
+		<cfset var bean = CreateObject("component", arguments.beanType) />
 		
-		<cfif IsDefined('arguments.initArgs') EQ true>
+		<cfif IsDefined("arguments.initArgs") EQ true>
 			<cfinvoke component="#bean#" method="init" argumentCollection="#arguments.initArgs#" />
 		<cfelse>
 			<cfset bean.init() />
@@ -59,7 +59,7 @@ arguments).
 	</cffunction>
 	
 	<cffunction name="setBeanFields" access="public" returntype="void" output="false"
-		hint="Sets the value of a fields in a bean using method calls setBeanField(beanField=value).">
+		hint="Sets the value of fields in a bean using method calls setBeanField().">
 		<cfargument name="bean" type="any" required="true"
 			hint="The bean to populate." />
 		<cfargument name="fields" type="string" required="true"
@@ -69,7 +69,24 @@ arguments).
 		
 		<cfset var field = 0  />
 		
-		<cfloop index="field" list="#arguments.fields#" delimiters=",">
+		<cfloop list="#arguments.fields#" index="field" delimiters=",">
+			<cfif StructKeyExists(arguments.fieldCollection, field)>
+				<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+			</cfif>
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="setBeanAutoFields" access="public" returntype="void" output="false"
+		hint="Sets the value of fields in a bean (determined by describeBean()) using method calls setBeanField().">
+		<cfargument name="bean" type="any" required="true"
+			hint="The bean to populate." />
+		<cfargument name="fieldCollection" type="struct" required="true"
+			hint="A struct of field names mapped to values." />
+		
+		<cfset var field = 0 />
+		<cfset var map = describeBean(arguments.bean) />
+		
+		<cfloop collection="#map#" item="field">
 			<cfif StructKeyExists(arguments.fieldCollection, field)>
 				<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
 			</cfif>
@@ -105,14 +122,14 @@ arguments).
 		<cfset var map = StructNew() />
 		<cfset var meta = GetMetaData(arguments.bean) />
 		<cfset var metaFunctions = meta.functions />
-		<cfset var metaFunction = '' /> 
-		<cfset var fieldName = '' />
-		<cfset var fieldValue = '' />
+		<cfset var metaFunction = "" /> 
+		<cfset var fieldName = "" />
+		<cfset var fieldValue = "" />
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#ArrayLen(metaFunctions)#">
+		<cfloop from="1" to="#ArrayLen(metaFunctions)#" index="i">
 			<cfset metaFunction = metaFunctions[i] />
-			<cfif metaFunction.name.toLowerCase().startsWith('get')
+			<cfif metaFunction.name.toLowerCase().startsWith("get")
 				AND metaFunction.access.equalsIgnoreCase("public")
 				AND ArrayLen(metaFunction.parameters) EQ 0>
 				<cfset fieldName = Right(metaFunction.name, Len(metaFunction.name)-3) />
