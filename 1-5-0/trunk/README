@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version 1.1.1
+Version 1.5.0
 $Id$
 ------------------------------------------------
 
@@ -19,7 +19,7 @@ web-applications.  The framework focuses on easing software development and
 maintenance.  Mach-II was the first object-oriented framework for ColdFusion 
 and continues to mature as a strong and viable framework choice for developers.
 
-Mach-II 1.1.1 is released under the Apache 2.0 license.  You can use Mach-II 
+Mach-II 1.5.0 is released under the Apache 2.0 license.  You can use Mach-II 
 on any commercial application as long as you abide by the license. For more 
 details, please see the NOTICE and LICENSE files that are shipped with the 
 framework.
@@ -69,7 +69,8 @@ If you encounter problems:
 	or that your "MachII" mapping is pointing to the right directory if you are
 	using a mapping.
 
-2.	Try restarting your ColdFusion Application Server service.
+2.	Clear your template cache if you have caching on and restart your ColdFusion 
+	Application Server service.
 
 3.	If problems persist, please check out the Mach-II for ColdFusion Google Group:
 	http://groups.google.com/group/mach-ii-for-coldfusion
@@ -79,13 +80,13 @@ If you encounter problems:
 |_||_)(_|| (_|(_||| |(_|  | \|(_) |_(/_
    |   _|             _|     
 ------------------------------------------------
-If you are updating your Mach-II installation from an older version, you must restart 
-your ColdFusion Application Server after you replace your older version with a newer 
-version.
+If you are updating your Mach-II installation from an older version, you must clear 
+your template cache and restart your ColdFusion Application Server after you replace 
+your older version with a newer version.
 
-If you do not restart your server, you will receive an error similar to this:
-The value returned from function getAppFactory() is not of type
-MachII.framework.AppFactory.
+If you do not clear your template cache and restart your server, you will receive 
+an error similar to this:
+The value returned from function getAppFactory() is not of type MachII.framework.AppFactory.
 
 The error occurred in C:\[PathToYourWebRoot]\MachII\framework\AppLoader.cfc: line XX
 Called from C:\[PathToYourWebRoot]\MachII\mach-ii.cfm: line XX
