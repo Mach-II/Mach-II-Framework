@@ -18,7 +18,7 @@ Copyright: Mach-II Corporation
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 - Deprecated hasProperty(). Duplicate method isPropertyDefined is more inline with
@@ -47,37 +47,58 @@ the rest of the framework. (pfarrell)
 		<cfargument name="version" type="string" required="true" />
 		
 		<cfset var xnProperties = "" />
+		<cfset var type = "" />
+		<cfset var value = "" />
 		<cfset var i = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setVersion(arguments.version) />
 
 		<!--- Set the properties from the XML file. --->
-		<cfset xnProperties = XMLSearch(configXML,'//property') />
+		<cfset xnProperties = XMLSearch(configXML, "//property") />
 
 		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">
-			<cfset setProperty(xnProperties[i].xmlAttributes.name, xnProperties[i].xmlAttributes.value) />
+			<!--- Check for the property type. Defaults to string --->
+			<cfif StructKeyExists(xnProperties[i].xmlAttributes, "type")>
+				<cfset type = xnProperties[i].xmlAttributes.type />
+			<cfelse>
+				<cfset type = "string" />
+			</cfif>
+			
+			<!--- Setup based on data type --->
+			<cfif type EQ "string">
+				<cfset value = xnProperties[i].xmlAttributes.value />
+			<cfelseif type EQ "struct">
+				<cfset value = setupStruct(xnProperties[i].xmlChildren) />
+			<cfelseif type EQ "array">
+				<cfset value = setupArray(xnProperties[i].xmlChildren[1].xmlChildren) />
+			<cfelse>
+				<cfthrow message="Property CFC datatype is unimplemented." />
+			</cfif>
+			
+			<!--- Set the property --->
+			<cfset setProperty(xnProperties[i].xmlAttributes.name, value) />
 		</cfloop>
 		
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents. --->
-		<cfif NOT isPropertyDefined('defaultEvent')>
-			<cfset setProperty('defaultEvent', 'defaultEvent') />
+		<cfif NOT isPropertyDefined("defaultEvent")>
+			<cfset setProperty("defaultEvent", "defaultEvent") />
 		</cfif>
-		<cfif NOT isPropertyDefined('exceptionEvent')>
-			<cfset setProperty('exceptionEvent', 'exceptionEvent') />
+		<cfif NOT isPropertyDefined("exceptionEvent")>
+			<cfset setProperty("exceptionEvent", "exceptionEvent") />
 		</cfif>
-		<cfif NOT isPropertyDefined('applicationRoot')>
-			<cfset setProperty('applicationRoot', '') />
+		<cfif NOT isPropertyDefined("applicationRoot")>
+			<cfset setProperty("applicationRoot", "") />
 		</cfif>
-		<cfif NOT isPropertyDefined('eventParameter')>
-			<cfset setProperty('eventParameter', 'event') />
+		<cfif NOT isPropertyDefined("eventParameter")>
+			<cfset setProperty("eventParameter", "event") />
 		</cfif>
-		<cfif NOT isPropertyDefined('parameterPrecedence')>
-			<cfset setProperty('parameterPrecedence', 'form') />
+		<cfif NOT isPropertyDefined("parameterPrecedence")>
+			<cfset setProperty("parameterPrecedence", "form") />
 		</cfif>
-		<cfif NOT isPropertyDefined('maxEvents')>
-			<cfset setProperty('maxEvents', 10) />
+		<cfif NOT isPropertyDefined("maxEvents")>
+			<cfset setProperty("maxEvents", 10) />
 		</cfif>
 	</cffunction>
 	
@@ -96,7 +117,7 @@ the rest of the framework. (pfarrell)
 		
 		<cfif isPropertyDefined(arguments.propertyName)>
 			<cfreturn variables.properties[arguments.propertyName] />
-		<cfelseif StructKeyExists(arguments, 'defaultValue')>
+		<cfelseif StructKeyExists(arguments, "defaultValue")>
 			<cfreturn arguments.defaultValue />
 		<cfelse>
 			<!--- This case is current unimplemented to retain backwards compatibility.
@@ -128,6 +149,64 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getProperties" access="public" returntype="struct" output="false"
 		hint="Returns all properties.">
 		<cfreturn variables.properties />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="setupStruct" access="private" returntype="struct" output="false"
+		hint="Setups a struct.">
+		<cfargument name="nodes" type="array" required="true" />
+		
+		<cfset var result = StructNew() />
+		<cfset var value = "" />
+		<cfset var child = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.nodes)#" index="i">			
+			<cfset result[arguments.nodes[i].xmlAttributes.name] = recurseByType(arguments.nodes[i]) />
+		</cfloop>
+		
+		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="setupArray" access="private" returntype="array" output="false"
+		hint="Setups an array.">
+		<cfargument name="nodes" type="array" required="true" />
+		
+		<cfset var result = ArrayNew(1) />
+		<cfset var value = "" />
+		<cfset var child = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.nodes)#" index="i">			
+			<cfset ArrayAppend(result, recurseByType(arguments.nodes[i])) />
+		</cfloop>
+		
+		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="recurseByType" access="private" returntype="any" output="false"
+		hint="Recurses properties by type.">
+		<cfargument name="node" type="any" required="true" />
+		
+		<cfset var value = "" />
+		
+		<cfif StructKeyExists(arguments.node.xmlAttributes, "value")>
+			<cfset value = arguments.node.xmlAttributes.value />
+		<cfelse>
+			<cfset child = arguments.node.xmlChildren[1] />
+			
+			<cfif child.xmlName EQ "value">
+				<cfset value = child.xmlText />
+			<cfelseif child.xmlName EQ "struct">
+				<cfset value = setupStruct(child.xmlChildren) />
+			<cfelseif child.xmlName EQ "array">
+				<cfset value = setupArray(child.xmlChildren) />
+			</cfif>
+		</cfif>
+		
+		<cfreturn value />
 	</cffunction>
 	
 	<!---
