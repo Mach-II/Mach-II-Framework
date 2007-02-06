@@ -39,8 +39,10 @@ All user-defined properties extend this base property component.
 	--->
 	<cffunction name="init" access="public" returntype="Property" output="false"
 		hint="Used by the framework for initialization. Do not override.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The framework instances' AppManager." />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="The initial set of configuration parameters." />
 		
 		<cfset super.init(arguments.appManager, arguments.parameters) />
 		

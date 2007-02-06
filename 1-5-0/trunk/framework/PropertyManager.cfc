@@ -35,6 +35,7 @@ the rest of the framework. (pfarrell)
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.properties = StructNew() />
+	<cfset variables.configurableProperties = ArrayNew(1) />
 	<cfset variables.version = "Unknown" />
 	
 	<!---
@@ -47,8 +48,15 @@ the rest of the framework. (pfarrell)
 		<cfargument name="version" type="string" required="true" />
 		
 		<cfset var xnProperties = "" />
+		<cfset var xnParams = "" />
+		<cfset var name = "" />
 		<cfset var value = "" />
+		<cfset var type = "" />
+		<cfset var propertyParams = "" />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setVersion(arguments.version) />
@@ -57,15 +65,32 @@ the rest of the framework. (pfarrell)
 		<cfset xnProperties = XMLSearch(configXML, "//property") />
 
 		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">			
-			<!--- Setup based on data type --->
+			<cfset name = xnProperties[i].xmlAttributes["name"] />
+			
+			<!--- Setup if configurable property --->
 			<cfif StructKeyExists(xnProperties[i].xmlAttributes, "type")>
-				<cfthrow message="Property CFC datatype is unimplemented." />				
+				<cfset type = xnProperties[i].xmlAttributes["type"] />
+				
+				<!--- For each configurable property, parse all the parameters --->
+				<cfset propertyParams = StructNew() />
+				<cfset xnParams = XMLSearch(xnProperties[i], "./parameters/parameter") />
+				<cfloop from="1" to="#ArrayLen(xnParams)#" index="j">
+					<cfset paramName = xnParams[j].XmlAttributes["name"] />
+					<cfset paramValue = xnParams[j].XmlAttributes["value"] />
+					
+					<cfset StructInsert(propertyParams, paramName, paramValue, true) />
+				</cfloop>
+				
+				<!--- Create the configurable property and append to array of configurable property names --->
+				<cfset value = CreateObject("component", type).init(arguments.appManager, propertyParams) />
+				<cfset ArrayAppend(variables.configurableProperties, name) />
+			<!--- Setup if name/value pair, struct or array --->
 			<cfelse>
 				<cfset value = recurseProperty(xnProperties[i]) />
 			</cfif>
 			
 			<!--- Set the property --->
-			<cfset setProperty(xnProperties[i].xmlAttributes.name, value) />
+			<cfset setProperty(name, value) />
 		</cfloop>
 		
 		<!--- Make sure required properties are set: 
@@ -91,8 +116,14 @@ the rest of the framework. (pfarrell)
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Prepares the manager for use.">
-		<!--- DO NOTHING --->
+		hint="Prepares the configurable properties for use.">
+		<cfset var aConfigurableProperty = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.configurableProperties)#" index="i">
+			<cfset aConfigurableProperty = getProperty(variables.configurableProperties[i]) />
+			<cfset aConfigurableProperty.configure() />
+		</cfloop>
 	</cffunction>
 	
 	<!---
@@ -151,7 +182,7 @@ the rest of the framework. (pfarrell)
 		<cfset var i = "" />
 		
 		<cfif StructKeyExists(arguments.node.xmlAttributes, "value")>
-			<cfset value = arguments.node.xmlAttributes.value />
+			<cfset value = arguments.node.xmlAttributes["value"] />
 		<cfelse>
 			<cfset child = arguments.node.xmlChildren[1] />
 			<cfif child.xmlName EQ "value">
@@ -159,7 +190,7 @@ the rest of the framework. (pfarrell)
 			<cfelseif child.xmlName EQ "struct">
 				<cfset value = StructNew() />
 				<cfloop from="1" to="#ArrayLen(child.xmlChildren)#" index="i">
-					<cfset value[child.xmlChildren[i].xmlAttributes.name] = recurseProperty(child.xmlChildren[i]) />
+					<cfset value[child.xmlChildren[i].xmlAttributes["name"]] = recurseProperty(child.xmlChildren[i]) />
 				</cfloop>
 			<cfelseif child.xmlName EQ "array">
 				<cfset value = ArrayNew(1) />
@@ -190,6 +221,11 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getVersion" access="public" returntype="string" output="false"
 		hint="Gets the version number of the framework.">
 		<cfreturn variables.version />
+	</cffunction>
+	
+	<cffunction name="getConfigurableProperties" access="public" returntype="array" output="false"
+		hint="Returns an array of configurable property names.">
+		<cfreturn StructKeyArray(variables.configurableProperties) />
 	</cffunction>
 	
 </cfcomponent>

@@ -42,7 +42,6 @@ the rest of the framework. (pfarrell)
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parameters = StructNew() />
-	<cfset variables.propertyManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -56,7 +55,6 @@ the rest of the framework. (pfarrell)
 		
 		<!--- PropertyManager be in set after AppManager --->
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setPropertyManager(getAppManager().getPropertyManager()) />
 		<cfset setParameters(arguments.parameters) />
 	</cffunction>
 
@@ -144,7 +142,7 @@ the rest of the framework. (pfarrell)
 		<!--- Auto resolve ${} parameters --->
 		<cfif REFindNoCase("\${(.)*?}", value)>
 			<cfset propertyName = Mid(value, 3, Len(value) -3) />
-			<cfif getPropertyManager().isPropertyDefined(propertyName)>
+			<cfif getAppManager().getPropertyManager().isPropertyDefined(propertyName)>
 				<cfset value = getProperty(propertyName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.ProperyNotDefinedForAutoResolvedParameter" 
@@ -192,16 +190,10 @@ the rest of the framework. (pfarrell)
 		hint="Gets the components AppManager instance.">
 		<cfreturn variables.appManager />
 	</cffunction>
-
-	<cffunction name="setPropertyManager" access="private" returntype="void" output="false"
-		hint="Sets the components PropertyManager instance.">
-		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"
-			hint="The PropertyManager instance to set." />
-		<cfset variables.propertyManager = arguments.propertyManager />
-	</cffunction>
+	
 	<cffunction name="getPropertyManager" access="package" returntype="MachII.framework.PropertyManager" output="false"
 		hint="Gets the components PropertyManager instance.">
-		<cfreturn variables.propertyManager />
-	</cffunction>	
+		<cfreturn getAppManager().getPropertyManager() />
+	</cffunction>
 
 </cfcomponent>
