@@ -223,9 +223,9 @@ the rest of the framework. (pfarrell)
 		<cfreturn variables.version />
 	</cffunction>
 	
-	<cffunction name="getConfigurableProperties" access="public" returntype="array" output="false"
+	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
 		hint="Returns an array of configurable property names.">
-		<cfreturn StructKeyArray(variables.configurableProperties) />
+		<cfreturn variables.configurableProperties />
 	</cffunction>
 	
 </cfcomponent>
