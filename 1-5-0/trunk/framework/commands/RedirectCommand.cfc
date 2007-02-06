@@ -19,6 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
+Updated version: 1.5.0
 --->
 <cfcomponent 
 	displayname="RedirectCommand" 
@@ -30,7 +31,8 @@ Created version: 1.1.0
 	PROPERTIES
 	--->
 	<cfset variables.eventName = "" />
-	<cfset variables.eventParam = "" />
+	<cfset variables.eventParameter = "" />
+	<cfset variables.redirectPersistParameter = "" />
 	<cfset variables.url = "" />
 	<cfset variables.args = "" />
 	<cfset variables.persist = "" />
@@ -41,13 +43,15 @@ Created version: 1.1.0
 	<cffunction name="init" access="public" returntype="RedirectCommand" output="false"
 		hint="Used by the framework for initialization.">
 		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="eventParam" type="string" required="true" />
+		<cfargument name="eventParameter" type="string" required="true" />
+		<cfargument name="redirectPersistParameter" type="string" required="true" />
 		<cfargument name="url" type="string" required="false" default="" />
 		<cfargument name="args" type="string" required="false" default="" />
-		<cfargument name="persist" type="boolean" required="false" default="false" /s>
+		<cfargument name="persist" type="boolean" required="false" default="false" />
 		
 		<cfset setEventName(arguments.eventName) />
-		<cfset setEventParam(arguments.eventParam) />
+		<cfset setEventParameter(arguments.eventParameter) />
+		<cfset setRedirectPersistParameter(arguments.redirectPersistParameter) />
 		<cfset setUrl(arguments.url) />
 		<cfset setArgs(arguments.args) />
 		<cfset setPersist(arguments.persist) />
@@ -124,12 +128,20 @@ Created version: 1.1.0
 		<cfreturn variables.eventName />
 	</cffunction>
 	
-	<cffunction name="setEventParam" access="private" returntype="void" output="false">
-		<cfargument name="eventParam" type="string" required="true" />
-		<cfset variables.eventParam = arguments.eventParam />
+	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
+		<cfargument name="eventParameter" type="string" required="true" />
+		<cfset variables.eventParameter = arguments.eventParameter />
 	</cffunction>
-	<cffunction name="getEventParam" access="private" returntype="string" output="false">
-		<cfreturn variables.eventParam />
+	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
+		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
+		<cfargument name="redirectPersistParameter" type="string" required="true" />
+		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
+	</cffunction>
+	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
+		<cfreturn variables.redirectPersistParameter />
 	</cffunction>
 	
 	<cffunction name="setUrl" access="private" returntype="void" output="false">
