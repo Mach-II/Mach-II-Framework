@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 - Added request event name functionality. (pfarrell)
@@ -82,7 +82,7 @@ Notes:
 			
 			<!--- Handle any errors with the exception event. --->
 			<cfcatch type="any">
-				<cfset exception = CreateObject('component', 'MachII.util.Exception') />
+				<cfset exception = CreateObject("component", "MachII.util.Exception") />
 				<cfset exception.wrapException(cfcatch) />
 				<cfset eventContext.handleException(exception, true) />
 			</cfcatch>
@@ -97,13 +97,13 @@ Notes:
 	--->
 	<cffunction name="getEventName" access="private" returntype="string" output="false">
 		<cfargument name="eventArgs" type="struct" required="true" />
-		<cfset var eventParam = getAppManager().getPropertyManager().getProperty('eventParameter') />
+		<cfset var eventParam = getAppManager().getPropertyManager().getProperty("eventParameter") />
 		<cfset var eventName = "" />
 		
-		<cfif StructKeyExists(arguments.eventArgs, eventParam) AND arguments.eventArgs[eventParam] NEQ ''>
+		<cfif StructKeyExists(arguments.eventArgs, eventParam) AND arguments.eventArgs[eventParam] NEQ "">
 			<cfset eventName = arguments.eventArgs[eventParam] />
 		<cfelse>
-			<cfset eventName = getAppManager().getPropertyManager().getProperty('defaultEvent') />
+			<cfset eventName = getAppManager().getPropertyManager().getProperty("defaultEvent") />
 		</cfif>
 		
 		<cfreturn eventName />
@@ -111,8 +111,8 @@ Notes:
 	
 	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false">
 		<cfset var eventArgs = StructNew() />
-		<cfset var paramPrecedence = getAppManager().getPropertyManager().getProperty('parameterPrecedence') />
-		<cfset var overwriteFormParams = (paramPrecedence EQ 'url') />
+		<cfset var paramPrecedence = getAppManager().getPropertyManager().getProperty("parameterPrecedence") />
+		<cfset var overwriteFormParams = (paramPrecedence EQ "url") />
 		
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
