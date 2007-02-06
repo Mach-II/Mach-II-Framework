@@ -18,7 +18,7 @@ Copyright: Mach-II Corporation
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 - Added request event name functionality. (pfarrell)
@@ -45,7 +45,7 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Used by the framework for initialization. Do not override.">
-		<cfset variables.requestHandler = CreateObject('component', 'MachII.framework.RequestHandler') />
+		<cfset variables.requestHandler = CreateObject("component", "MachII.framework.RequestHandler") />
 		<cfset variables.requestHandler.init(this) />
 	</cffunction>
 	
@@ -67,14 +67,14 @@ Notes:
 		hint="Creates an EventContext instance.">
 		<cfargument name="requestEventName" type="string" required="true" />
 		
-		<cfset var eventContext = CreateObject('component', 'MachII.framework.EventContext') />
+		<cfset var eventContext = CreateObject("component", "MachII.framework.EventContext") />
 		<cfset eventContext.init(this, arguments.requestEventName) />
 		<cfreturn eventContext />
 	</cffunction>
 	
 	<cffunction name="createRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Creates a RequestHandler instance.">
-		<cfset var requestHandler = CreateObject('component', 'MachII.framework.RequestHandler') />
+		<cfset var requestHandler = CreateObject("component", "MachII.framework.RequestHandler") />
 		<cfset requestHandler.init(this) />
 		<cfreturn requestHandler />
 	</cffunction>
