@@ -22,7 +22,7 @@ Created version: 1.0.0
 Updated version: 1.5.0
 
 Notes:
-The DTD for the Mach-II Application Configuration File, Version 1.1.1.
+The DTD for the Mach-II Application Configuration File, Version 1.5.0.
 
 To support validation of the configuration file, include one of the
 following DOCTYPE elements at the beginning (after the "xml" declaration):
@@ -53,9 +53,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		defaultEvent - the event for the framework to handle if one is not specified in a new request
 		exceptionEvent - the event to announce if there's an unhandled exception
 		maxEvents - the maximum number of events to process for a single request
-		eventVariable - the name of the request parameter (form or url) that will define the event
+		eventParameter - the name of the request parameter that will define the event (defaults to 'event')
 		applicationRoot - the path to the application's folder relative to the web-server root (i.e. '/SampleApp')
-		argumentsPrecedence - form | url : which to favor for conflicting request parameters
+		parameterPrecedence - form | url : which to favor for conflicting request parameters
 	
 	"property"
 		name - the name of the property
