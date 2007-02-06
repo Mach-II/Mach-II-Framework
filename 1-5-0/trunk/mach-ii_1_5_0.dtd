@@ -258,7 +258,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 	fields CDATA #IMPLIED
-	reinit CDATA #IMPLIED
+	reinit (true|false) "true"
 >
 
 <!--
