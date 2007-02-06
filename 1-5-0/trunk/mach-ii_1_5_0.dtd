@@ -62,10 +62,11 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		value - the value of the property
 -->
 <!ELEMENT properties (property*)>
-<!ELEMENT property EMPTY>
+<!ELEMENT property (parameters?, array?, struct?)>
 <!ATTLIST property 
 	name CDATA #REQUIRED
-	value CDATA #REQUIRED
+	value CDATA #IMPLIED
+	type CDATA #IMPLIED
 >
 
 <!--
@@ -297,3 +298,18 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	value CDATA #REQUIRED
 >
+
+<!ELEMENT struct (key*)>
+<!ELEMENT key (value?, struct?, array?)>
+<!ATTLIST key 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+>
+
+<!ELEMENT array (element*)>
+<!ELEMENT element (value?, struct?, array?)>
+<!ATTLIST element 
+	value CDATA #REQUIRED
+>
+
+<!ELEMENT value ()>
