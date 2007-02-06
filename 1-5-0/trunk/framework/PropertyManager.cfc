@@ -47,7 +47,6 @@ the rest of the framework. (pfarrell)
 		<cfargument name="version" type="string" required="true" />
 		
 		<cfset var xnProperties = "" />
-		<cfset var type = "" />
 		<cfset var value = "" />
 		<cfset var i = 0 />
 		
@@ -57,23 +56,12 @@ the rest of the framework. (pfarrell)
 		<!--- Set the properties from the XML file. --->
 		<cfset xnProperties = XMLSearch(configXML, "//property") />
 
-		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">
-			<!--- Check for the property type. Defaults to string --->
-			<cfif StructKeyExists(xnProperties[i].xmlAttributes, "type")>
-				<cfset type = xnProperties[i].xmlAttributes.type />
-			<cfelse>
-				<cfset type = "string" />
-			</cfif>
-			
+		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">			
 			<!--- Setup based on data type --->
-			<cfif type EQ "string">
-				<cfset value = xnProperties[i].xmlAttributes.value />
-			<cfelseif type EQ "struct">
-				<cfset value = setupStruct(xnProperties[i].xmlChildren) />
-			<cfelseif type EQ "array">
-				<cfset value = setupArray(xnProperties[i].xmlChildren[1].xmlChildren) />
+			<cfif StructKeyExists(xnProperties[i].xmlAttributes, "type")>
+				<cfthrow message="Property CFC datatype is unimplemented." />				
 			<cfelse>
-				<cfthrow message="Property CFC datatype is unimplemented." />
+				<cfset value = recurseProperty(xnProperties[i]) />
 			</cfif>
 			
 			<!--- Set the property --->
@@ -153,56 +141,31 @@ the rest of the framework. (pfarrell)
 	
 	<!---
 	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="setupStruct" access="private" returntype="struct" output="false"
-		hint="Setups a struct.">
-		<cfargument name="nodes" type="array" required="true" />
-		
-		<cfset var result = StructNew() />
-		<cfset var value = "" />
-		<cfset var child = "" />
-		<cfset var i = 0 />
-		
-		<cfloop from="1" to="#ArrayLen(arguments.nodes)#" index="i">			
-			<cfset result[arguments.nodes[i].xmlAttributes.name] = recurseByType(arguments.nodes[i]) />
-		</cfloop>
-		
-		<cfreturn result />
-	</cffunction>
-	
-	<cffunction name="setupArray" access="private" returntype="array" output="false"
-		hint="Setups an array.">
-		<cfargument name="nodes" type="array" required="true" />
-		
-		<cfset var result = ArrayNew(1) />
-		<cfset var value = "" />
-		<cfset var child = "" />
-		<cfset var i = 0 />
-		
-		<cfloop from="1" to="#ArrayLen(arguments.nodes)#" index="i">			
-			<cfset ArrayAppend(result, recurseByType(arguments.nodes[i])) />
-		</cfloop>
-		
-		<cfreturn result />
-	</cffunction>
-	
-	<cffunction name="recurseByType" access="private" returntype="any" output="false"
+	--->	
+	<cffunction name="recurseProperty" access="private" returntype="any" output="false"
 		hint="Recurses properties by type.">
 		<cfargument name="node" type="any" required="true" />
 		
 		<cfset var value = "" />
+		<cfset var child = "" />
+		<cfset var i = "" />
 		
 		<cfif StructKeyExists(arguments.node.xmlAttributes, "value")>
 			<cfset value = arguments.node.xmlAttributes.value />
 		<cfelse>
 			<cfset child = arguments.node.xmlChildren[1] />
-			
 			<cfif child.xmlName EQ "value">
 				<cfset value = child.xmlText />
 			<cfelseif child.xmlName EQ "struct">
-				<cfset value = setupStruct(child.xmlChildren) />
+				<cfset value = StructNew() />
+				<cfloop from="1" to="#ArrayLen(child.xmlChildren)#" index="i">
+					<cfset value[child.xmlChildren[i].xmlAttributes.name] = recurseProperty(child.xmlChildren[i]) />
+				</cfloop>
 			<cfelseif child.xmlName EQ "array">
-				<cfset value = setupArray(child.xmlChildren) />
+				<cfset value = ArrayNew(1) />
+				<cfloop from="1" to="#ArrayLen(child.xmlChildren)#" index="i">			
+					<cfset ArrayAppend(value, recurseProperty(child.xmlChildren[i])) />
+				</cfloop>
 			</cfif>
 		</cfif>
 		
