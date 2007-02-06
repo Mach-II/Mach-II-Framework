@@ -33,6 +33,7 @@ Created version: 1.1.0
 	<cfset variables.eventParam = "" />
 	<cfset variables.url = "" />
 	<cfset variables.args = "" />
+	<cfset variables.persist = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -43,11 +44,13 @@ Created version: 1.1.0
 		<cfargument name="eventParam" type="string" required="true" />
 		<cfargument name="url" type="string" required="false" default="" />
 		<cfargument name="args" type="string" required="false" default="" />
+		<cfargument name="persist" type="boolean" required="false" default="false" /s>
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setEventParam(arguments.eventParam) />
 		<cfset setUrl(arguments.url) />
 		<cfset setArgs(arguments.args) />
+		<cfset setPersist(arguments.persist) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -143,6 +146,14 @@ Created version: 1.1.0
 	</cffunction>
 	<cffunction name="getArgs" access="private" returntype="string" output="false">
 		<cfreturn variables.args />
+	</cffunction>
+	
+	<cffunction name="setPersist" access="private" returntype="void" output="false">
+		<cfargument name="persist" type="boolean" required="true" />
+		<cfset variables.persist = arguments.persist />
+	</cffunction>
+	<cffunction name="getPersist" access="private" returntype="boolean" output="false">
+		<cfreturn variables.persist />
 	</cffunction>
 
 </cfcomponent>
