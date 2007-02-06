@@ -94,7 +94,7 @@ the rest of the framework. (pfarrell)
 		</cfloop>
 		
 		<!--- Make sure required properties are set: 
-			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents. --->
+			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
 		<cfif NOT isPropertyDefined("defaultEvent")>
 			<cfset setProperty("defaultEvent", "defaultEvent") />
 		</cfif>
@@ -112,6 +112,9 @@ the rest of the framework. (pfarrell)
 		</cfif>
 		<cfif NOT isPropertyDefined("maxEvents")>
 			<cfset setProperty("maxEvents", 10) />
+		</cfif>
+		<cfif NOT isPropertyDefined("redirectPersistParameter")>
+			<cfset setProperty("redirectPersistParameter", "persistId") />
 		</cfif>
 	</cffunction>
 	
