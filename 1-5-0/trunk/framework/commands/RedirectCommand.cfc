@@ -57,7 +57,7 @@ Updated version: 1.5.0
 		<cfset setUrl(arguments.url) />
 		<cfset setArgs(arguments.args) />
 		<cfset setPersist(arguments.persist) />
-		<cfset setPersist(arguments.persistArgs) />
+		<cfset setPersistArgs(arguments.persistArgs) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -175,7 +175,7 @@ Updated version: 1.5.0
 		<cfargument name="persistArgs" type="string" required="true" />
 		<cfset variables.persistArgs = arguments.persistArgs />
 	</cffunction>
-	<cffunction name="getPersist" access="private" returntype="string" output="false">
+	<cffunction name="getPersistArgs" access="private" returntype="string" output="false">
 		<cfreturn variables.persistArgs />
 	</cffunction>
 

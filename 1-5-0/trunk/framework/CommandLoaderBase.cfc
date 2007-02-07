@@ -248,7 +248,7 @@ Updated version: 1.5.0
 			<cfset persist = arguments.commandNode.xmlAttributes["persist"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
-			<cfset persist = arguments.commandNode.xmlAttributes["persistArgs"] />
+			<cfset persistArgs = arguments.commandNode.xmlAttributes["persistArgs"] />
 		</cfif>
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, redirectUrl, args, persist, persistArgs) />
 		
