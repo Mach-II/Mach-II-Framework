@@ -98,7 +98,7 @@ Notes:
 		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager. 
-		Creation order is important: propertyManager first, listenerManager, filterManager and subroutineManager before eventManager. 
+		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXML, appManager, arguments.version) />
 		<cfset appManager.setPropertyManager(propertyManager) />
