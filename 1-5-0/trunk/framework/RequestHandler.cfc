@@ -116,6 +116,7 @@ Notes:
 		
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
+		<cfset StructAppend(eventArgs, getAppManager().getRequestManager().parseSesParameters(), overwriteFormParams) />
 		
 		<cfreturn eventArgs />
 	</cffunction>

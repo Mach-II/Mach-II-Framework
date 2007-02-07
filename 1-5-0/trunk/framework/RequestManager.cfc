@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
+	<cfset variables.parseSes = "" />
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
@@ -46,21 +47,23 @@ Notes:
 		hint="Initializes the manager.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		
-		<cfset var urlDelimiters = "" />
-		
 		<cfset setAppManager(arguments.appManager) />
 		
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Configures nothing.">
+		
+		<cfset var urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
+			
 		<!--- Setup defaults --->
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
-		
-		<!--- Setup url params --->
-		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />
+		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1)) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2)) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3)) />
-		
-		<cfreturn this />
 	</cffunction>
 
 	<!---
@@ -76,7 +79,7 @@ Notes:
 			hint="Base of the url. Defaults to index.cfm." />
 		
 		<cfset var builtUrl = "" />
-		<cfset var params = parseUrlParameters(arguments.urlParameters) />
+		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
 		<cfset var i = "" />
 		
 		<!--- Append the base url --->
@@ -100,12 +103,48 @@ Notes:
 		
 		<cfreturn builtUrl />
 	</cffunction>
+	
+	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
+		hint="Parse SES parameters.">
+		<cfset var pathInfo = cgi.PATH_INFO />
+		<cfset var names = "" />
+		<cfset var i = "" />
+		<cfset var value = "" />
+		<cfset var params = StructNew() />
+
+		<!--- Parse SES if necessary --->
+		<cfif getParseSes() AND Len(pathInfo)>
+			<cfset pathInfo = Right(pathInfo, Len(pathInfo) -1) />
+			
+			<cfset names = ListToArray(pathInfo, getUrlSeriesDelimiter()) />
+			
+			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
+				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
+					<cfset value = "" />
+					<cfif i + 1 LT ArrayLen(names)>
+						<cfset value = names[i+1] />
+					</cfif>
+					<cfset params[names[i]] = value />
+				</cfloop>
+			<cfelse>
+				<cfloop from="1" to="#ArrayLen(names)#" index="i">
+					<cfset value = "" />
+					<cfif ArrayLen(names[i]) EQ 2>
+						<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
+					</cfif>
+					<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
+				</cfloop>
+			</cfif>
+		</cfif>
+		
+		<cfreturn params />
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="parseUrlParameters" access="private" returntype="struct" output="false"
-		hint="Parses the url parameters into a useable form.">
+	<cffunction name="parseBuildUrlParameters" access="private" returntype="struct" output="false"
+		hint="Parses the build url parameters into a useable form.">
 		<cfargument name="urlParameters" type="any" required="true"
 			hint="Takes string of name/value pairs or a struct.">
 		
@@ -144,6 +183,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setParseSes" access="private" returntype="void" output="false">
+		<cfargument name="parseSes" type="string" required="true" />
+		<cfset variables.parseSes = arguments.parseSes />
+	</cffunction>
+	<cffunction name="getParseSes" access="private" returntype="string" output="false">
+		<cfreturn variables.parseSes />
 	</cffunction>
 	
 	<cffunction name="setDefaultUrlBase" access="private" returntype="void" output="false">

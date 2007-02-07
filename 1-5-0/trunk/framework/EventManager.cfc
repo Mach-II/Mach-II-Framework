@@ -90,7 +90,7 @@ Updated version: 1.1.0
 		<cfreturn this />
 	</cffunction>
 	
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures nothing.">
 		<!--- DO NOTHING --->
 	</cffunction>

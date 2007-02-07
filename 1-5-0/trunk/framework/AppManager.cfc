@@ -58,6 +58,7 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Calls configure() on each of the manager instances.">
 		<cfset getPropertyManager().configure() />
+		<cfset getRequestManager().configure() />
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
 		<cfset getFilterManager().configure() />
