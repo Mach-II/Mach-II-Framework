@@ -276,6 +276,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	url CDATA #IMPLIED
 	args CDATA #IMPLIED
 	persist (true|false) "false"
+	persistArgs CDATA #IMPLIED
 >
 
 <!--

@@ -231,6 +231,7 @@ Updated version: 1.5.0
 		<cfset var redirectUrl = "" />
 		<cfset var args = "" />
 		<cfset var persist = false />
+		<cfset var persistArgs = "" />
 		<cfset var eventParameter = getAppManager().getPropertyManager().getProperty("eventParameter", "event") />
 		<cfset var redirectPersistParameter = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") /> />
 		
@@ -246,7 +247,10 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persist")>
 			<cfset persist = arguments.commandNode.xmlAttributes["persist"] />
 		</cfif>
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, redirectUrl, args, persist) />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
+			<cfset persist = arguments.commandNode.xmlAttributes["persistArgs"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, redirectUrl, args, persist, persistArgs) />
 		
 		<cfreturn command />
 	</cffunction>
