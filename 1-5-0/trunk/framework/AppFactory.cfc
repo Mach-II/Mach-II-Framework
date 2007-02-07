@@ -56,6 +56,7 @@ Notes:
 		
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
+		<cfset var requestManager = "" />
 		<cfset var listenerManager = "" />
 		<cfset var filterManager = "" />
 		<cfset var subroutineManager = "" />
@@ -77,7 +78,7 @@ Notes:
 			<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
 				<cfset validationResult = XmlValidate(arguments.configXmlPath, arguments.configDtdPath)>
 				<cfif NOT validationResult.Status>
-					<cfset validationException = CreateObject('component','MachII.util.XmlValidationException') />
+					<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
 					<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlpath, arguments.configDtdPath) />
 					<cfthrow type="MachII.framework.XmlValidationException" 
 						message="#validationException.getFormattedMessage()#" />
@@ -93,39 +94,34 @@ Notes:
 		</cftry>
 			
 		<!--- Create the AppManager. --->
-		<cfset appManager = CreateObject('component', 'MachII.framework.AppManager') />
-		<cfset appManager.init() />
+		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
 		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager. 
 		Creation order is important: propertyManager first, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
-		<cfset propertyManager = CreateObject('component', 'MachII.framework.PropertyManager') />
-		<cfset propertyManager.init(configXML, appManager, arguments.version) />
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXML, appManager, arguments.version) />
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
-		<cfset listenerManager = CreateObject('component', 'MachII.framework.ListenerManager') />
-		<cfset listenerManager.init(configXML, appManager) />
+		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
+		<cfset appManager.setRequestManager(requestManager) />
+		
+		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXML, appManager) />
 		<cfset appManager.setListenerManager(listenerManager) />
 		
-		<cfset filterManager = CreateObject('component', 'MachII.framework.FilterManager') />
-		<cfset filterManager.init(configXML, appManager) />
+		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(configXML, appManager) />
 		<cfset appManager.setFilterManager(filterManager) />
 
-		<cfset subroutineManager = CreateObject('component', 'MachII.framework.SubroutineManager') />
-		<cfset subroutineManager.init(configXML, appManager) />
+		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(configXML, appManager) />
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<cfset eventManager = CreateObject('component', 'MachII.framework.EventManager') />
-		<cfset eventManager.init(configXML, appManager) />
+		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(configXML, appManager) />
 		<cfset appManager.setEventManager(eventManager) />
 		
-		<cfset viewManager = CreateObject('component', 'MachII.framework.ViewManager') />
-		<cfset viewManager.init(configXML, appManager) />
+		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(configXML, appManager) />
 		<cfset appManager.setViewManager(viewManager) />
 		
-		<cfset pluginManager = CreateObject('component', 'MachII.framework.PluginManager') />
-		<cfset pluginManager.init(configXML, appManager) />
+		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(configXML, appManager) />
 		<cfset appManager.setPluginManager(pluginManager) />
 		
 		<cfset appManager.configure() />

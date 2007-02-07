@@ -41,7 +41,7 @@ the rest of the framework. (pfarrell)
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="PropertyManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -116,6 +116,8 @@ the rest of the framework. (pfarrell)
 		<cfif NOT isPropertyDefined("redirectPersistParameter")>
 			<cfset setProperty("redirectPersistParameter", "persistId") />
 		</cfif>
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"

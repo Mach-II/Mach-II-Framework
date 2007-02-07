@@ -39,7 +39,7 @@ Updated version: 1.1.0
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="EventManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -86,6 +86,8 @@ Updated version: 1.1.0
 		<cfset variables.listenerMgr = "" />
 		<cfset variables.filterMgr = "" />
 		<cfset variables.subroutineMgr = "" />
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

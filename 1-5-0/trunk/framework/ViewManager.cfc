@@ -35,7 +35,7 @@ Updated version: 1.1.1
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="ViewManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -54,7 +54,9 @@ Updated version: 1.1.1
 			<cfset page = viewNodes[i].xmlAttributes['page'] />
 			
 			<cfset variables.viewPaths[name] = page />
-		</cfloop> 
+		</cfloop>
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

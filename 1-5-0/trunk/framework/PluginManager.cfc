@@ -48,7 +48,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="PluginManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -85,7 +85,8 @@ Notes:
 			<cfset plugin = CreateObject("component", pluginType).init(arguments.appManager, pluginParams) />
 			<cfset addPlugin(pluginName, plugin) />
 		</cfloop>
-				
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

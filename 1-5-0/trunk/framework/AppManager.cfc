@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.propertyManager = "" />
+	<cfset variables.requestManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.subroutineManager = "" />
@@ -43,10 +44,12 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="AppManager" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfset variables.requestHandler = CreateObject("component", "MachII.framework.RequestHandler") />
 		<cfset variables.requestHandler.init(this) />
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<!---
@@ -110,14 +113,6 @@ Notes:
 		<cfreturn variables.filterManager />
 	</cffunction>
 
-	<cffunction name="setSubroutineManager" access="public" returntype="void" output="false">
-		<cfargument name="subroutineManager" type="MachII.framework.SubroutineManager" required="true" />
-		<cfset variables.subroutineManager = arguments.subroutineManager />
-	</cffunction>
-	<cffunction name="getSubroutineManager" access="public" returntype="MachII.framework.SubroutineManager" output="false">
-		<cfreturn variables.subroutineManager />
-	</cffunction>
-
 	<cffunction name="setListenerManager" access="public" returntype="void" output="false">
 		<cfargument name="listenerManager" type="MachII.framework.ListenerManager" required="true" />
 		<cfset variables.listenerManager = arguments.listenerManager />
@@ -140,6 +135,22 @@ Notes:
 	</cffunction>	
 	<cffunction name="getPluginManager" access="public" returntype="MachII.framework.PluginManager" output="false">
 		<cfreturn variables.pluginManager />
+	</cffunction>
+	
+	<cffunction name="setRequestManager" access="public" returntype="void" output="false">
+		<cfargument name="requestManager" type="MachII.framework.RequestManager" required="true" />
+		<cfset variables.requestManager = arguments.requestManager />
+	</cffunction>	
+	<cffunction name="getRequestManager" access="public" returntype="MachII.framework.RequestManager" output="false">
+		<cfreturn variables.requestManager />
+	</cffunction>
+	
+	<cffunction name="setSubroutineManager" access="public" returntype="void" output="false">
+		<cfargument name="subroutineManager" type="MachII.framework.SubroutineManager" required="true" />
+		<cfset variables.subroutineManager = arguments.subroutineManager />
+	</cffunction>
+	<cffunction name="getSubroutineManager" access="public" returntype="MachII.framework.SubroutineManager" output="false">
+		<cfreturn variables.subroutineManager />
 	</cffunction>
 
 	<cffunction name="setViewManager" access="public" returntype="void" output="false">
