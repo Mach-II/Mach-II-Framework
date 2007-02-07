@@ -228,7 +228,7 @@ Updated version: 1.5.0
 		
 		<cfset var command = "" />
 		<cfset var eventName = "" />
-		<cfset var redirectUrl = "" />
+		<cfset var redirectUrl = getAppManager().getPropertyManager().getProperty("urlBase", "index.cfm") />
 		<cfset var args = "" />
 		<cfset var persist = false />
 		<cfset var persistArgs = "" />

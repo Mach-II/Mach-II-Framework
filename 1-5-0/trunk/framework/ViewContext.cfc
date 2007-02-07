@@ -94,7 +94,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url.">
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""

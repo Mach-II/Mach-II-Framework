@@ -113,7 +113,7 @@ Notes:
 		<cfset var i = "" />
 		
 		<cfif NOT IsStruct(arguments.urlParameters)>
-			<cfloop list="#arguments.urlParameters#" delimiters="," index="i">
+			<cfloop list="#arguments.urlParameters#" index="i" delimiters=",">
 				<cfset params[ListFirst(i, "=")] = ListLast(i, "=") />
 			</cfloop>
 		<cfelse>

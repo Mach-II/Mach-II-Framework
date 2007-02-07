@@ -84,40 +84,21 @@ Updated version: 1.5.0
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset var redirectUrl = getUrl() />
-		<cfset var redirectQueryStringParam = "" />
-		<cfset var redirectQueryString = "" />
-		<cfset var argNames = getArgs() />
-		<cfset var argName = "" />
+		<cfset var redirectUrl = "" />
+		<cfset var params = StructNew() />
+		<cfset var args = getArgs() />
+		<cfset var i = "" />
 		
-		<cfif redirectUrl EQ "">
-			<cfset redirectUrl = "index.cfm" />
-		</cfif>
-		
-		<!--- Attach the query string parameter. --->
-		<cfif Find("?", redirectUrl) GT 0>
-			<cfset redirectQueryStringParam = "&" />
-		<cfelse>
-			<cfset redirectQueryStringParam = "?" />
-		</cfif>
-
-		<!--- Attach the event name if defined --->
-		<cfif getEventName() NEQ "">
-			<cfset redirectQueryString = getEventParameter() & "=" & getEventName() />
-		</cfif>
-		
-		<!--- Attach each additional arguments if it exists and is a simple value --->
-		<cfloop index="argName" list="#argNames#" delimiters=",">
-			<cfif arguments.event.isArgDefined(argName) AND IsSimpleValue(arguments.event.getArg(argName, ""))>
-				<cfset redirectQueryString = redirectQueryString & "&" & argName & "=" & URLEncodedFormat(arguments.event.getArg(argName, "")) />
+		<!--- Build params --->
+		<cfloop list="#args#" index="i" delimiters=",">
+			<cfif arguments.event.isArgDefined(i) AND IsSimpleValue(arguments.event.getArg(i))>
+				<cfset params[i] = arguments.event.getArg(i) />
 			</cfif>
 		</cfloop>
 		
-		<cfif Len(redirectQueryString)>
-			<cfreturn redirectUrl & redirectQueryStringParam & redirectQueryString />
-		<cfelse>
-			<cfreturn redirectUrl />		
-		</cfif>
+		<cfset redirectUrl = arguments.eventContext.buildUrl(getEventName(), params, getUrl()) />
+		
+		<cfreturn redirectUrl />
 	</cffunction>
 	
 	<!---
