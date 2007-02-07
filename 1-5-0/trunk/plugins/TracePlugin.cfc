@@ -146,10 +146,10 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			</cfif>
 		</cfif>
 		<cfif isParameterDefined("debugModeOnly")>
-			<cfif NOT Len(getParameterName("debugModeOnly"))>
+			<cfif NOT Len(getParameter("debugModeOnly"))>
 				<cfset throwUsageException("The TracePlugin {debugOnlyMode} parameter must not be blank. Please set a boolean value.", "debugOnlyMode=[blank]") />
 			<cfelse>
-				<cfset setDebugModeOnly(getParameterName("debugModeOnly"))>
+				<cfset setDebugModeOnly(getParameter("debugModeOnly"))>
 			</cfif>
 		</cfif>
 	</cffunction>
