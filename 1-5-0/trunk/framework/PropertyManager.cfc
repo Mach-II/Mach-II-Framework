@@ -116,6 +116,15 @@ the rest of the framework. (pfarrell)
 		<cfif NOT isPropertyDefined("redirectPersistParameter")>
 			<cfset setProperty("redirectPersistParameter", "persistId") />
 		</cfif>
+		<cfif NOT isPropertyDefined("urlBase")>
+			<cfset setProperty("urlBase", "index.cfm") />
+		</cfif>
+		<cfif NOT isPropertyDefined("urlDelimiters")>
+			<cfset setProperty("urlDelimiters", "?,&,=") />
+		</cfif>
+		<cfif NOT isPropertyDefined("urlParseSES")>
+			<cfset setProperty("urlParseSES", false) />
+		</cfif>
 		
 		<cfreturn this />
 	</cffunction>

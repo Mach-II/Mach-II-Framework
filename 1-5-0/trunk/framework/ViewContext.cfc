@@ -93,6 +93,17 @@ Notes:
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="buildUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1,urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to index.cfm." />
+		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(arguments.eventName, arguments.urlParameters, arguments.urlBase)) />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
