@@ -87,26 +87,26 @@ Updated version: 1.5.0
 		<cfset var argNames = getArgs() />
 		<cfset var argName = "" />
 		
-		<cfif redirectUrl EQ ''>
+		<cfif redirectUrl EQ "">
 			<cfset redirectUrl = "index.cfm" />
 		</cfif>
 		
 		<!--- Attach the query string parameter. --->
-		<cfif Find('?', redirectUrl) GT 0>
-			<cfset redirectQueryStringParam = '&' />
+		<cfif Find("?", redirectUrl) GT 0>
+			<cfset redirectQueryStringParam = "&" />
 		<cfelse>
-			<cfset redirectQueryStringParam = '?' />
+			<cfset redirectQueryStringParam = "?" />
 		</cfif>
 
 		<!--- Attach the event name if defined --->
-		<cfif getEventName() NEQ ''>
-			<cfset redirectQueryString = getEventParam() & '=' & getEventName() />
+		<cfif getEventName() NEQ "">
+			<cfset redirectQueryString = getEventParameter() & "=" & getEventName() />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop index="argName" list="#argNames#" delimiters=",">
-			<cfif arguments.event.isArgDefined(argName) AND IsSimpleValue(arguments.event.getArg(argName, ''))>
-				<cfset redirectQueryString = redirectQueryString & '&' & argName & '=' & URLEncodedFormat(arguments.event.getArg(argName, '')) />
+			<cfif arguments.event.isArgDefined(argName) AND IsSimpleValue(arguments.event.getArg(argName, ""))>
+				<cfset redirectQueryString = redirectQueryString & "&" & argName & "=" & URLEncodedFormat(arguments.event.getArg(argName, "")) />
 			</cfif>
 		</cfloop>
 		
