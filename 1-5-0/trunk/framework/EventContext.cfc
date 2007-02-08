@@ -250,6 +250,12 @@ Notes:
 		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.eventName, arguments.urlParameters, arguments.urlBase) />
 	</cffunction>
 	
+	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
+		hint="Saves persisted event data and returns the persistId.">
+		<cfargument name="eventArgs" type="struct" required="true" />
+		<cfreturn getAppManager().getRequestManager().savePersistEventData(arguments.eventArgs) />
+	</cffunction>
+	
 	<cffunction name="processEvents" access="public" returntype="void" output="true"
 		hint="Begins processing of queued events. Can only be called once.">
 	

@@ -95,12 +95,13 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="getEventName" access="private" returntype="string" output="false">
+	<cffunction name="getEventName" access="private" returntype="string" output="false"
+		hint="Gets the event name from the incoming event arg struct.">
 		<cfargument name="eventArgs" type="struct" required="true" />
 		<cfset var eventParam = getAppManager().getPropertyManager().getProperty("eventParameter") />
 		<cfset var eventName = "" />
 		
-		<cfif StructKeyExists(arguments.eventArgs, eventParam) AND arguments.eventArgs[eventParam] NEQ "">
+		<cfif StructKeyExists(arguments.eventArgs, eventParam) AND Len(arguments.eventArgs[eventParam])>
 			<cfset eventName = arguments.eventArgs[eventParam] />
 		<cfelse>
 			<cfset eventName = getAppManager().getPropertyManager().getProperty("defaultEvent") />
@@ -109,14 +110,19 @@ Notes:
 		<cfreturn eventName />
 	</cffunction>
 	
-	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false">
+	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false"
+		hint="Builds a struct of incoming event args.">
 		<cfset var eventArgs = StructNew() />
 		<cfset var paramPrecedence = getAppManager().getPropertyManager().getProperty("parameterPrecedence") />
 		<cfset var overwriteFormParams = (paramPrecedence EQ "url") />
 		
+		<!--- Build event args from form/url/SES --->
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
-		<cfset StructAppend(eventArgs, getAppManager().getRequestManager().parseSesParameters(), overwriteFormParams) />
+		<cfset StructAppend(eventArgs, getAppManager().getRequestManager().parseSesParameters(cgi.PATH_INFO), overwriteFormParams) />
+		
+		<!--- Get redirect persist data and overwrite other args if conflct --->
+		<cfset StructAppend(eventArgs, getAppManager().getRequestManager().readPersistEventData(eventArgs), true) />
 		
 		<cfreturn eventArgs />
 	</cffunction>

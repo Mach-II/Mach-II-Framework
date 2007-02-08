@@ -59,6 +59,11 @@ Updated version: 1.5.0
 		<cfset setPersist(arguments.persist) />
 		<cfset setPersistArgs(arguments.persistArgs) />
 		
+		<!--- Add the persistId parameter to the arg if true --->
+		<cfif getPersist()>
+			<cfset setArgs(ListAppend(getArgs(), getRedirectPersistParameter())) />
+		</cfif>
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -69,9 +74,14 @@ Updated version: 1.5.0
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+
+		<!--- Persist if directed --->
+		<cfif getPersist()>
+			<cfset savePersistEventData(arguments.event, arguments.eventContext) />
+		</cfif>
 		
-		<cfset var redirectUrl = makeRedirectUrl(arguments.event, arguments.eventContext) />
-		<cflocation url="#redirectUrl#" addtoken="no" />
+		<!--- Make the url and relocate --->
+		<cflocation url="#makeRedirectUrl(arguments.event, arguments.eventContext)#" addtoken="no" />
 		
 		<cfreturn true />
 	</cffunction>
@@ -99,6 +109,32 @@ Updated version: 1.5.0
 		<cfset redirectUrl = arguments.eventContext.buildUrl(getEventName(), params, getUrl()) />
 		
 		<cfreturn redirectUrl />
+	</cffunction>
+	
+	<cffunction name="savePersistEventData" access="private" returntype="void" output="false"
+		hint="Saves persisted event data and returns the persistId.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+		<cfset var args = StructNew() />
+		<cfset var persistArgs = getPersistArgs() />
+		<cfset var persistId = "" />
+		<cfset var i = "" />
+		
+		<!--- Build params --->
+		<cfif NOT ListLen(persistArgs)>
+			<cfset args = arguments.event.getArgs() />
+		<cfelse>
+			<cfloop list="#persistArgs#" index="i" delimiters=",">
+				<cfif arguments.event.isArgDefined(i)>
+					<cfset args[i] = arguments.event.getArg(i) />
+				</cfif>
+			</cfloop>
+		</cfif>
+		
+		<!--- Save the data --->
+		<cfset persistId = arguments.eventContext.savePersistEventData(args) />
+		<cfset arguments.event.setArg(getRedirectPersistParameter(), persistId) />
 	</cffunction>
 	
 	<!---

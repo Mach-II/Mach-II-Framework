@@ -32,12 +32,14 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.redirectPersistParameter = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.parseSes = "" />
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
+	<cfset variables.cleanupDifference = -3 />
 
 	
 	<!---
@@ -58,9 +60,12 @@ Notes:
 		<cfset var urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
 			
 		<!--- Setup defaults --->
+		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
+		
+		<!--- Parse through the complex --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1)) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2)) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3)) />
@@ -106,17 +111,18 @@ Notes:
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
 		hint="Parse SES parameters.">
-		<cfset var pathInfo = cgi.PATH_INFO />
+		<cfargument name="pathInfo" type="string" required="true" />
+		
 		<cfset var names = "" />
 		<cfset var i = "" />
 		<cfset var value = "" />
 		<cfset var params = StructNew() />
 
 		<!--- Parse SES if necessary --->
-		<cfif getParseSes() AND Len(pathInfo)>
-			<cfset pathInfo = Right(pathInfo, Len(pathInfo) -1) />
+		<cfif getParseSes() AND Len(arguments.pathInfo)>
+			<cfset arguments.pathInfo = Right(arguments.pathInfo, Len(arguments.pathInfo) -1) />
 			
-			<cfset names = ListToArray(pathInfo, getUrlSeriesDelimiter()) />
+			<cfset names = ListToArray(arguments.pathInfo, getUrlSeriesDelimiter()) />
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
@@ -138,6 +144,52 @@ Notes:
 		</cfif>
 		
 		<cfreturn params />
+	</cffunction>
+
+	<cffunction name="readPersistEventData" access="public" returntype="struct" output="false"
+		hint="Gets a persisted event by id if found in event args.">
+		<cfargument name="eventArgs" type="struct" required="true" />
+		
+		<cfset var persistId = "" />
+		<cfset var persistedData = StructNew() />
+		<cfset var dataStorage = getPersistEventStorage() />
+		
+		<!--- Check they have a persistId in the event --->
+		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
+			<cfset persistId = arguments.eventArgs[getRedirectPersistParameter()] />
+			
+			<!--- Get the data and cleanup --->
+			<cfif StructKeyExists(dataStorage.data, persistId)>
+				<cftry>
+					<!--- Get the data and delete it from the dataStorage --->
+					<cfset persistedData = dataStorage.data[persistId]>
+					<cfset StructDelete(dataStorage.data, persistId, false) />
+					<cfcatch type="any">
+						<!--- Ingore this error --->
+					</cfcatch>
+				</cftry>
+			</cfif>
+		</cfif>
+		
+		<cfreturn persistedData />
+	</cffunction>
+	
+	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
+		hint="Saves persisted event data and returns the persistId.">
+		<cfargument name="eventArgs" type="struct" required="true" />
+		
+		<cfset var persistId = createPersistId() />
+		<cfset var timestamp = createTimestamp() />
+		<cfset var dataStorage = getPersistEventStorage() />
+		
+		<!--- Save the data/timestamp --->
+		<cfset dataStorage.data[persistId] = arguments.eventArgs />
+		<cfset dataStorage.timestamps[timestamp] = persistId />
+		
+		<!--- Do cleanup --->
+		<cfset cleanupPersistEventStorage() />
+		
+		<cfreturn persistId />
 	</cffunction>
 
 	<!---
@@ -162,6 +214,72 @@ Notes:
 		<cfreturn params />
 	</cffunction>
 	
+	<cffunction name="getPersistEventStorage" access="private" returntype="struct" output="false"
+		hint="Helper function to get the event data store for persists.">
+
+		<!--- Double check lock if default structure is not defined --->
+		<cfif NOT StructKeyExists(session, "_MachIIPersistEventStorage")>
+			<cflock name="_MachIIPersistEventStorageCreate" type="exclusive" timeout="5" throwontimeout="false">
+				<cfif NOT StructKeyExists(session, "_MachIIPersistEventStorage")>
+					<cfset session._MachIIPersistEventStorage = StructNew() />
+					<cfset session._MachIIPersistEventStorage.data = StructNew() />
+					<cfset session._MachIIPersistEventStorage.timestamps = StructNew() />
+					<cfset session._MachIIPersistEventStorage.lastCleanup = createTimestamp() />
+				</cfif>
+			</cflock>
+		</cfif>
+		
+		<cfreturn session._MachIIPersistEventStorage />		
+	</cffunction>
+	
+	<cffunction name="cleanupPersistEventStorage" access="private" returntype="void" output="false"
+		hint="Cleanups the persist event data storage.">
+		
+		<cfset var timestamp = createTimestamp() />
+		<cfset var diffTimestamp = DateAdd("n", variables.cleanupDifference, timestamp) />
+		<cfset var dataStorage = getPersistEventStorage() />
+		<cfset var dataTimestampArray = "" />
+		<cfset var i = "" />
+		
+		<!--- Do cleanup --->
+		<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
+			<cflock name="_MachIIPersistEventStorageCreateCleanup" type="exclusive" timeout="5" throwontimeout="false">
+				<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
+					<cfset dataStorage.lastCleanup = timestamp />
+					
+					<!--- Get array of timestamps and sort --->
+					<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
+					<cfset ArraySort(dataTimestampArray, "numeric", "asc") />
+					
+					<!--- Cleanup --->
+					<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
+						<cftry>
+							<cfif DateCompare(dataTimestampArray[i], diffTimestamp) EQ 1>
+								<cfset StructDelete(dataStorage.data, dataStorage.timestamps[dataTimestampArray[i]], false) />
+								<cfset StructDelete(dataStorage.timestamps, dataTimestampArray[i], false) />
+							<cfelse>
+								<cfbreak />
+							</cfif>
+							<cfcatch type="any">
+								<!--- Ingore this error --->
+							</cfcatch>
+						</cftry>
+					</cfloop>
+				</cfif>
+			</cflock>
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="createPersistId" access="private" returntype="string" output="false"
+		hint="Creates a persistId for use.">
+		<cfreturn REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
+	</cffunction>
+	
+	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
+		hint="Creates a timestamp for use.">
+		<cfreturn REReplace(Now(), "[ts[:punct:][:space:]]", "", "ALL") />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
@@ -175,6 +293,14 @@ Notes:
 	
 	<cffunction name="getPropertyManager" access="private" returntype="MachII.framework.PropertyManager" output="false">
 		<cfreturn getAppManager().getPropertyManager() />
+	</cffunction>
+	
+	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
+		<cfargument name="redirectPersistParameter" type="string" required="true" />
+		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
+	</cffunction>
+	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
+		<cfreturn variables.redirectPersistParameter />
 	</cffunction>
 	
 	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
