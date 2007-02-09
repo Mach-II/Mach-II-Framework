@@ -282,6 +282,19 @@ Notes:
 		<cfif NOT getEventQueue().isEmpty()>
 			<cfset exception = createException("MachII.framework.MaxEventsExceeded", "The maximum number of events (#getMaxEvents()#) the framework will process for a single request has been exceeded.") />
 			<cfset handleException(exception, true) />
+			
+			<cfset resetEventCount() />
+			
+			<cfloop condition="hasMoreEvents() AND getEventCount() LT getMaxEvents()">
+				<cfset handleNextEvent() />
+			</cfloop>
+			
+			<cfif NOT getEventQueue().isEmpty()>
+				<cfthrow
+					type="MachII.framework.MaxEventsExceededDuringException"
+					message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events (#getMaxEvents()#) was exceeded during the handling of the exception."
+					detail="Please check your exception handling since it initiated an infinite loop." />
+			</cfif>
 		</cfif>
 		
 		<!--- Post-Process. --->
@@ -384,6 +397,11 @@ Notes:
 	<cffunction name="incrementEventCount" access="private" returntype="void" output="false"
 		hint="Increments the current event count by 1.">
 		<cfset variables.eventCount = variables.eventCount + 1 />
+	</cffunction>
+	
+	<cffunction name="resetEventCount" access="private" returntype="void" output="false"
+		hint="Reset the current event count.">
+		<cfset variables.eventCount = 0 />
 	</cffunction>
 
 	<!---
