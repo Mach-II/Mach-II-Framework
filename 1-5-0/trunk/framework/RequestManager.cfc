@@ -182,12 +182,12 @@ Notes:
 		<cfset var timestamp = createTimestamp() />
 		<cfset var dataStorage = getPersistEventStorage() />
 		
+		<!--- Do cleanup --->
+		<cfset cleanupPersistEventStorage() />
+		
 		<!--- Save the data/timestamp --->
 		<cfset dataStorage.data[persistId] = arguments.eventArgs />
 		<cfset dataStorage.timestamps[timestamp] = persistId />
-		
-		<!--- Do cleanup --->
-		<cfset cleanupPersistEventStorage() />
 		
 		<cfreturn persistId />
 	</cffunction>
