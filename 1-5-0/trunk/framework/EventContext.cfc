@@ -59,16 +59,16 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setRequestEventName(arguments.requestEventName) />
-		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty('exceptionEvent')) />
-		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty('maxEvents')) />
+		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
+		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- Setup the event Queue. --->
-		<cfset eventQueue = CreateObject('component', 'MachII.util.SizedQueue') />
+		<cfset eventQueue = CreateObject("component", "MachII.util.SizedQueue") />
 		<cfset eventQueue.init(getMaxEvents()) />
 		<cfset setEventQueue(eventQueue) />
 		
 		<!--- Setup the ViewContext. --->
-		<cfset viewContext = CreateObject('component', 'MachII.framework.ViewContext') />
+		<cfset viewContext = CreateObject("component", "MachII.framework.ViewContext") />
 		<cfset viewContext.init(getAppManager()) />
 		<cfset setViewContext(viewContext) />
 		
@@ -199,10 +199,10 @@ Notes:
 			<!--- Put the request event name --->
 			<cfset exceptionEvent.setRequestName(getRequestEventName()) />
 			<!--- Put the exception object --->
-			<cfset exceptionEvent.setArg('exception', arguments.exception) />
+			<cfset exceptionEvent.setArg("exception", arguments.exception) />
 			
 			<cfif hasCurrentEvent()>
-				<cfset exceptionEvent.setArg('exceptionEvent', getCurrentEvent()) />
+				<cfset exceptionEvent.setArg("exceptionEvent", getCurrentEvent()) />
 			</cfif>
 			
 			<cfset getAppManager().getPluginManager().handleException(this, arguments.exception) />
@@ -363,7 +363,7 @@ Notes:
 		<cfargument name="extendedInfo" type="string" required="false" default="" />
 		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
 		
-		<cfset var exception = CreateObject('component', 'MachII.util.Exception') />
+		<cfset var exception = CreateObject("component", "MachII.util.Exception") />
 		<cfset exception.init(arguments.type, arguments.message, arguments.errorCode, arguments.detail, arguments.extendedInfo, arguments.tagContext) />
 		<cfset setIsException(true) />
 		
@@ -374,7 +374,7 @@ Notes:
 		hint="Creates an exception object (with cfcatch).">
 		<cfargument name="caughtException" type="any" required="true" />
 		
-		<cfset var exception = CreateObject('component', 'MachII.util.Exception') />
+		<cfset var exception = CreateObject("component", "MachII.util.Exception") />
 		<cfset exception.wrapException(arguments.caughtException) />
 		<cfset setIsException(true) />
 		
