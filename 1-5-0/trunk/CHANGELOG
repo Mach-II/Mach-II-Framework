@@ -22,6 +22,12 @@ Bug Fixes
 Fixed bug when plugin or components that they extend have no functions inside of
 the hierarchy. (2007-02-04 pfarrell)
 
+* White Screen of Death (WSOD) When Maximum Events Is Exceeded
+Fixed WSOD bug when the maximum number of events to be processed is exceeded.
+Now, process the generated exception up to the maximum number of events then 
+throws an error since the exception handling exceeded the maximum events for the
+second time. (2007-02-08 pfarrell)
+
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
