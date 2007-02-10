@@ -50,7 +50,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	Attributes: file - the path relative to app root where the file is located
 -->
 
-<!ELEMENT include>
+<!ELEMENT include EMPTY>
 <!ATTLIST include 
 	file CDATA #REQUIRED
 >
