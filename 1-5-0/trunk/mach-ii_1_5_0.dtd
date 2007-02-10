@@ -39,9 +39,20 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	"mach-ii"
 		version - the version of the DTD being used for configuration
 -->
-<!ELEMENT mach-ii (properties?, listeners?, event-filters?, event-handlers?, page-views?, plugins?)>
+<!ELEMENT mach-ii (include?, properties?, listeners?, event-filters?, event-handlers?, page-views?, plugins?)>
 <!ATTLIST mach-ii 
 	version CDATA #IMPLIED
+>
+
+<!--
+	The "include" element defines a file you get inserted into that document before Mach II parses
+	and validates the xml file.
+	Attributes: file - the path relative to app root where the file is located
+-->
+
+<!ELEMENT include>
+<!ATTLIST include 
+	file CDATA #REQUIRED
 >
 
 <!--
@@ -61,8 +72,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the property
 		value - the value of the property
 -->
-<!ELEMENT properties (property*)>
-<!ELEMENT property (parameters?, array?, struct?)>
+<!ELEMENT properties (property*, include?)>
+<!ELEMENT property (parameters?, array?, struct?, include?)>
 <!ATTLIST property 
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
@@ -81,7 +92,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	"invoker"
 		type - the type of the invoker (fully qualified path)
 -->
-<!ELEMENT listeners (listener*)>
+<!ELEMENT listeners (listener*, include?)>
 <!ELEMENT listener (invoker?, parameters?)>
 <!ATTLIST listener 
 	name CDATA #REQUIRED
@@ -101,7 +112,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the event-filter
 		type - the type of the event-filter (fully qualified path)
 -->
-<!ELEMENT event-filters (event-filter*)>
+<!ELEMENT event-filters (event-filter*, include?)>
 <!ELEMENT event-filter (parameters?)>
 <!ATTLIST event-filter 
 	name CDATA #REQUIRED
@@ -116,7 +127,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		event - the name of the event to handle
 		access - the access attribute of the event handler (public|private)
 -->
-<!ELEMENT event-handlers (event-handler*)>
+<!ELEMENT event-handlers (event-handler*, include?)>
 <!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
@@ -130,7 +141,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	"subroutine-handler"
 		subroutine - the name of the subroutine to handle
 -->
-<!ELEMENT subroutines (subroutine*)>
+<!ELEMENT subroutines (subroutine*, include?)>
 <!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST subroutine 
 	subroutine CDATA #REQUIRED 
@@ -144,7 +155,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the view
 		page - relative path to the view file
 -->
-<!ELEMENT page-views (page-view*)>
+<!ELEMENT page-views (page-view*, include?)>
 <!ELEMENT page-view EMPTY>
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
@@ -159,7 +170,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the plugin
 		type - the type of the plugin (fully qualified path)
 -->
-<!ELEMENT plugins (plugin*)>
+<!ELEMENT plugins (plugin*, include?)>
 <!ELEMENT plugin (parameters?)>
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
