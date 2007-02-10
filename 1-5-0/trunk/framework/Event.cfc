@@ -39,7 +39,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="Event" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfargument name="name" type="string" required="false" default=""
 			hint="The name of the event object." />
@@ -51,6 +51,8 @@ Notes:
 		<cfset setName(arguments.name) />
 		<cfset setArgs(arguments.args) />
 		<cfset setRequestName(arguments.requestName) />
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<!---

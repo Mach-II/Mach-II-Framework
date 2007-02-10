@@ -62,14 +62,14 @@ Updated version: 1.1.0
 
 		<cfset eventNodes = XMLSearch(configXML,"//event-handlers/event-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
-			<cfset eventName = eventNodes[i].xmlAttributes['event'] />
-			<cfif StructKeyExists(eventNodes[i].xmlAttributes, 'access')>
-				<cfset eventAccess = eventNodes[i].xmlAttributes['access'] />
+			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
+			<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
+				<cfset eventAccess = eventNodes[i].xmlAttributes["access"] />
 			<cfelse>
-				<cfset eventAccess = 'public' />
+				<cfset eventAccess = "public" />
 			</cfif>
 			
-			<cfset eventHandler = CreateObject('component', 'MachII.framework.EventHandler') />
+			<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler") />
 			<cfset eventHandler.init() />
 			<cfset eventHandler.setAccess(eventAccess) />
 	  
@@ -120,13 +120,13 @@ Updated version: 1.1.0
 		<cfset var event = "" />
 		
 		<cfif isEventDefined(arguments.eventName)>
-			<cfset event = CreateObject('component', arguments.eventType) />
-			<cfset event.init(arguments.eventName, arguments.eventArgs) />
-			<cfreturn event />
+			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 				message="EventHandler for event '#arguments.eventName#' is not defined." />
 		</cfif>
+		
+		<cfreturn event />
 	</cffunction>
 	
 	<cffunction name="getEventHandler" access="public" returntype="MachII.framework.EventHandler"
@@ -154,7 +154,7 @@ Updated version: 1.1.0
 		<cfargument name="eventName" type="string" required="true" />
 		<cfset var eventHandler = "" />
 		<cfset eventHandler = getEventHandler(arguments.eventName) />
-		<cfreturn eventHandler.getAccess() EQ 'public' />
+		<cfreturn eventHandler.getAccess() EQ "public" />
 	</cffunction>
 	
 	<!---
