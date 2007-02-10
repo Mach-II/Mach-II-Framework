@@ -31,6 +31,16 @@ second time. (2007-02-08 pfarrell)
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Include Tag Support
+You can now use the include tag in your Mach II XML config file to insert the contents
+of the included file. The include file is specificed using the file attribute of the include
+tag and is relative to the application root.
+
+<mach-ii>
+	...
+	<include file="config/foo-listeners.xml" />
+	...
+</mach-ii>
 
 * Redirect Persist
 Added new attributes to the redirect command that allows you to persist complex
