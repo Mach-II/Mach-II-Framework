@@ -31,6 +31,7 @@ second time. (2007-02-08 pfarrell)
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+
 * Redirect Persist
 Added new attributes to the redirect command that allows you to persist complex
 datatypes across a redirect.  The new attributes are:
@@ -72,3 +73,13 @@ not re-initialize the bean, but get it from the Event object.  This allows you
 to reuse beans and repopulate, whereas the old functionality would overwrite 
 the original bean and you would loose all the data contained within. This feature
 enhancement is backwards compatible with 1.1.1. (2007-02-05 pfarrell)
+
+------------------------------------------------
+Interal Framework Improvements / Enhancements
+------------------------------------------------
+
+* All init() methods now Return the "this" scope instead void
+(2007-02-10 pfarrell)
+
+* Version number of the framework is now hard-coded in the PropertyManager instead
+of being passed up the component chain from the bootstrappers. (2007-02-10 pfarrell)
