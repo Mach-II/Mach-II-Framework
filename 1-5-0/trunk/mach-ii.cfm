@@ -34,7 +34,7 @@ Notes:
 <!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 <cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 <!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_1_1.dtd. --->
-<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_1_1.dtd')#" />
+<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_5_0.dtd')#" />
 <!--- Set the version number of Mach-II --->
 <cfset MACHII_VERSION = "1.5.0.0" />
 
