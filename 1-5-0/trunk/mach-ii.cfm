@@ -35,9 +35,6 @@ Notes:
 <cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 <!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_1_1.dtd. --->
 <cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_5_0.dtd')#" />
-<!--- Set the version number of Mach-II --->
-<cfset MACHII_VERSION = "1.5.0.0" />
-
 <!--- default is request.MachIIConfigMode if it is defined, else use cfparam --->
 <cfif StructKeyExists(request,"MachIIConfigMode")>
 	<cfset MACHII_CONFIG_MODE = request.MachIIConfigMode />
@@ -53,23 +50,23 @@ Notes:
 </cfif>
 
 <!--- Create the AppLoader if necessary. Double check required for proper multi-threading. --->
-<cfif NOT (StructKeyExists(application[MACHII_APP_KEY],'appLoader') 
+<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader") 
 		AND IsObject(application[MACHII_APP_KEY].appLoader))>
 	<cflock name="application_#MACHII_APP_KEY#_apploader" type="exclusive" timeout="120">
-		<cfif NOT (StructKeyExists(application[MACHII_APP_KEY],'appLoader') 
+		<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader") 
 				AND IsObject(application[MACHII_APP_KEY].appLoader))>
 			<cfset application[MACHII_APP_KEY].appLoader = 
-					 CreateObject('component', 'MachII.framework.AppLoader').init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_VALIDATE_XML, MACHII_VERSION) />
+					 CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_VALIDATE_XML) />
 		</cfif>
 	</cflock>
 <!--- Reload the configuration if necessary. --->
 <cfelseif MACHII_CONFIG_MODE EQ 1>
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML, MACHII_VERSION) />
+		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 	</cflock>
 <cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadConfig()>
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML, MACHII_VERSION) />
+		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 	</cflock>
 <cfelseif MACHII_CONFIG_MODE EQ -1>
 	<!--- Do not reload config. --->

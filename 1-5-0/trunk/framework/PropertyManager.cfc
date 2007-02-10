@@ -36,7 +36,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.appManager = "" />
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurableProperties = ArrayNew(1) />
-	<cfset variables.version = "Unknown" />
+	<cfset variables.version = "1.5.0.0" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -45,7 +45,6 @@ the rest of the framework. (pfarrell)
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="version" type="string" required="true" />
 		
 		<cfset var xnProperties = "" />
 		<cfset var xnParams = "" />
@@ -59,7 +58,6 @@ the rest of the framework. (pfarrell)
 		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setVersion(arguments.version) />
 
 		<!--- Set the properties from the XML file. --->
 		<cfset xnProperties = XMLSearch(configXML, "//property") />
@@ -227,11 +225,7 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
-	<cffunction name="setVersion" access="private" returntype="void" output="false">
-		<cfargument name="version" type="string" required="true" />
-		<cfset variables.version = arguments.version />
-	</cffunction>
+
 	<cffunction name="getVersion" access="public" returntype="string" output="false"
 		hint="Gets the version number of the framework.">
 		<cfreturn variables.version />

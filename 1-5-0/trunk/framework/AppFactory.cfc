@@ -51,8 +51,6 @@ Notes:
 		 	hint="The full path to the configuration DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
-		<cfargument name="version" type="string" required="false" default="Unknown BER"
-			hint="The version number of Mach-II." />
 		
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
@@ -100,7 +98,7 @@ Notes:
 		Create the Framework Managers and set them in the AppManager. 
 		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXML, appManager, arguments.version) />
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXML, appManager) />
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />

@@ -48,16 +48,14 @@ Notes:
 			hint="The full path to the Mach-II DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
-		<cfargument name="version" type="string" required="false" default="Unknown BER"
-			hint="The version number of Mach-II." />
 		
-		<cfset var appFactory = CreateObject('component', 'MachII.framework.AppFactory').init() />
+		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
 		<cfset setAppFactory(appFactory) />
 
 		<cfset setConfigPath(arguments.configPath) />
 		<cfset setDtdPath(arguments.dtdPath) />
 		<!--- (Re)Load the configuration. --->
-		<cfset reloadConfig(arguments.validateXml, arguments.version) />
+		<cfset reloadConfig(arguments.validateXml) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -78,21 +76,22 @@ Notes:
 		hint="Reloads the config file and sets the last reload hash.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
-		<cfargument name="version" type="string" required="false" default="Unknown BER"
-			hint="The version number of Mach-II." />
 		
-		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), arguments.validateXml, arguments.version)) />
+		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), arguments.validateXml)) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
 
-	<cffunction name="getConfigFileReloadHash" access="public" returntype="string" output="false"
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="getConfigFileReloadHash" access="private" returntype="string" output="false"
 		hint="Get the current reload hash of the config file which is based on dateLastModified and size.">
 		<cfset var configFile = "" />
 
 		<cfdirectory action="LIST" directory="#GetDirectoryFromPath(getConfigPath())#" 
 			name="configFile" filter="#GetFileFromPath(getConfigPath())#" />
 
-		<cfreturn hash(configFile.dateLastModified & configFile.size) />
+		<cfreturn Hash(configFile.dateLastModified & configFile.size) />
 	</cffunction>
 
 	<!---
