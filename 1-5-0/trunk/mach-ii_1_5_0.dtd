@@ -327,4 +327,4 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	value CDATA #REQUIRED
 >
 
-<!ELEMENT value ()>
+<!ELEMENT value (#PCDATA)>
