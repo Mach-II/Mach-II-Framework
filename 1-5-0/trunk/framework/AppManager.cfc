@@ -70,17 +70,12 @@ Notes:
 	<cffunction name="createEventContext" access="public" returntype="MachII.framework.EventContext" output="false"
 		hint="Creates an EventContext instance.">
 		<cfargument name="requestEventName" type="string" required="true" />
-		
-		<cfset var eventContext = CreateObject("component", "MachII.framework.EventContext") />
-		<cfset eventContext.init(this, arguments.requestEventName) />
-		<cfreturn eventContext />
+		<cfreturn CreateObject("component", "MachII.framework.EventContext").init(this, arguments.requestEventName) />
 	</cffunction>
 	
 	<cffunction name="createRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Creates a RequestHandler instance.">
-		<cfset var requestHandler = CreateObject("component", "MachII.framework.RequestHandler") />
-		<cfset requestHandler.init(this) />
-		<cfreturn requestHandler />
+		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(this) />
 	</cffunction>
 	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"

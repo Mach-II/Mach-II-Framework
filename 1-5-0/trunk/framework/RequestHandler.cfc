@@ -37,11 +37,13 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
+	<cffunction name="init" access="public" returntype="RequestHandler" output="false"
 		hint="Initializes the RequestHandler.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<!---
