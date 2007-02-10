@@ -65,32 +65,42 @@ Notes:
 		<cfset var configXmlFile = "" />
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
+		<cfset var includePosition = 0 />
+		<cfset var includePositionEnd = 0 />
+		<cfset var includeFile = "" />
 		
-		<cftry>
-			<!--- Read the XML configuration file. --->
-			<cffile 
-				action="READ" 
-				file="#arguments.configXmlPath#" 
-				variable="configXmlFile" />
-			<!--- Validate the XML contents (if option is on and server is CFMX7). --->
-			<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
-				<cfset validationResult = XmlValidate(arguments.configXmlPath, arguments.configDtdPath)>
-				<cfif NOT validationResult.Status>
-					<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
-					<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlpath, arguments.configDtdPath) />
-					<cfthrow type="MachII.framework.XmlValidationException" 
-						message="#validationException.getFormattedMessage()#" />
-				</cfif>
+		<!--- Read the XML configuration file. --->
+		<cffile 
+			action="READ" 
+			file="#arguments.configXmlPath#" 
+			variable="configXmlFile" />
+		
+		<!--- Replace include tags with contents of include file before validating again --->	
+		<cfset includePosition = findNoCase('<include file="', configXMLFile, includePosition) />
+		<cfloop condition="includePosition gt 0">	
+			<cfset includeEndPosition = findNoCase('"', configXMLFile, includePosition + 15)>
+			<cfset includeFilePath = mid(configXMLFile, includePosition + 15, 
+					(includeEndPosition - (includePosition + 15))) />
+			<cffile action="read" file="#expandPath(includeFilePath)#" variable="includeFile" />
+			<!--- <cfdump var="#includeFilePath#" label="includeFilePath"> --->
+			<cfset configXMLFile = replaceNoCase(configXMLFile, '<include file="#includeFilePath#" />', includeFile, "ALL")>
+			<cfset includePosition = findNoCase('<include file="', configXMLFile, includePosition) />
+		</cfloop>
+
+		<!--- Parse the XML contents. --->
+		<cfset configXML = XmlParse(configXmlFile) />
+		
+		<!--- Validate the XML contents (if option is on and server is CFMX7). --->
+		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
+			<cfset validationResult = XmlValidate(configXML, arguments.configDtdPath)>
+			<cfif NOT validationResult.Status>
+				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
+				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlpath, arguments.configDtdPath) />
+				<cfthrow type="MachII.framework.XmlValidationException" 
+					message="#validationException.getFormattedMessage()#" />
 			</cfif>
-			<!--- Parse the XML contents. --->
-			<cfset configXML = XmlParse(configXmlFile) />
-			
-			<cfcatch type="Any">
-				<!--- XML parsing error handling should go here. --->
-				<cfrethrow />
-			</cfcatch>
-		</cftry>
-			
+		</cfif>
+		
 		<!--- Create the AppManager. --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
 		
