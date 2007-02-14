@@ -82,8 +82,8 @@ Notes:
 			<cfset includeFilePath = mid(configXMLFile, includePosition + 15, 
 					(includeEndPosition - (includePosition + 15))) />
 			<cffile action="read" file="#expandPath(includeFilePath)#" variable="includeFile" />
-			<!--- <cfdump var="#includeFilePath#" label="includeFilePath"> --->
-			<cfset configXMLFile = replaceNoCase(configXMLFile, '<include file="#includeFilePath#" />', includeFile, "ALL")>
+
+			<cfset configXMLFile = REReplaceNoCase(configXMLFile, '<include file="#includeFilePath#"( )?/>', includeFile, "ALL")>
 			<cfset includePosition = findNoCase('<include file="', configXMLFile, includePosition) />
 		</cfloop>
 
