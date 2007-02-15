@@ -155,7 +155,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the view
 		page - relative path to the view file
 -->
-<!ELEMENT page-views (page-view*| include?)>
+<!ELEMENT page-views (page-view*, include?)>
 <!ELEMENT page-view EMPTY>
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
