@@ -144,11 +144,15 @@ Updated version: 1.5.0
 		<cfset var command = "" />
 		<cfset var eventName = arguments.commandNode.xmlAttributes["event"] />
 		<cfset var copyEventArgs = true />
+		<cfset var moduleName = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "copyEventArgs")>
 			<cfset copyEventArgs = arguments.commandNode.xmlAttributes["copyEventArgs"] />
 		</cfif>
-		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs) />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
+			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs, moduleName) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -229,6 +233,7 @@ Updated version: 1.5.0
 		<cfset var command = "" />
 		<cfset var eventName = "" />
 		<cfset var redirectUrl = getAppManager().getPropertyManager().getProperty("urlBase", "index.cfm") />
+		<cfset var moduleName = "" />
 		<cfset var args = "" />
 		<cfset var persist = false />
 		<cfset var persistArgs = "" />
@@ -250,7 +255,10 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
 			<cfset persistArgs = arguments.commandNode.xmlAttributes["persistArgs"] />
 		</cfif>
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, redirectUrl, args, persist, persistArgs) />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
+			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />
+		</cfif>
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs) />
 		
 		<cfreturn command />
 	</cffunction>

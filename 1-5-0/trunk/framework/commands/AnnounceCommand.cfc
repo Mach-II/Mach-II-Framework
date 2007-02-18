@@ -32,6 +32,7 @@ Updated version: 1.1.0
 	--->
 	<cfset variables.eventName = "" />
 	<cfset variables.copyEventArgs = true />
+	<cfset variables.moduleName = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -40,9 +41,11 @@ Updated version: 1.1.0
 		hint="Used by the framework for initialization.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="copyEventArgs" type="boolean" required="false" default="true" />
+		<cfargument name="moduleName" type="string" required="false" default="" />
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setCopyEventArgs(arguments.copyEventArgs) />
+		<cfset setModuleName(arguments.moduleName) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -56,13 +59,14 @@ Updated version: 1.1.0
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var eventArgs = "" />
+		
 		<cfif isCopyEventArgs()>
-			<cfset eventArgs = event.getArgs() />
+			<cfset eventArgs = arguments.event.getArgs() />
 		<cfelse>
 			<cfset eventArgs = StructNew() />
 		</cfif>
 		
-		<cfset arguments.eventContext.announceEvent(getEventName(), eventArgs) />
+		<cfset arguments.eventContext.announceEvent(getEventName(), eventArgs, getModuleName()) />
 		
 		<cfreturn true />
 	</cffunction>
@@ -84,6 +88,14 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="isCopyEventArgs" access="private" returntype="boolean" output="false">
 		<cfreturn variables.copyEventArgs />
+	</cffunction>
+	
+	<cffunction name="setModuleName" access="private" returntype="void" output="false">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="private" returntype="string" output="false">
+		<cfreturn variables.moduleName />
 	</cffunction>
 
 </cfcomponent>

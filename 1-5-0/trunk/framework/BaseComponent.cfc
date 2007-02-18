@@ -72,6 +72,8 @@ the rest of the framework. (pfarrell)
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="moduleName" type="string" required="false" default=""
+			hint="The name of the module in which event exists. Defaults to current module." />
 		
 		<cfif StructKeyExists(request, "eventContext")>
 			<cfset request.eventContext.announceEvent(arguments.eventName, arguments.eventArgs) />

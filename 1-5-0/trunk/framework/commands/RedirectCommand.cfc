@@ -33,6 +33,7 @@ Updated version: 1.5.0
 	<cfset variables.eventName = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.redirectPersistParameter = "" />
+	<cfset variables.moduleName = "" />
 	<cfset variables.url = "" />
 	<cfset variables.args = "" />
 	<cfset variables.persist = "" />
@@ -46,6 +47,7 @@ Updated version: 1.5.0
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventParameter" type="string" required="true" />
 		<cfargument name="redirectPersistParameter" type="string" required="true" />
+		<cfargument name="moduleName" type="string" required="false" default="" />
 		<cfargument name="url" type="string" required="false" default="" />
 		<cfargument name="args" type="string" required="false" default="" />
 		<cfargument name="persist" type="boolean" required="false" default="false" />
@@ -54,6 +56,7 @@ Updated version: 1.5.0
 		<cfset setEventName(arguments.eventName) />
 		<cfset setEventParameter(arguments.eventParameter) />
 		<cfset setRedirectPersistParameter(arguments.redirectPersistParameter) />
+		<cfset setModuleName(arguments.moduleName) />
 		<cfset setUrl(arguments.url) />
 		<cfset setArgs(arguments.args) />
 		<cfset setPersist(arguments.persist) />
@@ -163,7 +166,15 @@ Updated version: 1.5.0
 	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.redirectPersistParameter />
 	</cffunction>
-	
+
+	<cffunction name="setModuleName" access="private" returntype="void" output="false">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="private" returntype="string" output="false">
+		<cfreturn variables.moduleName />
+	</cffunction>
+
 	<cffunction name="setUrl" access="private" returntype="void" output="false">
 		<cfargument name="url" type="string" required="true" />
 		<cfset variables.url = arguments.url />

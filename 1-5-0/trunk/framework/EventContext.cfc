@@ -82,6 +82,7 @@ Notes:
 		hint="Queues an event for the framework to handle.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="moduleName" type="string" required="false" default="" />
 		
 		<cfset var nextEventName = "" />
 		<cfset var nextEvent = "" />
