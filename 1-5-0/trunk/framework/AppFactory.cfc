@@ -65,27 +65,22 @@ Notes:
 		<cfset var configXmlFile = "" />
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
-		<cfset var includePosition = 0 />
-		<cfset var includePositionEnd = 0 />
-		<cfset var includeFile = "" />
 		
 		<!--- Read the XML configuration file. --->
-		<cffile 
-			action="READ" 
-			file="#arguments.configXmlPath#" 
-			variable="configXmlFile" />
+		<cftry>
+			<cffile 
+				action="READ" 
+				file="#arguments.configXmlPath#" 
+				variable="configXmlFile" />
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.CannotFindBaseConfigFile"
+					message="Unable to find the base config file."
+					detail="configPath=#arguments.configXmlPath#" />
+			</cfcatch>
+		</cftry>
 		
-		<!--- Replace include tags with contents of include file before validating again --->	
-		<cfset includePosition = REFindNoCase('<include file=("|'')', configXMLFile, includePosition) />
-		<cfloop condition="includePosition gt 0">	
-			<cfset includeEndPosition = REFindNoCase('("|'')( )?/>', configXMLFile, includePosition + 15) />
-			<cfset includeFilePath = mid(configXMLFile, includePosition + 15, 
-					(includeEndPosition - (includePosition + 15))) />
-			<cffile action="read" file="#expandPath(includeFilePath)#" variable="includeFile" />
-
-			<cfset configXMLFile = REReplaceNoCase(configXMLFile, '<include file=("|'')#includeFilePath#("|'')( )?/>', includeFile, "ALL") />
-			<cfset includePosition = REFindNoCase('<include file=("|'')', configXMLFile, includePosition) />
-		</cfloop>
+		<!--- Replace include tags with contents of include file before validating the XML --->	
+		<cfset configXmlFile = loadIncludes(configXmlFile) />
 
 		<!--- Parse the XML contents. --->
 		<cfset configXML = XmlParse(configXmlFile) />
@@ -135,6 +130,51 @@ Notes:
 		<cfset appManager.configure() />
 		
 		<cfreturn appManager />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="loadIncludes" access="private" returntype="string" output="false"
+		hint="Loads files to be included">
+		<cfargument name="configXMLFile" type="string" required="true" />
+		
+		<cfset var includePosition = 0 />
+		<cfset var includeFilePosition = 0 />
+		<cfset var includeFilePath = "" />
+		<cfset var includeXMLFile = "" />
+		
+		<!--- Replace include tags with contents of include file before validating again --->	
+		<cfset includePosition = REFindNoCase('<include file=("|'')', arguments.configXMLFile, includePosition) />
+		<cfloop condition="includePosition gt 0">	
+			<cfset includeEndPosition = REFindNoCase('("|'')( )?/>', arguments.configXMLFile, includePosition + 15) />
+			<cfset includeFilePath = Mid(arguments.configXMLFile, includePosition + 15, 
+					(includeEndPosition - (includePosition + 15))) />
+			
+			<!--- Read the include file --->
+			<cftry>
+				<cffile
+					action="read"
+					file="#expandPath(includeFilePath)#"
+					variable="includeXMLFile" />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.CannotFindIncludeConfigFile"
+						message="Unable to find the include config file."
+						detail="includePath=#expandPath(includeFilePath)#" />
+				</cfcatch>
+			</cftry>
+		
+			<!--- Recursively check the include for more includes --->
+			<cfset includeXMLFile = loadIncludes(includeXMLFile) />
+			
+			<!--- Replace the include tag body with contents of include file --->
+			<cfset configXMLFile = REReplaceNoCase(arguments.configXMLFile, '<include file=("|'')#includeFilePath#("|'')( )?/>', includeXMLFile, "ALL") />
+			
+			<!--- Find the next include tag --->
+			<cfset includePosition = REFindNoCase('<include file=("|'')', arguments.configXMLFile, includePosition) />
+		</cfloop>
+		
+		<cfreturn arguments.configXMLFile />
 	</cffunction>
 	
 </cfcomponent>
