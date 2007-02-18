@@ -34,13 +34,20 @@ Improvements / Enhancements
 * Include Tag Support
 You can now use the include tag in your Mach II XML config file to insert the contents
 of the included file. The include file is specificed using the file attribute of the include
-tag and is relative to the application root.
+tag and is relative to the application root or mapping.
 
+Example:
 <mach-ii>
 	...
-	<include file="config/foo-listeners.xml" />
+	<include file="config/foo-listeners.xml"/>
 	...
+	<event-handlers>
+		<include file="/someMapping/bar-event-handlers.xml"/>
+	</event-handlers>
 </mach-ii>
+
+The new include functionality supports includes that include other include files (i.e. 
+recursive). (2007-02-18 kwiersma)
 
 * Redirect Persist
 Added new attributes to the redirect command that allows you to persist complex
