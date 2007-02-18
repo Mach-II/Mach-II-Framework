@@ -61,7 +61,7 @@ Notes:
 		<cfset var eventManager = "" />
 		<cfset var viewManager = "" />
 		<cfset var pluginManager = "" />
-		<cfset var configXML = "" />
+		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
@@ -78,55 +78,48 @@ Notes:
 					detail="configPath=#arguments.configXmlPath#" />
 			</cfcatch>
 		</cftry>
-		
-		<!--- Replace include tags with contents of include file before validating the XML --->	
-		<cfset configXmlFile = loadIncludes(configXmlFile) />
 
-		<!--- Parse the XML contents. --->
-		<cfset configXML = XmlParse(configXmlFile) />
+		<!--- Parse the XML contents --->
+		<cfset configXml = XmlParse(configXmlFile) />
 		
-		<!--- Validate the XML contents (if option is on and server is CFMX7). --->
-		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
-			<cfset validationResult = XmlValidate(configXML, arguments.configDtdPath)>
-			<cfif NOT validationResult.Status>
-				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
-				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlpath, arguments.configDtdPath) />
-				<cfthrow type="MachII.framework.XmlValidationException" 
-					message="#validationException.getFormattedMessage()#" />
-			</cfif>
-		</cfif>
+		<!--- Validate the XML contents --->
+		<cfset validateConfigXml(arguments.validateXml, configXml, arguments.configXmlPath, arguments.configDtdPath) />
 		
-		<!--- Create the AppManager. --->
+		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
 		
 		<!--- 
-		Create the Framework Managers and set them in the AppManager. 
+		Create the Framework Managers and set them in the AppManager
 		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXML, appManager) />
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXml, appManager) />
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		<cfset appManager.setRequestManager(requestManager) />
 		
-		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXML, appManager) />
+		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXml, appManager) />
 		<cfset appManager.setListenerManager(listenerManager) />
 		
-		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(configXML, appManager) />
+		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(configXml, appManager) />
 		<cfset appManager.setFilterManager(filterManager) />
 
-		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(configXML, appManager) />
+		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(configXml, appManager) />
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(configXML, appManager) />
+		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(configXml, appManager) />
 		<cfset appManager.setEventManager(eventManager) />
 		
-		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(configXML, appManager) />
+		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(configXml, appManager) />
 		<cfset appManager.setViewManager(viewManager) />
 		
-		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(configXML, appManager) />
+		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(configXml, appManager) />
 		<cfset appManager.setPluginManager(pluginManager) />
-		
+
+		<!--- Load the includes --->	
+		<cfset loadIncludes(configXML, appManager, arguments.validateXml, arguments.configDtdPath) />
+
+		<!--- Configure all the managers by calling the base configure --->
 		<cfset appManager.configure() />
 		
 		<cfreturn appManager />
@@ -135,21 +128,22 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="loadIncludes" access="private" returntype="string" output="false"
+	<cffunction name="loadIncludes" access="private" returntype="void" output="false"
 		hint="Loads files to be included">
-		<cfargument name="configXMLFile" type="string" required="true" />
+		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="validateXml" type="boolean" required="true" />
+		<cfargument name="configDtdPath" type="string" required="true" />
 		
-		<cfset var includePosition = 0 />
-		<cfset var includeFilePosition = 0 />
+		<cfset var includeNodes = "" />
 		<cfset var includeFilePath = "" />
 		<cfset var includeXMLFile = "" />
+		<cfset var includeXml = "" />
+		<cfset var i = 0 />
 		
-		<!--- Replace include tags with contents of include file before validating again --->	
-		<cfset includePosition = REFindNoCase('<include file=("|'')', arguments.configXMLFile, includePosition) />
-		<cfloop condition="includePosition gt 0">	
-			<cfset includeEndPosition = REFindNoCase('("|'')( )?/>', arguments.configXMLFile, includePosition + 15) />
-			<cfset includeFilePath = Mid(arguments.configXMLFile, includePosition + 15, 
-					(includeEndPosition - (includePosition + 15))) />
+		<cfset includeNodes =  XMLSearch(arguments.configXML, "//includes/include") />
+		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
+			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
 			
 			<!--- Read the include file --->
 			<cftry>
@@ -163,18 +157,48 @@ Notes:
 						detail="includePath=#expandPath(includeFilePath)#" />
 				</cfcatch>
 			</cftry>
-		
+			
+			<!--- Parse the XML contents --->
+			<cfset includeXml = XmlParse(includeXmlFile) />
+			
+			<!--- Validate the XML contents --->
+			<cfset validateConfigXml(arguments.validateXml, includeXml, includeFilePath, arguments.configDtdPath) />
+			
+			<!--- Pass in the includeXml for processing
+			Init order is important: propertyManager first, listenerManager, filterManager and subroutineManager before eventManager. 
+			--->
+			<cfset arguments.appManager.getPropertyManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getListenerManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getFilterManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getSubroutineManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getEventManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getViewManager().init(includeXml, appManager) />
+			<cfset arguments.appManager.getPluginManager().init(includeXml, appManager) />
+			
 			<!--- Recursively check the include for more includes --->
-			<cfset includeXMLFile = loadIncludes(includeXMLFile) />
-			
-			<!--- Replace the include tag body with contents of include file --->
-			<cfset configXMLFile = REReplaceNoCase(arguments.configXMLFile, '<include file=("|'')#includeFilePath#("|'')( )?/>', includeXMLFile, "ALL") />
-			
-			<!--- Find the next include tag --->
-			<cfset includePosition = REFindNoCase('<include file=("|'')', arguments.configXMLFile, includePosition) />
+			<cfset includeXMLFile = loadIncludes(includeXml, arguments.appManager, arguments.validateXml, arguments.configDtdPath) />
 		</cfloop>
+	</cffunction>
+	
+	<cffunction name="validateConfigXml" access="private" returntype="void" output="false"
+		hint="Validates an xml file.">
+		<cfargument name="validateXml" type="boolean" required="true" />
+		<cfargument name="configXml" type="any" required="true" />
+		<cfargument name="configXmlPath" type="string" required="true" />
+		<cfargument name="configDtdPath" type="string" required="true" />
 		
-		<cfreturn arguments.configXMLFile />
+		<cfset var validationResult = "" />
+		<cfset var validationException = "" />
+		
+		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
+			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath)>
+			<cfif NOT validationResult.Status>
+				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
+				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlPath, arguments.configDtdPath) />
+				<cfthrow type="MachII.framework.XmlValidationException" 
+					message="#validationException.getFormattedMessage()#" />
+			</cfif>
+		</cfif>
 	</cffunction>
 	
 </cfcomponent>
