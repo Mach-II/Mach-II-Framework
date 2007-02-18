@@ -76,15 +76,15 @@ Notes:
 			variable="configXmlFile" />
 		
 		<!--- Replace include tags with contents of include file before validating again --->	
-		<cfset includePosition = findNoCase('<include file="', configXMLFile, includePosition) />
+		<cfset includePosition = REFindNoCase('<include file=("|'')', configXMLFile, includePosition) />
 		<cfloop condition="includePosition gt 0">	
-			<cfset includeEndPosition = findNoCase('"', configXMLFile, includePosition + 15)>
+			<cfset includeEndPosition = REFindNoCase('("|'')( )?/>', configXMLFile, includePosition + 15) />
 			<cfset includeFilePath = mid(configXMLFile, includePosition + 15, 
 					(includeEndPosition - (includePosition + 15))) />
 			<cffile action="read" file="#expandPath(includeFilePath)#" variable="includeFile" />
 
-			<cfset configXMLFile = REReplaceNoCase(configXMLFile, '<include file="#includeFilePath#"( )?/>', includeFile, "ALL")>
-			<cfset includePosition = findNoCase('<include file="', configXMLFile, includePosition) />
+			<cfset configXMLFile = REReplaceNoCase(configXMLFile, '<include file=("|'')#includeFilePath#("|'')( )?/>', includeFile, "ALL") />
+			<cfset includePosition = REFindNoCase('<include file=("|'')', configXMLFile, includePosition) />
 		</cfloop>
 
 		<!--- Parse the XML contents. --->
