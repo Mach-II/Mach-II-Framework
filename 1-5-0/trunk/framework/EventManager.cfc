@@ -60,7 +60,7 @@ Updated version: 1.1.0
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset eventNodes = XMLSearch(configXML,"//event-handlers/event-handler") />
+		<cfset eventNodes = XMLSearch(configXML, "//event-handlers/event-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
 			<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
