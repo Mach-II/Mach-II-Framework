@@ -74,7 +74,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		value - the value of the property
 -->
 <!ELEMENT properties (property*)>
-<!ELEMENT property (parameters?, array?, struct?, include?)>
+<!ELEMENT property (parameters?, array?, struct?)>
 <!ATTLIST property 
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
