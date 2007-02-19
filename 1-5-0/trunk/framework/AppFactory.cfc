@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.includeDependencies = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -141,20 +142,23 @@ Notes:
 		<cfset var includeXml = "" />
 		<cfset var i = 0 />
 		
-		<cfset includeNodes =  XMLSearch(arguments.configXML, "//includes/include") />
+		<cfset includeNodes =  XmlSearch(arguments.configXML, "//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
+			
+			<!--- Check for circular dependencies --->
+			<cfset checkIfAlreadyIncluded(includeFilePath) />
 			
 			<!--- Read the include file --->
 			<cftry>
 				<cffile
 					action="read"
-					file="#expandPath(includeFilePath)#"
+					file="#ExpandPath(includeFilePath)#"
 					variable="includeXMLFile" />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CannotFindIncludeConfigFile"
 						message="Unable to find the include config file."
-						detail="includePath=#expandPath(includeFilePath)#" />
+						detail="includePath=#includeFilePath#" />
 				</cfcatch>
 			</cftry>
 			
@@ -198,6 +202,20 @@ Notes:
 				<cfthrow type="MachII.framework.XmlValidationException" 
 					message="#validationException.getFormattedMessage()#" />
 			</cfif>
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="checkIfAlreadyIncluded" access="private" returntype="void" output="false"
+		hint="Checks if the include has already been processed.">
+		<cfargument name="includeFilePath" type="string" required="true" />
+		
+		<cfset var includeFilePathHash = Hash(ExpandPath(arguments.includeFilePath)) />
+		
+		<cfif StructKeyExists(variables.includeDependencies, includeFilePathHash)>
+			<cfthrow type="MachII.framework.IncludeAlreadyDefined"
+				message="An include located at '#arguments.includeFilePath#' has already been included. You cannot define an include more than once." />
+		<cfelse>
+			<cfset variables.includeDependencies[includeFilePathHash] = TRUE />
 		</cfif>
 	</cffunction>
 	

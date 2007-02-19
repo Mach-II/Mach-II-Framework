@@ -47,7 +47,8 @@ Example:
 </mach-ii>
 
 The new include functionality supports includes that include other include files (i.e. 
-recursive). (2007-02-18 kwiersma)
+recursive).  Also, if you try to include a file that has already been included, Mach-II
+will throw an error telling you cannot do that. (2007-02-18 kwiersma)
 
 * Redirect Persist
 Added new attributes to the redirect command that allows you to persist complex
