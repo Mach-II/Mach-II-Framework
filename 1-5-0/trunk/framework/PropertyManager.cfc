@@ -116,6 +116,9 @@ the rest of the framework. (pfarrell)
 		<cfif NOT isPropertyDefined("redirectPersistParameter")>
 			<cfset setProperty("redirectPersistParameter", "persistId") />
 		</cfif>
+		<cfif NOT isPropertyDefined("redirectPersistScope")>
+			<cfset setProperty("redirectPersistScope", "session") />
+		</cfif>
 		<cfif NOT isPropertyDefined("urlBase")>
 			<cfset setProperty("urlBase", "index.cfm") />
 		</cfif>

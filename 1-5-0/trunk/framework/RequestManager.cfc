@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.requestHandler = "" />
 	<cfset variables.redirectPersistParameter = "" />
+	<cfset variables.redirectPersistScope = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.parseSes = "" />
@@ -58,6 +59,7 @@ Notes:
 		<!--- Setup defaults --->
 		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
 		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
+		<cfset setRedirectPersistScope(getPropertyManager().getProperty("redirectPersistScope")) />
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
@@ -240,20 +242,34 @@ Notes:
 	
 	<cffunction name="getPersistEventStorage" access="private" returntype="struct" output="false"
 		hint="Helper function to get the event data store for persists.">
-
+		
+		<cfset var scope = "" />
+		
+		<!--- Select the right scope --->
+		<cfif getRedirectPersistScope() EQ "session">
+			<cfset scope = StructGet("session") />
+		<cfelseif  getRedirectPersistScope() EQ "application">
+			<cfset scope = StructGet("application") />
+		<cfelseif getRedirectPersistScope() EQ "server">
+			<cfset scope = StructGet("server") />
+		<cfelse>
+			<cfthrow type="MachII.framework.UnsupportedRedirectPersistScope"
+				message="You can only use session, application or server scopes." />
+		</cfif>
+		
 		<!--- Double check lock if default structure is not defined --->
-		<cfif NOT StructKeyExists(session, "_MachIIPersistEventStorage")>
+		<cfif NOT StructKeyExists(scope, "_MachIIPersistEventStorage")>
 			<cflock name="_MachIIPersistEventStorageCreate" type="exclusive" timeout="5" throwontimeout="false">
-				<cfif NOT StructKeyExists(session, "_MachIIPersistEventStorage")>
-					<cfset session._MachIIPersistEventStorage = StructNew() />
-					<cfset session._MachIIPersistEventStorage.data = StructNew() />
-					<cfset session._MachIIPersistEventStorage.timestamps = StructNew() />
-					<cfset session._MachIIPersistEventStorage.lastCleanup = createTimestamp() />
+				<cfif NOT StructKeyExists(scope, "_MachIIPersistEventStorage")>
+					<cfset scope._MachIIPersistEventStorage = StructNew() />
+					<cfset scope._MachIIPersistEventStorage.data = StructNew() />
+					<cfset scope._MachIIPersistEventStorage.timestamps = StructNew() />
+					<cfset scope._MachIIPersistEventStorage.lastCleanup = createTimestamp() />
 				</cfif>
 			</cflock>
 		</cfif>
 		
-		<cfreturn session._MachIIPersistEventStorage />		
+		<cfreturn scope._MachIIPersistEventStorage />		
 	</cffunction>
 	
 	<cffunction name="cleanupPersistEventStorage" access="private" returntype="void" output="false"
@@ -267,7 +283,7 @@ Notes:
 		
 		<!--- Do cleanup --->
 		<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
-			<cflock name="_MachIIPersistEventStorageCreateCleanup" type="exclusive" timeout="5" throwontimeout="false">
+			<cflock name="_MachIIPersistEventStorageCleanup" type="exclusive" timeout="5" throwontimeout="false">
 				<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
 					<cfset dataStorage.lastCleanup = timestamp />
 					
@@ -325,6 +341,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.redirectPersistParameter />
+	</cffunction>
+
+	<cffunction name="setRedirectPersistScope" access="private" returntype="void" output="false">
+		<cfargument name="redirectPersistScope" type="string" required="true" />
+		<cfset variables.redirectPersistScope = arguments.redirectPersistScope />
+	</cffunction>
+	<cffunction name="getRedirectPersistScope" access="private" returntype="string" output="false">
+		<cfreturn variables.redirectPersistScope />
 	</cffunction>
 	
 	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
