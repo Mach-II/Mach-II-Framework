@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: Mach-II Corporation
-Author: Ben Edwards (ben@ben-edwards.com)
-$Id: Listener.cfc 12 2006-11-30 01:25:57Z pfarrell $
+Author: Kurt Wiersma (kurt@mach-ii.com)
+$Id$
 
 Created version: 1.5.0
 Updated version: 1.5.0
