@@ -159,7 +159,7 @@ Notes:
 		<cfargument name="parentAppManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.parentAppManager = arguments.parentAppManager />
 	</cffunction>	
-	<cffunction name="getParent" access="public" returntype="MachII.framework.AppManager" output="false">
+	<cffunction name="getParent" access="public" returntype="any" output="false">
 		<cfreturn variables.parentAppManager />
 	</cffunction>
 	
