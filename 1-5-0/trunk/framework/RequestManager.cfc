@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.requestHandler = "" />
 	<cfset variables.redirectPersistParameter = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
@@ -50,7 +51,9 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		
 		<cfset setAppManager(arguments.appManager) />
-		
+
+		<cfset variables.requestHandler = createRequestHandler() />
+
 		<cfreturn this />
 	</cffunction>
 
@@ -74,6 +77,18 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
+		hint="Returns a new or cached instance of a RequestHandler.">
+		<cfargument name="createNew" type="boolean" required="false" default="false"
+			hint="Pass true to return a new instance of a RequestHandler." />
+		
+		<cfif arguments.createNew>
+			<cfreturn createRequestHandler() />
+		<cfelse>
+			<cfreturn variables.requestHandler />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
 		<cfargument name="eventName" type="string" required="true"
@@ -195,6 +210,11 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="createRequestHandler" access="private" returntype="MachII.framework.RequestHandler" output="false"
+		hint="Creates a RequestHandler instance.">
+		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager()) />
+	</cffunction>
+	
 	<cffunction name="parseBuildUrlParameters" access="private" returntype="struct" output="false"
 		hint="Parses the build url parameters into a useable form.">
 		<cfargument name="urlParameters" type="any" required="true"

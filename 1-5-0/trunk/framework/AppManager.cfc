@@ -39,16 +39,12 @@ Notes:
 	<cfset variables.eventManager = "" />
 	<cfset variables.pluginManager = "" />
 	<cfset variables.viewManager = "" />
-	<cfset variables.requestHandler = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="AppManager" output="false"
-		hint="Used by the framework for initialization. Do not override.">
-		<cfset variables.requestHandler = CreateObject("component", "MachII.framework.RequestHandler") />
-		<cfset variables.requestHandler.init(this) />
-		
+		hint="Used by the framework for initialization. Do not override.">		
 		<cfreturn this />
 	</cffunction>
 	
@@ -73,21 +69,11 @@ Notes:
 		<cfreturn CreateObject("component", "MachII.framework.EventContext").init(this, arguments.requestEventName) />
 	</cffunction>
 	
-	<cffunction name="createRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
-		hint="Creates a RequestHandler instance.">
-		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(this) />
-	</cffunction>
-	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		<cfargument name="createNew" type="boolean" required="false" default="false"
 			hint="Pass true to return a new instance of a RequestHandler." />
-		
-		<cfif arguments.createNew>
-			<cfreturn createRequestHandler() />
-		<cfelse>
-			<cfreturn variables.requestHandler />
-		</cfif>
+		<cfreturn getRequestManager().getRequestHandler(arguments.createNew) />
 	</cffunction>
 	
 	<!---
