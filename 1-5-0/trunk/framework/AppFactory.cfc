@@ -61,6 +61,7 @@ Notes:
 		<cfset var propertyManager = "" />
 		<cfset var requestManager = "" />
 		<cfset var listenerManager = "" />
+		<cfset var parentListenerManager = "" />
 		<cfset var filterManager = "" />
 		<cfset var subroutineManager = "" />
 		<cfset var eventManager = "" />
@@ -98,9 +99,10 @@ Notes:
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
 		
-		<!--- Setup a parent app manager if the parent is not empty string --->
-		<cfif isObject(arguments.parentAppManager)>
+		<!--- Setup a parent app manager and related managers if the parent is not empty string --->
+		<cfif IsObject(arguments.parentAppManager)>
 			<cfset appManager.setParent(arguments.parentAppManager) />
+			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
 		</cfif>
 		<!--- TODO: might have put the parent managers in the init call for each manager below --->
 		
@@ -117,11 +119,6 @@ Notes:
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		<cfset appManager.setRequestManager(requestManager) />
 		
-		<cfif isObject(arguments.parentAppManager)>
-			<cfset parentListenerManager = arguments.parentAppManager.getListenerManager() />
-		<cfelse>
-			<cfset parentListenerManager = "" />
-		</cfif>
 		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager") />
 		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
 			<cfset listenerManager.init(configXmls[i], appManager, parentListenerManager) />
@@ -165,6 +162,7 @@ Notes:
 		</cfloop>
 		<cfset appManager.setModuleManager(moduleManager) />
 		
+		<!--- Call the master configure() for all managers --->
 		<cfset appManager.configure() />
 		
 		<!--- Clear the includeDepencies --->
@@ -178,7 +176,7 @@ Notes:
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="loadIncludes" access="private" returntype="void" output="false"
-		hint="Loads files to be included">
+		hint="Loads files to be included into the config xml array.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
@@ -215,6 +213,7 @@ Notes:
 			<!--- Validate the XML contents --->
 			<cfset validateConfigXml(arguments.validateXml, includeXml, includeFilePath, arguments.configDtdPath) />
 			
+			<!--- Append the parsed include file to the config xml array --->
 			<cfset ArrayAppend(variables.configXmls, includeXml) />
 			
 			<!--- Recursively check the include for more includes --->
@@ -232,6 +231,7 @@ Notes:
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
 		
+		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
 			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath)>
 			<cfif NOT validationResult.Status>
