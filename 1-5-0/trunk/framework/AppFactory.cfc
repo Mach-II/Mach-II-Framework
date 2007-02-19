@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.configXmls = ArrayNew(1) />
 	<cfset variables.includeDependencies = StructNew() />
 	
 	<!---
@@ -67,8 +68,7 @@ Notes:
 		<cfset var pluginManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
-		<cfset var validationResult = "" />
-		<cfset var validationException = "" />
+		<cfset var i = "" />
 		
 		<!--- Read the XML configuration file. --->
 		<cftry>
@@ -88,6 +88,12 @@ Notes:
 		
 		<!--- Validate the XML contents --->
 		<cfset validateConfigXml(arguments.validateXml, configXml, arguments.configXmlPath, arguments.configDtdPath) />
+
+		<!--- Added the base config to the array --->
+		<cfset ArrayAppend(variables.configXmls, configXml) />
+
+		<!--- Load the includes --->	
+		<cfset loadIncludes(configXML, arguments.validateXml, arguments.configDtdPath) />
 		
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
@@ -102,7 +108,10 @@ Notes:
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(configXml, appManager) />
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset propertyManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
@@ -113,34 +122,53 @@ Notes:
 		<cfelse>
 			<cfset parentListenerManager = "" />
 		</cfif>
-		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXml, appManager, parentListenerManager) />
+		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset listenerManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setListenerManager(listenerManager) />
 		
-		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(configXml, appManager) />
+		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset filterManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setFilterManager(filterManager) />
 
-		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(configXml, appManager) />
+		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset subroutineManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(configXml, appManager) />
+		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset eventManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setEventManager(eventManager) />
 		
-		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(configXml, appManager) />
+		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset viewManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setViewManager(viewManager) />
 		
-		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(configXml, appManager) />
+		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset pluginManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setPluginManager(pluginManager) />
 
-		<!--- Load the includes --->	
-		<cfset loadIncludes(configXML, appManager, arguments.validateXml, arguments.configDtdPath) />
-
 		<!--- Configure all the managers by calling the base configure --->
-		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(configXML, appManager) />
+		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager") />
+		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
+			<cfset moduleManager.init(configXmls[i], appManager) />
+		</cfloop>
 		<cfset appManager.setModuleManager(moduleManager) />
 		
 		<cfset appManager.configure() />
 		
 		<!--- Clear the includeDepencies --->
+		<cfset variables.includes = ArrayNew(1) />
 		<cfset variables.includeDependencies = StructNew() />
 		
 		<cfreturn appManager />
@@ -152,7 +180,6 @@ Notes:
 	<cffunction name="loadIncludes" access="private" returntype="void" output="false"
 		hint="Loads files to be included">
 		<cfargument name="configXML" type="string" required="true" />
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
 		
@@ -188,19 +215,10 @@ Notes:
 			<!--- Validate the XML contents --->
 			<cfset validateConfigXml(arguments.validateXml, includeXml, includeFilePath, arguments.configDtdPath) />
 			
-			<!--- Pass in the includeXml for processing
-			Init order is important: propertyManager first, listenerManager, filterManager and subroutineManager before eventManager. 
-			--->
-			<cfset arguments.appManager.getPropertyManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getListenerManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getFilterManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getSubroutineManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getEventManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getViewManager().init(includeXml, appManager) />
-			<cfset arguments.appManager.getPluginManager().init(includeXml, appManager) />
+			<cfset ArrayAppend(variables.configXmls, includeXml) />
 			
 			<!--- Recursively check the include for more includes --->
-			<cfset includeXMLFile = loadIncludes(includeXml, arguments.appManager, arguments.validateXml, arguments.configDtdPath) />
+			<cfset loadIncludes(includeXml, arguments.validateXml, arguments.configDtdPath) />
 		</cfloop>
 	</cffunction>
 	
