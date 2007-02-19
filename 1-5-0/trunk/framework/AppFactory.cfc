@@ -124,7 +124,7 @@ Notes:
 		</cfif>
 		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager") />
 		<cfloop from="1" to="#ArrayLen(variables.configXmls)#" index="i">
-			<cfset listenerManager.init(configXmls[i], appManager) />
+			<cfset listenerManager.init(configXmls[i], appManager, parentListenerManager) />
 		</cfloop>
 		<cfset appManager.setListenerManager(listenerManager) />
 		
