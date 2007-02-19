@@ -48,6 +48,8 @@ Notes:
 			hint="The full path to the Mach-II DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
+		<cfargument name="parentAppManager" type="any" required="false" default=""
+			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
 		<cfset setAppFactory(appFactory) />
@@ -55,7 +57,7 @@ Notes:
 		<cfset setConfigPath(arguments.configPath) />
 		<cfset setDtdPath(arguments.dtdPath) />
 		<!--- (Re)Load the configuration. --->
-		<cfset reloadConfig(arguments.validateXml) />
+		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -76,8 +78,10 @@ Notes:
 		hint="Reloads the config file and sets the last reload hash.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
+		<cfargument name="parentAppManager" type="any" required="false" default=""
+			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		
-		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), arguments.validateXml)) />
+		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), arguments.validateXml, arguments.parentAppManager)) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
 

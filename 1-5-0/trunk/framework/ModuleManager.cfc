@@ -1,0 +1,129 @@
+<!---
+License:
+Copyright 2006 Mach-II Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright: Mach-II Corporation
+$Id:$
+
+Created version: 1.5.0
+Updated version: 1.5.0
+
+Notes:
+--->
+<cfcomponent 
+	displayname="ModuleManager"
+	output="false"
+	hint="Manages registered modules for the framework instance.">
+	
+	<!---
+	PROPERTIES
+	--->
+	<cfset variables.modules = StructNew() />
+	<cfset variables.appManager = "" />
+	
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="init" access="public" returntype="ModuleManager" output="false"
+		hint="Initialization function called by the framework.">
+		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		
+		<cfset var moduleNodes = "" />
+		<cfset var name = "" />
+		<cfset var file = "" />
+		<cfset var module = "" />
+		<cfset var i = 0 />
+		
+		<cfset setAppManager(arguments.appManager) />
+
+		<!--- Setup up each Module. --->
+		<cfset moduleNodes = XMLSearch(configXML,"//modules/module") />
+		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
+			<cfset name = moduleNodes[i].xmlAttributes['name'] />
+			<cfset file = moduleNodes[i].xmlAttributes['file'] />
+		
+			<!--- Setup the Module. --->
+			<cfset module = CreateObject('component', 'MachII.framework.Module') />
+			<cfset module.init(arguments.appManager, file) />
+
+			<!--- Add the Module to the Manager. --->
+			<cfset addModule(name, module) />
+		</cfloop>
+		<!--- <cfdump var="#variables.modules#" label="modules"><cfabort> --->
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="configure" access="public" returntype="void"
+		hint="Configures each of the registered modules.">
+		<cfset var key = "" />
+		<cfloop collection="#variables.modules#" item="key">
+			<cfset getModule(key).configure() />
+		</cfloop>
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS
+	--->
+	<cffunction name="getModule" access="public" returntype="MachII.framework.Module" output="false"
+		hint="Gets a module with the specified name.">
+		<cfargument name="moduleName" type="string" required="true" />
+		
+		<cfif isModuleDefined(arguments.moduleName)>
+			<cfreturn variables.modules[arguments.moduleName] />
+		<cfelse>
+			<cfthrow type="MachII.framework.ModuleNotDefined" 
+				message="Module with name '#arguments.moduleName#' is not defined." />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="addModule" access="public" returntype="void" output="false"
+		hint="Registers a module with the specified name.">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfargument name="module" type="MachII.framework.Module" required="true" />
+		
+		<cfif isModuleDefined(arguments.moduleName)>
+			<cfthrow type="MachII.framework.ModuleAlreadyDefined"
+				message="A Module with name '#arguments.moduleName#' is already registered." />
+		<cfelse>
+			<cfset variables.modules[arguments.moduleName] = arguments.module />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="isModuleDefined" access="public" returntype="boolean" output="false"
+		hint="Returns true if a module is registered with the specified name.">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfreturn StructKeyExists(variables.modules, arguments.moduleName) />
+	</cffunction>
+
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="setAppManager" access="public" returntype="void" output="false"
+		hint="Returns the AppManager instance this ModuleManager belongs to.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
+		hint="Sets the AppManager instance this ModuleManager belongs to.">
+		<cfreturn variables.appManager />
+	</cffunction>
+	
+	<cffunction name="getModuleNames" access="public" returntype="array" output="false"
+		hint="Returns an array of module names.">
+		<cfreturn StructKeyArray(variables.modules) />
+	</cffunction>
+	
+</cfcomponent>

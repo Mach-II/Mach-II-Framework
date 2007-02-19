@@ -52,6 +52,9 @@ Notes:
 		 	hint="The full path to the configuration DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
+		<cfargument name="parentAppManager" type="any" required="false" default=""
+			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
+		
 		
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
@@ -89,6 +92,12 @@ Notes:
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
 		
+		<!--- Setup a parent app manager if the parent is not empty string --->
+		<cfif isObject(arguments.parentAppManager)>
+			<cfset appManager.setParent(arguments.parentAppManager) />
+		</cfif>
+		<!--- TODO: might have put the parent managers in the init call for each manager below --->
+		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
@@ -99,7 +108,12 @@ Notes:
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		<cfset appManager.setRequestManager(requestManager) />
 		
-		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXml, appManager) />
+		<cfif isObject(arguments.parentAppManager)>
+			<cfset parentListenerManager = arguments.parentAppManager.getListenerManager() />
+		<cfelse>
+			<cfset parentListenerManager = "" />
+		</cfif>
+		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(configXml, appManager, parentListenerManager) />
 		<cfset appManager.setListenerManager(listenerManager) />
 		
 		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(configXml, appManager) />
@@ -121,6 +135,9 @@ Notes:
 		<cfset loadIncludes(configXML, appManager, arguments.validateXml, arguments.configDtdPath) />
 
 		<!--- Configure all the managers by calling the base configure --->
+		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(configXML, appManager) />
+		<cfset appManager.setModuleManager(moduleManager) />
+		
 		<cfset appManager.configure() />
 		
 		<!--- Clear the includeDepencies --->

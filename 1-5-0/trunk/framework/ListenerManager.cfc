@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.listeners = StructNew() />
 	<cfset variables.appManager = "" />
+	<cfset variables.parentListenerManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -41,6 +42,9 @@ Notes:
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentListenerManager" type="any" required="false" default=""
+			hint="Optional argument for a parent listener manager. If there isn't one default to empty string." />
+		
 		
 		<cfset var listenerNodes = "" />
 		<cfset var listenerParams = "" />
@@ -57,6 +61,10 @@ Notes:
 		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentListenerManager)>
+			<cfset setParent(arguments.parentListenerManager) />
+		</cfif>
 
 		<!--- Setup up each Listener. --->
 		<cfset listenerNodes = XMLSearch(configXML,"//listeners/listener") />
@@ -116,6 +124,8 @@ Notes:
 		
 		<cfif isListenerDefined(arguments.listenerName)>
 			<cfreturn variables.listeners[arguments.listenerName] />
+		<cfelseif isObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
+			<cfreturn getParent().getListener(arguments.listenerName)>
 		<cfelse>
 			<cfthrow type="MachII.framework.ListenerNotDefined" 
 				message="Listener with name '#arguments.listenerName#' is not defined." />
@@ -152,6 +162,15 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the AppManager instance this ListenerManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent ListenerManager instance this ListenerManager belongs to.">
+		<cfargument name="parentListenerManager" type="MachII.framework.ListenerManager" required="true" />
+		<cfset variables.parentListenerManager = arguments.parentListenerManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent ListenerManager instance this ListenerManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentListenerManager />
 	</cffunction>
 	
 	<cffunction name="getListenerNames" access="public" returntype="array" output="false"

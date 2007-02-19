@@ -39,6 +39,9 @@ Notes:
 	<cfset variables.eventManager = "" />
 	<cfset variables.pluginManager = "" />
 	<cfset variables.viewManager = "" />
+	<cfset variables.moduleManager = "" />
+	<cfset variables.requestHandler = "" />
+	<cfset variables.parentAppManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -61,6 +64,7 @@ Notes:
 		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
+		<cfset getModuleManager().configure() />
 	</cffunction>
 	
 	<cffunction name="createEventContext" access="public" returntype="MachII.framework.EventContext" output="false"
@@ -141,6 +145,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getViewManager" access="public" returntype="MachII.framework.ViewManager" output="false">
 		<cfreturn variables.viewManager />
+	</cffunction>
+	
+	<cffunction name="setModuleManager" access="public" returntype="void" output="false">
+		<cfargument name="moduleManager" type="MachII.framework.ModuleManager" required="true" />
+		<cfset variables.moduleManager = arguments.moduleManager />
+	</cffunction>	
+	<cffunction name="getModuleManager" access="public" returntype="MachII.framework.ModuleManager" output="false">
+		<cfreturn variables.moduleManager />
+	</cffunction>
+	
+	<cffunction name="setParent" access="public" returntype="void" output="false">
+		<cfargument name="parentAppManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.parentAppManager = arguments.parentAppManager />
+	</cffunction>	
+	<cffunction name="getParent" access="public" returntype="MachII.framework.AppManager" output="false">
+		<cfreturn variables.parentAppManager />
 	</cffunction>
 	
 </cfcomponent>
