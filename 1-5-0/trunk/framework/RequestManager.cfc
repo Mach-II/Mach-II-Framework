@@ -40,6 +40,7 @@ Notes:
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
+	<cfset varibales.moduleDelimiter = "" />
 	<cfset variables.cleanupDifference = -3 />
 
 	
@@ -49,29 +50,32 @@ Notes:
 	<cffunction name="init" access="public" returntype="RequestManager" output="false"
 		hint="Initializes the manager.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+
+		<cfset var urlDelimiters = "" />	
 		
 		<cfset setAppManager(arguments.appManager) />
 
-		<cfset variables.requestHandler = createRequestHandler() />
+		<!--- Setup defaults --->
+		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
+		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
+		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
+		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
+		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
+		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
+		
+		<!--- Parse through the complex list of delimiters --->
+		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1)) />
+		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2)) />
+		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3)) />
+
+		<cfset variables.requestHandler = createRequestHandler(getModuleDelimiter()) />
 
 		<cfreturn this />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures nothing.">
-		
-		<cfset var urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
-			
-		<!--- Setup defaults --->
-		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
-		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
-		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
-		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
-		
-		<!--- Parse through the complex --->
-		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1)) />
-		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2)) />
-		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3)) />
+		<!--- Does nothing --->
 	</cffunction>
 
 	<!---
@@ -212,7 +216,7 @@ Notes:
 	--->
 	<cffunction name="createRequestHandler" access="private" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Creates a RequestHandler instance.">
-		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager()) />
+		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getModuleDelimiter()) />
 	</cffunction>
 	
 	<cffunction name="parseBuildUrlParameters" access="private" returntype="struct" output="false"
@@ -369,6 +373,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getPairDelimiter" access="private" returntype="string" output="false">
 		<cfreturn variables.pairDelimiter />
+	</cffunction>
+	
+	<cffunction name="setModuleDelimiter" access="private" returntype="void" output="false">
+		<cfargument name="moduleDelimiter" type="string" required="true" />
+		<cfset variables.moduleDelimiter = arguments.moduleDelimiter />
+	</cffunction>
+	<cffunction name="getModuleDelimiter" access="private" returntype="string" output="false">
+		<cfreturn variables.moduleDelimiter />
 	</cffunction>
 
 </cfcomponent>

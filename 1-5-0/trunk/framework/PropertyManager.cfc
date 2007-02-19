@@ -91,6 +91,8 @@ the rest of the framework. (pfarrell)
 			<cfset setProperty(name, value) />
 		</cfloop>
 		
+		<!--- TODO: Add logic to set default properties for base/main property manager only --->
+		
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
 		<cfif NOT isPropertyDefined("defaultEvent")>
@@ -122,6 +124,9 @@ the rest of the framework. (pfarrell)
 		</cfif>
 		<cfif NOT isPropertyDefined("urlParseSES")>
 			<cfset setProperty("urlParseSES", false) />
+		</cfif>
+		<cfif NOT isPropertyDefined("moduleDelimiter")>
+			<cfset setProperty("moduleDelimiter", ":") />
 		</cfif>
 		
 		<cfreturn this />

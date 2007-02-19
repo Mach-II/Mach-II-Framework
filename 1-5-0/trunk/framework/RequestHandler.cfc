@@ -40,8 +40,10 @@ Notes:
 	<cffunction name="init" access="public" returntype="RequestHandler" output="false"
 		hint="Initializes the RequestHandler.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="moduleDelimiter" type="string" required="true" />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -138,6 +140,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+
+	<cffunction name="setModuleDelimiter" access="private" returntype="void" output="false">
+		<cfargument name="moduleDelimiter" type="string" required="true" />
+		<cfset variables.moduleDelimiter = arguments.moduleDelimiter />
+	</cffunction>
+	<cffunction name="getPairDelimiter" access="private" returntype="string" output="false">
+		<cfreturn variables.moduleDelimiter />
 	</cffunction>
 
 </cfcomponent>
