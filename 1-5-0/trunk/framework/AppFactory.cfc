@@ -123,6 +123,9 @@ Notes:
 		<!--- Configure all the managers by calling the base configure --->
 		<cfset appManager.configure() />
 		
+		<!--- Clear the includeDepencies --->
+		<cfset variables.includeDependencies = StructNew() />
+		
 		<cfreturn appManager />
 	</cffunction>
 	
