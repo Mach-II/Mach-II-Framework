@@ -114,6 +114,7 @@ Notes:
 		</cfloop>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
+		<!--- The requestManager is a singleton --->
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		<cfset appManager.setRequestManager(requestManager) />
 		
@@ -153,14 +154,13 @@ Notes:
 		</cfloop>
 		<cfset appManager.setPluginManager(pluginManager) />
 
-		<!--- Configure all the managers by calling the base configure --->
 		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset moduleManager.init(configXmls[i], appManager) />
 		</cfloop>
 		<cfset appManager.setModuleManager(moduleManager) />
 		
-		<!--- Call the master configure() for all managers --->
+		<!--- Configure all the managers by calling the base configure --->
 		<cfset appManager.configure() />
 		
 		<cfreturn appManager />
