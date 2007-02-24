@@ -38,6 +38,7 @@ Updated version: 1.5.0
 	<cfset variables.args = "" />
 	<cfset variables.persist = "" />
 	<cfset variables.persistArgs = "" />
+	<cfset variables.statusType = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -52,6 +53,7 @@ Updated version: 1.5.0
 		<cfargument name="args" type="string" required="false" default="" />
 		<cfargument name="persist" type="boolean" required="false" default="false" />
 		<cfargument name="persistArgs" type="string" required="false" default="" />
+		<cfargument name="statusType" type="string" required="false" default="temporary" />
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setEventParameter(arguments.eventParameter) />
@@ -61,8 +63,9 @@ Updated version: 1.5.0
 		<cfset setArgs(arguments.args) />
 		<cfset setPersist(arguments.persist) />
 		<cfset setPersistArgs(arguments.persistArgs) />
+		<cfset setStatusType(arguments.statusType) />
 		
-		<!--- Add the persistId parameter to the arg if true --->
+		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist()>
 			<cfset setArgs(ListAppend(getArgs(), getRedirectPersistParameter())) />
 		</cfif>
@@ -78,13 +81,32 @@ Updated version: 1.5.0
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 
+		<cfset var redirectUrl = "" />
+		<cfset var statusType = getStatusType() />
+
 		<!--- Persist if directed --->
 		<cfif getPersist()>
 			<cfset savePersistEventData(arguments.event, arguments.eventContext) />
 		</cfif>
 		
-		<!--- Make the url and relocate --->
-		<cflocation url="#makeRedirectUrl(arguments.event, arguments.eventContext)#" addtoken="no" />
+		<!--- Make the url --->
+		<cfset redirectUrl = makeRedirectUrl(arguments.event, arguments.eventContext) />
+		
+		<!--- Redirect based on the HTTP status type --->
+		<cfif statusType EQ "permenant">
+			<!--- Send the headers and manually call cfabort since cflocation does that implicitly --->
+			<cfheader statuscode="301" statustext="Moved Permenantly" />
+			<cfheader name="Location" value="#redirectUrl#" />
+			<cfabort>
+		<cfelseif statusType EQ "prg">
+			<!--- Send the headers and manually call cfabort since cflocation does that implicitly --->
+			<cfheader statuscode="303" statustext="See Other" />
+			<cfheader name="Location" value="#redirectUrl#" />
+			<cfabort>
+		<cfelse>
+			<!--- Default condition for 302 (temporary) --->
+			<cflocation url="#redirectUrl#" addtoken="no" />
+		</cfif>
 		
 		<cfreturn true />
 	</cffunction>
@@ -205,6 +227,14 @@ Updated version: 1.5.0
 	</cffunction>
 	<cffunction name="getPersistArgs" access="private" returntype="string" output="false">
 		<cfreturn variables.persistArgs />
+	</cffunction>
+	
+	<cffunction name="setStatusType" access="private" returntype="void" output="false">
+		<cfargument name="statusType" type="string" required="true" />
+		<cfset variables.statusType = arguments.statusType />
+	</cffunction>
+	<cffunction name="getStatusType" access="private" returntype="string" output="false">
+		<cfreturn variables.statusType />
 	</cffunction>
 
 </cfcomponent>

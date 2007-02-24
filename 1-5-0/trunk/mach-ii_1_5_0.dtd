@@ -304,6 +304,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	args CDATA #IMPLIED
 	persist (true|false) "false"
 	persistArgs CDATA #IMPLIED
+	statusType CDATA #IMPLIED
 >
 
 <!--
