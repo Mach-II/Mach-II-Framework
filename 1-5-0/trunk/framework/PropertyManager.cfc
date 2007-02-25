@@ -36,6 +36,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.appManager = "" />
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurableProperties = ArrayNew(1) />
+	<cfset variables.parentPropertyManager = "">
 	<cfset variables.version = "1.5.0.0" />
 	
 	<!---
@@ -45,6 +46,8 @@ the rest of the framework. (pfarrell)
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentPropertyManager" type="any" required="false" default=""
+			hint="Optional argument for a parent property manager. If there isn't one default to empty string." />
 		
 		<cfset var xnProperties = "" />
 		<cfset var xnParams = "" />
@@ -58,6 +61,10 @@ the rest of the framework. (pfarrell)
 		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentPropertyManager)>
+			<cfset setParent(arguments.parentPropertyManager) />
+		</cfif>
 
 		<!--- Set the properties from the XML file. --->
 		<cfset xnProperties = XMLSearch(configXML, "//property") />
@@ -96,40 +103,76 @@ the rest of the framework. (pfarrell)
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
 		<cfif NOT isPropertyDefined("defaultEvent")>
-			<cfset setProperty("defaultEvent", "defaultEvent") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("defaultEvent")>
+			<cfelse>
+				<cfset setProperty("defaultEvent", "defaultEvent") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("exceptionEvent")>
-			<cfset setProperty("exceptionEvent", "exceptionEvent") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("exceptionEvent")>
+			<cfelse>
+				<cfset setProperty("exceptionEvent", "exceptionEvent") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("applicationRoot")>
-			<cfset setProperty("applicationRoot", "") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("applicationRoot")>
+			<cfelse>
+				<cfset setProperty("applicationRoot", "") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("eventParameter")>
-			<cfset setProperty("eventParameter", "event") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("eventParameter")>
+			<cfelse>
+				<cfset setProperty("eventParameter", "event") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("parameterPrecedence")>
-			<cfset setProperty("parameterPrecedence", "form") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("parameterPrecedence")>
+			<cfelse>
+				<cfset setProperty("parameterPrecedence", "form") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("maxEvents")>
-			<cfset setProperty("maxEvents", 10) />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("maxEvents")>
+			<cfelse>
+				<cfset setProperty("maxEvents", 10) />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("redirectPersistParameter")>
-			<cfset setProperty("redirectPersistParameter", "persistId") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("redirectPersistParameter")>
+			<cfelse>
+				<cfset setProperty("redirectPersistParameter", "persistId") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("redirectPersistScope")>
-			<cfset setProperty("redirectPersistScope", "session") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("redirectPersistScope")>
+			<cfelse>
+				<cfset setProperty("redirectPersistScope", "session") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlBase")>
-			<cfset setProperty("urlBase", "index.cfm") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlBase")>
+			<cfelse>
+				<cfset setProperty("urlBase", "index.cfm") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlDelimiters")>
-			<cfset setProperty("urlDelimiters", "?,&,=") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlDelimiters")>
+			<cfelse>
+				<cfset setProperty("urlDelimiters", "?,&,=") />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlParseSES")>
-			<cfset setProperty("urlParseSES", false) />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlParseSES")>
+			<cfelse>
+				<cfset setProperty("urlParseSES", false) />
+			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("moduleDelimiter")>
-			<cfset setProperty("moduleDelimiter", ":") />
+			<cfif isObject(getParent()) AND getParent().isPropertyDefined("moduleDelimiter")>
+			<cfelse>
+				<cfset setProperty("moduleDelimiter", ":") />
+			</cfif>
 		</cfif>
 		
 		<cfreturn this />
@@ -156,6 +199,8 @@ the rest of the framework. (pfarrell)
 		
 		<cfif isPropertyDefined(arguments.propertyName)>
 			<cfreturn variables.properties[arguments.propertyName] />
+		<cfelseif isObject(getParent()) AND getParent().isPropertyDefined(arguments.propertyName)>
+			<cfreturn getParent().getProperty(arguments.propertyName)>
 		<cfelseif StructKeyExists(arguments, "defaultValue")>
 			<cfreturn arguments.defaultValue />
 		<cfelse>
@@ -232,6 +277,15 @@ the rest of the framework. (pfarrell)
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent PropertyManager instance this FilterManager belongs to.">
+		<cfargument name="parentPropertyManager" type="MachII.framework.PropertyManager" required="true" />
+		<cfset variables.parentPropertyManager = arguments.parentPropertyManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent PropertyManager instance this PropertyManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentPropertyManager />
 	</cffunction>
 
 	<cffunction name="getVersion" access="public" returntype="string" output="false"

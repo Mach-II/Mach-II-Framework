@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 --->
 <cfcomponent 
 	displayname="ViewManager"
@@ -31,6 +31,7 @@ Updated version: 1.1.1
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.viewPaths = StructNew() />
+	<cfset variables.parentViewManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -39,6 +40,8 @@ Updated version: 1.1.1
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentViewManager" type="any" required="false" default=""
+			hint="Optional argument for a parent view manager. If there isn't one default to empty string." />
 		
 		<cfset var viewNodes = "" />
 		<cfset var name = "" />
@@ -46,6 +49,10 @@ Updated version: 1.1.1
 		<cfset var i = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentViewManager)>
+			<cfset setParent(arguments.parentViewManager) />
+		</cfif>
 
 		<!--- Setup up each Page-View. --->
 		<cfset viewNodes = XMLSearch(configXML,"//page-views/page-view") />
@@ -74,6 +81,8 @@ Updated version: 1.1.1
 		
 		<cfif isViewDefined(arguments.viewName)>
 			<cfreturn variables.viewPaths[arguments.viewName] />
+		<cfelseif isObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
+			<cfreturn getParent().getViewPath(arguments.viewName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ViewNotDefined" 
 				message="View with name '#arguments.viewName#' is not defined." />
@@ -96,6 +105,15 @@ Updated version: 1.1.1
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent ViewManager instance this ViewManager belongs to.">
+		<cfargument name="parentViewManager" type="MachII.framework.ViewManager" required="true" />
+		<cfset variables.parentViewManager = arguments.parentViewManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent ViewManager instance this ViewManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentViewManager />
 	</cffunction>
 	
 </cfcomponent>

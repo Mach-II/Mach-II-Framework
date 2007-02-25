@@ -56,14 +56,19 @@ Notes:
 			
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
+		<cfset var parentPropertyManager = "" />
 		<cfset var requestManager = "" />
 		<cfset var listenerManager = "" />
 		<cfset var parentListenerManager = "" />
 		<cfset var filterManager = "" />
+		<cfset var parentFilterManager = "" />
 		<cfset var subroutineManager = "" />
+		<cfset var parentSubroutineManager = "" />
 		<cfset var eventManager = "" />
 		<cfset var viewManager = "" />
+		<cfset var parentViewManager = "" />
 		<cfset var pluginManager = "" />
+		<cfset var parentPluginManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -101,8 +106,12 @@ Notes:
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset appManager.setParent(arguments.parentAppManager) />
 			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
+			<cfset parentPropertyManager = appManager.getParent().getPropertyManager() />
+			<cfset parentFilterManager = appManager.getParent().getFilterManager() />
+			<cfset parentSubroutineManager = appManager.getParent().getSubroutineManager() />
+			<cfset parentViewManager = appManager.getParent().getViewManager() />
+			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
 		</cfif>
-		<!--- TODO: might have put the parent managers in the init call for each manager below --->
 		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager
@@ -110,7 +119,7 @@ Notes:
 		--->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset propertyManager.init(configXmls[i], appManager) />
+			<cfset propertyManager.init(configXmls[i], appManager, parentPropertyManager) />
 		</cfloop>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
@@ -126,13 +135,13 @@ Notes:
 		
 		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset filterManager.init(configXmls[i], appManager) />
+			<cfset filterManager.init(configXmls[i], appManager, parentFilterManager) />
 		</cfloop>
 		<cfset appManager.setFilterManager(filterManager) />
 
 		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset subroutineManager.init(configXmls[i], appManager) />
+			<cfset subroutineManager.init(configXmls[i], appManager, parentSubroutineManager) />
 		</cfloop>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
@@ -144,13 +153,13 @@ Notes:
 		
 		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset viewManager.init(configXmls[i], appManager) />
+			<cfset viewManager.init(configXmls[i], appManager, parentViewManager) />
 		</cfloop>
 		<cfset appManager.setViewManager(viewManager) />
 		
 		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager") />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset pluginManager.init(configXmls[i], appManager) />
+			<cfset pluginManager.init(configXmls[i], appManager, parentPluginManager) />
 		</cfloop>
 		<cfset appManager.setPluginManager(pluginManager) />
 

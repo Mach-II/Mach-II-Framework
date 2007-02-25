@@ -31,6 +31,7 @@ Updated version: 1.5.0
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
+	<cfset variables.parentSubrountineManager = "" />
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
@@ -42,6 +43,8 @@ Updated version: 1.5.0
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentSubroutineManager" type="any" required="false" default=""
+			hint="Optional argument for a parent subroutine manager. If there isn't one default to empty string." />
 		
 		<cfset var commandNodes = "" />
 		<cfset var commandNode = "" />
@@ -54,6 +57,10 @@ Updated version: 1.5.0
 		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentSubroutineManager)>
+			<cfset setParent(arguments.parentSubroutineManager) />
+		</cfif>
 		
 		<!--- Set temps. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
@@ -110,6 +117,8 @@ Updated version: 1.5.0
 		
 		<cfif isSubroutineDefined(arguments.subroutineName)>
 			<cfreturn variables.handlers[arguments.subroutineName] />
+		<cfelseif isObject(getParent()) AND getParent().isSubroutineDefined(arguments.subroutineName)>
+			<cfreturn getParent().getSubroutineHandler(arguments.subroutineName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.SubroutineHandlerNotDefined" 
 				message="SubroutineHandler for subroutine '#arguments.subroutineName#' is not defined." />
@@ -132,6 +141,15 @@ Updated version: 1.5.0
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent SubroutineManager instance this FilterManager belongs to.">
+		<cfargument name="parentSubroutineManager" type="MachII.framework.SubroutineManager" required="true" />
+		<cfset variables.parentSubroutineManager = arguments.parentSubroutineManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent SubroutineManager instance this FilterManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentSubroutineManager />
 	</cffunction>
 	
 </cfcomponent>

@@ -125,10 +125,10 @@ Notes:
 		<cfif isListenerDefined(arguments.listenerName)>
 			<cfreturn variables.listeners[arguments.listenerName] />
 		<cfelseif isObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
-			<cfreturn getParent().getListener(arguments.listenerName)>
+			<cfreturn getParent().getListener(arguments.listenerName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ListenerNotDefined" 
-				message="Listener with name '#arguments.listenerName#' is not defined." />
+				message="Listener with name '#arguments.listenerName#' is not defined. Listeners: '#ArrayToList(getListenerNames())#'" />
 		</cfif>
 	</cffunction>
 	

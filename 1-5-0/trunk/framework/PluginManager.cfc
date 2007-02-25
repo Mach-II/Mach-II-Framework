@@ -44,6 +44,7 @@ Notes:
 	<cfset variables.postProcessPlugins = ArrayNew(1) />
 	<cfset variables.handleExceptionPlugins = ArrayNew(1) />
 	<cfset variables.nPlugins = 0 />
+	<cfset variables.parentPluginManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -52,6 +53,8 @@ Notes:
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentPluginManager" type="any" required="false" default=""
+			hint="Optional argument for a parent plugin manager. If there isn't one default to empty string." />
 		
 		<cfset var xnPlugins = 0 />
 		<cfset var xnParams = 0 />
@@ -65,6 +68,10 @@ Notes:
 		<cfset var pluginParams = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentPluginManager)>
+			<cfset setParent(arguments.parentPluginManager) />
+		</cfif>
 		
 		<!--- Scoped argument variable - configXML --->
 		<cfset xnPlugins = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
@@ -109,6 +116,8 @@ Notes:
 		
 		<cfif isPluginDefined(arguments.pluginName)>
 			<cfreturn variables.plugins[arguments.pluginName] />
+		<cfelseif isObject(getParent()) AND getParent().isPluginDefined(arguments.pluginName)>
+			<cfreturn getParent().getPlugin(arguments.pluginName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.PluginNotDefined" 
 				message="Plugin with name '#arguments.pluginName#' is not defined." />
@@ -302,6 +311,15 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Returns the AppManager instance this PluginManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent PluginManager instance this PluginManager belongs to.">
+		<cfargument name="parentPluginManager" type="MachII.framework.PluginManager" required="true" />
+		<cfset variables.parentPluginManager = arguments.parentPluginManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent PluginManager instance this PluginManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentPluginManager />
 	</cffunction>
 	
 	<cffunction name="getPluginNames" access="public" returntype="array" output="false"

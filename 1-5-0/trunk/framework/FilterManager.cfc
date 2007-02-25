@@ -30,6 +30,7 @@ Updated version: 1.1.0
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.filters = StructNew() />
+	<cfset variables.parentFilterManager = "">
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -38,7 +39,9 @@ Updated version: 1.1.0
 		hint="Initialization function called by the framework.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		
+		<cfargument name="parentFilterManager" type="any" required="false" default=""
+			hint="Optional argument for a parent filter manager. If there isn't one default to empty string." />
+			
 		<cfset var filterNodes = "" />
 		<cfset var filterParams = "" />
 		<cfset var name = "" />
@@ -51,6 +54,10 @@ Updated version: 1.1.0
 		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentFilterManager)>
+			<cfset setParent(arguments.parentFilterManager) />
+		</cfif>
 
 		<!--- Setup up each EventFilter. --->
 		<cfset filterNodes = XMLSearch(configXML,"//event-filters/event-filter") />
@@ -105,6 +112,8 @@ Updated version: 1.1.0
 		
 		<cfif isFilterDefined(arguments.filterName)>
 			<cfreturn variables.filters[arguments.filterName] />
+		<cfelseif isObject(getParent()) AND getParent().isFilterDefined(arguments.filterName)>
+			<cfreturn getParent().getFilter(arguments.filterName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.FilterNotDefined" 
 				message="Filter with name '#arguments.filterName#' is not defined." />
@@ -125,6 +134,15 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent FilterManager instance this FilterManager belongs to.">
+		<cfargument name="parentFilterManager" type="MachII.framework.FilterManager" required="true" />
+		<cfset variables.parentFilterManager = arguments.parentFilterManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent FilterManager instance this FilterManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentFilterManager />
 	</cffunction>
 	
 	<cffunction name="getFilterNames" access="public" returntype="array" output="false"
