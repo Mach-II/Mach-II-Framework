@@ -39,7 +39,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	"mach-ii"
 		version - the version of the DTD being used for configuration
 -->
-<!ELEMENT mach-ii (includes?, modules?, properties?, listeners?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)>
+<!ELEMENT mach-ii ((includes?, modules?, properties?, listeners?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(includes?, modules?, properties?, listeners?, event-filters?, plugins?, event-handlers?, subroutines?, page-views?))>
 <!ATTLIST mach-ii 
 	version CDATA #IMPLIED
 >
