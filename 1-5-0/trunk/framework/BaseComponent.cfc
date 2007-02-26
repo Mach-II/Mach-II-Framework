@@ -174,9 +174,9 @@ the rest of the framework. (pfarrell)
 		<cfset var key = "" />
 		<cfset var resolvedParameters = StructNew() />
 		
-		<!--- Get values and resolve placeholders --->
+		<!--- Get values and bind placeholders --->
 		<cfloop collection="#variables.parameters#" item="key">
-			<cfset resolvedParameters[key] = resolveValue(key) />
+			<cfset resolvedParameters[key] = bindValue(key) />
 		</cfloop>
 		
 		<cfreturn resolvedParameters />
