@@ -51,8 +51,8 @@ recursive).  Also, if you try to include a file that has already been included, 
 will throw an error telling you cannot do that. (2007-02-18 kwiersma)
 
 * Redirect Persist
-Added new attributes to the redirect command that allows you to persist complex
-datatypes across a redirect.  The new attributes are:
+Added new optional attributes to the redirect command that allows you to 
+persist complex datatypes across a redirect.  The new attributes are:
 - persist [boolean]
 Turns complex persisting on/off for this redirect.
 - persistArg [comma,delimitated,list,of,event,args]
@@ -61,6 +61,16 @@ the command will persist the entire event object.
 
 A new optional property has been added called redirectPersistParameter.  This defaults
 to persistId. (2007-02-08 pfarrell)
+
+* Redirect StatusTypes
+Added new optional attribute to the redirect command to more than just http stauts 302 
+redirects. The new attributes is:
+- statusType [permanent|temporary|prg] defaults to temporary
+
+Permanent = 301 http status
+Temporary = 302 http status (this is what cflocation does)
+PRG = 303 http status (PRG = post-redirect-get routine which is a common idiom)
+(2007-02-25 pfarrell)
 
 * Complex Properties (including structs, arrays and the new Mach-II Property CFC)
 Please see the documentation for more information. (2007-02-05 pfarrell) 
@@ -105,6 +115,14 @@ AppManager since nobody *should* be calling this externally. (2007-02-19 pfarrel
 
 * All init() methods now Return the "this" scope instead void
 (2007-02-10 pfarrell)
+
+* Refactored all managers to method chain the init() method whe creating the object
+(2007-02-25 pfarrell)
+
+* Refactored manager's init() method into init() and loadXml() methods
+Separated the loading of xml data into separate function since it called so
+many times during the loading the framework due to the introduction of includes.
+(2007-02-25 pfarrell)
 
 * Version number of the framework is now hard-coded in the PropertyManager instead
 of being passed up the component chain from the bootstrappers. (2007-02-10 pfarrell)
