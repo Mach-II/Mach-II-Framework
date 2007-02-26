@@ -63,7 +63,7 @@ Notes:
 			<cfset file = moduleNodes[i].xmlAttributes["file"] />
 		
 			<!--- Setup the Module. --->
-			<cfset module = CreateObject("component", "MachII.framework.Module").init(arguments.appManager, file) />
+			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), file) />
 
 			<!--- Add the Module to the Manager. --->
 			<cfset addModule(name, module) />
