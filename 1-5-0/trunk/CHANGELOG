@@ -86,8 +86,8 @@ mode is on. (2007-02-02 kwiersma)
 Added a new XML construct to support subroutines and a related command to 
 execute a subroutine (2007-02-02 pfarrell)
 
-* Auto-Resolve Placeholder as Parameter Values
-Built-in auto-resolution of ${} syntax of placeholders in parameters values.
+* Bindable Placeholder Parameter Values Support
+Built-in bindable of ${} syntax of placeholders in parameters values.
 This allows you use placeholders to have dynamic parameter values. For example:
 
 <parameter name="mode" value="${serverMode}"/>
