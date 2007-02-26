@@ -97,7 +97,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="defaultValue" type="string" required="false" default=""
 			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
 		<cfif isParameterDefined(arguments.name)>
-			<cfreturn resolveValue(arguments.name) />
+			<cfreturn bindValue(arguments.name) />
 		<cfelse>
 			<cfreturn arguments.defaultValue />
 		</cfif>
@@ -133,22 +133,22 @@ the rest of the framework. (pfarrell)
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="resolveValue" access="private" returntype="any" output="false"
-		hint="Auto resolves placeholders values in parameters.">
+	<cffunction name="bindValue" access="private" returntype="any" output="false"
+		hint="Binds placeholders values in parameters.">
 		<cfargument name="parameterName" type="string" required="true"
 			hint="The parameter name." />
 		
 		<cfset var propertyName = "" />
 		<cfset var value = variables.parameters[arguments.parameterName] />
 		
-		<!--- Auto resolve ${} parameters --->
-		<cfif REFindNoCase("\${(.)*?}", value)>
+		<!--- Can only bind simple parameter values --->
+		<cfif IsSimpleValue(value) AND REFindNoCase("\${(.)*?}", value)>
 			<cfset propertyName = Mid(value, 3, Len(value) -3) />
 			<cfif getAppManager().getPropertyManager().isPropertyDefined(propertyName)>
 				<cfset value = getProperty(propertyName) />
 			<cfelse>
-				<cfthrow type="MachII.framework.ProperyNotDefinedForAutoResolvedParameter" 
-					message="The required property is not defined for an auto resolved parameter named '#arguments.parameterName#'." />
+				<cfthrow type="MachII.framework.ProperyNotDefinedToBindToParameter" 
+					message="The required property is not defined to bind to a parameter named '#arguments.parameterName#'." />
 			</cfif>
 		</cfif>
 		

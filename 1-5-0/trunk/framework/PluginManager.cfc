@@ -45,6 +45,7 @@ Notes:
 	<cfset variables.handleExceptionPlugins = ArrayNew(1) />
 	<cfset variables.nPlugins = 0 />
 	<cfset variables.parentPluginManager = "" />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -56,6 +57,7 @@ Notes:
 			hint="Optional argument for a parent plugin manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset variables.utils = getAppManager().getUtils() />
 		
 		<cfif isObject(arguments.parentPluginManager)>
 			<cfset setParent(arguments.parentPluginManager) />
@@ -90,9 +92,8 @@ Notes:
 			<cfset xnParams = XMLSearch(xnPlugins[i], "./parameters/parameter") />
 			<cfloop from="1" to="#ArrayLen(xnParams)#" index="j">
 				<cfset paramName = xnParams[j].XmlAttributes["name"] />
-				<cfset paramValue = xnParams[j].XmlAttributes["value"] />
-				
-				<cfset StructInsert(pluginParams, paramName, paramValue, true) />
+				<cfset paramValue = variables.utils.recurseComplexValues(xnParams[j]) />				
+				<cfset pluginParams[paramName] = paramValue />
 			</cfloop>
 			
 			<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />

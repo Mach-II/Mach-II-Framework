@@ -31,6 +31,7 @@ Updated version: 1.1.0
 	<cfset variables.appManager = "" />
 	<cfset variables.filters = StructNew() />
 	<cfset variables.parentFilterManager = "">
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -42,6 +43,7 @@ Updated version: 1.1.0
 			hint="Optional argument for a parent filter manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset variables.utils = getAppManager().getUtils() />
 		
 		<cfif isObject(arguments.parentFilterManager)>
 			<cfset setParent(arguments.parentFilterManager) />
@@ -76,7 +78,7 @@ Updated version: 1.1.0
 			<cfset paramNodes = XMLSearch(filterNodes[i], "./parameters/parameter") />
 			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-				<cfset paramValue = paramNodes[j].xmlAttributes["value"] />
+				<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
 				<cfset filterParams[paramName] = paramValue />
 			</cfloop>
 			

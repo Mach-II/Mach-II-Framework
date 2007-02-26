@@ -31,16 +31,16 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.propertyManager = "" />
-	<cfset variables.requestManager = "" />
-	<cfset variables.listenerManager = "" />
 	<cfset variables.filterManager = "" />
-	<cfset variables.subroutineManager = "" />
+	<cfset variables.listenerManager = "" />
 	<cfset variables.eventManager = "" />
-	<cfset variables.pluginManager = "" />
-	<cfset variables.viewManager = "" />
 	<cfset variables.moduleManager = "" />
-	<cfset variables.requestHandler = "" />
+	<cfset variables.propertyManager = "" />
+	<cfset variables.pluginManager = "" />
+	<cfset variables.requestManager = "" />
+	<cfset variables.subroutineManager = "" />
+	<cfset variables.utils = "" />
+	<cfset variables.viewManager = "" />
 	<cfset variables.parentAppManager = "" />
 	
 	<!---
@@ -107,6 +107,14 @@ Notes:
 		<cfreturn variables.listenerManager />
 	</cffunction>
 
+	<cffunction name="setModuleManager" access="public" returntype="void" output="false">
+		<cfargument name="moduleManager" type="MachII.framework.ModuleManager" required="true" />
+		<cfset variables.moduleManager = arguments.moduleManager />
+	</cffunction>	
+	<cffunction name="getModuleManager" access="public" returntype="MachII.framework.ModuleManager" output="false">
+		<cfreturn variables.moduleManager />
+	</cffunction>
+
 	<cffunction name="setPropertyManager" access="public" returntype="void" output="false">
 		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
 		<cfset variables.propertyManager = arguments.propertyManager />
@@ -138,6 +146,14 @@ Notes:
 	<cffunction name="getSubroutineManager" access="public" returntype="MachII.framework.SubroutineManager" output="false">
 		<cfreturn variables.subroutineManager />
 	</cffunction>
+	
+	<cffunction name="setUtils" access="public" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
+	</cffunction>
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
+		<cfreturn variables.utils />
+	</cffunction>
 
 	<cffunction name="setViewManager" access="public" returntype="void" output="false">
 		<cfargument name="viewManager" type="MachII.framework.ViewManager" required="true" />
@@ -145,14 +161,6 @@ Notes:
 	</cffunction>
 	<cffunction name="getViewManager" access="public" returntype="MachII.framework.ViewManager" output="false">
 		<cfreturn variables.viewManager />
-	</cffunction>
-	
-	<cffunction name="setModuleManager" access="public" returntype="void" output="false">
-		<cfargument name="moduleManager" type="MachII.framework.ModuleManager" required="true" />
-		<cfset variables.moduleManager = arguments.moduleManager />
-	</cffunction>	
-	<cffunction name="getModuleManager" access="public" returntype="MachII.framework.ModuleManager" output="false">
-		<cfreturn variables.moduleManager />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false">

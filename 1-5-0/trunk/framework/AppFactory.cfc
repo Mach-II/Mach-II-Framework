@@ -55,6 +55,7 @@ Notes:
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 			
 		<cfset var appManager = "" />
+		<cfset var utils = "" />
 		<cfset var propertyManager = "" />
 		<cfset var parentPropertyManager = "" />
 		<cfset var requestManager = "" />
@@ -112,6 +113,10 @@ Notes:
 			<cfset parentViewManager = appManager.getParent().getViewManager() />
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
 		</cfif>
+		
+		<!--- Load in the low-level Utils class --->
+		<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+		<cfset appManager.setUtils(utils) />
 		
 		<!--- 
 		Create the Framework Managers and set them in the AppManager

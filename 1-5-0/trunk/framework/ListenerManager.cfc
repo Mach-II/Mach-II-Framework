@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.listeners = StructNew() />
 	<cfset variables.appManager = "" />
 	<cfset variables.parentListenerManager = "" />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -45,6 +46,7 @@ Notes:
 			hint="Optional argument for a parent listener manager. If there isn't one default to empty string." />	
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset variables.utils = getAppManager().getUtils() />
 		
 		<cfif isObject(arguments.parentListenerManager)>
 			<cfset setParent(arguments.parentListenerManager) />
@@ -82,7 +84,7 @@ Notes:
 			<cfset paramNodes = XMLSearch(listenerNodes[i], "./parameters/parameter") />
 			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-				<cfset paramValue = paramNodes[j].xmlAttributes["value"] />
+				<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j].xmlAttributes["value"]) />
 				<cfset listenerParams[paramName] = paramValue />
 			</cfloop>
 		
