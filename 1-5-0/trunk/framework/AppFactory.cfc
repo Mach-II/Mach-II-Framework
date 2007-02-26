@@ -117,9 +117,9 @@ Notes:
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
 		--->
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager") />
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset propertyManager.init(configXmls[i], appManager, parentPropertyManager) />
+			<cfset propertyManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
@@ -127,45 +127,45 @@ Notes:
 		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		<cfset appManager.setRequestManager(requestManager) />
 		
-		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager") />
+		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(appManager, parentListenerManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset listenerManager.init(configXmls[i], appManager, parentListenerManager) />
+			<cfset listenerManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setListenerManager(listenerManager) />
 		
-		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager") />
+		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(appManager, parentFilterManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset filterManager.init(configXmls[i], appManager, parentFilterManager) />
+			<cfset filterManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setFilterManager(filterManager) />
 
-		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager") />
+		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(appManager, parentSubroutineManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset subroutineManager.init(configXmls[i], appManager, parentSubroutineManager) />
+			<cfset subroutineManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager") />
+		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset eventManager.init(configXmls[i], appManager) />
+			<cfset eventManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setEventManager(eventManager) />
 		
-		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager") />
+		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(appManager, parentViewManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset viewManager.init(configXmls[i], appManager, parentViewManager) />
+			<cfset viewManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setViewManager(viewManager) />
 		
-		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager") />
+		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(appManager, parentPluginManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset pluginManager.init(configXmls[i], appManager, parentPluginManager) />
+			<cfset pluginManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setPluginManager(pluginManager) />
 
-		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager") />
+		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset moduleManager.init(configXmls[i], appManager) />
+			<cfset moduleManager.loadXml(configXmls[i]) />
 		</cfloop>
 		<cfset appManager.setModuleManager(moduleManager) />
 		

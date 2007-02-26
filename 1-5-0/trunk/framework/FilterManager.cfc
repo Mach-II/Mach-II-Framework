@@ -37,11 +37,23 @@ Updated version: 1.1.0
 	--->
 	<cffunction name="init" access="public" returntype="FilterManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentFilterManager" type="any" required="false" default=""
 			hint="Optional argument for a parent filter manager. If there isn't one default to empty string." />
-			
+		
+		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentFilterManager)>
+			<cfset setParent(arguments.parentFilterManager) />
+		</cfif>
+		
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml for the manager.">
+		<cfargument name="configXML" type="string" required="true" />
+					
 		<cfset var filterNodes = "" />
 		<cfset var filterParams = "" />
 		<cfset var name = "" />
@@ -52,37 +64,29 @@ Updated version: 1.1.0
 		<cfset var filter = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-		
-		<cfset setAppManager(arguments.appManager) />
-		
-		<cfif isObject(arguments.parentFilterManager)>
-			<cfset setParent(arguments.parentFilterManager) />
-		</cfif>
 
 		<!--- Setup up each EventFilter. --->
-		<cfset filterNodes = XMLSearch(configXML,"//event-filters/event-filter") />
+		<cfset filterNodes = XMLSearch(arguments.configXML, "//event-filters/event-filter") />
 		<cfloop from="1" to="#ArrayLen(filterNodes)#" index="i">
-			<cfset name = filterNodes[i].xmlAttributes['name'] />
-			<cfset type = filterNodes[i].xmlAttributes['type'] />
+			<cfset name = filterNodes[i].xmlAttributes["name"] />
+			<cfset type = filterNodes[i].xmlAttributes["type"] />
 		
 			<!--- Set the EventFilter's parameters. --->
 			<cfset filterParams = StructNew() />
 			<cfset paramNodes = XMLSearch(filterNodes[i], "./parameters/parameter") />
 			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-				<cfset paramName = paramNodes[j].xmlAttributes['name'] />
-				<cfset paramValue = paramNodes[j].xmlAttributes['value'] />
+				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+				<cfset paramValue = paramNodes[j].xmlAttributes["value"] />
 				<cfset filterParams[paramName] = paramValue />
 			</cfloop>
 			
-			<cfset filter = CreateObject('component', type) />
-			<cfset filter.init(arguments.appManager, filterParams) />
+			<cfset filter = CreateObject("component", type) />
+			<cfset filter.init(getAppManager(), filterParams) />
 			
 			<cfset addFilter(name, filter) />
 		</cfloop>
-		
-		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered EventFilters.">
 		<cfset var key = "" />

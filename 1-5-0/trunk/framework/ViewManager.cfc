@@ -38,32 +38,36 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="init" access="public" returntype="ViewManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentViewManager" type="any" required="false" default=""
 			hint="Optional argument for a parent view manager. If there isn't one default to empty string." />
-		
-		<cfset var viewNodes = "" />
-		<cfset var name = "" />
-		<cfset var page = "" />
-		<cfset var i = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
 		
 		<cfif isObject(arguments.parentViewManager)>
 			<cfset setParent(arguments.parentViewManager) />
 		</cfif>
-
+		
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml for the manager.">
+		<cfargument name="configXML" type="string" required="true" />
+				
+		<cfset var viewNodes = "" />
+		<cfset var name = "" />
+		<cfset var page = "" />
+		<cfset var i = 0 />
+		
 		<!--- Setup up each Page-View. --->
-		<cfset viewNodes = XMLSearch(configXML,"//page-views/page-view") />
+		<cfset viewNodes = XMLSearch(arguments.configXML,"//page-views/page-view") />
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
-			<cfset name = viewNodes[i].xmlAttributes['name'] />
-			<cfset page = viewNodes[i].xmlAttributes['page'] />
+			<cfset name = viewNodes[i].xmlAttributes["name"] />
+			<cfset page = viewNodes[i].xmlAttributes["page"] />
 			
 			<cfset variables.viewPaths[name] = page />
 		</cfloop>
-		
-		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

@@ -41,10 +41,17 @@ Updated version: 1.1.0
 	--->
 	<cffunction name="init" access="public" returntype="EventManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+				
+		<cfset setAppManager(arguments.appManager) />
 		
-		<cfset var commandNodes = "" />
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml for the manager.">
+		<cfargument name="configXML" type="string" required="true" />
+		
 		<cfset var commandNode = "" />
 		<cfset var eventNodes = "" />
 		<cfset var eventHandler = "" />
@@ -54,13 +61,11 @@ Updated version: 1.1.0
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
-		<cfset setAppManager(arguments.appManager) />
-		
-		<!--- Set temps. --->
+		<!--- Set temps for the commandLoaderBase. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset eventNodes = XMLSearch(configXML, "//event-handlers/event-handler") />
+		<cfset eventNodes = XMLSearch(arguments.configXML, "//event-handlers/event-handler") />
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
 			<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
@@ -69,9 +74,7 @@ Updated version: 1.1.0
 				<cfset eventAccess = "public" />
 			</cfif>
 			
-			<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler") />
-			<cfset eventHandler.init() />
-			<cfset eventHandler.setAccess(eventAccess) />
+			<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess) />
 	  
 			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 			    <cfset commandNode = eventNodes[i].XMLChildren[j] />
@@ -85,9 +88,6 @@ Updated version: 1.1.0
 		<!--- Clear temps. --->
 		<cfset variables.listenerMgr = "" />
 		<cfset variables.filterMgr = "" />
-		<cfset variables.subroutineMgr = "" />
-		
-		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"

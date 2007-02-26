@@ -44,10 +44,22 @@ the rest of the framework. (pfarrell)
 	--->
 	<cffunction name="init" access="public" returntype="PropertyManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentPropertyManager" type="any" required="false" default=""
 			hint="Optional argument for a parent property manager. If there isn't one default to empty string." />
+		
+		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentPropertyManager)>
+			<cfset setParent(arguments.parentPropertyManager) />
+		</cfif>
+		
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml into the manager.">
+		<cfargument name="configXML" type="string" required="true" />
 		
 		<cfset var xnProperties = "" />
 		<cfset var xnParams = "" />
@@ -59,15 +71,9 @@ the rest of the framework. (pfarrell)
 		<cfset var paramValue = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-		
-		<cfset setAppManager(arguments.appManager) />
-		
-		<cfif isObject(arguments.parentPropertyManager)>
-			<cfset setParent(arguments.parentPropertyManager) />
-		</cfif>
 
 		<!--- Set the properties from the XML file. --->
-		<cfset xnProperties = XMLSearch(configXML, "//property") />
+		<cfset xnProperties = XMLSearch(arguments.configXML, "//property") />
 
 		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">			
 			<cfset name = xnProperties[i].xmlAttributes["name"] />
@@ -87,7 +93,7 @@ the rest of the framework. (pfarrell)
 				</cfloop>
 				
 				<!--- Create the configurable property and append to array of configurable property names --->
-				<cfset value = CreateObject("component", type).init(arguments.appManager, propertyParams) />
+				<cfset value = CreateObject("component", type).init(getAppManager(), propertyParams) />
 				<cfset ArrayAppend(variables.configurableProperties, name) />
 			<!--- Setup if name/value pair, struct or array --->
 			<cfelse>
@@ -174,10 +180,8 @@ the rest of the framework. (pfarrell)
 				<cfset setProperty("moduleDelimiter", ":") />
 			</cfif>
 		</cfif>
-		
-		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Prepares the configurable properties for use.">
 		<cfset var aConfigurableProperty = "" />

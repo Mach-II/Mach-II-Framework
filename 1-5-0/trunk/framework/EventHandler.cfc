@@ -36,6 +36,10 @@ Updated version: 1.1.0
 	--->
 	<cffunction name="init" access="public" returntype="EventHandler" output="false"
 		hint="Used by the framework for initialization. Do not override.">
+		<cfargument name="access" type="string" required="true" />
+		
+		<cfset setAccess(arguments.access) />
+		
 		<cfreturn this />
 	</cffunction>
 	

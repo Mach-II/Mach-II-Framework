@@ -41,20 +41,9 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="init" access="public" returntype="SubroutineManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentSubroutineManager" type="any" required="false" default=""
 			hint="Optional argument for a parent subroutine manager. If there isn't one default to empty string." />
-		
-		<cfset var commandNodes = "" />
-		<cfset var commandNode = "" />
-		<cfset var eventNodes = "" />
-		<cfset var subroutineHandler = "" />
-		<cfset var eventAccess = "" />
-		<cfset var subroutineName = "" />
-		<cfset var command = "" />
-		<cfset var i = 0 />
-		<cfset var j = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
 		
@@ -62,19 +51,33 @@ Updated version: 1.5.0
 			<cfset setParent(arguments.parentSubroutineManager) />
 		</cfif>
 		
-		<!--- Set temps. --->
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml for the manager.">
+		<cfargument name="configXML" type="string" required="true" />
+				
+		<cfset var subroutineNodes = "" />
+		<cfset var subroutineHandler = "" />
+		<cfset var subroutineName = "" />
+		<cfset var commandNode = "" />
+		<cfset var command = "" />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
+		
+		<!--- Set temps for commandLoaderBase to use. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset eventNodes = XMLSearch(configXML,"//subroutines/subroutine") />
-		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
-			<cfset subroutineName = eventNodes[i].xmlAttributes['name'] />
+		<cfset subroutineNodes = XMLSearch(arguments.configXML,"//subroutines/subroutine") />
+		<cfloop from="1" to="#ArrayLen(subroutineNodes)#" index="i">
+			<cfset subroutineName = subroutineNodes[i].xmlAttributes["name"] />
 			
-			<cfset subroutineHandler = CreateObject('component', 'MachII.framework.SubroutineHandler') />
-			<cfset subroutineHandler.init() />
+			<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
 	  
 			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
-			    <cfset commandNode = eventNodes[i].XMLChildren[j] />
+			    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
 				<cfset command = createCommand(commandNode) />
 				<cfset subroutineHandler.addCommand(command) />
 			</cfloop>
@@ -85,8 +88,6 @@ Updated version: 1.5.0
 		<!--- Clear temps. --->
 		<cfset variables.listenerMgr = "" />
 		<cfset variables.filterMgr = "" />
-		
-		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

@@ -39,32 +39,36 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="ModuleManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		
+		<cfset setAppManager(arguments.appManager) />
+
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml for the manager">
+		<cfargument name="configXML" type="string" required="true" />
 		
 		<cfset var moduleNodes = "" />
 		<cfset var name = "" />
 		<cfset var file = "" />
 		<cfset var module = "" />
 		<cfset var i = 0 />
-		
-		<cfset setAppManager(arguments.appManager) />
 
 		<!--- Setup up each Module. --->
 		<cfset moduleNodes = XMLSearch(configXML,"//modules/module") />
 		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
-			<cfset name = moduleNodes[i].xmlAttributes['name'] />
-			<cfset file = moduleNodes[i].xmlAttributes['file'] />
+			<cfset name = moduleNodes[i].xmlAttributes["name"] />
+			<cfset file = moduleNodes[i].xmlAttributes["file"] />
 		
 			<!--- Setup the Module. --->
-			<cfset module = CreateObject('component', 'MachII.framework.Module') />
-			<cfset module.init(arguments.appManager, file) />
+			<cfset module = CreateObject("component", "MachII.framework.Module").init(arguments.appManager, file) />
 
 			<!--- Add the Module to the Manager. --->
 			<cfset addModule(name, module) />
 		</cfloop>
 		<!--- <cfdump var="#variables.modules#" label="modules"><cfabort> --->
-		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

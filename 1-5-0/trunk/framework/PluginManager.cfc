@@ -51,10 +51,22 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="PluginManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentPluginManager" type="any" required="false" default=""
 			hint="Optional argument for a parent plugin manager. If there isn't one default to empty string." />
+		
+		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentPluginManager)>
+			<cfset setParent(arguments.parentPluginManager) />
+		</cfif>
+		
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml into the manager.">
+		<cfargument name="configXML" type="string" required="true" />
 		
 		<cfset var xnPlugins = 0 />
 		<cfset var xnParams = 0 />
@@ -66,12 +78,6 @@ Notes:
 		<cfset var pluginName = 0 />
 		<cfset var pluginType = 0 />
 		<cfset var pluginParams = 0 />
-		
-		<cfset setAppManager(arguments.appManager) />
-		
-		<cfif isObject(arguments.parentPluginManager)>
-			<cfset setParent(arguments.parentPluginManager) />
-		</cfif>
 		
 		<!--- Scoped argument variable - configXML --->
 		<cfset xnPlugins = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
@@ -89,11 +95,9 @@ Notes:
 				<cfset StructInsert(pluginParams, paramName, paramValue, true) />
 			</cfloop>
 			
-			<cfset plugin = CreateObject("component", pluginType).init(arguments.appManager, pluginParams) />
+			<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
 			<cfset addPlugin(pluginName, plugin) />
 		</cfloop>
-		
-		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

@@ -40,11 +40,22 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="ListenerManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentListenerManager" type="any" required="false" default=""
-			hint="Optional argument for a parent listener manager. If there isn't one default to empty string." />
+			hint="Optional argument for a parent listener manager. If there isn't one default to empty string." />	
 		
+		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentListenerManager)>
+			<cfset setParent(arguments.parentListenerManager) />
+		</cfif>
+		
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml into the manager.">
+		<cfargument name="configXML" type="string" required="true" />
 		
 		<cfset var listenerNodes = "" />
 		<cfset var listenerParams = "" />
@@ -59,40 +70,32 @@ Notes:
 		<cfset var listener = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-		
-		<cfset setAppManager(arguments.appManager) />
-		
-		<cfif isObject(arguments.parentListenerManager)>
-			<cfset setParent(arguments.parentListenerManager) />
-		</cfif>
 
 		<!--- Setup up each Listener. --->
-		<cfset listenerNodes = XMLSearch(configXML,"//listeners/listener") />
+		<cfset listenerNodes = XMLSearch(arguments.configXML, "//listeners/listener") />
 		<cfloop from="1" to="#ArrayLen(listenerNodes)#" index="i">
-			<cfset name = listenerNodes[i].xmlAttributes['name'] />
-			<cfset type = listenerNodes[i].xmlAttributes['type'] />
+			<cfset name = listenerNodes[i].xmlAttributes["name"] />
+			<cfset type = listenerNodes[i].xmlAttributes["type"] />
 		
 			<!--- Get the Listener's parameters. --->
 			<cfset listenerParams = StructNew() />
 			<cfset paramNodes = XMLSearch(listenerNodes[i], "./parameters/parameter") />
 			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-				<cfset paramName = paramNodes[j].xmlAttributes['name'] />
-				<cfset paramValue = paramNodes[j].xmlAttributes['value'] />
+				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+				<cfset paramValue = paramNodes[j].xmlAttributes["value"] />
 				<cfset listenerParams[paramName] = paramValue />
 			</cfloop>
 		
 			<!--- Setup the Listener. --->
-			<cfset listener = CreateObject('component', type) />
-			<cfset listener.init(arguments.appManager, listenerParams) />
+			<cfset listener = CreateObject("component", type).init(getAppManager(), listenerParams) />
 
 			<!--- Setup the Listener's Invoker. --->
 			<cfset invokerNodes = XMLSearch(listenerNodes[i], "./invoker") />	
 			<!--- Use declared invoker from config file --->
 			<cfif arrayLen(invokerNodes)>
-				<cfset invokerType = invokerNodes[1].xmlAttributes['type'] />
+				<cfset invokerType = invokerNodes[1].xmlAttributes["type"] />
 
-				<cfset invoker = CreateObject('component', invokerType) />
-				<cfset invoker.init() />
+				<cfset invoker = CreateObject("component", invokerType).init() />
 			<!--- Use defaultInvoker --->
 			<cfelse>
 				<cfset invoker = listener.getDefaultInvoker() >
@@ -103,10 +106,8 @@ Notes:
 			<!--- Add the Listener to the Manager. --->
 			<cfset addListener(name, listener) />
 		</cfloop>
-		
-		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered Listeners.">
 		<cfset var key = "" />

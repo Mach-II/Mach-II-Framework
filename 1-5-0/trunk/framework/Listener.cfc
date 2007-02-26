@@ -52,7 +52,7 @@ All user-defined listeners extend this base listener component.
 		
 		<cfset super.init(arguments.appManager, arguments.parameters) />
 		
-		<cfif StructKeyExists(arguments, 'invoker')>
+		<cfif StructKeyExists(arguments, "invoker")>
 			<cfset setInvoker(arguments.invoker) />
 		</cfif>
 		
@@ -74,7 +74,7 @@ All user-defined listeners extend this base listener component.
 
 	<cffunction name="getDefaultInvoker" access="public" returntype="MachII.framework.ListenerInvoker" output="false"
 		hint="Returns an instance of the default invoker (EventInvoker) for this Listener.">
-		<cfreturn CreateObject('component', 'MachII.framework.invokers.EventInvoker').init() />
+		<cfreturn CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
 	</cffunction>	
 
 </cfcomponent>
