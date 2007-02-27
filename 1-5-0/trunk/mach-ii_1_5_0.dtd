@@ -63,7 +63,10 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 
 <!ELEMENT modules (module*)>
-<!ELEMENT module (properties?, listeners?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)>
+<!ATTLIST module
+	baseMapping CDATA #IMPLIED
+>
+<!ELEMENT module ((properties?, listeners?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(properties?, listeners?, plugins?, event-filters?, event-handlers?, subroutines?, page-views?))>
 <!ATTLIST module 
 	name CDATA #REQUIRED
 	file CDATA #IMPLIED
