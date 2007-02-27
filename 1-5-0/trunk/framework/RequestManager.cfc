@@ -43,7 +43,6 @@ Notes:
 	<cfset variables.pairDelimiter = "" />
 	<cfset varibales.moduleDelimiter = "" />
 	<cfset variables.cleanupDifference = -3 />
-
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -104,30 +103,30 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false" default=""
 			hint="Base of the url. Defaults to index.cfm." />
 		
-		<cfset var builtUrl = "" />
+		<cfset var url = "" />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
 		<cfset var i = "" />
 		
 		<!--- Append the base url --->
 		<cfif NOT Len(arguments.urlBase)>
-			<cfset builtUrl = getDefaultUrlBase() />
+			<cfset url = getDefaultUrlBase() />
 		<cfelse>
-			<cfset builtUrl = arguments.urlBase />
+			<cfset url = arguments.urlBase />
 		</cfif>
 
 		<!--- Attach the event name if defined --->
 		<cfif Len(arguments.eventName)>
-			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.eventName />
+			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop collection="#params#" item="i">
 			<cfif IsSimpleValue(params[i])>
-				<cfset builtUrl = builtUrl & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
+				<cfset url = url & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn builtUrl />
+		<cfreturn url />
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
@@ -173,11 +172,12 @@ Notes:
 		
 		<cfset var persistId = "" />
 		<cfset var persistedData = StructNew() />
-		<cfset var dataStorage = getPersistEventStorage() />
+		<cfset var dataStorage = "" />
 		
 		<!--- Check they have a persistId in the event --->
 		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
 			<cfset persistId = arguments.eventArgs[getRedirectPersistParameter()] />
+			<cfset dataStorage = getPersistEventStorage() />
 			
 			<!--- Get the data and cleanup --->
 			<cfif StructKeyExists(dataStorage.data, persistId)>
