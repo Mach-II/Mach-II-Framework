@@ -114,8 +114,12 @@ Notes:
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
 		</cfif>
 		
-		<!--- Load in the low-level Utils class --->
-		<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+		<!--- Utils is a singleton --->
+		<cfif IsObject(arguments.parentAppManager)>
+			<cfset utils = arguments.parentAppManager.getUtils() />
+		<cfelse>
+			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+		</cfif>
 		<cfset appManager.setUtils(utils) />
 		
 		<!--- 
@@ -128,8 +132,12 @@ Notes:
 		</cfloop>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
-		<!--- The requestManager is a singleton --->
-		<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
+		<!--- RequestManager is a singleton --->
+		<cfif IsObject(arguments.parentAppManager)>
+			<cfset requestManager = arguments.parentAppManager.getRequestManager() />
+		<cfelse>
+			<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
+		</cfif>
 		<cfset appManager.setRequestManager(requestManager) />
 		
 		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(appManager, parentListenerManager) />
