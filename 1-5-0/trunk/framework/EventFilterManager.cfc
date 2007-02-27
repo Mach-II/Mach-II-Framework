@@ -21,7 +21,7 @@ Created version: 1.0.0
 Updated version: 1.1.0
 --->
 <cfcomponent 
-	displayname="FilterManager"
+	displayname="EventFilterManager"
 	output="false"
 	hint="Manages registered EventFilters for the framework.">
 	
@@ -36,7 +36,7 @@ Updated version: 1.1.0
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="FilterManager" output="false"
+	<cffunction name="init" access="public" returntype="EventFilterManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentFilterManager" type="any" required="false" default=""
@@ -143,7 +143,7 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent FilterManager instance this FilterManager belongs to.">
-		<cfargument name="parentFilterManager" type="MachII.framework.FilterManager" required="true" />
+		<cfargument name="parentFilterManager" type="MachII.framework.EventFilterManager" required="true" />
 		<cfset variables.parentFilterManager = arguments.parentFilterManager />
 	</cffunction>
 	<cffunction name="getParent" access="public" returntype="any" output="false"

@@ -92,10 +92,10 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setFilterManager" access="public" returntype="void" output="false">
-		<cfargument name="filterManager" type="MachII.framework.FilterManager" required="true" />
+		<cfargument name="filterManager" type="MachII.framework.EventFilterManager" required="true" />
 		<cfset variables.filterManager = arguments.filterManager />
 	</cffunction>
-	<cffunction name="getFilterManager" access="public" returntype="MachII.framework.FilterManager" output="false">
+	<cffunction name="getFilterManager" access="public" returntype="MachII.framework.EventFilterManager" output="false">
 		<cfreturn variables.filterManager />
 	</cffunction>
 

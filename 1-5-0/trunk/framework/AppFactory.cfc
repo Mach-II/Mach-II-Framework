@@ -138,7 +138,7 @@ Notes:
 		</cfloop>
 		<cfset appManager.setListenerManager(listenerManager) />
 		
-		<cfset filterManager = CreateObject("component", "MachII.framework.FilterManager").init(appManager, parentFilterManager) />
+		<cfset filterManager = CreateObject("component", "MachII.framework.EventFilterManager").init(appManager, parentFilterManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset filterManager.loadXml(configXmls[i]) />
 		</cfloop>
