@@ -92,23 +92,27 @@ Updated version: 1.5.0
 		<!--- Make the url --->
 		<cfset redirectUrl = makeRedirectUrl(arguments.event, arguments.eventContext) />
 		
+		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
+			handling to catch a cfabort --->
+		<cfset arguments.eventContext.clearEventQueue() />
+		
 		<!--- Redirect based on the HTTP status type --->
-		<cfif statusType EQ "permenant">
-			<!--- Send the headers and manually call cfabort since cflocation does that implicitly --->
-			<cfheader statuscode="301" statustext="Moved Permenantly" />
+		<cfif statusType EQ "permanent">
+			<cfheader statuscode="301" statustext="Moved Permanently" />
 			<cfheader name="Location" value="#redirectUrl#" />
-			<cfabort>
 		<cfelseif statusType EQ "prg">
-			<!--- Send the headers and manually call cfabort since cflocation does that implicitly --->
 			<cfheader statuscode="303" statustext="See Other" />
 			<cfheader name="Location" value="#redirectUrl#" />
-			<cfabort>
 		<cfelse>
 			<!--- Default condition for 302 (temporary) --->
 			<cflocation url="#redirectUrl#" addtoken="no" />
 		</cfif>
 		
-		<cfreturn true />
+		<!--- Return false to stop the processeing of any remaning commands.
+			Since we have cleared the event queue, the request will stop 
+			gracefully. Otherwise, the onError()/cferror handlers we be called
+			thus causing potential problems. --->
+		<cfreturn false />
 	</cffunction>
 	
 	<!---
