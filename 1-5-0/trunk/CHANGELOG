@@ -17,6 +17,22 @@ $Id$
 ------------------------------------------------
 Bug Fixes
 ------------------------------------------------
+* Short Changed the Maximum Number of Events When Exception Occurs
+Changed logic that if an exception occurs, it gets the maximum number of events to
+queue instead of being short changed in previous versions. For example, an 
+exception occured on event 9 of 10 and an exception was generated.  However, some
+application's exception handling announces other events to display "pretty" error pages.
+Since the event count was already very high, it is possible to exceed the max number
+of events during the exception handling.  This caused the framework to throw an 
+error stating you have exceeded the maximum number of events.
+
+Now, when an exception is generated, the event count is reset to 0 so the exception
+handling as the maximum number of events to announce if needed.  We have taken care to 
+not introduce an infinite loop. If the developer's exception handling as an error that
+causes an infinite loop, we throw an error after the maximum number of events that 
+states the exception handing has exceeded the maximum of events and it has caused an 
+infinite loop. (2007-02-27 pfarrell)
+
 * Plugin Manager Metadata Bug
 Fixed bug when plugin or components that they extend have no functions inside of
 the hierarchy. (2007-02-04 pfarrell)

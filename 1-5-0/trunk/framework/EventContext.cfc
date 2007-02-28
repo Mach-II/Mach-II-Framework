@@ -195,6 +195,14 @@ Notes:
 		<cfset var exceptionEvent = "" />
 		
 		<cftry>
+			<!--- Reset if we haven't processed an exception yet so we have the 
+				max events for processing the exception, otherwise we short change 
+				the exception handling queue length--->
+			<cfif NOT getIsException()>
+				<cfset resetEventCount() />
+			</cfif>
+			
+			<!--- Get the exception event and create and exception --->
 			<cfset nextEventName = getEventMapping(getExceptionEventName()) />
 			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextEventName) />
 			<!--- Put the request event name --->
@@ -212,7 +220,6 @@ Notes:
 				<cfset variables.clearEventQueue() />
 			</cfif>
 			
-			<!---<cfset handleEvent(exceptionEvent) /> --->
 			<!--- Queue the exception event instead of handling it immediately. 
 			The queue is cleared by default so it will be handled first anyway. --->
 			<cfset getEventQueue().put(exceptionEvent) />
@@ -280,10 +287,11 @@ Notes:
 		</cfloop>
 		
 		<!--- If there are still events in the queue after done processing, then throw an exception. --->
-		<cfif NOT getEventQueue().isEmpty()>
+		<cfif NOT getIsException() AND NOT getEventQueue().isEmpty()>
 			<cfset exception = createException("MachII.framework.MaxEventsExceeded", "The maximum number of events (#getMaxEvents()#) the framework will process for a single request has been exceeded.") />
 			<cfset handleException(exception, true) />
 			
+			<!--- Reset the count so the exception has the max number of event to process itself --->
 			<cfset resetEventCount() />
 			
 			<cfloop condition="hasMoreEvents() AND getEventCount() LT getMaxEvents()">
@@ -293,9 +301,16 @@ Notes:
 			<cfif NOT getEventQueue().isEmpty()>
 				<cfthrow
 					type="MachII.framework.MaxEventsExceededDuringException"
-					message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events (#getMaxEvents()#) was exceeded during the handling of the exception."
+					message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events was exceeded again during the handling of the exception."
 					detail="Please check your exception handling since it initiated an infinite loop." />
 			</cfif>
+		<!--- If we're in an exception and we've exceed the max queue, then something is 
+			wrong with the developer's exception handling, so throw an exception --->
+		<cfelseif getIsException() AND NOT getEventQueue().isEmpty()>
+			<cfthrow
+				type="MachII.framework.MaxEventsExceededDuringException"
+				message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events was exceeded again during the handling of the exception."
+				detail="Please check your exception handling since it initiated an infinite loop." />
 		</cfif>
 		
 		<!--- Post-Process. --->
