@@ -18,7 +18,7 @@ Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
-Created version: 1.0.10
+Created version: 1.0.7
 Updated version: 1.1.0
 
 EventBeanFilter

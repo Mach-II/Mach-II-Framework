@@ -18,7 +18,7 @@ Copyright: Mach-II Corporation
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
-Created version: 1.0.3
+Created version: 1.0.6
 Updated version: 1.5.0
 --->
 <cfcomponent 
