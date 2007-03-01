@@ -58,7 +58,6 @@ Base Command component.
 		<cfargument name="value" type="any" required="true" />
 		<cfset variables.parameters[arguments.name] = arguments.value />
 	</cffunction>
-
 	<cffunction name="getParameter" access="public" returntype="any" output="false">
 		<cfargument name="name" type="string" required="true" />
 		<cfreturn variables.parameters[arguments.name] />

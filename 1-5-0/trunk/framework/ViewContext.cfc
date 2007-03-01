@@ -117,7 +117,7 @@ Notes:
 	
 	<cffunction name="getAppRoot" access="private" returntype="string" output="false"
 		hint="Gets the application root from the Mach-II properties.">
-		<cfreturn getAppManager().getPropertyManager().getProperty('applicationRoot') />
+		<cfreturn getPropertyManager().getProperty('applicationRoot') />
 	</cffunction>
 	
 	<!---

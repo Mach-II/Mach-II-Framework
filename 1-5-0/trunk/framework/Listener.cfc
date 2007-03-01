@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.5.0
 
 MachComponent:
 Base listener component
@@ -39,7 +39,6 @@ All user-defined listeners extend this base listener component.
 	PROPERTIES
 	--->
 	<cfset variables.invoker = "" />
-	<cfset variables.defaultInvoker = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
