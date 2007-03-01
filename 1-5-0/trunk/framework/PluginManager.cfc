@@ -70,31 +70,35 @@ Notes:
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
 		
-		<cfset var xnPlugins = 0 />
-		<cfset var xnParams = 0 />
-		<cfset var i = 0 />
-		<cfset var j = 0 />
+		<cfset var pluginNodes = 0 />
+		<cfset var paramNodes = 0 />
 		<cfset var paramName = 0 />
 		<cfset var paramValue = 0 />
 		<cfset var plugin = 0 />
 		<cfset var pluginName = 0 />
 		<cfset var pluginType = 0 />
 		<cfset var pluginParams = 0 />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
 		
 		<!--- Scoped argument variable - configXML --->
-		<cfset xnPlugins = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
-		<cfloop index="i" from="1" to="#ArrayLen(xnPlugins)#">
-			<cfset pluginName = xnPlugins[i].XmlAttributes["name"] />
-			<cfset pluginType = xnPlugins[i].XmlAttributes["type"] />
-			
-			<!--- for each plugin, parse all the parameters --->
+		<cfset pluginNodes = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
+		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
+			<cfset pluginName = pluginNodes[i].XmlAttributes["name"] />
+			<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
+
+			<!--- Set the Plugin's parameters. --->
 			<cfset pluginParams = StructNew() />
-			<cfset xnParams = XMLSearch(xnPlugins[i], "./parameters/parameter") />
-			<cfloop from="1" to="#ArrayLen(xnParams)#" index="j">
-				<cfset paramName = xnParams[j].XmlAttributes["name"] />
-				<cfset paramValue = variables.utils.recurseComplexValues(xnParams[j]) />				
-				<cfset pluginParams[paramName] = paramValue />
-			</cfloop>
+			
+			<!--- For each plugin, parse all the parameters --->
+			<cfif StructKeyExists(pluginNodes[i], "parameters")>
+				<cfset paramNodes = pluginNodes[i].parameters.xmlChildren />
+				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+					<cfset paramName = paramNodes[j].XmlAttributes["name"] />
+					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />				
+					<cfset pluginParams[paramName] = paramValue />
+				</cfloop>
+			</cfif>
 			
 			<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
 			<cfset addPlugin(pluginName, plugin) />

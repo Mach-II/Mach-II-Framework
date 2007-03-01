@@ -61,12 +61,11 @@ Notes:
 		
 		<cfset var listenerNodes = "" />
 		<cfset var listenerParams = "" />
-		<cfset var name = "" />
-		<cfset var type = "" />
+		<cfset var listenerName = "" />
+		<cfset var listenerType = "" />
 		<cfset var paramNodes = "" />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var invokerNodes = "" />
 		<cfset var invokerType = "" />
 		<cfset var invoker = "" />
 		<cfset var listener = "" />
@@ -76,37 +75,39 @@ Notes:
 		<!--- Setup up each Listener. --->
 		<cfset listenerNodes = XMLSearch(arguments.configXML, "//listeners/listener") />
 		<cfloop from="1" to="#ArrayLen(listenerNodes)#" index="i">
-			<cfset name = listenerNodes[i].xmlAttributes["name"] />
-			<cfset type = listenerNodes[i].xmlAttributes["type"] />
+			<cfset listenerName = listenerNodes[i].xmlAttributes["name"] />
+			<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
 		
 			<!--- Get the Listener's parameters. --->
 			<cfset listenerParams = StructNew() />
-			<cfset paramNodes = XMLSearch(listenerNodes[i], "./parameters/parameter") />
-			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-				<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j].xmlAttributes["value"]) />
-				<cfset listenerParams[paramName] = paramValue />
-			</cfloop>
+			
+			<!--- For each plugin, parse all the parameters --->
+			<cfif StructKeyExists(listenerNodes[i], "parameters")>
+				<cfset paramNodes = listenerNodes[i].parameters.xmlChildren />
+				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+					<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+					<cfset listenerParams[paramName] = paramValue />
+				</cfloop>
+			</cfif>
 		
 			<!--- Setup the Listener. --->
-			<cfset listener = CreateObject("component", type).init(getAppManager(), listenerParams) />
+			<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
 
-			<!--- Setup the Listener's Invoker. --->
-			<cfset invokerNodes = XMLSearch(listenerNodes[i], "./invoker") />	
 			<!--- Use declared invoker from config file --->
-			<cfif arrayLen(invokerNodes)>
-				<cfset invokerType = invokerNodes[1].xmlAttributes["type"] />
+			<cfif StructKeyExists(listenerNodes[i], "invoker")>
+				<cfset invokerType = listenerNodes[i].invoker.xmlAttributes["type"] />
 
 				<cfset invoker = CreateObject("component", invokerType).init() />
 			<!--- Use defaultInvoker --->
 			<cfelse>
-				<cfset invoker = listener.getDefaultInvoker() >
+				<cfset invoker = listener.getDefaultInvoker() />
 			</cfif>
 
 			<!--- Continue setup on the Lister. --->
 			<cfset listener.setInvoker(invoker) />
 			<!--- Add the Listener to the Manager. --->
-			<cfset addListener(name, listener) />
+			<cfset addListener(listenerName, listener) />
 		</cfloop>
 	</cffunction>
 

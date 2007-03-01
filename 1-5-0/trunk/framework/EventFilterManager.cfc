@@ -58,34 +58,36 @@ Updated version: 1.1.0
 					
 		<cfset var filterNodes = "" />
 		<cfset var filterParams = "" />
-		<cfset var name = "" />
-		<cfset var type = "" />
 		<cfset var paramNodes = "" />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 		<cfset var filter = "" />
+		<cfset var filterName = "" />
+		<cfset var filterType = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
 		<!--- Setup up each EventFilter. --->
 		<cfset filterNodes = XMLSearch(arguments.configXML, "//event-filters/event-filter") />
 		<cfloop from="1" to="#ArrayLen(filterNodes)#" index="i">
-			<cfset name = filterNodes[i].xmlAttributes["name"] />
-			<cfset type = filterNodes[i].xmlAttributes["type"] />
+			<cfset filterName = filterNodes[i].xmlAttributes["name"] />
+			<cfset filterType = filterNodes[i].xmlAttributes["type"] />
 		
 			<!--- Set the EventFilter's parameters. --->
 			<cfset filterParams = StructNew() />
-			<cfset paramNodes = XMLSearch(filterNodes[i], "./parameters/parameter") />
-			<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-				<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-				<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
-				<cfset filterParams[paramName] = paramValue />
-			</cfloop>
 			
-			<cfset filter = CreateObject("component", type) />
-			<cfset filter.init(getAppManager(), filterParams) />
+			<!--- For each filter, parse all the parameters --->
+			<cfif StructKeyExists(filterNodes[i], "parameters")>
+				<cfset paramNodes = filterNodes[i].parameters.xmlChildren />
+				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+					<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+					<cfset filterParams[paramName] = paramValue />
+				</cfloop>
+			</cfif>
 			
-			<cfset addFilter(name, filter) />
+			<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
+			<cfset addFilter(filterName, filter) />
 		</cfloop>
 	</cffunction>
 
