@@ -63,47 +63,50 @@ the rest of the framework. (pfarrell)
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
 		
-		<cfset var xnProperties = "" />
-		<cfset var xnParams = "" />
-		<cfset var name = "" />
-		<cfset var value = "" />
-		<cfset var type = "" />
+		<cfset var propertyNodes = "" />
+		<cfset var propertyName = "" />
+		<cfset var propertyValue = "" />
+		<cfset var propertyType = "" />
 		<cfset var propertyParams = "" />
+		<cfset var paramsNodes = "" />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
 		<!--- Set the properties from the XML file. --->
-		<cfset xnProperties = XMLSearch(arguments.configXML, "//property") />
+		<cfset propertyNodes = XMLSearch(arguments.configXML, "//property") />
 
-		<cfloop from="1" to="#ArrayLen(xnProperties)#" index="i">			
-			<cfset name = xnProperties[i].xmlAttributes["name"] />
+		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">			
+			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
 			
 			<!--- Setup if configurable property --->
-			<cfif StructKeyExists(xnProperties[i].xmlAttributes, "type")>
-				<cfset type = xnProperties[i].xmlAttributes["type"] />
+			<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
+				<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
+				
+				<!--- Set the Property's parameters. --->
+				<cfset propertyParams = StructNew() />
 				
 				<!--- For each configurable property, parse all the parameters --->
-				<cfset propertyParams = StructNew() />
-				<cfset xnParams = XMLSearch(xnProperties[i], "./parameters/parameter") />
-				<cfloop from="1" to="#ArrayLen(xnParams)#" index="j">
-					<cfset paramName = xnParams[j].XmlAttributes["name"] />
-					<cfset paramValue = variables.utils.recurseComplexValues(xnParams[j]) />
-					
-					<cfset propertyParams[paramName] = paramValue />
-				</cfloop>
+				<cfif StructKeyExists(propertyNodes[i], "parameters")>
+					<cfset paramsNodes = propertyNodes[i].parameters.xmlChildren />
+					<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
+						<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
+						<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
+						<cfset propertyParams[paramName] = paramValue />
+					</cfloop>
+				</cfif>
 				
 				<!--- Create the configurable property and append to array of configurable property names --->
-				<cfset value = CreateObject("component", type).init(getAppManager(), propertyParams) />
-				<cfset ArrayAppend(variables.configurableProperties, name) />
+				<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
+				<cfset ArrayAppend(variables.configurableProperties, propertyName) />
 			<!--- Setup if name/value pair, struct or array --->
 			<cfelse>
-				<cfset value = variables.utils.recurseComplexValues(xnProperties[i]) />
+				<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
 			</cfif>
 			
 			<!--- Set the property --->
-			<cfset setProperty(name, value) />
+			<cfset setProperty(propertyName, propertyValue) />
 		</cfloop>
 		
 		<!--- TODO: Add logic to set default properties for base/main property manager only --->
