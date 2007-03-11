@@ -32,6 +32,7 @@ Updated version: 1.1.0
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
+	<cfset variables.parentEventManager = "" />
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
@@ -42,8 +43,14 @@ Updated version: 1.1.0
 	<cffunction name="init" access="public" returntype="EventManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="parentEventManager" type="any" required="false" default=""
+			hint="Optional argument for a parent event manager. If there isn't one default to empty string." />	
 				
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif isObject(arguments.parentEventManager)>
+			<cfset setParent(arguments.parentEventManager) />
+		</cfif>
 		
 		<cfreturn this />
 	</cffunction>
@@ -119,7 +126,7 @@ Updated version: 1.1.0
 		
 		<cfset var event = "" />
 		
-		<cfif isEventDefined(arguments.eventName)>
+		<cfif isEventDefined(arguments.eventName, true)>
 			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
@@ -136,6 +143,8 @@ Updated version: 1.1.0
 		
 		<cfif isEventDefined(arguments.eventName)>
 			<cfreturn variables.handlers[arguments.eventName] />
+		<cfelseif isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+			<cfreturn getParent().getEventHandler(arguments.eventName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 				message="EventHandler for event '#arguments.eventName#' is not defined." />
@@ -146,14 +155,29 @@ Updated version: 1.1.0
 		hint="Returns true if an EventHandler for the named Event is defined; otherwise false.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
-		<cfreturn StructKeyExists(variables.handlers, arguments.eventName) />
+		<cfargument name="checkParent" type="boolean" required="false" default="0" />
+		<cfset var localCheck = StructKeyExists(variables.handlers, arguments.eventName) />
+		<cfif localCheck>
+			<cfreturn true />
+		<cfelseif arguments.checkParent AND isObject(getParent())>
+			<cfreturn getParent().isEventDefined(arguments.eventName) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="isEventPublic" access="public" returntype="boolean" output="false"
 		hint="Returns true if the EventHandler for the named Event is publicly accessible; otherwise false.">
 		<cfargument name="eventName" type="string" required="true" />
+		<cfargument name="checkParent" type="boolean" required="false" default="0" />
 		<cfset var eventHandler = "" />
-		<cfset eventHandler = getEventHandler(arguments.eventName) />
+		<cfif isEventDefined(arguments.eventName)>
+			<cfset eventHandler = getEventHandler(arguments.eventName) />
+		<cfelseif arguments.checkParent AND isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+			<cfset eventHandler = getParent().getEventHandler(arguments.eventName) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 		<cfreturn eventHandler.getAccess() EQ "public" />
 	</cffunction>
 	
@@ -166,6 +190,19 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="getHandlerList" access="public" returntype="string" output="false">
+		<cfreturn structKeyList(variables.handlers) />
+	</cffunction>
+	
+	<cffunction name="setParent" access="public" returntype="void" output="false"
+		hint="Returns the parent EventManager instance this EventManager belongs to.">
+		<cfargument name="parentEventManager" type="MachII.framework.EventManager" required="true" />
+		<cfset variables.parentEventManager = arguments.parentEventManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false"
+		hint="Sets the parent EventManager instance this EventManager belongs to. It will return empty string if no parent is defined.">
+		<cfreturn variables.parentEventManager />
 	</cffunction>
 	
 </cfcomponent>

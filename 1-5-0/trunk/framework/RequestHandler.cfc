@@ -57,8 +57,12 @@ Notes:
 		<cfset var eventArgs = getRequestEventArgs() />
 		<!--- Get the Event. --->
 		<cfset var eventName = getEventName(eventArgs) />
+		<!--- Determine the module for this event and arse out the module name from the eventName  --->
+		<cfset var moduleName = getModuleName(eventName) />
+		<!--- Remove the module name from the event name --->
+		<cfset eventName = removeModuleName(eventName) />
 		
-		<cfset handleEventRequest(eventName, eventArgs) />
+		<cfset handleEventRequest(eventName, eventArgs, moduleName) />
 	</cffunction>
 	
 	<cffunction name="handleEventRequest" access="public" returntype="void" output="true"
@@ -67,17 +71,35 @@ Notes:
 			hint="The name of the requested event." />
 		<cfargument name="eventArgs" type="struct" required="true" default="#StructNew()#"
 			hint="The event arguments provided in the request." />
+		<cfargument name="moduleName" type="string" required="true"
+			hint="The name of the module for the requested event." />
 		<cfset var exception = "" />
-		<cfset var eventContext = getAppManager().createEventContext(arguments.eventName) />
-		<cfset request.eventContext = eventContext />
+		<cfset var eventContext = 0 />
+		<cfset var moduleManager = getAppManager().getModuleManager() />
+		<cfset var appManager = getAppManager()>
 		
 		<cftry>
-			<cfif NOT getAppManager().getEventManager().isEventDefined(arguments.eventName)>
-				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-					message="Event-handler for event '#arguments.eventName#' is not defined." />
+			<cfif len(arguments.moduleName)>
+				<cfif NOT moduleManager.isModuleDefined(arguments.moduleName)>
+					<cfthrow type="MachII.framework.ModuleNotDefined" 
+						message="The module '#arguments.moduleName#' for event '#arguments.eventName#' is not defined." />
+					<cfset eventContext = appManager.createEventContext(arguments.eventName) />
+				<cfelse>
+					<cfset appManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager() />
+					<cfset eventContext = appManager.createEventContext(arguments.eventName) />
+				</cfif>	
+			<cfelse>
+				<cfset eventContext = appManager.createEventContext(arguments.eventName) />
 			</cfif>
 			
-			<cfif getAppManager().getEventManager().isEventPublic(arguments.eventName)>
+			<cfset request.eventContext = eventContext />
+			
+			<cfif NOT appManager.getEventManager().isEventDefined(arguments.eventName, true)>
+				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
+					message="Event-handler for event '#arguments.eventName#', module '#arguments.moduleName#' is not defined." />
+			</cfif>
+			
+			<cfif appManager.getEventManager().isEventPublic(arguments.eventName, true)>
 				<cfset eventContext.announceEvent(arguments.eventName, arguments.eventArgs) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
@@ -99,6 +121,29 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="removeModuleName" access="private" returntype="string" output="false"
+		hint="Return the module name removed from the event name">
+		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
+		<cfset var cleanEventName = arguments.eventName />
+		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
+		
+		<cfif listLen(arguments.eventName, moduleDelimiter) gt 1>
+			<cfset cleanEventName = listDeleteAt(arguments.eventName, 1, moduleDelimiter) />
+		</cfif>
+		<cfreturn cleanEventName />
+	</cffunction>
+	
+	<cffunction name="getModuleName" access="private" returntype="string" output="false">
+		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
+		<cfset var moduleName = "" />
+		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
+		
+		<cfif listLen(arguments.eventName, moduleDelimiter) gt 1>
+			<cfset moduleName = listGetAt(arguments.eventName, 1, moduleDelimiter) />
+		</cfif>
+		<cfreturn moduleName />
+	</cffunction>
+	
 	<cffunction name="getEventName" access="private" returntype="string" output="false"
 		hint="Gets the event name from the incoming event arg struct.">
 		<cfargument name="eventArgs" type="struct" required="true" />

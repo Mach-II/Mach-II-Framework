@@ -70,6 +70,7 @@ Notes:
 		<cfset var parentViewManager = "" />
 		<cfset var pluginManager = "" />
 		<cfset var parentPluginManager = "" />
+		<cfset var parentEventManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -112,6 +113,7 @@ Notes:
 			<cfset parentSubroutineManager = appManager.getParent().getSubroutineManager() />
 			<cfset parentViewManager = appManager.getParent().getViewManager() />
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
+			<cfset parentEventManager = appManager.getParent().getEventManager() />
 		</cfif>
 		
 		<!--- Utils is a singleton --->
@@ -138,8 +140,12 @@ Notes:
 		<cfelse>
 			<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		</cfif>
-		<cfset appManager.setRequestManager(requestManager) />
-		
+		<cfif isObject(appManager.getParent())>
+			<cfset appManager.setRequestManager(appManager.getParent().getRequestManager()) />
+		<cfelse>
+			<cfset appManager.setRequestManager(requestManager) />
+		</cfif>
+
 		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(appManager, parentListenerManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset listenerManager.loadXml(configXmls[i]) />
@@ -158,7 +164,7 @@ Notes:
 		</cfloop>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager) />
+		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager, parentEventManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset eventManager.loadXml(configXmls[i]) />
 		</cfloop>

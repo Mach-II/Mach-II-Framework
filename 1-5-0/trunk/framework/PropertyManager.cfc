@@ -111,6 +111,9 @@ the rest of the framework. (pfarrell)
 		
 		<!--- TODO: Add logic to set default properties for base/main property manager only --->
 		
+		<!--- TODO: moduleDelimiter and all new ones, eventParameters - if I am a child override my values 
+			with the parent's values --->
+		
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
 		<cfif NOT isPropertyDefined("defaultEvent")>

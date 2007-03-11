@@ -210,6 +210,10 @@ Notes:
 			<!--- Put the exception object --->
 			<cfset exceptionEvent.setArg("exception", arguments.exception) />
 			
+			<!--- <cfdump var="#arguments.exception.getMessage()#" label="handleException: arguments.exception.getMessage">
+			<cfdump var="#arguments.exception.getTagContext()#" label="handleException: arguments.exception.getTagContext">
+			<cfabort /> --->
+			
 			<cfif hasCurrentEvent()>
 				<cfset exceptionEvent.setArg("exceptionEvent", getCurrentEvent()) />
 			</cfif>

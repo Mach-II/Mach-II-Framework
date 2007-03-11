@@ -71,7 +71,7 @@ Notes:
 		<!--- <cfdump var="#variables.modules#" label="modules"><cfabort> --->
 	</cffunction>
 	
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered modules.">
 		<cfset var key = "" />
 		<cfloop collection="#variables.modules#" item="key">
