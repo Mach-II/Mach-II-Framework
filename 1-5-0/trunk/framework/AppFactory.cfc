@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.configFilePaths = ArrayNew(1) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -75,7 +76,10 @@ Notes:
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
 		<cfset var i = "" />
-	
+		
+		<!--- Clear the config file paths --->
+		<cfset resetConfigFilePaths() />
+		
 		<!--- Read the XML configuration file. --->
 		<cftry>
 			<cffile 
@@ -88,6 +92,9 @@ Notes:
 					detail="configPath=#arguments.configXmlPath#" />
 			</cfcatch>
 		</cftry>
+		
+		<!--- Append the master config file to the file paths --->
+		<cfset appendConfigFilePath(arguments.configXmlPath) />
 
 		<!--- Parse the XML contents --->
 		<cfset configXml = XmlParse(configXmlFile) />
@@ -213,16 +220,16 @@ Notes:
 		
 		<cfset includeNodes =  XmlSearch(arguments.configXML, "//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
-			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
+			<cfset includeFilePath = ExpandPath(includeNodes[i].xmlAttributes["file"]) />
 			
-			<!--- Check for circular dependencies --->
+			<!--- Check for circular dependencies (pass a struct instead of stateful variables in case there is a error and it's impossible to cleanup)--->
 			<cfset arguments.alreadyLoaded = checkIfAlreadyIncluded(arguments.alreadyLoaded, includeFilePath) />
 			
 			<!--- Read the include file --->
 			<cftry>
 				<cffile
 					action="read"
-					file="#ExpandPath(includeFilePath)#"
+					file="#includeFilePath#"
 					variable="includeXMLFile" />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CannotFindIncludeConfigFile"
@@ -230,6 +237,9 @@ Notes:
 						detail="includePath=#includeFilePath#" />
 				</cfcatch>
 			</cftry>
+			
+			<!--- Append the include config file to the file paths --->
+			<cfset appendConfigFilePath(includeFilePath) />
 			
 			<!--- Parse the XML contents --->
 			<cfset includeXml = XmlParse(includeXmlFile) />
@@ -274,7 +284,7 @@ Notes:
 		<cfargument name="alreadyLoaded" type="struct" required="true" />
 		<cfargument name="includeFilePath" type="string" required="true" />
 		
-		<cfset var includeFilePathHash = Hash(ExpandPath(arguments.includeFilePath)) />
+		<cfset var includeFilePathHash = Hash(arguments.includeFilePath) />
 		
 		<cfif StructKeyExists(arguments.alreadyLoaded, includeFilePathHash)>
 			<cfthrow type="MachII.framework.IncludeAlreadyDefined"
@@ -284,6 +294,23 @@ Notes:
 		</cfif>
 		
 		<cfreturn arguments.alreadyLoaded />
+	</cffunction>
+	
+	<!---
+	ACCESSORS
+	--->	
+	<cffunction name="resetConfigFilePaths" access="private" returntype="void" output="false"
+		hint="Resets the config file paths to a zero element array.">
+		<cfset ArrayClear(variables.configFilePaths) />
+	</cffunction>
+	<cffunction name="appendConfigFilePath" access="private" returntype="void" output="false"
+		hint="Appends a config file path to be used by AppLoader to check if reloading is necessary when in dynamic mode.">
+		<cfargument name="configFilePath" type="string" required="true" />
+		<cfset ArrayAppend(variables.configFilePaths, arguments.configFilePath) />
+	</cffunction>
+	<cffunction name="getConfigFilePaths" access="public" returntype="array" output="false"
+		hint="Returns an array of config file paths.">
+		<cfreturn variables.configFilePaths />
 	</cffunction>
 	
 </cfcomponent>
