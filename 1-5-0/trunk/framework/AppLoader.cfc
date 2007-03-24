@@ -67,7 +67,7 @@ Notes:
 	--->
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Determines of the configuration file should be reloaded.">
-		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash())>
+		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash()) NEQ 0>
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />
