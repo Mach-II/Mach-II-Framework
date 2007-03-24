@@ -17,6 +17,11 @@ $Id$
 ------------------------------------------------
 Bug Fixes
 ------------------------------------------------
+* Fixed bug when MACHII_CONFIG_MODE was 0
+Sometimes the framework did not reload the framework when it was supposed to due
+to a logic error in an if/else condition.
+(2007-03-24 pfarrell)
+
 * Short Changed the Maximum Number of Events When Exception Occurs
 Changed logic that if an exception occurs, it gets the maximum number of events to
 queue instead of being short changed in previous versions. For example, an 
@@ -123,9 +128,12 @@ enhancement is backwards compatible with 1.1.1. (2007-02-05 pfarrell)
 ------------------------------------------------
 Interal Framework Improvements / Enhancements
 ------------------------------------------------
+* Framework reloads when changes are made to includes and MACHII_CONFIG_MODE is 0
+(2007-03-24 pfarrell)
+
 * Removed use of XmlSearch() and switched to StructKeyExists for parameters 
 in property, listener, filter and plugin managers. This has improved (re)load
-times up to approximately 10% of large applications that contain many declarations
+times up to approximately 10% for large applications that contain many declarations
 of properties, listeners, filters and plugins. (2007-03-01 pfarrell)
 
 * Refactored all managers to method chain the init() method whe creating the object
