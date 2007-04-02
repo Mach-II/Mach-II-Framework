@@ -72,11 +72,11 @@ Updated version: 1.5.0
 
 		<cfset subroutineNodes = XMLSearch(arguments.configXML,"//subroutines/subroutine") />
 		<cfloop from="1" to="#ArrayLen(subroutineNodes)#" index="i">
-			<cfset subroutineName = subroutineNodes[i].xmlAttributes["name"] />
+			<cfset subroutineName = subroutineNodes[i].xmlAttributes["subroutine"] />
 			
 			<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
 	  
-			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
+			<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
 			    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
 				<cfset command = createCommand(commandNode) />
 				<cfset subroutineHandler.addCommand(command) />
