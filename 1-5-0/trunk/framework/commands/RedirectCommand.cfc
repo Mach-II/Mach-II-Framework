@@ -153,6 +153,10 @@ Updated version: 1.5.0
 		<!--- Build params --->
 		<cfif NOT ListLen(persistArgs)>
 			<cfset args = arguments.event.getArgs() />
+			<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
+			<cfif StructKeyExists(args, getEventParameter())>
+				<cfset StructDelete(args, getEventParameter(), FALSE) />
+			</cfif>
 		<cfelse>
 			<cfloop list="#persistArgs#" index="i" delimiters=",">
 				<cfif arguments.event.isArgDefined(i)>
