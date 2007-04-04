@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.eventQueue = "" />
 	<cfset variables.requestEventName = "" />
+	<cfset variables.requestModuleName = "" />
 	<cfset variables.currentEventHandler = "" />
 	<cfset variables.currentEvent = "" />
 	<cfset variables.mappings = StructNew() />
@@ -53,12 +54,14 @@ Notes:
 		hint="Initalizes the event-context.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="requestEventName" type="string" required="false" default="" />
+		<cfargument name="requestModuleName" type="string" required="false" default="" />
 		
 		<cfset var eventQueue = 0 />
 		<cfset var viewContext = 0 />
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setRequestEventName(arguments.requestEventName) />
+		<cfset setRequestModuleName(arguments.requestModuleName) />
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
@@ -449,6 +452,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getRequestEventName" access="private" returntype="string" output="false">
 		<cfreturn variables.requestEventName />
+	</cffunction>
+	
+	<cffunction name="setRequestModuleName" access="private" returntype="void" output="false">
+		<cfargument name="requestModuleName" type="string" required="true" />
+		<cfset variables.requestModuleName = arguments.requestModuleName />
+	</cffunction>
+	<cffunction name="getRequestModuleName" access="private" returntype="string" output="false">
+		<cfreturn variables.requestModuleName />
 	</cffunction>
 	
 	<cffunction name="setEventQueue" access="private" returntype="void" output="false">

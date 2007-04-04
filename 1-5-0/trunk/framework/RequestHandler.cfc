@@ -78,7 +78,7 @@ Notes:
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var appManager = getAppManager()>
 		
-		<cftry>
+		<!--- <cftry> --->
 			<cfif len(arguments.moduleName)>
 				<cfif NOT moduleManager.isModuleDefined(arguments.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined" 
@@ -106,13 +106,13 @@ Notes:
 					message="Event-handler for event '#arguments.eventName#' is not accessible." />
 			</cfif>
 			
-			<!--- Handle any errors with the exception event. --->
+			<!--- Handle any errors with the exception event. 
 			<cfcatch type="any">
 				<cfset exception = CreateObject("component", "MachII.util.Exception") />
 				<cfset exception.wrapException(cfcatch) />
 				<cfset eventContext.handleException(exception, true) />
-			</cfcatch>
-		</cftry>
+			</cfcatch> --->
+		<!--- </cftry> --->
 		
 		<!--- Start the event processing. --->
 		<cfset eventContext.processEvents() />
