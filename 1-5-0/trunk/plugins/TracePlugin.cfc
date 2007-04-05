@@ -267,7 +267,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		hint="Runs a trace for the passed point and eventContext.">
 		<cfargument name="point" type="string" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
+		<cfif arguments.point EQ "postEvent">
+			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime(), StructCopy(arguments.eventContext.getEventMappings())) />
+		<cfelse>
+			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="computeEventName" access="private" returntype="string" output="false"
@@ -308,12 +312,15 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			hint="Name of plugin method for this trace." />
 		<cfargument name="timing" type="string" required="true"
 			hint="Timing for this trace." />
+		<cfargument name="mappings" type="struct" required="false"
+			default="#StructNew()#" hint="Event mappings for the events if available." />
 		<cfset var trace = structNew() />
 
 		<!--- Create the trace information struct to be appended to the array or used in the log --->
 		<cfset trace.event = arguments.event />
 		<cfset trace.point = arguments.point />
 		<cfset trace.timing = arguments.timing />
+		<cfset trace.mappings = arguments.mappings />
 
 		<cfif ListFindNoCase("display,both", getTraceMode())>
 			<cfset arrayAppend(getTraceInfo(), trace) />
@@ -333,6 +340,9 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var sc  = "" />
 		<cfset var traceInfoArrLen = ArrayLen(arguments.traceInfo) />
 		<cfset var i = "" />
+		<cfset var j = "" />
+		<cfset var commands = "" />
+		<cfset var commandMd = "" />
 
 		<cfif getDisplayCommented()>
 			<!-- Leave this code block as-is for proper HTML formatting --->
@@ -354,43 +364,93 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfsavecontent variable="sc">
 			<cfoutput>
 				<div id="MachIITraceDisplay">
+				<style type="text/css"><!--
+					##MachIITraceDisplay table {
+						border: 1px solid ##D0D0D0;
+						padding: 0.5em;
+						width:100%;
+					}
+					##MachIITraceDisplay td {
+						vertical-align: top;
+					}
+					##MachIITraceDisplay td.lineBottom {
+						border-bottom: 1px solid ##000;
+					}
+					##MachIITraceDisplay td.lineTop {
+						border-top: 1px solid ##000;
+					}
+					##MachIITraceDisplay ul li {
+						margin-left:15px;
+					}
+					##MachIITraceDisplay .small {
+						font-size: 0.9em;
+					}
+					##MachIITraceDisplay .red {
+						color: ##FF0000;
+					}
+					##MachIITraceDisplay .green {
+						color: ##6BB300;
+					}
+					##MachIITraceDisplay .strong {
+						font-weight: bold;
+					}
+				-->
+				</style>
 				<h3>Mach-II Trace Information</h3>
-				<table style="border: 1px solid ##D0D0D0; padding: 0.5em; width:100%;">
+				<table>
 					<tr>
-						<td style="border-bottom: 1px solid ##000; width:65%;"><strong>Event Name</strong></td>
-						<td style="border-bottom: 1px solid ##000; width:20%;"><strong>Trace Point</strong></td>
-						<td style="border-bottom: 1px solid ##000; width:15%;"><strong>* Average Time</strong></td>
+						<td class="lineBottom strong" style="width:65%;">Event Name</td>
+						<td class="lineBottom strong" style="width:20%;">Trace Point</td>
+						<td class="lineBottom strong" style="width:15%;">* Average Time</td>
 					</tr>
 				<cfloop from="1" to="#ArrayLen(traceInfo)-1#" index="i">
 					<tr <cfif i MOD 2>style="background-color:##F5F5F5" class="shade"</cfif>>
-						<td>#arguments.traceInfo[i].event#</td>
-						<td>#arguments.traceInfo[i].point#</td>
+						<td<cfif arguments.traceInfo[i].point EQ "preEvent"> class="lineTop"</cfif>>
+							<cfif NOT ListFindNoCase("preView,postView,postEvent", arguments.traceInfo[i].point)>#arguments.traceInfo[i].event#</cfif>
+						<cfif arguments.traceInfo[i].point EQ "preEvent">
+							<cfset commands = getAppManager().getEventManager().getEventHandler(arguments.traceInfo[i].event).getCommands() />
+							<ul class="small">
+							<cfloop from="1" to="#ArrayLen(commands)#" index="j">
+								<cfset commandMd = getMetadata(commands[j]) />
+								<li>#commandMd.displayName#</li>
+							</cfloop>
+							</ul>
+						<cfelseif arguments.traceInfo[i].point EQ "postEvent" AND StructCount(arguments.traceInfo[i].mappings)>
+							Event Mappings:
+							<ul class="small">
+							<cfloop collection="#arguments.traceInfo[i].mappings#" item="j">
+								<li<cfif i + 1 LTE ArrayLen(arguments.traceInfo) AND arguments.traceInfo[i+1].event EQ arguments.traceInfo[i].mappings[j]> class="green strong"</cfif>>#j# - #arguments.traceInfo[i].mappings[j]#</li>
+							</cfloop>
+							</ul>
+						</cfif>						
+						</td>
+						<td class="small<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>">#arguments.traceInfo[i].point#</td>
 					<cfif getHighlightLongTimings() NEQ 0 AND arguments.traceInfo[i].timing GTE getHighlightLongTimings()>
-						<td style="text-align: right;"><strong>#arguments.traceInfo[i].timing#</strong> ms</td><cfelse>	<td style="text-align: right;">#arguments.traceInfo[i].timing# ms</td></cfif>
+						<td class="small red strong<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>" style="text-align: right;">#arguments.traceInfo[i].timing# ms</td><cfelse>	<td class="small<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>" style="text-align: right;">#arguments.traceInfo[i].timing# ms</td></cfif>
 					</tr>
 				</cfloop>
 					<tr>
-						<td colspan="2" style="border-top: 1px solid ##000;"><em>#arguments.traceInfo[traceInfoArrLen].event#</em></td>
-						<td style="border-top: 1px solid ##000; text-align: right;"><em>#arguments.traceInfo[traceInfoArrLen].timing# ms</em></td>
+						<td colspan="2" class="lineTop"><em>#arguments.traceInfo[traceInfoArrLen].event#</em></td>
+						<td  class="lineTop" style="text-align: right;"><em>#arguments.traceInfo[traceInfoArrLen].timing# ms</em></td>
 					</tr>
 				<cfif getHighlightLongTimings()>
 					<tr>
-						<td colspan="3" style="text-align:right;"><strong>* Timings over #getHighlightLongTimings()# ms average execution time are bold</strong></td>
+						<td colspan="3" class="strong" style="text-align:right;">* Timings over #getHighlightLongTimings()# ms average execution time are red</td>
 					</tr>
 				</cfif>
 				</table>
 				<h3>General Information</h3>
-				<table style="border: 1px solid ##D0D0D0; padding: 0.5em; width:100%;">
+				<table>
 					<tr style="background-color:##F5F5F5" class="shade">
-						<td style="border-top: 1px solid ##000;"><strong>Request Event Name</strong></td>
-						<td style="border-top: 1px solid ##000;">#arguments.requestEventName#</td>
+						<td class="lineTop strong">Request Event Name</td>
+						<td class="lineTop">#arguments.requestEventName#</td>
 					</tr>
 					<tr>
-						<td><strong>Mach-II Version</strong></td>
+						<td class="strong">Mach-II Version</td>
 						<td>#getMachIIVersion()#</td>
 					</tr>
 					<tr style="background-color:##F5F5F5" class="shade">
-						<td><strong>Timestamp</strong></td>
+						<td class="strong">Timestamp</td>
 						<td>#DateFormat(Now())# #TimeFormat(Now())#</td>
 					</tr>
 				</table>

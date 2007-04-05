@@ -69,6 +69,10 @@ Updated version: 1.1.0
 		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
 	</cffunction>
+	<cffunction name="getCommands" access="public" returntype="array" output="false"
+		hint="Gets all Commands. Used by Trace Plugin. Not recommend for public use.">
+		<cfreturn variables.commands />
+	</cffunction>
 	
 	<!---
 	ACCESSORS

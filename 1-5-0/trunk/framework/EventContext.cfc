@@ -176,13 +176,17 @@ Notes:
 		<cfset variables.mappings[arguments.eventName] = arguments.mappingName />
 	</cffunction>
 	<cffunction name="getEventMapping" access="public" returntype="string" output="false"
-		hint="Gets an event mappiong by the event name.">
+		hint="Gets an event mapping by the event name.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
 			<cfreturn variables.mappings[arguments.eventName] />
 		<cfelse>
 			<cfreturn arguments.eventName />
 		</cfif>
+	</cffunction>
+	<cffunction name="getEventMappings" access="public" returntype="struct" output="false"
+		hint="Gets all active event mappings.">
+		<cfreturn variables.mappings />
 	</cffunction>
 	<cffunction name="clearEventMappings" access="public" returntype="void" output="false"
 		hint="Clears the current event mappings.">
