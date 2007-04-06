@@ -32,6 +32,7 @@ Updated version: 1.1.0
 	--->
 	<cfset variables.eventName = "" />
 	<cfset variables.mappingName = "" />
+	<cfset variables.mappingModule = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -40,9 +41,11 @@ Updated version: 1.1.0
 		hint="Used by the framework for initialization.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="mappingName" type="string" required="true" />
+		<cfargument name="mappingModule" type="string" required="true" />
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setMappingName(arguments.mappingName) />
+		<cfset setMappingModule(arguments.mappingModule) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -77,6 +80,14 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="getMappingName" access="private" returntype="string" output="false">
 		<cfreturn variables.mappingName />
+	</cffunction>
+	
+	<cffunction name="setMappingModule" access="private" returntype="void" output="false">
+		<cfargument name="mappingModule" type="string" required="true" />
+		<cfset variables.mappingModule = arguments.mappingModule />
+	</cffunction>
+	<cffunction name="getMappingModule" access="private" returntype="string" output="false">
+		<cfreturn variables.mappingModule />
 	</cffunction>
 
 </cfcomponent>

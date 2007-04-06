@@ -164,8 +164,13 @@ Updated version: 1.5.0
 		<cfset var command = "" />
 		<cfset var mappingEventName = arguments.commandNode.xmlAttributes["event"] />
 		<cfset var mappingName = arguments.commandNode.xmlAttributes["mapping"] />
+		<cfset var mappingModule = "" />
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(mappingEventName, mappingName) />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
+			<cfset mappingModule = arguments.commandNode.xmlAttributes["module"] />
+		</cfif>
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(mappingEventName, mappingName, mappingModule) />
 		
 		<cfreturn command />
 	</cffunction>

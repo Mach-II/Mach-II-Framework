@@ -248,6 +248,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST event-mapping 
 	event CDATA #REQUIRED
 	mapping CDATA #REQUIRED
+	module CDATA #IMPLIED
 >
 
 <!--
