@@ -340,9 +340,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var sc  = "" />
 		<cfset var traceInfoArrLen = ArrayLen(arguments.traceInfo) />
 		<cfset var i = "" />
-		<cfset var j = "" />
-		<cfset var commands = "" />
-		<cfset var commandMd = "" />
+		<cfset var timing = "" />
 
 		<cfif getDisplayCommented()>
 			<!-- Leave this code block as-is for proper HTML formatting --->
@@ -404,30 +402,34 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 						<td class="lineBottom strong" style="width:15%;">* Average Time</td>
 					</tr>
 				<cfloop from="1" to="#ArrayLen(traceInfo)-1#" index="i">
+					<cfif arguments.traceInfo[i].point NEQ "preView">
 					<tr <cfif i MOD 2>style="background-color:##F5F5F5" class="shade"</cfif>>
-						<td<cfif arguments.traceInfo[i].point EQ "preEvent"> class="lineTop"</cfif>>
-							<cfif NOT ListFindNoCase("preView,postView,postEvent", arguments.traceInfo[i].point)>#arguments.traceInfo[i].event#</cfif>
-						<cfif arguments.traceInfo[i].point EQ "preEvent">
-							<cfset commands = getAppManager().getEventManager().getEventHandler(arguments.traceInfo[i].event).getCommands() />
-							<ul class="small">
-							<cfloop from="1" to="#ArrayLen(commands)#" index="j">
-								<cfset commandMd = getMetadata(commands[j]) />
-								<li>#commandMd.displayName#</li>
-							</cfloop>
-							</ul>
-						<cfelseif arguments.traceInfo[i].point EQ "postEvent" AND StructCount(arguments.traceInfo[i].mappings)>
-							Event Mappings:
-							<ul class="small">
-							<cfloop collection="#arguments.traceInfo[i].mappings#" item="j">
-								<li<cfif i + 1 LTE ArrayLen(arguments.traceInfo) AND arguments.traceInfo[i+1].event EQ arguments.traceInfo[i].mappings[j]> class="green strong"</cfif>>#j# - #arguments.traceInfo[i].mappings[j]#</li>
-							</cfloop>
-							</ul>
-						</cfif>						
+						<td<cfif ListFindNoCase("preEvent,postProcess", arguments.traceInfo[i].point)> class="lineTop"</cfif>>
+						<cfif NOT ListFindNoCase("preView,postView,postEvent", arguments.traceInfo[i].point)>
+							#arguments.traceInfo[i].event#
+						<cfelse>
+							&nbsp;
+						</cfif>
 						</td>
-						<td class="small<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>">#arguments.traceInfo[i].point#</td>
-					<cfif getHighlightLongTimings() NEQ 0 AND arguments.traceInfo[i].timing GTE getHighlightLongTimings()>
-						<td class="small red strong<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>" style="text-align: right;">#arguments.traceInfo[i].timing# ms</td><cfelse>	<td class="small<cfif arguments.traceInfo[i].point EQ "preEvent"> lineTop</cfif>" style="text-align: right;">#arguments.traceInfo[i].timing# ms</td></cfif>
+						<td class="small<cfif ListFindNoCase("preEvent,postProcess", arguments.traceInfo[i].point)> lineTop</cfif>">
+						<cfif arguments.traceInfo[i].point EQ "postView">
+							view
+						<cfelse>
+							#arguments.traceInfo[i].point#
+						</cfif>
+						</td>
+					<cfif arguments.traceInfo[i].point EQ "postView">
+						<cfset timing = arguments.traceInfo[i].timing + arguments.traceInfo[i-1].timing>
+					<cfelse>
+						<cfset timing = arguments.traceInfo[i].timing />
+					</cfif>
+					<cfif getHighlightLongTimings() NEQ 0 AND timing GTE getHighlightLongTimings()>
+						<td class="small red strong<cfif ListFindNoCase("preEvent,postProcess", arguments.traceInfo[i].point)> lineTop</cfif>" style="text-align: right;">#timing# ms</td>
+					<cfelse>
+						<td class="small<cfif ListFindNoCase("preEvent,postProcess", arguments.traceInfo[i].point)> lineTop</cfif>" style="text-align: right;">#timing# ms</td>
+					</cfif>
 					</tr>
+					</cfif>
 				</cfloop>
 					<tr>
 						<td colspan="2" class="lineTop"><em>#arguments.traceInfo[traceInfoArrLen].event#</em></td>
