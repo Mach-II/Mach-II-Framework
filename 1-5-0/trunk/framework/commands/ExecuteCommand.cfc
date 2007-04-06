@@ -47,7 +47,7 @@ Updated version: 1.5.0
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="execute" access="public" returntype="boolean" output="false"
+	<cffunction name="execute" access="public" returntype="boolean" output="true"
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
