@@ -180,6 +180,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().preProcess(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="preEvent" access="public" returntype="void" output="true"
@@ -192,6 +196,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().preEvent(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="postEvent" access="public" returntype="void" output="true"
@@ -204,6 +212,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().postEvent(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="preView" access="public" returntype="void" output="true"
@@ -216,6 +228,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().preView(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="postView" access="public" returntype="void" output="true"
@@ -228,6 +244,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().postView(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="postProcess" access="public" returntype="void" output="true"
@@ -240,6 +260,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().postProcess(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="handleException" access="public" returntype="void" output="true"
@@ -254,6 +278,10 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
+		
+		<cfif isObject(getParent())>
+			<cfset getParent().handleException(arguments.eventContext)>
+		</cfif>
 	</cffunction>
 
 	<!---
