@@ -189,7 +189,7 @@ Notes:
 		</cfloop>
 		<cfset appManager.setPluginManager(pluginManager) />
 
-		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager) />
+		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset moduleManager.loadXml(configXmls[i]) />
 		</cfloop>

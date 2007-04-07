@@ -36,6 +36,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.appFactory = "" />
 	<cfset variables.lastReloadHash = 0 />
+	<cfset variables.validateXML = 0 />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -56,6 +57,7 @@ Notes:
 
 		<cfset setConfigPath(arguments.configPath) />
 		<cfset setDtdPath(arguments.dtdPath) />
+		<cfset setValidateXML(arguments.validateXML) />
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
@@ -81,7 +83,8 @@ Notes:
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		
-		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), arguments.validateXml, arguments.parentAppManager)) />
+		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
+				getValidateXml(), arguments.parentAppManager)) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
 
@@ -130,6 +133,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
 		<cfreturn variables.dtdPath />
+	</cffunction>
+	
+	<cffunction name="setValidateXML" access="public" returntype="void" output="false">
+		<cfargument name="validateXML" type="string" required="true" />
+		<cfset variables.validateXML = arguments.validateXML />
+	</cffunction>
+	<cffunction name="getValidateXML" access="public" returntype="boolean" output="false">
+		<cfreturn variables.validateXML />
 	</cffunction>
 	
 	<cffunction name="setAppManager" access="public" returntype="void" output="false">

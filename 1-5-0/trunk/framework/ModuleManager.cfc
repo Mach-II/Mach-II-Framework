@@ -33,6 +33,8 @@ Notes:
 	--->
 	<cfset variables.modules = StructNew() />
 	<cfset variables.appManager = "" />
+	<cfset variables.dtdPath = "" />
+	<cfset variables.validateXML = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -40,8 +42,14 @@ Notes:
 	<cffunction name="init" access="public" returntype="ModuleManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="configDtdPath" type="string" required="true"
+		 	hint="The full path to the configuration DTD file." />
+		<cfargument name="validateXml" type="boolean" required="false" default="false"
+			hint="Should the XML be validated before parsing." />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setDtdPath(arguments.configDtdPath) />
+		<cfset setValidateXML(arguments.validateXML) />
 
 		<cfreturn this />
 	</cffunction>
@@ -63,7 +71,7 @@ Notes:
 			<cfset file = moduleNodes[i].xmlAttributes["file"] />
 		
 			<!--- Setup the Module. --->
-			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), file) />
+			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), name, file) />
 
 			<!--- Add the Module to the Manager. --->
 			<cfset addModule(name, module) />
@@ -75,7 +83,7 @@ Notes:
 		hint="Configures each of the registered modules.">
 		<cfset var key = "" />
 		<cfloop collection="#variables.modules#" item="key">
-			<cfset getModule(key).configure() />
+			<cfset getModule(key).configure(getDtdPath(), getValidateXML()) />
 		</cfloop>
 	</cffunction>
 	
@@ -124,6 +132,22 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the AppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	
+	<cffunction name="setDtdPath" access="public" returntype="void" output="false">
+		<cfargument name="dtdPath" type="string" required="true" />
+		<cfset variables.dtdPath = arguments.dtdPath />
+	</cffunction>
+	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
+		<cfreturn variables.dtdPath />
+	</cffunction>
+	
+	<cffunction name="setValidateXML" access="public" returntype="void" output="false">
+		<cfargument name="validateXML" type="string" required="true" />
+		<cfset variables.validateXML = arguments.validateXML />
+	</cffunction>
+	<cffunction name="getValidateXML" access="public" returntype="boolean" output="false">
+		<cfreturn variables.validateXML />
 	</cffunction>
 	
 	<cffunction name="getModuleNames" access="public" returntype="array" output="false"

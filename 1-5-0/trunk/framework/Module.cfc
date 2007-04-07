@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id$
+$Id: $
 
 Created version: 1.5.0
 Updated version: 1.5.0
@@ -29,6 +29,7 @@ Updated version: 1.5.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.moduleName = "" />
 	<cfset variables.file = "" />
 	<cfset variables.moduleAppManager = "" />
 	<cfset variables.appManager = "" />
@@ -39,18 +40,23 @@ Updated version: 1.5.0
 	<cffunction name="init" access="public" returntype="Module" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="file" type="string" required="true" />
 		
 		<cfset setFile(arguments.file)>
+		<cfset setModuleName(arguments.moduleName)>
 		<cfset setAppManager(arguments.appManager)>
 		
 		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false">
-		<!--- TODO: Figure out how to get to the validation and DTD attributes from here --->
+		<cfargument name="configDtdPath" type="string" required="true"
+		 	hint="The full path to the configuration DTD file." />
+		<cfargument name="validateXml" type="boolean" required="false" default="false"
+			hint="Should the XML be validated before parsing." />
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				expandPath(getFile()), "", 0, getAppManager()) />
+				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
@@ -66,6 +72,15 @@ Updated version: 1.5.0
 	<cffunction name="getFile" access="public" type="string" output="false"
 		hint="Gets the file to use when setting up the module's AppManager">
 		<cfreturn variables.file />
+	</cffunction>
+	<cffunction name="setModuleName" access="public" returntype="void" output="false"
+		hint="Sets the name of the module">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="public" type="string" output="false"
+		hint="Gets the module name">
+		<cfreturn variables.moduleName />
 	</cffunction>
 	<cffunction name="setAppManager" access="public" returntype="void" output="false"
 		hint="Returns the AppManager instance this ModuleManager belongs to.">
