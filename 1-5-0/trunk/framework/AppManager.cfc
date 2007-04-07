@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.moduleName = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.eventManager = "" />
@@ -84,6 +85,14 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setModuleName" access="public" returntype="void" output="false">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="public" returntype="string" output="false">
+		<cfreturn variables.moduleName />
+	</cffunction>
+	
 	<cffunction name="setEventManager" access="public" returntype="void" output="false">
 		<cfargument name="eventManager" type="MachII.framework.EventManager" required="true" />
 		<cfset variables.eventManager = arguments.eventManager />
