@@ -151,6 +151,8 @@ Updated version: 1.5.0
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />
+		<cfelse>
+			<cfset moduleName = getAppManager().getModuleName() />
 		</cfif>
 		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs, moduleName) />
 		
@@ -168,6 +170,8 @@ Updated version: 1.5.0
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset mappingModule = arguments.commandNode.xmlAttributes["module"] />
+		<cfelse>
+			<cfset mappingModule = getAppManager().getModuleName() />
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(mappingEventName, mappingName, mappingModule) />
@@ -260,11 +264,11 @@ Updated version: 1.5.0
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
 			<cfset persistArgs = arguments.commandNode.xmlAttributes["persistArgs"] />
-		<cfelse>
-			<!--- TODO: get current module name from the XML if not defined --->
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />
+		<cfelse>
+			<cfset moduleName = getAppManager().getModuleName() />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "statusType")>
 			<cfset statusType = arguments.commandNode.xmlAttributes["statusType"] />
