@@ -99,7 +99,7 @@ Notes:
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1,urlArg2=value2) to build the url with or a struct of data." />
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false" default=""
 			hint="Base of the url. Defaults to index.cfm." />
 		
@@ -227,11 +227,17 @@ Notes:
 			hint="Takes string of name/value pairs or a struct.">
 		
 		<cfset var params = StructNew() />
+		<cfset var temp = "" />
 		<cfset var i = "" />
 		
 		<cfif NOT IsStruct(arguments.urlParameters)>
-			<cfloop list="#arguments.urlParameters#" index="i" delimiters=",">
-				<cfset params[ListFirst(i, "=")] = ListLast(i, "=") />
+			<cfloop list="#arguments.urlParameters#" index="i" delimiters="|">
+				<cfif ListLen(i) EQ 1>
+					<cfset temp = ListLast(i, "=") />
+				<cfelse>
+					<cfset temp = "" />
+				</cfif>
+				<cfset params[ListFirst(i, "=")] = temp />
 			</cfloop>
 		<cfelse>
 			<cfset params = arguments.urlParameters />
