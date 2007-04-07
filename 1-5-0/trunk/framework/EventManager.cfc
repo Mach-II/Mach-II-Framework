@@ -120,14 +120,16 @@ Updated version: 1.1.0
 	
 	<cffunction name="createEvent" access="public" returntype="MachII.framework.Event" output="true"
 		hint="Creates an Event instance.">
+		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="requestName" type="string" required="false" default="" />
 		<cfargument name="eventType" type="string" required="false" default="MachII.framework.Event" />
 		
 		<cfset var event = "" />
 		
 		<cfif isEventDefined(arguments.eventName, true)>
-			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs) />
+			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs, arguments.requestName, arguments.moduleName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 				message="EventHandler for event '#arguments.eventName#' is not defined." />
@@ -155,8 +157,11 @@ Updated version: 1.1.0
 		hint="Returns true if an EventHandler for the named Event is defined; otherwise false.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
-		<cfargument name="checkParent" type="boolean" required="false" default="0" />
+		<cfargument name="checkParent" type="boolean" required="false" default="0"
+			hint="Allows you to " />
+		
 		<cfset var localCheck = StructKeyExists(variables.handlers, arguments.eventName) />
+		
 		<cfif localCheck>
 			<cfreturn true />
 		<cfelseif arguments.checkParent AND isObject(getParent())>

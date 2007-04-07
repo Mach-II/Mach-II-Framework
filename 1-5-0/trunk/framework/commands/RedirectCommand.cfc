@@ -135,7 +135,7 @@ Updated version: 1.5.0
 			</cfif>
 		</cfloop>
 		
-		<cfset redirectUrl = arguments.eventContext.buildUrl(getEventName(), params, getUrl()) />
+		<cfset redirectUrl = arguments.eventContext.buildUrl(getModuleName(), getEventName(), params, getUrl()) />
 		
 		<cfreturn redirectUrl />
 	</cffunction>

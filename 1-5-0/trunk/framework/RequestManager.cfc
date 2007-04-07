@@ -96,6 +96,8 @@ Notes:
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
@@ -105,6 +107,7 @@ Notes:
 		
 		<cfset var url = "" />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
+		<cfset var module = "" />
 		<cfset var i = "" />
 		
 		<!--- Append the base url --->
@@ -116,7 +119,10 @@ Notes:
 
 		<!--- Attach the event name if defined --->
 		<cfif Len(arguments.eventName)>
-			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.eventName />
+			<cfif Len(arguments.moduleName)>
+				<cfset module = arguments.moduleName & getModuleDelimiter() />
+			</cfif>
+			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & module & arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->

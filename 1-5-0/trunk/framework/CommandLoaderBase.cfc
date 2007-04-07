@@ -260,6 +260,8 @@ Updated version: 1.5.0
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
 			<cfset persistArgs = arguments.commandNode.xmlAttributes["persistArgs"] />
+		<cfelse>
+			<!--- TODO: get current module name from the XML if not defined --->
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />

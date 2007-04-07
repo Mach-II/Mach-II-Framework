@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.name = "" />
+	<cfset variables.moduleName = "" />
 	<cfset variables.requestName = "" />
 	<cfset variables.args = StructNew() />
 	<cfset variables.argTypes = StructNew() />
@@ -47,10 +48,13 @@ Notes:
 			hint="Event args to populate this event object." />
 		<cfargument name="requestName" type="string" required="false" default=""
 			hint="A request name for this request lifecycle." />
+		<cfargument name="moduleName" type="string" required="false" default=""
+			hint="The module name of the event object." />
 		
 		<cfset setName(arguments.name) />
 		<cfset setArgs(arguments.args) />
 		<cfset setRequestName(arguments.requestName) />
+		<cfset setModuleName(arguments.moduleName) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -67,6 +71,17 @@ Notes:
 	<cffunction name="getName" access="public" returntype="string" output="false"
 		hint="Returns the name of the event object.">
 		<cfreturn variables.name />
+	</cffunction>
+	
+	<cffunction name="setModuleName" access="public" returntype="void" output="false"
+		hint="Sets the module name of the event object.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="A module name for this event." />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="public" returntype="string" output="false"
+		hint="Returns the module name of the event object.">
+		<cfreturn variables.moduleName />
 	</cffunction>
 
 	<cffunction name="setRequestName" access="public" returntype="void" output="false"

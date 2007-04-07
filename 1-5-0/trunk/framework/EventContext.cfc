@@ -93,11 +93,10 @@ Notes:
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
+			<!--- TODO: return a module name --->
 			<cfset nextEventName = getEventMapping(arguments.eventName) />
 			<!--- Create the event. --->
-			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextEventName, arguments.eventArgs) />
-			<!--- Put the request event name --->
-			<cfset nextEvent.setRequestName(getRequestEventName()) />
+			<cfset nextEvent = getAppManager().getEventManager().createEvent(arguments.moduleName, nextEventName, arguments.eventArgs, getRequestEventName()) />
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
@@ -211,7 +210,8 @@ Notes:
 			
 			<!--- Get the exception event and create and exception --->
 			<cfset nextEventName = getEventMapping(getExceptionEventName()) />
-			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextEventName) />
+			<!--- TODO: Add module name --->
+			<cfset exceptionEvent = getAppManager().getEventManager().createEvent("", nextEventName) />
 			<!--- Put the request event name --->
 			<cfset exceptionEvent.setRequestName(getRequestEventName()) />
 			<!--- Put the exception object --->
@@ -260,13 +260,20 @@ Notes:
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with. Defaults to current module if empty string." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1,urlArg2=value2) to build the url with or a struct of data." />
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false" default=""
 			hint="Base of the url. Defaults to index.cfm." />
-		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+		
+		<cfif NOT Len(arguments.moduleName)>
+			<cfset argument.moduleName = getCurrentEvent().getModuleName() />
+		</cfif>
+			
+		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
 	</cffunction>
 	
 	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
