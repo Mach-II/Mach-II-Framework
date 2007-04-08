@@ -115,6 +115,10 @@ Notes:
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="getModules" access="public" returntype="struct" output="false">
+		<cfreturn variables.modules />
+	</cffunction>
+	
 	<cffunction name="addModule" access="public" returntype="void" output="false"
 		hint="Registers a module with the specified name.">
 		<cfargument name="moduleName" type="string" required="true" />
