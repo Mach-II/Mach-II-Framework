@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: Mach-II Corporation
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id: $
+$Id$
 
 Created version: 1.5.0
 Updated version: 1.5.0
@@ -55,9 +55,12 @@ Updated version: 1.5.0
 		 	hint="The full path to the configuration DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
+
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
 				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
+
+		<cfset moduleAppManager.setModuleName(getModuleName()) />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
 	
