@@ -58,7 +58,7 @@ Updated version: 1.1.0
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName()) />
+		<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName(), getMappingModule()) />
 		
 		<cfreturn true />
 	</cffunction>

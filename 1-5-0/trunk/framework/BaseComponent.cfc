@@ -76,7 +76,7 @@ the rest of the framework. (pfarrell)
 			hint="The name of the module in which event exists. Defaults to current module." />
 		
 		<cfif StructKeyExists(request, "eventContext")>
-			<cfset request.eventContext.announceEvent(arguments.eventName, arguments.eventArgs) />
+			<cfset request.eventContext.announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 		<cfelse>
 			<cfthrow message="The EventContext necessary to announce events is not set in 'request.eventContext.'" />
 		</cfif>

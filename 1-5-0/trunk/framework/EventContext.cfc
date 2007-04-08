@@ -87,16 +87,21 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
 		<cfargument name="moduleName" type="string" required="false" default="" />
 		
-		<cfset var nextEventName = "" />
+		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
+		<cfset var nextModuleName = arguments.moduleName />
+		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
-			<!--- TODO: return a module name --->
-			<cfset nextEventName = getEventMapping(arguments.eventName) />
+			<cfif isEventMappingDefined(arguments.eventName)>
+				<cfset mapping = getEventMapping(arguments.eventName) />
+				<cfset nextModuleName = mapping.mappingModuleName />
+				<cfset nextEventName = mapping.mappingName />
+			</cfif>
 			<!--- Create the event. --->
-			<cfset nextEvent = getAppManager().getEventManager().createEvent(arguments.moduleName, nextEventName, arguments.eventArgs, getRequestEventName()) />
+			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName()) />
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
@@ -172,15 +177,40 @@ Notes:
 		hint="Sets an event mapping.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="mappingName" type="string" required="true" />
-		<cfset variables.mappings[arguments.eventName] = arguments.mappingName />
+		<cfargument name="mappingModuleName" type="string" required="false" default="" />
+
+		<cfset var temp = StructNew() />
+
+		<cfif NOT Len(arguments.mappingModuleName)>
+			<cfset argument.mappingModuleName = getCurrentEvent().getModuleName() />
+		</cfif>
+		
+		<cfset temp.mappingName = arguments.mappingName />
+		<cfset temp.mappingModuleName = arguments.mappingModuleName />
+		
+		<cfset variables.mappings[arguments.eventName] = temp />
 	</cffunction>
-	<cffunction name="getEventMapping" access="public" returntype="string" output="false"
+	<cffunction name="getEventMapping" access="public" returntype="struct" output="false"
 		hint="Gets an event mapping by the event name.">
 		<cfargument name="eventName" type="string" required="true" />
+		
+		<cfset var temp = StructNew() />
+		
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
 			<cfreturn variables.mappings[arguments.eventName] />
 		<cfelse>
-			<cfreturn arguments.eventName />
+			<cfset temp.mappingName = arguments.eventName />
+			<cfset temp.mappingModuleName = getCurrentEvent().getModuleName() />
+			<cfreturn temp />
+		</cfif>
+	</cffunction>
+	<cffunction name="isEventMappingDefined" type="public" returntype="boolean" output="false"
+		hint="Checks if an event mapping is defined.">
+		<cfargument name="eventName" type="string" required="true" />
+		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
+			<cfreturn true />
+		<cfelse>
+			<cfreturn false />
 		</cfif>
 	</cffunction>
 	<cffunction name="getEventMappings" access="public" returntype="struct" output="false"
@@ -197,7 +227,9 @@ Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
 		
-		<cfset var nextEventName = "" />
+		<cfset var mapping = "" />
+		<cfset var nextEventName = getExceptionEventName() />
+		<cfset var nextModuleName = "" />
 		<cfset var exceptionEvent = "" />
 		
 		<cftry>
@@ -209,9 +241,13 @@ Notes:
 			</cfif>
 			
 			<!--- Get the exception event and create and exception --->
-			<cfset nextEventName = getEventMapping(getExceptionEventName()) />
-			<!--- TODO: Add module name --->
-			<cfset exceptionEvent = getAppManager().getEventManager().createEvent("", nextEventName) />
+			<!--- Check for an event-mapping. --->
+			<cfif isEventMappingDefined(getExceptionEventName())>
+				<cfset mapping = getEventMapping(getExceptionEventName()) />
+				<cfset nextModuleName = mapping.mappingModuleName />
+				<cfset nextEventName = mapping.mappingName />
+			</cfif>
+			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName) />
 			<!--- Put the request event name --->
 			<cfset exceptionEvent.setRequestName(getRequestEventName()) />
 			<!--- Put the exception object --->
