@@ -39,6 +39,8 @@ the rest of the framework. (pfarrell)
 	<cfset variables.parentPropertyManager = "">
 	<cfset variables.version = "1.5.0.0" />
 	<cfset variables.utils = "" />
+	<cfset variables.propsNotAllowInModule =
+		 "applicationRoot,eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -106,13 +108,11 @@ the rest of the framework. (pfarrell)
 			</cfif>
 			
 			<!--- Set the property --->
-			<cfset setProperty(propertyName, propertyValue) />
+			<cfif (isObject(getParent()) AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
+					OR NOT isObject(getParent())>
+				<cfset setProperty(propertyName, propertyValue) />
+			</cfif>
 		</cfloop>
-		
-		<!--- TODO: Add logic to set default properties for base/main property manager only --->
-		
-		<!--- TODO: moduleDelimiter and all new ones, eventParameters - if I am a child override my values 
-			with the parent's values --->
 		
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
@@ -228,7 +228,15 @@ the rest of the framework. (pfarrell)
 		hint="Sets the property value by name.">
 		<cfargument name="propertyName" type="string" required="true" />
 		<cfargument name="propertyValue" type="any" required="true" />
-		<cfset variables.properties[arguments.propertyName] = arguments.propertyValue />
+		<!--- Default properties for base/main property manager only cannot be overriden:
+			applicationRoot, eventParameter, parameterPredence, maxEvents, redirectPreists, redirectPeristscope,
+			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
+		--->
+		<cfif isObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
+			<cfthrow type="MachII.framework.propertyNotAllowed" message="The '#arguments.propertyName#' property cannot be set inside of a module." />
+		<cfelse>
+			<cfset variables.properties[arguments.propertyName] = arguments.propertyValue />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
