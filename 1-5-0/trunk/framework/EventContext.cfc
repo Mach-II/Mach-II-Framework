@@ -98,7 +98,7 @@ Notes:
 			<cfif isEventMappingDefined(arguments.eventName)>
 				<cfset mapping = getEventMapping(arguments.eventName) />
 				<cfset nextModuleName = mapping.mappingModuleName />
-				<cfset nextEventName = mapping.mappingName />
+				<cfset nextEventName = mapping.mappingEventName />
 			</cfif>
 			<!--- Create the event. --->
 			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName()) />
@@ -185,7 +185,7 @@ Notes:
 			<cfset argument.mappingModuleName = getCurrentEvent().getModuleName() />
 		</cfif>
 		
-		<cfset temp.mappingName = arguments.mappingName />
+		<cfset temp.mappingEventName = arguments.mappingName />
 		<cfset temp.mappingModuleName = arguments.mappingModuleName />
 		
 		<cfset variables.mappings[arguments.eventName] = temp />
@@ -199,7 +199,7 @@ Notes:
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
 			<cfreturn variables.mappings[arguments.eventName] />
 		<cfelse>
-			<cfset temp.mappingName = arguments.eventName />
+			<cfset temp.mappingEventName = arguments.eventName />
 			<cfset temp.mappingModuleName = getCurrentEvent().getModuleName() />
 			<cfreturn temp />
 		</cfif>

@@ -164,7 +164,7 @@ Updated version: 1.5.0
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var mappingEventName = arguments.commandNode.xmlAttributes["event"] />
+		<cfset var eventName = arguments.commandNode.xmlAttributes["event"] />
 		<cfset var mappingName = arguments.commandNode.xmlAttributes["mapping"] />
 		<cfset var mappingModule = "" />
 		
@@ -174,7 +174,7 @@ Updated version: 1.5.0
 			<cfset mappingModule = getAppManager().getModuleName() />
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(mappingEventName, mappingName, mappingModule) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(eventName, mappingName, mappingModule) />
 		
 		<cfreturn command />
 	</cffunction>
