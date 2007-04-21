@@ -100,9 +100,11 @@ Updated version: 1.5.0
 		<cfif statusType EQ "permanent">
 			<cfheader statuscode="301" statustext="Moved Permanently" />
 			<cfheader name="Location" value="#redirectUrl#" />
+			<cfexit />
 		<cfelseif statusType EQ "prg">
 			<cfheader statuscode="303" statustext="See Other" />
 			<cfheader name="Location" value="#redirectUrl#" />
+			<cfexit />
 		<cfelse>
 			<!--- Default condition for 302 (temporary) --->
 			<cflocation url="#redirectUrl#" addtoken="no" />
