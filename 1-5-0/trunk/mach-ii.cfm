@@ -64,9 +64,13 @@ Notes:
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 	</cflock>
-<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadConfig()>
+<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadBaseConfig()>
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
+	</cflock>
+<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadModuleConfig()>
+	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
+		<cfset application[MACHII_APP_KEY].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 	</cflock>
 <cfelseif MACHII_CONFIG_MODE EQ -1>
 	<!--- Do not reload config. --->

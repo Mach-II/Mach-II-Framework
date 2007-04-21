@@ -70,7 +70,7 @@ Notes:
 		<cfargument name="moduleName" type="string" required="true"
 			hint="The name of the module for the requested event." />
 		<cfset var exception = "" />
-		<cfset var eventContext = 0 />
+		<cfset var eventContext = appManager.createEventContext(arguments.eventName) />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var appManager = getAppManager()>
 		

@@ -33,6 +33,8 @@ Updated version: 1.5.0
 	<cfset variables.file = "" />
 	<cfset variables.moduleAppManager = "" />
 	<cfset variables.appManager = "" />
+	<cfset variables.appLoader = "" />
+	<cfset variables.dtdPath = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -43,9 +45,9 @@ Updated version: 1.5.0
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="file" type="string" required="true" />
 		
-		<cfset setFile(arguments.file)>
-		<cfset setModuleName(arguments.moduleName)>
-		<cfset setAppManager(arguments.appManager)>
+		<cfset setFile(arguments.file) />
+		<cfset setModuleName(arguments.moduleName) />
+		<cfset setAppManager(arguments.appManager) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -60,6 +62,20 @@ Updated version: 1.5.0
 				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
+		<cfset setDtdPath(arguments.configDtdPath) />
+		<cfset setAppLoader(appLoader) />
+		<cfset moduleAppManager.setModuleName(getModuleName()) />
+		<cfset setModuleAppManager(moduleAppManager) />
+	</cffunction>
+	
+	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false">
+		<cfargument name="validateXml" type="boolean" required="false" default="false"
+			hint="Should the XML be validated before parsing." />
+		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
+				expandPath(getFile()), getDtdPath(), arguments.validateXML, getAppManager()) />
+		<cfset var moduleAppManager = appLoader.getAppManager() />
+
+		<cfset setAppLoader(appLoader) />
 		<cfset moduleAppManager.setModuleName(getModuleName()) />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
@@ -67,6 +83,9 @@ Updated version: 1.5.0
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false">
+		<cfreturn getAppLoader().shouldReloadConfig() />
+	</cffunction>
 	<cffunction name="setFile" access="public" returntype="void" output="false"
 		hint="Sets the path to the module Mach II config file">
 		<cfargument name="file" type="string" required="true" />
@@ -75,6 +94,13 @@ Updated version: 1.5.0
 	<cffunction name="getFile" access="public" type="string" output="false"
 		hint="Gets the file to use when setting up the module's AppManager">
 		<cfreturn variables.file />
+	</cffunction>
+	<cffunction name="setDtdPath" access="public" returntype="void" output="false">
+		<cfargument name="dtdPath" type="string" required="true" />
+		<cfset variables.dtdPath = arguments.dtdPath />
+	</cffunction>
+	<cffunction name="getDtdPath" access="public" type="string" output="false">
+		<cfreturn variables.dtdPath />
 	</cffunction>
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
 		hint="Sets the name of the module">
@@ -86,13 +112,22 @@ Updated version: 1.5.0
 		<cfreturn variables.moduleName />
 	</cffunction>
 	<cffunction name="setAppManager" access="public" returntype="void" output="false"
-		hint="Returns the AppManager instance this ModuleManager belongs to.">
+		hint="Returns the AppManager instance this Module belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the AppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
+		hint="Returns the AppLoader instance this Module belongs to.">
+		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
+		<cfset variables.appLoader = arguments.appLoader />
+	</cffunction>
+	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
+		hint="Sets the AppLoader instance this Module belongs to.">
+		<cfreturn variables.appLoader />
 	</cffunction>
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"
 		hint="Returns the ModuLeAppManager instance this ModuleManager belongs to.">

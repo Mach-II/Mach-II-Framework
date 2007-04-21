@@ -69,11 +69,38 @@ Notes:
 	--->
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Determines of the configuration file should be reloaded.">
-		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash()) NEQ 0>
+		
+		<cfif shouldReloadBaseConfig()>
+			<cfreturn true />
+		<cfelseif shouldReloadModuleConfig()>
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="shouldReloadModuleConfig" access="public" returntype="boolean" output="false"
+		hint="Determines of the configuration file should be reloaded.">
+		<cfset var modules = getAppManager().getModuleManager().getModules() />
+		<cfset var module = 0 />
+		
+		<cfloop collection="#modules#" item="module">
+			<!--- <cfdump var="#module#" label="module"><cfabort> --->
+			<cfif modules[module].shouldReloadConfig()>
+				<cfreturn true />
+			</cfif>
+		</cfloop>
+		<cfreturn false />
+	</cffunction>
+	
+	<cffunction name="shouldReloadBaseConfig" access="public" returntype="boolean" output="false"
+		hint="Determines of the configuration file should be reloaded.">
+		
+		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash()) NEQ 0>
+			<cfreturn true />
+		</cfif>
+		
+		<cfreturn false />
 	</cffunction>
 	
 	<cffunction name="reloadConfig" access="public" returntype="void" output="false"
@@ -87,13 +114,29 @@ Notes:
 				getValidateXml(), arguments.parentAppManager)) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
+	
+	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false"
+		hint="Reloads the config file and sets the last reload hash.">
+		<cfargument name="validateXml" type="boolean" required="false" default="false"
+			hint="Should the XML be validated before parsing." />
+		<cfargument name="parentAppManager" type="any" required="false" default=""
+			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
+
+		<cfset var modules = getAppManager().getModuleManager().getModules() />
+		<cfset var module = 0 />
+		
+		<cfloop collection="#modules#" item="module">
+			<cfif module.shouldReloadConfig()>
+				<cfset module.reloadConfig() />
+			</cfif>
+		</cfloop>
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="getConfigFileReloadHash" access="private" returntype="string" output="false"
 		hint="Get the current reload hash of the master config file and any include files which is based on dateLastModified and size.">
-		
 		<cfset var configFilePaths = getAppFactory().getConfigFilePaths() />
 		<cfset var directoryResults = "" />
 		<cfset var hashableString = "" />

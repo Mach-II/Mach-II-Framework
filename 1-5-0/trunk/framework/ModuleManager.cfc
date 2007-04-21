@@ -68,7 +68,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Set the module baseName if defined in the xml --->
-		<cfset modulesNode = XMLSearch(configXML, "//modules")>
+		<cfset modulesNode = XMLSearch(configXML, "//modules") />
 		<cfif arrayLen(modulesNode) eq 1>
 			<cfset modulesNode = modulesNode[1]>
 			<cfif structKeyExists(modulesNode[1].xmlAttributes, "baseName")>
