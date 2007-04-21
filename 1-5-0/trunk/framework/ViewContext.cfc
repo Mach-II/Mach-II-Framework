@@ -131,12 +131,7 @@ Notes:
 		<cfargument name="viewName" type="string" required="true" />
 		<cfset var viewPath = getAppManager().getViewManager().getViewPath(arguments.viewName) />
 		
-		<cfreturn getAppRoot() & viewPath />
-	</cffunction>
-	
-	<cffunction name="getAppRoot" access="private" returntype="string" output="false"
-		hint="Gets the application root from the Mach-II properties.">
-		<cfreturn getPropertyManager().getProperty('applicationRoot') />
+		<cfreturn viewPath />
 	</cffunction>
 	
 	<!---

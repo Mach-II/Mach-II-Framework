@@ -84,7 +84,7 @@ Updated version: 1.5.0
 			hint="Name of the view path to get." />
 		
 		<cfif isViewDefined(arguments.viewName)>
-			<cfreturn variables.viewPaths[arguments.viewName] />
+			<cfreturn getAppManager().getPropertyManager().getProperty('applicationRoot') & variables.viewPaths[arguments.viewName] />
 		<cfelseif isObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
 			<cfreturn getParent().getViewPath(arguments.viewName) />
 		<cfelse>
