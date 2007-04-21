@@ -40,7 +40,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.version = "1.5.0.0" />
 	<cfset variables.utils = "" />
 	<cfset variables.propsNotAllowInModule =
-		 "applicationRoot,eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
+		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -128,11 +128,8 @@ the rest of the framework. (pfarrell)
 				<cfset setProperty("exceptionEvent", "exceptionEvent") />
 			</cfif>
 		</cfif>
-		<cfif NOT isPropertyDefined("applicationRoot")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("applicationRoot")>
-			<cfelse>
-				<cfset setProperty("applicationRoot", "") />
-			</cfif>
+		<cfif NOT isPropertyDefined("applicationRoot") AND NOT isObject(getParent())>
+			<cfset setProperty("applicationRoot", "") />
 		</cfif>
 		<cfif NOT isPropertyDefined("eventParameter")>
 			<cfif isObject(getParent()) AND getParent().isPropertyDefined("eventParameter")>
