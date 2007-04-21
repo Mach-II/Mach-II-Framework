@@ -56,13 +56,9 @@ Notes:
 		<!--- Set the EventArgs scope with Form/URL parameters. --->
 		<cfset var eventArgs = getRequestEventArgs() />
 		<!--- Get the Event. --->
-		<cfset var eventName = getEventName(eventArgs) />
-		<!--- Determine the module for this event and arse out the module name from the eventName  --->
-		<cfset var moduleName = getModuleName(eventName) />
-		<!--- Remove the module name from the event name --->
-		<cfset eventName = removeModuleName(eventName) />
+		<cfset var result = getEventName(eventArgs) />
 		
-		<cfset handleEventRequest(eventName, eventArgs, moduleName) />
+		<cfset handleEventRequest(result.eventName, eventArgs, result.moduleName) />
 	</cffunction>
 	
 	<cffunction name="handleEventRequest" access="public" returntype="void" output="true"
@@ -138,25 +134,42 @@ Notes:
 		<cfset var moduleName = "" />
 		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
 		
-		<cfif listLen(arguments.eventName, moduleDelimiter) gt 1>
+		<cfif listLen(arguments.eventName, moduleDelimiter) gte 1>
 			<cfset moduleName = listGetAt(arguments.eventName, 1, moduleDelimiter) />
 		</cfif>
+		
 		<cfreturn moduleName />
 	</cffunction>
 	
-	<cffunction name="getEventName" access="private" returntype="string" output="false"
+	<cffunction name="getEventName" access="private" returntype="struct" output="false"
 		hint="Gets the event name from the incoming event arg struct.">
 		<cfargument name="eventArgs" type="struct" required="true" />
+		
+		<cfset var rawEvent = "" />
 		<cfset var eventParam = getAppManager().getPropertyManager().getProperty("eventParameter") />
-		<cfset var eventName = "" />
+		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
+		<cfset var result = StructNew() />
+		
+		<cfset result.moduleName = "" />
 		
 		<cfif StructKeyExists(arguments.eventArgs, eventParam) AND Len(arguments.eventArgs[eventParam])>
-			<cfset eventName = arguments.eventArgs[eventParam] />
+		
+			<cfset rawEvent = arguments.eventArgs[eventParam] />
+		
+			<cfif listLen(rawEvent, moduleDelimiter) eq 2>
+				<cfset result.moduleName = listGetAt(rawEvent, 1, moduleDelimiter) />
+				<cfset result.eventName = listGetAt(rawEvent, 2, moduleDelimiter) />
+			<cfelseif listLen(rawEvent, moduleDelimiter) eq 1 AND Right(rawEvent, 1) eq moduleDelimiter>
+				<cfset result.moduleName = listGetAt(rawEvent, 1, moduleDelimiter) />
+				<cfset result.eventName = getAppManager().getModuleManager().getModule(result.moduleName).getAppManager().getPropertyManager().getProperty("defaultEvent") />			
+			<cfelse>
+				<cfset result.eventName = rawEvent />
+			</cfif>
 		<cfelse>
-			<cfset eventName = getAppManager().getPropertyManager().getProperty("defaultEvent") />
+			<cfset result.eventName = getAppManager().getPropertyManager().getProperty("defaultEvent") />
 		</cfif>
 		
-		<cfreturn eventName />
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false"

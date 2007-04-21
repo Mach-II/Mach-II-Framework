@@ -117,12 +117,13 @@ Notes:
 			<cfset url = arguments.urlBase />
 		</cfif>
 
-		<!--- Attach the event name if defined --->
-		<cfif Len(arguments.eventName)>
-			<cfif Len(arguments.moduleName)>
-				<cfset module = arguments.moduleName & getModuleDelimiter() />
-			</cfif>
-			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & module & arguments.eventName />
+		<!--- Attach the module/event name if defined --->
+		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+		<cfelseif Len(arguments.moduleName) AND NOT Len(arguments.eventName)>
+			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.moduleName & getModuleDelimiter() />
+		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
