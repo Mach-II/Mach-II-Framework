@@ -280,7 +280,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().handleException(arguments.eventContext)>
+			<cfset getParent().handleException(arguments.eventContext, arguments.exception)>
 		</cfif>
 	</cffunction>
 
