@@ -236,17 +236,21 @@ Notes:
 		<cfset var temp = "" />
 		<cfset var i = "" />
 		
-		<cfif NOT IsStruct(arguments.urlParameters)>
+		<cfif IsSimpleValue(arguments.urlParameters)>
 			<cfloop list="#arguments.urlParameters#" index="i" delimiters="|">
-				<cfif ListLen(i) EQ 1>
+				<cfif ListLen(i) EQ 2>
 					<cfset temp = ListLast(i, "=") />
 				<cfelse>
 					<cfset temp = "" />
 				</cfif>
 				<cfset params[ListFirst(i, "=")] = temp />
 			</cfloop>
-		<cfelse>
+		<cfelseif IsStruct(arguments.urlParameters)>
 			<cfset params = arguments.urlParameters />
+		<cfelse>
+			<cfthrow
+				type="MachII.framework.urlParametersInvalidType"
+				message="BuildUrl()'s parameters attribute takes a list or struct."/>
 		</cfif>
 		
 		<cfreturn params />
