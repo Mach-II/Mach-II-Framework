@@ -149,12 +149,12 @@ Notes:
 		<cfif getParseSes() AND Len(arguments.pathInfo)>
 			<cfset arguments.pathInfo = Right(arguments.pathInfo, Len(arguments.pathInfo) -1) />
 			
-			<cfset names = ListToArray(arguments.pathInfo, getUrlSeriesDelimiter()) />
+			<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
 					<cfset value = "" />
-					<cfif i + 1 LT ArrayLen(names)>
+					<cfif i + 1 LTE ArrayLen(names)>
 						<cfset value = names[i+1] />
 					</cfif>
 					<cfset params[names[i]] = value />
@@ -162,7 +162,7 @@ Notes:
 			<cfelse>
 				<cfloop from="1" to="#ArrayLen(names)#" index="i">
 					<cfset value = "" />
-					<cfif ArrayLen(names[i]) EQ 2>
+					<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
 						<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
 					</cfif>
 					<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
