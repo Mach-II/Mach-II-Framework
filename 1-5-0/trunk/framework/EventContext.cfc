@@ -101,7 +101,7 @@ Notes:
 				<cfset nextEventName = mapping.mappingEventName />
 			</cfif>
 			<!--- Create the event. --->
-			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName()) />
+			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName(), getRequestModuleName()) />
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
@@ -247,9 +247,7 @@ Notes:
 				<cfset nextModuleName = mapping.mappingModuleName />
 				<cfset nextEventName = mapping.mappingName />
 			</cfif>
-			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName) />
-			<!--- Put the request event name --->
-			<cfset exceptionEvent.setRequestName(getRequestEventName()) />
+			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, StructNew(), getRequestEventName(), getRequestModuleName()) />
 			<!--- Put the exception object --->
 			<cfset exceptionEvent.setArg("exception", arguments.exception) />
 			

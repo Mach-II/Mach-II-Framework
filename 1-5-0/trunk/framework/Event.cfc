@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.name = "" />
 	<cfset variables.moduleName = "" />
 	<cfset variables.requestName = "" />
+	<cfset variables.requestModuleName = "" />
 	<cfset variables.args = StructNew() />
 	<cfset variables.argTypes = StructNew() />
 	
@@ -47,13 +48,16 @@ Notes:
 		<cfargument name="args" type="struct" required="false" default="#StructNew()#"
 			hint="Event args to populate this event object." />
 		<cfargument name="requestName" type="string" required="false" default=""
-			hint="A request name for this request lifecycle." />
+			hint="The request event name for this request lifecycle." />
+		<cfargument name="requestModuleName" type="string" required="false" default=""
+			hint="The request module name for this request lifecycle." />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="The module name of the event object." />
 		
 		<cfset setName(arguments.name) />
 		<cfset setArgs(arguments.args) />
 		<cfset setRequestName(arguments.requestName) />
+		<cfset setRequestModuleName(arguments.requestModuleName) />
 		<cfset setModuleName(arguments.moduleName) />
 		
 		<cfreturn this />
@@ -93,6 +97,17 @@ Notes:
 	<cffunction name="getRequestName" access="public" returntype="string" output="false"
 		hint="Returns the event name that started the request lifecycle.">
 		<cfreturn variables.requestName />
+	</cffunction>
+	
+	<cffunction name="setRequestModuleName" access="public" returntype="void" output="false"
+		hint="Sets the module name that started the request lifecycle.">
+		<cfargument name="requestModuleName" type="string" required="true"
+			hint="A request name for this event." />
+		<cfset variables.requestModuleName = arguments.requestModuleName />
+	</cffunction>
+	<cffunction name="getRequestModuleName" access="public" returntype="string" output="false"
+		hint="Returns the module name that started the request lifecycle.">
+		<cfreturn variables.requestModuleName />
 	</cffunction>
 	
 	<cffunction name="setArg" access="public" returntype="void" output="false"

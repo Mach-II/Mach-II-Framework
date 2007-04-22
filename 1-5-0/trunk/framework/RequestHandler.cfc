@@ -79,13 +79,13 @@ Notes:
 				<cfif NOT moduleManager.isModuleDefined(arguments.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined" 
 						message="The module '#arguments.moduleName#' for event '#arguments.eventName#' is not defined." />
-					<cfset eventContext = appManager.createEventContext(arguments.eventName) />
+					<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
 				<cfelse>
 					<cfset appManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager() />
-					<cfset eventContext = appManager.createEventContext(arguments.eventName) />
+					<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
 				</cfif>	
 			<cfelse>
-				<cfset eventContext = appManager.createEventContext(arguments.eventName) />
+				<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
 			</cfif>
 			
 			<cfset request.eventContext = eventContext />
@@ -117,18 +117,6 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="removeModuleName" access="private" returntype="string" output="false"
-		hint="Return the module name removed from the event name">
-		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
-		<cfset var cleanEventName = arguments.eventName />
-		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
-		
-		<cfif listLen(arguments.eventName, moduleDelimiter) gt 1>
-			<cfset cleanEventName = listDeleteAt(arguments.eventName, 1, moduleDelimiter) />
-		</cfif>
-		<cfreturn cleanEventName />
-	</cffunction>
-	
 	<cffunction name="getModuleName" access="private" returntype="string" output="false">
 		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
 		<cfset var moduleName = "" />
