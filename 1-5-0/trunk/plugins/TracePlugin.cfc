@@ -231,10 +231,10 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postProcess", arguments.eventContext) />
 			<!--- Compute total since preProcess --->
-			<cfset appendTrace("Total time", "", getTick() - getTickStart()) />
+			<cfset appendTrace("Total time", "", "", getTick() - getTickStart()) />
 			<!--- Display trace on-screen if mode is correct --->
 			<cfif ListFindNoCase("display,both", getTraceMode())>
-				<cfoutput>#displayTraceInfo(getTraceInfo(), arguments.eventContext.getCurrentEvent().getRequestName())#</cfoutput>
+				<cfoutput>#displayTraceInfo(getTraceInfo(), arguments.eventContext.getCurrentEvent().getRequestName(),  arguments.eventContext.getCurrentEvent().getRequestModuleName())#</cfoutput>
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -268,9 +268,9 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="point" type="string" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfif arguments.point EQ "postEvent">
-			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime(), StructCopy(arguments.eventContext.getEventMappings())) />
+			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), computeModuleName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime(), StructCopy(arguments.eventContext.getEventMappings())) />
 		<cfelse>
-			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
+			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), computeModuleName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
 		</cfif>
 	</cffunction>
 
@@ -283,6 +283,18 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfreturn arguments.eventContext.getCurrentEvent().getName() />
 		<cfelse>
 			<cfreturn "Core Process" />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="computeModuleName" access="private" returntype="string" output="false"
+		hint="Computes the module name for this trace.">
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		<cfargument name="point" type="string" required="true" />
+
+		<cfif NOT ListFindNoCase("postProcess,preProcess", arguments.point) AND arguments.eventContext.hasCurrentEvent()>
+			<cfreturn arguments.eventContext.getCurrentEvent().getModuleName() />
+		<cfelse>
+			<cfreturn "" />
 		</cfif>
 	</cffunction>
 
@@ -308,6 +320,8 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		hint="Appends a trace to the trace information array or to the log file.">
 		<cfargument name="event" type="string" required="true"
 			hint="Name of event for this trace." />
+		<cfargument name="module" type="string" required="true"
+			hint="Name of module for this trace." />
 		<cfargument name="point" type="string" required="true"
 			hint="Name of plugin method for this trace." />
 		<cfargument name="timing" type="string" required="true"
@@ -318,6 +332,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 
 		<!--- Create the trace information struct to be appended to the array or used in the log --->
 		<cfset trace.event = arguments.event />
+		<cfset trace.module = arguments.module />
 		<cfset trace.point = arguments.point />
 		<cfset trace.timing = arguments.timing />
 		<cfset trace.mappings = arguments.mappings />
@@ -326,7 +341,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfset arrayAppend(getTraceInfo(), trace) />
 		</cfif>
 		<cfif ListFindNoCase("file,both", getTraceMode())>
-			<cflog file="#getFileName()#" text="(#trace.timing#) - #trace.event# :: #trace.point#" />
+			<cflog file="#getFileName()#" text="(#trace.timing#) - <cfif Len(trace.module)>#trace.module#:</cfif>#trace.event# :: #trace.point#" />
 		</cfif>
 	</cffunction>
 
@@ -335,6 +350,8 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="traceInfo" type="array" required="true"
 			hint="Pass in the array from the getTraceInfo() method." />
 		<cfargument name="requestEventName" type="string" required="true"
+			hint="The event name that started the request lifecycle.">
+		<cfargument name="requestModuleName" type="string" required="true"
 			hint="The event name that started the request lifecycle.">
 
 		<cfset var sc  = "" />
@@ -377,6 +394,9 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 					##MachIITraceDisplay td.lineTop {
 						border-top: 1px solid ##000;
 					}
+					##MachIITraceDisplay .shade {
+						background-color: ##F5F5F5;
+					}
 					##MachIITraceDisplay ul li {
 						margin-left:15px;
 					}
@@ -403,10 +423,10 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 					</tr>
 				<cfloop from="1" to="#ArrayLen(traceInfo)-1#" index="i">
 					<cfif arguments.traceInfo[i].point NEQ "preView">
-					<tr <cfif i MOD 2>style="background-color:##F5F5F5" class="shade"</cfif>>
+					<tr <cfif i MOD 2> class="shade"</cfif>>
 						<td<cfif ListFindNoCase("preEvent,postProcess", arguments.traceInfo[i].point)> class="lineTop"</cfif>>
 						<cfif NOT ListFindNoCase("preView,postView,postEvent", arguments.traceInfo[i].point)>
-							#arguments.traceInfo[i].event#
+							<cfif Len(arguments.traceInfo[i].module)>#arguments.traceInfo[i].module#:</cfif>#arguments.traceInfo[i].event#
 						<cfelse>
 							&nbsp;
 						</cfif>
@@ -443,15 +463,19 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				</table>
 				<h3>General Information</h3>
 				<table>
-					<tr style="background-color:##F5F5F5" class="shade">
+					<tr class="shade">
 						<td class="lineTop strong">Request Event Name</td>
 						<td class="lineTop">#arguments.requestEventName#</td>
 					</tr>
 					<tr>
+						<td class="strong">Request Module Name</td>
+						<td>#arguments.requestModuleName#</td>
+					</tr>
+					<tr class="shade">
 						<td class="strong">Mach-II Version</td>
 						<td>#getMachIIVersion()#</td>
 					</tr>
-					<tr style="background-color:##F5F5F5" class="shade">
+					<tr>
 						<td class="strong">Timestamp</td>
 						<td>#DateFormat(Now())# #TimeFormat(Now())#</td>
 					</tr>
