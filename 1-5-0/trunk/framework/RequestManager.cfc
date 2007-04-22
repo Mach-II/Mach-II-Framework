@@ -84,13 +84,12 @@ Notes:
 	--->
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
-		<cfargument name="createNew" type="boolean" required="false" default="false"
-			hint="Pass true to return a new instance of a RequestHandler." />
 		
-		<cfif arguments.createNew>
-			<cfreturn createRequestHandler() />
+		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
+			<cfset request._MachIIRequestHandler = createRequestHandler() />
+			<cfreturn request._MachIIRequestHandler />
 		<cfelse>
-			<cfreturn variables.requestHandler />
+			<cfreturn request._MachIIRequestHandler />
 		</cfif>
 	</cffunction>
 	
