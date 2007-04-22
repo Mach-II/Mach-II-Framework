@@ -87,10 +87,9 @@ Notes:
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
 			<cfset request._MachIIRequestHandler = createRequestHandler() />
-			<cfreturn request._MachIIRequestHandler />
-		<cfelse>
-			<cfreturn request._MachIIRequestHandler />
 		</cfif>
+		
+		<cfreturn request._MachIIRequestHandler />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
