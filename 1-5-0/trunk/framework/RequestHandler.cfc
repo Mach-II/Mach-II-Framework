@@ -96,7 +96,7 @@ Notes:
 			</cfif>
 			
 			<cfif appManager.getEventManager().isEventPublic(arguments.eventName, true)>
-				<cfset eventContext.announceEvent(arguments.eventName, arguments.eventArgs) />
+				<cfset eventContext.announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#arguments.eventName#' is not accessible." />
