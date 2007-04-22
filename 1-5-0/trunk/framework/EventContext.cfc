@@ -432,7 +432,7 @@ Notes:
 		
 		<cfset eventName = arguments.event.getName() />
 		
-		<cfset eventHandler = getAppManager().getEventManager().getEventHandler(eventName) />
+		<cfset eventHandler = getAppManager().getEventManager().getEventHandler(eventName, arguments.event.getModuleName()) />
 		<cfset setCurrentEventHandler(eventHandler) />
 		
 		<!--- Pre-Invoke. --->

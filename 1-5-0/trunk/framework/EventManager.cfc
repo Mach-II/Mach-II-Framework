@@ -135,11 +135,11 @@ Updated version: 1.1.0
 		
 		<cfset var event = "" />
 		
-		<cfif isEventDefined(arguments.eventName, true)>
+		<cfif isEventDefined(arguments.eventName, true, arguments.moduleName)>
 			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs, arguments.requestName, arguments.requestModuleName, arguments.moduleName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-				message="EventHandler for event '#arguments.eventName#' is not defined." />
+				message="EventHandler for event '#arguments.eventName#' in module '#arguments.moduleName#' is not defined." />
 		</cfif>
 		
 		<cfreturn event />
@@ -149,8 +149,20 @@ Updated version: 1.1.0
 		hint="Returns the EventHandler for the named Event.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
+		<cfargument name="moduleName" type="string" required="false" default="" />
 		
-		<cfif isEventDefined(arguments.eventName)>
+		<cfset var moduleEventManager = 0 />
+		<cfset var moduleManager = 0 />
+		
+		<cfif arguments.moduleName neq "">
+			<cfif NOT isObject(getAppManager().getParent())>
+				<cfset moduleManager = getAppManager().getModuleManager() />
+			<cfelse>
+				<cfset moduleManager = getAppManager().getParent().getModuleManager() />
+			</cfif>
+			<cfset moduleEventManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
+			<cfreturn moduleEventManager.getEventHandler(arguments.eventName) />
+		<cfelseif isEventDefined(arguments.eventName)>
 			<cfreturn variables.handlers[arguments.eventName] />
 		<cfelseif isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
 			<cfreturn getParent().getEventHandler(arguments.eventName) />
@@ -165,16 +177,37 @@ Updated version: 1.1.0
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
 		<cfargument name="checkParent" type="boolean" required="false" default="0"
-			hint="Allows you to " />
+			hint="Allows you to check the parent to see if the event is in there" />
+		<cfargument name="moduleName" type="string" required="false" default=""
+			hint="Allows you to check in a specific module for an event" />
 		
-		<cfset var localCheck = StructKeyExists(variables.handlers, arguments.eventName) />
+		<cfset var moduleManager = 0 />
 		
-		<cfif localCheck>
-			<cfreturn true />
-		<cfelseif arguments.checkParent AND isObject(getParent())>
-			<cfreturn getParent().isEventDefined(arguments.eventName) />
+		<cfif arguments.moduleName neq "">
+			<cfif NOT isObject(getAppManager().getParent())>
+				<cfset moduleManager = getAppManager().getModuleManager() />
+			<cfelse>
+				<cfset moduleManager = getAppManager().getParent().getModuleManager() />
+			</cfif>
+			<cfif moduleManager.isModuleDefined(arguments.moduleName)>
+				<cfset moduleEventManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
+				<cftrace text="moduleEventManager.isEventDefined(#arguments.eventName#) (#arguments.moduleName#)">
+				<cfif moduleEventManager.isEventDefined(arguments.eventName, true)>
+					<cfreturn true />
+				<cfelse>
+					<cfreturn false />
+				</cfif>
+			<cfelse>
+				<cfreturn false />
+			</cfif>
 		<cfelse>
-			<cfreturn false />
+			<cfif StructKeyExists(variables.handlers, arguments.eventName)>
+				<cfreturn true />
+			<cfelseif arguments.checkParent AND isObject(getParent())>
+				<cfreturn getParent().isEventDefined(arguments.eventName, false, arguments.moduleName) />
+			<cfelse>
+				<cfreturn false />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
