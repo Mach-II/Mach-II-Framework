@@ -77,6 +77,7 @@ Notes:
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
+		<cfset var temp = StructNew() />
 		<cfset var i = "" />
 		
 		<!--- Clear the config file paths --->
@@ -99,16 +100,17 @@ Notes:
 		<cfset appendConfigFilePath(arguments.configXmlPath) />
 
 		<!--- Parse the XML contents --->
-		<cfset configXml = XmlParse(configXmlFile) />
+		<cfset temp.configXml = XmlParse(configXmlFile) />
+		<cfset temp.override = false />
 		
 		<!--- Validate the XML contents --->
-		<cfset validateConfigXml(arguments.validateXml, configXml, arguments.configXmlPath, arguments.configDtdPath) />
+		<cfset validateConfigXml(arguments.validateXml, temp.configXml, arguments.configXmlPath, arguments.configDtdPath) />
 
 		<!--- Added the base config to the array --->
-		<cfset ArrayAppend(configXmls, configXml) />
+		<cfset ArrayAppend(configXmls, temp) />
 
 		<!--- Load the includes --->	
-		<cfset configXmls = loadIncludes(configXmls, configXML, arguments.validateXml, arguments.configDtdPath) />
+		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath) />
 		
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
@@ -139,7 +141,7 @@ Notes:
 		--->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset propertyManager.loadXml(configXmls[i], false) />
+			<cfset propertyManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset propertyManager.loadXml(arguments.overrideXml, true) />
@@ -160,7 +162,7 @@ Notes:
 
 		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(appManager, parentListenerManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset listenerManager.loadXml(configXmls[i]) />
+			<cfset listenerManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset listenerManager.loadXml(arguments.overrideXml, true) />
@@ -169,7 +171,7 @@ Notes:
 		
 		<cfset filterManager = CreateObject("component", "MachII.framework.EventFilterManager").init(appManager, parentFilterManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset filterManager.loadXml(configXmls[i]) />
+			<cfset filterManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset filterManager.loadXml(arguments.overrideXml, true) />
@@ -178,7 +180,7 @@ Notes:
 
 		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(appManager, parentSubroutineManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset subroutineManager.loadXml(configXmls[i]) />
+			<cfset subroutineManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset subroutineManager.loadXml(arguments.overrideXml, true) />
@@ -187,7 +189,7 @@ Notes:
 				
 		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager, parentEventManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset eventManager.loadXml(configXmls[i]) />
+			<cfset eventManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset eventManager.loadXml(arguments.overrideXml, true) />
@@ -196,7 +198,7 @@ Notes:
 		
 		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(appManager, parentViewManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset viewManager.loadXml(configXmls[i]) />
+			<cfset viewManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfif Len(arguments.overrideXml)>
 			<cfset viewManager.loadXml(arguments.overrideXml, true) />
@@ -205,7 +207,7 @@ Notes:
 		
 		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(appManager, parentPluginManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset pluginManager.loadXml(configXmls[i]) />
+			<cfset pluginManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<!---
 		TODO: finish the plugins - overriding is more difficult since we register each plugin point (Peter is working on this)
@@ -216,7 +218,7 @@ Notes:
 
 		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset moduleManager.loadXml(configXmls[i]) />
+			<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
 		<cfset appManager.setModuleManager(moduleManager) />
 		
@@ -238,14 +240,19 @@ Notes:
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
 		<cfset var includeNodes = "" />
-		<cfset var includeFilePath = "" />
-		<cfset var includeXMLFile = "" />
-		<cfset var includeXml = "" />
+		<cfset var temp = StructNew() />
+		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
 		
 		<cfset includeNodes =  XmlSearch(arguments.configXML, "//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
+			<cfset temp = StructNew() />
 			<cfset includeFilePath = ExpandPath(includeNodes[i].xmlAttributes["file"]) />
+			<cfif StructKeyExists(includeNodes[i].xmlAttributes, "override")>
+				<cfset temp.override = includeNodes[i].xmlAttributes["override"] />
+			<cfelse>
+				<cfset temp.override = false />
+			</cfif>
 			
 			<!--- Check for circular dependencies (pass a struct instead of stateful variables in case there is a error and it's impossible to cleanup)--->
 			<cfset arguments.alreadyLoaded = checkIfAlreadyIncluded(arguments.alreadyLoaded, includeFilePath) />
@@ -267,16 +274,16 @@ Notes:
 			<cfset appendConfigFilePath(includeFilePath) />
 			
 			<!--- Parse the XML contents --->
-			<cfset includeXml = XmlParse(includeXmlFile) />
+			<cfset temp.configXml = XmlParse(includeXmlFile) />
 			
 			<!--- Validate the XML contents --->
-			<cfset validateConfigXml(arguments.validateXml, includeXml, includeFilePath, arguments.configDtdPath) />
+			<cfset validateConfigXml(arguments.validateXml, temp.configXml, includeFilePath, arguments.configDtdPath) />
 			
 			<!--- Append the parsed include file to the config xml array --->
-			<cfset ArrayAppend(arguments.configFiles, includeXml) />
+			<cfset ArrayAppend(arguments.configFiles, temp) />
 			
 			<!--- Recursively check the include for more includes --->
-			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, includeXml, arguments.validateXml, arguments.configDtdPath, arguments.alreadyLoaded) />
+			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, arguments.alreadyLoaded) />
 		</cfloop>
 		
 		<cfreturn arguments.configFiles />

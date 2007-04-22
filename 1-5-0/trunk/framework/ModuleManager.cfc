@@ -58,6 +58,7 @@ Notes:
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var moduleNodes = "" />
 		<cfset var modulesNodes = "" />
@@ -69,6 +70,11 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Set the module baseName if defined in the xml --->
+		<cfif NOT arguments.override>
+			<cfset modulesNode = XMLSearch(arguments.configXML, "mach-ii/modules") />
+		<cfelse>
+			<cfset modulesNode = XMLSearch(arguments.configXML, ".//modules") />
+		</cfif>
 		<cfset modulesNode = XmlSearch(configXML, "//modules") />
 		<cfif arrayLen(modulesNode) eq 1>
 			<cfset modulesNode = modulesNode[1]>
@@ -79,6 +85,11 @@ Notes:
 		</cfif>
 		
 		<!--- Setup up each Module. --->
+		<cfif NOT arguments.override>
+			<cfset moduleNodes = XMLSearch(arguments.configXML, "mach-ii/modules/module") />
+		<cfelse>
+			<cfset moduleNodes = XMLSearch(arguments.configXML, ".//modules/module") />
+		</cfif>
 		<cfset moduleNodes = XmlSearch(configXML,"//modules/module") />
 		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
 			<cfset name = moduleNodes[i].xmlAttributes["name"] />
