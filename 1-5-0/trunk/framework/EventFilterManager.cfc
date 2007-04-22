@@ -55,6 +55,7 @@ Updated version: 1.1.0
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 					
 		<cfset var filterNodes = "" />
 		<cfset var filterParams = "" />
@@ -68,7 +69,11 @@ Updated version: 1.1.0
 		<cfset var j = 0 />
 
 		<!--- Setup up each EventFilter. --->
-		<cfset filterNodes = XMLSearch(arguments.configXML, "//event-filters/event-filter") />
+		<cfif NOT arguments.override>
+			<cfset filterNodes = XMLSearch(arguments.configXML, "mach-ii/event-filters/event-filter") />
+		<cfelse>
+			<cfset filterNodes = XMLSearch(arguments.configXML, ".//event-filters/event-filter") />
+		</cfif>
 		<cfloop from="1" to="#ArrayLen(filterNodes)#" index="i">
 			<cfset filterName = filterNodes[i].xmlAttributes["name"] />
 			<cfset filterType = filterNodes[i].xmlAttributes["type"] />
@@ -87,7 +92,7 @@ Updated version: 1.1.0
 			</cfif>
 			
 			<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
-			<cfset addFilter(filterName, filter) />
+			<cfset addFilter(filterName, filter, arguments.override) />
 		</cfloop>
 	</cffunction>
 
@@ -106,8 +111,9 @@ Updated version: 1.1.0
 		hint="Registers an EventFilter by name.">
 		<cfargument name="filterName" type="string" required="true" />
 		<cfargument name="filter" type="MachII.framework.EventFilter" required="true" />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif isFilterDefined(arguments.filterName)>
+		<cfif NOT arguments.overrideCheck AND isFilterDefined(arguments.filterName)>
 			<cfthrow type="MachII.framework.FilterAlreadyDefined"
 				message="An EventFilter with name '#arguments.filterName#' is already registered." />
 		<cfelse>

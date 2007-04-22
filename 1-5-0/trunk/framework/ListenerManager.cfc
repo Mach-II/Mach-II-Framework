@@ -58,6 +58,7 @@ Notes:
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var listenerNodes = "" />
 		<cfset var listenerParams = "" />
@@ -74,6 +75,11 @@ Notes:
 
 		<!--- Setup up each Listener. --->
 		<cfset listenerNodes = XMLSearch(arguments.configXML, "//listeners/listener") />
+		<cfif NOT arguments.override>
+			<cfset listenerNodes = XMLSearch(arguments.configXML, "mach-ii/listeners/listener") />
+		<cfelse>
+			<cfset listenerNodes = XMLSearch(arguments.configXML, "./listeners/listener") />
+		</cfif>
 		<cfloop from="1" to="#ArrayLen(listenerNodes)#" index="i">
 			<cfset listenerName = listenerNodes[i].xmlAttributes["name"] />
 			<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
@@ -107,7 +113,7 @@ Notes:
 			<!--- Continue setup on the Lister. --->
 			<cfset listener.setInvoker(invoker) />
 			<!--- Add the Listener to the Manager. --->
-			<cfset addListener(listenerName, listener) />
+			<cfset addListener(listenerName, listener, arguments.override) />
 		</cfloop>
 	</cffunction>
 
@@ -140,8 +146,9 @@ Notes:
 		hint="Registers a Listener with the specified name.">
 		<cfargument name="listenerName" type="string" required="true" />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true" />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif isListenerDefined(arguments.listenerName)>
+		<cfif NOT arguments.overrideCheck AND isListenerDefined(arguments.listenerName)>
 			<cfthrow type="MachII.framework.ListenerAlreadyDefined"
 				message="A Listener with name '#arguments.listenerName#' is already registered." />
 		<cfelse>

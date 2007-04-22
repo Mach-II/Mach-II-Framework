@@ -58,6 +58,7 @@ Updated version: 1.1.0
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var commandNode = "" />
 		<cfset var eventNodes = "" />
@@ -72,7 +73,11 @@ Updated version: 1.1.0
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset eventNodes = XMLSearch(arguments.configXML, "//event-handlers/event-handler") />
+		<cfif NOT arguments.override>
+			<cfset eventNodes = XMLSearch(arguments.configXML, "mach-ii/event-handlers/event-handler") />
+		<cfelse>
+			<cfset eventNodes = XMLSearch(arguments.configXML, ".//event-handlers/event-handler") />
+		</cfif>
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
 			<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
@@ -89,7 +94,7 @@ Updated version: 1.1.0
 				<cfset eventHandler.addCommand(command) />
 			</cfloop>
 			
-			<cfset addEventHandler(eventName, eventHandler) />
+			<cfset addEventHandler(eventName, eventHandler, arguments.override) />
 		</cfloop>
 		
 		<!--- Clear temps. --->
@@ -109,8 +114,9 @@ Updated version: 1.1.0
 		hint="Registers an EventHandler by name.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventHandler" type="MachII.framework.EventHandler" required="true" />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif isEventDefined(arguments.eventName)>
+		<cfif NOT arguments.overrideCheck AND isEventDefined(arguments.eventName)>
 			<cfthrow type="MachII.framework.EventHandlerAlreadyDefined"
 				message="An EventHandler with name '#arguments.eventName#' is already registered." />
 		<cfelse>

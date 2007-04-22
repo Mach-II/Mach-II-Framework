@@ -57,6 +57,7 @@ Updated version: 1.5.0
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 				
 		<cfset var subroutineNodes = "" />
 		<cfset var subroutineHandler = "" />
@@ -70,7 +71,11 @@ Updated version: 1.5.0
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
-		<cfset subroutineNodes = XMLSearch(arguments.configXML,"//subroutines/subroutine") />
+		<cfif NOT arguments.override>
+			<cfset subroutineNodes = XMLSearch(arguments.configXML, "mach-ii/subroutines/subroutine") />
+		<cfelse>
+			<cfset subroutineNodes = XMLSearch(arguments.configXML, ".//subroutines/subroutine") />
+		</cfif>
 		<cfloop from="1" to="#ArrayLen(subroutineNodes)#" index="i">
 			<cfset subroutineName = subroutineNodes[i].xmlAttributes["name"] />
 			
@@ -82,7 +87,7 @@ Updated version: 1.5.0
 				<cfset subroutineHandler.addCommand(command) />
 			</cfloop>
 			
-			<cfset addSubroutineHandler(subroutineName, subroutineHandler) />
+			<cfset addSubroutineHandler(subroutineName, subroutineHandler, arguments.override) />
 		</cfloop>
 		
 		<!--- Clear temps. --->
@@ -102,8 +107,9 @@ Updated version: 1.5.0
 		hint="Registers an SubroutineHandler by name.">
 		<cfargument name="subroutineName" type="string" required="true" />
 		<cfargument name="subroutineHandler" type="MachII.framework.SubroutineHandler" required="true" />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif isSubroutineDefined(arguments.subroutineName)>
+		<cfif NOT arguments.overrideCheck AND isSubroutineDefined(arguments.subroutineName)>
 			<cfthrow type="MachII.framework.SubroutineHandlerAlreadyDefined"
 				message="An SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
 		<cfelse>

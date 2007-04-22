@@ -162,36 +162,56 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset listenerManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset listenerManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setListenerManager(listenerManager) />
 		
 		<cfset filterManager = CreateObject("component", "MachII.framework.EventFilterManager").init(appManager, parentFilterManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset filterManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset filterManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setFilterManager(filterManager) />
 
 		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(appManager, parentSubroutineManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset subroutineManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset subroutineManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
 		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager, parentEventManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset eventManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset eventManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setEventManager(eventManager) />
 		
 		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(appManager, parentViewManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset viewManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset viewManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setViewManager(viewManager) />
 		
 		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(appManager, parentPluginManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset pluginManager.loadXml(configXmls[i]) />
 		</cfloop>
+		<!---
+		TODO: finish the plugins - overriding is more difficult since we register each plugin point (Peter is working on this)
+		<cfif Len(arguments.overrideXml)>
+			<cfset pluginManager.loadXml(arguments.overrideXml, true) />
+		</cfif> --->
 		<cfset appManager.setPluginManager(pluginManager) />
 
 		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />

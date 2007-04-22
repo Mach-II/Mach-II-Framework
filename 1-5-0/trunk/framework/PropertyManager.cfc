@@ -79,9 +79,9 @@ the rest of the framework. (pfarrell)
 
 		<!--- Set the properties from the XML file. --->
 		<cfif NOT arguments.override>
-			<cfset propertyNodes = XMLSearch(arguments.configXML, "//properties/property") />
+			<cfset propertyNodes = XMLSearch(arguments.configXML, "mach-ii/properties/property") />
 		<cfelse>
-			<cfset propertyNodes = XMLSearch(arguments.configXML, "./properties/property") />
+			<cfset propertyNodes = XMLSearch(arguments.configXML, ".//properties/property") />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">			

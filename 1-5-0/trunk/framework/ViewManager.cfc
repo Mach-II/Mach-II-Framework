@@ -54,6 +54,7 @@ Updated version: 1.5.0
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 				
 		<cfset var viewNodes = "" />
 		<cfset var name = "" />
@@ -61,7 +62,11 @@ Updated version: 1.5.0
 		<cfset var i = 0 />
 		
 		<!--- Setup up each Page-View. --->
-		<cfset viewNodes = XMLSearch(arguments.configXML,"//page-views/page-view") />
+		<cfif NOT arguments.override>
+			<cfset viewNodes = XMLSearch(arguments.configXML, "mach-ii/page-views/page-view") />
+		<cfelse>
+			<cfset viewNodes = XMLSearch(arguments.configXML, "./page-views/page-view") />
+		</cfif>
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
 			<cfset page = viewNodes[i].xmlAttributes["page"] />
