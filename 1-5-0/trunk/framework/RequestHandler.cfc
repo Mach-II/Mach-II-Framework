@@ -55,51 +55,39 @@ Notes:
 		hint="Handles a request made to the framework.">
 		<!--- Set the EventArgs scope with Form/URL parameters. --->
 		<cfset var eventArgs = getRequestEventArgs() />
-		<!--- Get the Event. --->
+		<!--- Get the Event struct with module and event names --->
 		<cfset var result = getEventName(eventArgs) />
-		
-		<cfset handleEventRequest(result.eventName, eventArgs, result.moduleName) />
-	</cffunction>
-	
-	<cffunction name="handleEventRequest" access="public" returntype="void" output="true"
-		hint="Handles an event request made to the framework.">
-		<cfargument name="eventName" type="string" required="true"
-			hint="The name of the requested event." />
-		<cfargument name="eventArgs" type="struct" required="true" default="#StructNew()#"
-			hint="The event arguments provided in the request." />
-		<cfargument name="moduleName" type="string" required="true"
-			hint="The name of the module for the requested event." />
 		<cfset var exception = "" />
-		<cfset var eventContext = appManager.createEventContext(arguments.eventName) />
+		<cfset var eventContext = appManager.createEventContext(result.eventName) />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var appManager = getAppManager()>
 		
 		<cftry>
-			<cfif len(arguments.moduleName)>
-				<cfif NOT moduleManager.isModuleDefined(arguments.moduleName)>
+			<cfif len(result.moduleName)>
+				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined" 
-						message="The module '#arguments.moduleName#' for event '#arguments.eventName#' is not defined." />
-					<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
+						message="The module '#result.moduleName#' for event '#result.eventName#' is not defined." />
+					<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
 				<cfelse>
-					<cfset appManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager() />
-					<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
+					<cfset appManager = moduleManager.getModule(result.moduleName).getModuleAppManager() />
+					<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
 				</cfif>	
 			<cfelse>
-				<cfset eventContext = appManager.createEventContext(arguments.eventName, arguments.moduleName) />
+				<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
 			</cfif>
 			
 			<cfset request.eventContext = eventContext />
 			
-			<cfif NOT appManager.getEventManager().isEventDefined(arguments.eventName, true)>
+			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, true)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 					message="Event-handler for event '#arguments.eventName#', module '#arguments.moduleName#' is not defined." />
 			</cfif>
 			
-			<cfif appManager.getEventManager().isEventPublic(arguments.eventName, true)>
-				<cfset eventContext.announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+			<cfif appManager.getEventManager().isEventPublic(result.eventName, true)>
+				<cfset eventContext.announceEvent(result.eventName, eventArgs, result.moduleName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
-					message="Event-handler for event '#arguments.eventName#' is not accessible." />
+					message="Event-handler for event '#result.eventName#' is not accessible." />
 			</cfif>
 			
 			<!--- Handle any errors with the exception event.  --->

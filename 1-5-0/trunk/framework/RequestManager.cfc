@@ -69,8 +69,6 @@ Notes:
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
 
-		<cfset variables.requestHandler = createRequestHandler(getModuleDelimiter()) />
-
 		<cfreturn this />
 	</cffunction>
 
@@ -86,7 +84,7 @@ Notes:
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler = createRequestHandler() />
+			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getModuleDelimiter()) />
 		</cfif>
 		
 		<cfreturn request._MachIIRequestHandler />
@@ -220,12 +218,7 @@ Notes:
 
 	<!---
 	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="createRequestHandler" access="private" returntype="MachII.framework.RequestHandler" output="false"
-		hint="Creates a RequestHandler instance.">
-		<cfreturn CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getModuleDelimiter()) />
-	</cffunction>
-	
+	--->	
 	<cffunction name="parseBuildUrlParameters" access="private" returntype="struct" output="false"
 		hint="Parses the build url parameters into a useable form.">
 		<cfargument name="urlParameters" type="any" required="true"
