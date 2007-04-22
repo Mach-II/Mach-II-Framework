@@ -65,9 +65,9 @@ Notes:
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		
 		<!--- Parse through the complex list of delimiters --->
-		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1)) />
-		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2)) />
-		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3)) />
+		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
+		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
+		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
 
 		<cfset variables.requestHandler = createRequestHandler(getModuleDelimiter()) />
 

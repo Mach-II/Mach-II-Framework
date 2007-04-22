@@ -175,7 +175,7 @@ the rest of the framework. (pfarrell)
 		<cfif NOT isPropertyDefined("urlDelimiters")>
 			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlDelimiters")>
 			<cfelse>
-				<cfset setProperty("urlDelimiters", "?,&,=") />
+				<cfset setProperty("urlDelimiters", "?|&|=") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlParseSES")>
