@@ -255,7 +255,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 
 			<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 				<cfset trace("handleException", arguments.eventContext) />
-				<cfset appendTrace("Messsage: " & arguments.exception.getMessage(), "exception", "-") />
+				<cfset appendTrace("Messsage: " & arguments.exception.getMessage(), "", "exception", "-") />
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -326,8 +326,6 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			hint="Name of plugin method for this trace." />
 		<cfargument name="timing" type="string" required="true"
 			hint="Timing for this trace." />
-		<cfargument name="mappings" type="struct" required="false"
-			default="#StructNew()#" hint="Event mappings for the events if available." />
 		<cfset var trace = structNew() />
 
 		<!--- Create the trace information struct to be appended to the array or used in the log --->
@@ -335,7 +333,6 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset trace.module = arguments.module />
 		<cfset trace.point = arguments.point />
 		<cfset trace.timing = arguments.timing />
-		<cfset trace.mappings = arguments.mappings />
 
 		<cfif ListFindNoCase("display,both", getTraceMode())>
 			<cfset arrayAppend(getTraceInfo(), trace) />
