@@ -55,8 +55,8 @@ Notes:
 		hint="Handles a request made to the framework.">
 		<!--- Set the EventArgs scope with Form/URL parameters. --->
 		<cfset var eventArgs = getRequestEventArgs() />
-		<!--- Get the Event struct with module and event names --->
-		<cfset var result = getEventName(eventArgs) />
+		<!--- Get the module and event names --->
+		<cfset var result = parseEventParameter(eventArgs) />
 		<cfset var exception = "" />
 		<cfset var eventContext = appManager.createEventContext(result.eventName) />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
@@ -105,20 +105,8 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="getModuleName" access="private" returntype="string" output="false">
-		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
-		<cfset var moduleName = "" />
-		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
-		
-		<cfif listLen(arguments.eventName, moduleDelimiter) gte 1>
-			<cfset moduleName = listGetAt(arguments.eventName, 1, moduleDelimiter) />
-		</cfif>
-		
-		<cfreturn moduleName />
-	</cffunction>
-	
-	<cffunction name="getEventName" access="private" returntype="struct" output="false"
-		hint="Gets the event name from the incoming event arg struct.">
+	<cffunction name="parseEventParameter" access="private" returntype="struct" output="false"
+		hint="Gets the module and event name from the incoming event arg struct.">
 		<cfargument name="eventArgs" type="struct" required="true" />
 		
 		<cfset var rawEvent = "" />
