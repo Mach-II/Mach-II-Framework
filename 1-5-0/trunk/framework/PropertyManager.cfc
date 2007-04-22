@@ -235,7 +235,8 @@ the rest of the framework. (pfarrell)
 			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
 		--->
 		<cfif isObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
-			<cfthrow type="MachII.framework.propertyNotAllowed" message="The '#arguments.propertyName#' property cannot be set inside of a module." />
+			<cfthrow type="MachII.framework.propertyNotAllowed"
+				message="The '#arguments.propertyName#' property cannot be set inside of a module." />
 		<cfelse>
 			<cfset variables.properties[arguments.propertyName] = arguments.propertyValue />
 		</cfif>
@@ -267,6 +268,7 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent PropertyManager instance this FilterManager belongs to.">
 		<cfargument name="parentPropertyManager" type="MachII.framework.PropertyManager" required="true" />
