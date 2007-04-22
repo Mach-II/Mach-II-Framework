@@ -64,6 +64,7 @@ the rest of the framework. (pfarrell)
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var propertyNodes = "" />
 		<cfset var propertyName = "" />
@@ -77,7 +78,11 @@ the rest of the framework. (pfarrell)
 		<cfset var j = 0 />
 
 		<!--- Set the properties from the XML file. --->
-		<cfset propertyNodes = XMLSearch(arguments.configXML, "//property") />
+		<cfif NOT arguments.override>
+			<cfset propertyNodes = XMLSearch(arguments.configXML, "//properties/property") />
+		<cfelse>
+			<cfset propertyNodes = XMLSearch(arguments.configXML, "./properties/property") />
+		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">			
 			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />

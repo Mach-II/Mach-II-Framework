@@ -64,11 +64,12 @@ Notes:
 		<cfset var name = "" />
 		<cfset var file = "" />
 		<cfset var module = "" />
+		<cfset var overrideXml = "" />
 		<cfset var baseName = "" />
 		<cfset var i = 0 />
 
 		<!--- Set the module baseName if defined in the xml --->
-		<cfset modulesNode = XMLSearch(configXML, "//modules") />
+		<cfset modulesNode = XmlSearch(configXML, "//modules") />
 		<cfif arrayLen(modulesNode) eq 1>
 			<cfset modulesNode = modulesNode[1]>
 			<cfif structKeyExists(modulesNode[1].xmlAttributes, "baseName")>
@@ -78,13 +79,18 @@ Notes:
 		</cfif>
 		
 		<!--- Setup up each Module. --->
-		<cfset moduleNodes = XMLSearch(configXML,"//modules/module") />
+		<cfset moduleNodes = XmlSearch(configXML,"//modules/module") />
 		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
 			<cfset name = moduleNodes[i].xmlAttributes["name"] />
 			<cfset file = moduleNodes[i].xmlAttributes["file"] />
+			<cfif StructKeyExists(moduleNodes[i], "mach-ii")>
+				<cfset overrideXml = moduleNodes[i]["mach-ii"] />
+			<cfelse>
+				<cfset overrideXml = "" />
+			</cfif>
 		
 			<!--- Setup the Module. --->
-			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), name, file) />
+			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), name, file, overrideXml) />
 
 			<!--- Add the Module to the Manager. --->
 			<cfset addModule(name, module) />
@@ -115,7 +121,8 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="getModules" access="public" returntype="struct" output="false">
+	<cffunction name="getModules" access="public" returntype="struct" output="false"
+		hint="Returns a struct of all registered modules.">
 		<cfreturn variables.modules />
 	</cffunction>
 	

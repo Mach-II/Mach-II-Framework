@@ -54,6 +54,8 @@ Notes:
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
+		<cfargument name="overrideXml" type="any" required="false" default=""
+			hint="Optional argument for a modules. If there isn't one default to empty string." />
 			
 		<cfset var appManager = "" />
 		<cfset var utils = "" />
@@ -137,8 +139,11 @@ Notes:
 		--->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset propertyManager.loadXml(configXmls[i]) />
+			<cfset propertyManager.loadXml(configXmls[i], false) />
 		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset propertyManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
 		<cfset appManager.setPropertyManager(propertyManager) />
 		
 		<!--- RequestManager is a singleton --->

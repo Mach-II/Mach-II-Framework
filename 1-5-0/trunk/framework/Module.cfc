@@ -35,6 +35,7 @@ Updated version: 1.5.0
 	<cfset variables.appManager = "" />
 	<cfset variables.appLoader = "" />
 	<cfset variables.dtdPath = "" />
+	<cfset variables.overrideXml = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -44,10 +45,12 @@ Updated version: 1.5.0
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="file" type="string" required="true" />
+		<cfargument name="overrideXml" type="any" required="true" />
 		
 		<cfset setFile(arguments.file) />
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setOverrideXml(arguments.overrideXml) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -59,7 +62,7 @@ Updated version: 1.5.0
 			hint="Should the XML be validated before parsing." />
 
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager()) />
+				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager(), getOverrideXml()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
 		<cfset setDtdPath(arguments.configDtdPath) />
@@ -72,7 +75,7 @@ Updated version: 1.5.0
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				expandPath(getFile()), getDtdPath(), arguments.validateXML, getAppManager()) />
+				expandPath(getFile()), getDtdPath(), arguments.validateXML, getAppManager(), getOverrideXml()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
 		<cfset setAppLoader(appLoader) />
@@ -95,6 +98,7 @@ Updated version: 1.5.0
 		hint="Gets the file to use when setting up the module's AppManager">
 		<cfreturn variables.file />
 	</cffunction>
+	
 	<cffunction name="setDtdPath" access="public" returntype="void" output="false">
 		<cfargument name="dtdPath" type="string" required="true" />
 		<cfset variables.dtdPath = arguments.dtdPath />
@@ -102,6 +106,7 @@ Updated version: 1.5.0
 	<cffunction name="getDtdPath" access="public" type="string" output="false">
 		<cfreturn variables.dtdPath />
 	</cffunction>
+	
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
 		hint="Sets the name of the module">
 		<cfargument name="moduleName" type="string" required="true" />
@@ -111,6 +116,7 @@ Updated version: 1.5.0
 		hint="Gets the module name">
 		<cfreturn variables.moduleName />
 	</cffunction>
+	
 	<cffunction name="setAppManager" access="public" returntype="void" output="false"
 		hint="Returns the AppManager instance this Module belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -120,6 +126,7 @@ Updated version: 1.5.0
 		hint="Sets the AppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
 		hint="Returns the AppLoader instance this Module belongs to.">
 		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
@@ -129,6 +136,7 @@ Updated version: 1.5.0
 		hint="Sets the AppLoader instance this Module belongs to.">
 		<cfreturn variables.appLoader />
 	</cffunction>
+	
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"
 		hint="Returns the ModuLeAppManager instance this ModuleManager belongs to.">
 		<cfargument name="moduleAppManager" type="MachII.framework.AppManager" required="true" />
@@ -137,6 +145,16 @@ Updated version: 1.5.0
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the ModuLeAppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.moduleAppManager />
+	</cffunction>
+	
+	<cffunction name="setOverrideXml" access="public" returntype="void" output="false"
+		hint="Sets the override Xml for this module.">
+		<cfargument name="overrideXml" type="any" required="true" />
+		<cfset variables.overrideXml = arguments.overrideXml />
+	</cffunction>
+	<cffunction name="getOverrideXml" access="public" type="any" output="false"
+		hint="Gets the override Xml for this module.">
+		<cfreturn variables.overrideXml />
 	</cffunction>
 
 </cfcomponent>

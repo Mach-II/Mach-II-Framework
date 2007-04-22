@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.appFactory = "" />
 	<cfset variables.lastReloadHash = 0 />
 	<cfset variables.validateXML = 0 />
+	<cfset variables.overrideXml = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -51,13 +52,16 @@ Notes:
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
+		<cfargument name="overrideXml" type="any" required="false" default=""
+			hint="Optional argument for a modules. If there isn't one default to empty string." />
 		
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
 		<cfset setAppFactory(appFactory) />
 
 		<cfset setConfigPath(arguments.configPath) />
 		<cfset setDtdPath(arguments.dtdPath) />
-		<cfset setValidateXML(arguments.validateXML) />
+		<cfset setValidateXml(arguments.validateXml) />
+		<cfset setOverrideXml(arguments.overrideXml) />
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
@@ -111,7 +115,7 @@ Notes:
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
-				getValidateXml(), arguments.parentAppManager)) />
+				getValidateXml(), arguments.parentAppManager, getOverrideXml())) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
 	
@@ -200,6 +204,17 @@ Notes:
 	</cffunction>
 	<cffunction name="getAppFactory" access="public" returntype="MachII.framework.AppFactory" output="false">
 		<cfreturn variables.appFactory />
+	</cffunction>
+	
+	
+	<cffunction name="setOverrideXml" access="public" returntype="void" output="false"
+		hint="Sets the override Xml for this module.">
+		<cfargument name="overrideXml" type="any" required="true" />
+		<cfset variables.overrideXml = arguments.overrideXml />
+	</cffunction>
+	<cffunction name="getOverrideXml" access="public" type="any" output="false"
+		hint="Gets the override Xml for this module.">
+		<cfreturn variables.overrideXml />
 	</cffunction>
 
 </cfcomponent>
