@@ -54,6 +54,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT include EMPTY>
 <!ATTLIST include 
 	file CDATA #REQUIRED
+	override CDATA #IMPLIED
 >
 
 <!--
