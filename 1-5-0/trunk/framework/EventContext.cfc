@@ -42,10 +42,7 @@ Notes:
 	<cfset variables.currentEvent = "" />
 	<cfset variables.mappings = StructNew() />
 	<cfset variables.exceptionEventName = "" />
-	<cfset variables.maxEvents = 10 />
-	<cfset variables.isProcessing = false />
 	<cfset variables.previousEvent = "" />
-	<cfset variables.isException = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -64,7 +61,6 @@ Notes:
 		<cfset setRequestEventName(arguments.requestEventName) />
 		<cfset setRequestModuleName(arguments.requestModuleName) />
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
-		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- (re)init the ViewContext. --->
 		<cfset getViewContext().init(getAppManager()) />
@@ -76,7 +72,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - GENERAL
 	--->
 	<cffunction name="announceEvent" access="public" returntype="void" output="true"
 		hint="Queues an event for the framework to handle.">
@@ -129,47 +125,7 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
-	<cffunction name="setCurrentEvent" access="private" returntype="void" output="false">
-		<cfargument name="currentEvent" type="MachII.framework.Event" required="true" />
-		<cfset variables.currentEvent = arguments.currentEvent />
-	</cffunction>
-	<cffunction name="getCurrentEvent" access="public" returntype="MachII.framework.Event" output="false"
-		hint="Gets the current event object.">
-		<cfreturn variables.currentEvent />
-	</cffunction>
-	<cffunction name="hasCurrentEvent" access="public" returntype="boolean" output="false"
-		hint="Checks if the current event has an event object.">
-		<cfreturn IsObject(variables.currentEvent) />
-	</cffunction>
-	
-	<cffunction name="getNextEvent" access="public" returntype="MachII.framework.Event" output="false"
-		hint="Peeks at the next event in the queue.">
-		<cfreturn getEventQueue().peek() />
-	</cffunction>
-	<cffunction name="hasNextEvent" access="public" returntype="boolean" output="false"
-		hint="Peeks at the next event in the queue.">
-		<cfreturn hasMoreEvents() />
-	</cffunction>
-	
-	<cffunction name="setPreviousEvent" access="private" returntype="void" output="false">
-		<cfargument name="previousEvent" type="MachII.framework.Event" required="true" />
-		<cfset variables.previousEvent = arguments.previousEvent />
-	</cffunction>
-	<cffunction name="getPreviousEvent" access="public" returntype="MachII.framework.Event" output="false"
-		hint="Returns the previous handled event.">
-		<cfreturn variables.previousEvent />
-	</cffunction>
-	<cffunction name="hasPreviousEvent" access="public" returntype="boolean" output="false"
-		hint="Returns whether or not getPreviousEvent() can be called to return an event.">
-		<cfreturn IsObject(variables.previousEvent) />
-	</cffunction>
-	
-	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
-		hint="Checks if there are more events in the queue.">
-		<cfreturn NOT getEventQueue().isEmpty() />
-	</cffunction>
-	
+
 	<cffunction name="setEventMapping" access="public" returntype="string" output="false"
 		hint="Sets an event mapping.">
 		<cfargument name="eventName" type="string" required="true" />
@@ -214,6 +170,65 @@ Notes:
 		hint="Clears the current event mappings.">
 		<cfset StructClear(variables.mappings) />
 	</cffunction>
+
+	<cffunction name="displayView" access="public" returntype="void" output="true"
+		hint="Displays a view.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="viewName" type="string" required="true" />
+		<cfargument name="contentKey" type="string" required="false" default="" />
+		<cfargument name="contentArg" type="string" required="false" default="" />
+		<cfargument name="append" type="boolean" required="false" default="false" />
+		
+		<!--- Pre-Invoke. --->
+		<cfset getAppManager().getPluginManager().preView(this) />
+		
+		<cfset getViewContext().displayView(arguments.event, arguments.viewName, arguments.contentKey, arguments.contentArg, arguments.append) />
+		
+		<!--- Post-Invoke. --->
+		<cfset getAppManager().getPluginManager().postView(this) />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="setPreviousEvent" access="private" returntype="void" output="false">
+		<cfargument name="previousEvent" type="MachII.framework.Event" required="true" />
+		<cfset variables.previousEvent = arguments.previousEvent />
+	</cffunction>
+	<cffunction name="getPreviousEvent" access="public" returntype="MachII.framework.Event" output="false"
+		hint="Returns the previous handled event.">
+		<cfreturn variables.previousEvent />
+	</cffunction>
+	<cffunction name="hasPreviousEvent" access="public" returntype="boolean" output="false"
+		hint="Returns whether or not getPreviousEvent() can be called to return an event.">
+		<cfreturn IsObject(variables.previousEvent) />
+	</cffunction>
+	
+	<cffunction name="setCurrentEvent" access="private" returntype="void" output="false">
+		<cfargument name="currentEvent" type="MachII.framework.Event" required="true" />
+		<cfset variables.currentEvent = arguments.currentEvent />
+	</cffunction>
+	<cffunction name="getCurrentEvent" access="public" returntype="MachII.framework.Event" output="false"
+		hint="Gets the current event object.">
+		<cfreturn variables.currentEvent />
+	</cffunction>
+	<cffunction name="hasCurrentEvent" access="public" returntype="boolean" output="false"
+		hint="Checks if the current event has an event object.">
+		<cfreturn IsObject(variables.currentEvent) />
+	</cffunction>
+	
+	<cffunction name="getNextEvent" access="public" returntype="MachII.framework.Event" output="false"
+		hint="Peeks at the next event in the queue.">
+		<cfreturn getEventQueue().peek() />
+	</cffunction>
+	<cffunction name="hasNextEvent" access="public" returntype="boolean" output="false"
+		hint="Peeks at the next event in the queue.">
+		<cfreturn hasMoreEvents() />
+	</cffunction>
+	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
+		hint="Checks if there are more events in the queue.">
+		<cfreturn NOT getEventQueue().isEmpty() />
+	</cffunction>
 	
 	<cffunction name="handleException" access="public" returntype="void" output="true"
 		hint="Handles an exception.">
@@ -225,16 +240,7 @@ Notes:
 		<cfset var nextModuleName = "" />
 		<cfset var exceptionEvent = "" />
 		
-		<!--- TODO: need to fix this method and get it into the requestHander as well --->
-		
 		<cftry>
-			<!--- Reset if we haven't processed an exception yet so we have the 
-				max events for processing the exception, otherwise we short change 
-				the exception handling queue length--->
-			<cfif NOT getIsException()>
-				<cfset resetEventCount() />
-			</cfif>
-			
 			<!--- Get the exception event and create and exception --->
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(getExceptionEventName())>
@@ -268,23 +274,6 @@ Notes:
 				<cfrethrow />
 			</cfcatch>
 		</cftry>
-	</cffunction>
-	
-	<cffunction name="displayView" access="public" returntype="void" output="true"
-		hint="Displays a view.">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="viewName" type="string" required="true" />
-		<cfargument name="contentKey" type="string" required="false" default="" />
-		<cfargument name="contentArg" type="string" required="false" default="" />
-		<cfargument name="append" type="boolean" required="false" default="false" />
-		
-		<!--- Pre-Invoke. --->
-		<cfset getAppManager().getPluginManager().preView(this) />
-		
-		<cfset getViewContext().displayView(arguments.event, arguments.viewName, arguments.contentKey, arguments.contentArg, arguments.append) />
-		
-		<!--- Post-Invoke. --->
-		<cfset getAppManager().getPluginManager().postView(this) />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
@@ -322,7 +311,7 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="true" />
 		<cfreturn getAppManager().getRequestManager().savePersistEventData(arguments.eventArgs) />
 	</cffunction>
-	
+
 	<cffunction name="clearEventQueue" access="public" returntype="void" output="false"
 		hint="Clears the event queue.">
 		<cfset getEventQueue().clear() />
@@ -330,7 +319,7 @@ Notes:
 	
 	<cffunction name="getEventCount" access="public" returntype="numeric" output="false"
 		hint="Returns the number of events that have been processed for this context.">
-		<cfreturn variables.eventCount />
+		<cfreturn getRequestHandler().getEventCount() />
 	</cffunction>
 	
 	<!---
