@@ -68,13 +68,6 @@ Notes:
 		<cfset getModuleManager().configure() />
 	</cffunction>
 	
-	<cffunction name="createEventContext" access="public" returntype="MachII.framework.EventContext" output="false"
-		hint="Creates an EventContext instance.">
-		<cfargument name="requestEventName" type="string" required="true" />
-		<cfargument name="requestModuleName" type="string" required="false" default="" />
-		<cfreturn CreateObject("component", "MachII.framework.EventContext").init(this, arguments.requestEventName, requestModuleName) />
-	</cffunction>
-	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		<cfargument name="createNew" type="boolean" required="false" default="false"
