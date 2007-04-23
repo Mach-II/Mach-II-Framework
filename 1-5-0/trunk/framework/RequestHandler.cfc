@@ -77,10 +77,10 @@ Notes:
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
 		
-		<!--- <cftry> --->
+		<cftry>
 			<cfif len(result.moduleName)>
 				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
-					<cfthrow type="MachII.framework.ModuleNotDefined" 
+					<cfthrow type="MachII.framework.ModuleNotDefined"  	
 						message="The module '#result.moduleName#' for event '#result.eventName#' is not defined." />
 				<cfelse>
 					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
@@ -104,11 +104,13 @@ Notes:
 			</cfif>
 			
 			<!--- Handle any errors with the exception event --->
-			<!--- <cfcatch type="any">
+			<cfcatch type="any">
+				<cfdump var="#cfcatch#">
+				<cfabort />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
-		</cftry> --->
+		</cftry>
 		
 		<!--- Start the event processing --->
 		<cfset processEvents() />
@@ -139,6 +141,8 @@ Notes:
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch>
+				<cfdump var="#cfcatch#">
+				<cfabort />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
@@ -339,7 +343,7 @@ Notes:
 		<cfreturn variables.maxEvents />
 	</cffunction>
 	
-	<cffunction name="createException" access="private" returntype="MachII.util.Exception" output="false"
+	<cffunction name="createException" access="public" returntype="MachII.util.Exception" output="false"
 		hint="Creates an exception object (with no cfcatch).">
 		<cfargument name="type" type="string" required="false" default="" />
 		<cfargument name="message" type="string" required="false" default="" />
@@ -355,7 +359,7 @@ Notes:
 		<cfreturn exception />
 	</cffunction>
 	
-	<cffunction name="wrapException" access="private" returntype="MachII.util.Exception" output="false"
+	<cffunction name="wrapException" access="public" returntype="MachII.util.Exception" output="false"
 		hint="Creates an exception object (with cfcatch).">
 		<cfargument name="caughtException" type="any" required="true" />
 		
@@ -437,7 +441,7 @@ Notes:
 		<cfargument name="requestEventName" type="string" required="true" />
 		<cfset variables.requestEventName = arguments.requestEventName />
 	</cffunction>
-	<cffunction name="getRequestEventName" access="private" returntype="string" output="false">
+	<cffunction name="getRequestEventName" access="public" returntype="string" output="false">
 		<cfreturn variables.requestEventName />
 	</cffunction>
 	
@@ -445,7 +449,7 @@ Notes:
 		<cfargument name="requestModuleName" type="string" required="true" />
 		<cfset variables.requestModuleName = arguments.requestModuleName />
 	</cffunction>
-	<cffunction name="getRequestModuleName" access="private" returntype="string" output="false">
+	<cffunction name="getRequestModuleName" access="public" returntype="string" output="false">
 		<cfreturn variables.requestModuleName />
 	</cffunction>
 

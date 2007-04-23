@@ -94,12 +94,14 @@ Notes:
 				<cfset nextEventName = mapping.mappingEventName />
 			</cfif>
 			<!--- Create the event. --->
-			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName(), getRequestModuleName()) />
+			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch>
-				<cfset exception = wrapException(cfcatch) />
+				<cfdump var="#cfcatch#">
+				<cfabort />
+				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
@@ -120,6 +122,8 @@ Notes:
 			<cfset subroutineHandler.handleSubroutine(arguments.event, this) />
 					
 			<cfcatch>
+				<cfdump var="#cfcatch#">
+				<cfabort />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
