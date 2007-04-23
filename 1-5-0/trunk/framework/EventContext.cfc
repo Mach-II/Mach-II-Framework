@@ -235,40 +235,26 @@ Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
 		
-		<cfset var mapping = "" />
-		<cfset var nextEventName = getExceptionEventName() />
-		<cfset var nextModuleName = "" />
-		<cfset var exceptionEvent = "" />
+		<cfset var eventArgs = StructNew() />
 		
 		<cftry>
-			<!--- Get the exception event and create and exception --->
-			<!--- Check for an event-mapping. --->
-			<cfif isEventMappingDefined(getExceptionEventName())>
-				<cfset mapping = getEventMapping(getExceptionEventName()) />
-				<cfset nextModuleName = mapping.mappingModuleName />
-				<cfset nextEventName = mapping.mappingName />
-			</cfif>
-			<cfset exceptionEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, StructNew(), getRequestEventName(), getRequestModuleName()) />
-			<!--- Put the exception object --->
-			<cfset exceptionEvent.setArg("exception", arguments.exception) />
-			
-			<!--- <cfdump var="#arguments.exception.getMessage()#" label="handleException: arguments.exception.getMessage">
-			<cfdump var="#arguments.exception.getTagContext()#" label="handleException: arguments.exception.getTagContext">
-			<cfabort /> --->
-			
+			<!--- Create eventArg data --->			
+			<cfset eventArgs.exception = arguments.exception />
 			<cfif hasCurrentEvent()>
-				<cfset exceptionEvent.setArg("exceptionEvent", getCurrentEvent()) />
+				<cfset eventArgs.exceptionEvent = getCurrentEvent() />
 			</cfif>
 			
+			<!--- Call the handleException point in the plugins --->
 			<cfset getAppManager().getPluginManager().handleException(this, arguments.exception) />
 			
+			<!--- Clear event queue --->
 			<cfif arguments.clearEventQueue>
 				<cfset variables.clearEventQueue() />
 			</cfif>
 			
 			<!--- Queue the exception event instead of handling it immediately. 
 			The queue is cleared by default so it will be handled first anyway. --->
-			<cfset getEventQueue().put(exceptionEvent) />
+			<cfset announceEvent(getExceptionEventName(), eventArgs) />
 			
 			<cfcatch type="any">
 				<cfrethrow />
