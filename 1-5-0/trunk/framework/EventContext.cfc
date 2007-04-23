@@ -32,9 +32,10 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.eventCount = 0 />
-	<cfset variables.viewContext = "" />
+	<cfset variables.requestHandler = "" />
 	<cfset variables.appManager = "" />
+	<cfset variables.eventQueue = "" />
+	<cfset variables.viewContext = CreateObject("component", "MachII.framework.ViewContext") />
 	<cfset variables.requestEventName = "" />
 	<cfset variables.requestModuleName = "" />
 	<cfset variables.currentEventHandler = "" />
@@ -51,23 +52,25 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="EventContext" output="false"
 		hint="Initalizes the event-context.">
+		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
 		<cfargument name="requestEventName" type="string" required="false" default="" />
 		<cfargument name="requestModuleName" type="string" required="false" default="" />
 		
-		<cfset var eventQueue = 0 />
-		<cfset var viewContext = 0 />
-		
+		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setEventQueue(arguments.eventQueue) />
 		<cfset setRequestEventName(arguments.requestEventName) />
 		<cfset setRequestModuleName(arguments.requestModuleName) />
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
-		<!--- Setup the ViewContext. --->
-		<cfset viewContext = CreateObject("component", "MachII.framework.ViewContext") />
-		<cfset viewContext.init(getAppManager()) />
-		<cfset setViewContext(viewContext) />
+		<!--- (re)init the ViewContext. --->
+		<cfset getViewContext().init(getAppManager()) />
+		
+		<!--- Clear the event mappings --->
+		<cfset clearEventMappings() />
 		
 		<cfreturn this />
 	</cffunction>
@@ -86,7 +89,7 @@ Notes:
 		<cfset var nextModuleName = arguments.moduleName />
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
-		<cftrace text="announceEvent: module: #moduleName#, event: #eventName#">
+		
 		<cftry>
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(arguments.eventName)>
@@ -207,10 +210,6 @@ Notes:
 			<cfreturn false />
 		</cfif>
 	</cffunction>
-	<cffunction name="getEventMappings" access="public" returntype="struct" output="false"
-		hint="Gets all active event mappings.">
-		<cfreturn variables.mappings />
-	</cffunction>
 	<cffunction name="clearEventMappings" access="public" returntype="void" output="false"
 		hint="Clears the current event mappings.">
 		<cfset StructClear(variables.mappings) />
@@ -315,7 +314,7 @@ Notes:
 		<cfif NOT Len(arguments.moduleName)>
 			<cfset argument.moduleName = getCurrentEvent().getModuleName() />
 		</cfif>
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase)) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
 	</cffunction>
 	
 	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
@@ -342,12 +341,28 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="getRequestHandler" access="private" type="MachII.framework.RequestHandler" output="false">
+		<cfreturn variables.requestHandler />
+	</cffunction>
+	<cffunction name="setRequestHandler" access="private" returntype="void" output="false">
+		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
+		<cfset variables.requestHandler = arguments.requestHandler />
+	</cffunction>
+	
 	<cffunction name="getAppManager" access="private" type="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
 	<cffunction name="setAppManager" access="private" returntype="void" output="false">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	
+	<cffunction name="getEventQueue" access="private" type="MachII.framework.AppManager" output="false">
+		<cfreturn variables.eventQueue />
+	</cffunction>
+	<cffunction name="setEventQueue" access="private" returntype="void" output="false">
+		<cfargument name="eventQueue" type="MachII.utils.SizedQueue" required="true" />
+		<cfset variables.eventQueue = arguments.eventQueue />
 	</cffunction>
 	
 	<cffunction name="getViewContext" access="private" type="MachII.framework.ViewContext" output="false">
