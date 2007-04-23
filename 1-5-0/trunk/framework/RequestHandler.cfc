@@ -89,6 +89,7 @@ Notes:
 			</cfif>
 			
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, true)>
+				<cfset setupEventContext(appManager) />
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined." />
 			</cfif>
@@ -201,7 +202,6 @@ Notes:
 		hint="Handles the current event.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var eventName = "" />
 		<cfset var eventHandler = 0 />
 		<cfset var topAppManager = 0 />
 		<cfset var moduleAppManager = 0 />
@@ -229,9 +229,7 @@ Notes:
 		
 		<cfset request.event = arguments.event />
 		
-		<cfset eventName = arguments.event.getName() />
-		
-		<cfset eventHandler = moduleAppManager.getEventManager().getEventHandler(eventName, arguments.event.getModuleName()) />
+		<cfset eventHandler = moduleAppManager.getEventManager().getEventHandler(arguments.event.getName(), arguments.event.getModuleName()) />
 		<cfset setCurrentEventHandler(eventHandler) />
 		
 		<!--- Pre-Invoke. --->
