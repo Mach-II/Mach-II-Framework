@@ -34,8 +34,10 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.eventQueue = "" />
+	<cfset variables.eventCount = 0 />
 	<cfset variables.maxEvents = 10 />
 	<cfset variables.exceptionEventName = "" />
+	<cfset variables.isProcessing = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -61,6 +63,13 @@ Notes:
 		<cfreturn this />
 	</cffunction>
 	
+	<cffunction name="createEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
+		hint="Creates an EventContext instance.">
+		<cfargument name="requestEventName" type="string" required="true" />
+		<cfargument name="requestModuleName" type="string" required="false" default="" />
+		<cfreturn CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue(), arguments.requestEventName, arguments.requestModuleName) />
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -71,7 +80,7 @@ Notes:
 		<!--- Get the module and event names --->
 		<cfset var result = parseEventParameter(eventArgs) />
 		<cfset var exception = "" />
-		<cfset var eventContext = appManager.createEventContext(result.eventName) />
+		<!--- <cfset var eventContext = createEventContext(result.eventName, result.moduleName) /> --->
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var appManager = getAppManager()>
 		
@@ -80,16 +89,10 @@ Notes:
 				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined" 
 						message="The module '#result.moduleName#' for event '#result.eventName#' is not defined." />
-					<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
 				<cfelse>
-					<cfset appManager = moduleManager.getModule(result.moduleName).getModuleAppManager() />
-					<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
+					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
 				</cfif>	
-			<cfelse>
-				<cfset eventContext = appManager.createEventContext(result.eventName, result.moduleName) />
 			</cfif>
-			
-			<cfset request.eventContext = eventContext />
 			
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, true)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
@@ -97,7 +100,7 @@ Notes:
 			</cfif>
 			
 			<cfif appManager.getEventManager().isEventPublic(result.eventName, true)>
-				<cfset eventContext.announceEvent(result.eventName, eventArgs, result.moduleName) />
+				<cfset announceEvent(result.eventName, eventArgs, result.moduleName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#result.eventName#' is not accessible." />
@@ -107,31 +110,65 @@ Notes:
 			<cfcatch type="any">
 				<cfset exception = CreateObject("component", "MachII.util.Exception") />
 				<cfset exception.wrapException(cfcatch) />
-				<cfset eventContext.handleException(exception, true) />
+				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
 		
 		<!--- Start the event processing. --->
-		<cfset eventContext.processEvents() />
+		<cfset processEvents() />
+	</cffunction>
+	
+	<cffunction name="announceEvent" access="public" returntype="void" output="true"
+		hint="Queues an event for the framework to handle.">
+		<cfargument name="eventName" type="string" required="true" />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="moduleName" type="string" required="false" default="" />
+		
+		<cfset var mapping = "" />
+		<cfset var nextEvent = "" />
+		<cfset var nextModuleName = arguments.moduleName />
+		<cfset var nextEventName = arguments.eventName />
+		<cfset var exception = "" />
+		<cftrace text="announceEvent: module: #moduleName#, event: #eventName#">
+		<cftry>
+			<!--- Check for an event-mapping. --->
+			<cfif isEventMappingDefined(arguments.eventName)>
+				<cfset mapping = getEventMapping(arguments.eventName) />
+				<cfset nextModuleName = mapping.mappingModuleName />
+				<cfset nextEventName = mapping.mappingEventName />
+			</cfif>
+			<!--- Create the event. --->
+			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName(), getRequestModuleName()) />
+			<!--- Queue the event. --->
+			<cfset getEventQueue().put(nextEvent) />
+			
+			<cfcatch>
+				<cfset exception = wrapException(cfcatch) />
+				<cfset handleException(exception, true) />
+			</cfcatch>
+		</cftry>
+	</cffunction>
+	
+	<cffunction name="getEventCount" access="public" returntype="numeric" output="false"
+		hint="Returns the number of events that have been processed for this context.">
+		<cfreturn variables.eventCount />
 	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-<cffunction name="processEvents" access="private" returntype="void" output="true"
+	<cffunction name="processEvents" access="private" returntype="void" output="true"
 		hint="Begins processing of queued events. Can only be called once.">
 	
 		<cfset var pluginManager = "" />
-		<cfset var eventManager = "" />
 		<cfset var exception = "" />
 		
 		<cfif getIsProcessing()>
-			<cfthrow message="The EventContext is already processing the events in the queue. The processEvents() method can only be called once." />
+			<cfthrow message="The RequestHandler is already processing the events in the queue. The processEvents() method can only be called once." />
 		</cfif>
 		<cfset setIsProcessing(true) />
 		
 		<cfset pluginManager = getAppManager().getPluginManager() />
-		<cfset eventManager = getAppManager().getEventManager() />
 	
 		<!--- Pre-Process. --->
 		<cfset pluginManager.preProcess(this) />
