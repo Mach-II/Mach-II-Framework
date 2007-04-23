@@ -244,19 +244,21 @@ Notes:
 			<cfset topAppManager = getAppManager() />
 		</cfif>
 		
-		<cfif variables.eventContext.hasCurrentEvent()>
-			<cfset setPreviousEvent(getCurrentEvent()) />
-		</cfif>
-		<cfset variables.eventContext.setCurrentEvent(arguments.event) />
-		<cfset request.event = arguments.event />
-		
-		<cfset eventName = arguments.event.getName() />
-		
 		<cfif len(arguments.event.getModuleName())>
 			<cfset moduleAppManager = topAppManager.getModuleManager().getModule(arguments.event.getModuleName()).getModuleAppManager() />
 		<cfelse>
 			<cfset moduleAppManager = topAppManager>
 		</cfif>
+		
+		<cfif variables.eventContext.hasCurrentEvent()>
+			<cfset setPreviousEvent(variables.eventContext.getCurrentEvent()) />
+		</cfif>
+		
+		<cfset setupEventContext(moduleAppManager, arguments.event, variables.eventContext.getCurrentEvent()) />
+		
+		<cfset request.event = arguments.event />
+		
+		<cfset eventName = arguments.event.getName() />
 		
 		<cfset eventHandler = moduleAppManager.getEventManager().getEventHandler(eventName, arguments.event.getModuleName()) />
 		<cfset setCurrentEventHandler(eventHandler) />
@@ -273,7 +275,11 @@ Notes:
 	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
 		hint="Setup an EventContext instance.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue()) />
+		<cfargument name="currentEvent" type="MachII.framework.Event" required="false"
+			default="#createObject("component", "MachII.framework.Event")#" />
+		<cfargument name="previousEvent" type="MachII.framework.Event" required="false"
+			default="#createObject("component", "MachII.framework.Event")#" />
+		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), currentEvent, previousEvent) />
 	</cffunction>
 
 	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
