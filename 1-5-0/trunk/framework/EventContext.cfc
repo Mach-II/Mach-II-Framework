@@ -50,10 +50,14 @@ Notes:
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
+		<cfargument name="currentEvent" type="any" required="" default="" />
+		<cfargument name="previousEvent" type="any" required="" default="" />
 		
 		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEventQueue(arguments.eventQueue) />
+		<cfset setCurrentEvent(arguments.currentEvent) />
+		<cfset setPreviousEvent(arguments.previousEvent) />
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		
 		<!--- (re)init the ViewContext. --->
@@ -185,7 +189,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="setPreviousEvent" access="public" returntype="void" output="false">
+	<cffunction name="setPreviousEvent" access="private" returntype="void" output="false">
 		<cfargument name="previousEvent" type="MachII.framework.Event" required="true" />
 		<cfset variables.previousEvent = arguments.previousEvent />
 	</cffunction>
@@ -198,7 +202,7 @@ Notes:
 		<cfreturn IsObject(variables.previousEvent) />
 	</cffunction>
 	
-	<cffunction name="setCurrentEvent" access="public" returntype="void" output="false">
+	<cffunction name="setCurrentEvent" access="private" returntype="void" output="false">
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="true" />
 		<cfset variables.currentEvent = arguments.currentEvent />
 	</cffunction>
