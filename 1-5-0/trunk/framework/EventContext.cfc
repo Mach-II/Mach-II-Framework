@@ -50,8 +50,8 @@ Notes:
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
-		<cfargument name="currentEvent" type="any" required="" default="" />
-		<cfargument name="previousEvent" type="any" required="" default="" />
+		<cfargument name="currentEvent" type="any" required="false" default="" />
+		<cfargument name="previousEvent" type="any" required="false" default="" />
 		
 		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setAppManager(arguments.appManager) />
