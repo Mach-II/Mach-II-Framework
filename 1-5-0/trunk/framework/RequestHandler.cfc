@@ -77,7 +77,7 @@ Notes:
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
 		
-		<cftry>
+		<!--- <cftry> --->
 			<cfif len(result.moduleName)>
 				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined" 
@@ -97,18 +97,18 @@ Notes:
 				<cfset nextEvent = getAppManager().getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName) />
 				<!--- Queue the event. --->
 				<cfset getEventQueue().put(nextEvent) />
-				<cfset setupEventContext(appManager, result.moduleName, result.eventName) />
+				<cfset setupEventContext(appManager, nextEvent) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#result.eventName#' is not accessible." />
 			</cfif>
 			
 			<!--- Handle any errors with the exception event --->
-			<cfcatch type="any">
+			<!--- <cfcatch type="any">
 				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
-		</cftry>
+		</cftry> --->
 		
 		<!--- Start the event processing --->
 		<cfset processEvents() />
@@ -237,6 +237,7 @@ Notes:
 		<cfset var eventHandler = 0 />
 		<cfset var topAppManager = 0 />
 		<cfset var moduleAppManager = 0 />
+		<cfset var previousEvent = 0 />
 		
 		<cfif isObject(getAppManager().getParent())>
 			<cfset topAppManager = getAppManager().getParent() />
@@ -250,7 +251,13 @@ Notes:
 			<cfset moduleAppManager = topAppManager>
 		</cfif>
 		
-		<cfset setupEventContext(moduleAppManager, arguments.event, variables.eventContext.getCurrentEvent()) />
+		<cfif variables.eventContext.hasCurrentEvent()>
+			<cfset previousEvent = variables.eventContext.getCurrentEvent()>
+		<cfelse>
+			<cfset previousEvent = createObject("component", "MachII.framework.Event")>
+		</cfif>
+		
+		<cfset setupEventContext(moduleAppManager, arguments.event, previousEvent) />
 		
 		<cfset request.event = arguments.event />
 		
@@ -273,8 +280,7 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="false"
 			default="#createObject("component", "MachII.framework.Event")#" />
-		<cfargument name="previousEvent" type="MachII.framework.Event" required="false"
-			default="#createObject("component", "MachII.framework.Event")#" />
+		<cfargument name="previousEvent" type="any" required="false" default="" />
 		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), currentEvent, previousEvent) />
 	</cffunction>
 
