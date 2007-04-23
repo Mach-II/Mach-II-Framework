@@ -39,7 +39,6 @@ Notes:
 	<cfset variables.eventQueue = "" />
 	<cfset variables.eventCount = 0 />
 	<cfset variables.maxEvents = 10 />
-	<cfset variables.exceptionEventName = "" />
 	<cfset variables.isProcessing = false />
 	
 	<!---
@@ -52,8 +51,6 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
-		
-		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- Setup the event queue --->
@@ -62,14 +59,8 @@ Notes:
 		<cfreturn this />
 	</cffunction>
 	
-	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
-		hint="Setup an EventContext instance.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), getRequestEventName(), getRequestModuleName()) />
-	</cffunction>
-	
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - GENERAL
 	--->
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles a request made to the framework.">
@@ -279,6 +270,12 @@ Notes:
 		<cfset clearEventMappings() />
 	</cffunction>
 	
+	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
+		hint="Setup an EventContext instance.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), getRequestEventName(), getRequestModuleName()) />
+	</cffunction>
+	
 	<cffunction name="incrementEventCount" access="private" returntype="void" output="false"
 		hint="Increments the current event count by 1.">
 		<cfset variables.eventCount = variables.eventCount + 1 />
@@ -354,18 +351,6 @@ Notes:
 		<cfset setIsException(true) />
 		
 		<cfreturn exception />
-	</cffunction>	
-	
-	<cffunction name="getModuleName" access="private" returntype="string" output="false">
-		<cfargument name="eventName" type="string" required="true" hint="event name string with optional module name.">
-		<cfset var moduleName = "" />
-		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
-		
-		<cfif listLen(arguments.eventName, moduleDelimiter) gte 1>
-			<cfset moduleName = listGetAt(arguments.eventName, 1, moduleDelimiter) />
-		</cfif>
-		
-		<cfreturn moduleName />
 	</cffunction>
 
 	<cffunction name="parseEventParameter" access="private" returntype="struct" output="false"
