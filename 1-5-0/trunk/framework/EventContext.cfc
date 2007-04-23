@@ -99,8 +99,6 @@ Notes:
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch>
-				<cfdump var="#cfcatch#">
-				<cfabort />
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
@@ -122,8 +120,6 @@ Notes:
 			<cfset subroutineHandler.handleSubroutine(arguments.event, this) />
 					
 			<cfcatch>
-				<cfdump var="#cfcatch#">
-				<cfabort />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>

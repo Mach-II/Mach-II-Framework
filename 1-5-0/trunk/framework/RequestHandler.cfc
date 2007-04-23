@@ -115,39 +115,6 @@ Notes:
 		<cfset processEvents() />
 	</cffunction>
 	
-	<cffunction name="announceEvent" access="public" returntype="void" output="true"
-		hint="Queues an event for the framework to handle.">
-		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="moduleName" type="string" required="false" default="" />
-		
-		<cfset var mapping = "" />
-		<cfset var nextEvent = "" />
-		<cfset var nextModuleName = arguments.moduleName />
-		<cfset var nextEventName = arguments.eventName />
-		<cfset var exception = "" />
-		<cftrace text="announceEvent: module: #moduleName#, event: #eventName#">
-		<cftry>
-			<!--- Check for an event-mapping. --->
-			<cfif isEventMappingDefined(arguments.eventName)>
-				<cfset mapping = getEventMapping(arguments.eventName) />
-				<cfset nextModuleName = mapping.mappingModuleName />
-				<cfset nextEventName = mapping.mappingEventName />
-			</cfif>
-			<!--- Create the event. --->
-			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestEventName(), getRequestModuleName()) />
-			<!--- Queue the event. --->
-			<cfset getEventQueue().put(nextEvent) />
-			
-			<cfcatch>
-				<cfdump var="#cfcatch#">
-				<cfabort />
-				<cfset exception = wrapException(cfcatch) />
-				<cfset handleException(exception, true) />
-			</cfcatch>
-		</cftry>
-	</cffunction>
-	
 	<cffunction name="getEventCount" access="public" returntype="numeric" output="false"
 		hint="Returns the number of events that have been processed for this context.">
 		<cfreturn variables.eventCount />
@@ -179,7 +146,7 @@ Notes:
 		<!--- If there are still events in the queue after done processing, then throw an exception. --->
 		<cfif NOT getIsException() AND NOT getEventQueue().isEmpty()>
 			<cfset exception = createException("MachII.framework.MaxEventsExceeded", "The maximum number of events (#getMaxEvents()#) the framework will process for a single request has been exceeded.") />
-			<cfset handleException(exception, true) />
+			<cfset variables.eventContext.handleException(exception, true) />
 			
 			<!--- Reset the count so the exception has the max number of event to process itself --->
 			<cfset resetEventCount() />
@@ -223,10 +190,8 @@ Notes:
 				<cfif getIsException()>
 					<cfrethrow />
 				<cfelse>
-					<cfdump var="#cfcatch#">
-					<cfabort>
 					<cfset exception = wrapException(cfcatch) />
-					<cfset handleException(exception, true) />
+					<cfset variables.eventContext.handleException(exception, true) />
 				</cfif>
 			</cfcatch>
 		</cftry>
