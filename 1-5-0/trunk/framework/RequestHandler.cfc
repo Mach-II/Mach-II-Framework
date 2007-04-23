@@ -40,6 +40,7 @@ Notes:
 	<cfset variables.eventCount = 0 />
 	<cfset variables.maxEvents = 10 />
 	<cfset variables.isProcessing = false />
+	<cfset variables.isException = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -166,7 +167,7 @@ Notes:
 		<cfset pluginManager = getAppManager().getPluginManager() />
 	
 		<!--- Pre-Process. --->
-		<cfset pluginManager.preProcess(this) />
+		<cfset pluginManager.preProcess(variables.eventContext) />
 		
 		<cfloop condition="hasMoreEvents() AND getEventCount() LT getMaxEvents()">
 			<cfset handleNextEvent() />
@@ -200,7 +201,7 @@ Notes:
 		</cfif>
 		
 		<!--- Post-Process. --->
-		<cfset pluginManager.postProcess(this) />
+		<cfset pluginManager.postProcess(variables.eventContext) />
 		<cfset setIsProcessing(false) />
 	</cffunction>
 	
@@ -219,6 +220,8 @@ Notes:
 				<cfif getIsException()>
 					<cfrethrow />
 				<cfelse>
+					<cfdump var="#cfcatch#">
+					<cfabort>
 					<cfset exception = wrapException(cfcatch) />
 					<cfset handleException(exception, true) />
 				</cfif>
@@ -241,10 +244,10 @@ Notes:
 			<cfset topAppManager = getAppManager() />
 		</cfif>
 		
-		<cfif hasCurrentEvent()>
+		<cfif variables.eventContext.hasCurrentEvent()>
 			<cfset setPreviousEvent(getCurrentEvent()) />
 		</cfif>
-		<cfset setCurrentEvent(arguments.event) />
+		<cfset variables.eventContext.setCurrentEvent(arguments.event) />
 		<cfset request.event = arguments.event />
 		
 		<cfset eventName = arguments.event.getName() />
@@ -259,23 +262,25 @@ Notes:
 		<cfset setCurrentEventHandler(eventHandler) />
 		
 		<!--- Pre-Invoke. --->
-		<cfset getAppManager().getPluginManager().preEvent(this) />
+		<cfset getAppManager().getPluginManager().preEvent(variables.eventContext) />
 		
-		<cfset eventHandler.handleEvent(arguments.event, moduleAppManager.createEventContext(eventName, arguments.event.getModuleName())) />
+		<cfset eventHandler.handleEvent(arguments.event, variables.eventContext) />
 		
 		<!--- Post-Invoke. --->
-		<cfset getAppManager().getPluginManager().postEvent(this) />
-		
-		<!--- Event-mappings only live for one event, so clear them when this event is done executing. --->
-		<cfset clearEventMappings() />
+		<cfset getAppManager().getPluginManager().postEvent(variables.eventContext) />
 	</cffunction>
 	
 	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
 		hint="Setup an EventContext instance.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), getRequestEventName(), getRequestModuleName()) />
+		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue()) />
 	</cffunction>
-	
+
+	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
+		hint="Checks if there are more events in the queue.">
+		<cfreturn NOT getEventQueue().isEmpty() />
+	</cffunction>
+
 	<cffunction name="incrementEventCount" access="private" returntype="void" output="false"
 		hint="Increments the current event count by 1.">
 		<cfset variables.eventCount = variables.eventCount + 1 />

@@ -50,14 +50,10 @@ Notes:
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
-		<cfargument name="requestEventName" type="string" required="false" default="" />
-		<cfargument name="requestModuleName" type="string" required="false" default="" />
 		
 		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEventQueue(arguments.eventQueue) />
-		<cfset setRequestEventName(arguments.requestEventName) />
-		<cfset setRequestModuleName(arguments.requestModuleName) />
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		
 		<!--- (re)init the ViewContext. --->
@@ -189,7 +185,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="setPreviousEvent" access="private" returntype="void" output="false">
+	<cffunction name="setPreviousEvent" access="public" returntype="void" output="false">
 		<cfargument name="previousEvent" type="MachII.framework.Event" required="true" />
 		<cfset variables.previousEvent = arguments.previousEvent />
 	</cffunction>
@@ -202,7 +198,7 @@ Notes:
 		<cfreturn IsObject(variables.previousEvent) />
 	</cffunction>
 	
-	<cffunction name="setCurrentEvent" access="private" returntype="void" output="false">
+	<cffunction name="setCurrentEvent" access="public" returntype="void" output="false">
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="true" />
 		<cfset variables.currentEvent = arguments.currentEvent />
 	</cffunction>
@@ -334,7 +330,7 @@ Notes:
 		<cfreturn variables.eventQueue />
 	</cffunction>
 	<cffunction name="setEventQueue" access="private" returntype="void" output="false">
-		<cfargument name="eventQueue" type="MachII.utils.SizedQueue" required="true" />
+		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
 		<cfset variables.eventQueue = arguments.eventQueue />
 	</cffunction>
 	

@@ -268,7 +268,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="point" type="string" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfif arguments.point EQ "postEvent">
-			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), computeModuleName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime(), StructCopy(arguments.eventContext.getEventMappings())) />
+			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), computeModuleName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
 		<cfelse>
 			<cfset appendTrace(computeEventName(arguments.eventContext, arguments.point), computeModuleName(arguments.eventContext, arguments.point), arguments.point, computeTraceTime()) />
 		</cfif>
