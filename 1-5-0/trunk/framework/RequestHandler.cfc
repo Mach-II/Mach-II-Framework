@@ -76,6 +76,7 @@ Notes:
 		
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
+		<cfset setupEventContext(appManager) />
 		
 		<cftry>
 			<cfif len(result.moduleName)>
@@ -89,7 +90,7 @@ Notes:
 			
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, true)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-					message="Event-handler for event '#arguments.eventName#', module '#arguments.moduleName#' is not defined." />
+					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined." />
 			</cfif>
 			
 			<cfif appManager.getEventManager().isEventPublic(result.eventName, true)>
@@ -105,10 +106,8 @@ Notes:
 			
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
-				<cfdump var="#cfcatch#">
-				<cfabort />
 				<cfset exception = wrapException(cfcatch) />
-				<cfset handleException(exception, true) />
+				<cfset variables.eventContext.handleException(exception, true) />
 			</cfcatch>
 		</cftry>
 		
