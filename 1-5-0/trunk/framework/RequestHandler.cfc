@@ -80,6 +80,10 @@ Notes:
 		<cfset var appManager = getAppManager() />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var exception = "" />
+		<cfset var nextEvent = "" />
+		
+		<cfset setRequestEventName(result.eventName) />
+		<cfset setRequestModuleName(result.moduleName) />
 		
 		<cftry>
 			<cfif len(result.moduleName)>
@@ -97,7 +101,11 @@ Notes:
 			</cfif>
 			
 			<cfif appManager.getEventManager().isEventPublic(result.eventName, true)>
-				<cfset announceEvent(result.eventName, eventArgs, result.moduleName) />
+				<!--- Create the event. --->
+				<cfset nextEvent = getAppManager().getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName) />
+				<!--- Queue the event. --->
+				<cfset getEventQueue().put(nextEvent) />
+				<cfset setupEventContext(appManager, result.moduleName, result.eventName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#result.eventName#' is not accessible." />
