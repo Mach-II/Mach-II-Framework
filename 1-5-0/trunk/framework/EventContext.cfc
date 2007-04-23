@@ -36,8 +36,6 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.eventQueue = "" />
 	<cfset variables.viewContext = CreateObject("component", "MachII.framework.ViewContext") />
-	<cfset variables.requestEventName = "" />
-	<cfset variables.requestModuleName = "" />
 	<cfset variables.currentEventHandler = "" />
 	<cfset variables.currentEvent = "" />
 	<cfset variables.mappings = StructNew() />
@@ -346,22 +344,6 @@ Notes:
 	<cffunction name="setViewContext" access="private" returntype="void" output="false">
 		<cfargument name="viewContext" type="MachII.framework.ViewContext" required="true" />
 		<cfset variables.viewContext = arguments.viewContext />
-	</cffunction>
-	
-	<cffunction name="setRequestEventName" access="private" returntype="void" output="false">
-		<cfargument name="requestEventName" type="string" required="true" />
-		<cfset variables.requestEventName = arguments.requestEventName />
-	</cffunction>
-	<cffunction name="getRequestEventName" access="private" returntype="string" output="false">
-		<cfreturn variables.requestEventName />
-	</cffunction>
-	
-	<cffunction name="setRequestModuleName" access="private" returntype="void" output="false">
-		<cfargument name="requestModuleName" type="string" required="true" />
-		<cfset variables.requestModuleName = arguments.requestModuleName />
-	</cffunction>
-	<cffunction name="getRequestModuleName" access="private" returntype="string" output="false">
-		<cfreturn variables.requestModuleName />
 	</cffunction>
 	
 	<cffunction name="setExceptionEventName" access="public" returntype="void" output="false">

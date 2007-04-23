@@ -33,6 +33,9 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.eventContext = CreateObject("component", "MachII.framework.EventContext") />
+	<cfset variables.requestEventName = "" />
+	<cfset variables.requestModuleName = "" />
 	<cfset variables.eventQueue = "" />
 	<cfset variables.eventCount = 0 />
 	<cfset variables.maxEvents = 10 />
@@ -47,27 +50,22 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		
-		<cfset var eventQueue = 0 />
-		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
 		
-		<!--- Setup the event Queue. --->
-		<cfset eventQueue = CreateObject("component", "MachII.util.SizedQueue") />
-		<cfset eventQueue.init(getMaxEvents()) />
-		<cfset setEventQueue(eventQueue) />
+		<!--- Setup the event queue --->
+		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
 		
 		<cfreturn this />
 	</cffunction>
 	
-	<cffunction name="createEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
-		hint="Creates an EventContext instance.">
-		<cfargument name="requestEventName" type="string" required="true" />
-		<cfargument name="requestModuleName" type="string" required="false" default="" />
-		<cfreturn CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue(), arguments.requestEventName, arguments.requestModuleName) />
+	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
+		hint="Setup an EventContext instance.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), getRequestEventName(), getRequestModuleName()) />
 	</cffunction>
 	
 	<!---
@@ -79,10 +77,9 @@ Notes:
 		<cfset var eventArgs = getRequestEventArgs() />
 		<!--- Get the module and event names --->
 		<cfset var result = parseEventParameter(eventArgs) />
-		<cfset var exception = "" />
-		<!--- <cfset var eventContext = createEventContext(result.eventName, result.moduleName) /> --->
+		<cfset var appManager = getAppManager() />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
-		<cfset var appManager = getAppManager()>
+		<cfset var exception = "" />
 		
 		<cftry>
 			<cfif len(result.moduleName)>
@@ -106,15 +103,14 @@ Notes:
 					message="Event-handler for event '#result.eventName#' is not accessible." />
 			</cfif>
 			
-			<!--- Handle any errors with the exception event.  --->
+			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
-				<cfset exception = CreateObject("component", "MachII.util.Exception") />
-				<cfset exception.wrapException(cfcatch) />
+				<cfset exception = wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
 		
-		<!--- Start the event processing. --->
+		<!--- Start the event processing --->
 		<cfset processEvents() />
 	</cffunction>
 	
@@ -429,6 +425,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getPairDelimiter" access="private" returntype="string" output="false">
 		<cfreturn variables.moduleDelimiter />
+	</cffunction>
+	
+	<cffunction name="setRequestEventName" access="private" returntype="void" output="false">
+		<cfargument name="requestEventName" type="string" required="true" />
+		<cfset variables.requestEventName = arguments.requestEventName />
+	</cffunction>
+	<cffunction name="getRequestEventName" access="private" returntype="string" output="false">
+		<cfreturn variables.requestEventName />
+	</cffunction>
+	
+	<cffunction name="setRequestModuleName" access="private" returntype="void" output="false">
+		<cfargument name="requestModuleName" type="string" required="true" />
+		<cfset variables.requestModuleName = arguments.requestModuleName />
+	</cffunction>
+	<cffunction name="getRequestModuleName" access="private" returntype="string" output="false">
+		<cfreturn variables.requestModuleName />
 	</cffunction>
 
 </cfcomponent>
