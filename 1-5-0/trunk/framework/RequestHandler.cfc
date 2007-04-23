@@ -250,10 +250,6 @@ Notes:
 			<cfset moduleAppManager = topAppManager>
 		</cfif>
 		
-		<cfif variables.eventContext.hasCurrentEvent()>
-			<cfset setPreviousEvent(variables.eventContext.getCurrentEvent()) />
-		</cfif>
-		
 		<cfset setupEventContext(moduleAppManager, arguments.event, variables.eventContext.getCurrentEvent()) />
 		
 		<cfset request.event = arguments.event />
