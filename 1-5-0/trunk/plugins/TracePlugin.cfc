@@ -610,83 +610,83 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="setTraceRequest" access="private" returntype="void" output="false"
-		hint="Sets the trace request request.tracePluginScope.">
+		hint="Sets the trace request request._MachIITracePlugin.">
 		<cfargument name="traceRequest" type="boolean" required="false" />
-		<cfset request.tracePluginScope.traceRequest = arguments.traceRequest />
+		<cfset request._MachIITracePlugin.traceRequest = arguments.traceRequest />
 	</cffunction>
 	<cffunction name="getTraceRequest" access="private" returntype="boolean" output="false"
-		hint="Gets the trace request from the request.tracePluginScope.">
+		hint="Gets the trace request from the request._MachIITracePlugin.">
 		
 		<cftry>
-			<cfreturn request.tracePluginScope.traceRequest />
+			<cfreturn request._MachIITracePlugin.traceRequest />
 			<cfcatch type="expression">
-				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request.tracePluginScope.traceRequest.") />
+				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request._MachIITracePlugin.traceRequest.") />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 
 	<cffunction name="setTraceInfo" access="private" returntype="void" output="false"
-		hint="Sets the trace info array in the request.tracePluginScope.">
+		hint="Sets the trace info array in the request._MachIITracePlugin.">
 		<cfargument name="traceInfo" type="array" required="false" />
-		<cfset request.tracePluginScope.traceInfo = arguments.traceInfo />
+		<cfset request._MachIITracePlugin.traceInfo = arguments.traceInfo />
 	</cffunction>
 	<cffunction name="getTraceInfo" access="private" returntype="array" output="false"
-		hint="Gets the trace info array from the request.tracePluginScope.">
+		hint="Gets the trace info array from the request._MachIITracePlugin.">
 		<cftry>
-			<cfreturn request.tracePluginScope.traceInfo />
+			<cfreturn request._MachIITracePlugin.traceInfo />
 			<cfcatch type="expression">
-				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request.tracePluginScope.traceInfo.") />
+				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request._MachIITracePlugin.traceInfo.") />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 
 	<cffunction name="setTick" access="private" returntype="void" output="false"
-		hint="Sets the current tick in the request.tracePluginScope.">
+		hint="Sets the current tick in the request._MachIITracePlugin.">
 		<cfargument name="tick" type="numeric" required="true" />
-		<cfset request.tracePluginScope.tick = arguments.tick />
+		<cfset request._MachIITracePlugin.tick = arguments.tick />
 	</cffunction>
 	<cffunction name="getTick" access="private" returntype="numeric" output="false"
-		hint="Gets the current tick from the request.tracePluginScope.">
+		hint="Gets the current tick from the request._MachIITracePlugin.">
 		<cftry>
-			<cfreturn request.tracePluginScope.tick />
+			<cfreturn request._MachIITracePlugin.tick />
 			<cfcatch type="expression">
-				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request.tracePluginScope.tick.") />
+				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request._MachIITracePlugin.tick.") />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 
 	<cffunction name="setTickStart" access="private" returntype="void" output="false"
-		hint="Sets the tick start in the request.tracePluginScope.">
+		hint="Sets the tick start in the request._MachIITracePlugin.">
 		<cfargument name="tickStart" type="numeric" required="true" />
-		<cfset request.tracePluginScope.tickStart = arguments.tickStart />
+		<cfset request._MachIITracePlugin.tickStart = arguments.tickStart />
 	</cffunction>	
 	<cffunction name="getTickStart" access="private" returntype="numeric" output="false"
-		hint="Gets the tick start from the request.tracePluginScope.">
+		hint="Gets the tick start from the request._MachIITracePlugin.">
 		<cftry>
-			<cfreturn request.tracePluginScope.tickStart />
+			<cfreturn request._MachIITracePlugin.tickStart />
 			<cfcatch type="expression">
-				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request.tracePluginScope.tickStart.") />
+				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request._MachIITracePlugin.tickStart.") />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 
 	<cffunction name="setIsInitialTrace" access="private" returntype="void" output="false"
-		hint="Sets the initial trace flag in the request.tracePluginScope.">
+		hint="Sets the initial trace flag in the request._MachIITracePlugin.">
 		<cfargument name="isInitialTrace" type="boolean" required="true" />
-		<cfset request.tracePluginScope.isInitialTrace = arguments.isInitialTrace />
+		<cfset request._MachIITracePlugin.isInitialTrace = arguments.isInitialTrace />
 	</cffunction>
 	<cffunction name="getIsInitialTrace" access="private" returntype="boolean" output="false"
-		hint="Gets the initial trace flag from the reuqest.tracePluginScope.">
+		hint="Gets the initial trace flag from the reuqest._MachIITracePlugin.">
 		<cftry>
-			<cfreturn request.tracePluginScope.isInitialTrace />
+			<cfreturn request._MachIITracePlugin.isInitialTrace />
 			<cfcatch type="expression">
-				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request.tracePluginScope.isInitialTrace.") />
+				<cfset throwUsageException("Required request scope variable missing.", "Do not delete request._MachIITracePlugin.isInitialTrace.") />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 	<cffunction name="hasIsInitialTrace" access="private" returntype="boolean" output="false"
-		hint="Checks if the initial trace flag exists in the request.tracePluginScope.">
-		<cfreturn IsDefined("request.tracePluginScope.isInitialTrace") />
+		hint="Checks if the initial trace flag exists in the request._MachIITracePlugin.">
+		<cfreturn IsDefined("request._MachIITracePlugin.isInitialTrace") />
 	</cffunction>
 
 </cfcomponent>
