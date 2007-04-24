@@ -57,6 +57,9 @@ Notes:
 		<!--- Setup the event queue --->
 		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
 		
+		<!--- Set the EventContext into the request scope for backwards compatibility --->
+		<cfset request.eventContext = variables.eventContext />
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -413,6 +416,10 @@ Notes:
 	</cffunction>
 	<cffunction name="getRequestModuleName" access="public" returntype="string" output="false">
 		<cfreturn variables.requestModuleName />
+	</cffunction>
+	
+	<cffunction name="getEventContext" access="public" returntype="MachII.framework.EventContext" output="false">
+		<cfreturn variables.eventContext />
 	</cffunction>
 
 </cfcomponent>

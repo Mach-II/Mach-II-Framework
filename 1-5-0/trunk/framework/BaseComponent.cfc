@@ -75,10 +75,10 @@ the rest of the framework. (pfarrell)
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="The name of the module in which event exists. Defaults to current module." />
 		
-		<cfif StructKeyExists(request, "eventContext")>
-			<cfset request.eventContext.announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+		<cfif StructKeyExists(request, "_MachIIRequestHandler")>
+			<cfset request._MachIIRequestHandler.getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 		<cfelse>
-			<cfthrow message="The EventContext necessary to announce events is not set in 'request.eventContext.'" />
+			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request._MachIIRequestHandler.'" />
 		</cfif>
 	</cffunction>
 	
