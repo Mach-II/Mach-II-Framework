@@ -42,6 +42,7 @@ Notes:
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
 	<cfset varibales.moduleDelimiter = "" />
+	<cfset variables.maxEvents = 0 />
 	<cfset variables.cleanupDifference = -3 />
 	
 	<!---
@@ -63,6 +64,7 @@ Notes:
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
+		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- Parse through the complex list of delimiters --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
@@ -84,7 +86,7 @@ Notes:
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getModuleDelimiter()) />
+			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getModuleDelimiter(), getMaxEvents()) />
 		</cfif>
 		
 		<cfreturn request._MachIIRequestHandler />
@@ -413,6 +415,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getModuleDelimiter" access="private" returntype="string" output="false">
 		<cfreturn variables.moduleDelimiter />
+	</cffunction>
+	
+	<cffunction name="setMaxEvents" access="private" returntype="void" output="false">
+		<cfargument name="maxEvents" required="true" type="numeric" />
+		<cfset variables.maxEvents = arguments.maxEvents />
+	</cffunction>
+	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
+		<cfreturn variables.maxEvents />
 	</cffunction>
 
 </cfcomponent>

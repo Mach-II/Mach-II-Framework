@@ -27,13 +27,15 @@ Notes:
 <cfcomponent 
 	displayname="RequestHandler"
 	output="false"
-	hint="Handles request to event conversion for the framework.">
+	hint="Handles request to event conversion for the framework. The framework workhorse and controls the event-queue functionality.">
 	
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.eventContext = CreateObject("component", "MachII.framework.EventContext") />
+	<cfset variables.eventContext = "" />
+	<cfset variables.eventParameter = "" />
+	<cfset variables.moduleDelimiter = "" />
 	<cfset variables.requestEventName = "" />
 	<cfset variables.requestModuleName = "" />
 	<cfset variables.eventQueue = "" />
@@ -48,14 +50,20 @@ Notes:
 	<cffunction name="init" access="public" returntype="RequestHandler" output="false"
 		hint="Initializes the RequestHandler.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="eventParameter" type="string" required="true" />
 		<cfargument name="moduleDelimiter" type="string" required="true" />
+		<cfargument name="maxEvents" type="numeric" required="true" />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setEventParameter(arguments.eventParameter) />
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
-		<cfset setMaxEvents(getAppManager().getPropertyManager().getProperty("maxEvents")) />
+		<cfset setMaxEvents(arguments.maxEvents) />
 		
-		<!--- Setup the event queue --->
+		<!--- Setup the EventQueue --->
 		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
+				
+		<!--- Setup the EventContext --->
+		<cfset setEventContext(CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue())) />
 		
 		<!--- Set the EventContext into the request scope for backwards compatibility --->
 		<cfset request.eventContext = variables.eventContext />
@@ -117,6 +125,31 @@ Notes:
 		
 		<!--- Start the event processing --->
 		<cfset processEvents() />
+	</cffunction>
+	
+	<cffunction name="createException" access="public" returntype="MachII.util.Exception" output="false"
+		hint="Creates an exception object (with no cfcatch).">
+		<cfargument name="type" type="string" required="false" default="" />
+		<cfargument name="message" type="string" required="false" default="" />
+		<cfargument name="errorCode" type="string" required="false" default="" />
+		<cfargument name="detail" type="string" required="false" default="" />
+		<cfargument name="extendedInfo" type="string" required="false" default="" />
+		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
+		
+		<cfset var exception = CreateObject("component", "MachII.util.Exception").init(arguments.type, arguments.message, arguments.errorCode, arguments.detail, arguments.extendedInfo, arguments.tagContext) />
+		<cfset setIsException(true) />
+		
+		<cfreturn exception />
+	</cffunction>
+	
+	<cffunction name="wrapException" access="public" returntype="MachII.util.Exception" output="false"
+		hint="Creates an exception object (with cfcatch).">
+		<cfargument name="caughtException" type="any" required="true" />
+		
+		<cfset var exception = CreateObject("component", "MachII.util.Exception").wrapException(arguments.caughtException) />
+		<cfset setIsException(true) />
+		
+		<cfreturn exception />
 	</cffunction>
 	
 	<cffunction name="getEventCount" access="public" returntype="numeric" output="false"
@@ -244,16 +277,16 @@ Notes:
 		<cfset getAppManager().getPluginManager().postEvent(variables.eventContext) />
 	</cffunction>
 	
-	<cffunction name="setupEventContext" access="private" returntype="MachII.framework.EventContext" output="false"
+	<cffunction name="setupEventContext" access="private" returntype="void" output="false"
 		hint="Setup an EventContext instance.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="false"
-			default="#createObject("component", "MachII.framework.Event")#" />
+			default="#CreateObject("component", "MachII.framework.Event")#" />
 		<cfargument name="previousEvent" type="any" required="false" default="" />
-		<cfreturn variables.eventContext.init(this, arguments.appManager, getEventQueue(), currentEvent, previousEvent) />
+		<cfset variables.eventContext.setup(arguments.appManager, arguments.currentEvent, arguments.previousEvent) />
 	</cffunction>
 
-	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
+	<cffunction name="hasMoreEvents" access="private" returntype="boolean" output="false"
 		hint="Checks if there are more events in the queue.">
 		<cfreturn NOT getEventQueue().isEmpty() />
 	</cffunction>
@@ -267,73 +300,6 @@ Notes:
 		hint="Reset the current event count.">
 		<cfset variables.eventCount = 0 />
 	</cffunction>
-	
-	<cffunction name="setEventQueue" access="private" returntype="void" output="false">
-		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
-		<cfset variables.eventQueue = arguments.eventQueue />
-	</cffunction>
-	<cffunction name="getEventQueue" access="private" returntype="MachII.util.SizedQueue" output="false">
-		<cfreturn variables.eventQueue />
-	</cffunction>
-	
-	<cffunction name="setIsProcessing" access="private" returntype="void" output="false">
-		<cfargument name="isProcessing" type="boolean" required="true" />
-		<cfset variables.isProcessing = arguments.isProcessing />
-	</cffunction>
-	<cffunction name="getIsProcessing" access="private" returntype="boolean" output="false">
-		<cfreturn variables.isProcessing />
-	</cffunction>
-
-	<cffunction name="setCurrentEventHandler" access="private" returntype="void" output="false">
-		<cfargument name="currentEventHandler" type="MachII.framework.EventHandler" required="true" />
-		<cfset variables.currentEventHandler = arguments.currentEventHandler />
-	</cffunction>
-	<cffunction name="getCurrentEventHandler" access="private" returntype="MachII.framework.EventHandler" output="false">
-		<cfreturn variables.currentEventHandler />
-	</cffunction>
-
-	<cffunction name="getIsException" access="private" returntype="string" output="false">
-		<cfreturn variables.isException />
-	</cffunction>	
-	<cffunction name="setIsException" access="private" returntype="void" output="false">
-		<cfargument name="isException" type="boolean" required="true" />
-		<cfset variables.isException = arguments.isException />
-	</cffunction>
-
-	<cffunction name="setMaxEvents" access="public" returntype="void" output="false">
-		<cfargument name="maxEvents" required="true" type="numeric" />
-		<cfset variables.maxEvents = arguments.maxEvents />
-	</cffunction>
-	<cffunction name="getMaxEvents" access="public" returntype="numeric" output="false">
-		<cfreturn variables.maxEvents />
-	</cffunction>
-	
-	<cffunction name="createException" access="public" returntype="MachII.util.Exception" output="false"
-		hint="Creates an exception object (with no cfcatch).">
-		<cfargument name="type" type="string" required="false" default="" />
-		<cfargument name="message" type="string" required="false" default="" />
-		<cfargument name="errorCode" type="string" required="false" default="" />
-		<cfargument name="detail" type="string" required="false" default="" />
-		<cfargument name="extendedInfo" type="string" required="false" default="" />
-		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
-		
-		<cfset var exception = CreateObject("component", "MachII.util.Exception") />
-		<cfset exception.init(arguments.type, arguments.message, arguments.errorCode, arguments.detail, arguments.extendedInfo, arguments.tagContext) />
-		<cfset setIsException(true) />
-		
-		<cfreturn exception />
-	</cffunction>
-	
-	<cffunction name="wrapException" access="public" returntype="MachII.util.Exception" output="false"
-		hint="Creates an exception object (with cfcatch).">
-		<cfargument name="caughtException" type="any" required="true" />
-		
-		<cfset var exception = CreateObject("component", "MachII.util.Exception") />
-		<cfset exception.wrapException(arguments.caughtException) />
-		<cfset setIsException(true) />
-		
-		<cfreturn exception />
-	</cffunction>
 
 	<cffunction name="parseEventParameter" access="private" returntype="struct" output="false"
 		hint="Gets the module and event name from the incoming event arg struct.">
@@ -341,7 +307,7 @@ Notes:
 		
 		<cfset var rawEvent = "" />
 		<cfset var eventParam = getAppManager().getPropertyManager().getProperty("eventParameter") />
-		<cfset var moduleDelimiter = getAppManager().getPropertyManager().getProperty("moduleDelimiter") />
+		<cfset var moduleDelimiter = getModuleDelimiter() />
 		<cfset var result = StructNew() />
 		
 		<cfset result.moduleName = "" />
@@ -393,12 +359,20 @@ Notes:
 	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
+	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
+		<cfargument name="eventParameter" type="string" required="true" />
+		<cfset variables.eventParameter = arguments.eventParameter />
+	</cffunction>
+	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
+		<cfreturn variables.eventParameter />
+	</cffunction>
 
 	<cffunction name="setModuleDelimiter" access="private" returntype="void" output="false">
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		<cfset variables.moduleDelimiter = arguments.moduleDelimiter />
 	</cffunction>
-	<cffunction name="getPairDelimiter" access="private" returntype="string" output="false">
+	<cffunction name="getModuleDelimiter" access="private" returntype="string" output="false">
 		<cfreturn variables.moduleDelimiter />
 	</cffunction>
 	
@@ -417,9 +391,53 @@ Notes:
 	<cffunction name="getRequestModuleName" access="public" returntype="string" output="false">
 		<cfreturn variables.requestModuleName />
 	</cffunction>
-	
+
+	<cffunction name="setEventContext" access="private" returntype="void" output="false">
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		<cfset variables.eventContext = arguments.eventContext />
+	</cffunction>	
 	<cffunction name="getEventContext" access="public" returntype="MachII.framework.EventContext" output="false">
 		<cfreturn variables.eventContext />
+	</cffunction>
+	
+	<cffunction name="setEventQueue" access="private" returntype="void" output="false">
+		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
+		<cfset variables.eventQueue = arguments.eventQueue />
+	</cffunction>
+	<cffunction name="getEventQueue" access="private" returntype="MachII.util.SizedQueue" output="false">
+		<cfreturn variables.eventQueue />
+	</cffunction>
+	
+	<cffunction name="setIsProcessing" access="private" returntype="void" output="false">
+		<cfargument name="isProcessing" type="boolean" required="true" />
+		<cfset variables.isProcessing = arguments.isProcessing />
+	</cffunction>
+	<cffunction name="getIsProcessing" access="private" returntype="boolean" output="false">
+		<cfreturn variables.isProcessing />
+	</cffunction>
+
+	<cffunction name="setCurrentEventHandler" access="private" returntype="void" output="false">
+		<cfargument name="currentEventHandler" type="MachII.framework.EventHandler" required="true" />
+		<cfset variables.currentEventHandler = arguments.currentEventHandler />
+	</cffunction>
+	<cffunction name="getCurrentEventHandler" access="private" returntype="MachII.framework.EventHandler" output="false">
+		<cfreturn variables.currentEventHandler />
+	</cffunction>
+
+	<cffunction name="getIsException" access="private" returntype="string" output="false">
+		<cfreturn variables.isException />
+	</cffunction>	
+	<cffunction name="setIsException" access="private" returntype="void" output="false">
+		<cfargument name="isException" type="boolean" required="true" />
+		<cfset variables.isException = arguments.isException />
+	</cffunction>
+	
+	<cffunction name="setMaxEvents" access="private" returntype="void" output="false">
+		<cfargument name="maxEvents" required="true" type="numeric" />
+		<cfset variables.maxEvents = arguments.maxEvents />
+	</cffunction>
+	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
+		<cfreturn variables.maxEvents />
 	</cffunction>
 
 </cfcomponent>

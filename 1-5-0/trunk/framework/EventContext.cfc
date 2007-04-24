@@ -27,7 +27,7 @@ Notes:
 <cfcomponent 
 	displayname="EventContext"
 	output="false"
-	hint="The framework workhorse. Handles event-queue functionality and event-command execution. Controls the event queue and event processing mechanism for a request/event lifecycle.">
+	hint="Handles event-command execution and event processing mechanism for an event lifecycle.">
 	
 	<!---
 	PROPERTIES
@@ -48,14 +48,21 @@ Notes:
 	<cffunction name="init" access="public" returntype="EventContext" output="false"
 		hint="Initalizes the event-context.">
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
+		
+		<cfset setRequestHandler(arguments.requestHandler) />
+		<cfset setEventQueue(arguments.eventQueue) />
+		
+		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="setup" access="public" returntype="void" output="false"
+		hint="Setups the event-context.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="currentEvent" type="MachII.framework.Event" required="false" default="" />
 		<cfargument name="previousEvent" type="any" required="false" default="" />
 		
-		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setEventQueue(arguments.eventQueue) />
 		<cfset setCurrentEvent(arguments.currentEvent) />
 		<cfif IsObject(arguments.previousEvent)>
 			<cfset setPreviousEvent(arguments.previousEvent) />
@@ -67,9 +74,7 @@ Notes:
 		
 		<!--- Clear the event mappings --->
 		<cfset clearEventMappings() />
-		
-		<cfreturn this />
-	</cffunction>
+	</cffunction>	
 	
 	<!---
 	PUBLIC FUNCTIONS - GENERAL
