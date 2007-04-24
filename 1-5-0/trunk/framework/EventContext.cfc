@@ -19,10 +19,9 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
-- Added request event name functionality. (pfarrell)
 --->
 <cfcomponent 
 	displayname="EventContext"
@@ -36,11 +35,10 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.eventQueue = "" />
 	<cfset variables.viewContext = CreateObject("component", "MachII.framework.ViewContext") />
-	<cfset variables.currentEventHandler = "" />
 	<cfset variables.currentEvent = "" />
+	<cfset variables.previousEvent = "" />
 	<cfset variables.mappings = StructNew() />
 	<cfset variables.exceptionEventName = "" />
-	<cfset variables.previousEvent = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -59,14 +57,16 @@ Notes:
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Setups the event-context.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="currentEvent" type="MachII.framework.Event" required="false" default="" />
-		<cfargument name="previousEvent" type="any" required="false" default="" />
+		<cfargument name="currentEvent" type="any" required="false" default="" />
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setCurrentEvent(arguments.currentEvent) />
-		<cfif IsObject(arguments.previousEvent)>
-			<cfset setPreviousEvent(arguments.previousEvent) />
+		<cfif hasCurrentEvent()>
+			<cfset setPreviousEvent(getCurrentEvent()) />
 		</cfif>
+		<cfif IsObject(arguments.currentEvent)>
+			<cfset setCurrentEvent(arguments.currentEvent) />
+		</cfif>
+		
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		
 		<!--- (re)init the ViewContext. --->
@@ -312,53 +312,48 @@ Notes:
 		hint="Returns the number of events that have been processed for this context.">
 		<cfreturn getRequestHandler().getEventCount() />
 	</cffunction>
-	
-	<!---
-	PROTECTED FUNCTIONS
-	--->	
-	
 
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getRequestHandler" access="private" type="MachII.framework.RequestHandler" output="false">
-		<cfreturn variables.requestHandler />
-	</cffunction>
 	<cffunction name="setRequestHandler" access="private" returntype="void" output="false">
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfset variables.requestHandler = arguments.requestHandler />
 	</cffunction>
-	
-	<cffunction name="getAppManager" access="private" type="MachII.framework.AppManager" output="false">
-		<cfreturn variables.appManager />
+	<cffunction name="getRequestHandler" access="private" type="MachII.framework.RequestHandler" output="false">
+		<cfreturn variables.requestHandler />
 	</cffunction>
+
 	<cffunction name="setAppManager" access="private" returntype="void" output="false">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
+	</cffunction>	
+	<cffunction name="getAppManager" access="private" type="MachII.framework.AppManager" output="false">
+		<cfreturn variables.appManager />
 	</cffunction>
-	
-	<cffunction name="getEventQueue" access="private" type="MachII.framework.AppManager" output="false">
-		<cfreturn variables.eventQueue />
-	</cffunction>
+
 	<cffunction name="setEventQueue" access="private" returntype="void" output="false">
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
 		<cfset variables.eventQueue = arguments.eventQueue />
 	</cffunction>
-	
-	<cffunction name="getViewContext" access="private" type="MachII.framework.ViewContext" output="false">
-		<cfreturn variables.viewContext />
+	<cffunction name="getEventQueue" access="private" type="MachII.framework.AppManager" output="false">
+		<cfreturn variables.eventQueue />
 	</cffunction>
+
 	<cffunction name="setViewContext" access="private" returntype="void" output="false">
 		<cfargument name="viewContext" type="MachII.framework.ViewContext" required="true" />
 		<cfset variables.viewContext = arguments.viewContext />
+	</cffunction>	
+	<cffunction name="getViewContext" access="private" type="MachII.framework.ViewContext" output="false">
+		<cfreturn variables.viewContext />
 	</cffunction>
-	
+
+	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
+		<cfreturn variables.exceptionEventName />
+	</cffunction>	
 	<cffunction name="setExceptionEventName" access="public" returntype="void" output="false">
 		<cfargument name="exceptionEventName" type="string" required="true" />
 		<cfset variables.exceptionEventName = arguments.exceptionEventName />
-	</cffunction>
-	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
-		<cfreturn variables.exceptionEventName />
 	</cffunction>
 
 </cfcomponent>

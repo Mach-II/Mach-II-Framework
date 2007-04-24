@@ -137,7 +137,7 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setAppManager" access="public" returntype="void" output="false"
+	<cffunction name="setAppManager" access="private" returntype="void" output="false"
 		hint="Returns the AppManager instance this ViewContext belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />

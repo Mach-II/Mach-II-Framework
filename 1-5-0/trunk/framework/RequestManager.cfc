@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.redirectPersistScope = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
+	<cfset variables.parameterPrecedence = "" />
 	<cfset variables.parseSes = "" />
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
@@ -62,6 +63,7 @@ Notes:
 		<cfset setRedirectPersistScope(getPropertyManager().getProperty("redirectPersistScope")) />
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
+		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
@@ -86,7 +88,7 @@ Notes:
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getModuleDelimiter(), getMaxEvents()) />
+			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents()) />
 		</cfif>
 		
 		<cfreturn request._MachIIRequestHandler />
@@ -367,6 +369,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setParameterPrecedence" access="private" returntype="void" output="false">
+		<cfargument name="parameterPrecedence" type="string" required="true" />
+		<cfset variables.parameterPrecedence = arguments.parameterPrecedence />
+	</cffunction>
+	<cffunction name="getParameterPrecedence" access="private" returntype="string" output="false">
+		<cfreturn variables.parameterPrecedence />
 	</cffunction>
 	
 	<cffunction name="setParseSes" access="private" returntype="void" output="false">
