@@ -58,12 +58,10 @@ Updated version: 1.1.0
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset var eventArgs = "" />
+		<cfset var eventArgs = StructNew() />
 		
 		<cfif isCopyEventArgs()>
 			<cfset eventArgs = arguments.event.getArgs() />
-		<cfelse>
-			<cfset eventArgs = StructNew() />
 		</cfif>
 		
 		<cfset arguments.eventContext.announceEvent(getEventName(), eventArgs, getModuleName()) />

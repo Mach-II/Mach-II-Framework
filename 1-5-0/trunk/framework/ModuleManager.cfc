@@ -34,7 +34,7 @@ Notes:
 	<cfset variables.modules = StructNew() />
 	<cfset variables.appManager = "" />
 	<cfset variables.dtdPath = "" />
-	<cfset variables.validateXML = "" />
+	<cfset variables.validateXml = "" />
 	<cfset variables.baseName = "" />
 	
 	<!---
@@ -50,14 +50,14 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setDtdPath(arguments.configDtdPath) />
-		<cfset setValidateXML(arguments.validateXML) />
+		<cfset setValidateXml(arguments.validateXml) />
 
 		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager">
-		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="configXml" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var moduleNodes = "" />
@@ -75,7 +75,6 @@ Notes:
 		<cfelse>
 			<cfset modulesNode = XMLSearch(arguments.configXML, ".//modules") />
 		</cfif>
-		<cfset modulesNode = XmlSearch(configXML, "//modules") />
 		<cfif arrayLen(modulesNode) eq 1>
 			<cfset modulesNode = modulesNode[1]>
 			<cfif structKeyExists(modulesNode[1].xmlAttributes, "baseName")>
@@ -90,7 +89,6 @@ Notes:
 		<cfelse>
 			<cfset moduleNodes = XMLSearch(arguments.configXML, ".//modules/module") />
 		</cfif>
-		<cfset moduleNodes = XmlSearch(configXML,"//modules/module") />
 		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
 			<cfset name = moduleNodes[i].xmlAttributes["name"] />
 			<cfset file = moduleNodes[i].xmlAttributes["file"] />
@@ -104,7 +102,7 @@ Notes:
 			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), name, file, overrideXml) />
 
 			<!--- Add the Module to the Manager. --->
-			<cfset addModule(name, module) />
+			<cfset addModule(name, module, arguments.override) />
 		</cfloop>
 		<!--- <cfdump var="#variables.modules#" label="modules"><cfabort> --->
 	</cffunction>
@@ -141,8 +139,9 @@ Notes:
 		hint="Registers a module with the specified name.">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="module" type="MachII.framework.Module" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfif isModuleDefined(arguments.moduleName)>
+		<cfif NOT arguments.override AND isModuleDefined(arguments.moduleName)>
 			<cfthrow type="MachII.framework.ModuleAlreadyDefined"
 				message="A Module with name '#arguments.moduleName#' is already registered." />
 		<cfelse>
@@ -154,6 +153,14 @@ Notes:
 		hint="Returns true if a module is registered with the specified name.">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.modules, arguments.moduleName) />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getModuleNames" access="public" returntype="array" output="false"
+		hint="Returns an array of module names.">
+		<cfreturn StructKeyArray(variables.modules) />
 	</cffunction>
 
 	<!---
@@ -191,11 +198,6 @@ Notes:
 	</cffunction>
 	<cffunction name="getValidateXML" access="public" returntype="boolean" output="false">
 		<cfreturn variables.validateXML />
-	</cffunction>
-	
-	<cffunction name="getModuleNames" access="public" returntype="array" output="false"
-		hint="Returns an array of module names.">
-		<cfreturn StructKeyArray(variables.modules) />
 	</cffunction>
 	
 </cfcomponent>

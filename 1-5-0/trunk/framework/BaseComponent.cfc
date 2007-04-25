@@ -72,8 +72,22 @@ the rest of the framework. (pfarrell)
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
-		<cfargument name="moduleName" type="string" required="false" default=""
-			hint="The name of the module in which event exists. Defaults to current module." />
+		
+		<cfif StructKeyExists(request, "_MachIIRequestHandler")>
+			<cfset request._MachIIRequestHandler.getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
+		<cfelse>
+			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request._MachIIRequestHandler.'" />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="announceEventInModule" access="public" returntype="void" output="false"
+		hint="Announces a new event to the framework.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="The name of the module in which event exists." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the event to announce." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of arguments to set as the event's args." />
 		
 		<cfif StructKeyExists(request, "_MachIIRequestHandler")>
 			<cfset request._MachIIRequestHandler.getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />

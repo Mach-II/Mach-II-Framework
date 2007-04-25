@@ -184,9 +184,9 @@ Updated version: 1.5.0
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var subroutineName = arguments.commandNode.xmlAttributes["subroutine"] />
+		<cfset var subroutine = arguments.commandNode.xmlAttributes["subroutine"] />
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.ExecuteCommand").init(subroutineName) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.ExecuteCommand").init(subroutine) />
 		
 		<cfreturn command />
 	</cffunction>

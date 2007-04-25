@@ -141,7 +141,7 @@ Updated version: 1.1.0
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - GENERAL
 	--->
 	<cffunction name="addEventHandler" access="public" returntype="void" output="false"
 		hint="Registers an EventHandler by name.">
@@ -260,6 +260,14 @@ Updated version: 1.1.0
 	</cffunction>
 	
 	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getEventNames" access="public" returntype="array" output="false"
+		hint="Returns an array of event-handler names.">
+		<cfreturn StructKeyArray(variables.handlers) />
+	</cffunction>
+	
+	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setAppManager" access="public" returntype="void" output="false">
@@ -268,9 +276,6 @@ Updated version: 1.1.0
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
-	</cffunction>
-	<cffunction name="getEventList" access="public" returntype="string" output="false">
-		<cfreturn StructKeyList(variables.handlers) />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false"

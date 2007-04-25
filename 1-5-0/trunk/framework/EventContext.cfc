@@ -143,13 +143,13 @@ Notes:
 		<cfif NOT Len(arguments.mappingModuleName)>
 			<cfset argument.mappingModuleName = getCurrentEvent().getModuleName() />
 		<!--- Check if module exists --->
-		<cfelseif NOT getAppManager().getModuleManager.isModuleDefined(arguments.mappindModuleName)>
+		<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
 			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
 					message="The module '#arguments.mappingModuleName# cannot be found for this event-mapping." />
 		</cfif>
 		
-		<cfset temp.mappingEventName = arguments.mappingName />
-		<cfset temp.mappingModuleName = arguments.mappingModuleName />
+		<cfset temp.eventName = arguments.mappingName />
+		<cfset temp.moduleName = arguments.mappingModuleName />
 		
 		<cfset variables.mappings[arguments.eventName] = temp />
 	</cffunction>
