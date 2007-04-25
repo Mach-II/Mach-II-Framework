@@ -79,6 +79,8 @@ Notes:
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
+		<cfset var overrideIncludeNodes  = "" />
+		<cfset var overrideIncludes = ArrayNew(1) />
 		<cfset var temp = StructNew() />
 		<cfset var i = "" />
 		
@@ -111,8 +113,13 @@ Notes:
 		<!--- Added the base config to the array --->
 		<cfset ArrayAppend(configXmls, temp) />
 
-		<!--- Load the includes --->	
+		<!--- Load the includes --->
 		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath) />
+
+		<!--- Search for includes in the overrideXml if defined --->
+		<cfif Len(arguments.overrideXml)>
+			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true) />
+		</cfif>
 		
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
@@ -242,6 +249,7 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
+		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
 		<cfset var includeNodes = "" />
@@ -253,10 +261,15 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 			<cfset temp = StructNew() />
 			<cfset includeFilePath = ExpandPath(includeNodes[i].xmlAttributes["file"]) />
-			<cfif StructKeyExists(includeNodes[i].xmlAttributes, "override")>
-				<cfset temp.override = includeNodes[i].xmlAttributes["override"] />
+			<!--- If this isn't a setup override includes, then check otherwise override --->
+			<cfif NOT arguments.overrideIncludeType>
+				<cfif StructKeyExists(includeNodes[i].xmlAttributes, "override")>
+					<cfset temp.override = includeNodes[i].xmlAttributes["override"] />
+				<cfelse>
+					<cfset temp.override = false />
+				</cfif>
 			<cfelse>
-				<cfset temp.override = false />
+				<cfset temp.override = true />
 			</cfif>
 			
 			<!--- Check for circular dependencies (pass a struct instead of stateful variables in case there is a error and it's impossible to cleanup)--->
@@ -288,7 +301,7 @@ Notes:
 			<cfset ArrayAppend(arguments.configFiles, temp) />
 			
 			<!--- Recursively check the include for more includes --->
-			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, arguments.alreadyLoaded) />
+			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, arguments.overrideIncludeType, arguments.alreadyLoaded) />
 		</cfloop>
 		
 		<cfreturn arguments.configFiles />
@@ -327,7 +340,7 @@ Notes:
 			<cfthrow type="MachII.framework.IncludeAlreadyDefined"
 				message="An include located at '#arguments.includeFilePath#' has already been included. You cannot define an include more than once." />
 		<cfelse>
-			<cfset arguments.alreadyLoaded[includeFilePathHash] = TRUE />
+			<cfset arguments.alreadyLoaded[includeFilePathHash] = true />
 		</cfif>
 		
 		<cfreturn arguments.alreadyLoaded />
