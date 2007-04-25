@@ -54,6 +54,16 @@ second time.
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Added AnnounceEventInModule
+A new method to BaseComponent called announceEventInModule().  The BaseComponent is 
+available to filter, listener, plugins and the new properties constructs.  You can use
+this method to announces events in other modules.
+
+Example:
+<cfset announceEventInModule("moduleName", "eventName", arguments.event.getArgs()) />
+
+(2007-04-24 pfarrell)
+
 * Module Support
 Please see the documentation for more information.
 (2007-04-24 kwiersma & pfarrell)
@@ -90,6 +100,9 @@ Example:
 	<includes>
 		<include file="config/mach-ii_admin.xml" override="false|true"/>
 	</includes>
+	<modules>
+		...
+	</modules>
 	<properties>
 		...
 	</properties>
@@ -155,7 +168,7 @@ Interal Framework Improvements / Enhancements
 The framework's request runner has been completely rewritten in order to support
 modules.  We recommend NOT using the undocumented request.eventContext as this 
 construct has been depreciated and we recommend that you do NOT directly access 
-the new request._MachIIRequestHandler contruct. 
+the new request._MachIIRequestHandler contruct as well. 
 (2007-04-24 kwiersma & pfarrell)
 
 * Required event-handlers check
@@ -170,7 +183,8 @@ module.
 * Removed use of XmlSearch() and switched to StructKeyExists for parameters 
 in property, listener, filter and plugin managers. This has improved (re)load
 times up to approximately 10% for large applications that contain many declarations
-of properties, listeners, filters and plugins. (2007-03-01 pfarrell)
+of properties, listeners, filters and plugins.
+(2007-03-01 pfarrell)
 
 * Refactored all managers to method chain the init() method whe creating the object
 (2007-02-25 pfarrell)
