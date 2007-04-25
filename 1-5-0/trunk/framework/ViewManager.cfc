@@ -65,7 +65,7 @@ Updated version: 1.5.0
 		<cfif NOT arguments.override>
 			<cfset viewNodes = XMLSearch(arguments.configXML, "mach-ii/page-views/page-view") />
 		<cfelse>
-			<cfset viewNodes = XMLSearch(arguments.configXML, "./page-views/page-view") />
+			<cfset viewNodes = XMLSearch(arguments.configXML, ".//page-views/page-view") />
 		</cfif>
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
