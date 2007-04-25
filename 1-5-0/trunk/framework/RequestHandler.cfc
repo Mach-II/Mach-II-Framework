@@ -117,6 +117,8 @@ Notes:
 			
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
+				<!--- Setup the eventContext again in case we are announcing an event in a module --->
+				<cfset setupEventContext(appManager) />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset getEventContext().handleException(exception, true) />
 			</cfcatch>
@@ -136,6 +138,9 @@ Notes:
 		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
 		
 		<cfset var exception = CreateObject("component", "MachII.util.Exception").init(arguments.type, arguments.message, arguments.errorCode, arguments.detail, arguments.extendedInfo, arguments.tagContext) />
+		<cfif NOT getIsException()>
+			<cfset resetEventCount() />
+		</cfif>
 		<cfset setIsException(true) />
 		
 		<cfreturn exception />
@@ -146,6 +151,9 @@ Notes:
 		<cfargument name="caughtException" type="any" required="true" />
 		
 		<cfset var exception = CreateObject("component", "MachII.util.Exception").wrapException(arguments.caughtException) />
+		<cfif NOT getIsException()>
+			<cfset resetEventCount() />
+		</cfif>
 		<cfset setIsException(true) />
 		
 		<cfreturn exception />
@@ -157,7 +165,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PROTECTED FUNCTIONS
+	PROTECTED FUNCTIONS - GENERAL
 	--->
 	<cffunction name="setupEventContext" access="private" returntype="void" output="false"
 		hint="Setup an EventContext instance.">
@@ -266,7 +274,7 @@ Notes:
 		<!--- Pre-Event --->
 		<cfset thisEventAppManager.getPluginManager().preEvent(getEventContext()) />
 
-		<!--- Run command --->
+		<!--- Run commands --->
 		<cfset eventHandler = thisEventAppManager.getEventManager().getEventHandler(arguments.event.getName(), arguments.event.getModuleName()) />		
 		<cfset eventHandler.handleEvent(arguments.event, getEventContext()) />
 		
@@ -274,6 +282,9 @@ Notes:
 		<cfset thisEventAppManager.getPluginManager().postEvent(getEventContext()) />
 	</cffunction>
 
+	<!---
+	PROTECTED FUNCTIONS - UTILS
+	--->
 	<cffunction name="hasMoreEvents" access="private" returntype="boolean" output="false"
 		hint="Checks if there are more events in the queue.">
 		<cfreturn NOT getEventQueue().isEmpty() />

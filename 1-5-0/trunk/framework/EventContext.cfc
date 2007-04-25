@@ -67,6 +67,7 @@ Notes:
 			<cfset setCurrentEvent(arguments.currentEvent) />
 		</cfif>
 		
+		<!--- Set the exception event --->
 		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
 		
 		<!--- (re)init the ViewContext. --->
@@ -95,8 +96,8 @@ Notes:
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(arguments.eventName)>
 				<cfset mapping = getEventMapping(arguments.eventName) />
-				<cfset nextModuleName = mapping.mappingModuleName />
-				<cfset nextEventName = mapping.mappingEventName />
+				<cfset nextModuleName = mapping.moduleName />
+				<cfset nextEventName = mapping.eventName />
 			</cfif>
 			<!--- Create the event. --->
 			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
@@ -141,6 +142,10 @@ Notes:
 
 		<cfif NOT Len(arguments.mappingModuleName)>
 			<cfset argument.mappingModuleName = getCurrentEvent().getModuleName() />
+		<!--- Check if module exists --->
+		<cfelseif NOT getAppManager().getModuleManager.isModuleDefined(arguments.mappindModuleName)>
+			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
+					message="The module '#arguments.mappingModuleName# cannot be found for this event-mapping." />
 		</cfif>
 		
 		<cfset temp.mappingEventName = arguments.mappingName />
@@ -157,8 +162,8 @@ Notes:
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
 			<cfreturn variables.mappings[arguments.eventName] />
 		<cfelse>
-			<cfset temp.mappingEventName = arguments.eventName />
-			<cfset temp.mappingModuleName = getCurrentEvent().getModuleName() />
+			<cfset temp.eventName = arguments.eventName />
+			<cfset temp.moduleName = getCurrentEvent().getModuleName() />
 			<cfreturn temp />
 		</cfif>
 	</cffunction>
@@ -191,6 +196,84 @@ Notes:
 		
 		<!--- Post-Invoke. --->
 		<cfset getAppManager().getPluginManager().postView(this) />
+	</cffunction>
+
+	<cffunction name="handleException" access="public" returntype="void" output="true"
+		hint="Handles an exception.">
+		<cfargument name="exception" type="MachII.util.Exception" required="true" />
+		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
+		
+		<cfset var eventArgs = StructNew() />
+		<cfset var appManager = getAppManager() />
+		<cfset var result = StructNew() />
+		
+		<cfset result.eventName = getExceptionEventName() />
+		
+		<cftry>
+			<!--- Create eventArg data --->			
+			<cfset eventArgs.exception = arguments.exception />
+			<cfif hasCurrentEvent()>
+				<cfset eventArgs.exceptionEvent = getCurrentEvent() />
+			</cfif>
+			
+			<!--- Call the handleException point in the plugins for the current event first --->
+			<cfset appManager.getPluginManager().handleException(this, arguments.exception) />
+			
+			<!--- Clear event queue (must be called from the variables scope or it fails)--->
+			<cfif arguments.clearEventQueue>
+				<cfset variables.clearEventQueue() />
+			</cfif>
+			
+			<!--- Check for an event-mapping. --->
+			<cfif isEventMappingDefined(result.eventName)>
+				<cfset result = getEventMapping(exceptionEventName) />
+				<cfset appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
+			<!--- If the exception event is not defined, then we know it's in the parent --->
+			<cfelseif appManager.getPropertyManager().isPropertyDefined("exceptionEvent")>
+				<cfset result.moduleName = appManager.getModuleName() />
+			<cfelse>
+				<cfset result.moduleName = "" />
+			</cfif>
+			
+			<!--- Queue the exception event instead of handling it immediately. 
+			The queue is cleared by default so it will be handled first anyway. --->
+			<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
+			<cfset getEventQueue().put(nextEvent) />
+			
+			<cfcatch type="any">
+				<cfrethrow />
+			</cfcatch>
+		</cftry>
+	</cffunction>
+	
+	<cffunction name="buildUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to index.cfm." />			
+		<cfreturn getAppManager().getRequestManager().buildUrl(getCurrentEvent().getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+	</cffunction>
+	
+	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with. Defaults to current module if empty string." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to index.cfm." />
+		
+		<!--- Pull the current module name if empty string (we use the request scope so we do not
+			pollute the variables scope which is shared in the views) --->
+		<cfif NOT Len(arguments.moduleName)>
+			<cfset argument.moduleName = getCurrentEvent().getModuleName() />
+		</cfif>
+		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
 	</cffunction>
 
 	<!---
@@ -233,68 +316,6 @@ Notes:
 	<cffunction name="hasMoreEvents" access="public" returntype="boolean" output="false"
 		hint="Checks if there are more events in the queue.">
 		<cfreturn NOT getEventQueue().isEmpty() />
-	</cffunction>
-	
-	<cffunction name="handleException" access="public" returntype="void" output="true"
-		hint="Handles an exception.">
-		<cfargument name="exception" type="MachII.util.Exception" required="true" />
-		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
-		
-		<cfset var eventArgs = StructNew() />
-		
-		<cftry>
-			<!--- Create eventArg data --->			
-			<cfset eventArgs.exception = arguments.exception />
-			<cfif hasCurrentEvent()>
-				<cfset eventArgs.exceptionEvent = getCurrentEvent() />
-			</cfif>
-			
-			<!--- Call the handleException point in the plugins --->
-			<cfset getAppManager().getPluginManager().handleException(this, arguments.exception) />
-			
-			<!--- Clear event queue --->
-			<cfif arguments.clearEventQueue>
-				<cfset variables.clearEventQueue() />
-			</cfif>
-			
-			<!--- Queue the exception event instead of handling it immediately. 
-			The queue is cleared by default so it will be handled first anyway. --->
-			<cfset announceEvent(getExceptionEventName(), eventArgs) />
-			
-			<cfcatch type="any">
-				<cfrethrow />
-			</cfcatch>
-		</cftry>
-	</cffunction>
-	
-	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url.">
-		<cfargument name="eventName" type="string" required="true"
-			hint="Name of the event to build the url with." />
-		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />			
-		<cfreturn getAppManager().getRequestManager().buildUrl(getCurrentEvent().getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase) />
-	</cffunction>
-	
-	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
-		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with. Defaults to current module if empty string." />
-		<cfargument name="eventName" type="string" required="true"
-			hint="Name of the event to build the url with." />
-		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />
-		
-		<!--- Pull the current module name if empty string (we use the request scope so we do not
-			pollute the variables scope which is shared in the views) --->
-		<cfif NOT Len(arguments.moduleName)>
-			<cfset argument.moduleName = getCurrentEvent().getModuleName() />
-		</cfif>
-		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
 	</cffunction>
 	
 	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"

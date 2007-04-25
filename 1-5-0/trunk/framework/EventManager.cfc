@@ -236,8 +236,8 @@ Updated version: 1.1.0
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	<cffunction name="getHandlerList" access="public" returntype="string" output="false">
-		<cfreturn structKeyList(variables.handlers) />
+	<cffunction name="getEventList" access="public" returntype="string" output="false">
+		<cfreturn StructKeyList(variables.handlers) />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
