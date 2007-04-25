@@ -158,7 +158,7 @@ the rest of the framework. (pfarrell)
 		<!--- Can only bind simple parameter values --->
 		<cfif IsSimpleValue(value) AND REFindNoCase("\${(.)*?}", value)>
 			<cfset propertyName = Mid(value, 3, Len(value) -3) />
-			<cfif getAppManager().getPropertyManager().isPropertyDefined(propertyName)>
+			<cfif getPropertyManager().isPropertyDefined(propertyName)>
 				<cfset value = getProperty(propertyName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.ProperyNotDefinedToBindToParameter" 
