@@ -54,6 +54,8 @@ Notes:
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		<cfargument name="overrideXml" type="any" required="false" default=""
 			hint="Optional argument for a modules. If there isn't one default to empty string." />
+		<cfargument name="moduleName" type="string" required="false" default=""
+			hint="Optional argument for the name of a module. Defaults to empty string." />
 		
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
 		<cfset setAppFactory(appFactory) />
@@ -62,6 +64,7 @@ Notes:
 		<cfset setDtdPath(arguments.dtdPath) />
 		<cfset setValidateXml(arguments.validateXml) />
 		<cfset setOverrideXml(arguments.overrideXml) />
+		<cfset setModuleName(arguments.moduleName) />
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
@@ -115,7 +118,7 @@ Notes:
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
-				getValidateXml(), arguments.parentAppManager, getOverrideXml())) />
+				getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
 	
@@ -172,6 +175,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getConfigPath" access="public" returntype="string" output="false">
 		<cfreturn variables.configPath />
+	</cffunction>
+	
+	<cffunction name="setModuleName" access="public" returntype="void" output="false"
+		hint="Sets the name of the module">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>
+	<cffunction name="getModuleName" access="public" type="string" output="false"
+		hint="Gets the module name">
+		<cfreturn variables.moduleName />
 	</cffunction>
 	
 	<cffunction name="setDtdPath" access="public" returntype="void" output="false">

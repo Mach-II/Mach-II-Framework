@@ -53,9 +53,11 @@ Notes:
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
-			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
+			hint="Optional argument for a parent app manager. Defaults to empty string." />
 		<cfargument name="overrideXml" type="any" required="false" default=""
-			hint="Optional argument for a modules. If there isn't one default to empty string." />
+			hint="Optional argument for a modules. Defaults to empty string." />
+		<cfargument name="moduleName" type="string" required="false" default=""
+			hint="Optional argument for the name of a module. Defaults to empty string." />
 			
 		<cfset var appManager = "" />
 		<cfset var utils = "" />
@@ -114,6 +116,9 @@ Notes:
 		
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
+		<cfif Len(arguments.moduleName)>
+			<cfset appManager.setModuleName(arguments.moduleName) />
+		</cfif>
 		
 		<!--- Setup a parent app manager and related managers if the parent is not empty string --->
 		<cfif IsObject(arguments.parentAppManager)>

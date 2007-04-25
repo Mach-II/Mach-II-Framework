@@ -103,8 +103,41 @@ Updated version: 1.1.0
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures nothing.">
-		<!--- DO NOTHING --->
+		hint="Configures the EventManager and checks if default and exception are defined as required.">
+		
+		<cfset var defaultEvent = "" />
+		<cfset var exceptionEvent = "" />
+		
+		<!--- Make sure a default and exception event is defined for parent--->
+		<cfif NOT IsObject(getAppManager().getParent())>
+			<cfset defaultEvent = getAppManager().getPropertyManager().getProperty("defaultEvent") />
+			<cfif NOT isEventDefined(defaultEvent, false)>
+				<cfthrow type="MachII.framework.noDefaultEvent"
+					message="A default event named '#defaultEvent#' has been not defined, but is required. Please create one." />				
+			</cfif>
+			<cfset exceptionEvent = getAppManager().getPropertyManager().getProperty("exceptionEvent") />
+			<cfif NOT isEventDefined(exceptionEvent, false)>
+				<cfthrow type="MachII.framework.noExceptionEvent"
+					message="A exception event named '#exceptionEvent#' has been not defined, but is required. Please create one." />
+			</cfif>
+		<!--- Make sure a default and exception event is defined for modules is they are 
+			specified otherwise they default to the parent --->
+		<cfelse>
+			<cfif getAppManager().getPropertyManager().isPropertyDefined("defaultEvent")>
+				<cfset defaultEvent = getAppManager().getPropertyManager().getProperty("defaultEvent") />
+				<cfif NOT isEventDefined(defaultEvent, false)>
+					<cfthrow type="MachII.framework.noDefaultEvent"
+						message="A default event named '#defaultEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler is found. Please create one." />
+				</cfif>
+			</cfif>
+			<cfif getAppManager().getPropertyManager().isPropertyDefined("exceptionEvent")>
+				<cfset exceptionEvent = getAppManager().getPropertyManager().getProperty("exceptionEvent") />
+				<cfif NOT isEventDefined(exceptionEvent, false)>
+					<cfthrow type="MachII.framework.noExceptionEvent"
+						message="A exception event named '#exceptionEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler is found. Please create one." />
+				</cfif>
+			</cfif>
+		</cfif>
 	</cffunction>
 	
 	<!---
