@@ -255,7 +255,7 @@ Notes:
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
 		
-		<cfset includeNodes =  XmlSearch(arguments.configXML, "//includes/include") />
+		<cfset includeNodes =  XmlSearch(arguments.configXML, ".//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 			<cfset temp = StructNew() />
 			<cfset includeFilePath = ExpandPath(includeNodes[i].xmlAttributes["file"]) />
