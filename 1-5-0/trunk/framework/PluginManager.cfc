@@ -38,19 +38,19 @@ Notes:
 	<cfset variables.pluginArray = ArrayNew(1) />
 	<cfset variables.pluginArrayPosition = StructNew() />
 	<cfset variables.preProcessPlugins = ArrayNew(1) />
-	<cfset variables.preProcessPluginsPosition = StructNew() />
+	<cfset variables.preProcessPluginsPosition = "" />
 	<cfset variables.preEventPlugins = ArrayNew(1) />
-	<cfset variables.preEventPluginsPosition = StructNew() />
+	<cfset variables.preEventPluginsPosition = "" />
 	<cfset variables.postEventPlugins = ArrayNew(1) />
-	<cfset variables.postEventPluginsPosition = StructNew() />
+	<cfset variables.postEventPluginsPosition = "" />
 	<cfset variables.preViewPlugins = ArrayNew(1) />
-	<cfset variables.preViewPluginsPosition = StructNew() />
+	<cfset variables.preViewPluginsPosition = "" />
 	<cfset variables.postViewPlugins = ArrayNew(1) />
-	<cfset variables.postViewPluginsPosition = StructNew() />
+	<cfset variables.postViewPluginsPosition = "" />
 	<cfset variables.postProcessPlugins = ArrayNew(1) />
-	<cfset variables.postProcessPluginsPosition = StructNew() />
+	<cfset variables.postProcessPluginsPosition = "" />
 	<cfset variables.handleExceptionPlugins = ArrayNew(1) />
-	<cfset variables.handleExceptionPluginsPosition = StructNew() />
+	<cfset variables.handleExceptionPluginsPosition = "" />
 	<cfset variables.nPlugins = 0 />
 	<cfset variables.parentPluginManager = "" />
 	<cfset variables.utils = "" />
@@ -169,10 +169,15 @@ Notes:
 			<cfloop from="1" to="#ArrayLen(pluginRegisteredPoints)#" index="i">
 				<cfset pointName = pluginRegisteredPoints[i] />
 				<cfif StructKeyExists(variables, pointName & "Plugins")>
-					<cfif StructKeyExists(variables[pointName & "PluginsPosition"], arguments.pluginName)>
-						<cfset variables[pointName & "Plugins"][variables[pointName & "PluginsPosition"][arguments.pluginName]] = arguments.plugin />
+					<cfif ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)>
+						<cfset variables[pointName & "Plugins"][ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)] = arguments.plugin />
 					<cfelse>
 						<cfset ArrayInsertAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName], arguments.plugin) />
+						<cfif ListLen(variables[pointName & "PluginsPosition"]) GT 1>
+							<cfset variables[pointName & "PluginsPosition"] = ListInsertAt(variables[pointName & "PluginsPosition"], variables.pluginArrayPosition[arguments.pluginName], arguments.pluginName) />
+						<cfelse>
+							<cfset variables[pointName & "PluginsPosition"] = ListAppend(variables[pointName & "PluginsPosition"], variables.pluginArrayPosition[arguments.pluginName]) />
+						</cfif>
 					</cfif>
 					<cfset temp = ListAppend(temp, pointName) />
 				</cfif>
@@ -181,16 +186,11 @@ Notes:
 			<!--- delete any references from the old plugin for each registered point not in new plugin --->
 			<cfloop from="1" to="#ArrayLen(variables.pluginPointArray)#" index="i">
 				<cfset pointName = variables.pluginPointArray[i] />
-				<cfif StructKeyExists(variables[pointName & "PluginsPosition"], arguments.pluginName) AND NOT ListFindNoCase(temp, pointName)>
-					<cfset ArrayDeleteAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName]) />
-					<cfset StructDelete(variables[pointName & "PluginsPosition"], arguments.pluginName) />
+				<cfif ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName) AND NOT ListFindNoCase(temp, pointName)>
+					<cfset ArrayDeleteAt(variables[pointName & "Plugins"], ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)) />
+					<cfset ListDeleteAt(variables[pointName & "PluginsPosition"], ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)) />
 				</cfif>
 			</cfloop>
-			
-			<cfdump var="#temp#">
-			<cfdump var="#variables#">
-			
-			<cfabort>
 		<cfelse>
 			<cfset variables.plugins[arguments.pluginName] = arguments.plugin />
 			
@@ -203,7 +203,7 @@ Notes:
 				<cfset pointName = pluginRegisteredPoints[i] />
 				<cfif StructKeyExists(variables, pointName & "Plugins")>
 					<cfset ArrayAppend(variables[pointName & "Plugins"], arguments.plugin) />
-					<cfset variables[pointName & "PluginsPosition"][arguments.pluginName] = ArrayLen(variables[pointName & "Plugins"])>
+					<cfset variables[pointName & "PluginsPosition"] = ListAppend(variables[pointName & "PluginsPosition"], arguments.pluginName) />
 				</cfif>
 			</cfloop>
 		</cfif>
