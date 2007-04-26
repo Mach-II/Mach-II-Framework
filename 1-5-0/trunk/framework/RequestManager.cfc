@@ -234,7 +234,7 @@ Notes:
 		
 		<cfif IsSimpleValue(arguments.urlParameters)>
 			<cfloop list="#arguments.urlParameters#" index="i" delimiters="|">
-				<cfif ListLen(i) EQ 2>
+				<cfif ListLen(i, "=") EQ 2>
 					<cfset temp = ListLast(i, "=") />
 				<cfelse>
 					<cfset temp = "" />
