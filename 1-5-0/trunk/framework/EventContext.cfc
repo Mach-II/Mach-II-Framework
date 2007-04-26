@@ -349,7 +349,7 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>	
-	<cffunction name="getAppManager" access="private" type="MachII.framework.AppManager" output="false">
+	<cffunction name="getAppManager" access="public" type="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
 

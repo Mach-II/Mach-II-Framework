@@ -185,7 +185,7 @@ Notes:
 		</cfif>
 		<cfset setIsProcessing(true) />
 		
-		<cfset pluginManager = getAppManager().getPluginManager() />
+		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
 	
 		<!--- Pre-Process. --->
 		<cfset pluginManager.preProcess(getEventContext()) />
@@ -222,7 +222,9 @@ Notes:
 		</cfif>
 		
 		<!--- Post-Process. --->
+		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
 		<cfset pluginManager.postProcess(getEventContext()) />
+		
 		<cfset setIsProcessing(false) />
 	</cffunction>
 	
