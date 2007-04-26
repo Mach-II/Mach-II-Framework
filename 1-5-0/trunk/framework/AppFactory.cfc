@@ -221,11 +221,9 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset pluginManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 		</cfloop>
-		<!---
-		TODO: finish the plugins - overriding is more difficult since we register each plugin point (Peter is working on this)
 		<cfif Len(arguments.overrideXml)>
 			<cfset pluginManager.loadXml(arguments.overrideXml, true) />
-		</cfif> --->
+		</cfif>
 		<cfset appManager.setPluginManager(pluginManager) />
 
 		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />

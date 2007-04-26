@@ -36,16 +36,25 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.plugins = StructNew() />
 	<cfset variables.pluginArray = ArrayNew(1) />
+	<cfset variables.pluginArrayPosition = StructNew() />
 	<cfset variables.preProcessPlugins = ArrayNew(1) />
+	<cfset variables.preProcessPluginsPosition = StructNew() />
 	<cfset variables.preEventPlugins = ArrayNew(1) />
+	<cfset variables.preEventPluginsPosition = StructNew() />
 	<cfset variables.postEventPlugins = ArrayNew(1) />
+	<cfset variables.postEventPluginsPosition = StructNew() />
 	<cfset variables.preViewPlugins = ArrayNew(1) />
+	<cfset variables.preViewPluginsPosition = StructNew() />
 	<cfset variables.postViewPlugins = ArrayNew(1) />
+	<cfset variables.postViewPluginsPosition = StructNew() />
 	<cfset variables.postProcessPlugins = ArrayNew(1) />
+	<cfset variables.postProcessPluginsPosition = StructNew() />
 	<cfset variables.handleExceptionPlugins = ArrayNew(1) />
+	<cfset variables.handleExceptionPluginsPosition = StructNew() />
 	<cfset variables.nPlugins = 0 />
 	<cfset variables.parentPluginManager = "" />
 	<cfset variables.utils = "" />
+	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,handleException") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -69,6 +78,7 @@ Notes:
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var pluginNodes = 0 />
 		<cfset var paramNodes = 0 />
@@ -82,7 +92,11 @@ Notes:
 		<cfset var j = 0 />
 		
 		<!--- Scoped argument variable - configXML --->
-		<cfset pluginNodes = XMLSearch(arguments.configXML, "//plugins/plugin" ) />
+		<cfif NOT arguments.override>
+			<cfset pluginNodes = XMLSearch(arguments.configXML, "mach-ii/plugins/plugin") />
+		<cfelse>
+			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") />
+		</cfif>
 		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
 			<cfset pluginName = pluginNodes[i].XmlAttributes["name"] />
 			<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
@@ -101,7 +115,7 @@ Notes:
 			</cfif>
 			
 			<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
-			<cfset addPlugin(pluginName, plugin) />
+			<cfset addPlugin(pluginName, plugin, arguments.override) />
 		</cfloop>
 	</cffunction>
 	
@@ -137,25 +151,59 @@ Notes:
 		hint="Registers a plugin with the specified name.">
 		<cfargument name="pluginName" type="string" required="true" />
 		<cfargument name="plugin" type="MachII.framework.Plugin" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var i = 0 />
 		<cfset var pointName = 0 />
+		<cfset var temp = "" />
 		<cfset var pluginRegisteredPoints = ListToArray(findPluginPoints(arguments.plugin)) />		
 
-		<cfif isPluginDefined(arguments.pluginName)>
+		<cfif NOT arguments.override AND isPluginDefined(arguments.pluginName)>
 			<cfthrow type="MachII.framework.PluginAlreadyDefined"
 				message="A Plugin with name '#arguments.pluginName#' is already registered." />
+		<cfelseif arguments.override AND isPluginDefined(arguments.pluginName)>
+			<cfset variables.plugins[arguments.pluginName] = arguments.plugin />
+			<cfset variables.pluginArray[variables.pluginArrayPosition[arguments.pluginName]] = arguments.plugin />
+			
+			<!--- re-add references to this plugin for each registered point --->
+			<cfloop from="1" to="#ArrayLen(pluginRegisteredPoints)#" index="i">
+				<cfset pointName = pluginRegisteredPoints[i] />
+				<cfif StructKeyExists(variables, pointName & "Plugins")>
+					<cfif StructKeyExists(variables[pointName & "PluginsPosition"], arguments.pluginName)>
+						<cfset variables[pointName & "Plugins"][variables[pointName & "PluginsPosition"][arguments.pluginName]] = arguments.plugin />
+					<cfelse>
+						<cfset ArrayInsertAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName], arguments.plugin) />
+					</cfif>
+					<cfset temp = ListAppend(temp, pointName) />
+				</cfif>
+			</cfloop>
+
+			<!--- delete any references from the old plugin for each registered point not in new plugin --->
+			<cfloop from="1" to="#ArrayLen(variables.pluginPointArray)#" index="i">
+				<cfset pointName = variables.pluginPointArray[i] />
+				<cfif StructKeyExists(variables[pointName & "PluginsPosition"], arguments.pluginName) AND NOT ListFindNoCase(temp, pointName)>
+					<cfset ArrayDeleteAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName]) />
+					<cfset StructDelete(variables[pointName & "PluginsPosition"], arguments.pluginName) />
+				</cfif>
+			</cfloop>
+			
+			<cfdump var="#temp#">
+			<cfdump var="#variables#">
+			
+			<cfabort>
 		<cfelse>
 			<cfset variables.plugins[arguments.pluginName] = arguments.plugin />
 			
 			<cfset variables.nPlugins = variables.nPlugins + 1 />
 			<cfset variables.pluginArray[variables.nPlugins] = arguments.plugin />
+			<cfset variables.pluginArrayPosition[arguments.pluginName] = variables.nPlugins />
 			
 			<!--- add references to this plugin for each registered point --->
 			<cfloop from="1" to="#ArrayLen(pluginRegisteredPoints)#" index="i">
 				<cfset pointName = pluginRegisteredPoints[i] />
-				<cfif StructKeyExists(variables,pointName & "Plugins")>
-					<cfset ArrayAppend(variables[pointName & "Plugins" ], arguments.plugin) />
+				<cfif StructKeyExists(variables, pointName & "Plugins")>
+					<cfset ArrayAppend(variables[pointName & "Plugins"], arguments.plugin) />
+					<cfset variables[pointName & "PluginsPosition"][arguments.pluginName] = ArrayLen(variables[pointName & "Plugins"])>
 				</cfif>
 			</cfloop>
 		</cfif>
@@ -167,8 +215,13 @@ Notes:
 		<cfreturn StructKeyExists(variables.plugins, arguments.pluginName) />
 	</cffunction>
 	
+	<cffunction name="getPluginNames" access="public" returntype="array" output="false"
+		hint="Returns an array of plugin names.">
+		<cfreturn StructKeyArray(variables.plugins) />
+	</cffunction>
+	
 	<!---
-	PLUGIN POINT FUNCTIONS called from EventContext
+	PLUGIN POINT FUNCTIONS
 	--->
 	<cffunction name="preProcess" access="public" returntype="void" output="true"
 		hint="preProcess() is called for each new EventContext once before event processing begins.">
@@ -182,7 +235,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().preProcess(arguments.eventContext)>
+			<cfset getParent().preProcess(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 	
@@ -198,7 +251,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().preEvent(arguments.eventContext)>
+			<cfset getParent().preEvent(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -214,7 +267,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().postEvent(arguments.eventContext)>
+			<cfset getParent().postEvent(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 	
@@ -230,7 +283,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().preView(arguments.eventContext)>
+			<cfset getParent().preView(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -246,7 +299,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().postView(arguments.eventContext)>
+			<cfset getParent().postView(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -262,7 +315,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().postProcess(arguments.eventContext)>
+			<cfset getParent().postProcess(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -280,7 +333,7 @@ Notes:
 		</cfloop>
 		
 		<cfif isObject(getParent())>
-			<cfset getParent().handleException(arguments.eventContext, arguments.exception)>
+			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 		</cfif>
 	</cffunction>
 
@@ -349,6 +402,7 @@ Notes:
 		hint="Returns the AppManager instance this PluginManager belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent PluginManager instance this PluginManager belongs to.">
 		<cfargument name="parentPluginManager" type="MachII.framework.PluginManager" required="true" />
@@ -357,11 +411,6 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent PluginManager instance this PluginManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentPluginManager />
-	</cffunction>
-	
-	<cffunction name="getPluginNames" access="public" returntype="array" output="false"
-		hint="Returns an array of plugin names.">
-		<cfreturn StructKeyArray(variables.plugins) />
 	</cffunction>
 	
 </cfcomponent>
