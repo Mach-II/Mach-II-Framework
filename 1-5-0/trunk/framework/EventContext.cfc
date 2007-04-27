@@ -126,7 +126,7 @@ Notes:
 			<cfset subroutineHandler.handleSubroutine(arguments.event, this) />
 					
 			<cfcatch>
-				<cfset exception = wrapException(cfcatch) />
+				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
