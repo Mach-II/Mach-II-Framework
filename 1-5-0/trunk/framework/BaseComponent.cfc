@@ -96,6 +96,36 @@ the rest of the framework. (pfarrell)
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="buildUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to index.cfm." />
+		<cfreturn getAppManager().getRequestManager().buildUrl(request.event.getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+	</cffunction>
+	
+	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with. Defaults to current module if empty string." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to index.cfm." />
+		
+		<!--- Pull the current module name if empty string (we use the request scope so we do not
+			pollute the variables scope which is shared in the views) --->
+		<cfif NOT Len(arguments.moduleName)>
+			<cfset argument.moduleName = request.event.getModuleName() />
+		</cfif>
+		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+	</cffunction>
+	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
