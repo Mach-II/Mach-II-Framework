@@ -377,6 +377,13 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfoutput>
 				<div id="MachIITraceDisplay">
 				<style type="text/css"><!--
+					##MachIITraceDisplay {
+						color: ##000;
+						background-color: ##FFF;
+					}
+					##MachIITraceDisplay h3 {
+						color: ##000;
+					}
 					##MachIITraceDisplay table {
 						border: 1px solid ##D0D0D0;
 						padding: 0.5em;
