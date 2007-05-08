@@ -64,10 +64,10 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 
 <!ELEMENT modules (module*)>
-<!ATTLIST module
-	baseMapping CDATA #IMPLIED
+<!ATTLIST modules
+	baseName CDATA #IMPLIED
 >
-<!ELEMENT module ((properties?, listeners?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(properties?, listeners?, plugins?, event-filters?, event-handlers?, subroutines?, page-views?))>
+<!ELEMENT module (mach-ii?)>
 <!ATTLIST module 
 	name CDATA #REQUIRED
 	file CDATA #IMPLIED
@@ -98,6 +98,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
 	type CDATA #IMPLIED
+	useParent (false|true) "false"
 >
 
 <!--
@@ -117,6 +118,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST listener 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
+	useParent (false|true) "false"
 >
 <!ELEMENT invoker EMPTY>
 <!ATTLIST invoker 
@@ -137,6 +139,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST event-filter 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
+	useParent (false|true) "false"
 >
 
 <!--
@@ -152,6 +155,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
+	useParent (false|true) "false"
 >
 
 <!--
@@ -164,7 +168,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT subroutines (subroutine*)>
 <!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST subroutine 
-	name CDATA #REQUIRED 
+	name CDATA #REQUIRED
+	useParent (false|true) "false"
 >
 
 <!--
@@ -180,6 +185,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
 	page CDATA #REQUIRED
+	useParent (false|true) "false"
 >
 
 <!--
@@ -195,6 +201,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
+	useParent (false|true) "false"
 >
 
 
@@ -230,7 +237,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	Either value or variable should be defined.
 		name - the name of the arg to set in the event
 		value - the value of the arg to set in the event
-		variable - a variable to set as the value in the event
+		[variable] - a variable to set as the value in the event
 -->
 <!ELEMENT event-arg EMPTY>
 <!ATTLIST event-arg 
@@ -244,12 +251,13 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	will map one event (if announced) to another.
 		event - the name of the event to map
 		mapping - the name of the event to map to
+		[module] - the name of the module of the event to map to
 -->
 <!ELEMENT event-mapping EMPTY>
 <!ATTLIST event-mapping 
 	event CDATA #REQUIRED
 	mapping CDATA #REQUIRED
-	module CDATA #IMPLIED
+	mappingModule CDATA #IMPLIED
 >
 
 <!--
@@ -276,6 +284,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT announce EMPTY>
 <!ATTLIST announce
 	event CDATA #REQUIRED
+	module CDATA #IMPLIED
 	copyEventArgs (true|false) "true"
 >
 
@@ -301,6 +310,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		url - the url to redirect to
 		args - a comma-delimited list of event args to attach to the redirect url
 		[persist] - a boolean that allows you to persist complex event arguments across a redirect
+		[persistArgs] - a list of event args to persist across a redirect (if empty quotes or not defined - entire event is persisted)
+		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
+		
 -->
 <!ELEMENT redirect EMPTY>
 <!ATTLIST redirect
@@ -309,12 +321,12 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	args CDATA #IMPLIED
 	persist (true|false) "false"
 	persistArgs CDATA #IMPLIED
-	statusType CDATA #IMPLIED
+	statusType (permanent|temporary|prg) "temporary"
 >
 
 <!--
 	A "execute" element will execute a subroutine.
-		name - the name of the filter being referenced
+		name - the name of the subroutine being referenced
 -->
 <!ELEMENT execute (parameter*)>
 <!ATTLIST execute 
@@ -336,6 +348,11 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	value CDATA #IMPLIED
 >
 
+<!--
+	Builds a "struct" via XML
+		name - the name of the struct key
+		[value] - the value of the struct key
+-->
 <!ELEMENT struct (key*)>
 <!ELEMENT key (value?, struct?, array?)>
 <!ATTLIST key 
@@ -343,6 +360,10 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	value CDATA #IMPLIED
 >
 
+<!--
+	Builds a "array" via XML
+		value - the value of the array element
+-->
 <!ELEMENT array (element*)>
 <!ELEMENT element (value?, struct?, array?)>
 <!ATTLIST element 
