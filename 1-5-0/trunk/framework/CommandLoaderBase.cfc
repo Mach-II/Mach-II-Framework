@@ -168,8 +168,8 @@ Updated version: 1.5.0
 		<cfset var mappingName = arguments.commandNode.xmlAttributes["mapping"] />
 		<cfset var mappingModule = "" />
 		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
-			<cfset mappingModule = arguments.commandNode.xmlAttributes["module"] />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "mappingModule")>
+			<cfset mappingModule = arguments.commandNode.xmlAttributes["mappingModule"] />
 		<cfelse>
 			<cfset mappingModule = getAppManager().getModuleName() />
 		</cfif>
