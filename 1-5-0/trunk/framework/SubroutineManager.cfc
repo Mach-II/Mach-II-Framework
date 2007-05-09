@@ -31,7 +31,7 @@ Updated version: 1.5.0
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
-	<cfset variables.parentSubrountineManager = "" />
+	<cfset variables.parentSubroutineManager = "" />
 	<!--- temps --->
 	<cfset variables.listenerMgr = "" />
 	<cfset variables.filterMgr = "" />
@@ -64,6 +64,7 @@ Updated version: 1.5.0
 		<cfset var subroutineName = "" />
 		<cfset var commandNode = "" />
 		<cfset var command = "" />
+		<cfset var hasParent = isObject(getParent()) />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -78,16 +79,20 @@ Updated version: 1.5.0
 		</cfif>
 		<cfloop from="1" to="#ArrayLen(subroutineNodes)#" index="i">
 			<cfset subroutineName = subroutineNodes[i].xmlAttributes["name"] />
-			
-			<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
-	  
-			<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
-			    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
-				<cfset command = createCommand(commandNode) />
-				<cfset subroutineHandler.addCommand(command) />
-			</cfloop>
-			
-			<cfset addSubroutineHandler(subroutineName, subroutineHandler, arguments.override) />
+
+			<cfif hasParent AND arguments.override AND StructKeyExists(subroutineNodes[i].xmlAttributes, "useParent") AND subroutineNodes[i].xmlAttributes["useParent"]>
+				<cfset removeSubroutine(subroutineName) />
+			<cfelse>			
+				<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
+		  
+				<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
+				    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
+					<cfset command = createCommand(commandNode) />
+					<cfset subroutineHandler.addCommand(command) />
+				</cfloop>
+
+				<cfset addSubroutineHandler(subroutineName, subroutineHandler, arguments.override) />
+			</cfif>
 		</cfloop>
 		
 		<!--- Clear temps. --->
@@ -131,12 +136,27 @@ Updated version: 1.5.0
 				message="SubroutineHandler for subroutine '#arguments.subroutineName#' is not defined." />
 		</cfif>
 	</cffunction>
+
+	<cffunction name="removeSubroutine" access="public" returntype="void" output="false"
+		hint="Removes a subroutine. Does NOT remove from a parent.">
+		<cfargument name="subroutineName" type="string" required="true"
+			hint="The name of the Subroutine to handle." />
+		<cfset StructDelete(variables.handlers, arguments.subroutineName, false) />
+	</cffunction>
 	
 	<cffunction name="isSubroutineDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if an SubroutineHandler for the named Subroutine is defined; otherwise false.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
 		<cfreturn StructKeyExists(variables.handlers, arguments.subroutineName) />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getSubroutineNames" access="public" returntype="array" output="false"
+		hint="Returns an array of subroutine names.">
+		<cfreturn StructKeyArray(variables.handlers) />
 	</cffunction>
 	
 	<!---

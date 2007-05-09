@@ -70,6 +70,7 @@ Notes:
 		<cfset var invokerType = "" />
 		<cfset var invoker = "" />
 		<cfset var listener = "" />
+		<cfset var hasParent = isObject(getParent()) />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
@@ -82,38 +83,43 @@ Notes:
 		</cfif>
 		<cfloop from="1" to="#ArrayLen(listenerNodes)#" index="i">
 			<cfset listenerName = listenerNodes[i].xmlAttributes["name"] />
-			<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
-		
-			<!--- Get the Listener's parameters. --->
-			<cfset listenerParams = StructNew() />
 			
-			<!--- For each plugin, parse all the parameters --->
-			<cfif StructKeyExists(listenerNodes[i], "parameters")>
-				<cfset paramNodes = listenerNodes[i].parameters.xmlChildren />
-				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-					<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
-					<cfset listenerParams[paramName] = paramValue />
-				</cfloop>
-			</cfif>
-		
-			<!--- Setup the Listener. --->
-			<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
-
-			<!--- Use declared invoker from config file --->
-			<cfif StructKeyExists(listenerNodes[i], "invoker")>
-				<cfset invokerType = listenerNodes[i].invoker.xmlAttributes["type"] />
-
-				<cfset invoker = CreateObject("component", invokerType).init() />
-			<!--- Use defaultInvoker --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(viewNolistenerNodesdes[i].xmlAttributes, "useParent") AND listenerNodes[i].xmlAttributes["useParent"]>
+				<cfset removeListener(listenerName) />
 			<cfelse>
-				<cfset invoker = listener.getDefaultInvoker() />
+				<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
+			
+				<!--- Get the Listener's parameters. --->
+				<cfset listenerParams = StructNew() />
+				
+				<!--- For each plugin, parse all the parameters --->
+				<cfif StructKeyExists(listenerNodes[i], "parameters")>
+					<cfset paramNodes = listenerNodes[i].parameters.xmlChildren />
+					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+						<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfset listenerParams[paramName] = paramValue />
+					</cfloop>
+				</cfif>
+			
+				<!--- Setup the Listener. --->
+				<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
+	
+				<!--- Use declared invoker from config file --->
+				<cfif StructKeyExists(listenerNodes[i], "invoker")>
+					<cfset invokerType = listenerNodes[i].invoker.xmlAttributes["type"] />
+	
+					<cfset invoker = CreateObject("component", invokerType).init() />
+				<!--- Use defaultInvoker --->
+				<cfelse>
+					<cfset invoker = listener.getDefaultInvoker() />
+				</cfif>
+	
+				<!--- Continue setup on the Lister. --->
+				<cfset listener.setInvoker(invoker) />
+				<!--- Add the Listener to the Manager. --->
+				<cfset addListener(listenerName, listener, arguments.override) />
 			</cfif>
-
-			<!--- Continue setup on the Lister. --->
-			<cfset listener.setInvoker(invoker) />
-			<!--- Add the Listener to the Manager. --->
-			<cfset addListener(listenerName, listener, arguments.override) />
 		</cfloop>
 	</cffunction>
 
@@ -154,6 +160,12 @@ Notes:
 		<cfelse>
 			<cfset variables.listeners[arguments.listenerName] = arguments.listener />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="removeListener" access="public" returntype="void" output="false"
+		hint="Removes a listener. Does NOT remove from a parent.">
+		<cfargument name="listenerName" type="string" required="true" />
+		<cfset StructDelete(variables.listeners, arguments.listenerName, false) />
 	</cffunction>
 	
 	<cffunction name="isListenerDefined" access="public" returntype="boolean" output="false"

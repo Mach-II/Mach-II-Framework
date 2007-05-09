@@ -74,6 +74,7 @@ the rest of the framework. (pfarrell)
 		<cfset var paramsNodes = "" />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
+		<cfset var hasParent = isObject(getParent()) />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
@@ -84,108 +85,112 @@ the rest of the framework. (pfarrell)
 			<cfset propertyNodes = XMLSearch(arguments.configXML, ".//properties/property") />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">			
+		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">
 			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
-			
-			<!--- Setup if configurable property --->
-			<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
-				<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
-				
-				<!--- Set the Property's parameters. --->
-				<cfset propertyParams = StructNew() />
-				
-				<!--- For each configurable property, parse all the parameters --->
-				<cfif StructKeyExists(propertyNodes[i], "parameters")>
-					<cfset paramsNodes = propertyNodes[i].parameters.xmlChildren />
-					<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
-						<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
-						<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
-						<cfset propertyParams[paramName] = paramValue />
-					</cfloop>
+			<!--- Remove property if useParent is true and this is an override xml --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "useParent") AND propertyNodes[i].xmlAttributes["useParent"]>
+				<cfset removeProperty(propertyName) />
+			<cfelse>
+				<!--- Setup if configurable property --->
+				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
+					<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
+					
+					<!--- Set the Property's parameters. --->
+					<cfset propertyParams = StructNew() />
+					
+					<!--- For each configurable property, parse all the parameters --->
+					<cfif StructKeyExists(propertyNodes[i], "parameters")>
+						<cfset paramsNodes = propertyNodes[i].parameters.xmlChildren />
+						<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
+							<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
+							<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
+							<cfset propertyParams[paramName] = paramValue />
+						</cfloop>
+					</cfif>
+					
+					<!--- Create the configurable property and append to array of configurable property names --->
+					<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
+					<cfset ArrayAppend(variables.configurableProperties, propertyName) />
+				<!--- Setup if name/value pair, struct or array --->
+				<cfelse>
+					<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
 				</cfif>
 				
-				<!--- Create the configurable property and append to array of configurable property names --->
-				<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
-				<cfset ArrayAppend(variables.configurableProperties, propertyName) />
-			<!--- Setup if name/value pair, struct or array --->
-			<cfelse>
-				<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
-			</cfif>
-			
-			<!--- Set the property --->
-			<cfif (isObject(getParent()) AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
-					OR NOT isObject(getParent())>
-				<cfset setProperty(propertyName, propertyValue) />
+				<!--- Set the property --->
+				<cfif (hasParent AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
+						OR NOT hasParent>
+					<cfset setProperty(propertyName, propertyValue) />
+				</cfif>
 			</cfif>
 		</cfloop>
 		
 		<!--- Make sure required properties are set: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
 		<cfif NOT isPropertyDefined("defaultEvent")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("defaultEvent")>
+			<cfif hasParent AND getParent().isPropertyDefined("defaultEvent")>
 			<cfelse>
 				<cfset setProperty("defaultEvent", "defaultEvent") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("exceptionEvent")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("exceptionEvent")>
+			<cfif hasParent AND getParent().isPropertyDefined("exceptionEvent")>
 			<cfelse>
 				<cfset setProperty("exceptionEvent", "exceptionEvent") />
 			</cfif>
 		</cfif>
-		<cfif NOT isPropertyDefined("applicationRoot") AND NOT isObject(getParent())>
+		<cfif NOT isPropertyDefined("applicationRoot") AND NOT hasParent>
 			<cfset setProperty("applicationRoot", "") />
 		</cfif>
 		<cfif NOT isPropertyDefined("eventParameter")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("eventParameter")>
+			<cfif hasParent AND getParent().isPropertyDefined("eventParameter")>
 			<cfelse>
 				<cfset setProperty("eventParameter", "event") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("parameterPrecedence")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("parameterPrecedence")>
+			<cfif hasParent AND getParent().isPropertyDefined("parameterPrecedence")>
 			<cfelse>
 				<cfset setProperty("parameterPrecedence", "form") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("maxEvents")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("maxEvents")>
+			<cfif hasParent AND getParent().isPropertyDefined("maxEvents")>
 			<cfelse>
 				<cfset setProperty("maxEvents", 10) />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("redirectPersistParameter")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("redirectPersistParameter")>
+			<cfif hasParent AND getParent().isPropertyDefined("redirectPersistParameter")>
 			<cfelse>
 				<cfset setProperty("redirectPersistParameter", "persistId") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("redirectPersistScope")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("redirectPersistScope")>
+			<cfif hasParent AND getParent().isPropertyDefined("redirectPersistScope")>
 			<cfelse>
 				<cfset setProperty("redirectPersistScope", "session") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlBase")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlBase")>
+			<cfif hasParent AND getParent().isPropertyDefined("urlBase")>
 			<cfelse>
 				<cfset setProperty("urlBase", "index.cfm") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlDelimiters")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlDelimiters")>
+			<cfif hasParent AND getParent().isPropertyDefined("urlDelimiters")>
 			<cfelse>
 				<cfset setProperty("urlDelimiters", "?|&|=") />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("urlParseSES")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("urlParseSES")>
+			<cfif hasParent AND getParent().isPropertyDefined("urlParseSES")>
 			<cfelse>
 				<cfset setProperty("urlParseSES", false) />
 			</cfif>
 		</cfif>
 		<cfif NOT isPropertyDefined("moduleDelimiter")>
-			<cfif isObject(getParent()) AND getParent().isPropertyDefined("moduleDelimiter")>
+			<cfif hasParent AND getParent().isPropertyDefined("moduleDelimiter")>
 			<cfelse>
 				<cfset setProperty("moduleDelimiter", ":") />
 			</cfif>
@@ -241,9 +246,14 @@ the rest of the framework. (pfarrell)
 			<cfset variables.properties[arguments.propertyName] = arguments.propertyValue />
 		</cfif>
 	</cffunction>
+	<cffunction name="removeProperty" access="public" returntype="void" output="false"
+		hint="Removes a property from the current property manager. Does NOT remove from a parent.">
+		<cfargument name="propertyName" type="string" required="true" />
+		<cfset StructDelete(variables.properties, arguments.propertyName, false) />
+	</cffunction>
 	
 	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
-		hint="Checks if property name is defined in the properties.">
+		hint="Checks if property name is defined in the properties. Does NOT check a parent.">
 		<cfargument name="propertyName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.properties, arguments.propertyName) />
 	</cffunction>

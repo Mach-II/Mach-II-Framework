@@ -59,6 +59,7 @@ Updated version: 1.5.0
 		<cfset var viewNodes = "" />
 		<cfset var name = "" />
 		<cfset var page = "" />
+		<cfset var hasParent = isObject(getParent()) />
 		<cfset var i = 0 />
 		
 		<!--- Setup up each Page-View. --->
@@ -69,9 +70,14 @@ Updated version: 1.5.0
 		</cfif>
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
-			<cfset page = viewNodes[i].xmlAttributes["page"] />
 			
-			<cfset variables.viewPaths[name] = page />
+			<cfif hasParent AND arguments.override AND StructKeyExists(viewNodes[i].xmlAttributes, "useParent") AND viewNodes[i].xmlAttributes["useParent"]>
+				<cfset StructDelete(variables.viewPaths, name, false) />
+			<cfelse>
+				<cfset page = viewNodes[i].xmlAttributes["page"] />
+			
+				<cfset variables.viewPaths[name] = page />
+			</cfif>
 		</cfloop>
 	</cffunction>
 	

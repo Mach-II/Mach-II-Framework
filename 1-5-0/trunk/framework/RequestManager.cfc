@@ -69,6 +69,7 @@ Notes:
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- Parse through the complex list of delimiters --->
+		<!--- TODO: add try/catch --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />

@@ -66,6 +66,7 @@ Updated version: 1.1.0
 		<cfset var eventAccess = "" />
 		<cfset var eventName = "" />
 		<cfset var command = "" />
+		<cfset var hasParent = isObject(getParent()) />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -80,21 +81,26 @@ Updated version: 1.1.0
 		</cfif>
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
-			<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
-				<cfset eventAccess = eventNodes[i].xmlAttributes["access"] />
+			
+			<cfif hasParent AND arguments.override AND StructKeyExists(eventNodes[i].xmlAttributes, "useParent") AND eventNodes[i].xmlAttributes["useParent"]>>
+				<cfset removeEvent(eventName) />
 			<cfelse>
-				<cfset eventAccess = "public" />
+				<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
+					<cfset eventAccess = eventNodes[i].xmlAttributes["access"] />
+				<cfelse>
+					<cfset eventAccess = "public" />
+				</cfif>
+				
+				<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess) />
+		  
+				<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
+				    <cfset commandNode = eventNodes[i].XMLChildren[j] />
+					<cfset command = createCommand(commandNode) />
+					<cfset eventHandler.addCommand(command) />
+				</cfloop>
+				
+				<cfset addEventHandler(eventName, eventHandler, arguments.override) />
 			</cfif>
-			
-			<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess) />
-	  
-			<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
-			    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-				<cfset command = createCommand(commandNode) />
-				<cfset eventHandler.addCommand(command) />
-			</cfloop>
-			
-			<cfset addEventHandler(eventName, eventHandler, arguments.override) />
 		</cfloop>
 		
 		<!--- Clear temps. --->
@@ -203,6 +209,13 @@ Updated version: 1.1.0
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 				message="EventHandler for event '#arguments.eventName#' is not defined." />
 		</cfif>
+	</cffunction>
+
+	<cffunction name="removeEvent" access="public" returntype="void" output="false"
+		hint="Removes an event-handler. Does NOT remove from parent.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the Event to handle." />
+		<cfset StructDelete(variables.handlers, arguments.eventName, false) />
 	</cffunction>
 	
 	<cffunction name="isEventDefined" access="public" returntype="boolean" output="false"
