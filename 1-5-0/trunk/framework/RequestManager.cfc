@@ -106,35 +106,33 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false" default=""
 			hint="Base of the url. Defaults to index.cfm." />
 		
-		<cfset var url = "" />
+		<cfset var builtUrl = "" />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
 		<cfset var module = "" />
 		<cfset var i = "" />
 		
 		<!--- Append the base url --->
 		<cfif NOT Len(arguments.urlBase)>
-			<cfset url = getDefaultUrlBase() />
+			<cfset builtUrl = getDefaultUrlBase() />
 		<cfelse>
-			<cfset url = arguments.urlBase />
+			<cfset builtUrl = arguments.urlBase />
 		</cfif>
 
 		<!--- Attach the module/event name if defined --->
-		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
-		<cfelseif Len(arguments.moduleName) AND NOT Len(arguments.eventName)>
-			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.moduleName & getModuleDelimiter() />
-		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset url = url & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.eventName />
+		<cfif Len(arguments.moduleName)>
+			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+		<cfelseif NOT Len(arguments.moduleName)>
+			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop collection="#params#" item="i">
 			<cfif IsSimpleValue(params[i])>
-				<cfset url = url & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
+				<cfset builtUrl = builtUrl & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn url />
+		<cfreturn builtUrl />
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
