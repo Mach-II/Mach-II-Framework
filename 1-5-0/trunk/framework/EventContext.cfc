@@ -98,6 +98,8 @@ Notes:
 				<cfset mapping = getEventMapping(arguments.eventName) />
 				<cfset nextModuleName = mapping.moduleName />
 				<cfset nextEventName = mapping.eventName />
+			<cfelseif NOT Len(arguments.moduleName)>
+				<cfset nextModuleName = getCurrentEvent().getModuleName() />
 			</cfif>
 			<!--- Create the event. --->
 			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
