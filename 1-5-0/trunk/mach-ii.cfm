@@ -60,6 +60,8 @@ Notes:
 		</cfif>
 	</cflock>
 <!--- Reload the configuration if necessary. --->
+<cfelseif MACHII_CONFIG_MODE EQ -1>
+	<!--- Do not reload config. --->
 <cfelseif MACHII_CONFIG_MODE EQ 1>
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 		<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
@@ -72,8 +74,6 @@ Notes:
 	<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 		<cfset application[MACHII_APP_KEY].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 	</cflock>
-<cfelseif MACHII_CONFIG_MODE EQ -1>
-	<!--- Do not reload config. --->
 </cfif>
 
 <!--- Handle the Request. --->

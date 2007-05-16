@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,5 +19,8 @@ $Id$
 
 Created version: 1.0.0
 Updated version: 1.0.0
+
+Notes:
+Legacy code
 --->
 <cfinclude template="mach-ii.cfm" />

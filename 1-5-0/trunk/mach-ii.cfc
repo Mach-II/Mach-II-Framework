@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ Thank you to eCivis, Inc. for being the driving force behind
 the development of this component.
 
 Notes:
-- Compatible only with ColdFusion MX 7.0 and above.
+- Compatible only with ColdFusion MX 7.0+.
 - Call loadFramework in your onApplicationStart() event.
 - Call handleRequest in your onRequestStart() or onRequest() events.
 
-N.B
-Do not implement the handleRequest() in onRequest() application event if you to
-utilitze any CFCs that implement AJAX requests, web services, Flash 
+N.B.
+Do not implement the handleRequest() in onRequest() application event if you
+want to utilitze any CFCs that implement AJAX requests, web services, Flash 
 Remoting or event gateway requests.
 
 ColdFusion MX will not execute these types of requests if you implement 
@@ -70,7 +70,8 @@ the handleRequest() method in the onRequest() application event.
 
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
-		<!--- Default is request.MachIIConfigMode if it is defined temporarily override the config mode --->
+		<!--- Default is request.MachIIConfigMode if it is defined temporarily override the config mode
+			DO NOT USE THIS LEGACY CODE --->
 		<cfif StructKeyExists(request,"MachIIConfigMode")>
 			<cfset MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
@@ -85,7 +86,9 @@ the handleRequest() method in the onRequest() application event.
 		</cfif>
 
 		<!--- Reload the configuration if necessary --->
-		<cfif MACHII_CONFIG_MODE EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
+		<cfif MACHII_CONFIG_MODE EQ -1>
+			<!--- Do not reload config. --->
+		<cfelseif MACHII_CONFIG_MODE EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
 			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 				<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
@@ -97,8 +100,6 @@ the handleRequest() method in the onRequest() application event.
 			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 				<cfset application[MACHII_APP_KEY].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 			</cflock>
-		<cfelseif MACHII_CONFIG_MODE EQ -1>
-			<!--- Do not reload config. --->
 		</cfif>
 
 		<!--- Handle the request --->
