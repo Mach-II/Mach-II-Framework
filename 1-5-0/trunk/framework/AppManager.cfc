@@ -65,7 +65,11 @@ Notes:
 		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
-		<cfset getModuleManager().configure() />
+		
+		<!--- Module Manager is a singleton only call if this the parent AppManager --->
+		<cfif NOT IsObject(getParent())>
+			<cfset getModuleManager().configure() />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"

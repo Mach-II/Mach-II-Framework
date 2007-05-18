@@ -225,11 +225,16 @@ Notes:
 			<cfset pluginManager.loadXml(arguments.overrideXml, true) />
 		</cfif>
 		<cfset appManager.setPluginManager(pluginManager) />
-
-		<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
+		
+		<!--- ModuleManager is a singelton across the application --->
+		<cfif NOT IsObject(arguments.parentAppManager)>
+			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
+			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
+				<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
+			</cfloop>
+		<cfelse>
+			<cfset moduleManager = arguments.parentAppManager.getModuleManager() />
+		</cfif>
 		<cfset appManager.setModuleManager(moduleManager) />
 		
 		<!--- Configure all the managers by calling the base configure --->

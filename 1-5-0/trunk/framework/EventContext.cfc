@@ -147,7 +147,7 @@ Notes:
 		<!--- Check if module exists --->
 		<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
 			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
-					message="The module '#arguments.mappingModuleName# cannot be found for this event-mapping." />
+					message="The module '#arguments.mappingModuleName#' cannot be found for this event-mapping." />
 		</cfif>
 		
 		<cfset temp.eventName = arguments.mappingName />
