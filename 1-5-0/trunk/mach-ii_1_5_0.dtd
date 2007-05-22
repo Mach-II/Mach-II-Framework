@@ -99,6 +99,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	value CDATA #IMPLIED
 	type CDATA #IMPLIED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 <!--
@@ -119,6 +120,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 <!ELEMENT invoker EMPTY>
 <!ATTLIST invoker 
@@ -140,6 +142,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 <!--
@@ -156,6 +159,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	event CDATA #REQUIRED 
 	access (public|private) "public"
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 <!--
@@ -170,6 +174,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 <!--
@@ -186,6 +191,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	page CDATA #REQUIRED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 <!--
@@ -202,6 +208,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 	overrideAction (useParent|addFromParent)
+	mapping CDATA #IMPLIED
 >
 
 
