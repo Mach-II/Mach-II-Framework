@@ -60,19 +60,40 @@ Updated version: 1.5.0
 		<cfset var name = "" />
 		<cfset var page = "" />
 		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		
-		<!--- Setup up each Page-View. --->
+		<!--- Search for Page-Views --->
 		<cfif NOT arguments.override>
 			<cfset viewNodes = XMLSearch(arguments.configXML, "mach-ii/page-views/page-view") />
 		<cfelse>
 			<cfset viewNodes = XMLSearch(arguments.configXML, ".//page-views/page-view") />
 		</cfif>
+		
+		<!--- Setup up each Page-View --->
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
 			
-			<cfif hasParent AND arguments.override AND StructKeyExists(viewNodes[i].xmlAttributes, "useParent") AND viewNodes[i].xmlAttributes["useParent"]>
-				<cfset StructDelete(variables.viewPaths, name, false) />
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(viewNodes[i].xmlAttributes, "overrideAction")>
+				<cfif viewNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset StructDelete(variables.viewPaths, name, false) />
+				<cfelseif viewNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(viewNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = viewNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = name />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isViewDefined(mapping)>
+						<cfthrow type="MachII.framework.overrideViewNotDefined"
+							message="An view named '#mapping#' cannot be found in the parent view manager for the override named '#name#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset variables.viewPaths[name] = mapping />
+				</cfif>
 			<cfelse>
 				<cfset page = viewNodes[i].xmlAttributes["page"] />
 			

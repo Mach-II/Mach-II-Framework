@@ -65,34 +65,62 @@ Updated version: 1.1.0
 		<cfset var filter = "" />
 		<cfset var filterName = "" />
 		<cfset var filterType = "" />
+		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
-		<!--- Setup up each EventFilter. --->
+		<!--- Search for EventFilters --->
 		<cfif NOT arguments.override>
 			<cfset filterNodes = XMLSearch(arguments.configXML, "mach-ii/event-filters/event-filter") />
 		<cfelse>
 			<cfset filterNodes = XMLSearch(arguments.configXML, ".//event-filters/event-filter") />
 		</cfif>
+		
+		<!--- Setup up each EventFilter --->
 		<cfloop from="1" to="#ArrayLen(filterNodes)#" index="i">
 			<cfset filterName = filterNodes[i].xmlAttributes["name"] />
-			<cfset filterType = filterNodes[i].xmlAttributes["type"] />
-		
-			<!--- Set the EventFilter's parameters. --->
-			<cfset filterParams = StructNew() />
 			
-			<!--- For each filter, parse all the parameters --->
-			<cfif StructKeyExists(filterNodes[i], "parameters")>
-				<cfset paramNodes = filterNodes[i].parameters.xmlChildren />
-				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-					<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
-					<cfset filterParams[paramName] = paramValue />
-				</cfloop>
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(filterNodes[i].xmlAttributes, "overrideAction")>
+				<cfif filterNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset removeFilter(filterName) />
+				<cfelseif filterNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(filterNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = filterNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = filterName />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isFilterDefined(mapping)>
+						<cfthrow type="MachII.framework.overrideFilterNotDefined"
+							message="An filter named '#mapping#' cannot be found in the parent event filter manager for the override named '#filterName#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset addFilter(filterName, getParent().getFilter(mapping), arguments.override) />
+				</cfif>
+			<!--- General XML setup --->
+			<cfelse>
+				<cfset filterType = filterNodes[i].xmlAttributes["type"] />
+			
+				<!--- Set the EventFilter's parameters. --->
+				<cfset filterParams = StructNew() />
+				
+				<!--- For each filter, parse all the parameters --->
+				<cfif StructKeyExists(filterNodes[i], "parameters")>
+					<cfset paramNodes = filterNodes[i].parameters.xmlChildren />
+					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+						<cfset paramName = paramNodes[j].xmlAttributes["name"] />
+						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfset filterParams[paramName] = paramValue />
+					</cfloop>
+				</cfif>
+				
+				<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
+				<cfset addFilter(filterName, filter, arguments.override) />
 			</cfif>
-			
-			<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
-			<cfset addFilter(filterName, filter, arguments.override) />
 		</cfloop>
 	</cffunction>
 
@@ -134,7 +162,14 @@ Updated version: 1.1.0
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false">
+	<cffunction name="removeFilter" access="public" returntype="void" output="false"
+		hint="Removes a filter. Does NOT remove from a parent.">
+		<cfargument name="filterName" type="string" required="true" />
+		<cfset StructDelete(variables.filters, arguments.filterName, false) />
+	</cffunction>
+	
+	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if a filter is defined in this event filter manager. Does NOT check the parent.">
 		<cfargument name="filterName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.filters, arguments.filterName) />
 	</cffunction>

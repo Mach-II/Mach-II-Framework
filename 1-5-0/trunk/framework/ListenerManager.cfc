@@ -71,21 +71,42 @@ Notes:
 		<cfset var invoker = "" />
 		<cfset var listener = "" />
 		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
-		<!--- Setup up each Listener. --->
-		<cfset listenerNodes = XMLSearch(arguments.configXML, "//listeners/listener") />
+		<!--- Search for listeners --->
 		<cfif NOT arguments.override>
 			<cfset listenerNodes = XMLSearch(arguments.configXML, "mach-ii/listeners/listener") />
 		<cfelse>
 			<cfset listenerNodes = XMLSearch(arguments.configXML, "./listeners/listener") />
 		</cfif>
+		
+		<!--- Setup up each Listener --->
 		<cfloop from="1" to="#ArrayLen(listenerNodes)#" index="i">
 			<cfset listenerName = listenerNodes[i].xmlAttributes["name"] />
 			
-			<cfif hasParent AND arguments.override AND StructKeyExists(viewNolistenerNodesdes[i].xmlAttributes, "useParent") AND listenerNodes[i].xmlAttributes["useParent"]>
-				<cfset removeListener(listenerName) />
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(listenerNodes[i].xmlAttributes, "overrideAction")>
+				<cfif listenerNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset removeListener(listenerName) />
+				<cfelseif listenerNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(listenerNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = listenerNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = listenerName />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isListenerDefined(mapping)>
+						<cfthrow type="MachII.framework.overrideListenerNotDefined"
+							message="An listener named '#mapping#' cannot be found in the parent listener manager for the override named '#listenerName#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset addListener(listenerName, getParent().getListener(mapping), arguments.override) />
+				</cfif>
+			<!--- General XML setup --->
 			<cfelse>
 				<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
 			

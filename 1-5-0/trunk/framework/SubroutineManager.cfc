@@ -65,23 +65,46 @@ Updated version: 1.5.0
 		<cfset var commandNode = "" />
 		<cfset var command = "" />
 		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
 		<!--- Set temps for commandLoaderBase to use. --->
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
-
+		
+		<!--- Search for subroutines --->
 		<cfif NOT arguments.override>
 			<cfset subroutineNodes = XMLSearch(arguments.configXML, "mach-ii/subroutines/subroutine") />
 		<cfelse>
 			<cfset subroutineNodes = XMLSearch(arguments.configXML, ".//subroutines/subroutine") />
 		</cfif>
+		
+		<!--- Setup each subroutine --->
 		<cfloop from="1" to="#ArrayLen(subroutineNodes)#" index="i">
 			<cfset subroutineName = subroutineNodes[i].xmlAttributes["name"] />
 
-			<cfif hasParent AND arguments.override AND StructKeyExists(subroutineNodes[i].xmlAttributes, "useParent") AND subroutineNodes[i].xmlAttributes["useParent"]>
-				<cfset removeSubroutine(subroutineName) />
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(subroutineNodes[i].xmlAttributes, "overrideAction")>
+				<cfif subroutineNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset removeSubroutine(subroutineName) />
+				<cfelseif subroutineNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(subroutineNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = subroutineNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = subroutineName />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isSubroutineDefined(mapping)>
+						<cfthrow type="MachII.framework.overrideSubroutineNotDefined"
+							message="An subroutine named '#mapping#' cannot be found in the parent subroutine manager for the override named '#subroutineName#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset addSubroutineHandler(subroutineName, getParent().getSubroutineHandler(mapping), arguments.override) />
+				</cfif>
+			<!--- General XML setup --->
 			<cfelse>			
 				<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
 		  
@@ -101,7 +124,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"
-		hint="Configures each of the registered SubroutineHandlers/Subroutines.">
+		hint="Configures each of the registered SubroutineHandlers.">
 		<!--- DO NOTHING --->
 	</cffunction>
 	

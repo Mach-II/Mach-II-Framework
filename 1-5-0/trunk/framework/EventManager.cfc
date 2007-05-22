@@ -67,6 +67,7 @@ Updated version: 1.1.0
 		<cfset var eventName = "" />
 		<cfset var command = "" />
 		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -74,16 +75,38 @@ Updated version: 1.1.0
 		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
 		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
+		<!--- Search for event handlers --->
 		<cfif NOT arguments.override>
 			<cfset eventNodes = XMLSearch(arguments.configXML, "mach-ii/event-handlers/event-handler") />
 		<cfelse>
 			<cfset eventNodes = XMLSearch(arguments.configXML, ".//event-handlers/event-handler") />
 		</cfif>
+		
+		<!--- Setup each even handler --->
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
 			
-			<cfif hasParent AND arguments.override AND StructKeyExists(eventNodes[i].xmlAttributes, "useParent") AND eventNodes[i].xmlAttributes["useParent"]>>
-				<cfset removeEvent(eventName) />
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(eventNodes[i].xmlAttributes, "overrideAction")>
+				<cfif eventNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset removeEvent(eventName) />
+				<cfelseif eventNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(eventNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = eventNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = eventName />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isEventDefined(mapping)>
+						<cfthrow type="MachII.framework.overrideEventHandlerNotDefined"
+							message="An event-handler named '#mapping#' cannot be found in the parent event manager for the override named '#eventName#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset addEventHandler(eventName, getParent().getEventHandler(mapping), arguments.override) />
+				</cfif>
+			<!--- General XML setup --->
 			<cfelse>
 				<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
 					<cfset eventAccess = eventNodes[i].xmlAttributes["access"] />

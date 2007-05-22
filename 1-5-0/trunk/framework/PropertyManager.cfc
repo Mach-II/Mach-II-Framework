@@ -75,21 +75,42 @@ the rest of the framework. (pfarrell)
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 		<cfset var hasParent = isObject(getParent()) />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
-		<!--- Set the properties from the XML file. --->
+		<!--- Search for properties --->
 		<cfif NOT arguments.override>
 			<cfset propertyNodes = XMLSearch(arguments.configXML, "mach-ii/properties/property") />
 		<cfelse>
 			<cfset propertyNodes = XMLSearch(arguments.configXML, ".//properties/property") />
 		</cfif>
 
+		<!--- Set the properties from the XML file. --->
 		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">
 			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
-			<!--- Remove property if useParent is true and this is an override xml --->
-			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "useParent") AND propertyNodes[i].xmlAttributes["useParent"]>
-				<cfset removeProperty(propertyName) />
+			
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "overrideAction")>
+				<cfif propertyNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+					<cfset removeProperty(propertyName) />
+				<cfelseif propertyNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+					<!--- Check for a mapping --->
+					<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = propertyNodes[i].xmlAttributes["mapping"] />
+					<cfelse>
+						<cfset mapping = propertyName />
+					</cfif>
+					
+					<!--- Check if parent has event handler with the mapping name --->
+					<cfif NOT getParent().isPropertyDefined(mapping)>
+						<cfthrow type="MachII.framework.overridePropertyNotDefined"
+							message="An property named '#mapping#' cannot be found in the parent property manager for the override named '#propertyName#' in module '#getAppManager().getModuleName()#'." />
+					</cfif>
+					
+					<cfset setProperty(propertyName, getParent().getProperty(mapping), arguments.override) />
+				</cfif>
+			<!--- General XML setup --->
 			<cfelse>
 				<!--- Setup if configurable property --->
 				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
