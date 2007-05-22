@@ -42,7 +42,7 @@ Updated version: 1.5.0
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="handleSubroutine" access="public" returntype="void" output="true"
+	<cffunction name="handleSubroutine" access="public" returntype="boolean" output="true"
 		hint="Handles an Subroutine.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -58,6 +58,8 @@ Updated version: 1.5.0
 				<cfbreak />
 			</cfif>
 		</cfloop>
+		
+		<cfreturn continue />
 	</cffunction>
 	
 	<cffunction name="addCommand" access="public" returntype="void" output="false"

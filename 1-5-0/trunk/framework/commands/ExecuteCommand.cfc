@@ -51,10 +51,7 @@ Updated version: 1.5.0
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
-		<cfset arguments.eventContext.executeSubroutine(getSubroutineName(), arguments.event) />
-		
-		<cfreturn true />
+		<cfreturn arguments.eventContext.executeSubroutine(getSubroutineName(), arguments.event) />
 	</cffunction>
 	
 	<!---

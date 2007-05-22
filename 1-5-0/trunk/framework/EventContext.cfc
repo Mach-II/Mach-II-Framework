@@ -113,25 +113,28 @@ Notes:
 		</cftry>
 	</cffunction>
 	
-	<cffunction name="executeSubroutine" access="public" returntype="void" output="true"
+	<cffunction name="executeSubroutine" access="public" returntype="boolean" output="true"
 		hint="Executes a subroutine.">
 		<cfargument name="subroutineName" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var subroutineHandler = "" />
 		<cfset var exception = "" />
+		<cfset var continue = "" />
 		
 		<cftry>
 			<!--- Get the subroutine handler --->		
 			<cfset subroutineHandler = getAppManager().getSubroutineManager().getSubroutineHandler(arguments.subroutineName) />
 			<!--- Execute the subroutine --->
-			<cfset subroutineHandler.handleSubroutine(arguments.event, this) />
+			<cfset continue = subroutineHandler.handleSubroutine(arguments.event, this) />
 					
 			<cfcatch>
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
+		
+		<cfreturn continue />
 	</cffunction>
 
 	<cffunction name="setEventMapping" access="public" returntype="string" output="false"
