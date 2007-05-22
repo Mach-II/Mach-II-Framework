@@ -98,7 +98,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
 	type CDATA #IMPLIED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
@@ -119,7 +119,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST listener 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 <!ELEMENT invoker EMPTY>
@@ -141,7 +141,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST event-filter 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
@@ -158,7 +158,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
@@ -173,7 +173,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
@@ -190,7 +190,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
 	page CDATA #REQUIRED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
@@ -207,7 +207,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
-	overrideAction (useParent|addFromParent)
+	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
