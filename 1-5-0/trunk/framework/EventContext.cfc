@@ -120,7 +120,7 @@ Notes:
 		
 		<cfset var subroutineHandler = "" />
 		<cfset var exception = "" />
-		<cfset var continue = "" />
+		<cfset var continue = true />
 		
 		<cftry>
 			<!--- Get the subroutine handler --->		
