@@ -104,7 +104,6 @@ Notes:
 			<!--- Add the Module to the Manager. --->
 			<cfset addModule(name, module, arguments.override) />
 		</cfloop>
-		<!--- <cfdump var="#variables.modules#" label="modules"><cfabort> --->
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"

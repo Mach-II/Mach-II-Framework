@@ -260,7 +260,6 @@ Updated version: 1.1.0
 			</cfif>
 			<cfif moduleManager.isModuleDefined(arguments.moduleName)>
 				<cfset moduleEventManager = moduleManager.getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
-				<cftrace text="moduleEventManager.isEventDefined(#arguments.eventName#) (#arguments.moduleName#)">
 				<cfif moduleEventManager.isEventDefined(arguments.eventName, true)>
 					<cfreturn true />
 				<cfelse>
