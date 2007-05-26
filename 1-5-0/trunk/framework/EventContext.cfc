@@ -106,7 +106,7 @@ Notes:
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
-			<cfcatch>
+			<cfcatch  type="any">
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
@@ -121,14 +121,14 @@ Notes:
 		<cfset var subroutineHandler = "" />
 		<cfset var exception = "" />
 		<cfset var continue = true />
-		
+	
 		<cftry>
 			<!--- Get the subroutine handler --->		
 			<cfset subroutineHandler = getAppManager().getSubroutineManager().getSubroutineHandler(arguments.subroutineName) />
 			<!--- Execute the subroutine --->
 			<cfset continue = subroutineHandler.handleSubroutine(arguments.event, this) />
-					
-			<cfcatch>
+			
+			<cfcatch type="any">
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
