@@ -123,6 +123,7 @@ Notes:
 		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
 				getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
+		<cfset getAppManager().setAppLoader(this) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 		<cfset updateLastReloadDatetime() />
 	</cffunction>
