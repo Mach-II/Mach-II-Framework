@@ -322,7 +322,7 @@ Notes:
 			<!--- Has a module, but no event is defined so announce the default event for that module (i.e sample:) --->
 			<cfelseif listLen(rawEvent, moduleDelimiter) eq 1 AND Right(rawEvent, 1) eq moduleDelimiter>
 				<cfset result.moduleName = listGetAt(rawEvent, 1, moduleDelimiter) />
-				<cfset result.eventName = getAppManager().getModuleManager().getModule(result.moduleName).getAppManager().getPropertyManager().getProperty("defaultEvent") />			
+				<cfset result.eventName = getAppManager().getModuleManager().getModule(result.moduleName).getModuleAppManager().getPropertyManager().getProperty("defaultEvent") />			
 			<!--- Has no module --->
 			<cfelse>
 				<cfset result.moduleName = "" />
