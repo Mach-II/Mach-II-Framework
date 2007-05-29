@@ -66,7 +66,7 @@ Updated version: 1.5.0
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
 		<cfset setDtdPath(arguments.configDtdPath) />
-		<cfset setAppLoader(appLoader) />
+		<cfset moduleAppManager.setAppLoader(appLoader) />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
 	
@@ -77,7 +77,7 @@ Updated version: 1.5.0
 				expandPath(getFile()), getDtdPath(), arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
-		<cfset setAppLoader(appLoader) />
+		<cfset moduleAppManager.setAppLoader(appLoader) />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
 	
@@ -123,16 +123,6 @@ Updated version: 1.5.0
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the AppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.appManager />
-	</cffunction>
-	
-	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
-		hint="Returns the AppLoader instance this Module belongs to.">
-		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
-		<cfset variables.appLoader = arguments.appLoader />
-	</cffunction>
-	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
-		hint="Sets the AppLoader instance this Module belongs to.">
-		<cfreturn variables.appLoader />
 	</cffunction>
 	
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"

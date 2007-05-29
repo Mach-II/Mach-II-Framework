@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.moduleName = "" />
+	<cfset variables.appLoader = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.eventManager = "" />
@@ -88,6 +89,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getModuleName" access="public" returntype="string" output="false">
 		<cfreturn variables.moduleName />
+	</cffunction>
+	
+	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
+		hint="Returns the AppLoader instance.">
+		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
+		<cfset variables.appLoader = arguments.appLoader />
+	</cffunction>
+	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
+		hint="Sets the AppLoader instance.">
+		<cfreturn variables.appLoader />
 	</cffunction>
 	
 	<cffunction name="setEventManager" access="public" returntype="void" output="false">

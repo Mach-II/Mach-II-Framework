@@ -57,6 +57,7 @@ Notes:
 				AND IsObject(application[MACHII_APP_KEY].appLoader))>
 			<cfset application[MACHII_APP_KEY].appLoader = 
 					 CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_VALIDATE_XML) />
+			<cfset application[MACHII_APP_KEY].appLoader.getAppManager().setAppLoader(application[MACHII_APP_KEY].appLoader) />
 		</cfif>
 	</cflock>
 <!--- Reload the configuration if necessary. --->
