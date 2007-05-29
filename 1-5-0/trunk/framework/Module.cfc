@@ -69,7 +69,14 @@ Updated version: 1.5.0
 		<cfset moduleAppManager.setAppLoader(appLoader) />
 		<cfset setModuleAppManager(moduleAppManager) />
 	</cffunction>
-	
+
+	<!---
+	PUBLIC FUNCTIONS
+	--->
+	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false">
+		<cfreturn getModuleAppManager().getAppLoader().shouldReloadConfig() />
+	</cffunction>
+		
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
@@ -82,11 +89,8 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS
+	ACCESSORS
 	--->
-	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false">
-		<cfreturn getAppLoader().shouldReloadConfig() />
-	</cffunction>
 	<cffunction name="setFile" access="public" returntype="void" output="false"
 		hint="Sets the path to the module Mach II config file">
 		<cfargument name="file" type="string" required="true" />

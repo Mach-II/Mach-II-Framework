@@ -38,6 +38,7 @@ Notes:
 	<cfset variables.lastReloadHash = 0 />
 	<cfset variables.validateXML = 0 />
 	<cfset variables.overrideXml = "" />
+	<cfset variables.lastReloadDatetime = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -91,12 +92,15 @@ Notes:
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var module = 0 />
 		
-		<cfloop collection="#modules#" item="module">
-			<!--- <cfdump var="#module#" label="module"><cfabort> --->
-			<cfif modules[module].shouldReloadConfig()>
-				<cfreturn true />
-			</cfif>
-		</cfloop>
+		<!--- Only loop over the modules if this is the base app --->
+		<cfif NOT IsObject(getAppManager().getParent())>
+			<cfloop collection="#modules#" item="module">
+				<cfif modules[module].shouldReloadConfig()>
+					<cfreturn true />
+				</cfif>
+			</cfloop>
+		</cfif>
+		
 		<cfreturn false />
 	</cffunction>
 	
@@ -120,6 +124,7 @@ Notes:
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
 				getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
+		<cfset updateLastReloadDatetime() />
 	</cffunction>
 	
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false"
@@ -132,11 +137,14 @@ Notes:
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var module = 0 />
 		
-		<cfloop collection="#modules#" item="module">
-			<cfif module.shouldReloadConfig()>
-				<cfset module.reloadConfig() />
-			</cfif>
-		</cfloop>
+		<!--- Only loop over the modules if this is the base app --->
+		<cfif NOT IsObject(getAppManager().getParent())>
+			<cfloop collection="#modules#" item="module">
+				<cfif module.shouldReloadConfig()>
+					<cfset module.reloadConfig() />
+				</cfif>
+			</cfloop>
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -219,7 +227,6 @@ Notes:
 		<cfreturn variables.appFactory />
 	</cffunction>
 	
-	
 	<cffunction name="setOverrideXml" access="public" returntype="void" output="false"
 		hint="Sets the override Xml for this module.">
 		<cfargument name="overrideXml" type="any" required="true" />
@@ -228,6 +235,15 @@ Notes:
 	<cffunction name="getOverrideXml" access="public" type="any" output="false"
 		hint="Gets the override Xml for this module.">
 		<cfreturn variables.overrideXml />
+	</cffunction>
+	
+	<cffunction name="updateLastReloadDatetime" access="private" returntype="void" output="false"
+		hint="Updates the last reload datetime for this module or base application.">
+		<cfset variables.lastReloadDatetime = Now() />
+	</cffunction>
+	<cffunction name="getLastReloadDatetime" access="public" type="date" output="false"
+		hint="Gets the last reload datetime for this module or base application.">
+		<cfreturn variables.lastReloadDatetime />
 	</cffunction>
 
 </cfcomponent>
