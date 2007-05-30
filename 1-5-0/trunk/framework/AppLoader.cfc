@@ -120,12 +120,12 @@ Notes:
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
-		
+
+		<cfset updateLastReloadDatetime() />		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
 				getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset getAppManager().setAppLoader(this) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
-		<cfset updateLastReloadDatetime() />
 	</cffunction>
 	
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false"
