@@ -19,19 +19,19 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Depreciated version: 1.1.0
-Updated version: 1.1.0
+Deprecated in version: 1.1.0
+Updated version: 1.5.0
 
 
 Notes:
-This invoker is depreciated and may not be included with future versions of Mach-II.
+This invoker is DEPRECIATED and may not be included with future versions of Mach-II.
 Please use EventInvoker.cfc instead.
 --->
 <cfcomponent 
 	displayname="CFCInvoker_Event" 
 	output="false"
 	extends="MachII.framework.ListenerInvoker"
-	hint="DEPRECIATED. ListenerInvoker that invokes a Listener's method passing the Event as the sole argument.">
+	hint="DEPRECATED. ListenerInvoker that invokes a Listener's method passing the Event as the sole argument.">
 	
 	<!---
 	PROPERTIES
@@ -49,7 +49,7 @@ Please use EventInvoker.cfc instead.
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="invokeListener" access="public" returntype="void"
-		hint="Invokes the Listener.">
+		hint="DEPRECIATED. Invokes the Listener.">
 		<cfargument name="event" type="MachII.framework.Event" required="true"
 			hint="The Event triggering the invocation." />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true"
@@ -62,6 +62,7 @@ Please use EventInvoker.cfc instead.
 			hint="Not supported." />
 		
 		<cfset var resultValue = "" />
+		
 		<cftry>
 			<cfinvoke 
 				component="#arguments.listener#" 
@@ -75,6 +76,12 @@ Please use EventInvoker.cfc instead.
 			</cfif>
 			<!--- resultArg not supported. --->
 			
+			<cfthrow type="MachII.framework.deprecatedInvoker"
+				message="The CFCInvoker_Event has been deprecated. Please use the EventInvoker." />
+
+			<cfcatch type="MachII.framework.deprecatedInvoker">
+				<!--- Do nothing --->
+			</cfcatch>
 			<cfcatch type="Any">
 				<cfrethrow />
 			</cfcatch>
