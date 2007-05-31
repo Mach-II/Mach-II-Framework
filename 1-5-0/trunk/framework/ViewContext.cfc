@@ -100,7 +100,7 @@ Notes:
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />
+			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(request.event.getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase)) />
 	</cffunction>
 	
@@ -113,7 +113,7 @@ Notes:
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />
+			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
 		<!--- Pull the current module name if empty string (we use the request scope so we do not
 			pollute the variables scope which is shared in the views) --->

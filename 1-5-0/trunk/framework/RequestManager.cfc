@@ -103,20 +103,13 @@ Notes:
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />
+		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
-		<cfset var builtUrl = "" />
+		<cfset var builtUrl = arguments.urlBase />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
 		<cfset var module = "" />
 		<cfset var i = "" />
-		
-		<!--- Append the base url --->
-		<cfif NOT Len(arguments.urlBase)>
-			<cfset builtUrl = getDefaultUrlBase() />
-		<cfelse>
-			<cfset builtUrl = arguments.urlBase />
-		</cfif>
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName)>

@@ -139,6 +139,13 @@ Notes:
 			<cfset parentEventManager = appManager.getParent().getEventManager() />
 		</cfif>
 		
+		<!--- 
+		Create the Framework Managers and set them in the AppManager
+		Creation order is important (do not change!):
+		utils, propertyManager, requestManager, listenerManager, filterManager, subroutineManager, 
+		eventManager, viewManager, pluginManager and then moduleManager
+		--->
+		
 		<!--- Utils is a singleton --->
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset utils = arguments.parentAppManager.getUtils() />
@@ -147,10 +154,6 @@ Notes:
 		</cfif>
 		<cfset appManager.setUtils(utils) />
 		
-		<!--- 
-		Create the Framework Managers and set them in the AppManager
-		Creation order is important: propertyManager first, requestManager, listenerManager, filterManager and subroutineManager before eventManager. 
-		--->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset propertyManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
