@@ -298,10 +298,10 @@ Updated version: 1.5.0
 		<cfreturn command />
 	</cffunction>
 	
-	<cffunction name="setupDefault" access="private" returntype="MachII.framework.command" output="false"
+	<cffunction name="setupDefault" access="private" returntype="MachII.framework.Command" output="false"
 		hint="Setups a default command.">
 		
-		<cfset var command = CreateObject("component", "MachII.framework.command").init() />
+		<cfset var command = CreateObject("component", "MachII.framework.Command").init() />
 		
 		<cfreturn command />
 	</cffunction>
