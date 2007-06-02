@@ -24,7 +24,7 @@ Updated version: 1.5.0
 
 
 Notes:
-This invoker is DEPRECIATED and may not be included with future versions of Mach-II.
+This invoker is DEPRECATED and may not be included with future versions of Mach-II.
 Please use EventInvoker.cfc instead.
 --->
 <cfcomponent 
@@ -41,7 +41,7 @@ Please use EventInvoker.cfc instead.
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="CFCInvoker_Event" output="false"
-		hint="Used by the framework for initialization. Do not override.">
+		hint="DEPRECATED. Used by the framework for initialization. Do not override.">
 		<cfreturn this />
 	</cffunction>
 	
@@ -49,7 +49,7 @@ Please use EventInvoker.cfc instead.
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="invokeListener" access="public" returntype="void"
-		hint="DEPRECIATED. Invokes the Listener.">
+		hint="DEPRECATED. Invokes the Listener.">
 		<cfargument name="event" type="MachII.framework.Event" required="true"
 			hint="The Event triggering the invocation." />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true"

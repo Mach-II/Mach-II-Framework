@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
-Update version: 1.1.1
+Update version: 1.5.0
 
 Notes:
 - Added error handling if notified listener method returns void, but a ResultArg/Key 
@@ -60,6 +60,7 @@ has been defined. This also fixed the problem if the listener returns a Java nul
 			hint="The eventArg to set the result in." />
 		
 		<cfset var resultValue = "" />
+		
 		<cftry>
 			<cfinvoke 
 				component="#arguments.listener#" 

@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ Deprecated in version: 1.1.0
 Updated version: 1.5.0
 
 Notes:
-This invoker is DEPRECIATED and may not be included with future versions of Mach-II.
+This invoker is DEPRECATED and may not be included with future versions of Mach-II.
 Please use EventArgsInvoker.cfc instead.
 --->
 <cfcomponent 
@@ -36,7 +36,7 @@ Please use EventArgsInvoker.cfc instead.
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="CFCInvoker_EventArgs" output="false"
-		hint="Used by the framework for initialization. Do not override.">
+		hint="DEPRECATED. Used by the framework for initialization. Do not override.">
 		<cfreturn this />
 	</cffunction>
 	
@@ -44,7 +44,7 @@ Please use EventArgsInvoker.cfc instead.
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="invokeListener" access="public" returntype="void"
-		hint="DEPRECIATED. Invokes the Listener.">
+		hint="DEPRECATED. Invokes the Listener.">
 		<cfargument name="event" type="MachII.framework.Event" required="true"
 			hint="The Event triggering the invocation." />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true"
