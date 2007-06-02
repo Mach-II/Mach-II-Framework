@@ -34,7 +34,7 @@ Notes:
 	<cfset variables.requestHandler = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.eventQueue = "" />
-	<cfset variables.viewContext = CreateObject("component", "MachII.framework.ViewContext") />
+	<cfset variables.viewContext =  ""/>
 	<cfset variables.currentEvent = "" />
 	<cfset variables.previousEvent = "" />
 	<cfset variables.mappings = StructNew() />
@@ -50,6 +50,7 @@ Notes:
 		
 		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setEventQueue(arguments.eventQueue) />
+		<cfset setViewContext(CreateObject("component", "MachII.framework.ViewContext")) />
 		
 		<cfreturn this />
 	</cffunction>
