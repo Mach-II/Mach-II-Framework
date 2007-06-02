@@ -69,7 +69,6 @@ Notes:
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		
 		<!--- Parse through the complex list of delimiters --->
-		<!--- TODO: add try/catch --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
@@ -145,17 +144,19 @@ Notes:
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
-					<cfset value = "" />
 					<cfif i + 1 LTE ArrayLen(names)>
 						<cfset value = names[i+1] />
+					<cfelse>
+						<cfset value = "" />
 					</cfif>
 					<cfset params[names[i]] = value />
 				</cfloop>
 			<cfelse>
 				<cfloop from="1" to="#ArrayLen(names)#" index="i">
-					<cfset value = "" />
 					<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
 						<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
+					<cfelse>
+						<cfset value = "" />
 					</cfif>
 					<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
 				</cfloop>
@@ -250,10 +251,10 @@ Notes:
 		<cfset var scope = "" />
 		
 		<!--- Select the right scope --->
-		<cfif getRedirectPersistScope() EQ "session">
-			<cfset scope = StructGet("session") />
-		<cfelseif  getRedirectPersistScope() EQ "application">
+		<cfif getRedirectPersistScope() EQ "application">
 			<cfset scope = StructGet("application") />
+		<cfelseif  getRedirectPersistScope() EQ "session">
+			<cfset scope = StructGet("session") />
 		<cfelseif getRedirectPersistScope() EQ "server">
 			<cfset scope = StructGet("server") />
 		<cfelse>
