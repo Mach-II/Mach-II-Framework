@@ -145,74 +145,55 @@ the rest of the framework. (pfarrell)
 			</cfif>
 		</cfloop>
 		
-		<!--- Make sure required properties are set: 
+		<!--- Make sure required properties are set if this is the base application: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
-		<cfif NOT isPropertyDefined("defaultEvent")>
-			<cfif hasParent AND getParent().isPropertyDefined("defaultEvent")>
-			<cfelse>
+		<cfif NOT hasParent>
+			<cfif NOT isPropertyDefined("defaultEvent")>
 				<cfset setProperty("defaultEvent", "defaultEvent") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("exceptionEvent")>
-			<cfif hasParent AND getParent().isPropertyDefined("exceptionEvent")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("exceptionEvent")>
 				<cfset setProperty("exceptionEvent", "exceptionEvent") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("applicationRoot") AND NOT hasParent>
-			<cfset setProperty("applicationRoot", "") />
-		</cfif>
-		<cfif NOT isPropertyDefined("eventParameter")>
-			<cfif hasParent AND getParent().isPropertyDefined("eventParameter")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("applicationRoot")>
+				<cfset setProperty("applicationRoot", "") />
+			</cfif>
+			<cfif NOT isPropertyDefined("eventParameter")>
 				<cfset setProperty("eventParameter", "event") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("parameterPrecedence")>
-			<cfif hasParent AND getParent().isPropertyDefined("parameterPrecedence")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("parameterPrecedence")>
 				<cfset setProperty("parameterPrecedence", "form") />
+			<cfelseif NOT ListFindNoCase("form|url", getProperty("parameterPrecedence"), "|")>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'parameterPrecedence' property must have a the value of 'form' or 'url'." />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("maxEvents")>
-			<cfif hasParent AND getParent().isPropertyDefined("maxEvents")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("maxEvents")>
 				<cfset setProperty("maxEvents", 10) />
+			<cfelseif NOT IsNumeric(getProperty("maxEvents"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'maxEvents' property must be an integer." />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("redirectPersistParameter")>
-			<cfif hasParent AND getParent().isPropertyDefined("redirectPersistParameter")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("redirectPersistParameter")>
 				<cfset setProperty("redirectPersistParameter", "persistId") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("redirectPersistScope")>
-			<cfif hasParent AND getParent().isPropertyDefined("redirectPersistScope")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("redirectPersistScope")>
 				<cfset setProperty("redirectPersistScope", "session") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("urlBase")>
-			<cfif hasParent AND getParent().isPropertyDefined("urlBase")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("urlBase")>
 				<cfset setProperty("urlBase", "index.cfm") />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("urlDelimiters")>
-			<cfif hasParent AND getParent().isPropertyDefined("urlDelimiters")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("urlDelimiters")>
 				<cfset setProperty("urlDelimiters", "?|&|=") />
+			<cfelseif ListLen(getProperty("urlDelimiters"), "|") NEQ 3>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlDelimiters' property must have a list length of 3 with a delimiter of a '|'." />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("urlParseSES")>
-			<cfif hasParent AND getParent().isPropertyDefined("urlParseSES")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("urlParseSES")>
 				<cfset setProperty("urlParseSES", false) />
+			<cfelseif NOT IsBoolean(getProperty("urlParseSES"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlParseSES' property must be a boolean." />
 			</cfif>
-		</cfif>
-		<cfif NOT isPropertyDefined("moduleDelimiter")>
-			<cfif hasParent AND getParent().isPropertyDefined("moduleDelimiter")>
-			<cfelse>
+			<cfif NOT isPropertyDefined("moduleDelimiter")>
 				<cfset setProperty("moduleDelimiter", ":") />
 			</cfif>
 		</cfif>
@@ -281,6 +262,15 @@ the rest of the framework. (pfarrell)
 	<cffunction name="hasProperty" access="public" returntype="boolean" output="false"
 		hint="DEPRECATED - use isPropertyDefined() instead. Checks if property name is deinfed in the propeties.">
 		<cfargument name="propertyName" type="string" required="true" />
+		
+		<cftry>
+			<cfthrow type="MachII.framework.deprecatedMethod"
+				message="The hasProperty() method has been deprecated. Please use isPropertyDefined() instead." />
+			<cfcatch type="MachII.framework.deprecatedMethod">
+				<!--- Do nothing --->
+			</cfcatch> 
+		</cftry>
+		
 		<cfreturn StructKeyExists(variables.properties, arguments.propertyName) />
 	</cffunction>
 
