@@ -156,6 +156,15 @@ the rest of the framework. (pfarrell)
 		hint="DEPRECATED - use isParameterDefined() instead. Checks to see whether or not a configuration parameter is defined.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
+		
+		<cftry>
+			<cfthrow type="MachII.framework.deprecatedMethod"
+				message="The hasParameter() method has been deprecated. Please use isParameterDefined() instead." />
+			<cfcatch type="MachII.framework.deprecatedMethod">
+				<!--- Do nothing --->
+			</cfcatch> 
+		</cftry>
+		
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
 
