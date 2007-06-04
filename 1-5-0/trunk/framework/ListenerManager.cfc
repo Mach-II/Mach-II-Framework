@@ -133,7 +133,7 @@ Notes:
 					<cfset invoker = CreateObject("component", invokerType).init() />
 				<!--- Use defaultInvoker --->
 				<cfelse>
-					<cfset invoker = listener.getDefaultInvoker() />
+					<cfset invoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
 				</cfif>
 	
 				<!--- Continue setup on the Lister. --->
@@ -145,8 +145,10 @@ Notes:
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void"
-		hint="Configures each of the registered Listeners.">
+		hint="Configures each of the registered Listeners and its' invoker.">
 		<cfset var key = "" />
+		
+		<!--- Loop through the listerns and configure invokers first --->
 		<cfloop collection="#variables.listeners#" item="key">
 			<cfset getListener(key).configure() />
 		</cfloop>

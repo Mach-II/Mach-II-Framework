@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2006 Mach-II Corporation
+Copyright 2007 Mach-II Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ Base listener component
 
 Notes:
 All user-defined listeners extend this base listener component.
-
-- Added default invoker (pfarrell)
 --->
 <cfcomponent
 	displayname="Listener"
@@ -70,10 +68,5 @@ All user-defined listeners extend this base listener component.
 		hint="Gets the ListenerInvoker to use when invoking methods for this Listener.">
 		<cfreturn variables.invoker />
 	</cffunction>
-
-	<cffunction name="getDefaultInvoker" access="public" returntype="MachII.framework.ListenerInvoker" output="false"
-		hint="Returns an instance of the default invoker (EventInvoker) for this Listener.">
-		<cfreturn CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
-	</cffunction>	
 
 </cfcomponent>
