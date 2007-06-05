@@ -203,6 +203,10 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		type - the type of the plugin (fully qualified path)
 -->
 <!ELEMENT plugins (plugin*)>
+<!ATTLIST plugins
+	runParent (none|after|before) #IMPLIED
+>
+
 <!ELEMENT plugin (parameters?)>
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
