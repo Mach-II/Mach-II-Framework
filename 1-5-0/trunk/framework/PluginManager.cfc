@@ -55,6 +55,7 @@ Notes:
 	<cfset variables.parentPluginManager = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,handleException") />
+	<cfset variables.runParent = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -95,6 +96,15 @@ Notes:
 		<cfif NOT arguments.override>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, "mach-ii/plugins/plugin") />
 		<cfelse>
+			<!--- <cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") /> --->
+			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
+			<!--- TODO remove <cftrace text="override pluginNodes count: #arrayLen(pluginNodes)#">
+			<cfdump var="#pluginNodes#" label="pluginNodes">
+			<cfdump var="#arguments.configXML#" label="configXML"><cfabort> --->
+			<cfif arrayLen(pluginNodes) gt 0 AND structKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
+				<!--- <cftrace text="runParent set to '#pluginNodes[1].xmlAttributes["runParent"]#'"> --->
+				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"])>
+			</cfif>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") />
 		</cfif>
 		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
@@ -230,12 +240,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().preProcess(arguments.eventContext) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().preProcess(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().preProcess(arguments.eventContext) />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -246,12 +264,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().preEvent(arguments.eventContext) />
+			</cfif>	
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().preEvent(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().preEvent(arguments.eventContext) />
+			</cfif>	
 		</cfif>
 	</cffunction>
 
@@ -262,12 +288,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().postEvent(arguments.eventContext) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().postEvent(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().postEvent(arguments.eventContext) />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -278,12 +312,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().preView(arguments.eventContext) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().preView(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().preView(arguments.eventContext) />
+			</cfif>
 		</cfif>
 	</cffunction>
 
@@ -294,12 +336,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().postView(arguments.eventContext) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().postView(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().postView(arguments.eventContext) />
+			</cfif>
 		</cfif>
 	</cffunction>
 
@@ -310,12 +360,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().postProcess(arguments.eventContext) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().postProcess(arguments.eventContext) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().postProcess(arguments.eventContext) />
+			</cfif>
 		</cfif>
 	</cffunction>
 
@@ -328,12 +386,20 @@ Notes:
 		
 		<cfset var i = 0 />
 		
+		<cfif getRunParent() eq "before">
+			<cfif isObject(getParent())>
+				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
+			</cfif>
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
 		
-		<cfif isObject(getParent())>
-			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
+		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+			<cfif isObject(getParent())>
+				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
+			</cfif>
 		</cfif>
 	</cffunction>
 
@@ -401,6 +467,13 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Returns the AppManager instance this PluginManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	<cffunction name="setRunParent" access="public" returntype="void" output="false">
+		<cfargument name="runParent" type="string" required="true" />
+		<cfset variables.runParent = arguments.runParent />
+	</cffunction>
+	<cffunction name="getRunParent" access="public" returntype="string" output="false">
+		<cfreturn variables.runParent />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
