@@ -201,14 +201,25 @@ Updated version: 1.5.0
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filter = variables.filterMgr.getFilter(filterName) /> />
+		<cfset var filter = variables.filterMgr.getFilter(filterName) />
 		<cfset var i = "" />
 
+		<cftry>
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
 			<cfset paramName = paramNodes[i].xmlAttributes["name"] />
-			<cfset paramValue = paramNodes[i].xmlAttributes["value"] />
+			<cfif NOT StructKeyExists(paramNodes[i].xmlAttributes, "value")>
+				<cfset paramValue = getAppManager().getUtils().recurseComplexValues(paramNodes[i]) />
+			<cfelse>
+				<cfset paramValue = paramNodes[i].xmlAttributes["value"] />
+			</cfif>
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
+			<cfcatch type="any">
+				<cfdump var="#cfcatch#">
+				<cfdump var="#paramNodes[i]#">
+				<cfabort>
+			</cfcatch>
+		</cftry>
 		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filter, filterParams) />
 		
 		<cfreturn command />
