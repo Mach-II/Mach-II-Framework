@@ -102,10 +102,10 @@ Notes:
 			</cfif>
 			
 			<!--- Check if the event exists and is publically accessible --->
-			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, true)>
+			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined." />
-			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, true)>
+			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not accessible." />
 			</cfif>
