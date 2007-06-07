@@ -245,7 +245,7 @@ Updated version: 1.1.0
 		hint="Returns true if an EventHandler for the named Event is defined; otherwise false.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
-		<cfargument name="checkParent" type="boolean" required="false" default="0"
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Allows you to check the parent to see if the event is in there" />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Allows you to check in a specific module for an event" />
@@ -282,8 +282,10 @@ Updated version: 1.1.0
 	<cffunction name="isEventPublic" access="public" returntype="boolean" output="false"
 		hint="Returns true if the EventHandler for the named Event is publicly accessible; otherwise false.">
 		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="checkParent" type="boolean" required="false" default="0" />
+		<cfargument name="checkParent" type="boolean" required="false" default="false" />
+		
 		<cfset var eventHandler = "" />
+		
 		<cfif isEventDefined(arguments.eventName)>
 			<cfset eventHandler = getEventHandler(arguments.eventName) />
 		<cfelseif arguments.checkParent AND isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
@@ -291,6 +293,7 @@ Updated version: 1.1.0
 		<cfelse>
 			<cfreturn false />
 		</cfif>
+		
 		<cfreturn eventHandler.getAccess() EQ "public" />
 	</cffunction>
 	
