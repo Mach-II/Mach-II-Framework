@@ -213,7 +213,6 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	type CDATA #REQUIRED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
-	runParent (before|after|none) #IMPLIED
 >
 
 
