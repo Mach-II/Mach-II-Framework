@@ -96,14 +96,9 @@ Notes:
 		<cfif NOT arguments.override>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, "mach-ii/plugins/plugin") />
 		<cfelse>
-			<!--- <cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") /> --->
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
-			<!--- TODO remove <cftrace text="override pluginNodes count: #arrayLen(pluginNodes)#">
-			<cfdump var="#pluginNodes#" label="pluginNodes">
-			<cfdump var="#arguments.configXML#" label="configXML"><cfabort> --->
 			<cfif arrayLen(pluginNodes) gt 0 AND structKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
-				<!--- <cftrace text="runParent set to '#pluginNodes[1].xmlAttributes["runParent"]#'"> --->
-				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"])>
+				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
 			</cfif>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") />
 		</cfif>
