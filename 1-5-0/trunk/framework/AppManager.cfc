@@ -44,6 +44,7 @@ Notes:
 	<cfset variables.utils = "" />
 	<cfset variables.viewManager = "" />
 	<cfset variables.parentAppManager = "" />
+	<cfset variables.appkey = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -187,6 +188,14 @@ Notes:
 	</cffunction>	
 	<cffunction name="getParent" access="public" returntype="any" output="false">
 		<cfreturn variables.parentAppManager />
+	</cffunction>
+	
+	<cffunction name="setAppKey" access="public" returntype="void" output="false">
+		<cfargument name="appkey" type="string" required="true" />
+		<cfset variables.appkey = arguments.appkey />
+	</cffunction>
+	<cffunction name="getAppKey" access="public" type="string" output="false">
+		<cfreturn variables.appkey />
 	</cffunction>
 	
 </cfcomponent>

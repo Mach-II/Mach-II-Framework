@@ -62,7 +62,7 @@ Updated version: 1.5.0
 			hint="Should the XML be validated before parsing." />
 
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				expandPath(getFile()), arguments.configDtdPath, arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
+				expandPath(getFile()), arguments.configDtdPath, getAppManager().getAppKey(), arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
 		<cfset setDtdPath(arguments.configDtdPath) />
@@ -81,7 +81,7 @@ Updated version: 1.5.0
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				expandPath(getFile()), getDtdPath(), arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
+				expandPath(getFile()), getDtdPath(), getAppManager().getAppKey(), arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
 		<cfset var moduleAppManager = appLoader.getAppManager() />
 
 		<cfset moduleAppManager.setAppLoader(appLoader) />

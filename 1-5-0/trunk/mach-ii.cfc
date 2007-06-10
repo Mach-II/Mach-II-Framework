@@ -64,7 +64,7 @@ the handleRequest() method in the onRequest() application event.
 		hint="Loads the framework. Only call in onApplicationStart() event.">		
 		<!--- Create the AppLoader. No locking requires if called during the onApplicationStart() event. --->
 		<cfset application[MACHII_APP_KEY] = StructNew() />
-		<cfset application[MACHII_APP_KEY].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_VALIDATE_XML) />
+		<cfset application[MACHII_APP_KEY].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_APP_KEY, MACHII_VALIDATE_XML) />
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
 

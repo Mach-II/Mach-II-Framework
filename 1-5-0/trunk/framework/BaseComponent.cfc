@@ -73,10 +73,10 @@ the rest of the framework. (pfarrell)
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
 		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler.getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
+			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
 		<cfelse>
-			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request._MachIIRequestHandler.'" />
+			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#']'" />
 		</cfif>
 	</cffunction>
 	
@@ -89,10 +89,10 @@ the rest of the framework. (pfarrell)
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
 		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler.getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
+			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 		<cfelse>
-			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request._MachIIRequestHandler.'" />
+			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#']'" />
 		</cfif>
 	</cffunction>
 	

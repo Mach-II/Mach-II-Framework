@@ -39,6 +39,7 @@ Notes:
 	<cfset variables.validateXML = 0 />
 	<cfset variables.overrideXml = "" />
 	<cfset variables.lastReloadDatetime = "" />
+	<cfset variables.appkey = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -49,6 +50,7 @@ Notes:
 			hint="The full path to the configuration XML file." />
 		<cfargument name="dtdPath" type="string" required="true"
 			hint="The full path to the Mach-II DTD file." />
+		<cfargument name="appkey" type="string" required="true" hint="Unqiue key for this application.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
@@ -66,6 +68,7 @@ Notes:
 		<cfset setValidateXml(arguments.validateXml) />
 		<cfset setOverrideXml(arguments.overrideXml) />
 		<cfset setModuleName(arguments.moduleName) />
+		<cfset setAppKey(arguments.appkey) />
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
@@ -123,7 +126,7 @@ Notes:
 
 		<cfset updateLastReloadDatetime() />		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
-				getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
+				getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset getAppManager().setAppLoader(this) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 	</cffunction>
@@ -245,6 +248,14 @@ Notes:
 	<cffunction name="getLastReloadDatetime" access="public" type="date" output="false"
 		hint="Gets the last reload datetime for this module or base application.">
 		<cfreturn variables.lastReloadDatetime />
+	</cffunction>
+	
+	<cffunction name="setAppKey" access="public" returntype="void" output="false">
+		<cfargument name="appkey" type="string" required="true" />
+		<cfset variables.appkey = arguments.appkey />
+	</cffunction>
+	<cffunction name="getAppKey" access="public" type="string" output="false">
+		<cfreturn variables.appkey />
 	</cffunction>
 
 </cfcomponent>

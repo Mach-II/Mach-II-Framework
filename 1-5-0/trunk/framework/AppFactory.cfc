@@ -50,6 +50,7 @@ Notes:
 		 	hint="The full path to the configuration XML file." />
 		<cfargument name="configDtdPath" type="string" required="true"
 		 	hint="The full path to the configuration DTD file." />
+		<cfargument name="appkey" type="string" required="true" hint="Unqiue key for this application.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
@@ -123,6 +124,7 @@ Notes:
 		
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
+		<cfset appManager.setAppKey(arguments.appkey) />
 		<cfif Len(arguments.moduleName)>
 			<cfset appManager.setModuleName(arguments.moduleName) />
 		</cfif>

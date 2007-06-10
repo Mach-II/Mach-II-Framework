@@ -87,11 +87,12 @@ Notes:
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
-		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler")>
-			<cfset request._MachIIRequestHandler = CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents()) />
+		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
+			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"] = 
+					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents()) />
 		</cfif>
 		
-		<cfreturn request._MachIIRequestHandler />
+		<cfreturn request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"]  />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
