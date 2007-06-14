@@ -87,12 +87,14 @@ Notes:
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
-		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
-			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"] = 
+		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		
+		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfset request["_MachIIRequestHandler_" & appKey] = 
 					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents()) />
 		</cfif>
 		
-		<cfreturn request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"]  />
+		<cfreturn request["_MachIIRequestHandler_" & appKey]  />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
@@ -112,10 +114,12 @@ Notes:
 		<cfset var i = "" />
 
 		<!--- Attach the module/event name if defined --->
-		<cfif Len(arguments.moduleName)>
+		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
 			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
-		<cfelseif NOT Len(arguments.moduleName)>
+		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
 			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.eventName />
+		<cfelse>
+			<cfset builtUrl = builtUrl & getQueryStringDelimiter() />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
@@ -133,9 +137,9 @@ Notes:
 		<cfargument name="pathInfo" type="string" required="true" />
 		
 		<cfset var names = "" />
-		<cfset var i = "" />
 		<cfset var value = "" />
 		<cfset var params = StructNew() />
+		<cfset var i = "" />
 
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo)>
@@ -240,7 +244,7 @@ Notes:
 		<cfelse>
 			<cfthrow
 				type="MachII.framework.urlParametersInvalidType"
-				message="BuildUrl()'s parameters attribute takes a list or struct."/>
+				message="BuildUrl()'s urlParameters attribute takes a list or struct."/>
 		</cfif>
 		
 		<cfreturn params />
