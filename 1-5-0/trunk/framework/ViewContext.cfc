@@ -66,6 +66,8 @@ Notes:
 		
 		<cfset var viewPath = getFullPath(arguments.viewName) />
 		<cfset var viewContent = "" />
+		
+		<!--- This has been left in for BC --->
 		<cfset request.event = arguments.event />
 
 		<cfif arguments.contentKey NEQ ''>
