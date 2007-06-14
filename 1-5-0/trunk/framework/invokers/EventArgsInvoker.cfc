@@ -81,7 +81,7 @@ has been defined. This also fixed the problem if the listener returns a Java nul
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfthrow type="MachII.framework.VoidReturnType"
 							message="A ResultArg/Key has been specified on a notify command method that is returning void. This can also happen if your listener method returns a Java null."
-							detail="Notify method name: '#arguments.method#'" />
+							detail="Listener: '#getMetadata(listener).name#' Method: '#arguments.method#'" />
 				<cfelse>
 					<cfrethrow />
 				</cfif>
