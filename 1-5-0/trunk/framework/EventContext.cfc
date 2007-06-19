@@ -85,13 +85,20 @@ Notes:
 		hint="Queues an event for the framework to handle.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="moduleName" type="string" required="false" default="" />
+		<cfargument name="moduleName" type="string" required="false" />
 		
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
-		<cfset var nextModuleName = arguments.moduleName />
+		<cfset var nextModuleName = "" />
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
+		
+		<!--- Check for if we need to look up the module name --->
+		<cfif NOT StructKeyExists(arguments, "moduleName")>
+			<cfset nextModuleName = getCurrentEvent().getModuleName() />
+		<cfelse>
+			<cfset nextModuleName = arguments.moduleName />
+		</cfif>
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
@@ -99,8 +106,6 @@ Notes:
 				<cfset mapping = getEventMapping(arguments.eventName) />
 				<cfset nextModuleName = mapping.moduleName />
 				<cfset nextEventName = mapping.eventName />
-			<cfelseif NOT Len(arguments.moduleName)>
-				<cfset nextModuleName = getCurrentEvent().getModuleName() />
 			</cfif>
 			<!--- Create the event. --->
 			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
@@ -233,7 +238,11 @@ Notes:
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(result.eventName)>
 				<cfset result = getEventMapping(exceptionEventName) />
-				<cfset appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
+				<cfif NOT Len(reesult.moduleName)>
+					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
+				<cfelse>
+					<cfset appManager = appManager.getModuleManager().getAppManager() />
+				</cfif>
 			<!--- If the exception event is not defined, then we know it's in the parent --->
 			<cfelseif appManager.getPropertyManager().isPropertyDefined("exceptionEvent")>
 				<cfset result.moduleName = appManager.getModuleName() />
