@@ -93,7 +93,7 @@ Notes:
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
 		
-		<!--- Check for if we need to look up the module name --->
+		<!--- Look up the module name if the moduleName argument does not exist --->
 		<cfif NOT StructKeyExists(arguments, "moduleName")>
 			<cfset nextModuleName = getCurrentEvent().getModuleName() />
 		<cfelse>

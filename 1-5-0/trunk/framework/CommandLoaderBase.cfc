@@ -35,7 +35,7 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initialization function called by the framework.">
-		<!--- Overrided by child object. --->
+		<!--- Overridden by child object. --->
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"
@@ -92,7 +92,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupViewPage" access="private" returntype="MachII.framework.commands.ViewPageCommand" output="false"
-		hint="Setups a view-page command.">
+		hint="Sets up a view-page command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -116,7 +116,7 @@ Updated version: 1.5.0
 	</cffunction>
 
 	<cffunction name="setupNotify" access="private" returntype="MachII.framework.commands.NotifyCommand" output="false"
-		hint="Setups a notify command.">
+		hint="Sets up a notify command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -138,7 +138,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupAnnounce" access="private" returntype="MachII.framework.commands.AnnounceCommand" output="false"
-		hint="Setups an announce command.">
+		hint="Sets up an announce command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -160,7 +160,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupEventMapping" access="private" returntype="MachII.framework.commands.EventMappingCommand" output="false"
-		hint="Setups an event-mapping command.">
+		hint="Sets up an event-mapping command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -180,7 +180,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupExecute" access="private" returntype="MachII.framework.commands.ExecuteCommand" output="false"
-		hint="Setups an execute command.">
+		hint="Sets up an execute command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -192,7 +192,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupFilter" access="private" returntype="MachII.framework.commands.FilterCommand" output="false"
-		hint="Setups a filter command.">
+		hint="Sets up a filter command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -226,7 +226,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupEventBean" access="private" returntype="MachII.framework.commands.EventBeanCommand" output="false"
-		hint="Setups a event-bean command.">
+		hint="Sets up a event-bean command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -247,7 +247,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupRedirect" access="private" returntype="MachII.framework.commands.RedirectCommand" output="false"
-		hint="Setups a redirect command.">
+		hint="Sets up a redirect command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -290,7 +290,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupEventArg" access="private" returntype="MachII.framework.commands.EventArgCommand" output="false"
-		hint="Setups an event-arg command.">
+		hint="Sets up an event-arg command.">
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
@@ -310,7 +310,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setupDefault" access="private" returntype="MachII.framework.Command" output="false"
-		hint="Setups a default command.">
+		hint="Sets up a default command.">
 		
 		<cfset var command = CreateObject("component", "MachII.framework.Command").init() />
 		

@@ -56,7 +56,7 @@ Notes:
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. Defaults to empty string." />
 		<cfargument name="overrideXml" type="any" required="false" default=""
-			hint="Optional argument for a modules. Defaults to empty string." />
+			hint="Optional argument for override Xml for a module. Defaults to empty string." />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Optional argument for the name of a module. Defaults to empty string." />
 			
@@ -231,7 +231,7 @@ Notes:
 		</cfif>
 		<cfset appManager.setPluginManager(pluginManager) />
 		
-		<!--- ModuleManager is a singelton across the application --->
+		<!--- ModuleManager is a singleton across the application --->
 		<cfif NOT IsObject(arguments.parentAppManager)>
 			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
 			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">

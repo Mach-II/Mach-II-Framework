@@ -56,7 +56,7 @@ has been logged as a non-critical bug. Schedule to be fixed in 1.1.1. (pfarrell)
 		<cfargument name="resultKey" type="string" required="false" default=""
 			hint="The result key." />
 		
-		<!--- Overwrite in Sub-Type --->
+		<!--- Override in Sub-Type --->
 	</cffunction>
 
 </cfcomponent>

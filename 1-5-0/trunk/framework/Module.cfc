@@ -130,7 +130,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"
-		hint="Returns the ModuLeAppManager instance this ModuleManager belongs to.">
+		hint="Returns the ModuleAppManager instance this ModuleManager belongs to.">
 		<cfargument name="moduleAppManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.moduleAppManager = arguments.moduleAppManager />
 	</cffunction>

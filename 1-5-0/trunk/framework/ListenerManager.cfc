@@ -136,7 +136,7 @@ Notes:
 					<cfset invoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
 				</cfif>
 	
-				<!--- Continue setup on the Lister. --->
+				<!--- Continue setup on the Listener. --->
 				<cfset listener.setInvoker(invoker) />
 				<!--- Add the Listener to the Manager. --->
 				<cfset addListener(listenerName, listener, arguments.override) />
@@ -148,7 +148,7 @@ Notes:
 		hint="Configures each of the registered Listeners and its' invoker.">
 		<cfset var key = "" />
 		
-		<!--- Loop through the listerns and configure invokers first --->
+		<!--- Loop through the Listeners and configure invokers first --->
 		<cfloop collection="#variables.listeners#" item="key">
 			<cfset getListener(key).configure() />
 		</cfloop>

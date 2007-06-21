@@ -56,7 +56,7 @@ Notes:
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 		<cfargument name="overrideXml" type="any" required="false" default=""
-			hint="Optional argument for a modules. If there isn't one default to empty string." />
+			hint="Optional argument for override Xml for a module. Default to empty string." />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Optional argument for the name of a module. Defaults to empty string." />
 		
@@ -79,7 +79,7 @@ Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
-		hint="Determines of the configuration file should be reloaded.">
+		hint="Determines if the configuration file should be reloaded.">
 		
 		<cfif shouldReloadBaseConfig()>
 			<cfreturn true />
@@ -91,7 +91,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="shouldReloadModuleConfig" access="public" returntype="boolean" output="false"
-		hint="Determines of the configuration file should be reloaded.">
+		hint="Determines if any of the module configuration files should be reloaded.">
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var module = 0 />
 		
@@ -108,7 +108,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="shouldReloadBaseConfig" access="public" returntype="boolean" output="false"
-		hint="Determines of the configuration file should be reloaded.">
+		hint="Determines if any of the base configuration files should be reloaded.">
 		
 		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash()) NEQ 0>
 			<cfreturn true />
