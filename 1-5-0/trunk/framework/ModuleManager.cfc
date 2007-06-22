@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2007 Mach-II Corporation
+Copyright 2007 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Copyright: Mach-II Corporation
+Copyright: GreatBizTools, LLC
 Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
