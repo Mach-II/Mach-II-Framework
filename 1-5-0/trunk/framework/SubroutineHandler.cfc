@@ -43,7 +43,7 @@ Updated version: 1.5.0
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="handleSubroutine" access="public" returntype="boolean" output="true"
-		hint="Handles an Subroutine.">
+		hint="Handles a Subroutine.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
@@ -63,7 +63,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="addCommand" access="public" returntype="void" output="false"
-		hint="Adds an Command.">
+		hint="Adds a Command.">
 		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
 	</cffunction>

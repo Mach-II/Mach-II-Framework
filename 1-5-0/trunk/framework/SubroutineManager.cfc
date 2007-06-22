@@ -132,14 +132,14 @@ Updated version: 1.5.0
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="addSubroutineHandler" access="public" returntype="void" output="false"
-		hint="Registers an SubroutineHandler by name.">
+		hint="Registers a SubroutineHandler by name.">
 		<cfargument name="subroutineName" type="string" required="true" />
 		<cfargument name="subroutineHandler" type="MachII.framework.SubroutineHandler" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
 		<cfif NOT arguments.overrideCheck AND isSubroutineDefined(arguments.subroutineName)>
 			<cfthrow type="MachII.framework.SubroutineHandlerAlreadyDefined"
-				message="An SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
+				message="A SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
 		<cfelse>
 			<cfset variables.handlers[arguments.subroutineName] = arguments.subroutineHandler />
 		</cfif>
@@ -168,7 +168,7 @@ Updated version: 1.5.0
 	</cffunction>
 	
 	<cffunction name="isSubroutineDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if an SubroutineHandler for the named Subroutine is defined; otherwise false.">
+		hint="Returns true if a SubroutineHandler for the named Subroutine is defined; otherwise false.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
 		<cfreturn StructKeyExists(variables.handlers, arguments.subroutineName) />
@@ -193,12 +193,12 @@ Updated version: 1.5.0
 		<cfreturn variables.appManager />
 	</cffunction>
 	<cffunction name="setParent" access="public" returntype="void" output="false"
-		hint="Returns the parent SubroutineManager instance this FilterManager belongs to.">
+		hint="Returns the parent SubroutineManager instance this SubroutineManager belongs to.">
 		<cfargument name="parentSubroutineManager" type="MachII.framework.SubroutineManager" required="true" />
 		<cfset variables.parentSubroutineManager = arguments.parentSubroutineManager />
 	</cffunction>
 	<cffunction name="getParent" access="public" returntype="any" output="false"
-		hint="Sets the parent SubroutineManager instance this FilterManager belongs to. It will return empty string if no parent is defined.">
+		hint="Sets the parent SubroutineManager instance this SubroutineManager belongs to. Return empty string if no parent is defined.">
 		<cfreturn variables.parentSubroutineManager />
 	</cffunction>
 	

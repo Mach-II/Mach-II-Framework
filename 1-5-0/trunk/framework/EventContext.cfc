@@ -56,7 +56,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setup" access="public" returntype="void" output="false"
-		hint="Setups the event-context.">
+		hint="Sets up the event-context.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="currentEvent" type="any" required="false" default="" />
 		
@@ -364,7 +364,7 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>	
-	<cffunction name="getAppManager" access="public" type="MachII.framework.AppManager" output="false">
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
 
@@ -372,7 +372,7 @@ Notes:
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
 		<cfset variables.eventQueue = arguments.eventQueue />
 	</cffunction>
-	<cffunction name="getEventQueue" access="private" type="MachII.framework.AppManager" output="false">
+	<cffunction name="getEventQueue" access="private" returntype="MachII.util.SizedQueue" output="false">
 		<cfreturn variables.eventQueue />
 	</cffunction>
 
