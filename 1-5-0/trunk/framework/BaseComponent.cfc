@@ -104,7 +104,7 @@ the rest of the framework. (pfarrell)
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false" default=""
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn getAppManager().getRequestManager().buildUrl(request.event.getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
@@ -123,7 +123,7 @@ the rest of the framework. (pfarrell)
 		<cfif NOT Len(arguments.moduleName)>
 			<cfset argument.moduleName = request.event.getModuleName() />
 		</cfif>
-		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
