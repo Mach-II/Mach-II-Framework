@@ -189,7 +189,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT page-view EMPTY>
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
-	page CDATA #REQUIRED
+	page CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
