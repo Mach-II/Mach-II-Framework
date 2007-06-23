@@ -104,7 +104,7 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<!--- Fake the module name --->
-		<cfset arguments.moduleName = "" />
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
 		
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
