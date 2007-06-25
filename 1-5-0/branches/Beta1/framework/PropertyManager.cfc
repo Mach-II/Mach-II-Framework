@@ -37,7 +37,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurableProperties = ArrayNew(1) />
 	<cfset variables.parentPropertyManager = "">
-	<cfset variables.version = "1.5.0.0" />
+	<cfset variables.version = "1.5.0.1" />
 	<cfset variables.utils = "" />
 	<cfset variables.propsNotAllowInModule =
 		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
