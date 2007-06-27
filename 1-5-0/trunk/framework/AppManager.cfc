@@ -93,12 +93,12 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
-		hint="Returns the AppLoader instance.">
+		hint="Sets the AppLoader instance.">
 		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
 		<cfset variables.appLoader = arguments.appLoader />
 	</cffunction>
 	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
-		hint="Sets the AppLoader instance.">
+		hint="Returns the AppLoader instance.">
 		<cfreturn variables.appLoader />
 	</cffunction>
 	
