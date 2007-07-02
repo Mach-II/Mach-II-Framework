@@ -136,9 +136,11 @@ Notes:
 			<cfset timestamp = DateAdd("h", cacheFor, timestamp) />
 		<cfelseif unit EQ "days">
 			<cfset timestamp = DateAdd("d", cacheFor, timestamp) />
+		<cfelseif unit EQ "forever">
+			<cfset timestamp = DateAdd("y", cacheFor, timestamp) />
 		<cfelse>
 			<cfthrow type="MachII.framework.CacheHandler"
-				message="Invalid CacheForUnit of '#unit#'. Use 'seconds, 'minutes', 'hours' or 'days'." />
+				message="Invalid CacheForUnit of '#unit#'. Use 'seconds, 'minutes', 'hours', 'days' or 'forever'." />
 		</cfif>
 		
 		<cfreturn timestamp />

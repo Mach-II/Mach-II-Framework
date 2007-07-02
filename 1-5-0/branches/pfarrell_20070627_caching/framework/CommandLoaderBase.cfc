@@ -314,8 +314,8 @@ Updated version: 1.5.0
 		<cfset var nestedCommandNodes = arguments.commandNode.xmlChildren />
 		<cfset var storage = "memory" />
 		<cfset var type = "application" />
-		<cfset var cacheFor = "" />
-		<cfset var cacheForUnit = "" />
+		<cfset var cacheFor = "100" />
+		<cfset var cacheForUnit = "forever" />
 		<cfset var i = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "storage")>
