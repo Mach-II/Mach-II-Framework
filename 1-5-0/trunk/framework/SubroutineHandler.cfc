@@ -29,7 +29,6 @@ Updated version: 1.5.0
 	PROPERTIES
 	--->
 	<cfset variables.commands = ArrayNew(1) />
-	<cfset variables.access = "public" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
