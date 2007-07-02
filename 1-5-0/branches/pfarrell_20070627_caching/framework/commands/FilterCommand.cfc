@@ -30,6 +30,7 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "filter" />
 	<cfset variables.filter = "" />
 	<cfset variables.paramArgs = "" />
 	

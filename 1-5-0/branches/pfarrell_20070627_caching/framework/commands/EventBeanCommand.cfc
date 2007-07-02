@@ -30,6 +30,7 @@ Updated version: 1.5.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "event-bean" />
 	<cfset variables.beanName = "" />
 	<cfset variables.beanType = "" />
 	<cfset variables.beanFields = "" />

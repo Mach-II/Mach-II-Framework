@@ -83,6 +83,8 @@ Updated version: 1.5.0
 		<!--- event-arg --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
 			<cfset command = setupEventArg(arguments.commandNode) />
+		<cfelseif arguments.commandNode.xmlName EQ "cache">
+			<cfset command = setupCache(arguments.commandNode) />
 		<!--- default/unrecognized command --->
 		<cfelse>
 			<cfset command = setupDefault(arguments.commandNode) />
@@ -204,7 +206,6 @@ Updated version: 1.5.0
 		<cfset var filter = variables.filterMgr.getFilter(filterName) />
 		<cfset var i = "" />
 
-		<cftry>
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
 			<cfset paramName = paramNodes[i].xmlAttributes["name"] />
 			<cfif NOT StructKeyExists(paramNodes[i].xmlAttributes, "value")>
@@ -214,12 +215,7 @@ Updated version: 1.5.0
 			</cfif>
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
-			<cfcatch type="any">
-				<cfdump var="#cfcatch#">
-				<cfdump var="#paramNodes[i]#">
-				<cfabort>
-			</cfcatch>
-		</cftry>
+
 		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filter, filterParams) />
 		
 		<cfreturn command />
@@ -305,6 +301,47 @@ Updated version: 1.5.0
 			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
 		</cfif>
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupCache" access="private" returntype="MachII.framework.commands.CacheCommand" output="false"
+		hint="Sets up a cache command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var cacheHandler = "" />
+		<cfset var nestedCommandNodes = arguments.commandNode.xmlChildren />
+		<cfset var storage = "memory" />
+		<cfset var type = "application" />
+		<cfset var cacheFor = "" />
+		<cfset var cacheForUnit = "" />
+		<cfset var i = "" />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "storage")>
+			<cfset storage = arguments.commandNode.xmlAttributes["storage"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "type")>
+			<cfset type = arguments.commandNode.xmlAttributes["type"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "cacheFor")>
+			<cfset cacheFor = arguments.commandNode.xmlAttributes["cacheFor"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "cacheForUnit")>
+			<cfset cacheForUnit = arguments.commandNode.xmlAttributes["cacheForUnit"] />
+		</cfif>
+		
+		<!--- Build the cache handler --->
+		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(storage, type, cacheFor, cacheForUnit) />
+		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
+			<cfset command = createCommand(nestedCommandNodes[i]) />
+			<cfset cacheHandler.addCommand(command) />
+		</cfloop>
+		
+		<!--- Set the cache handler to the manager --->
+		<cfset getAppManager().getCacheManager().addCacheHandler(cacheHandler) />
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(cacheHandler.getHandlerId()) />
 		
 		<cfreturn command />
 	</cffunction>

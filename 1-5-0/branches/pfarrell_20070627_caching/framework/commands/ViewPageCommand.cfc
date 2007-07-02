@@ -30,6 +30,7 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "view-page" />
 	<cfset variables.viewName = "" />
 	<cfset variables.contentKey = "" />
 	<cfset variables.contentArg = "" />

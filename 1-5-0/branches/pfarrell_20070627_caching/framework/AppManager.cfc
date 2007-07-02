@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.moduleName = "" />
 	<cfset variables.appLoader = "" />
+	<cfset variables.cacheManager = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.eventManager = "" />
@@ -93,12 +94,12 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
-		hint="Returns the AppLoader instance.">
+		hint="Sets the AppLoader instance.">
 		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
 		<cfset variables.appLoader = arguments.appLoader />
 	</cffunction>
 	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
-		hint="Sets the AppLoader instance.">
+		hint="Returns the AppLoader instance.">
 		<cfreturn variables.appLoader />
 	</cffunction>
 	
@@ -164,6 +165,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getSubroutineManager" access="public" returntype="MachII.framework.SubroutineManager" output="false">
 		<cfreturn variables.subroutineManager />
+	</cffunction>
+	
+	<cffunction name="setCacheManager" access="public" returntype="void" output="false"
+		hint="Sets the CacheManager instance.">
+		<cfargument name="cacheManager" type="MachII.framework.CacheManager" required="true" />
+		<cfset variables.cacheManager = arguments.cacheManager />
+	</cffunction>
+	<cffunction name="getCacheManager" access="public" returntype="MachII.framework.CacheManager" output="false"
+		hint="Returns the CacheManager instance.">
+		<cfreturn variables.cacheManager />
 	</cffunction>
 	
 	<cffunction name="setUtils" access="public" returntype="void" output="false">

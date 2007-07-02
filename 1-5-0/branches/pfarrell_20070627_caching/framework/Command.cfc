@@ -32,6 +32,7 @@ Base Command component.
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "unknown" />
 	<cfset variables.parameters = StructNew() />
 	
 	<!---
@@ -72,6 +73,11 @@ Base Command component.
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, parameters[key]) />
 		</cfloop>
+	</cffunction>
+	
+	<cffunction name="getCommandType" access="public" returntype="string" output="false"
+		hint="Gets the command type for this command.">
+		<cfset variables.commandType />
 	</cffunction>
 
 </cfcomponent>

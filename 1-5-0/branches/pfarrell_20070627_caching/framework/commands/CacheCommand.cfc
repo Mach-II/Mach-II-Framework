@@ -15,55 +15,62 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
 Updated version: 1.5.0
+
+Notes:
 --->
-<cfcomponent 
-	displayname="ExecuteCommand" 
+<cfcomponent
+	displayname="CacheCommand"
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for executing a subroutine.">
-	
+	hint="A Command for performing caching.">
+
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.commandType = "execute" />
-	<cfset variables.subroutineName = "" />
+	<cfset variables.commandType = "cache" />
+	<cfset variables.handlerId = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="ExecuteCommand" output="false"
-		hint="Used by the framework for initialization.">
-		<cfargument name="subroutineName" type="string" required="true" />
-		
-		<cfset setSubroutineName(arguments.subroutineName) />
-		
+	<cffunction name="init" access="public" returntype="CacheCommand" output="false"
+		hint="Initializes the command.">
+		<cfargument name="handlerId" type="uuid" required="true" />
+
+		<cfset setHandlerId(arguments.handlerId) />
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="execute" access="public" returntype="boolean" output="true"
-		hint="Executes the command.">
+		hint="Executes a caching block.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		<cfreturn arguments.eventContext.executeSubroutine(getSubroutineName(), arguments.event) />
+		
+		<cfset var continue = true />
+		<cfset var cacheHandler = arguments.eventContext.getAppManager().getCacheManager().getCacheHandler(getHandlerId()) />
+		
+		<cfset contine = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
+		
+		<cfreturn continue />
 	</cffunction>
 	
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setSubroutineName" access="private" returntype="void" output="false">
-		<cfargument name="subroutineName" type="string" required="true" />
-		<cfset variables.subroutineName = arguments.subroutineName />
+	<cffunction name="setHandlerId" access="public" returntype="void" output="false">
+		<cfargument name="handlerId" type="uuid" required="true" />
+		<cfset variables.handlerId = arguments.handlerId />
 	</cffunction>
-	<cffunction name="getSubroutineName" access="private" returntype="string" output="false">
-		<cfreturn variables.subroutineName />
+	<cffunction name="getHandlerId" access="public" returntype="uuid" output="false">
+		<cfreturn variables.handlerId />
 	</cffunction>
 
 </cfcomponent>

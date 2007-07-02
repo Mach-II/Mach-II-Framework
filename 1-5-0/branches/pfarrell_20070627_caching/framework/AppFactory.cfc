@@ -69,14 +69,16 @@ Notes:
 		<cfset var parentListenerManager = "" />
 		<cfset var filterManager = "" />
 		<cfset var parentFilterManager = "" />
+		<cfset var cacheManager = "" />
+		<cfset var parentCacheManager = "" />
 		<cfset var subroutineManager = "" />
 		<cfset var parentSubroutineManager = "" />
 		<cfset var eventManager = "" />
+		<cfset var parentEventManager = "" />
 		<cfset var viewManager = "" />
 		<cfset var parentViewManager = "" />
 		<cfset var pluginManager = "" />
 		<cfset var parentPluginManager = "" />
-		<cfset var parentEventManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -135,6 +137,7 @@ Notes:
 			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
 			<cfset parentPropertyManager = appManager.getParent().getPropertyManager() />
 			<cfset parentFilterManager = appManager.getParent().getFilterManager() />
+			<cfset parentCacheManager = appManager.getParent().getCacheManager() />
 			<cfset parentSubroutineManager = appManager.getParent().getSubroutineManager() />
 			<cfset parentViewManager = appManager.getParent().getViewManager() />
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
@@ -194,6 +197,10 @@ Notes:
 			<cfset filterManager.loadXml(arguments.overrideXml, true) />
 		</cfif>
 		<cfset appManager.setFilterManager(filterManager) />
+		
+		<!--- CacheManager is a singleton per module instance --->
+		<cfset cacheManager = CreateObject("component", "MachII.framework.CacheManager").init(appManager, parentCacheManager) />
+		<cfset appManager.setCacheManager(cacheManager) />
 
 		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(appManager, parentSubroutineManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">

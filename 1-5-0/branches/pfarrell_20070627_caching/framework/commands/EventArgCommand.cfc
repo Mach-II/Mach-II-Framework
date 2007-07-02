@@ -30,6 +30,7 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "event-arg" />
 	<cfset variables.argName = "" />
 	<cfset variables.argValue = "" />
 	<cfset variables.argVariable = "" />

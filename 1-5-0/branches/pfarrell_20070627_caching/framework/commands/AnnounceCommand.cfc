@@ -30,6 +30,7 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "announce" />
 	<cfset variables.eventName = "" />
 	<cfset variables.copyEventArgs = true />
 	<cfset variables.moduleName = "" />
