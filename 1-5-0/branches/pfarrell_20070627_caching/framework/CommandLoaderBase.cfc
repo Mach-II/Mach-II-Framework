@@ -85,6 +85,9 @@ Updated version: 1.5.0
 		<!--- event-arg --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
 			<cfset command = setupEventArg(arguments.commandNode) />
+		<!--- cache-clear --->
+		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
+			<cfset command = setupCacheClear(arguments.commandNode) />
 		<!--- cache --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache">
 			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
@@ -308,6 +311,25 @@ Updated version: 1.5.0
 		<cfreturn command />
 	</cffunction>
 	
+	<cffunction name="setupCacheClear" access="private" returntype="MachII.framework.commands.CacheClearCommand" output="false"
+		hint="Sets up a cache-clear command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var alias = "" />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+			<cfset alias = arguments.commandNode.xmlAttributes["alias"] />
+		<cfelse>
+			<cfthrow type="MachII.framework.CacheClearNoAlias"
+				message="You must specify an alias attribute." />
+		</cfif>
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(alias) />
+		
+		<cfreturn command />
+	</cffunction>
+	
 	<cffunction name="setupCache" access="private" returntype="MachII.framework.commands.CacheCommand" output="false"
 		hint="Sets up a cache command.">
 		<cfargument name="commandNode" type="any" required="true" />
@@ -315,7 +337,6 @@ Updated version: 1.5.0
 		<cfargument name="parentHandlerType" type="string" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var action = "cache" />
 		<cfset var alias = "" />
 		<cfset var handlerId = CreateUUID() />
 		
@@ -326,22 +347,9 @@ Updated version: 1.5.0
 			<cfset alias = arguments.commandNode.xmlAttributes["alias"] />
 		</cfif>
 		
-		<!--- Build the correct data based on the action type --->
-		<cfif action EQ "cache">
-			<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
-		<cfelseif action EQ "clear">
-			<cfif NOT Len(alias)>
-				<cfthrow type="MachII.framework.NoAlias"
-					message="You must specify an alias attribute when using the cache action 'clear'."
-					detail="#arguments.handlerType#-handler: '#arguments.handlerName#'" />
-			</cfif>
-		<cfelse>
-			<cfthrow type="MachII.framework.NoAlias"
-				message="You must specify an action attribute when using the cache command."
-				detail="#arguments.handlerType#-handler: '#arguments.handlerName#'" />
-		</cfif>
+		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(action, handlerId, alias) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, alias) />
 		
 		<cfreturn command />
 	</cffunction>

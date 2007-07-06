@@ -118,14 +118,14 @@ Notes:
 		
 		<!--- Register the handler by handler type --->
 		<cfif handlerType EQ "event">
-			<cfset StructInsert(variables.handlersByEventName, Hash(arguments.cacheHandler.getParentHandlerName()), 1, true) />
+			<cfset variables.handlersByEventName[handlerId][Hash(arguments.cacheHandler.getParentHandlerName())] = true />
 		<cfelseif handlerType EQ "subroutine">
-			<cfset StructInsert(variables.handlersBySubroutineName, Hash(arguments.cacheHandler.getParentHandlerName()), 1, true) />
+			<cfset variables.handlersBySubroutineName[handlerId][Hash(arguments.cacheHandler.getParentHandlerName())] = true />
 		</cfif>
 		
 		<!--- Register the alias if defined --->
 		<cfif Len(alias)>
-			<cfset StructInsert(variables.handlersByAliases, Hash(alias), 1, true) />
+			<cfset variables.handlersByAliases[Hash(alias)][handlerId] = true />
 		</cfif>
 	</cffunction>
 	
@@ -150,14 +150,14 @@ Notes:
 		
 		<!--- Unregiester the handler by handler type --->
 		<cfif handlerType EQ "event">
-			<cfset StructDelete(variables.handlersByEventName, Hash(arguments.cacheHandler.getParentHandlerName()), true) />
+			<cfset StructDelete(variables.handlersByEventName[handlerId], Hash(arguments.cacheHandler.getParentHandlerName()), true) />
 		<cfelseif handlerType EQ "subroutine">
-			<cfset StructDelete(variables.handlersBySubroutineName, Hash(arguments.cacheHandler.getParentHandlerName()), true) />
+			<cfset StructDelete(variables.handlersBySubroutineName[handlerId], Hash(arguments.cacheHandler.getParentHandlerName()), true) />
 		</cfif>
 		
 		<!--- Unregister the alias if defined --->
 		<cfif Len(alias)>
-			<cfset StructDelete(variables.handlersByAliases, Hash(alias), false) />
+			<cfset StructDelete(variables.handlersByAliases[Hash(alias)], handlerId, false) />
 		</cfif>
 	</cffunction>
 		
@@ -175,10 +175,6 @@ Notes:
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var handlerIds = StructNew() />
 		<cfset var i = 0 />
-		
-		<cfdump var="#Hash(arguments.alias)#">
-		<cfdump var="#variables.handlersByAliases#">
-		<cfabort>
 		
 		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
 			<cfset handlerIds = variables.handlersByAliases[Hash(arguments.alias)] />
@@ -201,7 +197,7 @@ Notes:
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
 		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
 			<cfset cacheHandlers = variables.handlersByAliases[Hash(arguments.alias)] />
-			
+
 			<cfloop collection="#cacheHandlers#" item="i">
 				<cfset getCacheHandler(i).clearCache() />
 			</cfloop>

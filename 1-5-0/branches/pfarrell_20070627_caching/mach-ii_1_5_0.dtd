@@ -154,7 +154,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		access - the access attribute of the event handler (public|private)
 -->
 <!ELEMENT event-handlers (event-handler*)>
-<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache-clear | cache)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
@@ -170,7 +170,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		subroutine - the name of the subroutine to handle
 -->
 <!ELEMENT subroutines (subroutine*)>
-<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
+<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache-clear | cache)*>
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
 	overrideAction (useParent|addFromParent) #IMPLIED
@@ -215,9 +215,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	mapping CDATA #IMPLIED
 >
 
-
 <!--
-	Event-Handler tags.
+	Handler tags.
 -->
 <!--
 	A "filter" element will apply an event-filter to the current event being handled.
@@ -342,6 +341,19 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT execute (parameter*)>
 <!ATTLIST execute 
 	subroutine CDATA #REQUIRED
+>
+
+<!ELEMENT cache-clear EMPTY>
+<!ATTLIST cache-clear 
+	alias CDATA #REQUIRED
+>
+
+<!ELEMENT cache EMPTY>
+<!ATTLIST cache
+	type (application|session) "application"
+	cacheFor CDATA #IMPLIED
+	cacheForUnit (seconds|minutes|hours|days|forever) "forever" 
+	alias CDATA #IMPLIED
 >
 
 <!--
