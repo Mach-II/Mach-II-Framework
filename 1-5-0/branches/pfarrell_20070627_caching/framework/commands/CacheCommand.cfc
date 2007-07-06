@@ -70,19 +70,19 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setHandlerId" access="public" returntype="void" output="false">
+	<cffunction name="setHandlerId" access="private" returntype="void" output="false">
 		<cfargument name="handlerId" type="uuid" required="true" />
 		<cfset variables.handlerId = arguments.handlerId />
 	</cffunction>
-	<cffunction name="getHandlerId" access="public" returntype="uuid" output="false">
+	<cffunction name="getHandlerId" access="private" returntype="uuid" output="false">
 		<cfreturn variables.handlerId />
 	</cffunction>
 	
-	<cffunction name="setAlias" access="public" returntype="void" output="false">
+	<cffunction name="setAlias" access="private" returntype="void" output="false">
 		<cfargument name="alias" type="string" required="true" />
 		<cfset variables.alias = arguments.alias />
 	</cffunction>
-	<cffunction name="getAlias" access="public" returntype="string" output="false">
+	<cffunction name="getAlias" access="private" returntype="string" output="false">
 		<cfreturn variables.alias />
 	</cffunction>
 

@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.commandType = "cache-clear" />
 	<cfset variables.alias = "" />
+	<cfset variables.condition = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -40,8 +41,10 @@ Notes:
 	<cffunction name="init" access="public" returntype="CacheClearCommand" output="false"
 		hint="Initializes the command.">
 		<cfargument name="alias" type="string" required="false" default="" />
+		<cfargument name="condition" type="string" required="false" default="" />
 
 		<cfset setAlias(arguments.alias) />
+		<cfset setCondition(arguments.condition) />
 
 		<cfreturn this />
 	</cffunction>
@@ -49,7 +52,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="execute" access="public" returntype="boolean" output="true"
+	<cffunction name="execute" access="public" returntype="boolean" output="false"
 		hint="Executes a caching block.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -57,7 +60,9 @@ Notes:
 		<cfset var continue = true />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
 		
-		<cfset cacheManager.clearCachesByAlias(getAlias()) />
+		<cfif NOT Len(getCondition()) OR evaluate(getCondition())>
+			<cfset cacheManager.clearCachesByAlias(getAlias()) />
+		</cfif>
 		
 		<cfreturn continue />
 	</cffunction>
@@ -65,12 +70,20 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setAlias" access="public" returntype="void" output="false">
+	<cffunction name="setAlias" access="private" returntype="void" output="false">
 		<cfargument name="alias" type="string" required="true" />
 		<cfset variables.alias = arguments.alias />
 	</cffunction>
-	<cffunction name="getAlias" access="public" returntype="string" output="false">
+	<cffunction name="getAlias" access="private" returntype="string" output="false">
 		<cfreturn variables.alias />
+	</cffunction>
+	
+	<cffunction name="setCondition" access="private" returntype="void" output="false">
+		<cfargument name="condition" type="string" required="true" />
+		<cfset variables.condition = arguments.condition />
+	</cffunction>
+	<cffunction name="getCondition" access="private" returntype="string" output="false">
+		<cfreturn variables.condition />
 	</cffunction>
 
 </cfcomponent>

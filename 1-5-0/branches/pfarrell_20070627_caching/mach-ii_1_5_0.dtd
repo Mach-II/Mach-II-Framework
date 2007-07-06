@@ -343,11 +343,24 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	subroutine CDATA #REQUIRED
 >
 
+<!--
+	A "cache-clear" element will clear a cache by caching alias.
+		alias - the alias of the cache you wish to clear
+		[condition] - the condition to clear the cache if evaluatess to true 
+-->
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear 
 	alias CDATA #REQUIRED
+	condition CDATA #IMPLIED
 >
 
+<!--
+	A "cache" element will perform caching of the nested commands.
+		[type] - The scope of where the cached data will live (application or session).
+		[cacheFor] - The length to cache the data for (takes an integer).
+		[cacheForUnit] - The unit length to cache the date for (seconds, minutes, hours, days or forever).
+		[alias] - A name in which to reference this cache block if you wish to do a programmatic clear. 
+-->
 <!ELEMENT cache EMPTY>
 <!ATTLIST cache
 	type (application|session) "application"

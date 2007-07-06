@@ -317,6 +317,7 @@ Updated version: 1.5.0
 		
 		<cfset var command = "" />
 		<cfset var alias = "" />
+		<cfset var condition = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
 			<cfset alias = arguments.commandNode.xmlAttributes["alias"] />
@@ -324,8 +325,11 @@ Updated version: 1.5.0
 			<cfthrow type="MachII.framework.CacheClearNoAlias"
 				message="You must specify an alias attribute." />
 		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
+			<cfset condition = arguments.commandNode.xmlAttributes["condition"] />
+		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(alias) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(alias, condition) />
 		
 		<cfreturn command />
 	</cffunction>
