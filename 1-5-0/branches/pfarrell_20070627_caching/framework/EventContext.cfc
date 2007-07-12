@@ -267,28 +267,26 @@ Notes:
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
-			hint="Base of the url. Defaults to index.cfm." />			
-		<cfreturn getAppManager().getRequestManager().buildUrl(getCurrentEvent().getModuleName(), arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to index.cfm." />
+		
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+					
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		hint="Builds a framework specific url with module name.">
 		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with. Defaults to current module if empty string." />
+			hint="Name of the module to build the url with." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
+		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to index.cfm." />
-		
-		<!--- Pull the current module name if empty string (we use the request scope so we do not
-			pollute the variables scope which is shared in the views) --->
-		<cfif NOT Len(arguments.moduleName)>
-			<cfset argument.moduleName = getCurrentEvent().getModuleName() />
-		</cfif>
-		<cfreturn getAppManager().getRequestManager().buildUrl(arguments.moduleName, arguments.eventName, arguments.urlParameters, arguments.urlBase) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<!---

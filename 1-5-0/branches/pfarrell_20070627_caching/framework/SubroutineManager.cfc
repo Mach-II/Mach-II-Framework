@@ -32,6 +32,9 @@ Updated version: 1.5.0
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
 	<cfset variables.parentSubroutineManager = "" />
+	<!--- temps --->
+	<cfset variables.listenerMgr = "" />
+	<cfset variables.filterMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -65,6 +68,10 @@ Updated version: 1.5.0
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
+		
+		<!--- Set temps for commandLoaderBase to use. --->
+		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
+		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 		
 		<!--- Search for subroutines --->
 		<cfif NOT arguments.override>
@@ -103,13 +110,17 @@ Updated version: 1.5.0
 		  
 				<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
-					<cfset command = createCommand(commandNode, subroutineName, "subroutine") />
+					<cfset command = createCommand(commandNode) />
 					<cfset subroutineHandler.addCommand(command) />
 				</cfloop>
 
 				<cfset addSubroutineHandler(subroutineName, subroutineHandler, arguments.override) />
 			</cfif>
 		</cfloop>
+		
+		<!--- Clear temps. --->
+		<cfset variables.listenerMgr = "" />
+		<cfset variables.filterMgr = "" />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void"

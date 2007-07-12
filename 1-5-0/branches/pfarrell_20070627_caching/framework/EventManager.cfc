@@ -33,6 +33,9 @@ Updated version: 1.1.0
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
 	<cfset variables.parentEventManager = "" />
+	<!--- temps --->
+	<cfset variables.listenerMgr = "" />
+	<cfset variables.filterMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -67,6 +70,10 @@ Updated version: 1.1.0
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
+		
+		<!--- Set temps for the commandLoaderBase. --->
+		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
+		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 
 		<!--- Search for event handlers --->
 		<cfif NOT arguments.override>
@@ -111,13 +118,17 @@ Updated version: 1.1.0
 		  
 				<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-					<cfset command = createCommand(commandNode, eventName, "event") />
+					<cfset command = createCommand(commandNode) />
 					<cfset eventHandler.addCommand(command) />
 				</cfloop>
 				
 				<cfset addEventHandler(eventName, eventHandler, arguments.override) />
 			</cfif>
 		</cfloop>
+		
+		<!--- Clear temps. --->
+		<cfset variables.listenerMgr = "" />
+		<cfset variables.filterMgr = "" />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"

@@ -154,7 +154,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		access - the access attribute of the event handler (public|private)
 -->
 <!ELEMENT event-handlers (event-handler*)>
-<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache-clear | cache)*>
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
@@ -170,7 +170,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		subroutine - the name of the subroutine to handle
 -->
 <!ELEMENT subroutines (subroutine*)>
-<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache-clear | cache)*>
+<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute)*>
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
 	overrideAction (useParent|addFromParent) #IMPLIED
@@ -215,8 +215,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	mapping CDATA #IMPLIED
 >
 
+
 <!--
-	Handler tags.
+	Event-Handler tags.
 -->
 <!--
 	A "filter" element will apply an event-filter to the current event being handled.
@@ -341,32 +342,6 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT execute (parameter*)>
 <!ATTLIST execute 
 	subroutine CDATA #REQUIRED
->
-
-<!--
-	A "cache-clear" element will clear a cache by caching alias.
-		alias - the alias of the cache you wish to clear
-		[condition] - the condition to clear the cache if evaluatess to true 
--->
-<!ELEMENT cache-clear EMPTY>
-<!ATTLIST cache-clear 
-	alias CDATA #REQUIRED
-	condition CDATA #IMPLIED
->
-
-<!--
-	A "cache" element will perform caching of the nested commands.
-		[type] - The scope of where the cached data will live (application or session).
-		[cacheFor] - The length to cache the data for (takes an integer).
-		[cacheForUnit] - The unit length to cache the date for (seconds, minutes, hours, days or forever).
-		[alias] - A name in which to reference this cache block if you wish to do a programmatic clear. 
--->
-<!ELEMENT cache EMPTY>
-<!ATTLIST cache
-	type (application|session) "application"
-	cacheFor CDATA #IMPLIED
-	cacheForUnit (seconds|minutes|hours|days|forever) "forever" 
-	alias CDATA #IMPLIED
 >
 
 <!--

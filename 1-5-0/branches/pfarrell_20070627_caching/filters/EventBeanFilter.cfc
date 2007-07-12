@@ -20,6 +20,7 @@ $Id$
 
 Created version: 1.0.7
 Updated version: 1.1.0
+Deprecated version 1.5.0
 
 EventBeanFilter
 	This event-filter creates beans in an event and populates the beans
@@ -45,12 +46,15 @@ Event-Handler Parameters:
 	"name" - The name of the bean to create (in the event-args).
 	"type" - The type of the bean to create.
 	"fields" - The fields from the event-args to set in the bean.
+
+Notes:
+This filter has been DEPRECATED in Mach-II 1.5.0.
 --->
 <cfcomponent 
 	displayname="EventBeanFilter" 
 	extends="MachII.framework.EventFilter"
 	output="false"
-	hint="A robust EventFilter for creating and populating beans in events.">
+	hint="DEPRECATED. A robust EventFilter for creating and populating beans in events.">
 	
 	<!---
 	PROPERTIES
@@ -65,7 +69,7 @@ Event-Handler Parameters:
 	INITALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the filter.">
+		hint="DEPRECATED. Configures the filter.">
 		<cfset setBeanUtil( CreateObject('component','MachII.util.BeanUtil') ) />
 	</cffunction>
 	
@@ -73,7 +77,7 @@ Event-Handler Parameters:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="filterEvent" access="public" returntype="boolean"
-		hint="Runs the filter event.">
+		hint="DEPRECATED. Runs the filter event.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />

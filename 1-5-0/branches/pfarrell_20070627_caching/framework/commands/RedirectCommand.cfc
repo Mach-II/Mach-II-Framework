@@ -30,7 +30,6 @@ Updated version: 1.5.0
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.commandType = "redirect" />
 	<cfset variables.eventName = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.redirectPersistParameter = "" />

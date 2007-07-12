@@ -30,7 +30,6 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.commandType = "event-mapping" />
 	<cfset variables.eventName = "" />
 	<cfset variables.mappingName = "" />
 	<cfset variables.mappingModule = "" />

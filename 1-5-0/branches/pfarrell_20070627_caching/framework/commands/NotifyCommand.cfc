@@ -30,7 +30,6 @@ Updated version: 1.1.0
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.commandType = "notify" />
 	<cfset variables.listener = "" />
 	<cfset variables.method = "" />
 	<cfset variables.resultKey = "" />

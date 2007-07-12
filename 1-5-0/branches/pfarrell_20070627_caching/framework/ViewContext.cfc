@@ -103,14 +103,15 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<!--- Fake the module name --->
+
+		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 		
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		hint="Builds a framework specific url with module name and automatically escapes entities for html display.">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with. Defaults to current module if empty string." />
 		<cfargument name="eventName" type="string" required="true"
@@ -119,12 +120,6 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		
-		<!--- Pull the current module name if empty string (we use the request scope so we do not
-			pollute the variables scope which is shared in the views) --->
-		<cfif NOT Len(arguments.moduleName)>
-			<cfset argument.moduleName = request.event.getModuleName() />
-		</cfif>
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	

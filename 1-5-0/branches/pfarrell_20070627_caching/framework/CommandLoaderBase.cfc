@@ -52,8 +52,6 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
 		<cfargument name="commandNode" type="any" required="true" />
-		<cfargument name="parentHandlerName" type="string" required="false" default="" />
-		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
 
@@ -85,12 +83,6 @@ Updated version: 1.5.0
 		<!--- event-arg --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
 			<cfset command = setupEventArg(arguments.commandNode) />
-		<!--- cache-clear --->
-		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
-			<cfset command = setupCacheClear(arguments.commandNode) />
-		<!--- cache --->
-		<cfelseif arguments.commandNode.xmlName EQ "cache">
-			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<!--- default/unrecognized command --->
 		<cfelse>
 			<cfset command = setupDefault(arguments.commandNode) />
@@ -132,7 +124,7 @@ Updated version: 1.5.0
 		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var notifyResultKey = "" />
 		<cfset var notifyResultArg = "" />
-		<cfset var listener = getAppManager().getListenerManager().getListener(notifyListener) />
+		<cfset var listener = variables.listenerMgr.getListener(notifyListener) />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
 			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
@@ -209,7 +201,7 @@ Updated version: 1.5.0
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filter = getAppManager().getFilterManager().getFilter(filterName) />
+		<cfset var filter = variables.filterMgr.getFilter(filterName) />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
@@ -307,53 +299,6 @@ Updated version: 1.5.0
 			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
 		</cfif>
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
-		
-		<cfreturn command />
-	</cffunction>
-	
-	<cffunction name="setupCacheClear" access="private" returntype="MachII.framework.commands.CacheClearCommand" output="false"
-		hint="Sets up a cache-clear command.">
-		<cfargument name="commandNode" type="any" required="true" />
-		
-		<cfset var command = "" />
-		<cfset var alias = "" />
-		<cfset var condition = "" />
-		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-			<cfset alias = arguments.commandNode.xmlAttributes["alias"] />
-		<cfelse>
-			<cfthrow type="MachII.framework.CacheClearNoAlias"
-				message="You must specify an alias attribute." />
-		</cfif>
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
-			<cfset condition = arguments.commandNode.xmlAttributes["condition"] />
-		</cfif>
-		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(alias, condition) />
-		
-		<cfreturn command />
-	</cffunction>
-	
-	<cffunction name="setupCache" access="private" returntype="MachII.framework.commands.CacheCommand" output="false"
-		hint="Sets up a cache command.">
-		<cfargument name="commandNode" type="any" required="true" />
-		<cfargument name="parentHandlerName" type="string" required="true" />
-		<cfargument name="parentHandlerType" type="string" required="true" />
-		
-		<cfset var command = "" />
-		<cfset var alias = "" />
-		<cfset var handlerId = CreateUUID() />
-		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "action")>
-			<cfset action = arguments.commandNode.xmlAttributes["action"] />
-		</cfif>
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-			<cfset alias = arguments.commandNode.xmlAttributes["alias"] />
-		</cfif>
-		
-		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
-		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, alias) />
 		
 		<cfreturn command />
 	</cffunction>

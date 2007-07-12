@@ -30,7 +30,6 @@ Updated version: 1.5.0
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.commandType = "execute" />
 	<cfset variables.subroutineName = "" />
 	
 	<!---
