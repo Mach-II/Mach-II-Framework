@@ -72,11 +72,13 @@ the rest of the framework. (pfarrell)
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
+			
+		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
 		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
-			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
 		<cfelse>
-			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#']'" />
+			<cfthrow message="The required RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
 		</cfif>
 	</cffunction>
 	
@@ -89,40 +91,42 @@ the rest of the framework. (pfarrell)
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
 		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#")>
-			<cfset request["_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#"].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 		<cfelse>
-			<cfthrow message="The RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#getAppManager().getAppLoader().getAppKey()#']'" />
+			<cfthrow message="The required RequestHandler is necessary to announce events is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		hint="Builds a framework specific url with module name.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
+		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
+			
+		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+			
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = request["_MachIIRequestHandler_" & appKey].getEventContext().getAppManager().getModuleName() />
+		
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		hint="Builds a framework specific url.">
 		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with. Defaults to current module if empty string." />
+			hint="Name of the module to build the url with. Defaults to base module if empty string." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default=""
+		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		
-		<!--- Pull the current module name if empty string (we use the request scope so we do not
-			pollute the variables scope which is shared in the views) --->
-		<cfif NOT Len(arguments.moduleName)>
-			<cfset argument.moduleName = request.event.getModuleName() />
-		</cfif>
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	

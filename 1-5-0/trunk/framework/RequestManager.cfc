@@ -108,18 +108,16 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
-		<cfset var builtUrl = arguments.urlBase />
+		<cfset var builtUrl = arguments.urlBase & getQueryStringDelimiter() />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
 		<cfset var module = "" />
 		<cfset var i = "" />
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+			<cfset builtUrl = builtUrl & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset builtUrl = builtUrl & getQueryStringDelimiter() & getEventParameter() & getPairDelimiter()& arguments.eventName />
-		<cfelse>
-			<cfset builtUrl = builtUrl & getQueryStringDelimiter() />
+			<cfset builtUrl = builtUrl & getEventParameter() & getPairDelimiter()& arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
