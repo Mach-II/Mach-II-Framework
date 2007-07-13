@@ -154,16 +154,16 @@ Updated version: 1.1.0
 		<cfelse>
 			<cfif getAppManager().getPropertyManager().isPropertyDefined("defaultEvent")>
 				<cfset defaultEvent = getAppManager().getPropertyManager().getProperty("defaultEvent") />
-				<cfif NOT isEventDefined(defaultEvent, false)>
+				<cfif NOT isEventDefined(defaultEvent, true)>
 					<cfthrow type="MachII.framework.noDefaultEvent"
-						message="A default event named '#defaultEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler is found. Please create one." />
+						message="A default event named '#defaultEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler can be found in this module or parent. Please create one." />
 				</cfif>
 			</cfif>
 			<cfif getAppManager().getPropertyManager().isPropertyDefined("exceptionEvent")>
 				<cfset exceptionEvent = getAppManager().getPropertyManager().getProperty("exceptionEvent") />
-				<cfif NOT isEventDefined(exceptionEvent, false)>
+				<cfif NOT isEventDefined(exceptionEvent, true)>
 					<cfthrow type="MachII.framework.noExceptionEvent"
-						message="A exception event named '#exceptionEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler is found. Please create one." />
+						message="A exception event named '#exceptionEvent#' has been defined for this module ('#getAppManager().getModuleName()#'), but no event-handler can be found in this module or parent." />
 				</cfif>
 			</cfif>
 		</cfif>
