@@ -143,11 +143,12 @@ Notes:
 		<cfif getParseSes() AND Len(arguments.pathInfo)>
 			<cfset arguments.pathInfo = Right(arguments.pathInfo, Len(arguments.pathInfo) -1) />
 			
-			<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
-			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
+			
+				<cfset names = ListToArray(getUtils().listFix(arguments.pathInfo, getSeriesDelimiter(), "_-_NULL_-_"), getSeriesDelimiter()) />
+				
 				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
-					<cfif i + 1 LTE ArrayLen(names)>
+					<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
 						<cfset value = names[i+1] />
 					<cfelse>
 						<cfset value = "" />
@@ -155,6 +156,9 @@ Notes:
 					<cfset params[names[i]] = value />
 				</cfloop>
 			<cfelse>
+				
+				<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
+				
 				<cfloop from="1" to="#ArrayLen(names)#" index="i">
 					<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
 						<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
@@ -341,6 +345,10 @@ Notes:
 	
 	<cffunction name="getPropertyManager" access="private" returntype="MachII.framework.PropertyManager" output="false">
 		<cfreturn getAppManager().getPropertyManager() />
+	</cffunction>
+	
+	<cffunction name="getUtils" access="private" returntype="MachII.util.Utils" output="false">
+		<cfreturn getAppManager().getUtils() />
 	</cffunction>
 	
 	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">

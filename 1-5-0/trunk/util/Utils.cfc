@@ -71,4 +71,39 @@ Updated version: 1.5.0
 		<cfreturn value />
 	</cffunction>
 
+	<cffunction name="listFix" access="public" returntype="string" output="false"
+		hint="Fixes a list by replacing null entries.">
+		<cfargument name="list" type="string" required="true" />
+		<cfargument name="listDelimiter" type="string" required="false" default="," />
+		<cfargument name="nullString" type="string" required="false" default="NULL" />
+		<!--- Rewritten UDF from cflib.org Author: Steven Van Gemert (pmcelhaney@amcity.comsvg2@placs.net)   --->
+		<cfset var delim = arguments.listDelimiter />
+		<cfset var null = arguments.nullString />
+		<cfset var special_char_list = "\,+,*,?,.,[,],^,$,(,),{,},|,-" />
+		<cfset var esc_special_char_list = "\\,\+,\*,\?,\.,\[,\],\^,\$,\(,\),\{,\},\|,\-" />
+		<cfset var i = "" />
+
+		<cfif findNoCase(left(arguments.list, 1), delim)>
+			<cfset arguments.list = null & arguments.list />
+		</cfif> 
+		<cfif findNoCase(right(list,1), delim)>
+			<cfset arguments.list = arguments.list & null />
+		</cfif>
+
+		<cfset i = len(delim) - 1 />
+		
+		<cfloop condition="i GTE 1">
+			<cfset delim = mid(delim, 1, i) & "_Separator_" & mid(delim, i+1, len(delim) - (i)) />
+			<cfset i = i - 1 />
+		</cfloop>
+
+		<cfset delim = ReplaceList(delim, special_char_list, esc_special_char_list) />
+		<cfset delim = Replace(delim, "_Separator_", "|", "ALL") />
+
+		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & null & "\2", "ALL") />
+		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & null & "\2", "ALL") />
+  
+		<cfreturn arguments.list />
+	</cffunction>
+
 </cfcomponent>
