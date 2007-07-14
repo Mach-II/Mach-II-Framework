@@ -260,34 +260,6 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
-	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url.">
-		<cfargument name="eventName" type="string" required="true"
-			hint="Name of the event to build the url with." />
-		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false"
-			hint="Base of the url. Defaults to index.cfm." />
-		
-		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
-					
-		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
-	</cffunction>
-	
-	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url with module name.">
-		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with." />
-		<cfargument name="eventName" type="string" required="true"
-			hint="Name of the event to build the url with." />
-		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false"
-			hint="Base of the url. Defaults to index.cfm." />
-		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
-	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
@@ -330,12 +302,6 @@ Notes:
 		hint="Checks if there are more events in the queue.">
 		<cfreturn NOT getEventQueue().isEmpty() />
 	</cffunction>
-	
-	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
-		hint="Saves persisted event data and returns the persistId.">
-		<cfargument name="eventArgs" type="struct" required="true" />
-		<cfreturn getAppManager().getRequestManager().savePersistEventData(arguments.eventArgs) />
-	</cffunction>
 
 	<cffunction name="clearEventQueue" access="public" returntype="void" output="false"
 		hint="Clears the event queue.">
@@ -358,11 +324,13 @@ Notes:
 		<cfreturn variables.requestHandler />
 	</cffunction>
 
-	<cffunction name="setAppManager" access="private" returntype="void" output="false">
+	<cffunction name="setAppManager" access="private" returntype="void" output="false"
+		hint="Sets the appManager that pertains to context of currently executing event.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>	
-	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
+		hint="Sets the appManager that pertains to context of currently executing event.">
 		<cfreturn variables.appManager />
 	</cffunction>
 

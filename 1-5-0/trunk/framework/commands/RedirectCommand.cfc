@@ -137,7 +137,7 @@ Updated version: 1.5.0
 			</cfif>
 		</cfloop>
 		
-		<cfset redirectUrl = arguments.eventContext.buildUrlToModule(getModuleName(), getEventName(), params, getUrl()) />
+		<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(getModuleName(), getEventName(), params, getUrl()) />
 		
 		<cfreturn redirectUrl />
 	</cffunction>
@@ -168,7 +168,7 @@ Updated version: 1.5.0
 		</cfif>
 		
 		<!--- Save the data --->
-		<cfset persistId = arguments.eventContext.savePersistEventData(args) />
+		<cfset persistId = arguments.eventContext.getAppManager().getRequestManager().savePersistEventData(args) />
 		<cfset arguments.event.setArg(getRedirectPersistParameter(), persistId) />
 	</cffunction>
 	
