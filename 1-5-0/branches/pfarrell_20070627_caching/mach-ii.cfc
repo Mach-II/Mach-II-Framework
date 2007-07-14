@@ -113,7 +113,7 @@ the handleRequest() method in the onRequest() application event.
 		hint="Sets the property value by name. Not available until loadFramework() has been called.">
 		<cfargument name="propertyName" type="string" required="true" />
 		<cfargument name="propertyValue" type="any" required="true" />
-		<cfset getAppManager().getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) /> />
+		<cfset getAppManager().getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
 	</cffunction>
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Returns the property value by name. If the property is not defined, and a default value is passed, it will be returned. If the property and a default value are both not defined then an exception is thrown. Not available until loadFramework() has been called.">
