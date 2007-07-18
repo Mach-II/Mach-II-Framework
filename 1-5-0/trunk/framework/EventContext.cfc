@@ -95,7 +95,7 @@ Notes:
 		
 		<!--- Look up the module name if the moduleName argument does not exist --->
 		<cfif NOT StructKeyExists(arguments, "moduleName")>
-			<cfset nextModuleName = getCurrentEvent().getModuleName() />
+			<cfset nextModuleName = getAppManager().getModuleName() />
 		<cfelse>
 			<cfset nextModuleName = arguments.moduleName />
 		</cfif>
