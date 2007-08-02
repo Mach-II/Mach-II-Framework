@@ -191,6 +191,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	page CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
+	useParentAppRoot (true|false) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 

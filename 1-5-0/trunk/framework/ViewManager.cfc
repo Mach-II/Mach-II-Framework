@@ -95,7 +95,12 @@ Updated version: 1.5.0
 					<cfset variables.viewPaths[name] = mapping />
 				</cfif>
 			<cfelse>
-				<cfset page = viewNodes[i].xmlAttributes["page"] />
+				<!--- Use a different appRoot if defined --->
+				<cfif StructKeyExists(viewNodes[i].xmlAttributes, "useParentAppRoot") AND viewNodes[i].xmlAttributes["useParentAppRoot"]>
+					<cfset page = getAppManager().getParent().getPropertyManager().getProperty("applicationRoot") & viewNodes[i].xmlAttributes["page"] />
+				<cfelse>
+					<cfset page = getAppManager().getPropertyManager().getProperty("applicationRoot") & viewNodes[i].xmlAttributes["page"] />
+				</cfif>
 			
 				<cfset variables.viewPaths[name] = page />
 			</cfif>
@@ -116,7 +121,7 @@ Updated version: 1.5.0
 			hint="Name of the view path to get." />
 		
 		<cfif isViewDefined(arguments.viewName)>
-			<cfreturn getAppManager().getPropertyManager().getProperty('applicationRoot') & variables.viewPaths[arguments.viewName] />
+			<cfreturn variables.viewPaths[arguments.viewName] />
 		<cfelseif isObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
 			<cfreturn getParent().getViewPath(arguments.viewName) />
 		<cfelse>
