@@ -76,7 +76,7 @@ Updated version: 1.5.0
 		<cfargument name="list" type="string" required="true" />
 		<cfargument name="listDelimiter" type="string" required="false" default="," />
 		<cfargument name="nullString" type="string" required="false" default="NULL" />
-		<!--- Rewritten UDF from cflib.org Author: Steven Van Gemert (pmcelhaney@amcity.comsvg2@placs.net)   --->
+		<!--- Rewritten UDF from cflib.org Author: Steven Van Gemert (svg2@placs.net)   --->
 		<cfset var delim = arguments.listDelimiter />
 		<cfset var null = arguments.nullString />
 		<cfset var special_char_list = "\,+,*,?,.,[,],^,$,(,),{,},|,-" />
