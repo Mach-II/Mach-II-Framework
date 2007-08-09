@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.modules = StructNew() />
 	<cfset variables.appManager = "" />
+	<cfset variables.baseConfigFileDirectory = "" />
 	<cfset variables.dtdPath = "" />
 	<cfset variables.validateXml = "" />
 	<cfset variables.baseName = "" />
@@ -43,12 +44,15 @@ Notes:
 	<cffunction name="init" access="public" returntype="ModuleManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="baseConfigFileDirectory" type="string" required="true"
+			hint="The directory of the base config file. Required for relative path support resolution." />
 		<cfargument name="configDtdPath" type="string" required="true"
 		 	hint="The full path to the configuration DTD file." />
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setBaseConfigFileDirectory(arguments.baseConfigFileDirectory) />
 		<cfset setDtdPath(arguments.configDtdPath) />
 		<cfset setValidateXml(arguments.validateXml) />
 
@@ -92,6 +96,14 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(moduleNodes)#" index="i">
 			<cfset name = moduleNodes[i].xmlAttributes["name"] />
 			<cfset file = moduleNodes[i].xmlAttributes["file"] />
+			
+			<!--- Resolve the file path --->
+			<cfif Left(file, 1) IS ".">
+				<cfset file = getAppManager().getUtils().expandRelativePath(getBaseConfigFileDirectory(), file) />
+			<cfelse>
+				<cfset file = ExpandPath(file) />
+			</cfif>
+			
 			<cfif StructKeyExists(moduleNodes[i], "mach-ii")>
 				<cfset overrideXml = moduleNodes[i]["mach-ii"] />
 			<cfelse>
@@ -173,6 +185,14 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the AppManager instance this ModuleManager belongs to.">
 		<cfreturn variables.appManager />
+	</cffunction>
+	
+	<cffunction name="setBaseConfigFileDirectory" access="public" returntype="void" output="false">
+		<cfargument name="baseConfigFileDirectory" type="string" required="true" />
+		<cfset variables.baseConfigFileDirectory = arguments.baseConfigFileDirectory />
+	</cffunction>
+	<cffunction name="getBaseConfigFileDirectory" access="public" returntype="string" output="false">
+		<cfreturn variables.baseConfigFileDirectory />
 	</cffunction>
 	
 	<cffunction name="setDtdPath" access="public" returntype="void" output="false">
