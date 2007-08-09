@@ -50,7 +50,8 @@ Notes:
 		 	hint="The full path to the configuration XML file." />
 		<cfargument name="configDtdPath" type="string" required="true"
 		 	hint="The full path to the configuration DTD file." />
-		<cfargument name="appkey" type="string" required="true" hint="Unqiue key for this application.">
+		<cfargument name="appkey" type="string" required="true"
+			hint="Unqiue key for this application.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
@@ -85,7 +86,7 @@ Notes:
 		<cfset var temp = StructNew() />
 		<cfset var i = "" />
 		
-		<!--- Clear the config file paths --->
+		<!--- Clear the config file paths as this is important since the AppFactory is reused for full reloads --->
 		<cfset resetConfigFilePaths() />
 		
 		<!--- Read the XML configuration file. --->
@@ -115,7 +116,7 @@ Notes:
 		<cfset ArrayAppend(configXmls, temp) />
 
 		<!--- Load the includes --->
-		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath) />
+		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(arguments.configXmlPath)) />
 
 		<!--- Search for includes in the overrideXml if defined --->
 		<cfif Len(arguments.overrideXml)>
@@ -257,6 +258,7 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
+		<cfargument name="parentConfigFilePathDirectory" type="string" required="true" />
 		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
@@ -267,8 +269,16 @@ Notes:
 		
 		<cfset includeNodes =  XmlSearch(arguments.configXML, ".//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
+
 			<cfset temp = StructNew() />
-			<cfset includeFilePath = ExpandPath(includeNodes[i].xmlAttributes["file"]) />
+			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
+			
+			<cfif Left(includeFilePath, 1) IS ".">
+				<cfset includeFilePath = expandRelativePath(arguments.parentConfigFilePathDirectory, includeFilePath) />
+			<cfelse>
+				<cfset includeFilePath = ExpandPath(includeFilePath) />
+			</cfif>
+
 			<!--- If this isn't a setup override includes, then check otherwise override --->
 			<cfif NOT arguments.overrideIncludeType>
 				<cfif StructKeyExists(includeNodes[i].xmlAttributes, "override")>
@@ -281,7 +291,7 @@ Notes:
 			</cfif>
 			
 			<!--- Check for circular dependencies (pass a struct instead of stateful variables in case there is a error and it's impossible to cleanup)--->
-			<cfset arguments.alreadyLoaded = checkIfAlreadyIncluded(arguments.alreadyLoaded, includeFilePath) />
+			<cfset checkIfAlreadyIncluded(arguments.alreadyLoaded, includeFilePath) />
 			
 			<!--- Read the include file --->
 			<cftry>
@@ -291,25 +301,25 @@ Notes:
 					variable="includeXMLFile" />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CannotFindIncludeConfigFile"
-						message="Unable to find the include config file."
+						message="Unable to find the include config file. This could be due to an incorrect relative path."
 						detail="includePath=#includeFilePath#" />
 				</cfcatch>
 			</cftry>
 			
-			<!--- Append the include config file to the file paths --->
-			<cfset appendConfigFilePath(includeFilePath) />
-			
 			<!--- Parse the XML contents --->
 			<cfset temp.configXml = XmlParse(includeXmlFile) />
-			
+
 			<!--- Validate the XML contents --->
 			<cfset validateConfigXml(arguments.validateXml, temp.configXml, includeFilePath, arguments.configDtdPath) />
+			
+			<!--- Append the include config file to the file paths --->
+			<cfset appendConfigFilePath(includeFilePath) />
 			
 			<!--- Append the parsed include file to the config xml array --->
 			<cfset ArrayAppend(arguments.configFiles, temp) />
 			
-			<!--- Recursively check the include for more includes --->
-			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, arguments.overrideIncludeType, arguments.alreadyLoaded) />
+			<!--- Recursively check the currently processing include for more includes --->
+			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(includeFilePath), arguments.overrideIncludeType, arguments.alreadyLoaded) />
 		</cfloop>
 		
 		<cfreturn arguments.configFiles />
@@ -327,7 +337,7 @@ Notes:
 		
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
-			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath)>
+			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath) />
 			<cfif NOT validationResult.Status>
 				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
 				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlPath, arguments.configDtdPath) />
@@ -337,7 +347,7 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="checkIfAlreadyIncluded" access="private" returntype="struct" output="false"
+	<cffunction name="checkIfAlreadyIncluded" access="private" returntype="void" output="false"
 		hint="Checks if the include has already been processed.">
 		<cfargument name="alreadyLoaded" type="struct" required="true" />
 		<cfargument name="includeFilePath" type="string" required="true" />
@@ -350,8 +360,59 @@ Notes:
 		<cfelse>
 			<cfset arguments.alreadyLoaded[includeFilePathHash] = true />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="expandRelativePath" access="public" returntype="string" output="false"
+		hint="Expands a relative path to an absolute path relative from a base (starting) directory.">
+		<cfargument name="baseDirectory" type="string" required="true" />
+		<cfargument name="relativePath" type="string" required="true" />
+	
+		<cfset var combinedWorkingPath = "" />
+		<cfset var pathCollection = 0 />
+		<cfset var resolvedPath = "" />
+		<cfset var hits = ArrayNew(1) />
+		<cfset var offset = 0 />
+		<cfset var i = 0 />
 		
-		<cfreturn arguments.alreadyLoaded />
+		<!--- Build the working path. If left position is ".", then the file is relative, going 
+			farther down, from the base directory --->
+		<cfif Left(arguments.relativePath, 1) IS ".">
+			<cfset combinedWorkingPath = arguments.baseDirectory & Right(arguments.relativePath, Len(arguments.relativePath) -2) />
+		<cfelse>
+			<cfset combinedWorkingPath = arguments.baseDirectory & arguments.relativePath />
+		</cfif>
+		
+		<!--- Unified slashes due to operating system differences and convert ./ to / --->
+		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "\", "/", "all") />
+		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "/./", "/", "all") />
+		<cfset pathCollection = ListToArray(combinedWorkingPath, "/") />
+		
+		<!--- Check how many directories we need to move up using the ../ syntax --->
+		<cfloop from="1" to="#ArrayLen(pathCollection)#" index="i">
+			<cfif pathCollection[i] IS "..">
+				<cfset ArrayAppend(hits, i) />
+			</cfif>
+		</cfloop>
+		<cfloop from="1" to="#ArrayLen(hits)#" index="i">
+			<cfset ArrayDeleteAt(pathCollection, hits[i] - offset) />
+			<cfset ArrayDeleteAt(pathCollection, hits[i] - (offset + 1)) />
+			<cfset offset = offset + 2 />
+		</cfloop>
+		
+		<!--- Rebuild the path from the collection --->
+		<cfset resolvedPath = ArrayToList(pathCollection, "/") />
+		
+		<!--- Reinsert the leading slash if *nix system --->
+		<cfif Left(arguments.baseDirectory, 1) IS "/">
+			<cfset resolvedPath = "/" & resolvedPath />
+		</cfif>
+		
+		<!--- Reinsert the trailing slash if the relativePath was just a directory --->
+		<cfif Right(arguments.relativePath, 1) IS "/">
+			<cfset resolvedPath = resolvedPath & "/" />
+		</cfif>
+		 
+		<cfreturn resolvedPath />
 	</cffunction>
 	
 	<!---
