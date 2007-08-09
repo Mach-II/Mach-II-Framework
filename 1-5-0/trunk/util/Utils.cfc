@@ -105,5 +105,50 @@ Updated version: 1.5.0
   
 		<cfreturn arguments.list />
 	</cffunction>
+	
+	<cffunction name="expandRelativePath" access="public" returntype="string" output="false"
+		hint="Expands a relative path to an absolute path relative from a base (starting) directory.">
+		<cfargument name="baseDirectory" type="string" required="true" />
+		<cfargument name="relativePath" type="string" required="true" />
+		
+		<cfset var combinedWorkingPath = arguments.baseDirectory & arguments.relativePath />
+		<cfset var pathCollection = 0 />
+		<cfset var resolvedPath = "" />
+		<cfset var hits = ArrayNew(1) />
+		<cfset var offset = 0 />
+		<cfset var i = 0 />
+		
+		<!--- Unified slashes due to operating system differences and convert ./ to / --->
+		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "\", "/", "all") />
+		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "/./", "/", "all") />
+		<cfset pathCollection = ListToArray(combinedWorkingPath, "/") />
+		
+		<!--- Check how many directories we need to move up using the ../ syntax --->
+		<cfloop from="1" to="#ArrayLen(pathCollection)#" index="i">
+			<cfif pathCollection[i] IS "..">
+				<cfset ArrayAppend(hits, i) />
+			</cfif>
+		</cfloop>
+		<cfloop from="1" to="#ArrayLen(hits)#" index="i">
+			<cfset ArrayDeleteAt(pathCollection, hits[i] - offset) />
+			<cfset ArrayDeleteAt(pathCollection, hits[i] - (offset + 1)) />
+			<cfset offset = offset + 2 />
+		</cfloop>
+		
+		<!--- Rebuild the path from the collection --->
+		<cfset resolvedPath = ArrayToList(pathCollection, "/") />
+		
+		<!--- Reinsert the leading slash if *nix system --->
+		<cfif Left(arguments.baseDirectory, 1) IS "/">
+			<cfset resolvedPath = "/" & resolvedPath />
+		</cfif>
+		
+		<!--- Reinsert the trailing slash if the relativePath was just a directory --->
+		<cfif Right(arguments.relativePath, 1) IS "/">
+			<cfset resolvedPath = resolvedPath & "/" />
+		</cfif>
+		 
+		<cfreturn resolvedPath />
+	</cffunction>
 
 </cfcomponent>
