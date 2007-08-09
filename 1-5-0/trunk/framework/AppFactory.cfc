@@ -21,7 +21,8 @@ Created version: 1.0.0
 Updated version: 1.1.1
 
 Notes:
-- Added optimal XML configuration file validation. {bedwards)
+- Added optimal XML configuration file validation. (bedwards)
+- Thanks to the ColdSpring project for the inspiration for the expandRelativePath() method (pfarrell)
 --->
 <cfcomponent 
 	displayname="AppFactory" 
@@ -366,7 +367,7 @@ Notes:
 		hint="Expands a relative path to an absolute path relative from a base (starting) directory.">
 		<cfargument name="baseDirectory" type="string" required="true" />
 		<cfargument name="relativePath" type="string" required="true" />
-	
+		
 		<cfset var combinedWorkingPath = "" />
 		<cfset var pathCollection = 0 />
 		<cfset var resolvedPath = "" />
