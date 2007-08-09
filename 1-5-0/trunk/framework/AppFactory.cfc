@@ -33,6 +33,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.configFilePaths = ArrayNew(1) />
+	<cfset variables.utils = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -89,6 +90,16 @@ Notes:
 		
 		<!--- Clear the config file paths as this is important since the AppFactory is reused for full reloads --->
 		<cfset resetConfigFilePaths() />
+		
+		<!--- Utils is a singleton --->
+		<cfif IsObject(arguments.parentAppManager)>
+			<cfset utils = arguments.parentAppManager.getUtils() />
+		<cfelse>
+			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+		</cfif>
+		
+		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->
+		<cfset variables.utils = utils />
 		
 		<!--- Read the XML configuration file. --->
 		<cftry>
@@ -150,12 +161,7 @@ Notes:
 		eventManager, viewManager, pluginManager and then moduleManager
 		--->
 		
-		<!--- Utils is a singleton --->
-		<cfif IsObject(arguments.parentAppManager)>
-			<cfset utils = arguments.parentAppManager.getUtils() />
-		<cfelse>
-			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
-		</cfif>
+		<!--- Set the utils which is a singleton across the application --->
 		<cfset appManager.setUtils(utils) />
 		
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
@@ -235,7 +241,7 @@ Notes:
 		
 		<!--- ModuleManager is a singleton across the application --->
 		<cfif NOT IsObject(arguments.parentAppManager)>
-			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, arguments.configDtdPath, arguments.validateXML) />
+			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, GetDirectoryFromPath(arguments.configXmlPath), arguments.configDtdPath, arguments.validateXML) />
 			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 				<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
 			</cfloop>
@@ -275,7 +281,7 @@ Notes:
 			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
 			
 			<cfif Left(includeFilePath, 1) IS ".">
-				<cfset includeFilePath = expandRelativePath(arguments.parentConfigFilePathDirectory, includeFilePath) />
+				<cfset includeFilePath = variables.utils.expandRelativePath(arguments.parentConfigFilePathDirectory, includeFilePath) />
 			<cfelse>
 				<cfset includeFilePath = ExpandPath(includeFilePath) />
 			</cfif>
@@ -361,59 +367,6 @@ Notes:
 		<cfelse>
 			<cfset arguments.alreadyLoaded[includeFilePathHash] = true />
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="expandRelativePath" access="public" returntype="string" output="false"
-		hint="Expands a relative path to an absolute path relative from a base (starting) directory.">
-		<cfargument name="baseDirectory" type="string" required="true" />
-		<cfargument name="relativePath" type="string" required="true" />
-		
-		<cfset var combinedWorkingPath = "" />
-		<cfset var pathCollection = 0 />
-		<cfset var resolvedPath = "" />
-		<cfset var hits = ArrayNew(1) />
-		<cfset var offset = 0 />
-		<cfset var i = 0 />
-		
-		<!--- Build the working path. If left position is ".", then the file is relative, going 
-			farther down, from the base directory --->
-		<cfif Left(arguments.relativePath, 1) IS ".">
-			<cfset combinedWorkingPath = arguments.baseDirectory & Right(arguments.relativePath, Len(arguments.relativePath) -2) />
-		<cfelse>
-			<cfset combinedWorkingPath = arguments.baseDirectory & arguments.relativePath />
-		</cfif>
-		
-		<!--- Unified slashes due to operating system differences and convert ./ to / --->
-		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "\", "/", "all") />
-		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "/./", "/", "all") />
-		<cfset pathCollection = ListToArray(combinedWorkingPath, "/") />
-		
-		<!--- Check how many directories we need to move up using the ../ syntax --->
-		<cfloop from="1" to="#ArrayLen(pathCollection)#" index="i">
-			<cfif pathCollection[i] IS "..">
-				<cfset ArrayAppend(hits, i) />
-			</cfif>
-		</cfloop>
-		<cfloop from="1" to="#ArrayLen(hits)#" index="i">
-			<cfset ArrayDeleteAt(pathCollection, hits[i] - offset) />
-			<cfset ArrayDeleteAt(pathCollection, hits[i] - (offset + 1)) />
-			<cfset offset = offset + 2 />
-		</cfloop>
-		
-		<!--- Rebuild the path from the collection --->
-		<cfset resolvedPath = ArrayToList(pathCollection, "/") />
-		
-		<!--- Reinsert the leading slash if *nix system --->
-		<cfif Left(arguments.baseDirectory, 1) IS "/">
-			<cfset resolvedPath = "/" & resolvedPath />
-		</cfif>
-		
-		<!--- Reinsert the trailing slash if the relativePath was just a directory --->
-		<cfif Right(arguments.relativePath, 1) IS "/">
-			<cfset resolvedPath = resolvedPath & "/" />
-		</cfif>
-		 
-		<cfreturn resolvedPath />
 	</cffunction>
 	
 	<!---
