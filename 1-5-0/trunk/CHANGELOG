@@ -82,6 +82,11 @@ Example:
 Please see the documentation for more information.
 (2007-04-24 kwiersma & pfarrell)
 
+* Modules Relative File Paths
+You can specify a relative path to your module file.  This works in the same manner 
+as relative paths for includes (see below).
+(2007-08-09 pfarrell)
+
 * Complex Properties To Configure Time Parameters
 Please see the documentation for more information.
 (2007-02-25 pfarrell) 
@@ -106,13 +111,20 @@ arise a situation where your include may contain a duplicate event etc.  You can
 override attribute to override conflicts.  The attribute defaults to "false" if not 
 specified.
 
-Also, if you set the MACHII_CONFIG_MODE to 0 (dynamic) and a included config file changes,
+If you set the MACHII_CONFIG_MODE to 0 (dynamic) and a included config file changes,
 Mach-II will automatically reload even if the base config file does not change.
 
-Example:
+Also, you can specify a relative path to your include file.  The relative path is
+relative from the location of the xml file that defines the include.  Use the
+standard *nix style ./ and ../ notation for building your relative path.  In the
+example below, the ./ indicates that the starting path is relative to the current
+directory and that the mach-ii_admin.xml file is location in the SAME directory as
+the mach-ii.xml file.
+
+Example - mach-ii.xml:
 <mach-ii>
 	<includes>
-		<include file="config/mach-ii_admin.xml" override="false|true"/>
+		<include file="./mach-ii_admin.xml" override="false|true"/>
 	</includes>
 	<modules>
 		...
@@ -124,7 +136,9 @@ Example:
 
 The new include functionality supports includes that include other include files (i.e. 
 recursive).  Also, if you try to include a file that has already been included, Mach-II
-will throw an error telling you cannot do that. (2007-02-18 kwiersma)
+will throw an error telling you cannot do that.
+(2007-02-18 kwiersma - includes)
+(2007-08-09 pfarrell - relative paths)
 
 * Redirect Persist
 Added new optional attributes to the redirect command that allows you to 

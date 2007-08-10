@@ -113,7 +113,13 @@ Updated version: 1.1.0
 					<cfset paramNodes = filterNodes[i].parameters.xmlChildren />
 					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 						<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cftry>
+							<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+							<cfcatch type="any">
+								<cfthrow type="MachII.framework.InvalidParameterXml"
+									message="Xml parsing error for the parameter named '#paramName#' for event-filter '#filterName#' in module '#getAppManager().getModuleName()#'." />
+							</cfcatch>
+						</cftry>
 						<cfset filterParams[paramName] = paramValue />
 					</cfloop>
 				</cfif>

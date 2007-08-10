@@ -114,7 +114,13 @@ Notes:
 				<cfset paramNodes = pluginNodes[i].parameters.xmlChildren />
 				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 					<cfset paramName = paramNodes[j].XmlAttributes["name"] />
-					<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+					<cftry>
+						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfcatch type="any">
+							<cfthrow type="MachII.framework.InvalidParameterXml"
+								message="Xml parsing error for the parameter named '#paramName#' for plugin '#pluginName#' in module '#getAppManager().getModuleName()#'." />
+						</cfcatch>
+					</cftry>
 					<cfset pluginParams[paramName] = paramValue />
 				</cfloop>
 			</cfif>

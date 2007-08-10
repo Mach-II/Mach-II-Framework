@@ -117,8 +117,14 @@ Notes:
 				<cfif StructKeyExists(listenerNodes[i], "parameters")>
 					<cfset paramNodes = listenerNodes[i].parameters.xmlChildren />
 					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-						<cfset paramName = paramNodes[j].xmlAttributes["name"] />
-						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfset paramName = paramNodes[j].xmlAttributes["name"] />						
+						<cftry>
+							<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+							<cfcatch type="any">
+								<cfthrow type="MachII.framework.InvalidParameterXml"
+									message="Xml parsing error for the parameter named '#paramName#' for listener '#listenerName#' in module '#getAppManager().getModuleName()#'." />
+							</cfcatch>
+						</cftry>
 						<cfset listenerParams[paramName] = paramValue />
 					</cfloop>
 				</cfif>
