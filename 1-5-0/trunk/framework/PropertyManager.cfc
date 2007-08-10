@@ -86,64 +86,77 @@ the rest of the framework. (pfarrell)
 			<cfset propertyNodes = XMLSearch(arguments.configXML, ".//properties/property") />
 		</cfif>
 
-		<!--- Set the properties from the XML file. --->
-		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">
-			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
-			
-			<!--- Override XML for Modules --->
-			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "overrideAction")>
-				<cfif propertyNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
-					<cfset removeProperty(propertyName) />
-				<cfelseif propertyNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
-					<!--- Check for a mapping --->
-					<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "mapping")>
-						<cfset mapping = propertyNodes[i].xmlAttributes["mapping"] />
-					<cfelse>
-						<cfset mapping = propertyName />
-					</cfif>
-					
-					<!--- Check if parent has event handler with the mapping name --->
-					<cfif NOT getParent().isPropertyDefined(mapping)>
-						<cfthrow type="MachII.framework.overridePropertyNotDefined"
-							message="An property named '#mapping#' cannot be found in the parent property manager for the override named '#propertyName#' in module '#getAppManager().getModuleName()#'." />
-					</cfif>
-					
-					<cfset setProperty(propertyName, getParent().getProperty(mapping), arguments.override) />
-				</cfif>
-			<!--- General XML setup --->
-			<cfelse>
-				<!--- Setup if configurable property --->
-				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
-					<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
-					
-					<!--- Set the Property's parameters. --->
-					<cfset propertyParams = StructNew() />
-					
-					<!--- For each configurable property, parse all the parameters --->
-					<cfif StructKeyExists(propertyNodes[i], "parameters")>
-						<cfset paramsNodes = propertyNodes[i].parameters.xmlChildren />
-						<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
-							<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
-							<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
-							<cfset propertyParams[paramName] = paramValue />
-						</cfloop>
-					</cfif>
-					
-					<!--- Create the configurable property and append to array of configurable property names --->
-					<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
-					<cfset ArrayAppend(variables.configurableProperties, propertyName) />
-				<!--- Setup if name/value pair, struct or array --->
-				<cfelse>
-					<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
-				</cfif>
+		<cftry>
+			<!--- Set the properties from the XML file. --->
+			<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">
+				<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
+				<cfset propertyType = "" />
 				
-				<!--- Set the property --->
-				<cfif (hasParent AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
-						OR NOT hasParent>
-					<cfset setProperty(propertyName, propertyValue) />
+				<!--- Override XML for Modules --->
+				<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "overrideAction")>
+					<cfif propertyNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+						<cfset removeProperty(propertyName) />
+					<cfelseif propertyNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+						<!--- Check for a mapping --->
+						<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "mapping")>
+							<cfset mapping = propertyNodes[i].xmlAttributes["mapping"] />
+						<cfelse>
+							<cfset mapping = propertyName />
+						</cfif>
+						
+						<!--- Check if parent has event handler with the mapping name --->
+						<cfif NOT getParent().isPropertyDefined(mapping)>
+							<cfthrow type="MachII.framework.overridePropertyNotDefined"
+								message="An property named '#mapping#' cannot be found in the parent property manager for the override named '#propertyName#' in module '#getAppManager().getModuleName()#'." />
+						</cfif>
+						
+						<cfset setProperty(propertyName, getParent().getProperty(mapping), arguments.override) />
+					</cfif>
+				<!--- General XML setup --->
+				<cfelse>
+					<!--- Setup if configurable property --->
+					<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
+						<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
+						
+						<!--- Set the Property's parameters. --->
+						<cfset propertyParams = StructNew() />
+						
+						<!--- For each configurable property, parse all the parameters --->
+						<cfif StructKeyExists(propertyNodes[i], "parameters")>
+							<cfset paramsNodes = propertyNodes[i].parameters.xmlChildren />
+							<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
+								<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
+								<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
+								<cfset propertyParams[paramName] = paramValue />
+							</cfloop>
+						</cfif>
+						
+						<!--- Create the configurable property and append to array of configurable property names --->
+						<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
+						<cfset ArrayAppend(variables.configurableProperties, propertyName) />
+					<!--- Setup if name/value pair, struct or array --->
+					<cfelse>
+						<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
+					</cfif>
+					
+					<!--- Set the property --->
+					<cfif (hasParent AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
+							OR NOT hasParent>
+						<cfset setProperty(propertyName, propertyValue) />
+					</cfif>
 				</cfif>
-			</cfif>
-		</cfloop>
+			</cfloop>
+			<cfcatch type="any">
+				<!--- Throw an exception we cannot find the a property cfc --->
+				<cfif Len(propertyType)>
+					<cfthrow type="MachII.framework.CannotFindProperty"
+						message="Cannot find a CFC with the type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'.">
+				<cfelse>
+					<cfthrow type="MachII.framework.InvalidPropertyXml"
+						message="Xml parsing error for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'." />
+				</cfif>
+			</cfcatch>
+		</cftry>
 		
 		<!--- Make sure required properties are set if this is the base application: 
 			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
