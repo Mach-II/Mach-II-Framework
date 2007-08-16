@@ -152,7 +152,7 @@ Notes:
 		<cfset var temp = StructNew() />
 
 		<cfif NOT Len(arguments.mappingModuleName)>
-			<cfset argument.mappingModuleName = getCurrentEvent().getModuleName() />
+			<cfset arguments.mappingModuleName = getCurrentEvent().getModuleName() />
 		<!--- Check if module exists --->
 		<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
 			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
