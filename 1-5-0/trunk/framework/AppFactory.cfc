@@ -80,6 +80,7 @@ Notes:
 		<cfset var pluginManager = "" />
 		<cfset var parentPluginManager = "" />
 		<cfset var parentEventManager = "" />
+		<cfset var moduleManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -271,6 +272,7 @@ Notes:
 		
 		<cfset var includeNodes = "" />
 		<cfset var temp = StructNew() />
+		<cfset var includeFilePath = "" />
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
 		

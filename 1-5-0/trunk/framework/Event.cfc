@@ -67,7 +67,7 @@ Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="setName" access="public" returntype="void" output="false"
-		hint="Sets the name of the event object.">
+		hint="Sets the name of the event object. (Not for public use.)">
 		<cfargument name="name" type="string" required="true"
 			hint="A name for this event." />
 		<cfset variables.name = arguments.name />
@@ -78,7 +78,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
-		hint="Sets the module name of the event object.">
+		hint="Sets the module name of the event object. (Not for public use.)">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="A module name for this event." />
 		<cfset variables.moduleName = arguments.moduleName />
@@ -89,7 +89,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="setRequestName" access="public" returntype="void" output="false"
-		hint="Sets the event name that started the request lifecycle.">
+		hint="Sets the event name that started the request lifecycle. (Not for public use.)">
 		<cfargument name="requestName" type="string" required="true"
 			hint="A request name for this event." />
 		<cfset variables.requestName = arguments.requestName />
@@ -100,7 +100,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setRequestModuleName" access="public" returntype="void" output="false"
-		hint="Sets the module name that started the request lifecycle.">
+		hint="Sets the module name that started the request lifecycle. (Not for public use.)">
 		<cfargument name="requestModuleName" type="string" required="true"
 			hint="A request name for this event." />
 		<cfset variables.requestModuleName = arguments.requestModuleName />

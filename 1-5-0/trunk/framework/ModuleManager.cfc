@@ -65,6 +65,7 @@ Notes:
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var moduleNodes = "" />
+		<cfset var modulesNode = "" />
 		<cfset var modulesNodes = "" />
 		<cfset var name = "" />
 		<cfset var file = "" />

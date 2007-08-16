@@ -250,7 +250,8 @@ Updated version: 1.1.0
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Allows you to check in a specific module for an event" />
 		
-		<cfset var moduleManager = 0 />
+		<cfset var moduleManager = "" />
+		<cfset var moduleEventManager = "" />
 		
 		<cfif arguments.moduleName neq "">
 			<cfif NOT isObject(getAppManager().getParent())>

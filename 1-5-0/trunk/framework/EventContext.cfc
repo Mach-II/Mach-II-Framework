@@ -214,6 +214,7 @@ Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
 		
+		<cfset var nextEvent = "" />
 		<cfset var eventArgs = StructNew() />
 		<cfset var appManager = getAppManager() />
 		<cfset var result = StructNew() />
