@@ -130,7 +130,7 @@ Notes:
 		<cfreturn builtUrl />
 	</cffunction>
 	
-	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
+	<cffunction name="parseSesParameters" access="public" returntype="struct" output="true"
 		hint="Parse SES parameters.">
 		<cfargument name="pathInfo" type="string" required="true" />
 		
@@ -140,7 +140,8 @@ Notes:
 		<cfset var i = "" />
 
 		<!--- Parse SES if necessary --->
-		<cfif getParseSes() AND Len(arguments.pathInfo)>
+		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
+			
 			<cfset arguments.pathInfo = Right(arguments.pathInfo, Len(arguments.pathInfo) -1) />
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
