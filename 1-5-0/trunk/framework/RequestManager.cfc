@@ -111,6 +111,7 @@ Notes:
 		<cfset var builtUrl = "" />
 		<cfset var queryString = "" />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
+		<cfset var value = "" />
 		<cfset var i = "" />
 
 		<!--- Attach the module/event name if defined --->
@@ -123,13 +124,17 @@ Notes:
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop collection="#params#" item="i">
 			<cfif IsSimpleValue(params[i])>
+				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
+				<cfif getParseSes()>
+					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
+				</cfif>
 				<cfset queryString = queryString & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
 		
-		<!--- Prepend the urlBase as needed --->
+		<!--- Prepend the urlBase and add trailing series delimiter --->
 		<cfif Len(queryString)>
-			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
+			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString & getSeriesDelimiter() />
 		<cfelse>
 			<cfset builtUrl = arguments.urlBase />
 		</cfif>
@@ -149,7 +154,11 @@ Notes:
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
 			
-			<cfset arguments.pathInfo = Right(arguments.pathInfo, Len(arguments.pathInfo) -1) />
+			<!--- Remove the query string delimiter and trailing series delimiter --->
+			<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo) - 2) />
+			
+			<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
+			<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 			
