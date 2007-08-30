@@ -108,29 +108,36 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
-		<cfset var builtUrl = arguments.urlBase & getQueryStringDelimiter() />
+		<cfset var builtUrl = "" />
+		<cfset var queryString = "" />
 		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
-		<cfset var module = "" />
 		<cfset var i = "" />
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset builtUrl = builtUrl & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+			<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset builtUrl = builtUrl & getEventParameter() & getPairDelimiter()& arguments.eventName />
+			<cfset queryString = queryString & getEventParameter() & getPairDelimiter()& arguments.eventName />
 		</cfif>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop collection="#params#" item="i">
 			<cfif IsSimpleValue(params[i])>
-				<cfset builtUrl = builtUrl & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
+				<cfset queryString = queryString & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
+		
+		<!--- Prepend the urlBase as needed --->
+		<cfif Len(queryString)>
+			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
+		<cfelse>
+			<cfset builtUrl = arguments.urlBase />
+		</cfif>
 		
 		<cfreturn builtUrl />
 	</cffunction>
 	
-	<cffunction name="parseSesParameters" access="public" returntype="struct" output="true"
+	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
 		hint="Parse SES parameters.">
 		<cfargument name="pathInfo" type="string" required="true" />
 		
