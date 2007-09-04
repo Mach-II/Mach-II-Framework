@@ -134,7 +134,10 @@ Notes:
 		
 		<!--- Prepend the urlBase and add trailing series delimiter --->
 		<cfif Len(queryString)>
-			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString & getSeriesDelimiter() />
+			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
+			<cfif getSeriesDelimiter() NEQ "&">
+				<cfset builtUrl = builtUrl & getSeriesDelimiter() />
+			</cfif>
 		<cfelse>
 			<cfset builtUrl = arguments.urlBase />
 		</cfif>
