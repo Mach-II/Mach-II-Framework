@@ -219,7 +219,7 @@ Notes:
 			<cfthrow
 				type="MachII.framework.MaxEventsExceededDuringException"
 				message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events was exceeded again during the handling of the exception."
-				detail="The last exception was '#exception.detail#' which occurred on line #exception.line# in '#exception.tagContext[1].template#'." />
+				detail="The last exception was '#exception.detail#' which occurred on line #exception.tagContext[1].line# in '#exception.tagContext[1].template#'." />
 		</cfif>
 		
 		<!--- Post-Process. --->
