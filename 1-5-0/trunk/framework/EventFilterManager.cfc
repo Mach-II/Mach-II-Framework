@@ -130,7 +130,7 @@ Updated version: 1.1.0
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered EventFilters.">
 		<cfset var key = "" />
 		<cfloop collection="#variables.filters#" item="key">

@@ -150,7 +150,7 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered Listeners and its' invoker.">
 		<cfset var key = "" />
 		
@@ -198,9 +198,17 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="isListenerDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if a Listener is registered with the specified name.">
+		hint="Returns true if a Listener is registered with the specified name. Does NOT check parent.">
 		<cfargument name="listenerName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.listeners, arguments.listenerName) />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getListenerNames" access="public" returntype="array" output="false"
+		hint="Returns an array of listener names.">
+		<cfreturn StructKeyArray(variables.listeners) />
 	</cffunction>
 
 	<!---
@@ -215,6 +223,7 @@ Notes:
 		hint="Sets the AppManager instance this ListenerManager belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent ListenerManager instance this ListenerManager belongs to.">
 		<cfargument name="parentListenerManager" type="MachII.framework.ListenerManager" required="true" />
@@ -223,11 +232,6 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent ListenerManager instance this ListenerManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentListenerManager />
-	</cffunction>
-	
-	<cffunction name="getListenerNames" access="public" returntype="array" output="false"
-		hint="Returns an array of listener names.">
-		<cfreturn StructKeyArray(variables.listeners) />
 	</cffunction>
 	
 </cfcomponent>

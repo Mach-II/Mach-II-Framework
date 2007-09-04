@@ -108,8 +108,10 @@ Updated version: 1.5.0
 	
 	<cffunction name="expandRelativePath" access="public" returntype="string" output="false"
 		hint="Expands a relative path to an absolute path relative from a base (starting) directory.">
-		<cfargument name="baseDirectory" type="string" required="true" />
-		<cfargument name="relativePath" type="string" required="true" />
+		<cfargument name="baseDirectory" type="string" required="true"
+			hint="The starting directory from which relative path is relative." />
+		<cfargument name="relativePath" type="string" required="true"
+			hint="The relative path to use." />
 		
 		<cfset var combinedWorkingPath = arguments.baseDirectory & arguments.relativePath />
 		<cfset var pathCollection = 0 />

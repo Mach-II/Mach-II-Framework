@@ -43,7 +43,7 @@ Updated version: 1.1.0
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="filterEvent" access="public" returntype="boolean"
+	<cffunction name="filterEvent" access="public" returntype="boolean" output="false"
 		hint="Override (be sure to keep the same arguments and returntype) to provide event filtering logic.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />

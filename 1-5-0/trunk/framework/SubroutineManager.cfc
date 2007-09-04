@@ -32,9 +32,6 @@ Updated version: 1.5.0
 	<cfset variables.appManager = "" />
 	<cfset variables.handlers = StructNew() />
 	<cfset variables.parentSubroutineManager = "" />
-	<!--- temps --->
-	<cfset variables.listenerMgr = "" />
-	<cfset variables.filterMgr = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -68,10 +65,6 @@ Updated version: 1.5.0
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-		
-		<!--- Set temps for commandLoaderBase to use. --->
-		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
-		<cfset variables.filterMgr = getAppManager().getFilterManager() />
 		
 		<!--- Search for subroutines --->
 		<cfif NOT arguments.override>
@@ -117,13 +110,9 @@ Updated version: 1.5.0
 				<cfset addSubroutineHandler(subroutineName, subroutineHandler, arguments.override) />
 			</cfif>
 		</cfloop>
-		
-		<!--- Clear temps. --->
-		<cfset variables.listenerMgr = "" />
-		<cfset variables.filterMgr = "" />
 	</cffunction>
 	
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered SubroutineHandlers.">
 		<!--- DO NOTHING --->
 	</cffunction>
@@ -192,6 +181,7 @@ Updated version: 1.5.0
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent SubroutineManager instance this SubroutineManager belongs to.">
 		<cfargument name="parentSubroutineManager" type="MachII.framework.SubroutineManager" required="true" />

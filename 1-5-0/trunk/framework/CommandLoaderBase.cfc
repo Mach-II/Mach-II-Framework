@@ -27,25 +27,12 @@ Updated version: 1.5.0
 	hint="Base component to load commands for the framework.">
 	
 	<!---
-	PROPERTIES
-	--->
-	
-	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initialization function called by the framework.">
-		<!--- Overridden by child object. --->
+		<!--- Does nothing --->
 	</cffunction>
-	
-	<cffunction name="configure" access="public" returntype="void"
-		hint="Configures nothing.">
-		<!--- DO NOTHING --->
-	</cffunction>
-	
-	<!---
-	PUBLIC FUNCTIONS
-	--->
 		
 	<!---
 	PROTECTED FUNCTIONS
@@ -110,6 +97,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "append")>
 			<cfset appendContent = arguments.commandNode.xmlAttributes["append"] />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.ViewPageCommand").init(viewName, contentKey, contentArg, appendContent) />
 		
 		<cfreturn command />
@@ -124,7 +112,7 @@ Updated version: 1.5.0
 		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var notifyResultKey = "" />
 		<cfset var notifyResultArg = "" />
-		<cfset var listener = variables.listenerMgr.getListener(notifyListener) />
+		<cfset var listener = getAppManager().getListenerManager().getListener(notifyListener) />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
 			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
@@ -132,6 +120,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
 			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
 		
 		<cfreturn command />
@@ -154,6 +143,7 @@ Updated version: 1.5.0
 		<cfelse>
 			<cfset moduleName = getAppManager().getModuleName() />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs, moduleName) />
 		
 		<cfreturn command />
@@ -201,7 +191,7 @@ Updated version: 1.5.0
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filter = variables.filterMgr.getFilter(filterName) />
+		<cfset var filter = getAppManager().getFilterManager().getFilter(filterName) />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
@@ -235,6 +225,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "reinit")>
 			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit) />
 
 		<cfreturn command />
@@ -278,6 +269,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "statusType")>
 			<cfset statusType = arguments.commandNode.xmlAttributes["statusType"] />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType) />
 		
 		<cfreturn command />
@@ -298,6 +290,7 @@ Updated version: 1.5.0
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "variable")>
 			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
 		</cfif>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
 		
 		<cfreturn command />

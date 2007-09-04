@@ -24,7 +24,7 @@ Updated version: 1.5.0
 <cfcomponent
 	displayname="Module"
 	output="false"
-	hint="Module">
+	hint="Holds a Module.">
 	
 	<!---
 	PROPERTIES

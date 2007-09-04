@@ -300,6 +300,19 @@ the rest of the framework. (pfarrell)
 		hint="Returns all properties.">
 		<cfreturn variables.properties />
 	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getVersion" access="public" returntype="string" output="false"
+		hint="Gets the version number of the framework.">
+		<cfreturn variables.version />
+	</cffunction>
+	
+	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
+		hint="Returns an array of property names that we can call a configure() method on.">
+		<cfreturn variables.configurableProperties />
+	</cffunction>
 	
 	<!---
 	ACCESSORS
@@ -320,16 +333,6 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent PropertyManager instance this PropertyManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentPropertyManager />
-	</cffunction>
-
-	<cffunction name="getVersion" access="public" returntype="string" output="false"
-		hint="Gets the version number of the framework.">
-		<cfreturn variables.version />
-	</cffunction>
-	
-	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
-		hint="Returns an array of configurable property names.">
-		<cfreturn variables.configurableProperties />
 	</cffunction>
 	
 </cfcomponent>

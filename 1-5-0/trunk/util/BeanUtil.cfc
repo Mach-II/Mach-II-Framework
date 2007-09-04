@@ -49,8 +49,8 @@ arguments).
 		
 		<cfset var bean = CreateObject("component", arguments.beanType) />
 		
-		<cfif IsDefined("arguments.initArgs") EQ true>
-			<cfinvoke component="#bean#" method="init" argumentCollection="#arguments.initArgs#" />
+		<cfif StructKeyExists(arguments, "initArgs")>
+			<cfset bean.init(argumentcollection=arguments.initArgs) />
 		<cfelse>
 			<cfset bean.init() />
 		</cfif>

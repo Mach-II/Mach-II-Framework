@@ -146,13 +146,13 @@ Notes:
 		<!--- Setup a parent app manager and related managers if the parent is not empty string --->
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset appManager.setParent(arguments.parentAppManager) />
-			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
 			<cfset parentPropertyManager = appManager.getParent().getPropertyManager() />
+			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
 			<cfset parentFilterManager = appManager.getParent().getFilterManager() />
 			<cfset parentSubroutineManager = appManager.getParent().getSubroutineManager() />
+			<cfset parentEventManager = appManager.getParent().getEventManager() />
 			<cfset parentViewManager = appManager.getParent().getViewManager() />
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
-			<cfset parentEventManager = appManager.getParent().getEventManager() />
 		</cfif>
 		
 		<!--- 

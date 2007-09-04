@@ -59,6 +59,8 @@ Notes:
 	--->
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Calls configure() on each of the manager instances.">
+		<!--- In order in which the managers are called is important
+			DO NOT CHANGE ORDER OF METHOD CALLS --->
 		<cfset getPropertyManager().configure() />
 		<cfset getRequestManager().configure() />
 		<cfset getPluginManager().configure() />

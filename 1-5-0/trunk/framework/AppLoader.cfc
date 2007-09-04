@@ -81,40 +81,44 @@ Notes:
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Determines if the configuration file should be reloaded.">
 		
-		<cfif shouldReloadBaseConfig()>
-			<cfreturn true />
-		<cfelseif shouldReloadModuleConfig()>
-			<cfreturn true />
-		<cfelse>
-			<cfreturn false />
+		<cfset var result = false />
+		
+		<cfif shouldReloadBaseConfig() OR shouldReloadModuleConfig()>
+			<cfset result = true />
 		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="shouldReloadModuleConfig" access="public" returntype="boolean" output="false"
 		hint="Determines if any of the module configuration files should be reloaded.">
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var module = 0 />
+		<cfset var result = false />
 		
 		<!--- Only loop over the modules if this is the base app --->
 		<cfif NOT IsObject(getAppManager().getParent())>
 			<cfloop collection="#modules#" item="module">
 				<cfif modules[module].shouldReloadConfig()>
-					<cfreturn true />
+					<cfset result = true />
+					<cfbreak />
 				</cfif>
 			</cfloop>
 		</cfif>
 		
-		<cfreturn false />
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="shouldReloadBaseConfig" access="public" returntype="boolean" output="false"
 		hint="Determines if any of the base configuration files should be reloaded.">
 		
+		<cfset var result = false />
+		
 		<cfif CompareNoCase(getLastReloadHash(), getConfigFileReloadHash()) NEQ 0>
-			<cfreturn true />
+			<cfset result = true />
 		</cfif>
 		
-		<cfreturn false />
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="reloadConfig" access="public" returntype="void" output="false"

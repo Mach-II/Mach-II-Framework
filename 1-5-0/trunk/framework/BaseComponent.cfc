@@ -60,7 +60,7 @@ the rest of the framework. (pfarrell)
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Override to provide custom configuration logic. Called after init().">
-		<!--- Override to provide custom configuration logic. Called after init(). --->
+		<!--- Does nothing --->
 	</cffunction>
 
 	<!---

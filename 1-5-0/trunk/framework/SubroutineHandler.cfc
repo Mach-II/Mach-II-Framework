@@ -50,7 +50,7 @@ Updated version: 1.5.0
 		<cfset var command = "" />
 		<cfset var i = 0 />
 		
-		<cfloop index="i" from="1" to="#ArrayLen(variables.commands)#">
+		<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
 			<cfset command = variables.commands[i] />
 			<cfset continue = command.execute(arguments.event, arguments.eventContext) />
 			<cfif continue IS false>

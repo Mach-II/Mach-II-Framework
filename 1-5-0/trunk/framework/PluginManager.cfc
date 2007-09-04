@@ -221,11 +221,14 @@ Notes:
 	</cffunction>
 
 	<cffunction name="isPluginDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if a Plugin is registered with the specified name.">
+		hint="Returns true if a Plugin is registered with the specified name. Does NOT check parent.">
 		<cfargument name="pluginName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.plugins, arguments.pluginName) />
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
 	<cffunction name="getPluginNames" access="public" returntype="array" output="false"
 		hint="Returns an array of plugin names.">
 		<cfreturn StructKeyArray(variables.plugins) />

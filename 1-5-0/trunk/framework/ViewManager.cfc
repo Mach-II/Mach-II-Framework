@@ -107,7 +107,7 @@ Updated version: 1.5.0
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Prepares the manager for use.">
 		<!--- DO NOTHING --->
 	</cffunction>
@@ -116,7 +116,7 @@ Updated version: 1.5.0
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="getViewPath" access="public" returntype="string" output="false"
-		hint="Gets the view path.">
+		hint="Gets the view path by view name.">
 		<cfargument name="viewName" type="string" required="true"
 			hint="Name of the view path to get." />
 		
@@ -133,7 +133,7 @@ Updated version: 1.5.0
 	<cffunction name="isViewDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if the view is defined.">
 		<cfargument name="viewName" type="string" required="true"
-			hint="Name of the view to check." />
+			hint="Name of the view to check. Does not check parent ViewManager." />
 		<cfreturn StructKeyExists(variables.viewPaths, arguments.viewName) />
 	</cffunction>
 	
@@ -147,6 +147,7 @@ Updated version: 1.5.0
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
+	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent ViewManager instance this ViewManager belongs to.">
 		<cfargument name="parentViewManager" type="MachII.framework.ViewManager" required="true" />
