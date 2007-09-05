@@ -19,11 +19,9 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Created version: 1.1.0
+Created version: 1.5.0
 
 Notes:
-The argument.target variable is mismatched and probably should be arguments.listener. This
-has been logged as a non-critical bug. Schedule to be fixed in 1.1.1. (pfarrell)
 --->
 <cfcomponent 
 	displayname="ListenerInvoker"

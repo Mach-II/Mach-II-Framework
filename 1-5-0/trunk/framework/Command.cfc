@@ -21,8 +21,7 @@ $Id$
 Created version: 1.0.0
 Updated version: 1.5.0
 
-Mach-II Component:
-Base Command component.
+Notes:
 --->
 <cfcomponent 
 	displayname="Command"

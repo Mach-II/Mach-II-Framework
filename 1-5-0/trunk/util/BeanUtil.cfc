@@ -18,6 +18,9 @@ Copyright: GreatBizTools, LLC
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
+Created version: 1.0.6
+Updated version: 1.5.0
+
 Notes:
 Beans are expected to follow the standard Java bean pattern of having
 a no argument constuctor (an init() function with no required arguments) 

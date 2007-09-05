@@ -221,7 +221,7 @@ the rest of the framework. (pfarrell)
 		</cfif>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void" output="false"
+	<cffunction name="configure" access="public" returntype="void"
 		hint="Prepares the configurable properties for use.">
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />

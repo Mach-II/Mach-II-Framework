@@ -22,7 +22,6 @@ Created version: 1.0.0
 Updated version: 1.5.0
 
 Notes:
-- Added request event name functionality. (pfarrell)
 --->
 <cfcomponent 
 	displayname="RequestHandler"

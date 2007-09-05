@@ -22,8 +22,6 @@ Created version: 1.0.0
 Updated version: 1.5.0
 
 Notes:
-- Added introspection to call only defined plugin points. (dross, pfarrell, hklein)
-- Fixed metadata introspection bug with components that have no fuctions (pfarrell)
 --->
 <cfcomponent
 	displayname="PluginManager"

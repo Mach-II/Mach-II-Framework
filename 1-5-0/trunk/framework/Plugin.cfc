@@ -21,9 +21,6 @@ $Id$
 Created version: 1.0.0
 Updated version: 1.1.0
 
-Mach-II Component:
-Base Plugin component
-
 Notes:
 All user-defined plugins extend this base plugin component.
 --->

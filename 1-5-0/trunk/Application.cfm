@@ -19,6 +19,8 @@ $Id$
 
 Created version: 1.0.0
 Updated version: 1.1.0
+
+Notes:
 --->
 <cfapplication
 	name="MachII"

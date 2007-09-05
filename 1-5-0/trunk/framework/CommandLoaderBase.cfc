@@ -20,6 +20,8 @@ $Id$
 
 Created version: 1.5.0
 Updated version: 1.5.0
+
+Notes:
 --->
 <cfcomponent 
 	displayname="CommandLoaderBase"

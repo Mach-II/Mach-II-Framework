@@ -18,10 +18,9 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.5.0
 
 Notes:
-- Added logic to invoke the default invoker if no invoker is defined. (pfarrell)
 --->
 <cfcomponent 
 	displayname="ListenerManager"
@@ -150,7 +149,7 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void" output="false"
+	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered Listeners and its' invoker.">
 		<cfset var key = "" />
 		

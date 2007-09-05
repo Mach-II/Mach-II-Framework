@@ -18,10 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.10
-Updated version: 1.1.0
-
-MachComponent:
-Base Mach-II component.
+Updated version: 1.5.0
 
 Notes:
 The BaseComponent extended by Listener, EventFilter and Plugin components and gives

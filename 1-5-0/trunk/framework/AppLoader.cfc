@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.5.0
 
 Notes:
 - Added fix for LSDatetimeParse() bug for Non-EN locales. (pfarrell)

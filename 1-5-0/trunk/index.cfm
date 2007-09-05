@@ -21,6 +21,6 @@ Created version: 1.0.0
 Updated version: 1.0.0
 
 Notes:
-Legacy code
+Legacy code which is here for backwards compatibility.
 --->
 <cfinclude template="mach-ii.cfm" />

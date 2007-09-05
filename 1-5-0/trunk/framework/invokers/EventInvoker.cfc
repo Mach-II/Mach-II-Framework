@@ -22,8 +22,6 @@ Created version: 1.1.0
 Updated version: 1.5.0
 
 Notes:
-- Added error handling if notified listener method returns void, but a ResultArg/Key 
-has been defined. This also fixed the problem if the listener returns a Java null value. (pfarrell)
 --->
 <cfcomponent 
 	displayname="EventInvoker" 

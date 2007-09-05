@@ -21,9 +21,6 @@ Created version: 1.0.1
 Updated version: 1.5.0
 
 Notes:
-- Added XML configuration file validation parameters. (bedwards)
-- Added Mach-II version (pfarrell)
-- Fixed bug where framework loaded twice on initial application start and where config mode is 1
 --->
 <!--- Set the path to the application's mach-ii.xml file. Default to ./config/mach-ii.xml. --->
 <cfparam name="MACHII_CONFIG_PATH" type="string" default="#ExpandPath('./config/mach-ii.xml')#" />

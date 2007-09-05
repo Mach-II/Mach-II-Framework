@@ -21,9 +21,6 @@ $Id$
 Created version: 1.0.0
 Updated version: 1.5.0
 
-MachComponent:
-Base listener component
-
 Notes:
 All user-defined listeners extend this base listener component.
 --->

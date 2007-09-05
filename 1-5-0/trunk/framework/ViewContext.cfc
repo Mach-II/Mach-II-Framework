@@ -19,10 +19,9 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.5.0
 
 Notes:
-- Fixed direct calls to propertyManager variables by adding the appropriate accessors. (pfarrell)
 --->
 <cfcomponent 
 	displayname="ViewContext"
