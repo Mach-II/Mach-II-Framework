@@ -150,7 +150,7 @@ Notes:
 			hint="The PropertyManager instance to set." />
 		<cfset variables.propertyManager = arguments.propertyManager />
 	</cffunction>
-	<cffunction name="getPropertyManager" access="package" returntype="MachII.framework.PropertyManager" output="false"
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
 		hint="Gets the components PropertyManager instance.">
 		<cfreturn variables.propertyManager />
 	</cffunction>	
