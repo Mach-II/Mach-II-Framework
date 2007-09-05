@@ -44,7 +44,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="MachII.framework.AppLoader" output="true"
+	<cffunction name="init" access="public" returntype="MachII.framework.AppLoader" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfargument name="configPath" type="string" required="true"
 			hint="The full path to the configuration XML file." />
