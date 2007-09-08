@@ -242,12 +242,12 @@ the rest of the framework. (pfarrell)
 			hint="The AppManager instance to set." />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
-	<cffunction name="getAppManager" access="package" returntype="MachII.framework.AppManager" output="false"
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Gets the components AppManager instance.">
 		<cfreturn variables.appManager />
 	</cffunction>
 	
-	<cffunction name="getPropertyManager" access="package" returntype="MachII.framework.PropertyManager" output="false"
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
 		hint="Gets the components PropertyManager instance.">
 		<cfreturn getAppManager().getPropertyManager() />
 	</cffunction>

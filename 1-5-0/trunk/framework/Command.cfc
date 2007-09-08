@@ -65,7 +65,7 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setParameters" access="package" returntype="void" output="false"
+	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets a struct of parameters to this command.">
 		<cfargument name="parameters" type="struct" required="true" />
 
