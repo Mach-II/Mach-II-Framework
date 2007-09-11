@@ -157,8 +157,12 @@ Notes:
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
 			
-			<!--- Remove the query string delimiter and trailing series delimiter --->
-			<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo) - 2) />
+			<!--- Remove the query string delimiter --->
+			<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo)) />
+			<!--- Remove trailing series delimiter if defined --->
+			<cfif Right(arguments.pathInfo, 1) IS getSeriesDelimiter()>
+				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
+			</cfif>
 			
 			<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
 			<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
