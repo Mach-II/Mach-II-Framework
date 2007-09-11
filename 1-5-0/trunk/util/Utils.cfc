@@ -80,16 +80,15 @@ Notes:
 		<cfargument name="nullString" type="string" required="false" default="NULL" />
 		<!--- Rewritten UDF from cflib.org Author: Steven Van Gemert (svg2@placs.net)   --->
 		<cfset var delim = arguments.listDelimiter />
-		<cfset var null = arguments.nullString />
 		<cfset var special_char_list = "\,+,*,?,.,[,],^,$,(,),{,},|,-" />
 		<cfset var esc_special_char_list = "\\,\+,\*,\?,\.,\[,\],\^,\$,\(,\),\{,\},\|,\-" />
 		<cfset var i = "" />
 
 		<cfif findNoCase(left(arguments.list, 1), delim)>
-			<cfset arguments.list = null & arguments.list />
+			<cfset arguments.list = arguments.nullString & arguments.list />
 		</cfif> 
 		<cfif findNoCase(right(list,1), delim)>
-			<cfset arguments.list = arguments.list & null />
+			<cfset arguments.list = arguments.list & arguments.nullString />
 		</cfif>
 
 		<cfset i = len(delim) - 1 />
@@ -102,8 +101,8 @@ Notes:
 		<cfset delim = ReplaceList(delim, special_char_list, esc_special_char_list) />
 		<cfset delim = Replace(delim, "_Separator_", "|", "ALL") />
 
-		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & null & "\2", "ALL") />
-		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & null & "\2", "ALL") />
+		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & arguments.nullString & "\2", "ALL") />
+		<cfset arguments.list = rereplace(arguments.list, "(" & delim & ")(" & delim & ")", "\1" & arguments.nullString & "\2", "ALL") />
   
 		<cfreturn arguments.list />
 	</cffunction>
