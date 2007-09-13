@@ -291,6 +291,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!--
 	An "announce" element will broadcast an event to registered listeners.
 		event - the event name to announce
+		module - the module name to announce
 		copyEventArgs - whether or not to copy the event args of the current event into the event being announced
 -->
 <!ELEMENT announce EMPTY>
@@ -306,7 +307,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the bean in the event
 		type - the type of the bean to create
 		[fields] - the fields in the event to set in the bean
-		[reinit] - allows you to reuse the event bean if it is available in the Event object
+		[reinit] - allows you to reuse and repopulate the bean if it is available in the Event object
 -->
 <!ELEMENT event-bean EMPTY>
 <!ATTLIST event-bean
@@ -318,7 +319,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	A "redirect" element will send a redirect.
-		event - the event the redirect will announce
+		event - the event the redirect will relocate to
+		module - the module the redirect will relocate to
 		url - the url to redirect to
 		args - a comma-delimited list of event args to attach to the redirect url
 		[persist] - a boolean that allows you to persist complex event arguments across a redirect
@@ -329,6 +331,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT redirect EMPTY>
 <!ATTLIST redirect
 	event CDATA #IMPLIED
+	module CDATA #IMPLIED
 	url CDATA #IMPLIED
 	args CDATA #IMPLIED
 	persist (true|false) "false"

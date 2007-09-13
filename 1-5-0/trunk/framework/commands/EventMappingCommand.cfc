@@ -60,7 +60,12 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName(), getMappingModule()) />
+		<!--- Only pass the module name if we know what it is otherwise assume it the base --->
+		<cfif Len(getMappingModule())>
+			<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName(), getMappingModule()) />
+		<cfelse>
+			<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName()) />
+		</cfif>
 		
 		<cfreturn true />
 	</cffunction>

@@ -147,16 +147,21 @@ Notes:
 		hint="Sets an event mapping.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="mappingName" type="string" required="true" />
-		<cfargument name="mappingModuleName" type="string" required="false" default="" />
+		<cfargument name="mappingModuleName" type="string" required="false" />
 
 		<cfset var temp = StructNew() />
 
-		<cfif NOT Len(arguments.mappingModuleName)>
-			<cfset arguments.mappingModuleName = getCurrentEvent().getModuleName() />
-		<!--- Check if module exists --->
-		<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
-			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
+		<cfif StructKeyExists(arguments, "mappingModuleName")>
+			<!--- Check if we need to get the current module --->
+			<cfif NOT Len(arguments.mappingModuleName)>
+				<cfset arguments.mappingModuleName = getAppManager().getModuleName() />
+			<!--- Check if module exists --->
+			<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
+				<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
 					message="The module '#arguments.mappingModuleName#' cannot be found for this event-mapping." />
+			</cfif>
+		<cfelse>
+			<cfset arguments.mappingModuleName = "" />
 		</cfif>
 		
 		<cfset temp.eventName = arguments.mappingName />

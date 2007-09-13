@@ -541,7 +541,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		hint="Checks if we should trace">
 		<cfargument name="suppressTrace" type="boolean" required="true" />
 
-		<cfif getTraceRequest() AND arguments.suppressTrace>
+		<cfif NOT IsDefined("request._MachIITracePlugin.traceRequest") OR (getTraceRequest() AND arguments.suppressTrace)>
 			<cfsetting showdebugoutput="false" />
 			<cfset setTraceRequest(FALSE) />
 		</cfif>
