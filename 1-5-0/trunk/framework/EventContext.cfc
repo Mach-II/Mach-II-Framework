@@ -85,20 +85,13 @@ Notes:
 		hint="Queues an event for the framework to handle.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="moduleName" type="string" required="false" />
+		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#" />
 		
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
-		<cfset var nextModuleName = "" />
+		<cfset var nextModuleName = arguments.moduleName />
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
-		
-		<!--- Look up the module name if the moduleName argument does not exist --->
-		<cfif NOT StructKeyExists(arguments, "moduleName")>
-			<cfset nextModuleName = getAppManager().getModuleName() />
-		<cfelse>
-			<cfset nextModuleName = arguments.moduleName />
-		</cfif>
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
@@ -143,54 +136,54 @@ Notes:
 		<cfreturn continue />
 	</cffunction>
 
-	<cffunction name="setEventMapping" access="public" returntype="string" output="false"
+	<cffunction name="setEventMapping" access="public" returntype="void" output="false"
 		hint="Sets an event mapping.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="mappingName" type="string" required="true" />
-		<cfargument name="mappingModuleName" type="string" required="false" />
+		<cfargument name="mappingModuleName" type="string" required="false"
+			default="#getAppManager().getModuleName()#" />
 
-		<cfset var temp = StructNew() />
+		<cfset var mapping = StructNew() />
 
-		<cfif StructKeyExists(arguments, "mappingModuleName")>
-			<!--- Check if we need to get the current module --->
-			<cfif NOT Len(arguments.mappingModuleName)>
-				<cfset arguments.mappingModuleName = getAppManager().getModuleName() />
-			<!--- Check if module exists --->
-			<cfelseif NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
-				<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
-					message="The module '#arguments.mappingModuleName#' cannot be found for this event-mapping." />
-			</cfif>
-		<cfelse>
-			<cfset arguments.mappingModuleName = "" />
+		<cfif Len(arguments.mappingModuleName)
+			AND NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
+			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
+				message="The module '#arguments.mappingModuleName#' cannot be found for this event-mapping." />	
 		</cfif>
 		
-		<cfset temp.eventName = arguments.mappingName />
-		<cfset temp.moduleName = arguments.mappingModuleName />
+		<!--- Build the mapping --->
+		<cfset mapping.eventName = arguments.mappingName />
+		<cfset mapping.moduleName = arguments.mappingModuleName />
 		
-		<cfset variables.mappings[arguments.eventName] = temp />
+		<cfset variables.mappings[arguments.eventName] = mapping />
 	</cffunction>
 	<cffunction name="getEventMapping" access="public" returntype="struct" output="false"
 		hint="Gets an event mapping by the event name.">
 		<cfargument name="eventName" type="string" required="true" />
 		
-		<cfset var temp = StructNew() />
+		<cfset var mapping = StructNew() />
 		
+		<!--- Get the mapping or default to the eventName if no mapping exists --->
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
-			<cfreturn variables.mappings[arguments.eventName] />
+			<cfset mapping = variables.mappings[arguments.eventName] />
 		<cfelse>
-			<cfset temp.eventName = arguments.eventName />
-			<cfset temp.moduleName = getCurrentEvent().getModuleName() />
-			<cfreturn temp />
+			<cfset mapping.eventName = arguments.eventName />
+			<cfset mapping.moduleName = getAppManager().getModuleName() />
 		</cfif>
+		
+		<cfreturn mapping />
 	</cffunction>
 	<cffunction name="isEventMappingDefined" type="public" returntype="boolean" output="false"
 		hint="Checks if an event mapping is defined.">
 		<cfargument name="eventName" type="string" required="true" />
+		
+		<cfset var result = false />
+		
 		<cfif StructKeyExists(variables.mappings, arguments.eventName)>
-			<cfreturn true />
-		<cfelse>
-			<cfreturn false />
+			<cfset result = true />
 		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	<cffunction name="clearEventMappings" access="public" returntype="void" output="false"
 		hint="Clears the current event mappings.">
