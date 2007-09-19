@@ -244,7 +244,7 @@ Notes:
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(result.eventName)>
 				<cfset result = getEventMapping(exceptionEventName) />
-				<cfif NOT Len(reesult.moduleName)>
+				<cfif NOT Len(result.moduleName)>
 					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
 				<cfelse>
 					<cfset appManager = appManager.getModuleManager().getAppManager() />
