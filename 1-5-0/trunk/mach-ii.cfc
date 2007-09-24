@@ -77,9 +77,9 @@ the handleRequest() method in the onRequest() application event.
 		</cfif>
 		
 		<!--- Create the AppLoader if necessary. Double check required for proper multi-threading. --->
-		<cfif NOT StructKeyExists(application, MACHII_APP_KEY)>
+		<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
 			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-				<cfif NOT StructKeyExists(application, MACHII_APP_KEY)>
+				<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
 					<cfset loadFramework() />
 				</cfif>
 			</cflock>
