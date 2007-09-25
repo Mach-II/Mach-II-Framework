@@ -37,7 +37,8 @@ the rest of the framework. (pfarrell)
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurableProperties = ArrayNew(1) />
 	<cfset variables.parentPropertyManager = "">
-	<cfset variables.version = "1.5.0.0" />
+	<cfset variables.majorVersion = "1.5.0" />
+	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.utils = "" />
 	<cfset variables.propsNotAllowInModule =
 		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
@@ -306,7 +307,14 @@ the rest of the framework. (pfarrell)
 	--->
 	<cffunction name="getVersion" access="public" returntype="string" output="false"
 		hint="Gets the version number of the framework.">
-		<cfreturn variables.version />
+		
+		<cfset var minorVersion = 0 />
+		
+		<cfif variables.minorVersion NEQ "@minorVersion@">
+			<cfset minorVersion = variables.minorVersion />
+		</cfif>
+		
+		<cfreturn variables.majorVersion &  "." & variables.minorVersion />
 	</cffunction>
 	
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"

@@ -498,7 +498,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var version = getPropertyManager().getVersion() />
 		<cfset var release = "" />
 		
-		<cfswitch expression="#Right(version, 1)#">
+		<cfswitch expression="#ListLast(version, ".")#">
 			<cfcase value="0">
 				<cfset release = "Pre-Alpha / Bleeding Edge Release" />
 			</cfcase>
@@ -530,7 +530,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				<cfset release = "Production-Only Stable (duck-typed core for performance)" />
 			</cfcase>
 			<cfdefaultcase>
-				<cfset release = "Unknown Release" />
+				<cfset release = "Bleeding Edge Release - " & ListLast(version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
 		

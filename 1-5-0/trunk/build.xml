@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright: GreatBizTools, LLC
+Author: Peter J. Farrell (peter@mach-ii.com)
+$Id: build.xml 6362 2007-09-07 03:06:02Z pfarrell $
+
+Notes:
+-->
+<project
+	name="Mach-II Framework"
+	default="build"
+	basedir=".">
+	
+	<description>Mach-II Framework Build File</description>
+	
+	<!-- Properties -->
+	<property name="dest" location="./dest"/>
+	<property name="zip" location="./zip"/>
+	<property name="nightly" location=""/>
+	<property name="majorVersion" value="1-5-0"/>
+	<property name="baseSvnUrl" value="http://svn.mach-ii.com/framework/${majorVersion}/"/>
+
+	<!-- Task defitions -->
+	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml"/>
+	
+	<!-- Targets -->
+	<target name="clean">
+		<echo message="---------------------------------------------" />
+		<echo message="Cleaning" />
+		<echo message="---------------------------------------------" />
+		<delete dir="${dest}"/>
+		<delete dir="${zip}"/>
+	</target>
+
+	<target name="build" depends="clean">
+		<echo message="---------------------------------------------" />
+		<echo message="Creating a build" />
+		<echo message="---------------------------------------------" />
+		<mkdir dir="${dest}"/>
+		<svn>
+			<status path="${basedir}" lastChangedRevisionProperty="lastCommitRevision" />
+		</svn>
+		<copy todir="${dest}/MachII/">
+			<fileset dir="${basedir}">
+				<exclude name="build.xml"/>
+				<exclude name="dest"/>
+				<exclude name="zip"/>
+			</fileset>
+			<filterset begintoken="@" endtoken="@">
+				<filter token="minorVersion" value="${lastCommitRevision}" />
+			</filterset>
+		</copy>
+	</target>
+	
+	<target name="zip" depends="build">
+		<echo message="---------------------------------------------" />
+		<echo message="Building zip" />
+		<echo message="---------------------------------------------" />
+		<mkdir dir="${zip}"/>
+		<zip destfile="${zip}/MachII_${majorVersion}.zip"
+			basedir="${dest}"/>
+		<checksum file="${zip}/MachII_${majorVersion}.zip"/>
+	</target>
+	
+	<target name="zipNightly" depends="build">
+		<echo message="---------------------------------------------" />
+		<echo message="Building nightly zip" />
+		<echo message="---------------------------------------------" />
+		<mkdir dir="${zip}"/>
+		<tstamp>
+			<format property="formattedDatetime" pattern="yyyy-MM-dd_HH-mm"/>
+		</tstamp>
+		<zip destfile="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
+			basedir="${dest}"/>
+		<checksum file="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"/>
+	</target>
+	
+	<target name="branch">
+		<echo message="---------------------------------------------" />
+		<echo message="Creating a branch" />
+		<echo message="---------------------------------------------" />
+		<input addproperty="branchName"
+			message="Please define a name for this branch:"/>
+		<input addproperty="revision"
+			message="What revision would you like to branch from (a date with the following format : MM/DD/YYYY HH:MM AM_PM, a revision number, HEAD, BASE, COMMITED or PREV):"
+			defaultvalue="HEAD" />
+		<input addproperty="message"
+			message="Commit message:"/>
+		<svn>
+			<copy srcPath="${basedir}"
+				destUrl="${baseSvnUrl}/branches/${branchName}"
+				message="${message}"
+				revision="${revision}"/>
+		</svn>
+	</target>
+	
+</project>
