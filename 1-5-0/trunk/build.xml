@@ -63,10 +63,10 @@ Notes:
 				<filter token="minorVersion" value="${lastCommitRevision}" />
 			</filterset>
 		</copy>
-		<echo message="Last commit revision #${lastCommitRevision}"/>
+		<echo message="Last commit revision '${lastCommitRevision}'"/>
 	</target>
 	
-	<target name="buildDuckTypeds" depends="build">
+	<target name="buildDuckTyped" depends="build">
 		<echo message="---------------------------------------------" />
 		<echo message="Duck typing the build" />
 		<echo message="---------------------------------------------" />		
@@ -90,6 +90,7 @@ Notes:
 	      	<fileset dir="${dest}"
 	      		includes="**/*.cfc"/>
 	   </replaceregexp>
+		<echo message="Created duck typed build located in '${dest}'."/>
 	</target>
 	
 	<target name="zip" depends="build">
