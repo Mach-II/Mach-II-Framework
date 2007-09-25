@@ -534,7 +534,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			</cfdefaultcase>
 		</cfswitch>
 		
-		<cfreturn Left(version, Len(version) - Len(ListLast(version, ".")) + 1) & " " & release />
+		<cfreturn Left(version, Len(version) - Len(ListLast(version, ".")) - 1) & " " & release />
 	</cffunction>
 	
 	<cffunction name="shouldTrace" access="private" returntype="boolean" output="false"

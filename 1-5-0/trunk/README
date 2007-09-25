@@ -71,6 +71,7 @@ _|_| |_>  |_(_|||(_| |_ |(_)| |
 
 Just three simple steps and you are done.  The Mach-II framework is just a ColdFusion 
 application, so it will operate and behave just like any other ColdFusion application.
+Please read the Upgrading Note below if you are upgrading your installation of Mach-II.
 
 Mach-II uses absolute pathing for CFCs, so installation of both core framework files 
 (the MachII directory).
@@ -103,13 +104,10 @@ your template cache and restart your ColdFusion Application Server after you rep
 your older version with a newer version.
 
 If you do not clear your template cache and restart your server, you will receive 
-an error similar to this:
-The value returned from function getAppFactory() is not of type MachII.framework.AppFactory.
+an error similar such as:
 
-The error occurred in C:\[PathToYourWebRoot]\MachII\framework\AppLoader.cfc: line XX
-Called from C:\[PathToYourWebRoot]\MachII\mach-ii.cfm: line XX
-or
-Called from C:\[PathToYourWebRoot]\MachII\mach-ii.cfc: line XX
+- The value returned from function getAppFactory() is not of type MachII.framework.AppFactory.
+- Element AppLoader undefined in application[MACHII_APP_KEY].
 
 ------------------------------------------------
  _                      
@@ -126,3 +124,7 @@ email listserv/forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
 
 * Check out http://www.mach-ii.com for Quick Starts, FAQs and additional sample 
 applications and documentation.
+
+* If you wish to submit code for a feature enhancement or bug fix, your submission
+is governed under the license in which Mach-II is released. For more information, 
+please read the accompanying license.

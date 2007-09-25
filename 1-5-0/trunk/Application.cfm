@@ -21,6 +21,7 @@ Created version: 1.0.0
 Updated version: 1.1.0
 
 Notes:
+Legacy code which is here for backwards compatibility.
 --->
 <cfapplication
 	name="MachII"

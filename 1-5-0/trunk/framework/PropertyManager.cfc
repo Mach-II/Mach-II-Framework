@@ -310,11 +310,11 @@ the rest of the framework. (pfarrell)
 		
 		<cfset var minorVersion = 0 />
 		
-		<cfif variables.minorVersion NEQ "@minorVersion@">
+		<cfif variables.minorVersion IS "@minorVersion@">
 			<cfset minorVersion = variables.minorVersion />
 		</cfif>
 		
-		<cfreturn variables.majorVersion &  "." & variables.minorVersion />
+		<cfreturn variables.majorVersion &  "." & minorVersion />
 	</cffunction>
 	
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"

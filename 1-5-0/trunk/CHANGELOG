@@ -68,6 +68,9 @@ second time.
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Added ANT build file
+(2007-09-25 pfarrell)
+
 * Added AnnounceEventInModule
 A new method to BaseComponent called announceEventInModule().  The BaseComponent is 
 available to filter, listener, plugins and the new properties constructs.  You can use
@@ -190,7 +193,7 @@ enhancement is backwards compatible with 1.1.1.
 (2007-02-05 pfarrell)
 
 ------------------------------------------------
-Interal Framework Improvements / Enhancements
+Internal Framework Improvements / Enhancements
 ------------------------------------------------
 * New EventContext in conjuction with RequestHandler
 The framework's request runner has been completely rewritten in order to support
