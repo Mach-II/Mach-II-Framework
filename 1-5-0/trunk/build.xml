@@ -63,9 +63,10 @@ Notes:
 				<filter token="minorVersion" value="${lastCommitRevision}" />
 			</filterset>
 		</copy>
+		<echo message="Last commit revision #${lastCommitRevision}"/>
 	</target>
 	
-	<target name="buildDuckType" depends="build">
+	<target name="buildDuckTypeds" depends="build">
 		<echo message="---------------------------------------------" />
 		<echo message="Duck typing the build" />
 		<echo message="---------------------------------------------" />		
@@ -115,6 +116,8 @@ Notes:
 	</target>
 	
 	<target name="ftp-init">
+		<input addProperty="ftp.password"
+			message="Please enter the password for FTP user named '${ftp.user}':"/>
 		<fail unless="ftp.password">You must set the ftp.password property for ftp (usually as command line arg -Dftp.password=YOURPWD).</fail>
 	</target>
 	
