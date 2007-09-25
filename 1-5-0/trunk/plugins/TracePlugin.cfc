@@ -500,7 +500,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		
 		<cfswitch expression="#ListLast(version, ".")#">
 			<cfcase value="0">
-				<cfset release = "Pre-Alpha / Bleeding Edge Release" />
+				<cfset release = "Bleeding Edge Release - Unknown build" />
 			</cfcase>
 			<cfcase value="1">
 				<cfset release = "Alpha" />
@@ -530,11 +530,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				<cfset release = "Production-Only Stable (duck-typed core for performance)" />
 			</cfcase>
 			<cfdefaultcase>
-				<cfset release = "Bleeding Edge Release - " & ListLast(version, ".") />
+				<cfset release = "Bleeding Edge Release - Build " & ListLast(version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
 		
-		<cfreturn Left(version, Len(version) - 2) & " " & release />
+		<cfreturn Left(version, Len(version) - Len(ListLast(version, ".")) + 1) & " " & release />
 	</cffunction>
 	
 	<cffunction name="shouldTrace" access="private" returntype="boolean" output="false"
