@@ -210,13 +210,11 @@ Notes:
 			defaultvalue="HEAD" />
 		<input addproperty="message"
 			message="Commit message:"/>
-		<svn>
+		<svn username="${svn.usr}" password="${svn.pwd}">
 			<copy srcPath="${basedir}"
 				destUrl="${baseSvnUrl}/branches/${branchName}"
 				message="${message}"
-				revision="${revision}"
-				username="${svn.usr}"
-				password="${svn.pwd}"/>
+				revision="${revision}"/>
 		</svn>
 	</target>
 	
