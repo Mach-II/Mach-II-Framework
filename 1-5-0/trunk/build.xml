@@ -7,7 +7,7 @@ $Id: build.xml 6362 2007-09-07 03:06:02Z pfarrell $
 Requirements:
 - ANT 1.5+
 - Apache Net-Commons (if using FTP options)
-- SVNAnt taske
+- SVNAnt task
 
 Notes:
 
@@ -17,7 +17,7 @@ Notes:
 	default="build"
 	basedir=".">
 	
-	<description>Mach-II Framework Build File</description>
+	<description>Mach-II Framework</description>
 	
 	<!-- Properties -->
 	<property name="dest" location="./dest"/>
@@ -56,33 +56,38 @@ Notes:
 		<mkdir dir="${dest}"/>
 		<echo message="Gettting last commit revision number"/>
 		<svn>
-			<status path="${basedir}" lastChangedRevisionProperty="lastCommitRevision" />
+			<status path="${basedir}" lastChangedRevisionProperty="buildVersion" />
 		</svn>
 		<echo message="Copying files to dest"/>
 		<copy todir="${dest}/MachII/"
-			verbose="${debug}">
+			verbose="${debug}"
+			preservelastmodified="true">
 			<fileset dir="${basedir}">
 				<exclude name="dest/"/>
 				<exclude name="zip/"/>
 			</fileset>
 			<filterset begintoken="@" endtoken="@">
-				<filter token="minorVersion" value="${lastCommitRevision}"/>
+				<filter token="minorVersion" value="${buildVersion}"/>
 			</filterset>
 		</copy>
 		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and README to .txt files for windows"/>
 		<copy file="${dest}/MachII/CHANGELOG"
 			tofile="${dest}/MachII/CHANGELOG.txt"
+			preservelastmodified="true"
 			verbose="${debug}"/>
 		<copy file="${dest}/MachII/LICENSE"
 			tofile="${dest}/MachII/LICENSE.txt"
+			preservelastmodified="true"
 			verbose="${debug}"/>
 		<copy file="${dest}/MachII/NOTICE"
 			tofile="${dest}/MachII/NOTICE.txt"
+			preservelastmodified="true"
 			verbose="${debug}"/>
 		<copy file="${dest}/MachII/README"
 			tofile="${dest}/MachII/README.txt"
+			preservelastmodified="true"
 			verbose="${debug}"/>
-		<echo message="Built as version '${lastCommitRevision}'"/>
+		<echo message="Built as version '${buildVersion}'"/>
 	</target>
 	
 	<target name="buildDuckTyped" depends="build">
@@ -93,23 +98,23 @@ Notes:
 		<replaceregexp match="(cffunction.*?)([ ]?returntype)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
 			replace="\1 "
 			flags="igm">
-			<fileset dir="${dest}"
+			<fileset dir="${dest}/MachII/"
 				includes="**/*.cfc"/>
-	   </replaceregexp>
+		</replaceregexp>
 		<echo message="Regexing 'required' attribute from cfarguments"/>
-	   <replaceregexp match="(cfargument.*?)([ ]?required)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
+		<replaceregexp match="(cfargument.*?)([ ]?required)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
 		   replace="\1 "
 			flags="igm">
-		   	<fileset dir="${dest}"
+		   	<fileset dir="${dest}/MachII/"
 	   			includes="**/*.cfc"/>
-	   </replaceregexp>
+		</replaceregexp>
 		<echo message="Regexing 'type' attribute from cfarguments"/>
 		<replaceregexp match="(cfargument.*?)([ ]?type)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
 			replace="\1 "
 			flags="igm">
-	      	<fileset dir="${dest}"
+	      	<fileset dir="${dest}/MachII/"
 	      		includes="**/*.cfc"/>
-	   </replaceregexp>
+		</replaceregexp>
 		<echo message="---------------------------------------------"/>
 		<echo message="Created duck typed build located in '${dest}'"/>
 		<echo message="---------------------------------------------"/>
@@ -122,7 +127,11 @@ Notes:
 		<mkdir dir="${zip}"/>
 		<zip destfile="${zip}/MachII_${majorVersion}.zip"
 			basedir="${dest}"/>
+		<echo message="Creating MD5 checksum for zip"/>
 		<checksum file="${zip}/MachII_${majorVersion}.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}.zip'"/>
+		<echo message="---------------------------------------------"/>
 	</target>
 	
 	<target name="zipDuckTyped" depends="buildDuckTyped">
@@ -132,7 +141,11 @@ Notes:
 		<mkdir dir="${zip}"/>
 		<zip destfile="${zip}/MachII_${majorVersion}_ducktyped.zip"
 			basedir="${dest}"/>
+		<echo message="Creating MD5 checksum for zip"/>
 		<checksum file="${zip}/MachII_${majorVersion}_ducktyped.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}_ducktyped.zip'"/>
+		<echo message="---------------------------------------------"/>
 	</target>
 	
 	<target name="zipNightly" depends="build">
@@ -146,6 +159,9 @@ Notes:
 		<zip destfile="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
 			basedir="${dest}"/>
 		<checksum file="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip'"/>
+		<echo message="---------------------------------------------"/>
 	</target>
 	
 	<target name="ftp-init">
