@@ -311,7 +311,7 @@ the rest of the framework. (pfarrell)
 		<cfset var minorVersion = 0 />
 		
 		<!--- Leave the string as-is or the build will fail --->
-		<cfif variables.minorVersion IS "@" & "minorVersion" & "@">
+		<cfif NOT variables.minorVersion IS "@" & "minorVersion" & "@">
 			<cfset minorVersion = variables.minorVersion />
 		</cfif>
 		
