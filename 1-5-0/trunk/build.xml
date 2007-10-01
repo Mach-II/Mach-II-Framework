@@ -15,8 +15,7 @@ Notes:
 <project
 	name="Mach-II Framework"
 	default="build"
-	basedir="."
-	xmlns:ac="antlib:net.sf.antcontrib">
+	basedir=".">
 	
 	<description>Mach-II Framework</description>
 	
@@ -200,7 +199,7 @@ Notes:
 		</ftp>
 	</target>
 	
-	<target name="branch">
+	<target name="branch" depends="svnLogin">
 		<echo message="---------------------------------------------"/>
 		<echo message="Creating a branch" />
 		<echo message="---------------------------------------------"/>
@@ -215,8 +214,17 @@ Notes:
 			<copy srcPath="${basedir}"
 				destUrl="${baseSvnUrl}/branches/${branchName}"
 				message="${message}"
-				revision="${revision}"/>
+				revision="${revision}"
+				username="${svn.usr}"
+				password="${svn.pwd}"/>
 		</svn>
+	</target>
+	
+	<target name="svnLogin">
+		<input addproperty="svn.usr"
+			message="SVN Username:"/>
+		<input addproperty="svn.pwd"
+			message="SVN password:"/>		
 	</target>
 	
 </project>
