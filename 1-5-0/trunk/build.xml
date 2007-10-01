@@ -15,7 +15,8 @@ Notes:
 <project
 	name="Mach-II Framework"
 	default="build"
-	basedir=".">
+	basedir="."
+	xmlns:ac="antlib:net.sf.antcontrib">
 	
 	<description>Mach-II Framework</description>
 	
@@ -28,7 +29,7 @@ Notes:
 	
 	<property name="ftp.server" value="mach-ii.com"/>
 	<property name="ftp.user" value="machii"/>
-	<property name="ftp.dir" value="/var/www/machii/m2website/public/nightly/"/>
+	<property name="ftp.nightly.dir" value="/var/www/machii/m2website/public/nightly/"/>
 	
 	<!-- ReIDs -->
 	<fileset id="ftp.upload.fileset"
@@ -49,15 +50,11 @@ Notes:
 		<delete dir="${zip}"/>
 	</target>
 
-	<target name="build" depends="clean">
+	<target name="build" depends="clean,lastCommitRevision">
 		<echo message="---------------------------------------------"/>
 		<echo message="Creating a build"/>
 		<echo message="---------------------------------------------"/>
 		<mkdir dir="${dest}"/>
-		<echo message="Gettting last commit revision number"/>
-		<svn>
-			<status path="${basedir}" lastChangedRevisionProperty="buildVersion" />
-		</svn>
 		<echo message="Copying files to dest"/>
 		<copy todir="${dest}/MachII/"
 			verbose="${debug}"
@@ -120,7 +117,26 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zip" depends="build">
+	<target name="lastCommitRevision" unless="buildVersion">
+		<echo message="---------------------------------------------"/>
+		<echo message="Gettting last commit revision number"/>
+		<echo message="---------------------------------------------"/>
+		<svn>
+			<status path="${basedir}" lastChangedRevisionProperty="buildVersion" />
+		</svn>
+	</target>
+	
+	<target name="zip-init">
+		<echo message="Gettting last commit revision number"/>
+		<svn>
+			<status path="${basedir}" lastChangedRevisionProperty="svnBuildVersion" />
+		</svn>
+		<input addProperty="buildVersion"
+			message="Input a build number or minor version level (0-9) (defaults to SVN build number):"
+			defaultvalue="${svnBuildVersion}"/>
+	</target>
+	
+	<target name="zip" depends="zip-init,build">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the build"/>
 		<echo message="---------------------------------------------"/>
@@ -134,7 +150,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipDuckTyped" depends="buildDuckTyped">
+	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the duck typed build"/>
 		<echo message="---------------------------------------------"/>
@@ -178,7 +194,7 @@ Notes:
 			userid="${ftp.user}"
 			password="${ftp.password}"
 			action="put"
-			remotedir="${ftp.dir}"
+			remotedir="${ftp.nightly.dir}"
 			verbose="${debug}">
 			<fileset refid="ftp.upload.fileset"/>
 		</ftp>
