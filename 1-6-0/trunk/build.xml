@@ -22,7 +22,7 @@ Notes:
 	<!-- Properties -->
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
-	<property name="majorVersion" value="1-5-0"/>
+	<property name="majorVersion" value="1-6-0"/>
 	<property name="baseSvnUrl" value="http://svn.mach-ii.com/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	
