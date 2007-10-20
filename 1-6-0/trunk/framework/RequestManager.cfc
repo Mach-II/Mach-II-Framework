@@ -204,6 +204,7 @@ Notes:
 		<cfset var persistId = "" />
 		<cfset var persistedData = StructNew() />
 		<cfset var dataStorage = "" />
+		<cfset var key = "" />
 		
 		<!--- Check they have a persistId in the event --->
 		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
@@ -216,6 +217,8 @@ Notes:
 					<!--- Get the data and delete it from the dataStorage --->
 					<cfset persistedData = dataStorage.data[persistId]>
 					<cfset StructDelete(dataStorage.data, persistId, false) />
+					<cfset key = StructFindValue(dataStorage.timestamps, persistId, "one") />
+					<cfset StructDelete(dataStorage.timestamps, key[1].key, false) />
 					<cfcatch type="any">
 						<!--- Ingore this error --->
 					</cfcatch>
@@ -239,7 +242,7 @@ Notes:
 		
 		<!--- Save the data/timestamp --->
 		<cfset dataStorage.data[persistId] = arguments.eventArgs />
-		<cfset dataStorage.timestamps[timestamp] = persistId />
+		<cfset dataStorage.timestamps[timestamp & "_" & persistId] = persistId />
 		
 		<cfreturn persistId />
 	</cffunction>
@@ -312,27 +315,30 @@ Notes:
 		hint="Cleanups the persist event data storage.">
 		
 		<cfset var timestamp = createTimestamp() />
-		<cfset var diffTimestamp = DateAdd("n", variables.cleanupDifference, timestamp) />
+		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
 		<cfset var dataStorage = getPersistEventStorage() />
 		<cfset var dataTimestampArray = "" />
+		<cfset var key = "" />
 		<cfset var i = "" />
 		
 		<!--- Do cleanup --->
-		<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
+		<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
 			<cflock name="_MachIIPersistEventStorageCleanup" type="exclusive" timeout="5" throwontimeout="false">
-				<cfif DateCompare(dataStorage.lastCleanup, diffTimestamp) EQ 1>
-					<cfset dataStorage.lastCleanup = timestamp />
+				<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
 					
 					<!--- Get array of timestamps and sort --->
 					<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
-					<cfset ArraySort(dataTimestampArray, "numeric", "asc") />
+					<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
 					
 					<!--- Cleanup --->
 					<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
 						<cftry>
-							<cfif DateCompare(dataTimestampArray[i], diffTimestamp) EQ 1>
-								<cfset StructDelete(dataStorage.data, dataStorage.timestamps[dataTimestampArray[i]], false) />
-								<cfset StructDelete(dataStorage.timestamps, dataTimestampArray[i], false) />
+							<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
+								<!--- The order of the deletes is important as the timestamp may be
+									around, but the data already deleted --->
+								<cfset key = dataTimestampArray[i] />
+								<cfset StructDelete(dataStorage.timestamps, key, false) />
+								<cfset StructDelete(dataStorage.data, ListLast(key, "_"), false) />
 							<cfelse>
 								<cfbreak />
 							</cfif>
@@ -342,6 +348,9 @@ Notes:
 						</cftry>
 					</cfloop>
 				</cfif>
+				
+				<!--- Reset the timestamp of the last cleanup --->
+				<cfset dataStorage.lastCleanup = timestamp />
 			</cflock>
 		</cfif>
 	</cffunction>
@@ -353,7 +362,8 @@ Notes:
 	
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
 		hint="Creates a timestamp for use.">
-		<cfreturn REReplace(Now(), "[ts[:punct:][:space:]]", "", "ALL") />
+		<cfargument name="time" type="date" required="false" default="#Now()#" />
+		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
 	<!---

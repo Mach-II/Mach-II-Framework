@@ -37,7 +37,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurableProperties = ArrayNew(1) />
 	<cfset variables.parentPropertyManager = "">
-	<cfset variables.majorVersion = "1.5.0" />
+	<cfset variables.majorVersion = "1.6.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.utils = "" />
 	<cfset variables.propsNotAllowInModule =
