@@ -172,7 +172,7 @@ Notes:
 			<cfreturn getParent().getListener(arguments.listenerName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ListenerNotDefined" 
-				message="Listener with name '#arguments.listenerName#' is not defined. Listeners: '#ArrayToList(getListenerNames())#'" />
+				message="Listener with name '#arguments.listenerName#' is not defined. Available Listeners: '#ArrayToList(getListenerNames())#'" />
 		</cfif>
 	</cffunction>
 	
