@@ -70,6 +70,8 @@ Notes:
 		<cfset var requestManager = "" />
 		<cfset var listenerManager = "" />
 		<cfset var parentListenerManager = "" />
+		<cfset var messageManager = "" />
+		<cfset var parentMessageManager = "" />
 		<cfset var filterManager = "" />
 		<cfset var parentFilterManager = "" />
 		<cfset var subroutineManager = "" />
@@ -148,6 +150,7 @@ Notes:
 			<cfset appManager.setParent(arguments.parentAppManager) />
 			<cfset parentPropertyManager = appManager.getParent().getPropertyManager() />
 			<cfset parentListenerManager = appManager.getParent().getListenerManager() />
+			<cfset parentMessageManager = appManager.getParent().getMessageManager() />
 			<cfset parentFilterManager = appManager.getParent().getFilterManager() />
 			<cfset parentSubroutineManager = appManager.getParent().getSubroutineManager() />
 			<cfset parentEventManager = appManager.getParent().getEventManager() />
@@ -158,8 +161,8 @@ Notes:
 		<!--- 
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important (do not change!):
-		utils, propertyManager, requestManager, listenerManager, filterManager, subroutineManager, 
-		eventManager, viewManager, pluginManager and then moduleManager
+		utils, propertyManager, requestManager, listenerManager, messageManager, filterManager, 
+		subroutineManager, eventManager, viewManager, pluginManager and then moduleManager
 		--->
 		
 		<!--- Set the utils which is a singleton across the application --->
@@ -194,6 +197,15 @@ Notes:
 			<cfset listenerManager.loadXml(arguments.overrideXml, true) />
 		</cfif>
 		<cfset appManager.setListenerManager(listenerManager) />
+
+		<cfset messageManager = CreateObject("component", "MachII.framework.MessageManager").init(appManager, parentMessageManager) />
+		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
+			<cfset messageManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
+		</cfloop>
+		<cfif Len(arguments.overrideXml)>
+			<cfset messageManager.loadXml(arguments.overrideXml, true) />
+		</cfif>
+		<cfset appManager.setMessageManager(messageManager) />
 		
 		<cfset filterManager = CreateObject("component", "MachII.framework.EventFilterManager").init(appManager, parentFilterManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">

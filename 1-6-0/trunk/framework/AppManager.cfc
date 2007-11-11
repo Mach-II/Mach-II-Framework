@@ -35,6 +35,7 @@ Notes:
 	<cfset variables.appLoader = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.listenerManager = "" />
+	<cfset variables.messageManager = "" />
 	<cfset variables.eventManager = "" />
 	<cfset variables.moduleManager = "" />
 	<cfset variables.propertyManager = "" />
@@ -65,6 +66,7 @@ Notes:
 		<cfset getRequestManager().configure() />
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
+		<cfset getMessageManager().configure() />
 		<cfset getFilterManager().configure() />
 		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
@@ -166,6 +168,14 @@ Notes:
 	</cffunction>	
 	<cffunction name="getListenerManager" access="public" returntype="MachII.framework.ListenerManager" output="false">
 		<cfreturn variables.listenerManager />
+	</cffunction>
+
+	<cffunction name="setMessageManager" access="public" returntype="void" output="false">
+		<cfargument name="messageManager" type="MachII.framework.MessageManager" required="true" />
+		<cfset variables.messageManager = arguments.messageManager />
+	</cffunction>	
+	<cffunction name="getMessageManager" access="public" returntype="MachII.framework.MessageManager" output="false">
+		<cfreturn variables.messageManager />
 	</cffunction>
 
 	<cffunction name="setModuleManager" access="public" returntype="void" output="false">

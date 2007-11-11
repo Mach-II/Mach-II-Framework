@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
 --->
@@ -54,6 +54,9 @@ Notes:
 		<!--- announce --->
 		<cfelseif arguments.commandNode.xmlName EQ "announce">
 			<cfset command = setupAnnounce(arguments.commandNode) />
+		<!--- publish --->
+		<cfelseif arguments.commandNode.xmlName EQ "publish">
+			<cfset command = setupPublish(arguments.commandNode) />
 		<!--- event-mapping --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-mapping">
 			<cfset command = setupEventMapping(arguments.commandNode) />
@@ -124,6 +127,19 @@ Notes:
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupPublish" access="private" returntype="MachII.framework.commands.PublishCommand" output="false"
+		hint="Sets up a publish command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var message = arguments.commandNode.xmlAttributes["message"] />
+		<cfset var messageHandler = getAppManager().getMessageManager().getMessageHandler(message) />
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.PublishCommand").init(message, messageHandler) />
 		
 		<cfreturn command />
 	</cffunction>
