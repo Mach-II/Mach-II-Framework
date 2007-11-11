@@ -121,9 +121,11 @@ Notes:
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered modules.">
+		
 		<cfset var key = "" />
+		
 		<cfloop collection="#variables.modules#" item="key">
-			<cfset getModule(key).configure(getDtdPath(), getValidateXML()) />
+			<cfset variables.modules[key].configure(getDtdPath(), getValidateXML()) />
 		</cfloop>
 	</cffunction>
 	
