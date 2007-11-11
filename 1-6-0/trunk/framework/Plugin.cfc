@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.6.0
 
 Notes:
 All user-defined plugins extend this base plugin component.
@@ -96,6 +96,20 @@ All user-defined plugins extend this base plugin component.
 	
 	<cffunction name="postProcess" access="public" returntype="void" output="true"
 		hint="Plugin point called after Event processing finishes. Override to provide custom functionality.">
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
+			hint="The EventContext of the processing." />
+		<!--- Override to provide custom functionality. --->
+	</cffunction>
+
+	<cffunction name="onSessionStart" access="public" returntype="void" output="true"
+		hint="Plugin point called when a session starts. Override to provide custom functionality.">
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
+			hint="The EventContext of the processing." />
+		<!--- Override to provide custom functionality. --->
+	</cffunction>
+	
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="true"
+		hint="Plugin point called when a session ends. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 		<!--- Override to provide custom functionality. --->

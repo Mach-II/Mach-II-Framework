@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
 --->
@@ -47,12 +47,16 @@ Notes:
 	<cfset variables.postViewPluginsPosition = "" />
 	<cfset variables.postProcessPlugins = ArrayNew(1) />
 	<cfset variables.postProcessPluginsPosition = "" />
+	<cfset variables.onSessionStartPlugins = ArrayNew(1) />
+	<cfset variables.onSessionStartPluginsPosition = "" />
+	<cfset variables.onSessionEndPlugins = ArrayNew(1) />
+	<cfset variables.onSessionEndPluginsPosition = "" />
 	<cfset variables.handleExceptionPlugins = ArrayNew(1) />
 	<cfset variables.handleExceptionPluginsPosition = "" />
 	<cfset variables.nPlugins = 0 />
 	<cfset variables.parentPluginManager = "" />
 	<cfset variables.utils = "" />
-	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,handleException") />
+	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,onSessionStart,onSessionEnd,handleException") />
 	<cfset variables.runParent = "" />
 
 	<!---
@@ -379,6 +383,26 @@ Notes:
 		</cfif>
 	</cffunction>
 
+	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
+		hint="onSessionStart() is called at the start of a session.">
+
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
+			<cfset variables.onSessionStartPlugins[i].onSessionStart() />
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
+		hint="onSessionEnd() is called at the end of a session.">
+
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
+			<cfset variables.onSessionEndPlugins[i].onSessionEnd() />
+		</cfloop>
+	</cffunction>
+
 	<cffunction name="handleException" access="public" returntype="void" output="true"
 		hint="handleException() is called for each exception caught by the framework.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
@@ -422,7 +446,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="gatherPluginMetaData" access="private" returntype="void" output="false"
-		hint="Gathers meta data about a plugin.">
+		hint="A recursive method that gathers meta data about a plugin.">
 		<cfargument name="metadata" type="struct" required="true" />
 		<cfargument name="points" type="struct" required="true" />
 

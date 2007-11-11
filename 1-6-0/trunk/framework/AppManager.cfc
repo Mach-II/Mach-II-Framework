@@ -70,7 +70,7 @@ Notes:
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
 		
-		<!--- Module Manager is a singleton only call if this the parent AppManager --->
+		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
 		<cfif NOT IsObject(getParent())>
 			<cfset getModuleManager().configure() />
 		</cfif>
@@ -81,6 +81,46 @@ Notes:
 		<cfargument name="createNew" type="boolean" required="false" default="false"
 			hint="Pass true to return a new instance of a RequestHandler." />
 		<cfreturn getRequestManager().getRequestHandler(arguments.createNew) />
+	</cffunction>
+	
+	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
+		hint="Handles on session start application event.">
+		
+		<cfset var modules = "" />
+		<cfset var key = "" />
+		
+		<!--- Call this instance first --->
+		<cfset getPluginManager().onSessionStart() />
+		
+		<!--- Call module instances only if this is the parent AppManager --->
+		<cfif NOT IsObject(getParent())>
+			
+			<cfset modules = variables.moduleManager.getModules() />
+			
+			<cfloop collection="#modules#" item="key">
+				<cfset modules[key].getModuleAppManager().onSessionStart() />
+			</cfloop>
+		</cfif>
+	</cffunction>
+
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
+		hint="Handles on session end application event.">
+		
+		<cfset var modules = "" />
+		<cfset var key = "" />
+		
+		<!--- Call this instance first --->
+		<cfset getPluginManager().onSessionEnd() />
+		
+		<!--- Call module instances only if this is the parent AppManager --->
+		<cfif NOT IsObject(getParent())>
+			
+			<cfset modules = variables.moduleManager.getModules() />
+			
+			<cfloop collection="#modules#" item="key">
+				<cfset modules[key].getModuleAppManager().onSessionEnd() />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<!---

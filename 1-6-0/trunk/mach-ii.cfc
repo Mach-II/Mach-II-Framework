@@ -19,14 +19,10 @@ Author: Peter J. Farrell (pjf@maestropublishing.com)
 $Id$
 
 Created version: 1.1.1
-Updated version: 1.5.0
-
-Acknowledgement:
-Thank you to eCivis, Inc. for being the driving force behind 
-the development of this component.
+Updated version: 1.6.0
 
 Notes:
-- Compatible only with ColdFusion MX 7.0+.
+- Compatible only with Adobe ColdFusion MX 7.0+ or NewAtlanta BlueDragon 7+.
 - Call loadFramework in your onApplicationStart() event.
 - Call handleRequest in your onRequestStart() or onRequest() events.
 
@@ -55,13 +51,49 @@ the handleRequest() method in the onRequest() application event.
 	<!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 	<cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 	<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_1.dtd. --->
-	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_5_0.dtd')#" />	
+	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_6_0.dtd')#" />	
+	<!--- Set the request timeout for loading of the framework. Defaults to 120 --->
+	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
+
+	<!---
+	APPLICATION SPECIFIC EVENTS
+	--->
+	<cffunction name="onApplicationStart" access="public" returntype="boolean" output="false"
+		hint="Run on the application start event. Override to provide customize functionality.">
+		<!--- Load up the framework --->
+		<cfset LoadFramework() />
+		
+		<cfreturn TRUE />
+	</cffunction>
+	
+	<cffunction name="onRequestStart" access="public" returntype="void" output="true"
+		hint="Handles Mach-II requests. Output must be set to true. Override to provide custom functionality.">
+		<cfargument name="targetPage" type="string" required="true" />
+
+		<!--- Handle Mach-II request --->
+		<cfif arguments.targetPage EQ getProperty("urlBase")>
+			<cfset handleRequest() />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
+		hint="Handles on session start event if sessions are enabled for this application.">
+		<cfset getAppManager().onSessionStart() />
+	</cffunction>
+	
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
+		hint="Handles on session end event if sessions are enabled for this application.">
+		<cfset getAppManager().onSessionEnd() />
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="loadFramework" access="public" returntype="void" output="false"
 		hint="Loads the framework. Only call in onApplicationStart() event.">		
+		<!--- Set the timeout --->
+		<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
+		
 		<!--- Create the AppLoader. No locking requires if called during the onApplicationStart() event. --->
 		<cfset application[MACHII_APP_KEY] = StructNew() />
 		<cfset application[MACHII_APP_KEY].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_APP_KEY, MACHII_VALIDATE_XML) />
