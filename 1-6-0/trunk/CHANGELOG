@@ -38,7 +38,18 @@ Re-built cleanup routine to ensure totatl cleanup of abandoned redirect persist 
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Application.cfc Bootstrapper Enhancements and OnSessionStart / OnSessionEnd Integration
+Add onSessionStart / onSessionEnd integration as new plugin point.  This enhancement helps 
+developers to integrate third-party modules into a base application with ease and/or to 
+encapsulate session application events into Mach-II rather than maintaining application 
+event code in their Application.cfc file.
 
+The bootstrapper (mach-ii.cfc) was added onApplicationStart and onRequestStart methods to
+allow for easier setup of Mach-II applications. These methods can be overrided for custom
+functionality.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/5
+(2007-11-10 pfarrell)
 
 ------------------------------------------------
 Internal Framework Improvements / Enhancements
