@@ -57,20 +57,18 @@ Notes:
 									, threadId=threadId
 									, waitForThreads=waitForThreads } />
 		
+		<!--- Set the thread id to the thread ids (passed by reference) --->
 		<cfset arguments.threadIds[threadId] = "" />
 		
 		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the even to the thread) --->
-		<cfset request._MachIIThreadingAdapter[threadId] = StructNew() />
-		<cfset request._MachIIThreadingAdapter[threadId].callback = arguments.callback />
-		<cfset request._MachIIThreadingAdapter[threadId].method = arguments.method />
-		<cfset request._MachIIThreadingAdapter[threadId].parameters = arguments.parameters />
+		<cfset request._MachIIThreadingAdapter[threadId] = { component=arguments.callback
+																, method=arguments.method
+																, argumentCollection=arguments.parameters } />
 		
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread attributeCollection="#collection#">
 			<cftry>
-				<cfinvoke component="#request._MachIIThreadingAdapter[threadId].callback#"
-					method="#request._MachIIThreadingAdapter[threadId].method#"
-					argumentcollection="#request._MachIIThreadingAdapter[threadId].parameters#" />
+				<cfinvoke attributeCollection="#request._MachIIThreadingAdapter[threadId]#" />
 					
 				<cfcatch type="any">
 					<!--- If we're going to join later, then save the exception --->
