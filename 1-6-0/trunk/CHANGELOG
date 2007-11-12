@@ -38,6 +38,15 @@ Re-built cleanup routine to ensure totatl cleanup of abandoned redirect persist 
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Message Subscriber Listeners Enhancement (AKA Broadcast Style Listeners Invocation)
+This enhancement allows developers another way to invoke listeners by publishing messages.
+This lets developers easily swap different listener methods or add addition listeners that 
+respond to a message by changing the subscribes directive instead of changing the a bunch 
+of notify commands throughout an XML file since listeners are decoupled from the event-handlers.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/4
+(2007-11-11 pfarrell)
+
 * Application.cfc Bootstrapper Enhancements and OnSessionStart / OnSessionEnd Integration
 Add onSessionStart / onSessionEnd integration as new plugin point.  This enhancement helps 
 developers to integrate third-party modules into a base application with ease and/or to 
