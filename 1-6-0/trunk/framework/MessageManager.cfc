@@ -31,9 +31,9 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.messageHandlers = StructNew() />
+	<cfset variables.threadingAdapter = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.parentMessageManager = "" />
-	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -45,7 +45,7 @@ Notes:
 			hint="Optional argument for a parent message manager. If there isn't one default to empty string." />	
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
+		<cfset setThreadingAdapter(createThreadingAdapter()) />
 		
 		<cfif IsObject(arguments.parentMessageManager)>
 			<cfset setParent(arguments.parentMessageManager) />
@@ -115,23 +115,23 @@ Notes:
 				<cfif StructKeyExists(messageSubscribersNodes[i].xmlAttributes, "multithreaded")>
 					<cfset messageMultithreaded = messageSubscribersNodes[i].xmlAttributes["multithreaded"] />
 				<cfelse>
-					<cfset messageMultithreaded = false />
+					<cfset messageMultithreaded = true />
 				</cfif>
 				
 				<cfif StructKeyExists(messageSubscribersNodes[i].xmlAttributes, "waitForThreads")>
 					<cfset messageWaitForThreads = messageSubscribersNodes[i].xmlAttributes["waitForThreads"] />
 				<cfelse>
-					<cfset messageWaitForThreads = false />
+					<cfset messageWaitForThreads = true />
 				</cfif>
 				
 				<cfif StructKeyExists(messageSubscribersNodes[i].xmlAttributes, "timeout")>
 					<cfset messageTimeout = messageSubscribersNodes[i].xmlAttributes["timeout"] />
 				<cfelse>
-					<cfset messageTimeout = 60 />
+					<cfset messageTimeout = 0 />
 				</cfif>
 				
 				<!--- Setup the Message Handler --->
-				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageMultithreaded, messageWaitForThreads, messageTimeout) />
+				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
 								
 				<!--- For each message, parse all the parameters --->
 				<cfif StructKeyExists(messageSubscribersNodes[i], "subscribe")>
@@ -216,27 +216,69 @@ Notes:
 		<cfreturn StructKeyArray(variables.messageHandlers) />
 	</cffunction>
 
+	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean if threading is allowed.">
+		<cfreturn IsObject(getThreadingAdapter()) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="createThreadingAdapter" access="private" returntype="any" output="false"
+		hint="Creates a threading adapter if the ColdFusion engine has threading capabilities.">
+		
+		<cfset var threadingAdapter = "" />
+		<cfset var serverName = server.coldfusion.productname />
+		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
+		<cfset var type = "" />
+		
+		<!--- Adobe ColdFusion 8+ --->
+		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
+			<cfset type = "MachII.util.threading.ThreadingAdapterCF" />
+		<!--- NewAtlanta BlueDragon 7+ --->
+		<cfelseif FindNoCase("BlueDragon", serverName) AND serverMajorVersion GTE 7>
+			<cfset type = "MachII.util.threading.ThreadingAdapterBD" />
+		</cfif>
+		
+		<!--- Create a threading adapter if there is a type --->
+		<cfif Len(type)>
+			<cfset threadingAdapter = CreateObject("component", type).init() />
+		</cfif>
+		
+		<cfreturn threadingAdapter />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setAppManager" access="public" returntype="void" output="false"
-		hint="Returns the AppManager instance this ListenerManager belongs to.">
+		hint="Sets the AppManager instance this MessageManager belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Sets the AppManager instance this ListenerManager belongs to.">
+		hint="Returns the AppManager instance this MessageManager belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false"
-		hint="Returns the parent MessageManager instance this MessageManager belongs to.">
+		hint="Sets the parent MessageManager instance this MessageManager belongs to.">
 		<cfargument name="parentMessageManager" type="MachII.framework.MessageManager" required="true" />
 		<cfset variables.parentMessageManager = arguments.parentMessageManager />
 	</cffunction>
 	<cffunction name="getParent" access="public" returntype="any" output="false"
-		hint="Sets the parent MessageManager instance this MessageManager belongs to. It will return empty string if no parent is defined.">
+		hint="Returns the parent MessageManager instance this MessageManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentMessageManager />
+	</cffunction>
+	
+	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false"
+		hint="Sets a threading adapter.">
+		<cfargument name="threadingAdapter" type="any" required="true" />
+		<cfset variables.threadingAdapter = arguments.threadingAdapter />
+	</cffunction>
+	<cffunction name="getThreadingAdapter" access="public" returntype="any" output="false"
+		hint="Gets a threading adapter.">
+		<cfreturn variables.threadingAdapter />
 	</cffunction>
 	
 </cfcomponent>

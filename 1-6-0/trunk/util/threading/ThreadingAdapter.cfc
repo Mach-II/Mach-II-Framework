@@ -1,0 +1,68 @@
+<!---
+License:
+Copyright 2007 GreatBizTools, LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright: GreatBizTools, LLC
+Author: Peter J. Farrell (peter@mach-ii.com)
+$Id: MessageHandler.cfc 549 2007-11-11 22:19:47Z peterfarrell $
+
+Created version: 1.6.0
+Updated version: 1.6.0
+
+Notes:
+--->
+<cfcomponent displayname="ThreadingAdapter"
+	output="false"
+	hint="Base threading adapter component. This is a base class and is abstract. Please instantiate a concrete adapter.">
+
+	<!---
+	PROPERTIES
+	--->
+	
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="init" access="public" returntype="void" output="false"
+		hint="This is a base class and is abstract. Please instantiate a concrete adapter.">
+		<cfabort showerror="This is a base class and is abstract. Please instantiate a concrete adapter." />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS
+	--->
+	<cffunction name="run" access="public" returntype="void" output="false"
+		hint="Runs a thread.">
+		<cfargument name="threadIds" type="struct" required="true" />
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
+		
+	</cffunction>
+	
+	<cffunction name="join" access="public" returntype="void" output="false"
+		hint="Joins a group of threads.">
+		<cfargument name="threadIds" type="struct" required="true" />
+		
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="createThreadId" access="private" returntype="string" output="false"
+		hint="Creates a thread id.">
+		<cfreturn "_" & Replace(CreateUUID(), "-", "", "all") />
+	</cffunction>
+
+</cfcomponent>
