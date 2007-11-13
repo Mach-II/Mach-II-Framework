@@ -128,6 +128,9 @@ Notes:
 				<cfif getParseSes()>
 					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
 				</cfif>
+				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter()>
+					<cfset params[i] = "_-_NULL_-_" />
+				</cfif>
 				<cfset queryString = queryString & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
@@ -169,7 +172,7 @@ Notes:
 			
 			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 			
-				<cfset names = ListToArray(getUtils().listFix(arguments.pathInfo, getSeriesDelimiter(), "_-_NULL_-_"), getSeriesDelimiter()) />
+				<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
 				
 				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
 					<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
