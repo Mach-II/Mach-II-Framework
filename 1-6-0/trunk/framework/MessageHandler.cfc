@@ -45,7 +45,7 @@ Notes:
 		<cfargument name="multithreaded" type="boolean" required="true" />
 		<cfargument name="waitForThreads" type="boolean" required="true" />
 		<cfargument name="timeout" type="numeric" required="true" />
-		<cfargument name="threadingAdapter" type="any" required="true" />
+		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 
 		<!--- run setters --->
 		<cfset setMultithreaded(arguments.multithreaded) />
@@ -67,24 +67,28 @@ Notes:
 		<cfset var invokers = getMessageSubscriberInvokers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
 		<cfset var threadIds = StructNew() />
+		<cfset var publishThreadIdsInEvent = arguments.event.setArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
 		<cfset var i = 0 />
 		
-		<!--- Run in parallel if allowed and multithreaded is requested --->
-		<cfif getMultithreaded() AND allowThreading()>
+		<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
+		<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
 			
 			<!--- Setup parameters --->
 			<cfset parameters.event = arguments.event />
 			
+			<!--- Run all the threads --->
 			<cfloop collection="#invokers#" item="i">
-				<cfset threadingAdapter.run(threadIds, invokers[i], "invokeListener", parameters, getWaitForThreads()) />
+				<cfset threadingAdapter.run(threadIds, invokers[i], "invokeListener", parameters) />
 			</cfloop>
 			
 			<!--- Wait and join --->
 			<cfif getWaitForThreads()>
 				<cfset threadingAdapter.join(threadIds, getTimeout()) />
+			<!--- Or set thread ids into the event --->
 			<cfelse>
-				<cfset arguments.event.setArg("_publishThreadIds", threadIds) />
+				<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
+				<cfset arguments.event.setArg("_publishThreadIds", publishThreadIdsInEvent) />
 			</cfif>
 		<!--- Run in serial --->
 		<cfelse>
@@ -116,11 +120,6 @@ Notes:
 		<cfreturn StructKeyArray(variables.messageSubscriberInvokers) />
 	</cffunction>
 	
-	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
-		hint="Returns a boolean if threading is allowed.">
-		<cfreturn IsObject(getThreadingAdapter()) />
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
@@ -150,10 +149,10 @@ Notes:
 
 	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false"
 		hint="Sets a threading adapter.">
-		<cfargument name="threadingAdapter" type="any" required="true" />
+		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 		<cfset variables.threadingAdapter = arguments.threadingAdapter />
 	</cffunction>
-	<cffunction name="getThreadingAdapter" access="private" returntype="any" output="false"
+	<cffunction name="getThreadingAdapter" access="private" returntype="MachII.util.threading.ThreadingAdapter" output="false"
 		hint="Gets a threading adapter.">
 		<cfreturn variables.threadingAdapter />
 	</cffunction>

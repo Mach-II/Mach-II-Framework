@@ -45,7 +45,7 @@ Notes:
 			hint="Optional argument for a parent message manager. If there isn't one default to empty string." />	
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setThreadingAdapter(createThreadingAdapter()) />
+		<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 		
 		<cfif IsObject(arguments.parentMessageManager)>
 			<cfset setParent(arguments.parentMessageManager) />
@@ -216,38 +216,6 @@ Notes:
 		<cfreturn StructKeyArray(variables.messageHandlers) />
 	</cffunction>
 
-	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
-		hint="Returns a boolean if threading is allowed.">
-		<cfreturn IsObject(getThreadingAdapter()) />
-	</cffunction>
-	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="createThreadingAdapter" access="private" returntype="any" output="false"
-		hint="Creates a threading adapter if the ColdFusion engine has threading capabilities.">
-		
-		<cfset var threadingAdapter = "" />
-		<cfset var serverName = server.coldfusion.productname />
-		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
-		<cfset var type = "" />
-		
-		<!--- Adobe ColdFusion 8+ --->
-		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
-			<cfset type = "MachII.util.threading.ThreadingAdapterCF" />
-		<!--- NewAtlanta BlueDragon 7+ --->
-		<cfelseif FindNoCase("BlueDragon", serverName) AND serverMajorVersion GTE 7>
-			<cfset type = "MachII.util.threading.ThreadingAdapterBD" />
-		</cfif>
-		
-		<!--- Create a threading adapter if there is a type --->
-		<cfif Len(type)>
-			<cfset threadingAdapter = CreateObject("component", type).init() />
-		</cfif>
-		
-		<cfreturn threadingAdapter />
-	</cffunction>
-
 	<!---
 	ACCESSORS
 	--->
@@ -273,10 +241,10 @@ Notes:
 	
 	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false"
 		hint="Sets a threading adapter.">
-		<cfargument name="threadingAdapter" type="any" required="true" />
+		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 		<cfset variables.threadingAdapter = arguments.threadingAdapter />
 	</cffunction>
-	<cffunction name="getThreadingAdapter" access="public" returntype="any" output="false"
+	<cffunction name="getThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false"
 		hint="Gets a threading adapter.">
 		<cfreturn variables.threadingAdapter />
 	</cffunction>

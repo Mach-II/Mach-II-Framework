@@ -25,18 +25,19 @@ Notes:
 --->
 <cfcomponent displayname="ThreadingAdapter"
 	output="false"
-	hint="Base threading adapter component. This is a base class and is abstract. Please instantiate a concrete adapter.">
+	hint="Base threading adapter component. This is a base class. Please instantiate a concrete adapter.">
 
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.allowThreading = FALSE />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="void" output="false"
-		hint="This is a base class and is abstract. Please instantiate a concrete adapter.">
-		<cfabort showerror="This is a base class and is abstract. Please instantiate a concrete adapter." />
+	<cffunction name="init" access="public" returntype="ThreadingAdapter" output="false"
+		hint="This is a base class. Please instantiate a concrete adapter.">
+		<cfreturn this />
 	</cffunction>
 	
 	<!---
@@ -48,13 +49,18 @@ Notes:
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
-		
+		<cfabort showerror="This is a base class. Please instantiate a complete adapter." />
 	</cffunction>
 	
 	<cffunction name="join" access="public" returntype="void" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="struct" required="true" />
-		
+		<cfabort showerror="This is a base class. Please instantiate a complete adapter." />
+	</cffunction>
+	
+	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean if threading is allowed.">
+		<cfreturn variables.allowThreading />
 	</cffunction>
 	
 	<!---

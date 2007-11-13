@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.allowThreading = TRUE />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -49,21 +50,15 @@ Notes:
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="true" />
-		<cfargument name="waitForThreads" type="boolean" required="true" />
 		
 		<cfset var threadId = createThreadId() />
-		<cfset var collection = { action="run"
-									, name=threadId
-									, threadId=threadId
-									, waitForThreads=waitForThreads } />
+		<cfset var collection = { action="run", name=threadId, threadId=threadId } />
 		
 		<!--- Set the thread id to the thread ids (passed by reference) --->
 		<cfset arguments.threadIds[threadId] = "" />
 		
 		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the even to the thread) --->
-		<cfset request._MachIIThreadingAdapter[threadId] = { component=arguments.callback
-																, method=arguments.method
-																, argumentCollection=arguments.parameters } />
+		<cfset request._MachIIThreadingAdapter[threadId] = { component=arguments.callback, method=arguments.method, argumentCollection=arguments.parameters } />
 		
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread attributeCollection="#collection#">
@@ -71,13 +66,10 @@ Notes:
 				<cfinvoke attributeCollection="#request._MachIIThreadingAdapter[threadId]#" />
 					
 				<cfcatch type="any">
-					<!--- If we're going to join later, then save the exception --->
-					<cfif waitForThreads>
-						<cfset thread.caughtException = cfcatch />
-					<!--- Otherwise, rethrow so this will be logged --->
-					<cfelse>
-						<cfrethrow />
-					</cfif>
+					<!--- Save the exception in the thread since we cannot copy the thread.error into a cfthrow (bug?) --->
+					<cfset thread.caughtException = cfcatch />
+					<!--- Rethrow so this will be logged --->
+					<cfrethrow />
 				</cfcatch>
 			</cftry>
 		</cfthread>
@@ -89,23 +81,20 @@ Notes:
 		<cfargument name="timeout" type="numeric" required="true" />
 		
 		<cfset var collection = { action="join", name=StructKeyList(arguments.threadIds) } />
-		<cfset var thread = "" />
 		<cfset var i = "" />
 		
 		<!--- ColdFusion 8 does not allow a timeout="0" --->
 		<cfif arguments.timeout GT 0>
-			<cfset collection.timeout = arguments.timeout />
+			<cfset collection.timeout = convertSecondsToMilliseconds(arguments.timeout) />
 		</cfif>
 		
 		<!--- ResultArgs are automatically put into the event so we just have to wait for all threads --->
 		<cfthread attributeCollection="#collection#" />
 		
-		<!--- Check for un-handled errors in the threads --->
+		<!--- Check for unhandled errors in the threads --->
 		<cfloop collection="#arguments.threadIds#" item="i">
-			<cfset thread = cfthread[i] />
-			
-			<cfif StructKeyExists(thread, "caughtException")>
-				<cfthrow object="#thread.caughtException#" />
+			<cfif cfthread[i].status is "terminated">
+				<cfthrow object="#cfthread[i].caughtException#" />
 			</cfif>
 		</cfloop>
 	</cffunction>
