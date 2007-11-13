@@ -128,7 +128,7 @@ Notes:
 				<cfif getParseSes()>
 					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
 				</cfif>
-				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter()>
+				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
 					<cfset params[i] = "_-_NULL_-_" />
 				</cfif>
 				<cfset queryString = queryString & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
