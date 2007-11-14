@@ -358,8 +358,8 @@ Notes:
 		
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
-			<!--- Check to see if the dtd file exists --->
-			<cfif NOT FileExists(arguments.configDtdPath)>
+			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
+			<cfif NOT FindNoCase("http://", arguments.configDtdPath) AND NOT FileExists(arguments.configDtdPath)>
 				<cfthrow type="MachII.framework.XmlValidationException"
 					message="Unable to find the DTD for xml validation. Please check that this a valid path."
 					detail="dtdPath=#arguments.configDtdPath#" />
