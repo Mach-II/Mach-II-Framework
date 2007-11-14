@@ -358,7 +358,16 @@ Notes:
 		
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
+			<!--- Check to see if the dtd file exists --->
+			<cfif NOT FileExists(arguments.configDtdPath)>
+				<cfthrow type="MachII.framework.XmlValidationException"
+					message="Unable to find the DTD for xml validation. Please check that this a valid path."
+					detail="dtdPath=#arguments.configDtdPath#" />
+			</cfif>
+			
 			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath) />
+			
+			<!--- Throw an error if the Xml config file does not validate --->
 			<cfif NOT validationResult.Status>
 				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
 				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlPath, arguments.configDtdPath) />
