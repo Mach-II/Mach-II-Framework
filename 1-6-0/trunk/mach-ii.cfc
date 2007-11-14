@@ -71,7 +71,7 @@ the handleRequest() method in the onRequest() application event.
 		<cfargument name="targetPage" type="string" required="true" />
 
 		<!--- Handle Mach-II request --->
-		<cfif arguments.targetPage EQ getProperty("urlBase")>
+		<cfif FindNoCase(getProperty("urlBase"), arguments.targetPage)>
 			<cfset handleRequest() />
 		</cfif>
 	</cffunction>
