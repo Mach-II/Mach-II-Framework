@@ -169,7 +169,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 		<mkdir dir="${zip}"/>
 		<tstamp>
-			<format property="formattedDatetime" pattern="yyyy-MM-dd"/>
+			<format property="formattedDatetime" pattern="yyyy-MM-dd_HH-mm-ss"/>
 		</tstamp>
 		<zip destfile="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
 			basedir="${dest}"/>
