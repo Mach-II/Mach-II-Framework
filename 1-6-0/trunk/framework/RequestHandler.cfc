@@ -118,8 +118,10 @@ Notes:
 			<cfcatch type="any">
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
 				<cfset setupEventContext(appManager) />
+				<!--- Build a faux event for the exception so we know everything about it --->
+				<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
 				<cfset exception = wrapException(cfcatch) />
-				<cfset getEventContext().handleException(exception, true) />
+				<cfset getEventContext().handleException(exception, true, nextEvent) />
 			</cfcatch>
 		</cftry>
 		
