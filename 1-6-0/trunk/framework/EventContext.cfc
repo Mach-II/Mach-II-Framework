@@ -106,10 +106,8 @@ Notes:
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch  type="any">
-				<!--- Build a faux event for the exception so we know everything about it --->
-				<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName(), false) />
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
-				<cfset handleException(exception, true, nextEvent) />
+				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -213,7 +211,6 @@ Notes:
 		hint="Handles an exception.">
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
-		<cfargument name="exceptionEvent" type="MachII.framework.Event" required="false" default="" />
 		
 		<cfset var nextEvent = "" />
 		<cfset var eventArgs = StructNew() />
@@ -227,8 +224,6 @@ Notes:
 			<cfset eventArgs.exception = arguments.exception />
 			<cfif hasCurrentEvent()>
 				<cfset eventArgs.exceptionEvent = getCurrentEvent() />
-			<cfelseif IsObject(arguments.exceptionEvent)>
-				<cfset eventArgs.exceptionEvent = arguments.exceptionEvent />
 			</cfif>
 			
 			<!--- Call the handleException point in the plugins for the current event first --->

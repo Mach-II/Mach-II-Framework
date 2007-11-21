@@ -184,12 +184,12 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
 		<cfargument name="requestName" type="string" required="false" default="" />
 		<cfargument name="requestModuleName" type="string" required="false" default="" />
-		<cfargument name="checkIfEventIsDefined" type="boolean" required="false" default="true" />
+		<cfargument name="eventType" type="string" required="false" default="MachII.framework.Event" />
 		
 		<cfset var event = "" />
 		
-		<cfif NOT arguments.checkIfEventIsDefined OR isEventDefined(arguments.eventName, true, arguments.moduleName)>
-			<cfset event = CreateObject("component", "MachII.framework.Event").init(arguments.eventName, arguments.eventArgs, arguments.requestName, arguments.requestModuleName, arguments.moduleName) />
+		<cfif isEventDefined(arguments.eventName, true, arguments.moduleName)>
+			<cfset event = CreateObject("component", arguments.eventType).init(arguments.eventName, arguments.eventArgs, arguments.requestName, arguments.requestModuleName, arguments.moduleName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 				message="EventHandler for event '#arguments.eventName#' in module '#arguments.moduleName#' is not defined." />
