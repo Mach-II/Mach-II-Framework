@@ -23,7 +23,7 @@ Notes:
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
 	<property name="majorVersion" value="1-6-0"/>
-	<property name="baseSvnUrl" value="http://svn.mach-ii.com/framework/${majorVersion}/"/>
+	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	
 	<property name="ftp.server" value="mach-ii.com"/>
