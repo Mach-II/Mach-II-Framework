@@ -92,6 +92,7 @@ Notes:
 		<cfset var nextModuleName = arguments.moduleName />
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
+		<cfset var missingEvent = "" />
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
@@ -106,8 +107,9 @@ Notes:
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch  type="any">
+				<cfset missingEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName(), false) />
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
-				<cfset handleException(exception, true) />
+				<cfset handleException(exception, true, missingEvent) />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -211,6 +213,7 @@ Notes:
 		hint="Handles an exception.">
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
+		<cfargument name="missingEvent" type="MachII.framework.Event" required="false" default="" />
 		
 		<cfset var nextEvent = "" />
 		<cfset var eventArgs = StructNew() />
@@ -225,9 +228,9 @@ Notes:
 			<cfif hasCurrentEvent()>
 				<cfset eventArgs.exceptionEvent = getCurrentEvent() />
 			</cfif>
-			
-			<!--- Call the handleException point in the plugins for the current event first --->
-			<cfset appManager.getPluginManager().handleException(this, arguments.exception) />
+			<cfif IsObject(arguments.missingEvent)>
+				<cfset eventArgs.missingEvent = arguments.missingEvent />
+			</cfif>
 			
 			<!--- Clear event queue (must be called from the variables scope or it fails)--->
 			<cfif arguments.clearEventQueue>
@@ -253,6 +256,9 @@ Notes:
 			The queue is cleared by default so it will be handled first anyway. --->
 			<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
 			<cfset getEventQueue().put(nextEvent) />
+			
+			<!--- Call the handleException point in the plugins for the current event first --->
+			<cfset appManager.getPluginManager().handleException(this, arguments.exception) />
 			
 			<cfcatch type="any">
 				<cfrethrow />

@@ -84,6 +84,7 @@ Notes:
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var nextEvent = "" />
 		<cfset var exception = "" />
+		<cfset var missingEvent = "" />
 		
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
@@ -118,8 +119,9 @@ Notes:
 			<cfcatch type="any">
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
 				<cfset setupEventContext(appManager) />
+				<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
 				<cfset exception = wrapException(cfcatch) />
-				<cfset getEventContext().handleException(exception, true) />
+				<cfset getEventContext().handleException(exception, true, missingEvent) />
 			</cfcatch>
 		</cftry>
 		
