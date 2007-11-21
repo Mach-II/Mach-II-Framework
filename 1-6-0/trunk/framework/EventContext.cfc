@@ -213,7 +213,7 @@ Notes:
 		hint="Handles an exception.">
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfargument name="clearEventQueue" type="boolean" required="false" default="true" />
-		<cfargument name="missingEvent" type="MachII.framework.Event" required="false" default="" />
+		<cfargument name="missingEvent" type="any" required="false" default="" />
 		
 		<cfset var nextEvent = "" />
 		<cfset var eventArgs = StructNew() />
