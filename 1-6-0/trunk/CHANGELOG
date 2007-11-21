@@ -39,12 +39,27 @@ Re-built cleanup routine to ensure totatl cleanup of abandoned redirect persist 
 CF8 strips out the double "//" from the path info. This causes url params to become mismatched.
 (2007-11-13 pfarrell)
 
-* Event arguments not available in handleException plugin point
-The original event arguments are available in event.getArg("exceptionEvent") in your exception
-event or the handleException plugin point.
+* Event arguments not available in handleException plugin point or exception event
+The missing event is placed in an event arg named 'missingEvent' in the exception event. Replumbed 
+when the exception event is placed in the queue, so getNextEvent() is now available in the 
+handleException plugin point.
+
+In the handleException plugin point, you can get the missing event by doing this:
+arguments.eventContext.getNextEvent().getArg("missingEvent")
+
+You use getNextEvent() because the handleException() plugin point is called before the 
+next event begins processing.
+
+In your exception event handler:
+event.getArg("missingEvent")
+
+If you clear the event queue in the handleException() plugin point and do not announce a
+a new event.  You will clear the exception event and no exception event handler will be
+run.  You must announce a new event if you clear the event queue in the handleException()
+plugin point.
 
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/14
-(2007-11-20 pfarrell)
+(2007-11-21 pfarrell)
 
 ------------------------------------------------
 Improvements / Enhancements
