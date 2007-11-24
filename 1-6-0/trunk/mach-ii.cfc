@@ -83,7 +83,10 @@ the handleRequest() method in the onRequest() application event.
 	
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
 		hint="Handles on session end event if sessions are enabled for this application.">
-		<cfset getAppManager().onSessionEnd() />
+		<cfargument name="sessionScope" type="struct" required="true" />
+		<cfargument name="applicationScope" type="struct" required="true" />
+		<!--- Access to the application and session scopes are passed in --->	
+		<cfset arguments.applicationScope[MACHII_APP_KEY].appLoader.getAppManager().onSessionEnd(arguments.sessionScope) />
 	</cffunction>
 
 	<!---

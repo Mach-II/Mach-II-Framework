@@ -107,12 +107,14 @@ Notes:
 
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
 		hint="Handles on session end application event.">
+		<cfargument name="sessionScope" type="struct" required="true"
+			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
 		
 		<cfset var modules = "" />
 		<cfset var key = "" />
 		
 		<!--- Call this instance first --->
-		<cfset getPluginManager().onSessionEnd() />
+		<cfset getPluginManager().onSessionEnd(arguments.sessionScope) />
 		
 		<!--- Call module instances only if this is the parent AppManager --->
 		<cfif NOT IsObject(getParent())>
@@ -120,7 +122,7 @@ Notes:
 			<cfset modules = variables.moduleManager.getModules() />
 			
 			<cfloop collection="#modules#" item="key">
-				<cfset modules[key].getModuleAppManager().onSessionEnd() />
+				<cfset modules[key].getModuleAppManager().onSessionEnd(arguments.sessionScope) />
 			</cfloop>
 		</cfif>
 	</cffunction>

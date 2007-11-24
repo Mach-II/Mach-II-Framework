@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.1
+Updated version: 1.6.0
 
 Notes:
 The PluginManager only calls plugin points that are utilized.
@@ -75,6 +75,18 @@ preEvent plugin point, then remove the remaining points. (pfarrell)
 	<cffunction name="postProcess" access="public" returntype="void" output="true">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfoutput>&nbsp;SimplePlugin.postProcess()<br /></cfoutput>
+	</cffunction>
+	
+	<cffunction name="onSessionStart" access="public" returntype="void" output="true">
+		<!--- There is no access to the eventContext since sessions start before a request begins --->
+		<cfoutput>&nbsp;SimplePlugin.onSessionStart()<br /></cfoutput>
+	</cffunction>
+	
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="true">
+		<cfargument name="sessionScope" type="struct" required="true"
+			hint="The session scope is passed in since direct access to it is not available." />
+		<!--- There is no access to the eventContext since sessions end asnycronisely --->
+		<cfoutput>&nbsp;SimplePlugin.onSessionEnd()<br /></cfoutput>
 	</cffunction>
 	
 	<cffunction name="handleException" access="public" returntype="void" output="true">

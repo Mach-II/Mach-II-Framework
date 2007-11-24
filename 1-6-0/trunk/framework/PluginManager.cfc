@@ -395,11 +395,13 @@ Notes:
 
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
 		hint="onSessionEnd() is called at the end of a session.">
-
+		<cfargument name="sessionScope" type="struct" required="true"
+			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
+		
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
-			<cfset variables.onSessionEndPlugins[i].onSessionEnd() />
+			<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
 		</cfloop>
 	</cffunction>
 

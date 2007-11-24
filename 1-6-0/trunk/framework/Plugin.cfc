@@ -103,15 +103,15 @@ All user-defined plugins extend this base plugin component.
 
 	<cffunction name="onSessionStart" access="public" returntype="void" output="true"
 		hint="Plugin point called when a session starts. Override to provide custom functionality.">
-		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
-			hint="The EventContext of the processing." />
+		<!--- There is no access to the eventContext since sessions start before a request begins --->
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="true"
 		hint="Plugin point called when a session ends. Override to provide custom functionality.">
-		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
-			hint="The EventContext of the processing." />
+		<cfargument name="sessionScope" type="struct" required="true"
+			hint="The session scope is passed in since direct access to it is not available." />
+		<!--- There is no access to the eventContext since sessions end asnycronisely --->
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
