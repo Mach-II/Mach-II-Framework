@@ -23,7 +23,8 @@ Updated version: 1.6.0
 
 Notes:
 --->
-<cfcomponent displayname="ThreadingAdapter"
+<cfcomponent
+	displayname="ThreadingAdapter"
 	extends="MachII.util.threading.ThreadingAdapter"
 	output="false"
 	hint="Threading adapter for Adobe ColdFusion 8+.">

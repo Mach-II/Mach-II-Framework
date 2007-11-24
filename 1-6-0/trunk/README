@@ -107,7 +107,9 @@ If you do not clear your template cache and restart your server, you will receiv
 an error similar such as:
 
 - The value returned from function getAppFactory() is not of type MachII.framework.AppFactory.
+- The value returned from function getMessageManager() is not of type MachII.framework.MessageManager.
 - Element AppLoader undefined in application[MACHII_APP_KEY].
+- Etc. (Too many to list here as it vary from what version you upgraded from)
 
 ------------------------------------------------
  _                      
@@ -117,7 +119,10 @@ an error similar such as:
 * The best way of contacting Team Mach-II or helping the Mach-II project is 
 info@mach-ii.com.
 
-* All bugs reports can be emailed to Team Mach-II at bugs@mach-ii.com.
+* All defect (bug) reports and enhancment requests shoud be logged as a new ticket
+on our Trac installation at http://trac.mach-ii.com.  Please search the tickets for
+duplicate / similar defect reports or enhancmemt requests before submitting a new
+ticket.
 
 * The best place to get quick help from other developers is to join our public 
 email listserv/forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
@@ -125,6 +130,6 @@ email listserv/forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
 * Check out http://www.mach-ii.com for Quick Starts, FAQs and additional sample 
 applications and documentation.
 
-* If you wish to submit code for a feature enhancement or bug fix, your submission
+* If you wish to submit code for defect fix or feature enhancemtn, your submission
 is governed under the license in which Mach-II is released. For more information, 
 please read the accompanying license.
