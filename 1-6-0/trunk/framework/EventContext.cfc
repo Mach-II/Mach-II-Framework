@@ -325,7 +325,7 @@ Notes:
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfset variables.requestHandler = arguments.requestHandler />
 	</cffunction>
-	<cffunction name="getRequestHandler" access="private" type="MachII.framework.RequestHandler" output="false">
+	<cffunction name="getRequestHandler" access="public" type="MachII.framework.RequestHandler" output="false">
 		<cfreturn variables.requestHandler />
 	</cffunction>
 
@@ -355,12 +355,12 @@ Notes:
 		<cfreturn variables.viewContext />
 	</cffunction>
 
-	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
-		<cfreturn variables.exceptionEventName />
-	</cffunction>	
 	<cffunction name="setExceptionEventName" access="public" returntype="void" output="false">
 		<cfargument name="exceptionEventName" type="string" required="true" />
 		<cfset variables.exceptionEventName = arguments.exceptionEventName />
+	</cffunction>
+	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
+		<cfreturn variables.exceptionEventName />
 	</cffunction>
 
 </cfcomponent>

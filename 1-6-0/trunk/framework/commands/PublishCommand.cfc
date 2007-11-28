@@ -57,9 +57,9 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset getMessageHandler().handleMessage(arguments.event, arguments.eventContext) />
+		<cfset var continue = getMessageHandler().handleMessage(arguments.event, arguments.eventContext) />
 		
-		<cfreturn true />
+		<cfreturn continue />
 	</cffunction>
 	
 	<!---

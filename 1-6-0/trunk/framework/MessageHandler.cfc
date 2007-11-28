@@ -59,7 +59,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="handleMessage" access="public" returntype="void" output="false"
+	<cffunction name="handleMessage" access="public" returntype="boolean" output="false"
 		hint="Handles the message.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -69,6 +69,9 @@ Notes:
 		<cfset var threadIds = StructNew() />
 		<cfset var publishThreadIdsInEvent = arguments.event.setArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
+		<cfset var error = "" />
+		<cfset var exception = "" />
+		<cfset var continue = true />
 		<cfset var i = 0 />
 		
 		<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
@@ -84,7 +87,14 @@ Notes:
 			
 			<!--- Wait and join --->
 			<cfif getWaitForThreads()>
-				<cfset threadingAdapter.join(threadIds, getTimeout()) />
+				<cfset error = threadingAdapter.join(threadIds, getTimeout()) />
+				
+				<!--- Create an exception --->
+				<cfif IsStruct(error)>
+					<cfset continue = false />
+					<cfset exception = arguments.eventContext.getRequestHandler().wrapException(error) />
+					<cfset arguments.eventContext.handleException(exception, true) />
+				</cfif>
 			<!--- Or set thread ids into the event --->
 			<cfelse>
 				<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
@@ -96,6 +106,8 @@ Notes:
 				<cfset invokers[i].invokeListener(arguments.event) />
 			</cfloop>
 		</cfif>
+		
+		<cfreturn continue />
 	</cffunction>
 	
 	<cffunction name="addMessageSubscriberInvoker" access="public" returntype="void" output="false"

@@ -66,22 +66,21 @@ Notes:
 			<cftry>
 				<cfinvoke attributeCollection="#request._MachIIThreadingAdapter[threadId]#" />
 					
+				<!--- Catch and rethrow so this will be logged --->
 				<cfcatch type="any">
-					<!--- Save the exception in the thread since we cannot copy the thread.error into a cfthrow (bug?) --->
-					<cfset thread.caughtException = cfcatch />
-					<!--- Rethrow so this will be logged --->
 					<cfrethrow />
 				</cfcatch>
 			</cftry>
 		</cfthread>
 	</cffunction>
 	
-	<cffunction name="join" access="public" returntype="void" output="false"
+	<cffunction name="join" access="public" returntype="any" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="struct" required="true" />
 		<cfargument name="timeout" type="numeric" required="true" />
 		
 		<cfset var collection = { action="join", name=StructKeyList(arguments.threadIds) } />
+		<cfset var error = "" />
 		<cfset var i = "" />
 		
 		<!--- ColdFusion 8 does not allow a timeout="0" --->
@@ -94,10 +93,14 @@ Notes:
 		
 		<!--- Check for unhandled errors in the threads --->
 		<cfloop collection="#arguments.threadIds#" item="i">
+			<!--- Check if the thread was terminated and return the error to be handled --->
 			<cfif cfthread[i].status is "terminated">
-				<cfthrow object="#cfthread[i].caughtException#" />
+				<cfset error = cfthread[i].error />
+				<cfbreak />
 			</cfif>
 		</cfloop>
+		
+		<cfreturn error />
 	</cffunction>
 
 	<!---
