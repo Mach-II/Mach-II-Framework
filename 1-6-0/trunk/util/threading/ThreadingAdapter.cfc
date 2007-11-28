@@ -36,7 +36,7 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ThreadingAdapter" output="false"
-		hint="This is a base class. Please instantiate a concrete adapter.">
+		hint="This is the base class. Please instantiate a concrete adapter.">
 		<cfreturn this />
 	</cffunction>
 	
@@ -49,13 +49,13 @@ Notes:
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
-		<cfabort showerror="This is a base class. Please instantiate a complete adapter." />
+		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
 	</cffunction>
 	
 	<cffunction name="join" access="public" returntype="void" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="struct" required="true" />
-		<cfabort showerror="This is a base class. Please instantiate a complete adapter." />
+		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
 	</cffunction>
 	
 	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
@@ -68,7 +68,7 @@ Notes:
 	--->
 	<cffunction name="createThreadId" access="private" returntype="string" output="false"
 		hint="Creates a thread id.">
-		<cfreturn "_" & Replace(CreateUUID(), "-", "", "all") />
+		<cfreturn "_MachIIThreadingAdapter_" & Replace(CreateUUID(), "-", "", "all") />
 	</cffunction>
 
 </cfcomponent>
