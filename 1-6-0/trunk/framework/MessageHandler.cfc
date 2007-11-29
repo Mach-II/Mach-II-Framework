@@ -67,7 +67,7 @@ Notes:
 		<cfset var invokers = getMessageSubscriberInvokers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
 		<cfset var threadIds = StructNew() />
-		<cfset var publishThreadIdsInEvent = arguments.event.setArg("_publishThreadIds", StructNew()) />
+		<cfset var publishThreadIdsInEvent = arguments.event.getArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
 		<cfset var error = "" />
 		<cfset var exception = "" />
