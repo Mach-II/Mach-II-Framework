@@ -89,3 +89,9 @@ See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticke
 ------------------------------------------------
 Internal Framework Improvements / Enhancements
 ------------------------------------------------
+* Removed superfluous Application.cfm and index.cfm files
+These files are no longer required for backwards compatibility and cause confusion to new
+users that thinking they can run index.cfm instead of using the skeleton.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/16
+(2007-12-7 pfarrell)
