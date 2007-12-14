@@ -83,7 +83,7 @@ Notes:
 		<cfif NOT arguments.override>
 			<cfset messageSubscribersNodes = XMLSearch(arguments.configXML, "mach-ii/message-subscribers/message") />
 		<cfelse>
-			<cfset messageSubscribersNodes = XMLSearch(arguments.configXML, "./message-subscribers/message") />
+			<cfset messageSubscribersNodes = XMLSearch(arguments.configXML, ".//message-subscribers/message") />
 		</cfif>
 		
 		<!--- Setup up each Listener --->
