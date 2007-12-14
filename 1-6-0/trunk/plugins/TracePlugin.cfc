@@ -22,6 +22,8 @@ Created version: 1.1.0
 Updated version: 1.5.0
 
 Description:
+DEPRECATED. Please use the new Logging functionality.
+
 A robust plugin that traces the execution of events and displays the trace
 information on screen and/or logs it to a file.
 
@@ -89,7 +91,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	displayname="tracePlugin"
 	extends="MachII.framework.Plugin"
 	output="false"
-	hint="Traces the execution of Mach-II events and displays the trace information on screen and/or logs it to a file.">
+	hint="DEPRECATED. Traces the execution of Mach-II events and displays the trace information on screen and/or logs it to a file.">
 
 	<!---
 	PROPERTIES
@@ -106,7 +108,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the plugin.">
+		hint="DEPRECATED. Configures the plugin.">
 
 		<!--- Check and set the plugin parameters --->
 		<cfif isParameterDefined("traceMode")>			
@@ -158,7 +160,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	PLUGIN POINT FUNCTIONS called from EventContext
 	--->
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
-		hint="Starts the trace if mode is not none.">
+		hint="DEPRECATED. Starts the trace if mode is not none.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getNextEvent() />
@@ -179,7 +181,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="preEvent" access="public" returntype="void" output="false"
-		hint="Runs the trace for the preEvent plugin point.">
+		hint="DEPRECATED. Runs the trace for the preEvent plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
@@ -190,7 +192,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="postEvent" access="public" returntype="void" output="false"
-		hint="Runs the trace for the postEvent plugin point.">
+		hint="DEPRECATED. Runs the trace for the postEvent plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
@@ -201,7 +203,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="preView" access="public" returntype="void" output="false"
-		hint="Runs the trace for the preView plugin point.">
+		hint="DEPRECATED. Runs the trace for the preView plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
@@ -212,7 +214,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="postView" access="public" returntype="void" output="false"
-		hint="Runs the trace for the postView plugin point.">
+		hint="DEPRECATED. Runs the trace for the postView plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
@@ -223,7 +225,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="postProcess" access="public" returntype="void" output="true"
-		hint="Ends the trace if the trace mode is not none and displays trace on screen if applicable.">
+		hint="DEPRECATED. Ends the trace if the trace mode is not none and displays trace on screen if applicable.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
@@ -240,7 +242,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="handleException" access="public" returntype="void" output="false"
-		hint="Runs a trace when an exception occurs (before exception event is handled).">
+		hint="DEPRECATED. Runs a trace when an exception occurs (before exception event is handled).">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfset var methodTraceInfo = structNew() />
@@ -264,7 +266,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	PROTECTED FUNCTIONS
 	--->	
 	<cffunction name="trace" access="private" returntype="void" output="false"
-		hint="Runs a trace for the passed point and eventContext.">
+		hint="DEPRECATED. Runs a trace for the passed point and eventContext.">
 		<cfargument name="point" type="string" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfif arguments.point EQ "postEvent">
@@ -275,7 +277,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="computeEventName" access="private" returntype="string" output="false"
-		hint="Computes the event name for this trace.">
+		hint="DEPRECATED. Computes the event name for this trace.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="point" type="string" required="true" />
 
@@ -287,7 +289,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="computeModuleName" access="private" returntype="string" output="false"
-		hint="Computes the module name for this trace.">
+		hint="DEPRECATED. Computes the module name for this trace.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="point" type="string" required="true" />
 
@@ -299,7 +301,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="computeTraceTime" access="private" returntype="string" output="false"
-		hint="Computes the trace time from the last trace until now.">
+		hint="DEPRECATED. Computes the trace time from the last trace until now.">
 		<cfset var currentTick = getTickCount() />
 		<cfset var timing  = "" />
 
@@ -317,7 +319,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="appendTrace" access="private" returntype="void" output="false"
-		hint="Appends a trace to the trace information array or to the log file.">
+		hint="DEPRECATED. Appends a trace to the trace information array or to the log file.">
 		<cfargument name="event" type="string" required="true"
 			hint="Name of event for this trace." />
 		<cfargument name="module" type="string" required="true"
@@ -343,7 +345,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="displayTraceInfo" access="private" returntype="string" output="false"
-		hint="Gets the trace information and formats for on-screen or HTML commented display.">
+		hint="DEPRECATED. Gets the trace information and formats for on-screen or HTML commented display.">
 		<cfargument name="traceInfo" type="array" required="true"
 			hint="Pass in the array from the getTraceInfo() method." />
 		<cfargument name="requestEventName" type="string" required="true"
@@ -494,7 +496,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="getMachIIVersion" access="private" returntype="string" output="false"
-		hint="Gets a nice version number istead of just numbers.">
+		hint="DEPRECATED. Gets a nice version number istead of just numbers.">
 		<cfset var version = getPropertyManager().getVersion() />
 		<cfset var release = "" />
 		
@@ -538,7 +540,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	
 	<cffunction name="shouldTrace" access="private" returntype="boolean" output="false"
-		hint="Checks if we should trace">
+		hint="DEPRECATED. Checks if we should trace">
 		<cfargument name="suppressTrace" type="boolean" required="true" />
 
 		<cfif NOT IsDefined("request._MachIITracePlugin.traceRequest") OR (getTraceRequest() AND arguments.suppressTrace)>
@@ -550,14 +552,14 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="isTrueNumeric" access="private" returntype="boolean" output="false"
-		hint="Returns true if all characters in a string are numeric.">
+		hint="DEPRECATED. Returns true if all characters in a string are numeric.">
 		<cfargument name="str" type="string" required="true"
 			hint="String to check.">
 		<cfreturn REFind("[^0-9]", arguments.str) IS 0 />
 	</cffunction>
 
 	<cffunction name="throwUsageException" access="private" returntype="void" output="false"
-		hint="Throws an usage exception.">
+		hint="DEPRECATED. Throws an usage exception.">
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="detail" type="string" required="false" default="No details." />
 		<cfthrow type="TracePlugin.usageException"
@@ -617,12 +619,12 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="setTraceRequest" access="private" returntype="void" output="false"
-		hint="Sets the trace request request._MachIITracePlugin.">
+		hint="DEPRECATED. Sets the trace request request._MachIITracePlugin.">
 		<cfargument name="traceRequest" type="boolean" required="false" />
 		<cfset request._MachIITracePlugin.traceRequest = arguments.traceRequest />
 	</cffunction>
 	<cffunction name="getTraceRequest" access="private" returntype="boolean" output="false"
-		hint="Gets the trace request from the request._MachIITracePlugin.">
+		hint="DEPRECATED. Gets the trace request from the request._MachIITracePlugin.">
 		
 		<cftry>
 			<cfreturn request._MachIITracePlugin.traceRequest />
@@ -633,12 +635,12 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="setTraceInfo" access="private" returntype="void" output="false"
-		hint="Sets the trace info array in the request._MachIITracePlugin.">
+		hint="DEPRECATED. Sets the trace info array in the request._MachIITracePlugin.">
 		<cfargument name="traceInfo" type="array" required="false" />
 		<cfset request._MachIITracePlugin.traceInfo = arguments.traceInfo />
 	</cffunction>
 	<cffunction name="getTraceInfo" access="private" returntype="array" output="false"
-		hint="Gets the trace info array from the request._MachIITracePlugin.">
+		hint="DEPRECATED. Gets the trace info array from the request._MachIITracePlugin.">
 		<cftry>
 			<cfreturn request._MachIITracePlugin.traceInfo />
 			<cfcatch type="expression">
@@ -648,12 +650,12 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="setTick" access="private" returntype="void" output="false"
-		hint="Sets the current tick in the request._MachIITracePlugin.">
+		hint="DEPRECATED. Sets the current tick in the request._MachIITracePlugin.">
 		<cfargument name="tick" type="numeric" required="true" />
 		<cfset request._MachIITracePlugin.tick = arguments.tick />
 	</cffunction>
 	<cffunction name="getTick" access="private" returntype="numeric" output="false"
-		hint="Gets the current tick from the request._MachIITracePlugin.">
+		hint="DEPRECATED. Gets the current tick from the request._MachIITracePlugin.">
 		<cftry>
 			<cfreturn request._MachIITracePlugin.tick />
 			<cfcatch type="expression">
@@ -678,12 +680,12 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 
 	<cffunction name="setIsInitialTrace" access="private" returntype="void" output="false"
-		hint="Sets the initial trace flag in the request._MachIITracePlugin.">
+		hint="DEPRECATED. Sets the initial trace flag in the request._MachIITracePlugin.">
 		<cfargument name="isInitialTrace" type="boolean" required="true" />
 		<cfset request._MachIITracePlugin.isInitialTrace = arguments.isInitialTrace />
 	</cffunction>
 	<cffunction name="getIsInitialTrace" access="private" returntype="boolean" output="false"
-		hint="Gets the initial trace flag from the reuqest._MachIITracePlugin.">
+		hint="DEPRECATED. Gets the initial trace flag from the reuqest._MachIITracePlugin.">
 		<cftry>
 			<cfreturn request._MachIITracePlugin.isInitialTrace />
 			<cfcatch type="expression">
@@ -692,7 +694,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		</cftry>
 	</cffunction>
 	<cffunction name="hasIsInitialTrace" access="private" returntype="boolean" output="false"
-		hint="Checks if the initial trace flag exists in the request._MachIITracePlugin.">
+		hint="DEPRECATED. Checks if the initial trace flag exists in the request._MachIITracePlugin.">
 		<cfreturn IsDefined("request._MachIITracePlugin.isInitialTrace") />
 	</cffunction>
 
