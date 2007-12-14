@@ -78,7 +78,7 @@ Notes:
 		<cfif NOT arguments.override>
 			<cfset listenerNodes = XMLSearch(arguments.configXML, "mach-ii/listeners/listener") />
 		<cfelse>
-			<cfset listenerNodes = XMLSearch(arguments.configXML, "./listeners/listener") />
+			<cfset listenerNodes = XMLSearch(arguments.configXML, ".//listeners/listener") />
 		</cfif>
 		
 		<!--- Setup up each Listener --->
