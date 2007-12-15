@@ -61,6 +61,7 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var value = "" />
+		<cfset var log = getLog() />
 		
 		<cfif isArgVariableDefined()>
 			<cfset value = getArgVariableValue() />
@@ -68,6 +69,10 @@ Notes:
 			<cfset value = getArgValue() />
 		<cfelse>
 			<cfset value = "" />
+		</cfif>
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
 		</cfif>
 		
 		<cfset arguments.event.setArg(getArgName(), value) />

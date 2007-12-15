@@ -65,6 +65,7 @@ Notes:
 			
 		<cfset var appManager = "" />
 		<cfset var utils = "" />
+		<cfset var logFactory = "" />
 		<cfset var propertyManager = "" />
 		<cfset var parentPropertyManager = "" />
 		<cfset var requestManager = "" />
@@ -94,11 +95,21 @@ Notes:
 		<!--- Clear the config file paths as this is important since the AppFactory is reused for full reloads --->
 		<cfset resetConfigFilePaths() />
 		
-		<!--- Utils is a singleton --->
+		<!--- Utils and LogFactory is a singleton --->
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset utils = arguments.parentAppManager.getUtils() />
+			<cfset logFactory = arguments.parentAppManager.getLogFactory() />
 		<cfelse>
 			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+			<cfset logFactory = CreateObject("component", "MachII.logging.LogFactory").init() />
+			
+			<cfset p = { loggingLevel="all" } />
+			
+			<cfset adapter = CreateObject("component", "MachII.logging.adapters.CFLogAdapter").init(p) />
+			<cfset adapter.configure() />
+			
+			<cfset logFactory.registerLogAdapter(adapter) />
+			
 		</cfif>
 		
 		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->
@@ -167,6 +178,9 @@ Notes:
 		
 		<!--- Set the utils which is a singleton across the application --->
 		<cfset appManager.setUtils(utils) />
+
+		<!--- Set the LogFactory which is a singleton across the application --->
+		<cfset appManager.setLogFactory(logFactory) />
 		
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">

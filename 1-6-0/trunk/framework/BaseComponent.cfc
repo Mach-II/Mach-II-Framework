@@ -38,6 +38,7 @@ the rest of the framework. (pfarrell)
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variable.log = "" />
 	<cfset variables.parameters = StructNew() />
 	
 	<!---
@@ -157,14 +158,8 @@ the rest of the framework. (pfarrell)
 		hint="DEPRECATED - use isParameterDefined() instead. Checks to see whether or not a configuration parameter is defined.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-		
-		<cftry>
-			<cfthrow type="MachII.framework.deprecatedMethod"
-				message="The hasParameter() method has been deprecated. Please use isParameterDefined() instead." />
-			<cfcatch type="MachII.framework.deprecatedMethod">
-				<!--- Do nothing --->
-			</cfcatch> 
-		</cftry>
+				
+		<cfset getLog().warn("The hasParameter() method has been deprecated. Please use isParameterDefined() instead. Called from component '#getComponentNameForLogging()#'.") />
 		
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
@@ -182,6 +177,11 @@ the rest of the framework. (pfarrell)
 		<cfargument name="propertyValue" type="any" required="true" 
 			hint="The value to store in the property." />
 		<cfreturn getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
+	</cffunction>
+	
+	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
+		hint="Gets the component name for logging.">
+		<cfreturn ListLast(getMetaData(this).name, ".") />
 	</cffunction>
 
 	<!---
@@ -236,6 +236,16 @@ the rest of the framework. (pfarrell)
 		<cfreturn resolvedParameters />
 	</cffunction>
 	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
+	</cffunction>
+
 	<cffunction name="setAppManager" access="private" returntype="void" output="false"
 		hint="Sets the components AppManager instance.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"

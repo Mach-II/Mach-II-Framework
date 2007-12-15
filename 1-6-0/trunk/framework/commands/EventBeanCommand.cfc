@@ -67,10 +67,15 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var bean = "" />
-		<cfset var reinit = TRUE />
+		<cfset var log = getLog() />
 		
 		<!--- If reinit is FALSE, get the bean from the event --->
 		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName())>
+		
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Event-bean '#getBeanName()#' already in event. Repopulated with data.") />
+			</cfif>
+			
 			<cfset bean = arguments.event.getArg(getBeanName()) />
 			
 			<cfif isBeanFieldsDefined()>
@@ -79,6 +84,10 @@ Notes:
 				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs()) />
 			</cfif>
 		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Event-bean '#getBeanName()#' created and populated with data.") />
+			</cfif>
+
 			<cfif isBeanFieldsDefined()>
 				<cfset bean = getBeanUtil().createBean(getBeanType()) />
 				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />

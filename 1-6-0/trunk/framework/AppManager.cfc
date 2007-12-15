@@ -43,6 +43,7 @@ Notes:
 	<cfset variables.requestManager = "" />
 	<cfset variables.subroutineManager = "" />
 	<cfset variables.utils = "" />
+	<cfset variables.logFactory = "" />
 	<cfset variables.viewManager = "" />
 	<cfset variables.parentAppManager = "" />
 	<cfset variables.appkey = "" />
@@ -234,6 +235,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getViewManager" access="public" returntype="MachII.framework.ViewManager" output="false">
 		<cfreturn variables.viewManager />
+	</cffunction>
+	
+	<cffunction name="setLogFactory" access="public" returntype="void" output="false">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.logFactory = arguments.logFactory />
+	</cffunction>
+	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false">
+		<cfreturn variables.logFactory />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false">

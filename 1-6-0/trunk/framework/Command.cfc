@@ -75,5 +75,15 @@ Notes:
 			<cfset setParameter(key, parameters[key]) />
 		</cfloop>
 	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
+	</cffunction>
 
 </cfcomponent>

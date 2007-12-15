@@ -151,11 +151,16 @@ Notes:
 
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered Listeners and its' invoker.">
-		<cfset var key = "" />
+
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var aListener = 0 />
+		<cfset var i = 0 />
 		
-		<!--- Loop through the Listeners and configure invokers first --->
-		<cfloop collection="#variables.listeners#" item="key">
-			<cfset getListener(key).configure() />
+		<!--- Loop through the listeners configure --->
+		<cfloop collection="#variables.listeners#" item="i">
+			<cfset aListener = variables.listeners[i] />
+			<cfset aListener.setLog(logFactory) />
+			<cfset aListener.configure() />
 		</cfloop>
 	</cffunction>
 	

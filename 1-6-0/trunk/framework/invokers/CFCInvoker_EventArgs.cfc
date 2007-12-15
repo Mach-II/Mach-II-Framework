@@ -57,6 +57,7 @@ Please use EventArgsInvoker.cfc instead.
 			hint="Not supported." />
 		
 		<cfset var resultValue = "" />
+		<cfset var log = arguments.listener.getLog() />
 		
 		<cftry>
 			<cfinvoke 
@@ -71,12 +72,10 @@ Please use EventArgsInvoker.cfc instead.
 			</cfif>
 			<!--- resultArg not supported. --->
 			
-			<cfthrow type="MachII.framework.deprecatedInvoker"
-				message="The CFCInvoker_EventArgs has been deprecated. Please use the EventArgsInvoker." />
-
-			<cfcatch type="MachII.framework.deprecatedInvoker">
-				<!--- Do nothing --->
-			</cfcatch> 
+			<cfif log.isWarnEnabled()>
+				<cfset log.warn("Listener '#arguments.listener.getComponentNameForLogging()#' is using the CFCInvoker_Event which has been deprecated. Please use the EventInvoker.") />
+			</cfif>
+			
 			<cfcatch type="Any">
 				<cfrethrow />
 			</cfcatch>

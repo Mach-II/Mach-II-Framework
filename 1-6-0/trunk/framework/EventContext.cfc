@@ -74,6 +74,9 @@ Notes:
 		<!--- (re)init the ViewContext. --->
 		<cfset getViewContext().init(getAppManager()) />
 		
+		<!--- Setup the log --->
+		<cfset setLog(getAppManager().getLogFactory()) />
+		
 		<!--- Clear the event mappings --->
 		<cfset clearEventMappings() />
 	</cffunction>	
@@ -93,6 +96,7 @@ Notes:
 		<cfset var nextEventName = arguments.eventName />
 		<cfset var exception = "" />
 		<cfset var missingEvent = "" />
+		<cfset var log = getLog() />
 		
 		<cftry>
 			<!--- Check for an event-mapping. --->
@@ -100,13 +104,26 @@ Notes:
 				<cfset mapping = getEventMapping(arguments.eventName) />
 				<cfset nextModuleName = mapping.moduleName />
 				<cfset nextEventName = mapping.eventName />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Announcing event '#nextEventName#' in module '#nextModuleName#' mapped from '#arguments.eventName#'.") />
+				</cfif>
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Announcing event '#nextEventName#' in module '#nextModuleName#'.") />
+				</cfif>
 			</cfif>
+			
 			<!--- Create the event. --->
 			<cfset nextEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName()) />
 			<!--- Queue the event. --->
 			<cfset getEventQueue().put(nextEvent) />
 			
 			<cfcatch  type="any">
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("Cannot announce event '#nextEventName#' in module '#nextModuleName#' because it cannot be found.", cfcatch) />
+				</cfif>
+				
 				<cfset missingEvent = getAppManager().getEventManager().createEvent(nextModuleName, nextEventName, arguments.eventArgs, getRequestHandler().getRequestEventName(), getRequestHandler().getRequestModuleName(), false) />
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true, missingEvent) />
@@ -122,18 +139,31 @@ Notes:
 		<cfset var subroutineHandler = "" />
 		<cfset var exception = "" />
 		<cfset var continue = true />
+		<cfset var log = getLog() />
 	
 		<cftry>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Subroutine '#arguments.subroutineName#' beginning execution.") />
+			</cfif>
+			
 			<!--- Get the subroutine handler --->		
 			<cfset subroutineHandler = getAppManager().getSubroutineManager().getSubroutineHandler(arguments.subroutineName) />
 			<!--- Execute the subroutine --->
 			<cfset continue = subroutineHandler.handleSubroutine(arguments.event, this) />
 			
 			<cfcatch type="any">
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("Subroutine '#arguments.subroutineName#' has caused an exception.", cfcatch) />
+				</cfif>
+				
 				<cfset exception = getRequestHandler().wrapException(cfcatch) />
 				<cfset handleException(exception, true) />
 			</cfcatch>
 		</cftry>
+		
+		<cfif log.isInfoEnabled() AND NOT continue>
+			<cfset log.info("Subroutine '#arguments.subroutineName#' has changed the flow of this event.") />
+		</cfif>
 		
 		<cfreturn continue />
 	</cffunction>
@@ -146,9 +176,15 @@ Notes:
 			default="#getAppManager().getModuleName()#" />
 
 		<cfset var mapping = StructNew() />
+		<cfset var log = getLog() />
 
 		<cfif Len(arguments.mappingModuleName)
 			AND NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
+			
+			<cfif log.isErrorEnabled()>
+				<cfset log.error("Cannot create an event-mapping on event '#arguments.eventMapping#' because the mapping '#arguments.mappingName#' in module '#arguments.mappingModuleName#' cannot be found.") />
+			</cfif>
+			
 			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"
 				message="The module '#arguments.mappingModuleName#' cannot be found for this event-mapping." />	
 		</cfif>
@@ -158,6 +194,10 @@ Notes:
 		<cfset mapping.moduleName = arguments.mappingModuleName />
 		
 		<cfset variables.mappings[arguments.eventName] = mapping />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Created event-mapping on event '#arguments.eventName#'.") />
+		</cfif>
 	</cffunction>
 	<cffunction name="getEventMapping" access="public" returntype="struct" output="false"
 		hint="Gets an event mapping by the event name.">
@@ -361,6 +401,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
 		<cfreturn variables.exceptionEventName />
+	</cffunction>
+	
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

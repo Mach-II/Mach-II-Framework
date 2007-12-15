@@ -54,8 +54,13 @@ Notes:
 			hint="The eventArg to set the result in." />
 		
 		<cfset var resultValue = "" />
+		<cfset var log = arguments.listener.getLog() />
 		
 		<cftry>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Listener '#arguments.listener.getComponentNameForLogging()#' invoking method '#arguments.method#'.") />
+			</cfif>
+			
 			<cfinvoke 
 				component="#arguments.listener#" 
 				method="#arguments.method#" 
@@ -73,14 +78,23 @@ Notes:
 
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
+					<cfif log.isErrorEnabled()>
+						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has returned void but a ResultArg/Key has been defined.",  cfcatch) />
+					</cfif>
 					<cfthrow type="MachII.framework.VoidReturnType"
 							message="A ResultArg/Key has been specified on a notify command method that is returning void. This can also happen if your listener method returns a Java null."
 							detail="Listener: '#getMetadata(listener).name#' Method: '#arguments.method#'" />
 				<cfelse>
+					<cfif log.isErrorEnabled()>
+						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has caused an exception.",  cfcatch) />
+					</cfif>
 					<cfrethrow />
 				</cfif>
 			</cfcatch>
 			<cfcatch type="Any">
+					<cfif log.isErrorEnabled()>
+						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has caused an exception.",  cfcatch) />
+					</cfif>
 				<cfrethrow />
 			</cfcatch>
 		</cftry>

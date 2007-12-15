@@ -43,6 +43,7 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setPropertyManager(getAppManager().getPropertyManager()) />
+		<cfset setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -65,6 +66,19 @@ Notes:
 		
 		<cfset var viewPath = getFullPath(arguments.viewName) />
 		<cfset var viewContent = "" />
+		<cfset var log = getLog() />
+		
+		<cfif log.isDebugEnabled()>
+			<cfif Len(arguments.contentKey)>
+				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'.") />
+			</cfif>
+			<cfif Len(arguments.contentArg)>
+				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'.") />
+			</cfif>
+			<cfif NOT Len(arguments.contentKey) AND NOT Len(arguments.ContentArg)>
+				<cfset log.debug("Rendering view '#arguments.viewName#'.") />
+			</cfif>
+		</cfif>
 		
 		<!--- This has been left in for BC --->
 		<cfset request.event = arguments.event />
@@ -168,6 +182,16 @@ Notes:
 		<cfargument name="propertyName" type="string" required="yes"
 			hint="The name of the property to return." />
 		<cfreturn getPropertyManager().getProperty(arguments.propertyName) />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

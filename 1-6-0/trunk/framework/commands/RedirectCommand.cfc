@@ -85,6 +85,7 @@ Notes:
 
 		<cfset var redirectUrl = "" />
 		<cfset var statusType = getStatusType() />
+		<cfset var log = getLog() />
 
 		<!--- Persist if directed --->
 		<cfif getPersist()>
@@ -97,7 +98,11 @@ Notes:
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
 			handling to catch a cfabort --->
 		<cfset arguments.eventContext.clearEventQueue() />
-		
+
+		<cfif log.isDebugEnable()>
+			<cfset log.debug("Redirecting to url '#redirectUrl#' with '#statusType#' status code (persist='#getPersist()#').") />
+		</cfif>
+
 		<!--- Redirect based on the HTTP status type --->
 		<cfif statusType EQ "permanent">
 			<cfheader statuscode="301" statustext="Moved Permanently" />

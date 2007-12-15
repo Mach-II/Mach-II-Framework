@@ -245,6 +245,8 @@ Notes:
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit) />
+		
+		<cfset command.setLog(getAppManager().getLogFactory()) />
 
 		<cfreturn command />
 	</cffunction>
@@ -290,6 +292,8 @@ Notes:
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType) />
 		
+		<cfset command.setLog(getAppManager().getLogFactory()) />
+		
 		<cfreturn command />
 	</cffunction>
 	
@@ -310,6 +314,8 @@ Notes:
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
+		
+		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
 	</cffunction>

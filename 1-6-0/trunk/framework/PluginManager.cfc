@@ -134,11 +134,14 @@ Notes:
 
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered Plugins.">
+
+		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
+			<cfset aPlugin.setLog(logFactory) />
 			<cfset aPlugin.configure() />
 		</cfloop>
 	</cffunction>
@@ -244,6 +247,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -253,6 +258,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running pre-process.") />
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
 
@@ -268,6 +277,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -277,6 +288,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running pre-event.") />
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
 
@@ -292,6 +307,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -301,6 +318,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running post-event.") />
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
 
@@ -316,6 +337,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -325,6 +348,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running pre-view.") />
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
 
@@ -340,6 +367,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -349,6 +378,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running post-view.") />
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
 
@@ -364,6 +397,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
@@ -373,6 +408,10 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
+			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preProcessPlugins[i].getLog() />
+			
+			<cfset log.debug("Plugin '#loggingName#' running post-process.") />
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
 
