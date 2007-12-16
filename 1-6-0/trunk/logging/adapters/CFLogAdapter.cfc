@@ -262,6 +262,33 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfreturn result />
 	</cffunction>
 	
+	<cffunction name="translateLevelToName" access="private" returntype="string" output="false"
+		hint="Translate a numerical logging level to human readable string.">
+		<cfargument name="level" type="numeric" required="true" />
+
+		<cfset var loggingLevelName = "" />
+		
+		<cfif arguments.level EQ 1>
+			<cfset loggingLevelName = "trace" />
+		<cfelseif  arguments.level EQ 2>
+			<cfset loggingLevelName = "debug" />
+		<cfelseif  arguments.level EQ 3>
+			<cfset loggingLevelName = "info" />
+		<cfelseif  arguments.level EQ 4>
+			<cfset loggingLevelName = "warn" />
+		<cfelseif  arguments.level EQ 5>
+			<cfset loggingLevelName = "error" />
+		<cfelseif  arguments.level EQ 6>
+			<cfset loggingLevelName = "fatal" />
+		<cfelseif  arguments.level EQ 0>
+			<cfset loggingLevelName = "all" />
+		<cfelseif  arguments.level EQ 7>
+			<cfset loggingLevelName = "off" />
+		</cfif>
+		
+		<cfreturn loggingLevelName />
+	</cffunction>
+	
 	<cffunction name="loadConfigFile" access="private" returntype="any" output="false"
 		hint="Loads configuration from a config file.">
 
@@ -321,29 +348,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	</cffunction>
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
 		hint="Gets the logging level by name.">
-		
-		<cfset var level = getLevel() />
-		<cfset var loggingLevelName = "" />
-		
-		<cfif level EQ 1>
-			<cfset loggingLevelName = "trace" />
-		<cfelseif  level EQ 2>
-			<cfset loggingLevelName = "debug" />
-		<cfelseif  level EQ 3>
-			<cfset loggingLevelName = "info" />
-		<cfelseif  level EQ 4>
-			<cfset loggingLevelName = "warn" />
-		<cfelseif  level EQ 5>
-			<cfset loggingLevelName = "error" />
-		<cfelseif  level EQ 6>
-			<cfset loggingLevelName = "fatal" />
-		<cfelseif  level EQ 0>
-			<cfset loggingLevelName = "all" />
-		<cfelseif  level EQ 7>
-			<cfset loggingLevelName = "off" />
-		</cfif>
-		
-		<cfreturn loggingLevelName />
+		<cfreturn translateLevelToName(getLevel()) />
 	</cffunction>
 	
 	<cffunction name="setLevel" access="private" returntype="void" output="false"

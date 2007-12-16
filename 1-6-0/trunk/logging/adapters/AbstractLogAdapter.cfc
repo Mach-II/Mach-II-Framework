@@ -22,7 +22,6 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Mach-II Logging is heavily based on Apache Commons Logging.
 --->
 <cfcomponent
 	displayname="AbstractLogAdapter"
