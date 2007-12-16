@@ -143,7 +143,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="defaultValue" type="string" required="false" default=""
 			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
 		<cfif isParameterDefined(arguments.name)>
-			<cfreturn bindValue(arguments.name) />
+			<cfreturn bindValue(arguments.name, variables.parameters[arguments.name]) />
 		<cfelse>
 			<cfreturn arguments.defaultValue />
 		</cfif>
@@ -188,16 +188,16 @@ the rest of the framework. (pfarrell)
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="bindValue" access="private" returntype="any" output="false"
-		hint="Binds placeholders values in parameters.">
-		<cfargument name="parameterName" type="string" required="true"
-			hint="The parameter name." />
+		hint="Binds placeholders to any passed value.">
+		<cfargument name="parameterName" type="string" required="true" />
+		<cfargument name="parameterValue" type="any" required="true" />
 		
 		<cfset var propertyName = "" />
-		<cfset var value = variables.parameters[arguments.parameterName] />
+		<cfset var value =  arguments.parameterValue />
 		
 		<!--- Can only bind simple parameter values --->
-		<cfif IsSimpleValue(value) AND REFindNoCase("\${(.)*?}", value)>
-			<cfset propertyName = Mid(value, 3, Len(value) -3) />
+		<cfif IsSimpleValue(arguments.parameterValue) AND REFindNoCase("\${(.)*?}", arguments.parameterValue)>
+			<cfset propertyName = Mid(arguments.parameterValue, 3, Len(arguments.parameterValue) -3) />
 			<cfif getPropertyManager().isPropertyDefined(propertyName)>
 				<cfset value = getProperty(propertyName) />
 			<cfelse>
@@ -230,7 +230,7 @@ the rest of the framework. (pfarrell)
 		
 		<!--- Get values and bind placeholders --->
 		<cfloop collection="#variables.parameters#" item="key">
-			<cfset resolvedParameters[key] = bindValue(key) />
+			<cfset resolvedParameters[key] = bindValue(key, variables.parameters[key]) />
 		</cfloop>
 		
 		<cfreturn resolvedParameters />
