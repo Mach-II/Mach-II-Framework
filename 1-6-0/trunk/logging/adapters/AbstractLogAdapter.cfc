@@ -134,12 +134,12 @@ Notes:
 	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
 		hint="Disables logging.">
-		<cfset variables.loggingEnabled = false />
+		<cfset setLoggingEnabled(false) />
 	</cffunction>
 	
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging.">
-		<cfset variables.loggingEnabled = true />
+		<cfset setLoggingEnabled(true) />
 	</cffunction>
 	
 	<!---
@@ -181,8 +181,18 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
-		hint="Returns the logging level by name.  Required for Dashboard integration.">
+		hint="Returns the logging level by name. Required for Dashboard integration.">
 		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+	
+	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
+		hint="Sets the logging enabled.">
+		<cfargument name="loggingEnabled" type="boolean" required="true" />
+		<cfset variables.loggingEnabled = arguments.loggingEnabled />
+	</cffunction>
+	<cffunction name="getLoggingEnabled" access="public" returntype="boolean" output="false"
+		hint="Gets the logging enabled.">
+		<cfreturn variables.loggingEnabled />
 	</cffunction>
 	
 	<cffunction name="setParameters" access="public" returntype="void" output="false"

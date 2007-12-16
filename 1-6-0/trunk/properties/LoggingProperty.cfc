@@ -23,6 +23,32 @@ Updated version: 1.6.0
 
 Notes:
 
+Configuring for Mach-II loging only:
+	<property name="Logging" type="MachII.properties.LoggingProperty" />
+
+This will turn on the MachIILogAdapter and display the log message 
+in the request output.
+
+Configuring multiple logging adapters:
+	<property name="Logging" type="MachII.properties.LoggingProperty">
+		<parameters>
+			<parameter name="CFLog">
+				<struct>
+					<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
+					<key name="loggingEnabled" value="false" />
+					<key name="loggingLevel" value="warn" />
+					<key name="logFile" value="lightpost" />
+				</struct>
+			</parameter>
+			<parameter name="MachIILog">
+				<struct>
+					<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
+					<key name="loggingEnabled" value="true" />
+					<key name="loggingLevel" value="debug" />
+				</struct>
+			</parameter>
+		</parameters>
+	</property>
 --->
 <cfcomponent
 	displayname="LoggingProperty"
@@ -108,12 +134,18 @@ Notes:
 		
 		<cfset var type = "" />
 		<cfset var adapter = "" />
+		<cfset var i = 0 />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
 			<cfthrow type="MachII.properties.LoggingProperty"
 				message="You must specify a 'type' for log adapter named '#arguments.name#'." />
 		</cfif>
+		
+		<!--- Bind values in parameters struct --->
+		<cfloop collection="#arguments.parameters#" item="i">
+			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
+		</cfloop>
 		
 		<!--- Create the adapter --->
 		<cfset adapter = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />

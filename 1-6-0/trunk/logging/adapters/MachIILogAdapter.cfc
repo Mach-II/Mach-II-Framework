@@ -42,7 +42,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	<cfset variables.LOG_LEVEL_ALL = 0 />
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
-	<cfset variables.level = variables.LOG_LEVEL_INFO />
+	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
 	<cfset variables.loggerName = "MachII Logging" />
 	<cfset variables.configFile = "" />
 	<cfset variables.configFileIsRelative = false />
@@ -62,6 +62,9 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfelse>
 			<cfif isParameterDefined("loggingLevel")>
 				<cfset setLoggingLevel(getParameter("loggingLevel")) />
+			</cfif>
+			<cfif isParameterDefined("loggingEnabled")>
+				<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
 			</cfif>
 		</cfif>
 	</cffunction>

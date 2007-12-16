@@ -67,6 +67,9 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 			<cfif isParameterDefined("loggingLevel")>
 				<cfset setLoggingLevel(getParameter("loggingLevel")) />
 			</cfif>
+			<cfif isParameterDefined("loggingEnabled")>
+				<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
