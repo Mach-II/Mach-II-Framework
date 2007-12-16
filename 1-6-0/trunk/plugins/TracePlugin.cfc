@@ -164,6 +164,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getNextEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<!--- Set the if we should trace this request or temporarily suppress it --->
 		<cfif NOT getTraceMode() IS "none" AND ((getDebugModeOnly() AND isDebugMode()) OR NOT getDebugModeOnly())>
@@ -185,6 +190,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("preEvent", arguments.eventContext) />
@@ -196,6 +206,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postEvent", arguments.eventContext) />
@@ -207,6 +222,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("preView", arguments.eventContext) />
@@ -218,6 +238,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postView", arguments.eventContext) />
@@ -229,6 +254,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 		
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postProcess", arguments.eventContext) />
@@ -248,6 +278,11 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var methodTraceInfo = structNew() />
 		
 		<cfset var event = "" />
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+		</cfif>
 
 		<!--- If no isInitialTrace exists, do not do trace as an exception occur before the preProcess point --->
 		<cfif hasIsInitialTrace()>
