@@ -7,7 +7,7 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
-s
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,8 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Mach-II Logging is heavily based on Apache Commons Logging.
+Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
+it allows you attach multiple loggers at once.
 --->
 <cfcomponent
 	displayname="Log"
@@ -224,7 +225,7 @@ Mach-II Logging is heavily based on Apache Commons Logging.
 		<cfset var i = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.loggers[i].isWarnEnabled()>
+			<cfif variables.logAdapters[i].isWarnEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>

@@ -22,7 +22,8 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Mach-II Logging is heavily based on Apache Commons Logging.
+Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
+it allows you attach multiple loggers at once.
 --->
 <cfcomponent
 	displayname="LogFactory"
@@ -66,10 +67,32 @@ Mach-II Logging is heavily based on Apache Commons Logging.
 		<cfreturn log />
 	</cffunction>
 	
-	<cffunction name="registerLogAdapter" access="public" returntype="void" output="false"
-		hint="Registers a log adapter">
+	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
+		hint="Adds a log adapter">
+		<cfargument name="name" type="string" required="true"
+			hint="The name of this adapter" />
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset variables.logAdapters["_" & Replace(CreateUUID(), "-", "", "all")] = arguments.logAdapter />
+		<cfset variables.logAdapters[arguments.name] = arguments.logAdapter />
+	</cffunction>
+	
+	<cffunction name="disableLogging" access="public" returntype="void" output="false"
+		hint="Disables logging.">
+		
+		<cfset var i = 0 />
+		
+		<cfloop collection="#variables.logAdapters#" item="i">
+			<cfset variables.logAdapters[i].disableLogging() />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="enableLogging" access="public" returntype="void" output="false"
+		hint="Enables logging.">
+			
+		<cfset var i = 0 />
+		
+		<cfloop collection="#variables.logAdapters#" item="i">
+			<cfset variables.logAdapters[i].enableLogging() />
+		</cfloop>
 	</cffunction>
 	
 	<!---

@@ -101,15 +101,7 @@ Notes:
 			<cfset logFactory = arguments.parentAppManager.getLogFactory() />
 		<cfelse>
 			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
-			<cfset logFactory = CreateObject("component", "MachII.logging.LogFactory").init() />
-			
-			<cfset p = { loggingLevel="all" } />
-			
-			<cfset adapter = CreateObject("component", "MachII.logging.adapters.CFLogAdapter").init(p) />
-			<cfset adapter.configure() />
-			
-			<cfset logFactory.registerLogAdapter(adapter) />
-			
+			<cfset logFactory = CreateObject("component", "MachII.logging.LogFactory").init() />	
 		</cfif>
 		
 		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->

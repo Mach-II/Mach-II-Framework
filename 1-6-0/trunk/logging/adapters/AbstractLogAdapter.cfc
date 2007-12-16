@@ -7,7 +7,7 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
-s
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,6 +33,7 @@ Mach-II Logging is heavily based on Apache Commons Logging.
 	PROPERTIES
 	--->
 	<cfset variables.loggerName = "" />
+	<cfset variables.loggingEnabled = true />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -130,6 +131,16 @@ Mach-II Logging is heavily based on Apache Commons Logging.
 	<cffunction name="isWarnEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if warn level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+	
+	<cffunction name="disableLogging" access="public" returntype="void" output="false"
+		hint="Disables logging.">
+		<cfset variables.loggingEnabled = false />
+	</cffunction>
+	
+	<cffunction name="enableLogging" access="public" returntype="void" output="false"
+		hint="Enables logging.">
+		<cfset variables.loggingEnabled = true />
 	</cffunction>
 	
 	<!---

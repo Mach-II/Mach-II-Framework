@@ -7,7 +7,7 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
-s
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Special thanks to the Apache Commons - Logging project for inspiration for this component.
+Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
 --->
 <cfcomponent
 	displayname="CFLogAdapter"
@@ -45,6 +45,8 @@ Special thanks to the Apache Commons - Logging project for inspiration for this 
 	<cfset variables.level = variables.LOG_LEVEL_INFO />
 	<cfset variables.loggerName = "CFLog" />
 	<cfset variables.logFile = "application" />
+	<cfset variables.configFile = "" />
+	<cfset variables.configFileIsRelative = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -54,7 +56,10 @@ Special thanks to the Apache Commons - Logging project for inspiration for this 
 		
 		<!--- Load from a config file or downgrade to passed parameters --->	
 		<cfif isParameterDefined("configFile")>
-			<cfset loadConfigFile(getParameter("configFile"), getParameter("configFileRelative", false)) />
+			<cfset setConfigFile(getParameter("configFile")) />
+			<cfset setConfigFileIsRelative(getParameter("configFileIsRelative", false)) />
+			
+			<cfset loadConfigFile() />
 		<cfelse>
 			<cfif isParameterDefined("logFile")>
 				<cfset setlogFile(getParameter("logFile")) />
@@ -195,7 +200,11 @@ Special thanks to the Apache Commons - Logging project for inspiration for this 
 		hint="Checks if the passed log level is enabled.">
 		<cfargument name="logLevel" type="numeric" required="true"
 			hint="Log levels are numerically ordered for easier comparison." />
-		<cfreturn arguments.logLevel GTE getLevel() />
+		<cfif variables.loggingEnabled>
+			<cfreturn arguments.logLevel GTE getLevel() />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="logMessage" access="private" returntype="void" output="false"
@@ -255,7 +264,22 @@ Special thanks to the Apache Commons - Logging project for inspiration for this 
 	
 	<cffunction name="loadConfigFile" access="private" returntype="any" output="false"
 		hint="Loads configuration from a config file.">
-		<cfargument name="configFile" type="string" required="true" />
+
+		<cfset var configFilePath = getConfigFile() />
+		
+		<!--- Expand the path if it's relative --->
+		<cfif getConfigFileIsRelative()>
+			<cfset configFilePath = ExpandPath(configFilePath) />
+		</cfif>
+		
+		<!--- Read file --->
+		<cftry>
+			<cfcatch type="any">
+				<cfthrow type="MachII.logging.adapters.CFLogAdapter.configFileNotFound"
+					message="Config file not found. Please check the path." 
+					detail="configFilePath='#configFilePath#'" />
+			</cfcatch>
+		</cftry>
 
 	</cffunction>
 	
@@ -339,12 +363,32 @@ Special thanks to the Apache Commons - Logging project for inspiration for this 
 		<cfreturn variables.level />
 	</cffunction>
 	
-	<cffunction name="setLogFile" access="public" returntype="void" output="false"
+	<cffunction name="setConfigFile" access="private" returntype="void" output="false"
+		hint="Sets the config file path.">
+		<cfargument name="configFile" type="string" required="true" />
+		<cfset variables.configFile = arguments.configFile />
+	</cffunction>
+	<cffunction name="getConfigFile" access="public" returntype="string" output="false"
+		hint="Gets the config file path.">
+		<cfreturn variables.configFile />
+	</cffunction>
+	
+	<cffunction name="setConfigFileIsRelative" access="private" returntype="void" output="false"
+		hint="Sets a boolean that states if config file is relative path.">
+		<cfargument name="configFileIsRelative" type="boolean" required="true" />
+		<cfset variables.configFileIsRelative = arguments.configFileIsRelative />
+	</cffunction>
+	<cffunction name="getConfigFileIsRelative" access="public" returntype="boolean" output="false"
+		hint="Gets a boolean that states if the config file is relative path.">
+		<cfreturn variables.configFileIsRelative />
+	</cffunction>
+	
+	<cffunction name="setLogFile" access="private" returntype="void" output="false"
 		hint="Sets the value for the cflog 'file' attribute.">
 		<cfargument name="logFile" type="string" required="true" />
 		<cfset variables.logFile = arguments.logFile />
 	</cffunction>
-	<cffunction name="getLogFile" access="private" returntype="string" output="false"
+	<cffunction name="getLogFile" access="public" returntype="string" output="false"
 		hint="Gets the value for the cflog 'file' attribute">
 		<cfreturn variables.logFile />
 	</cffunction>
