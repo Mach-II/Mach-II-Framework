@@ -350,6 +350,13 @@ Notes:
 
 	<cffunction name="clearEventQueue" access="public" returntype="void" output="false"
 		hint="Clears the event queue.">
+			
+		<cfset var log = getLog() />
+		
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Event queue has been cleared.") />
+		</cfif>
+		
 		<cfset getEventQueue().clear() />
 	</cffunction>
 	

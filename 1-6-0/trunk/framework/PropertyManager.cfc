@@ -59,6 +59,9 @@ the rest of the framework. (pfarrell)
 			<cfset setParent(arguments.parentPropertyManager) />
 		</cfif>
 		
+		<!--- Setup the log --->
+		<cfset setLog(getAppManager().getLogFactory()) />
+		
 		<cfreturn this />
 	</cffunction>
 
@@ -286,13 +289,11 @@ the rest of the framework. (pfarrell)
 		hint="DEPRECATED - use isPropertyDefined() instead. Checks if property name is deinfed in the propeties.">
 		<cfargument name="propertyName" type="string" required="true" />
 		
-		<cftry>
-			<cfthrow type="MachII.framework.deprecatedMethod"
-				message="The hasProperty() method has been deprecated. Please use isPropertyDefined() instead." />
-			<cfcatch type="MachII.framework.deprecatedMethod">
-				<!--- Do nothing --->
-			</cfcatch> 
-		</cftry>
+		<cfset var log = getLog() />
+		
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("The hasProperty() method has been deprecated. Please use isPropertyDefined() instead.") />
+		</cfif>
 		
 		<cfreturn StructKeyExists(variables.properties, arguments.propertyName) />
 	</cffunction>
@@ -342,6 +343,16 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent PropertyManager instance this PropertyManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentPropertyManager />
+	</cffunction>
+	
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 	
 </cfcomponent>

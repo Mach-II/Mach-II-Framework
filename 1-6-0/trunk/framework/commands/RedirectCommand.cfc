@@ -99,7 +99,7 @@ Notes:
 			handling to catch a cfabort --->
 		<cfset arguments.eventContext.clearEventQueue() />
 
-		<cfif log.isDebugEnable()>
+		<cfif log.isDebugEnabled()>
 			<cfset log.debug("Redirecting to url '#redirectUrl#' with '#statusType#' status code (persist='#getPersist()#').") />
 		</cfif>
 
