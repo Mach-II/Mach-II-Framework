@@ -77,6 +77,8 @@ Notes:
 		<cfset var pluginManager = "" />
 		<cfset var parentPluginManager = "" />
 		<cfset var parentEventManager = "" />
+		<cfset var cacheManager = "" />
+		<cfset var parentCacheManager = "" />
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -139,6 +141,7 @@ Notes:
 			<cfset parentViewManager = appManager.getParent().getViewManager() />
 			<cfset parentPluginManager = appManager.getParent().getPluginManager() />
 			<cfset parentEventManager = appManager.getParent().getEventManager() />
+			<cfset parentCacheManager = appManager.getParent().getCacheManager() />
 		</cfif>
 		
 		<!--- 
@@ -204,6 +207,11 @@ Notes:
 		</cfif>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
+		<!--- The cacheManager does load in any xml. The cache commands are loaded in by the 
+			eventManager and the subroutineManager when looks through its commands. --->
+		<cfset cacheManager = CreateObject("component", "MachII.framework.CacheManager").init(appManager, parentCacheManager) />
+		<cfset appManager.setCacheManager(cacheManager) />
+
 		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager, parentEventManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset eventManager.loadXml(configXmls[i].configXml, configXmls[i].override) />

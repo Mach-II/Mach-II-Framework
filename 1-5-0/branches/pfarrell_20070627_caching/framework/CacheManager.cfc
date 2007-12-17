@@ -83,6 +83,10 @@ Notes:
 			<cfset cacheForUnit = arguments.xml.xmlAttributes["cacheForUnit"] />
 		</cfif>
 		
+		<!--- Set temps for the commandLoaderBase. --->
+		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
+		<cfset variables.filterMgr = getAppManager().getFilterManager() />
+
 		<!--- Build the cache handler --->
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(alias, type, cacheFor, cacheForUnit, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
@@ -92,6 +96,10 @@ Notes:
 		
 		<!--- Set the cache handler to the manager --->
 		<cfset addCacheHandler(cacheHandler) />
+		
+		<!--- Clear temps. --->
+		<cfset variables.listenerMgr = "" />
+		<cfset variables.filterMgr = "" />
 		
 		<cfreturn cacheHandler.getHandlerId() />		
 	</cffunction>

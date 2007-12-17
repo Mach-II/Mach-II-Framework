@@ -62,7 +62,7 @@ Notes:
 		<cfset var cacheHandler = "" />
 		
 		<cfset cacheHandler = cacheManager.getCacheHandler(getHandlerId()) />
-		<cfset contine = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
+		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
 		
 		<cfreturn continue />
 	</cffunction>

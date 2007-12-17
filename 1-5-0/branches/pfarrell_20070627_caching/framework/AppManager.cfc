@@ -41,6 +41,7 @@ Notes:
 	<cfset variables.pluginManager = "" />
 	<cfset variables.requestManager = "" />
 	<cfset variables.subroutineManager = "" />
+	<cfset variables.cacheManager = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.viewManager = "" />
 	<cfset variables.parentAppManager = "" />
@@ -66,6 +67,7 @@ Notes:
 		<cfset getFilterManager().configure() />
 		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
+		<cfset getCacheManager().configure() />
 		<cfset getViewManager().configure() />
 		
 		<!--- Module Manager is a singleton only call if this the parent AppManager --->
@@ -108,6 +110,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventManager" access="public" returntype="MachII.framework.EventManager" output="false">
 		<cfreturn variables.eventManager />
+	</cffunction>
+	
+	<cffunction name="setCacheManager" access="public" returntype="void" output="false">
+		<cfargument name="cacheManager" type="MachII.framework.CacheManager" required="true" />
+		<cfset variables.cacheManager = arguments.cacheManager />
+	</cffunction>
+	<cffunction name="getCacheManager" access="public" returntype="MachII.framework.CacheManager" output="false">
+		<cfreturn variables.cacheManager />
 	</cffunction>
 	
 	<cffunction name="setFilterManager" access="public" returntype="void" output="false">

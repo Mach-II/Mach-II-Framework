@@ -52,6 +52,8 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
 		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
 
@@ -83,6 +85,12 @@ Updated version: 1.5.0
 		<!--- event-arg --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
 			<cfset command = setupEventArg(arguments.commandNode) />
+		<!--- cache --->
+		<cfelseif arguments.commandNode.xmlName EQ "cache">
+			<cfset command = setupCache(arguments.commandNode, parentHandlerName, parentHandlerType) />
+		<!--- cacheclear --->
+		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
+			<cfset command = setupCacheClear(arguments.commandNode) />
 		<!--- default/unrecognized command --->
 		<cfelse>
 			<cfset command = setupDefault(arguments.commandNode) />
@@ -133,6 +141,50 @@ Updated version: 1.5.0
 			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
 		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupCache" access="private" returntype="MachII.framework.commands.CacheCommand" output="false"
+		hint="Sets up a cache command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		
+		<cfset var command = "" />
+		<cfset var cacheAlias = "" />
+		<cfset var handlerId = "" />
+		
+		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(commandNode, parentHandlerName, parentHandlerType) />
+		
+		<cfif structKeyExists(arguments.commandNode, "xmlAttributes") 
+			AND structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+			<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />			
+		</cfif>
+		
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheAlias) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupCacheClear" access="private" returntype="MachII.framework.commands.CacheClearCommand" output="false"
+		hint="Sets up a CacheClear command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var cacheAlias = "" />
+		<cfset var cacheCondition = "" />
+		
+		<cfif structKeyExists(arguments.commandNode, "xmlAttributes")>
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />	
+			</cfif>		
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "condition")>
+				<cfset cacheCondition = arguments.commandNode.xmlAttributes["condition"] />	
+			</cfif>		
+		</cfif>
+
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(cacheAlias, cacheCondition) />
 		
 		<cfreturn command />
 	</cffunction>
