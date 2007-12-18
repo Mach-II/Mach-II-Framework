@@ -142,7 +142,7 @@ Configuring multiple logging adapters:
 				message="You must specify a 'type' for log adapter named '#arguments.name#'." />
 		</cfif>
 		
-		<!--- Bind values in parameters struct --->
+		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="i">
 			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
 		</cfloop>

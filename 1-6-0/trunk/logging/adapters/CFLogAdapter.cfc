@@ -45,8 +45,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	<cfset variables.level = variables.LOG_LEVEL_INFO />
 	<cfset variables.loggerName = "CFLog" />
 	<cfset variables.logFile = "application" />
-	<cfset variables.configFile = "" />
-	<cfset variables.configFileIsRelative = false />
+	<cfset variables.filter = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -54,23 +53,17 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the adapter.">
 		
-		<!--- Load from a config file or downgrade to passed parameters --->	
-		<cfif isParameterDefined("configFile")>
-			<cfset setConfigFile(getParameter("configFile")) />
-			<cfset setConfigFileIsRelative(getParameter("configFileIsRelative", false)) />
-			
-			<cfset loadConfigFile() />
-		<cfelse>
-			<cfif isParameterDefined("logFile")>
-				<cfset setlogFile(getParameter("logFile")) />
-			</cfif>
-			<cfif isParameterDefined("loggingLevel")>
-				<cfset setLoggingLevel(getParameter("loggingLevel")) />
-			</cfif>
-			<cfif isParameterDefined("loggingEnabled")>
-				<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
-			</cfif>
+		<cfif isParameterDefined("logFile")>
+			<cfset setlogFile(getParameter("logFile")) />
 		</cfif>
+		<cfif isParameterDefined("loggingLevel")>
+			<cfset setLoggingLevel(getParameter("loggingLevel")) />
+		</cfif>
+		<cfif isParameterDefined("loggingEnabled")>
+			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
+		</cfif>
+		
+		<cfset setFilter(CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", ""))) />
 	</cffunction>
 	
 	<!---
@@ -371,24 +364,14 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfreturn variables.level />
 	</cffunction>
 	
-	<cffunction name="setConfigFile" access="private" returntype="void" output="false"
-		hint="Sets the config file path.">
-		<cfargument name="configFile" type="string" required="true" />
-		<cfset variables.configFile = arguments.configFile />
+	<cffunction name="setFilter" access="private" returntype="void" output="false"
+		hint="Sets the filter.">
+		<cfargument name="filter" type="any" required="true" />
+		<cfset variables.filter = arguments.filter />
 	</cffunction>
-	<cffunction name="getConfigFile" access="public" returntype="string" output="false"
-		hint="Gets the config file path.">
-		<cfreturn variables.configFile />
-	</cffunction>
-	
-	<cffunction name="setConfigFileIsRelative" access="private" returntype="void" output="false"
-		hint="Sets a boolean that states if config file is relative path.">
-		<cfargument name="configFileIsRelative" type="boolean" required="true" />
-		<cfset variables.configFileIsRelative = arguments.configFileIsRelative />
-	</cffunction>
-	<cffunction name="getConfigFileIsRelative" access="public" returntype="boolean" output="false"
-		hint="Gets a boolean that states if the config file is relative path.">
-		<cfreturn variables.configFileIsRelative />
+	<cffunction name="getFilter" access="public" returntype="any" output="false"
+		hint="Gets the filter.">
+		<cfreturn variables.filter />
 	</cffunction>
 	
 	<cffunction name="setLogFile" access="private" returntype="void" output="false"

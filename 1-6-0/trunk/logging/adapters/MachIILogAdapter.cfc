@@ -23,6 +23,32 @@ Updated version: 1.6.0
 
 Notes:
 Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
+
+Uses the GenericChannelFitler for filtering. See that CFC for information on how to use to setup a filters.
+
+Configuration Example:
+<property name="logging" type="MachII.properties.LoggingProperty">
+	<parameters>
+		<parameter name="MachIILog">
+			<struct>
+				<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
+				<key name="loggingEnabled" value="true|false" />
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<key name="debugModeOnly" value="true|false" />
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
+			</struct>
+		</parameter>
+	</parameters>
+</property>
 --->
 <cfcomponent
 	displayname="CFLogAdapter"
@@ -44,8 +70,8 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	
 	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
 	<cfset variables.loggerName = "MachII Logging" />
-	<cfset variables.configFile = "" />
-	<cfset variables.configFileIsRelative = false />
+	<cfset variables.debugModeOnly = false />
+	<cfset variables.filter = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -53,20 +79,17 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the adapter.">
 		
-		<!--- Load from a config file or downgrade to passed parameters --->	
-		<cfif isParameterDefined("configFile")>
-			<cfset setConfigFile(getParameter("configFile")) />
-			<cfset setConfigFileIsRelative(getParameter("configFileIsRelative", false)) />
-			
-			<cfset loadConfigFile() />
-		<cfelse>
-			<cfif isParameterDefined("loggingLevel")>
-				<cfset setLoggingLevel(getParameter("loggingLevel")) />
-			</cfif>
-			<cfif isParameterDefined("loggingEnabled")>
-				<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
-			</cfif>
+		<cfif isParameterDefined("loggingLevel")>
+			<cfset setLoggingLevel(getParameter("loggingLevel")) />
 		</cfif>
+		<cfif isParameterDefined("loggingEnabled")>
+			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
+		</cfif>
+		<cfif isParameterDefined("debugModeOnly")>
+			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
+		</cfif>
+		
+		<cfset setFilter(CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", ""))) />
 	</cffunction>
 	
 	<!---
@@ -199,7 +222,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		hint="Checks if the passed log level is enabled.">
 		<cfargument name="logLevel" type="numeric" required="true"
 			hint="Log levels are numerically ordered for easier comparison." />
-		<cfif variables.loggingEnabled>
+		<cfif getLoggingEnabled() AND ((getDebugModeOnly() AND isDebugMode()) OR NOT getDebugModeOnly())>
 			<cfreturn arguments.logLevel GTE getLevel() />
 		<cfelse>
 			<cfreturn false />
@@ -215,45 +238,27 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		
 		<cfset var entry = StructNew() />
 		
-		<!--- See if we need to create a place to put the log messages --->
-		<cfif NOT StructKeyExists(request, "_MachIILog")>
-			<cfset request._MachIILog = ArrayNew(1) />
+		<!--- Filter the message by channel --->
+		<cfif getFilter().decide(arguments.channel)>
+		
+			<!--- See if we need to create a place to put the log messages --->
+			<cfif NOT StructKeyExists(request, "_MachIILog")>
+				<cfset request._MachIILog = ArrayNew(1) />
+			</cfif>
+			
+			<cfset entry.channel = arguments.channel />
+			<cfset entry.logLevel = arguments.logLevel />
+			<cfset entry.logLevelName = translateLevelToName(arguments.logLevel) />
+			<cfset entry.message = arguments.message />
+			<cfset entry.tick = getTickCount() />
+			<cfif StructKeyExists(arguments, "caughtException")>
+				<cfset entry.caughtException = arguments.caughtException />
+			<cfelse>
+				<cfset entry.caughtException = "" />
+			</cfif>
+			
+			<cfset ArrayAppend(request._MachIILog, entry) />
 		</cfif>
-		
-		<cfset entry.channel = arguments.channel />
-		<cfset entry.logLevel = arguments.logLevel />
-		<cfset entry.logLevelName = translateLevelToName(arguments.logLevel) />
-		<cfset entry.message = arguments.message />
-		<cfset entry.tick = getTickCount() />
-		<cfif StructKeyExists(arguments, "caughtException")>
-			<cfset entry.caughtException = arguments.caughtException />
-		<cfelse>
-			<cfset entry.caughtException = "" />
-		</cfif>
-		
-		<cfset ArrayAppend(request._MachIILog, entry) />
-		
-	</cffunction>
-	
-	<cffunction name="loadConfigFile" access="private" returntype="any" output="false"
-		hint="Loads configuration from a config file.">
-
-		<cfset var configFilePath = getConfigFile() />
-		
-		<!--- Expand the path if it's relative --->
-		<cfif getConfigFileIsRelative()>
-			<cfset configFilePath = ExpandPath(configFilePath) />
-		</cfif>
-		
-		<!--- Read file --->
-		<cftry>
-			<cfcatch type="any">
-				<cfthrow type="MachII.logging.adapters.CFLogAdapter.configFileNotFound"
-					message="Config file not found. Please check the path." 
-					detail="configFilePath='#configFilePath#'" />
-			</cfcatch>
-		</cftry>
-
 	</cffunction>
 	
 	<cffunction name="translateLevelToName" access="private" returntype="string" output="false"
@@ -341,24 +346,24 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfreturn variables.level />
 	</cffunction>
 	
-	<cffunction name="setConfigFile" access="private" returntype="void" output="false"
-		hint="Sets the config file path.">
-		<cfargument name="configFile" type="string" required="true" />
-		<cfset variables.configFile = arguments.configFile />
+	<cffunction name="setFilter" access="private" returntype="void" output="false"
+		hint="Sets the filter.">
+		<cfargument name="filter" type="any" required="true" />
+		<cfset variables.filter = arguments.filter />
 	</cffunction>
-	<cffunction name="getConfigFile" access="public" returntype="string" output="false"
-		hint="Gets the config file path.">
-		<cfreturn variables.configFile />
+	<cffunction name="getFilter" access="public" returntype="any" output="false"
+		hint="Gets the filter.">
+		<cfreturn variables.filter />
 	</cffunction>
 	
-	<cffunction name="setConfigFileIsRelative" access="private" returntype="void" output="false"
-		hint="Sets a boolean that states if config file is relative path.">
-		<cfargument name="configFileIsRelative" type="boolean" required="true" />
-		<cfset variables.configFileIsRelative = arguments.configFileIsRelative />
+	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
+		hint="Sets if we should log only if debug mode is on in CF.">
+		<cfargument name="debugModeOnly" type="boolean" required="true" />
+		<cfset variables.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
-	<cffunction name="getConfigFileIsRelative" access="public" returntype="boolean" output="false"
-		hint="Gets a boolean that states if the config file is relative path.">
-		<cfreturn variables.configFileIsRelative />
+	<cffunction name="getDebugModeOnly" access="public" returntype="string" output="false"
+		hint="Gets the value of if we should log only if debug mode is on in CF.">
+		<cfreturn variables.debugModeOnly />
 	</cffunction>
 	
 </cfcomponent>
