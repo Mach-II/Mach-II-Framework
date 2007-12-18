@@ -22,6 +22,20 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
+FilterCriteria can be an comma delimited list or an array.
+-----------------------------------------------------------------------------------------
+|	Pattern				|	Matches Channels											|
+-----------------------------------------------------------------------------------------
+|	!*					|	Nothing (unless you have another pattern that matches)		|
+|	MachII.*			|	Matches all channels that start with 'MachII.'				|
+|	!myApp.model.*		|	Does not match any channels that start with 'myApp.model.'	|
+|	MachII				|	Matches only 'MachII' literal not 'MachII.framework.etc'	|
+----------------------------------------------------------------------------------------|
+
+! 		= Do not match (can only occur at the beginning of a pattern string)
+no !	= Indicates that you should match
+* 		= Wildcard (can only occur at the end of a pattern string)
+
 --->
 <cfcomponent
 	displayname="GenericChannelFilter"

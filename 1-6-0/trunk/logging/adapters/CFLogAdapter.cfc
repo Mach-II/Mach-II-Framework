@@ -23,6 +23,36 @@ Updated version: 1.6.0
 
 Notes:
 Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
+
+Uses the GenericChannelFitler for filtering. See that CFC for information on how to use to setup filters.
+
+Configuration Example:
+<property name="logging" type="MachII.properties.LoggingProperty">
+	<parameters>
+		<parameter name="MachIILog">
+			<struct>
+				<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
+				<!-- Optional and defaults to true -->
+				<key name="loggingEnabled" value="true|false" />
+				<!-- Optional and defaults to 'fatal' -->
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<!-- Optional and defaults to the application.log if not defined -->
+				<key name="loggingFile" value="nameOfCFLogFile" />
+				<!-- Optional -->
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
+			</struct>
+		</parameter>
+	</parameters>
+</property>
 --->
 <cfcomponent
 	displayname="CFLogAdapter"
@@ -42,7 +72,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	<cfset variables.LOG_LEVEL_ALL = 0 />
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
-	<cfset variables.level = variables.LOG_LEVEL_INFO />
+	<cfset variables.level = variables.LOG_FATAL_INFO />
 	<cfset variables.loggerName = "CFLog" />
 	<cfset variables.logFile = "application" />
 	<cfset variables.filter = "" />
@@ -213,26 +243,29 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfset var type = translateLogLevelToCFLogType(arguments.logLevel) />
 		<cfset var text = "[" & arguments.channel & "] " />
 		
-		<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
-			does not have these levels and are logged on the "Information" level--->
-		<cfif arguments.logLevel EQ 1>
-			<cfset text = text & "(Trace) " />
-		<cfelseif arguments.logLevel EQ 2>
-			<cfset text = text & "(Debug) " />
-		<cfelseif arguments.logLevel EQ 3>
-			<cfset text = text & "(Info) " />
+		<!---  --->
+		<cfif getFilter().decided(arguments.channel)>
+			<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
+				does not have these levels and are logged on the "Information" level--->
+			<cfif arguments.logLevel EQ 1>
+				<cfset text = text & "(Trace) " />
+			<cfelseif arguments.logLevel EQ 2>
+				<cfset text = text & "(Debug) " />
+			<cfelseif arguments.logLevel EQ 3>
+				<cfset text = text & "(Info) " />
+			</cfif>
+			
+			<!--- Append message --->
+			<cfset text = text & arguments.message />
+			
+			<!--- Append and serialize to string the caught exception if available --->
+			<cfif StructKeyExists(arguments, "caughtException")>
+				<cfset text = text & " :: " & arguments.caughtException.toString() />
+			</cfif>
+			
+			<!--- Make the cflog call --->
+			<cflog type="#type#" text="#text#" file="#getLogFile()#" />
 		</cfif>
-		
-		<!--- Append message --->
-		<cfset text = text & arguments.message />
-		
-		<!--- Append and serialize to string the caught exception if available --->
-		<cfif StructKeyExists(arguments, "caughtException")>
-			<cfset text = text & " :: " & arguments.caughtException.toString() />
-		</cfif>
-		
-		<!--- Make the cflog call --->
-		<cflog type="#type#" text="#text#" file="#getLogFile()#" />
 	</cffunction>
 	
 	<cffunction name="translateLogLevelToCFLogType" access="private" returntype="string" output="false"
