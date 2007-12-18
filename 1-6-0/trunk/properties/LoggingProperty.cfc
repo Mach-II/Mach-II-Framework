@@ -32,6 +32,8 @@ in the request output.
 Configuring multiple logging adapters:
 <property name="Logging" type="MachII.properties.LoggingProperty">
 	<parameters>
+		<!-- Optionally turns logging on/off (loggingEnabled values in the adapters are still adhered to)-->
+		<parameter name="loggingEnabled" value="false"/>
 		<parameter name="CFLog">
 			<struct>
 				<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
@@ -60,7 +62,7 @@ See individual logging adapter for more information on configuration.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.enableLogging = true />
+	<cfset variables.loggingEnabled = true />
 	
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -73,8 +75,8 @@ See individual logging adapter for more information on configuration.
 		<cfset var i = 0 />
 		
 		<!--- Set if logging is enabled (which is by default true) --->
-		<cfif isParameterDefined("enableLogging")>
-			<cfset setEnableLogging(getParameter("enableLogging")) />
+		<cfif isParameterDefined("loggingEnabled")>
+			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
 		</cfif>
 		
 		<!--- Determine if we should load adapters or use the default 
@@ -92,7 +94,7 @@ See individual logging adapter for more information on configuration.
 		</cfif>
 		
 		<!--- Set logging enabled/disabled --->
-		<cfif NOT getEnableLogging()>
+		<cfif NOT getLoggingEnabled()>
 			<cfset getAppManager().getLogFactory().disableLogging() />
 		</cfif>
 	</cffunction>
@@ -159,14 +161,14 @@ See individual logging adapter for more information on configuration.
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setEnableLogging" access="public" returntype="void" output="false"
+	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
 		hint="Sets if logging is enabled.">
-		<cfargument name="enableLogging" type="boolean" required="true" />
-		<cfset variables.enableLogging = arguments.enableLogging />
+		<cfargument name="loggingEnabled" type="boolean" required="true" />
+		<cfset variables.loggingEnabled = arguments.loggingEnabled />
 	</cffunction>
-	<cffunction name="getEnableLogging" access="public" returntype="boolean" output="false"
+	<cffunction name="getLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the value if logging is enabled.">
-		<cfreturn variables.enableLogging />
+		<cfreturn variables.loggingEnabled />
 	</cffunction>
 	
 	
