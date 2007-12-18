@@ -24,31 +24,32 @@ Updated version: 1.6.0
 Notes:
 
 Configuring for Mach-II loging only:
-	<property name="Logging" type="MachII.properties.LoggingProperty" />
+<property name="Logging" type="MachII.properties.LoggingProperty" />
 
 This will turn on the MachIILogAdapter and display the log message 
 in the request output.
 
 Configuring multiple logging adapters:
-	<property name="Logging" type="MachII.properties.LoggingProperty">
-		<parameters>
-			<parameter name="CFLog">
-				<struct>
-					<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
-					<key name="loggingEnabled" value="false" />
-					<key name="loggingLevel" value="warn" />
-					<key name="logFile" value="lightpost" />
-				</struct>
-			</parameter>
-			<parameter name="MachIILog">
-				<struct>
-					<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
-					<key name="loggingEnabled" value="true" />
-					<key name="loggingLevel" value="debug" />
-				</struct>
-			</parameter>
-		</parameters>
-	</property>
+<property name="Logging" type="MachII.properties.LoggingProperty">
+	<parameters>
+		<parameter name="CFLog">
+			<struct>
+				<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
+				<key name="loggingEnabled" value="false" />
+				<key name="loggingLevel" value="warn" />
+			</struct>
+		</parameter>
+		<parameter name="MachIILog">
+			<struct>
+				<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
+				<key name="loggingEnabled" value="true" />
+				<key name="loggingLevel" value="debug" />
+			</struct>
+		</parameter>
+	</parameters>
+</property>
+
+See individual logging adapter for more information on configuration.
 --->
 <cfcomponent
 	displayname="LoggingProperty"
