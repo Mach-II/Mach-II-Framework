@@ -72,7 +72,7 @@ Configuration Example:
 	<cfset variables.LOG_LEVEL_ALL = 0 />
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
-	<cfset variables.level = variables.LOG_FATAL_INFO />
+	<cfset variables.level = variables.LOG_LEVEL_FATAL />
 	<cfset variables.loggerName = "CFLog" />
 	<cfset variables.logFile = "application" />
 	<cfset variables.filter = "" />
@@ -244,7 +244,7 @@ Configuration Example:
 		<cfset var text = "[" & arguments.channel & "] " />
 		
 		<!---  --->
-		<cfif getFilter().decided(arguments.channel)>
+		<cfif getFilter().decide(arguments.channel)>
 			<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
 				does not have these levels and are logged on the "Information" level--->
 			<cfif arguments.logLevel EQ 1>
