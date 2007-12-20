@@ -140,7 +140,7 @@ the rest of the framework. (pfarrell)
 		hint="Gets a configuration parameter value, or a default value if not defined.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-		<cfargument name="defaultValue" type="string" required="false" default=""
+		<cfargument name="defaultValue" type="any" required="false" default=""
 			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
 		<cfif isParameterDefined(arguments.name)>
 			<cfreturn bindValue(arguments.name, variables.parameters[arguments.name]) />
@@ -168,7 +168,9 @@ the rest of the framework. (pfarrell)
 		hint="Gets the specified property - this is just a shortcut for getPropertyManager().getProperty()">
 		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to return."/>
-		<cfreturn getPropertyManager().getProperty(arguments.propertyName) />
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to use if the requested property is not defined." />
+		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
 	</cffunction>
 	<cffunction name="setProperty" access="public" returntype="any" output="false"
 		hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
@@ -198,7 +200,8 @@ the rest of the framework. (pfarrell)
 		<!--- Can only bind simple parameter values --->
 		<cfif IsSimpleValue(arguments.parameterValue) AND REFindNoCase("\${(.)*?}", arguments.parameterValue)>
 			<cfset propertyName = Mid(arguments.parameterValue, 3, Len(arguments.parameterValue) -3) />
-			<cfif getPropertyManager().isPropertyDefined(propertyName)>
+			<cfif getPropertyManager().isPropertyDefined(propertyName) 
+				OR (IsObject(getAppManager().getParent()) AND getAppManager().getParent().getPropertyManager().isPropertyDefined(propertyName))>
 				<cfset value = getProperty(propertyName) />
 			<cfelse>
 				<cfthrow type="MachII.framework.ProperyNotDefinedToBindToParameter" 
