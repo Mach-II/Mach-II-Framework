@@ -241,8 +241,10 @@ the rest of the framework. (pfarrell)
 	--->
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Returns the property value by name. If the property is not defined, and a default value is passed, it will be returned. If the property and a default value are both not defined then an exception is thrown.">
-		<cfargument name="propertyName" type="string" required="true" />
-		<cfargument name="defaultValue" type="any" required="false" default="" />
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to return." />
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to use if the requested property is not defined." />
 		
 		<cfif isPropertyDefined(arguments.propertyName)>
 			<cfreturn variables.properties[arguments.propertyName] />
@@ -261,8 +263,10 @@ the rest of the framework. (pfarrell)
 	</cffunction>	
 	<cffunction name="setProperty" access="public" returntype="void" output="false"
 		hint="Sets the property value by name.">
-		<cfargument name="propertyName" type="string" required="true" />
-		<cfargument name="propertyValue" type="any" required="true" />
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to set." />
+		<cfargument name="propertyValue" type="any" required="true"
+			hint="The value to store in the property." />
 		<!--- Default properties for base/main property manager only cannot be overriden:
 			applicationRoot, eventParameter, parameterPredence, maxEvents, redirectPreists, redirectPeristscope,
 			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
@@ -276,18 +280,21 @@ the rest of the framework. (pfarrell)
 	</cffunction>
 	<cffunction name="removeProperty" access="public" returntype="void" output="false"
 		hint="Removes a property from the current property manager. Does NOT remove from a parent.">
-		<cfargument name="propertyName" type="string" required="true" />
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to remove." />
 		<cfset StructDelete(variables.properties, arguments.propertyName, false) />
 	</cffunction>
 	
 	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if property name is defined in the properties. Does NOT check a parent.">
-		<cfargument name="propertyName" type="string" required="true" />
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The named of the property to check if it is defined." />
 		<cfreturn StructKeyExists(variables.properties, arguments.propertyName) />
 	</cffunction>
 	<cffunction name="hasProperty" access="public" returntype="boolean" output="false"
 		hint="DEPRECATED - use isPropertyDefined() instead. Checks if property name is deinfed in the propeties.">
-		<cfargument name="propertyName" type="string" required="true" />
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The named of the property to check if it is defined." />
 		
 		<cfset var log = getLog() />
 		
