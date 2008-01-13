@@ -105,7 +105,7 @@ Notes:
 		  
 				<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />
-					<cfset command = createCommand(commandNode) />
+					<cfset command = createCommand(commandNode, subroutineName, "subroutine") />
 					<cfset subroutineHandler.addCommand(command) />
 				</cfloop>
 

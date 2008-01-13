@@ -113,7 +113,7 @@ Notes:
 		  
 				<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-					<cfset command = createCommand(commandNode) />
+					<cfset command = createCommand(commandNode, eventName, "event") />
 					<cfset eventHandler.addCommand(command) />
 				</cfloop>
 				
