@@ -55,10 +55,10 @@ Configuration Example:
 </property>
 --->
 <cfcomponent
-	displayname="CFLogAdapter"
+	displayname="ScopeAdapter"
 	extends="MachII.logging.adapters.AbstractLogAdapter"
 	output="false"
-	hint="A concrete adapter for MachII logging.">
+	hint="A concrete adapter for scope logging. Logs messages to a scope.">
 	
 	<!---
 	PROPERTIES
@@ -73,7 +73,8 @@ Configuration Example:
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
 	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
-	<cfset variables.loggerName = "MachII Logging" />
+	<cfset variables.loggerName = "Scope Logging" />
+	<cfset variables.loggingScopePath = "request._ScopeLogging" />
 	<cfset variables.debugModeOnly = false />
 	<cfset variables.filter = "" />
 	
@@ -83,6 +84,9 @@ Configuration Example:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the adapter.">
 		
+		<cfif isParameterDefined("loggingScopePath")>
+			<cfset setLoggingScopePath(getParameter("loggingScopePath")) />
+		</cfif>
 		<cfif isParameterDefined("loggingLevel")>
 			<cfset setLoggingLevel(getParameter("loggingLevel")) />
 		</cfif>
@@ -241,27 +245,30 @@ Configuration Example:
 		<cfargument name="caughtException" type="any" required="false" />
 		
 		<cfset var entry = StructNew() />
+		<cfset var scope = "" />
 		
 		<!--- Filter the message by channel --->
 		<cfif getFilter().decide(arguments.channel)>
 		
 			<!--- See if we need to create a place to put the log messages --->
-			<cfif NOT StructKeyExists(request, "_MachIILog")>
-				<cfset request._MachIILog = ArrayNew(1) />
+			<cfif NOT IsDefined("#getLoggingScope()#")>
+				<cfset "#getLoggingScope()#" = ArrayNew(1) />
 			</cfif>
+			
+			<cfset scope = StructGet(getLoggingScope()) />
 			
 			<cfset entry.channel = arguments.channel />
 			<cfset entry.logLevel = arguments.logLevel />
 			<cfset entry.logLevelName = translateLevelToName(arguments.logLevel) />
 			<cfset entry.message = arguments.message />
-			<cfset entry.tick = getTickCount() />
+			<cfset entry.currentTick = getTickCount() />
 			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset entry.caughtException = arguments.caughtException />
 			<cfelse>
 				<cfset entry.caughtException = "" />
 			</cfif>
 			
-			<cfset ArrayAppend(request._MachIILog, entry) />
+			<cfset ArrayAppend(scope, entry) />
 		</cfif>
 	</cffunction>
 	
@@ -348,6 +355,16 @@ Configuration Example:
 	<cffunction name="getLevel" access="private" returntype="numeric" output="false"
 		hint="Returns the internal numeric log level.">
 		<cfreturn variables.level />
+	</cffunction>
+	
+	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
+		hint="Sets the logging scope.">
+		<cfargument name="loggingScope" type="string" required="true" />
+		<cfset variables.loggingScope = arguments.loggingScope />
+	</cffunction>
+	<cffunction name="getFilter" access="public" returntype="string" output="false"
+		hint="Gets the logging scope.">
+		<cfreturn variables.loggingScope />
 	</cffunction>
 	
 	<cffunction name="setFilter" access="private" returntype="void" output="false"
