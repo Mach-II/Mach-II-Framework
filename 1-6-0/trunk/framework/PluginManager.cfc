@@ -288,8 +288,8 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-			<cfset log = variables.preProcessPlugins[i].getLog() />
+			<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preEventPlugins[i].getLog() />
 			
 			<cfset log.debug("Plugin '#loggingName#' running pre-event.") />
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
@@ -318,8 +318,8 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-			<cfset log = variables.preProcessPlugins[i].getLog() />
+			<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.postEventPlugins[i].getLog() />
 			
 			<cfset log.debug("Plugin '#loggingName#' running post-event.") />
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
@@ -348,8 +348,8 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-			<cfset log = variables.preProcessPlugins[i].getLog() />
+			<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.preViewPlugins[i].getLog() />
 			
 			<cfset log.debug("Plugin '#loggingName#' running pre-view.") />
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
@@ -378,8 +378,8 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-			<cfset log = variables.preProcessPlugins[i].getLog() />
+			<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.postViewPlugins[i].getLog() />
 			
 			<cfset log.debug("Plugin '#loggingName#' running post-view.") />
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
@@ -408,8 +408,8 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-			<cfset log = variables.preProcessPlugins[i].getLog() />
+			<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.postProcessPlugins[i].getLog() />
 			
 			<cfset log.debug("Plugin '#loggingName#' running post-process.") />
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
