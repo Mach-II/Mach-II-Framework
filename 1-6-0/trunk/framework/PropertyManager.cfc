@@ -227,9 +227,16 @@ the rest of the framework. (pfarrell)
 
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Prepares the configurable properties for use.">
+
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
+
+		<!--- Put a reference of the log factory into properties if this is the parent --->
+		<cfif NOT IsObject(getParent())>
+			<cfset setProperty("logFactory", getAppManager().getLogFactory()) /	>
+		</cfif>
 		
+		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurableProperties)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurableProperties[i]) />
 			<cfset aConfigurableProperty.configure() />
