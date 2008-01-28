@@ -31,23 +31,27 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.messageName = "" />
 	<cfset variables.multithreaded = "" />
 	<cfset variables.waitForThreads = "" />
 	<cfset variables.timeout = "" />
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.messageSubscriberInvokers = StructNew() />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="MessageHandler" output="false"
 		hint="Initializes the handler.">
+		<cfargument name="messageName" type="string" required="true" />
 		<cfargument name="multithreaded" type="boolean" required="true" />
 		<cfargument name="waitForThreads" type="boolean" required="true" />
 		<cfargument name="timeout" type="numeric" required="true" />
 		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 
 		<!--- run setters --->
+		<cfset setMessageName(arguments.messageName) />
 		<cfset setMultithreaded(arguments.multithreaded) />
 		<cfset setWaitForThreads(arguments.waitForThreads) />
 		<cfset setTimeout(arguments.timeout) />
@@ -72,10 +76,15 @@ Notes:
 		<cfset var error = "" />
 		<cfset var exception = "" />
 		<cfset var continue = true />
+		<cfset var log = getLog() />
 		<cfset var i = 0 />
 		
 		<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
 		<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
+		
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
+			</cfif>
 			
 			<!--- Setup parameters --->
 			<cfset parameters.event = arguments.event />
@@ -87,21 +96,35 @@ Notes:
 			
 			<!--- Wait and join --->
 			<cfif getWaitForThreads()>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
+				</cfif>
+
 				<cfset error = threadingAdapter.join(threadIds, getTimeout()) />
 				
 				<!--- Create an exception --->
 				<cfif IsStruct(error)>
 					<cfset continue = false />
+					<cfif log.isErrorEnabled()>
+						<cfset log.error("#error.message#", error) />
+					</cfif>					
 					<cfset exception = arguments.eventContext.getRequestHandler().wrapException(error) />
 					<cfset arguments.eventContext.handleException(exception, true) />
 				</cfif>
 			<!--- Or set thread ids into the event --->
 			<cfelse>
+				<cfif log.isTraceEnabled()>
+					<cfset log.trace("Not waiting to join message threads.") />
+				</cfif>
 				<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
 				<cfset arguments.event.setArg("_publishThreadIds", publishThreadIdsInEvent) />
 			</cfif>
 		<!--- Run in serial --->
 		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
+			</cfif>
+
 			<cfloop collection="#invokers#" item="i">
 				<cfset invokers[i].invokeListener(arguments.event) />
 			</cfloop>
@@ -135,6 +158,14 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setMessageName" access="private" returntype="void" output="false">
+		<cfargument name="messageName" type="string" required="true" />
+		<cfset variables.messageName = arguments.messageName />
+	</cffunction>
+	<cffunction name="getMessageName" access="public" returntype="string" output="false">
+		<cfreturn variables.messageName />
+	</cffunction>
+	
 	<cffunction name="setMultithreaded" access="private" returntype="void" output="false">
 		<cfargument name="multithreaded" type="boolean" required="true" />
 		<cfset variables.multithreaded = arguments.multithreaded />
@@ -167,6 +198,16 @@ Notes:
 	<cffunction name="getThreadingAdapter" access="private" returntype="MachII.util.threading.ThreadingAdapter" output="false"
 		hint="Gets a threading adapter.">
 		<cfreturn variables.threadingAdapter />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

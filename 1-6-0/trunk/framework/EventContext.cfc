@@ -39,6 +39,7 @@ Notes:
 	<cfset variables.previousEvent = "" />
 	<cfset variables.mappings = StructNew() />
 	<cfset variables.exceptionEventName = "" />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -150,6 +151,10 @@ Notes:
 			<cfset subroutineHandler = getAppManager().getSubroutineManager().getSubroutineHandler(arguments.subroutineName) />
 			<!--- Execute the subroutine --->
 			<cfset continue = subroutineHandler.handleSubroutine(arguments.event, this) />
+
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Subroutine '#arguments.subroutineName#' execution has ended.") />
+			</cfif>
 			
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
@@ -196,7 +201,7 @@ Notes:
 		<cfset variables.mappings[arguments.eventName] = mapping />
 		
 		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Created event-mapping on event '#arguments.eventName#'.") />
+			<cfset log.debug("Created event-mapping named '#arguments.eventName#' to event '#arguments.mappingName#' in module '#arguments.mappingModuleName#'.") />
 		</cfif>
 	</cffunction>
 	<cffunction name="getEventMapping" access="public" returntype="struct" output="false"
@@ -259,6 +264,7 @@ Notes:
 		<cfset var eventArgs = StructNew() />
 		<cfset var appManager = getAppManager() />
 		<cfset var result = StructNew() />
+		<cfset var log = getLog() />
 		
 		<cfset result.eventName = getExceptionEventName() />
 		
@@ -290,6 +296,10 @@ Notes:
 				<cfset result.moduleName = appManager.getModuleName() />
 			<cfelse>
 				<cfset result.moduleName = "" />
+			</cfif>
+			
+			<cfif log.isInfoEnabled()>
+				<cfset log.info("Handling exception.") />
 			</cfif>
 			
 			<!--- Queue the exception event instead of handling it immediately. 
@@ -353,8 +363,8 @@ Notes:
 			
 		<cfset var log = getLog() />
 		
-		<cfif log.isInfoEnabled()>
-			<cfset log.info("Event queue has been cleared.") />
+		<cfif log.isWarnEnabled()>
+			<cfset log.warn("Event queue has been cleared.") />
 		</cfif>
 		
 		<cfset getEventQueue().clear() />

@@ -131,7 +131,7 @@ Notes:
 				</cfif>
 				
 				<!--- Setup the Message Handler --->
-				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
+				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageName, messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
 								
 				<!--- For each message, parse all the parameters --->
 				<cfif StructKeyExists(messageSubscribersNodes[i], "subscribe")>
@@ -161,8 +161,17 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
-		hint="Configures each of the registered Listeners and its' invoker.">
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Configures each of the registered message handlers.">
+
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var aMessageHandler = 0 />
+		<cfset var i = 0 />
+
+		<cfloop collection="#variables.messageHandlers#" item="i">
+			<cfset aMessageHandler = variables.messageHandlers[i] />
+			<cfset aMessageHandler.setLog(logFactory) />
+		</cfloop>
 	</cffunction>
 	
 	<!---

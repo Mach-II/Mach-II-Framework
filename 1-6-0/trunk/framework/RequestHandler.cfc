@@ -43,6 +43,7 @@ Notes:
 	<cfset variables.maxEvents = 10 />
 	<cfset variables.isProcessing = false />
 	<cfset variables.isException = false />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -71,6 +72,9 @@ Notes:
 		<!--- Set the EventContext into the request scope for backwards compatibility --->
 		<cfset request.eventContext = getEventContext() />
 		
+		<!--- Setup the log --->
+		<cfset setLog(getAppManager().getLogFactory()) />
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -87,6 +91,11 @@ Notes:
 		<cfset var nextEvent = "" />
 		<cfset var exception = "" />
 		<cfset var missingEvent = "" />
+		<cfset var log = getLog() />
+		
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Begin processing request.") />
+		</cfif>
 		
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
@@ -119,6 +128,10 @@ Notes:
 			
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
+				<cfif log.isWarnEnabled()>
+					<cfset log.warn("#cfcatch.message#", cfcatch) />
+				</cfif>
+
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
 				<cfset setupEventContext(appManager) />
 				<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
@@ -141,6 +154,7 @@ Notes:
 		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
 		
 		<cfset var exception = CreateObject("component", "MachII.util.Exception").init(arguments.type, arguments.message, arguments.errorCode, arguments.detail, arguments.extendedInfo, arguments.tagContext) />
+
 		<cfif NOT getIsException()>
 			<cfset resetEventCount() />
 		</cfif>
@@ -154,6 +168,7 @@ Notes:
 		<cfargument name="caughtException" type="any" required="true" />
 		
 		<cfset var exception = CreateObject("component", "MachII.util.Exception").wrapException(arguments.caughtException) />
+
 		<cfif NOT getIsException()>
 			<cfset resetEventCount() />
 		</cfif>
@@ -231,6 +246,10 @@ Notes:
 		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
 		<cfset pluginManager.postProcess(getEventContext()) />
 		
+		<cfif log.isInfoEnabled()>
+			<cfset log.Info("End processing request.") />
+		</cfif>
+		
 		<!--- Run On-Request-End callbacks --->
 		<cfloop from="1" to="#ArrayLen(onRequestEndCallbacks)#" index="i">
 			<cfinvoke component="#onRequestEndCallbacks[i].callback#"
@@ -244,7 +263,9 @@ Notes:
 	
 	<cffunction name="handleNextEvent" access="private" returntype="void" output="true"
 		hint="Handles the next event in the queue.">
+
 		<cfset var exception = 0 />
+		<cfset var log = getLog() />
 		
 		<cftry>
 			<cfset incrementEventCount() />
@@ -257,6 +278,9 @@ Notes:
 				<cfif getIsException()>
 					<cfrethrow />
 				<cfelse>
+					<cfif log.isFatalEnabled()>
+						<cfset log.fatal("#cfcatch.message#", cfcatch) />
+					</cfif>
 					<cfset exception = wrapException(cfcatch) />
 					<cfset getEventContext().handleException(exception, true) />
 				</cfif>
@@ -464,6 +488,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getOnRequestEndCallbacks" access="private" returntype="any" output="false">
 		<cfreturn variables.onRequestEndCallbacks />
+	</cffunction>
+
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

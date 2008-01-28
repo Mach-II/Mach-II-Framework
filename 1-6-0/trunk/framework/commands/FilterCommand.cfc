@@ -70,8 +70,8 @@ Notes:
 			<cfinvokeargument name="paramArgs" value="#getParamArgs()#" />
 		</cfinvoke>
 
-		<cfif log.isInfoEnabled() and NOT continue>
-			<cfset log.info("Filter '#getFilter().getComponentNameForLogging()# has changed the flow of this event.") />
+		<cfif log.isWarnEnabled() and NOT continue>
+			<cfset log.warn("Filter '#getFilter().getComponentNameForLogging()# has changed the flow of this event.") />
 		</cfif>
 		
 		<cfreturn continue />

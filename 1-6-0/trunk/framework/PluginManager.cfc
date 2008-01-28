@@ -261,7 +261,9 @@ Notes:
 			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preProcessPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running pre-process.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running pre-process.") />
+			</cfif>
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
 
@@ -291,7 +293,9 @@ Notes:
 			<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preEventPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running pre-event.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running pre-event.") />
+			</cfif>
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
 
@@ -321,7 +325,9 @@ Notes:
 			<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postEventPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running post-event.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running post-event.") />
+			</cfif>
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
 
@@ -351,7 +357,9 @@ Notes:
 			<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preViewPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running pre-view.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running pre-view.") />
+			</cfif>
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
 
@@ -381,7 +389,9 @@ Notes:
 			<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postViewPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running post-view.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running post-view.") />
+			</cfif>
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
 
@@ -411,7 +421,9 @@ Notes:
 			<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postProcessPlugins[i].getLog() />
 			
-			<cfset log.debug("Plugin '#loggingName#' running post-process.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running post-process.") />
+			</cfif>
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
 
@@ -452,6 +464,7 @@ Notes:
 			hint="The Exception object." />
 
 		<cfset var i = 0 />
+		<cfset var log = "" />
 
 		<cfif getRunParent() eq "before">
 			<cfif isObject(getParent())>
@@ -460,6 +473,12 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
+			<cfset loggingName = variables.handleExceptionPlugins[i].getComponentNameForLogging() />
+			<cfset log = variables.handleExceptionPlugins[i].getLog() />
+			
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Plugin '#loggingName#' running handle-exception point.") />
+			</cfif>
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
 

@@ -62,7 +62,7 @@ Notes:
 
 		<cfset var listener = getListener() />
 		<cfset var invoker = listener.getInvoker() />
-
+		
 		<cfset invoker.invokeListener(arguments.event, listener, getMethod(), "", getResultArg()) />
 	</cffunction>
 
