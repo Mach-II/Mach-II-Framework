@@ -26,13 +26,14 @@ Notes:
 <cfcomponent
 	displayname="AbstractLogAdapter"
 	output="false"
-	hint="A simple logging adapter. This is abstract and must be extend by a concrete adapter implementation.">
+	hint="A logging adapter. This is abstract and must be extend by a concrete adapter implementation.">
 	
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggerName = "" />
 	<cfset variables.loggingEnabled = true />
+	<cfset variables.filter = "" />
+	<cfset variables.parameters = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -143,8 +144,13 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PROTECTED
+	PUBLIC FUNCTIONS - UTILS
 	--->
+	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if a filter has been defined for this adapter.">
+		<cfreturn IsObject(variables.filter) />
+	</cffunction>
+	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -174,12 +180,7 @@ Notes:
 	
 	<!---
 	ACCESSORS
-	--->
-	<cffunction name="getLoggerName" access="public" returntype="string" output="false"
-		hint="Returns the name of the logger. Required for Dashboard integration.">
-		<cfreturn variables.loggerName />
-	</cffunction>
-	
+	--->	
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
 		hint="Returns the logging level by name. Required for Dashboard integration.">
 		<cfabort showerror="This method is abstract and must be overrided." />
@@ -193,6 +194,16 @@ Notes:
 	<cffunction name="getLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the logging enabled.">
 		<cfreturn variables.loggingEnabled />
+	</cffunction>
+	
+	<cffunction name="setFilter" access="public" returntype="void" output="false"
+		hint="Sets the filter.">
+		<cfargument name="filter" type="MachII.logging.filters.AbstractFilter" required="true" />
+		<cfset variables.filter = arguments.filter />
+	</cffunction>
+	<cffunction name="getFilter" access="public" returntype="MachII.logging.filters.AbstractFilter" output="false"
+		hint="Gets the filter.">
+		<cfreturn variables.filter />
 	</cffunction>
 	
 	<cffunction name="setParameters" access="public" returntype="void" output="false"

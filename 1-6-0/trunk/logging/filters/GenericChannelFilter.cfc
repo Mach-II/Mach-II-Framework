@@ -39,6 +39,7 @@ no !	= Indicates that you should match
 --->
 <cfcomponent
 	displayname="GenericChannelFilter"
+	extends="MachII.logging.filters.AbstractFilter"
 	output="false"
 	hint="">
 	
@@ -52,12 +53,10 @@ no !	= Indicates that you should match
 	--->
 	<cffunction name="init" access="public" returntype="GenericChannelFilter" output="false"
 		hint="Initalizes the filter.">
-		<cfargument name="filterCriteria" type="any" required="false"
+		<cfargument name="filterCriteria" type="any" required="false" default=""
 			hint="Criteria to filter on. Accepts an array or list." />
 		
-		<cfif StructKeyExists(arguments, "filterCriteria")>
-			<cfset loadFilterCriteria(arguments.filterCriteria) />
-		</cfif>
+		<cfset loadFilterCriteria(arguments.filterCriteria) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -67,8 +66,9 @@ no !	= Indicates that you should match
 	--->
 	<cffunction name="decide" access="public" returntype="boolean" output="false"
 		hint="Decides whether or not the passed channel should be logged.">
-		<cfargument name="channel" type="string" required="true" />
+		<cfargument name="logMessageElements" type="struct" required="true" />
 		
+		<cfset var channel = arguments.logMessageElements.channel />
 		<cfset var result = true />
 		<cfset var filterChannels = getFilterChannels() />
 		<cfset var i = 0 />
@@ -77,26 +77,18 @@ no !	= Indicates that you should match
 			<!--- Restrict --->
 			<cfif filterChannels[i].restrict>
 				<!--- Wildcard --->
-				<cfif filterChannels[i].wildcard>
-					<cfif FindNoCase(filterChannels[i].channel, arguments.channel) EQ 1>
-						<cfset result = false />
-					</cfif>
-				<cfelse>
-					<cfif filterChannels[i].channel IS arguments.channel>
-						<cfset result = false />
-					</cfif>
+				<cfif filterChannels[i].wildcard AND FindNoCase(filterChannels[i].channel, channel) EQ 1>
+					<cfset result = false />
+				<cfelseif filterChannels[i].channel IS channel>
+					<cfset result = false />
 				</cfif>
 			<cfelse>
 			
 				<!--- Wildcard --->
-				<cfif filterChannels[i].wildcard>
-					<cfif FindNoCase(filterChannels[i].channel, arguments.channel) EQ 1>
-						<cfset result = true />
-					</cfif>
-				<cfelse>
-					<cfif filterChannels[i].channel IS arguments.channel>
-						<cfset result = true />
-					</cfif>
+				<cfif filterChannels[i].wildcard AND FindNoCase(filterChannels[i].channel, channel) EQ 1>
+					<cfset result = true />
+				<cfelseif filterChannels[i].channel IS channel>
+					<cfset result = true />
 				</cfif>
 			</cfif>
 		</cfloop>
@@ -115,41 +107,45 @@ no !	= Indicates that you should match
 		<cfset var temp = "" />
 		<cfset var channel = "" />
 		<cfset var i = 0 />
-		
+
+		<!--- Convert to an arry if the criteria is a list --->
 		<cfif IsSimpleValue(arguments.filterCriteria)>
 			<cfset arguments.filterCriteria = ListToArray(arguments.filterCriteria, ",") />
 		</cfif>
 		
-		<cfloop from="1" to="#ArrayLen(arguments.filterCriteria)#" index="i">
-			<cfset temp = StructNew() />
-			<cfset channel = arguments.filterCriteria[i] />
-			
-			<!--- Check restriction --->
-			<cfif Left(channel, 1)  EQ "!">
-				<cfset temp.restrict = true />
-				<cfset channel = Right(channel, Len(channel) -1) />
-			<cfelse>
-				<cfset temp.restrict = false />
-			</cfif>
-			
-			<!--- Check for Wildcard --->
-			<cfif Right(channel, 1) EQ "*">
-				<cfset temp.wildcard = true />
-				<cfif Len(channel) GT 1>
-					<cfset channel = Left(channel, Len(channel) -1) />
+		<!--- Only convert criteria data structure if there are criteria --->
+		<cfif ArrayLen(arguments.filterCriteria)>
+			<cfloop from="1" to="#ArrayLen(arguments.filterCriteria)#" index="i">
+				<cfset temp = StructNew() />
+				<cfset channel = arguments.filterCriteria[i] />
+				
+				<!--- Check restriction (will always be the first character)--->
+				<cfif Left(channel, 1)  EQ "!">
+					<cfset temp.restrict = true />
+					<cfset channel = Right(channel, Len(channel) -1) />
 				<cfelse>
-					<cfset channel = "" />
+					<cfset temp.restrict = false />
 				</cfif>
-			<cfelse>
-				<cfset temp.wildcard = false />
-			</cfif>
-			
-			<!--- Set channel string --->
-			<cfset temp.channel = channel />
-			
-			<!--- Set to the channel filter array --->
-			<cfset ArrayAppend(filterChannels, temp) />
-		</cfloop>
+				
+				<!--- Check for Wildcard (will always be the last character)--->
+				<cfif Right(channel, 1) EQ "*">
+					<cfset temp.wildcard = true />
+					<cfif Len(channel) GT 1>
+						<cfset channel = Left(channel, Len(channel) -1) />
+					<cfelse>
+						<cfset channel = "" />
+					</cfif>
+				<cfelse>
+					<cfset temp.wildcard = false />
+				</cfif>
+				
+				<!--- Set channel string --->
+				<cfset temp.channel = channel />
+				
+				<!--- Set to the channel filter array --->
+				<cfset ArrayAppend(filterChannels, temp) />
+			</cfloop>
+		</cfif>
 		
 		<!--- Set the all the filterChannels --->
 		<cfset setFilterChannels(filterChannels) />

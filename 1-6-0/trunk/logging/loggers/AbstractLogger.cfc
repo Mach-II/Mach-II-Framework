@@ -26,17 +26,29 @@ Notes:
 <cfcomponent
 	displayname="AbstractLogger"
 	output="false"
-	hint="">
+	hint="A logger that configures a logging adapter and performs output of the results if necessary. This is abstract and must be extend by a concrete logger implementation.">
 
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.loggerType = "undefined" />
+	<cfset variables.displayOutputAvailable = false />
+	<cfset variables.logFactory = "" />
+	<cfset variables.logAdapter = "" />
+	<cfset variables.parameters = StructNew() />
 	
 	<!---
 	INITIAlIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="AbstractLogger" output="false"
-		hint="">
+		hint="Initializes the logger. Do not override.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfargument name="parameters" type="struct" required="true" />
+		
+		<cfset setLogFactory(arguments.logFactory) />
+		<cfset setParameters(arguments.parameters) />
+		
+		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -47,5 +59,98 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="displayOutput" access="public" returntype="void" 
+		hint="Displays output for this logger. Override to provide custom display output.">
+		<!--- Note that leaving off the 'output' attribute requires all output to be
+			surrounded by cfoutput tags --->
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="isDisplayOutputAvailable" access="public" returntype="string" output="false"
+		hint="Checks if display output is available.">
+		<cfreturn variables.displayOutputAvailable />
+	</cffunction>
+	
+	<cffunction name="disableLogging" access="public" returntype="void" output="false"
+		hint="Disables logging. Convenience method for dashboard.">
+		<cfset getLogAdapter().setLoggingEnabled(false) />
+	</cffunction>
+	<cffunction name="enableLogging" access="public" returntype="void" output="false"
+		hint="Enables logging. Convenience method for dashboard.">
+		<cfset getLogAdapter().setLoggingEnabled(true) />
+	</cffunction>
+	
+	<cffunction name="setParameter" access="public" returntype="void" output="false"
+		hint="Sets a configuration parameter.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfargument name="value" required="true"
+			hint="The parameter value." />
+		<cfset variables.parameters[arguments.name] = arguments.value />
+	</cffunction>
+	<cffunction name="getParameter" access="public" returntype="any" output="false"
+		hint="Gets a configuration parameter value, or a default value if not defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfargument name="defaultValue" type="string" required="false" default=""
+			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
+		<cfif isParameterDefined(arguments.name)>
+			<cfreturn variables.parameters[arguments.name] />
+		<cfelse>
+			<cfreturn arguments.defaultValue />
+		</cfif>
+	</cffunction>
+	<cffunction name="isParameterDefined" access="public" returntype="boolean" output="false"
+		hint="Checks to see whether or not a configuration parameter is defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
+	</cffunction>
+	
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="getLoggerType" access="public" returntype="string" output="false"
+		hint="Returns the type of the logger. Required for Dashboard integration.">
+		<cfreturn variables.loggerType />
+	</cffunction>
+	
+	<cffunction name="setLogFactory" access="private" returntype="void" output="false"
+		hint="Sets the log factory for this logger.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.logFactory = arguments.logFactory />
+	</cffunction>
+	<cffunction name="getLogFactory" access="private" returntype="MachII.logging.LogFactory" output="false"
+		hint="Gets the log factory for this logger.">
+		<cfreturn variables.logFactory />
+	</cffunction>
+	
+	<cffunction name="setLogAdapter" access="private" returntype="void" output="false"
+		hint="Sets the log adapter for this logger.">
+		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
+		<cfset variables.logAdapter = arguments.logAdapter />
+	</cffunction>
+	<cffunction name="getLogAdapter" access="private" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
+		hint="Gets the log adapter for this logger.">
+		<cfreturn variables.logAdapter />
+	</cffunction>
+	
+	<cffunction name="setParameters" access="public" returntype="void" output="false"
+		hint="Sets the full set of configuration parameters for the component.">
+		<cfargument name="parameters" type="struct" required="true" />
+		
+		<cfset var key = "" />
+		
+		<cfloop collection="#arguments.parameters#" item="key">
+			<cfset setParameter(key, parameters[key]) />
+		</cfloop>
+	</cffunction>
+	<cffunction name="getParameters" access="public" returntype="struct" output="false"
+		hint="Gets the full set of configuration parameters for the component.">
+		<cfreturn variables.parameters />
+	</cffunction>
 
 </cfcomponent>

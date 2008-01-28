@@ -74,9 +74,9 @@ Configuration Example:
 	
 	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
 	<cfset variables.loggerName = "Scope Logging" />
-	<cfset variables.loggingScopePath = "request._ScopeLogging" />
+	<cfset variables.loggingScope = "request" />
+	<cfset variables.loggingPath = "_ScopeLogging" & "_" & Replace(CreateUUID(), "-", "", "all") />
 	<cfset variables.debugModeOnly = false />
-	<cfset variables.filter = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -84,8 +84,11 @@ Configuration Example:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the adapter.">
 		
-		<cfif isParameterDefined("loggingScopePath")>
-			<cfset setLoggingScopePath(getParameter("loggingScopePath")) />
+		<cfif isParameterDefined("loggingScope")>
+			<cfset setLoggingScope(getParameter("loggingScope")) />
+		</cfif>
+		<cfif isParameterDefined("loggingPath")>
+			<cfset setLoggingPath(getParameter("loggingPath")) />
 		</cfif>
 		<cfif isParameterDefined("loggingLevel")>
 			<cfset setLoggingLevel(getParameter("loggingLevel")) />
@@ -245,17 +248,16 @@ Configuration Example:
 		<cfargument name="caughtException" type="any" required="false" />
 		
 		<cfset var entry = StructNew() />
-		<cfset var scope = "" />
+		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<!--- Filter the message by channel --->
-		<cfif getFilter().decide(arguments.channel)>
-		
+		<cfif NOT isFilterDefined() OR getFilter().decide(arguments)>		
 			<!--- See if we need to create a place to put the log messages --->
-			<cfif NOT IsDefined("#getLoggingScope()#")>
-				<cfset "#getLoggingScope()#" = ArrayNew(1) />
+			<cfif NOT IsDefined(getLoggingScope() & "." & getLoggingPath())>
+				<cfset scope[getLoggingPath()] = ArrayNew(1) />
 			</cfif>
-			
-			<cfset scope = StructGet(getLoggingScope()) />
+
+			<cfset logArray = scope[getLoggingPath()] />
 			
 			<cfset entry.channel = arguments.channel />
 			<cfset entry.logLevel = arguments.logLevel />
@@ -268,7 +270,7 @@ Configuration Example:
 				<cfset entry.caughtException = "" />
 			</cfif>
 			
-			<cfset ArrayAppend(scope, entry) />
+			<cfset ArrayAppend(scope[getLoggingPath()], entry) />
 		</cfif>
 	</cffunction>
 	
@@ -362,19 +364,19 @@ Configuration Example:
 		<cfargument name="loggingScope" type="string" required="true" />
 		<cfset variables.loggingScope = arguments.loggingScope />
 	</cffunction>
-	<cffunction name="getFilter" access="public" returntype="string" output="false"
+	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
 		hint="Gets the logging scope.">
 		<cfreturn variables.loggingScope />
 	</cffunction>
-	
-	<cffunction name="setFilter" access="private" returntype="void" output="false"
-		hint="Sets the filter.">
-		<cfargument name="filter" type="any" required="true" />
-		<cfset variables.filter = arguments.filter />
+
+	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
+		hint="Sets the logging path.">
+		<cfargument name="loggingPath" type="string" required="true" />
+		<cfset variables.loggingPath = arguments.loggingPath />
 	</cffunction>
-	<cffunction name="getFilter" access="public" returntype="any" output="false"
-		hint="Gets the filter.">
-		<cfreturn variables.filter />
+	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
+		hint="Gets the logging path.">
+		<cfreturn variables.loggingPath />
 	</cffunction>
 	
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"

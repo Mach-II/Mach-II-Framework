@@ -1,0 +1,86 @@
+<!---
+License:
+Copyright 2007 GreatBizTools, LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright: GreatBizTools, LLC
+Author: Peter J. Farrell (peter@mach-ii.com)
+$Id$
+
+Created version: 1.6.0
+Updated version: 1.6.0
+
+Notes:
+<property name="logging" type="MachII.properties.LoggingProperty">
+	<parameters>
+		<parameter name="MachIILog">
+			<struct>
+				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
+				<!-- Optional and defaults to true -->
+				<key name="loggingEnabled" value="true|false" />
+				<!-- Optional and defaults to 'fatal' -->
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<!-- Optional and defaults to the application.log if not defined -->
+				<key name="loggingFile" value="nameOfCFLogFile" />
+				<!-- Optional -->
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
+			</struct>
+		</parameter>
+	</parameters>
+</property>
+
+Uses the generic channel filter (MachII.logging.filters.GenericChannelFilter)for filtering.
+See that file header for configuration of filter criteria.
+--->
+<cfcomponent
+	displayname="Logger for CFLog"
+	extends="MachII.logging.loggers.AbstractLogger"
+	output="false"
+	hint="Concrete CFLog logger implementation for Mach-II logging.">
+	
+	<!---
+	PROPERTIES
+	--->
+	<cfset variables.loggerType = "CFLog" />
+
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Configures the logger.">
+		
+		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", "")) />
+		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.CFLogAdapter").init(getParameters()) />
+		
+		<!--- Set the filter to the adapter --->
+		<cfset adapter.setFilter(filter) />
+		
+		<!--- Configure and set the adapter --->
+		<cfset adapter.configure()>
+		<cfset setLogAdapter(adapter) />
+		
+		<!--- Add the adapter to the log factory --->
+		<cfset getLogFactory().addLogAdapter(adapter) />
+	</cffunction>
+	
+</cfcomponent>

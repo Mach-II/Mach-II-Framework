@@ -23,10 +23,10 @@ Updated version: 1.6.0
 
 Notes:
 
-Configuring for Mach-II loging only:
+Configuring for Mach-II logging only:
 <property name="Logging" type="MachII.properties.LoggingProperty" />
 
-This will turn on the MachIILogAdapter and display the log message 
+This will turn on the MachIILog logger and display the log message 
 in the request output.
 
 Configuring multiple logging adapters:
@@ -36,14 +36,14 @@ Configuring multiple logging adapters:
 		<parameter name="loggingEnabled" value="false"/>
 		<parameter name="CFLog">
 			<struct>
-				<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
+				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
 				<key name="loggingEnabled" value="false" />
 				<key name="loggingLevel" value="warn" />
 			</struct>
 		</parameter>
 		<parameter name="MachIILog">
 			<struct>
-				<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
+				<key name="type" value="MachII.logging.loggers.MachIILog.Logger" />
 				<key name="loggingEnabled" value="true" />
 				<key name="loggingLevel" value="debug" />
 			</struct>
@@ -51,7 +51,7 @@ Configuring multiple logging adapters:
 	</parameters>
 </property>
 
-See individual logging adapter for more information on configuration.
+See individual loggers for more information on configuration.
 --->
 <cfcomponent
 	displayname="LoggingProperty"
@@ -63,6 +63,7 @@ See individual logging adapter for more information on configuration.
 	PROPERTIES
 	--->
 	<cfset variables.loggingEnabled = true />
+	<cfset variables.loggers = StructNew() />
 	
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -79,18 +80,18 @@ See individual logging adapter for more information on configuration.
 			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
 		</cfif>
 		
-		<!--- Determine if we should load adapters or use the default 
-			adapter (e.g. MachII.logging.adapters.MachIILogAdapter) --->
+		<!--- Determine if we should load logger or use the default 
+			logger (e.g. MachII.logging.loggers.MachIILog.Logger) --->
 		<cfloop collection="#params#" item="i">
 			<cfif i NEQ "enableLogging" AND IsStruct(params[i])>
-				<cfset configureAdapter(i, getParameter(i)) />
+				<cfset configureLogger(i, getParameter(i)) />
 				<cfset configured = true />
 			</cfif>
 		</cfloop>
 		
-		<!--- Configure the default adapter since no adapters were set --->
+		<!--- Configure the default logger since no loggers were set --->
 		<cfif NOT configured>
-			<cfset configureDefaultAdapter() />
+			<cfset configureDefaultLogger() />
 		</cfif>
 		
 		<!--- Set logging enabled/disabled --->
@@ -115,28 +116,28 @@ See individual logging adapter for more information on configuration.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="configureDefaultAdapter" access="private" returntype="void" output="false"
+	<cffunction name="configureDefaultLogger" access="private" returntype="void" output="false"
 		hint="Configures the default logging adapter (e.g. MachII.logging.adapters.MachIILogAdapter).">
 		
-		<cfset var adapter = "" />
+		<cfset var logger = "" />
 		<cfset var parameters = StructNew() />
 		
-		<cfset adapter = CreateObject("component", "MachII.logging.adapters.MachIILogAdapter").init(parameters) />
-		<cfset adapter.configure() />
+		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(parameters) />
+		<cfset logger.configure() />
 
-		<!--- Set the adapter to the LogFactory --->
-		<cfset getAppManager().getLogFactory().addLogAdapter("default", adapter) />		
+		<!--- Set the logger --->
+		<cfset addLogger("logger", adapter) />
 	</cffunction>
 	
-	<cffunction name="configureAdapter" access="private" returntype="void" output="false"
-		hint="Configures an adapter.">
+	<cffunction name="configureLogger" access="private" returntype="void" output="false"
+		hint="Configures an logger.">
 		<cfargument name="name" type="string" required="true"
-			hint="Name of the adapter" />
+			hint="Name of the logger" />
 		<cfargument name="parameters" type="struct" required="true"
-			hint="Parameters for this adapter.">
+			hint="Parameters for thislogger.">
 		
 		<cfset var type = "" />
-		<cfset var adapter = "" />
+		<cfset var logger = "" />
 		<cfset var i = 0 />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
@@ -150,12 +151,17 @@ See individual logging adapter for more information on configuration.
 			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
 		</cfloop>
 		
-		<!--- Create the adapter --->
-		<cfset adapter = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />
-		<cfset adapter.configure() />
+		<!--- Create, init and configure the adapter --->
+		<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
+		<cfset logger.configure() />
 		
-		<!--- Set the adapter to the LogFactory --->
-		<cfset getAppManager().getLogFactory().addLogAdapter(arguments.name, adapter) />
+		<!--- Add a callback to the request manager if there is display to output --->
+		<cfif logger.isDisplayOutputAvailable()>
+			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "displayOutput") />
+		</cfif>
+		
+		<!--- Add the logger --->
+		<cfset addLogger(arguments.name, logger) />
 	</cffunction>
 	
 	<!---
@@ -171,5 +177,21 @@ See individual logging adapter for more information on configuration.
 		<cfreturn variables.loggingEnabled />
 	</cffunction>
 	
+	<cffunction name="addLogger" access="private" returntype="void" output="false"
+		hint="Adds a logger to the struct of registered loggers.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfargument name="logger" type="MachII.logging.loggers.AbstractLogger" required="true" />
+		
+		<cfif StructKeyExists(variables.loggers, arguments.loggerName)>
+			<cfthrow type="MachII.properties.LoggingProperty"
+				message="A logger named '#arguments.loggerName#' already exists. Logger names must be unique." />
+		<cfelse>
+			<cfset variables.loggers[arguments.loggerName] = arguments.logger />
+		</cfif>
+	</cffunction>
+	<cffunction name="getLoggers" access="public" returntype="struct" output="false"
+		hint="Gets all the registered loggers.">
+		<cfreturn variables.loggers />
+	</cffunction>
 	
 </cfcomponent>

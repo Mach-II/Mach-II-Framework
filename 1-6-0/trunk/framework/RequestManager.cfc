@@ -45,6 +45,7 @@ Notes:
 	<cfset varibales.moduleDelimiter = "" />
 	<cfset variables.maxEvents = 0 />
 	<cfset variables.cleanupDifference = -3 />
+	<cfset variables.onRequestEndCallbacks = ArrayNew(1) />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -91,7 +92,7 @@ Notes:
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfset request["_MachIIRequestHandler_" & appKey] = 
-					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents()) />
+					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents(), getOnRequestEndCallbacks()) />
 		</cfif>
 		
 		<cfreturn request["_MachIIRequestHandler_" & appKey]  />
@@ -248,6 +249,17 @@ Notes:
 		<cfset dataStorage.timestamps[timestamp & "_" & persistId] = persistId />
 		
 		<cfreturn persistId />
+	</cffunction>
+	
+	<cffunction name="addOnRequestEndCallback" access="public" returntype="void" output="false"
+		hint="Adds an on request end callback to be run at the end of processing an event.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.onRequestEndCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="getOnRequestEndCallbacks" access="public" returntype="array" output="false"
+		hints="Gets the on request end callbacks.">
+		<cfreturn variables.onRequestEndCallbacks />
 	</cffunction>
 
 	<!---

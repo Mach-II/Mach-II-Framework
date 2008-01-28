@@ -33,7 +33,7 @@ it allows you attach multiple loggers at once.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.logAdapters = StructNew() />
+	<cfset variables.logAdapters = ArrayNew(1) />
 	<cfset variables.logCache = StructNew() />
 	
 	<!---
@@ -69,34 +69,34 @@ it allows you attach multiple loggers at once.
 	
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
 		hint="Adds a log adapter">
-		<cfargument name="name" type="string" required="true"
-			hint="The name of this adapter" />
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset variables.logAdapters[arguments.name] = arguments.logAdapter />
+		<cfset ArrayAppend(variables.logAdapters, arguments.logAdapter) />
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
 		hint="Disables logging.">
 		
 		<cfset var i = 0 />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
 			<cfset variables.logAdapters[i].disableLogging() />
 		</cfloop>
 	</cffunction>
-	
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging.">
 			
 		<cfset var i = 0 />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
 			<cfset variables.logAdapters[i].enableLogging() />
 		</cfloop>
 	</cffunction>
 	
 	<!---
-	PROCTECTED FUNCTIONS
+	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="hasInCache" access="private" returntype="boolean" output="false"
 		hint="Checks to see if a log is already in the cache.">
@@ -135,10 +135,10 @@ it allows you attach multiple loggers at once.
 	--->
 	<cffunction name="setLogAdapters" access="private" returntype="void" output="false"
 		hint="Sets the log adapters.">
-		<cfargument name="logAdapters" type="struct" required="true" />
+		<cfargument name="logAdapters" type="array" required="true" />
 		<cfset variables.logAdapters = arguments.logAdapters />
 	</cffunction>
-	<cffunction name="getLogAdapters" access="private" returntype="struct" output="false"
+	<cffunction name="getLogAdapters" access="private" returntype="array" output="false"
 		hint="Returns the log adapters.">
 		<cfreturn variables.logAdapters />
 	</cffunction>

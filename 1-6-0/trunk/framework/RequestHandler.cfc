@@ -54,11 +54,13 @@ Notes:
 		<cfargument name="parameterPrecedence" type="string" required="true" />
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		<cfargument name="maxEvents" type="numeric" required="true" />
+		<cfargument name="onRequestEndCallbacks" type="any" required="true" />
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEventParameter(arguments.eventParameter) />
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		<cfset setMaxEvents(arguments.maxEvents) />
+		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
 		
 		<!--- Setup the EventQueue --->
 		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
@@ -180,6 +182,8 @@ Notes:
 	
 		<cfset var pluginManager = "" />
 		<cfset var exception = "" />
+		<cfset var onRequestEndCallbacks = getOnRequestEndCallbacks() />
+		<cfset var i = "" />
 		
 		<cfif getIsProcessing()>
 			<cfthrow message="The RequestHandler is already processing the events in the queue. The processEvents() method can only be called once." />
@@ -226,6 +230,14 @@ Notes:
 		<!--- Post-Process. --->
 		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
 		<cfset pluginManager.postProcess(getEventContext()) />
+		
+		<!--- Run On-Request-End callbacks --->
+		<cfloop from="1" to="#ArrayLen(onRequestEndCallbacks)#" index="i">
+			<cfinvoke component="#onRequestEndCallbacks[i].callback#"
+				method="#onRequestEndCallbacks[i].method#">
+				<cfinvokeargument name="appManager" value="#getAppManager()#" />
+			</cfinvoke>
+		</cfloop>
 		
 		<cfset setIsProcessing(false) />
 	</cffunction>
@@ -439,11 +451,19 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setMaxEvents" access="private" returntype="void" output="false">
-		<cfargument name="maxEvents" required="true" type="numeric" />
+		<cfargument name="maxEvents" type="numeric" required="true" />
 		<cfset variables.maxEvents = arguments.maxEvents />
 	</cffunction>
 	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
 		<cfreturn variables.maxEvents />
+	</cffunction>
+
+	<cffunction name="setOnRequestEndCallbacks" access="private" returntype="void" output="false">
+		<cfargument name="onRequestEndCallbacks" type="any" required="true" />
+		<cfset variables.onRequestEndCallbacks = arguments.onRequestEndCallbacks />
+	</cffunction>
+	<cffunction name="getOnRequestEndCallbacks" access="private" returntype="any" output="false">
+		<cfreturn variables.onRequestEndCallbacks />
 	</cffunction>
 
 </cfcomponent>

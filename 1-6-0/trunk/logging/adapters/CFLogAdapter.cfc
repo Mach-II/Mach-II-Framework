@@ -23,36 +23,6 @@ Updated version: 1.6.0
 
 Notes:
 Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
-
-Uses the GenericChannelFitler for filtering. See that CFC for information on how to use to setup filters.
-
-Configuration Example:
-<property name="logging" type="MachII.properties.LoggingProperty">
-	<parameters>
-		<parameter name="MachIILog">
-			<struct>
-				<key name="type" value="MachII.logging.adapters.CFLogAdapter" />
-				<!-- Optional and defaults to true -->
-				<key name="loggingEnabled" value="true|false" />
-				<!-- Optional and defaults to 'fatal' -->
-				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
-				<!-- Optional and defaults to the application.log if not defined -->
-				<key name="loggingFile" value="nameOfCFLogFile" />
-				<!-- Optional -->
-				<key name="filter" value="list,of,filter,criteria" />
-				- OR -
-				<key name="filter">
-					<array>
-						<element value="array" />
-						<element value="of" />
-						<element value="filter" />
-						<element value="criteria" />
-					</array>
-				</key>
-			</struct>
-		</parameter>
-	</parameters>
-</property>
 --->
 <cfcomponent
 	displayname="CFLogAdapter"
@@ -73,7 +43,6 @@ Configuration Example:
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
 	<cfset variables.level = variables.LOG_LEVEL_FATAL />
-	<cfset variables.loggerName = "CFLog" />
 	<cfset variables.logFile = "application" />
 	<cfset variables.filter = "" />
 	
@@ -92,8 +61,6 @@ Configuration Example:
 		<cfif isParameterDefined("loggingEnabled")>
 			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
 		</cfif>
-		
-		<cfset setFilter(CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", ""))) />
 	</cffunction>
 	
 	<!---
@@ -243,8 +210,8 @@ Configuration Example:
 		<cfset var type = translateLogLevelToCFLogType(arguments.logLevel) />
 		<cfset var text = "[" & arguments.channel & "] " />
 		
-		<!---  --->
-		<cfif getFilter().decide(arguments.channel)>
+		<!--- Use the filter if defined, otherwise continue --->
+		<cfif NOT isFilterDefined() OR getFilter().decide(arguments)>
 			<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
 				does not have these levels and are logged on the "Information" level--->
 			<cfif arguments.logLevel EQ 1>
@@ -318,27 +285,6 @@ Configuration Example:
 		<cfreturn loggingLevelName />
 	</cffunction>
 	
-	<cffunction name="loadConfigFile" access="private" returntype="any" output="false"
-		hint="Loads configuration from a config file.">
-
-		<cfset var configFilePath = getConfigFile() />
-		
-		<!--- Expand the path if it's relative --->
-		<cfif getConfigFileIsRelative()>
-			<cfset configFilePath = ExpandPath(configFilePath) />
-		</cfif>
-		
-		<!--- Read file --->
-		<cftry>
-			<cfcatch type="any">
-				<cfthrow type="MachII.logging.adapters.CFLogAdapter.configFileNotFound"
-					message="Config file not found. Please check the path." 
-					detail="configFilePath='#configFilePath#'" />
-			</cfcatch>
-		</cftry>
-
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
@@ -395,16 +341,6 @@ Configuration Example:
 	<cffunction name="getLevel" access="private" returntype="numeric" output="false"
 		hint="Returns the internal numeric log level.">
 		<cfreturn variables.level />
-	</cffunction>
-	
-	<cffunction name="setFilter" access="private" returntype="void" output="false"
-		hint="Sets the filter.">
-		<cfargument name="filter" type="any" required="true" />
-		<cfset variables.filter = arguments.filter />
-	</cffunction>
-	<cffunction name="getFilter" access="public" returntype="any" output="false"
-		hint="Gets the filter.">
-		<cfreturn variables.filter />
 	</cffunction>
 	
 	<cffunction name="setLogFile" access="private" returntype="void" output="false"
