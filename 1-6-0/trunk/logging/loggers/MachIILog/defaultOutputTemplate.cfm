@@ -85,9 +85,9 @@ Notes:
 	<table>
 		<tr>
 			<td class="lineBottom strong" style="width:30%;">Channel</td>
-			<td class="lineBottom strong" style="width:10%;">Log Level</td>
-			<td class="lineBottom strong" style="width:50%;">Message</td>
-			<td class="lineBottom strong" style="width:10%;">Timing (ms)</td>
+			<td class="lineBottom strong" style="width:7.5%;">Log Level</td>
+			<td class="lineBottom strong" style="width:55%;">Message</td>
+			<td class="lineBottom strong" style="width:7.5%;">Timing (ms)</td>
 		</tr>
 	<cfloop from="1" to="#ArrayLen(data)#" index="i">
 		<tr class="<cfif i MOD 2>shade</cfif> #data[i].logLevelName#">

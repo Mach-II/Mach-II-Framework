@@ -71,7 +71,6 @@ Notes:
 		
 		<!--- If reinit is FALSE, get the bean from the event --->
 		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName())>
-		
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Event-bean '#getBeanName()#' already in event. Repopulated with data.") />
 			</cfif>

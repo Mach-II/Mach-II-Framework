@@ -63,7 +63,7 @@ See that file header for configuration of filter criteria.
 	--->
 	<cfset variables.loggerType = "Mach-II Log" />
 	<cfset variables.displayOutputAvailable = true />
-	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />\
+	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
 	

@@ -58,9 +58,28 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var continue = true />
+		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
+		<cfset var log = getLog() />
 		
-		<cfif NOT Len(getCondition()) OR evaluate(getCondition())>
+		<!--- Make decision on whether or not to clear a cache by alias --->
+		<cfif NOT Len(getCondition())>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
+			</cfif>
+			<cfset clearCache = true />
+		<cfelseif evaluate(getCondition())>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
+			</cfif>
+			<cfset clearCache = true />
+		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
+			</cfif>
+		</cfif>
+
+		<cfif clearCache>
 			<cfset cacheManager.clearCachesByAlias(getAlias()) />
 		</cfif>
 		

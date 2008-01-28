@@ -46,6 +46,7 @@ Notes:
 	<cfset variables.maxEvents = 0 />
 	<cfset variables.cleanupDifference = -3 />
 	<cfset variables.onRequestEndCallbacks = ArrayNew(1) />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -57,6 +58,7 @@ Notes:
 		<cfset var urlDelimiters = "" />	
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<!--- Setup defaults --->
 		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
@@ -209,6 +211,7 @@ Notes:
 		<cfset var persistedData = StructNew() />
 		<cfset var dataStorage = "" />
 		<cfset var key = "" />
+		<cfset var log = getLog() />
 		
 		<!--- Check they have a persistId in the event --->
 		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
@@ -217,6 +220,10 @@ Notes:
 			
 			<!--- Get the data and cleanup --->
 			<cfif StructKeyExists(dataStorage.data, persistId)>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.") />
+				</cfif>
+				
 				<cftry>
 					<!--- Get the data and delete it from the dataStorage --->
 					<cfset persistedData = dataStorage.data[persistId]>
@@ -486,6 +493,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
 		<cfreturn variables.maxEvents />
+	</cffunction>
+
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

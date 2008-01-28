@@ -24,6 +24,10 @@ Updated version: 1.6.0
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
 it allows you attach multiple loggers at once.
+
+Log adapters must be stored as a struct so they can be passed by reference. Otherwise some
+logs are requested before adapters have been setup and will not log any messages since they
+do not have any adapters.
 --->
 <cfcomponent
 	displayname="LogFactory"
@@ -33,7 +37,7 @@ it allows you attach multiple loggers at once.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.logAdapters = ArrayNew(1) />
+	<cfset variables.logAdapters = StructNew() />
 	<cfset variables.logCache = StructNew() />
 	
 	<!---
@@ -55,7 +59,7 @@ it allows you attach multiple loggers at once.
 		<cfset var log = "" />
 		
 		<!--- Single thread this since we want to keep the log cache from overwritting an entry --->
-		<cflock name="_MachIILogFactory.getLog" type="exclusive" timeout="0">
+		<cflock name="_MachIILogFactory.getLog" type="exclusive" timeout="10" throwontimeout="true">
 			<cfif hasInCache(arguments.channel)>
 				<cfset log = getFromCache(arguments.channel) />
 			<cfelse>
@@ -70,7 +74,7 @@ it allows you attach multiple loggers at once.
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
 		hint="Adds a log adapter">
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset ArrayAppend(variables.logAdapters, arguments.logAdapter) />
+		<cfset variables.logAdapters["_" & Replace(CreateUUID(), "-", "", "all")] = arguments.logAdapter />
 	</cffunction>
 	
 	<!---
@@ -79,18 +83,18 @@ it allows you attach multiple loggers at once.
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
 		hint="Disables logging.">
 		
-		<cfset var i = 0 />
+		<cfset var i = "" />
 		
-		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
+		<cfloop collection="#variables.logAdapters#" item="i">
 			<cfset variables.logAdapters[i].disableLogging() />
 		</cfloop>
 	</cffunction>
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging.">
 			
-		<cfset var i = 0 />
+		<cfset var i = "" />
 		
-		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
+		<cfloop collection="#variables.logAdapters#" item="i">
 			<cfset variables.logAdapters[i].enableLogging() />
 		</cfloop>
 	</cffunction>
@@ -135,10 +139,10 @@ it allows you attach multiple loggers at once.
 	--->
 	<cffunction name="setLogAdapters" access="private" returntype="void" output="false"
 		hint="Sets the log adapters.">
-		<cfargument name="logAdapters" type="array" required="true" />
+		<cfargument name="logAdapters" type="struct" required="true" />
 		<cfset variables.logAdapters = arguments.logAdapters />
 	</cffunction>
-	<cffunction name="getLogAdapters" access="private" returntype="array" output="false"
+	<cffunction name="getLogAdapters" access="private" returntype="struct" output="false"
 		hint="Returns the log adapters.">
 		<cfreturn variables.logAdapters />
 	</cffunction>

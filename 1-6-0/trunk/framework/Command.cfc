@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION

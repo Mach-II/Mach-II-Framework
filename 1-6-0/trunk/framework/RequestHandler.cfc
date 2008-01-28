@@ -84,8 +84,8 @@ Notes:
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles a request made to the framework.">
 		
-		<cfset var eventArgs = getRequestEventArgs() />
-		<cfset var result = parseEventParameter(eventArgs) />
+		<cfset var eventArgs = ""/>
+		<cfset var result =  ""/>
 		<cfset var appManager = getAppManager() />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
 		<cfset var nextEvent = "" />
@@ -96,6 +96,9 @@ Notes:
 		<cfif log.isInfoEnabled()>
 			<cfset log.info("Begin processing request.") />
 		</cfif>
+
+		<cfset eventArgs = getRequestEventArgs() />
+		<cfset result = parseEventParameter(eventArgs) />
 		
 		<cfset setRequestEventName(result.eventName) />
 		<cfset setRequestModuleName(result.moduleName) />
@@ -295,6 +298,7 @@ Notes:
 		<cfset var eventHandler = 0 />
 		<cfset var topAppManager = 0 />
 		<cfset var thisEventAppManager = 0 />
+		<cfset var log = getLog() />
 		
 		<cfif IsObject(getAppManager().getParent())>
 			<cfset topAppManager = getAppManager().getParent() />
@@ -311,6 +315,10 @@ Notes:
 		<cfset setupEventContext(thisEventAppManager, arguments.event) />
 		<cfset request.event = arguments.event />
 		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Event-handler '#arguments.event.getName()#' in module '#arguments.event.getModuleName()#' beginning execution.") />
+		</cfif>
+		
 		<!--- Pre-Event --->
 		<cfset thisEventAppManager.getPluginManager().preEvent(getEventContext()) />
 
@@ -320,6 +328,10 @@ Notes:
 		
 		<!--- Post-Event --->
 		<cfset thisEventAppManager.getPluginManager().postEvent(getEventContext()) />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Event-handler '#arguments.event.getName()#' in module '#arguments.event.getModuleName()#' has ended.") />
+		</cfif>
 	</cffunction>
 
 	<!---
