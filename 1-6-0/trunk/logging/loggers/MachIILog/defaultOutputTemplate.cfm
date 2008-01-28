@@ -1,3 +1,4 @@
+<cfsilent>
 <!---
 License:
 Copyright 2007 GreatBizTools, LLC
@@ -23,6 +24,7 @@ Updated version: 1.6.0
 
 Notes:
 --->
+</cfsilent>
 <cfoutput>
 <div id="MachIITraceDisplay">
 	<style type="text/css"><!--
@@ -38,13 +40,13 @@ Notes:
 			padding: 0.5em;
 			width:100%;
 		}
-		##MachIITraceDisplay td {
+		##MachIITraceDisplay table td {
 			vertical-align: top;
 		}
-		##MachIITraceDisplay td.lineBottom {
+		##MachIITraceDisplay table td.lineBottom {
 			border-bottom: 1px solid ##000;
 		}
-		##MachIITraceDisplay td.lineTop {
+		##MachIITraceDisplay table td.lineTop {
 			border-top: 1px solid ##000;
 		}
 		##MachIITraceDisplay .shade {
@@ -56,11 +58,22 @@ Notes:
 		##MachIITraceDisplay .small {
 			font-size: 0.9em;
 		}
-		##MachIITraceDisplay .red {
-			color: ##FF0000;
+		##MachIITraceDisplay .fatal {
+			color: ##FFF;
+			background-color: ##FF9999;
+			font-weight: bold;
 		}
-		##MachIITraceDisplay .green {
-			color: ##6BB300;
+		##MachIITraceDisplay .error {
+			background-color: ##FFCC66;
+			font-weight: bold;
+		}
+		##MachIITraceDisplay .warn {
+			background-color: ##FFFF99;
+			font-weight: bold;
+		}
+		##MachIITraceDisplay .info {
+			background-color: ##CCFF99;
+			font-weight: bold;
 		}
 		##MachIITraceDisplay .strong {
 			font-weight: bold;
@@ -77,12 +90,17 @@ Notes:
 			<td class="lineBottom strong" style="width:10%;">Timing (ms)</td>
 		</tr>
 	<cfloop from="1" to="#ArrayLen(data)#" index="i">
-		<tr <cfif i MOD 2> class="shade"</cfif>>
+		<tr class="<cfif i MOD 2>shade</cfif> #data[i].logLevelName#">
 			<td><p>#data[i].channel#</p></td>
 			<td><p>#data[i].logLevelName#</p></td>
 			<td><p>#data[i].message#</p></td>
 			<td><p><cfif i EQ 1>0<cfelse>#data[i].currentTick - data[i - 1].currentTick#</cfif></p></td>
 		</tr>
+		<cfif NOT IsSimpleValue(data[i].caughtException)>
+		<tr>
+			<td colspan="4"><cfdump var="#data[i].caughtException#"  expand="false" /></td>
+		</tr>
+		</cfif>
 	</cfloop>
 	</table>
 
