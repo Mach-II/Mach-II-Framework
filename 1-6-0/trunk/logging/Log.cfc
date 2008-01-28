@@ -61,7 +61,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].debug(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].debug(getChannel(), arguments.message) />
@@ -77,7 +77,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].error(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].error(getChannel(), arguments.message) />
@@ -93,7 +93,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].fatal(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].fatal(getChannel(), arguments.message) />
@@ -109,7 +109,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].info(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].info(getChannel(), arguments.message) />
@@ -125,7 +125,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].trace(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].trace(getChannel(), arguments.message) />
@@ -141,7 +141,7 @@ it allows you attach multiple loggers at once.
 		<cfset var i = "" />
 		
 		<cfloop from="1" to="#ArrayLen(variables.logAdapters)#" index="i">
-			<cfif StructKeyExists(arguments, "caughtExcpetion")>
+			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset variables.logAdapters[i].warn(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
 				<cfset variables.logAdapters[i].warn(getChannel(), arguments.message) />
