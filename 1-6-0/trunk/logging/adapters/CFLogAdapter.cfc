@@ -119,9 +119,9 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 
 		<cfif isFatalEnabled()>
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message, arguments.caughtException) />
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message) />
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message) />
 			</cfif>
 		</cfif>
 	</cffunction>
