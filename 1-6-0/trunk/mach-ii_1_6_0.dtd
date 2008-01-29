@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!--
 License:
-Copyright 2007 GreatBizTools, LLC
+Copyright 2008 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
-The DTD for the Mach-II Application Configuration File, Version 1.5.0.
+The DTD for the Mach-II Application Configuration File, Version 1.6.0.
 
 To support validation of the configuration file, include one of the
 following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!DOCTYPE mach-ii PUBLIC
-	"-//Mach-II//DTD Mach-II Configuration 1.5.0//EN"
-	"http://www.mach-ii.com/dtds/mach-ii_1_5_0.dtd">
+	"-//Mach-II//DTD Mach-II Configuration 1.6.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_6_0.dtd">
 
 <!DOCTYPE mach-ii SYSTEM
-	"http://localhost:8500/MachII/mach-ii_1_5_0.dtd">
+	"http://localhost:8500/MachII/mach-ii_1_6_0.dtd">
 -->
 
 <!--
