@@ -57,9 +57,10 @@ do not have any adapters.
 			hint="Channel to log. Typically 'getMetadata(this).name'" />
 		
 		<cfset var log = "" />
+		<cfset var channelHash = createChannelHash(arguments.channel) />
 		
 		<!--- Single thread this since we want to keep the log cache from overwritting an entry --->
-		<cflock name="_MachIILogFactory.getLog" type="exclusive" timeout="10" throwontimeout="true">
+		<cflock name="_MachIILogFactory.channel_#channelHash#" type="exclusive" timeout="10" throwontimeout="true">
 			<cfif hasInCache(arguments.channel)>
 				<cfset log = getFromCache(arguments.channel) />
 			<cfelse>
