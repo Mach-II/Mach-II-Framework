@@ -52,6 +52,9 @@ Configuring multiple logging adapters:
 </property>
 
 See individual loggers for more information on configuration.
+
+The LoggingProperty also will bind nested parameter values using ${} syntax. Mach-II only
+will bind to root parameter values.
 --->
 <cfcomponent
 	displayname="LoggingProperty"
@@ -117,16 +120,17 @@ See individual loggers for more information on configuration.
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="configureDefaultLogger" access="private" returntype="void" output="false"
-		hint="Configures the default logging adapter (e.g. MachII.logging.adapters.MachIILogAdapter).">
+		hint="Configures the default logger (e.g. MachII.logging.loggers.MachIILog.Logger).">
 		
 		<cfset var logger = "" />
 		<cfset var parameters = StructNew() />
 		
+		<!--- Create, init and configure the logger --->
 		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(parameters) />
 		<cfset logger.configure() />
 
 		<!--- Set the logger --->
-		<cfset addLogger("logger", adapter) />
+		<cfset addLogger("logger", logger) />
 	</cffunction>
 	
 	<cffunction name="configureLogger" access="private" returntype="void" output="false"
@@ -151,7 +155,7 @@ See individual loggers for more information on configuration.
 			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
 		</cfloop>
 		
-		<!--- Create, init and configure the adapter --->
+		<!--- Create, init and configure the logger --->
 		<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
 		<cfset logger.configure() />
 		

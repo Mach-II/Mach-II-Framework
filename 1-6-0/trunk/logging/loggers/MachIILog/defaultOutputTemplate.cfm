@@ -26,56 +26,56 @@ Notes:
 --->
 </cfsilent>
 <cfoutput>
-<div id="MachIITraceDisplay">
+<div id="MachIIRequestLogDisplay">
 	<style type="text/css"><!--
-		##MachIITraceDisplay {
+		##MachIIRequestLogDisplay {
 			color: ##000;
 			background-color: ##FFF;
 		}
-		##MachIITraceDisplay h3 {
+		##MachIIRequestLogDisplay h3 {
 			color: ##000;
 		}
-		##MachIITraceDisplay table {
+		##MachIIRequestLogDisplay table {
 			border: 1px solid ##D0D0D0;
 			padding: 0.5em;
 			width:100%;
 		}
-		##MachIITraceDisplay table td {
+		##MachIIRequestLogDisplay table td {
 			vertical-align: top;
 		}
-		##MachIITraceDisplay table td.lineBottom {
+		##MachIIRequestLogDisplay table td.lineBottom {
 			border-bottom: 1px solid ##000;
 		}
-		##MachIITraceDisplay table td.lineTop {
+		##MachIIRequestLogDisplay table td.lineTop {
 			border-top: 1px solid ##000;
 		}
-		##MachIITraceDisplay .shade {
+		##MachIIRequestLogDisplay .shade {
 			background-color: ##F5F5F5;
 		}
-		##MachIITraceDisplay ul li {
+		##MachIIRequestLogDisplay ul li {
 			margin-left:15px;
 		}
-		##MachIITraceDisplay .small {
+		##MachIIRequestLogDisplay .small {
 			font-size: 0.9em;
 		}
-		##MachIITraceDisplay .fatal {
+		##MachIIRequestLogDisplay .fatal {
 			color: ##FFF;
 			background-color: ##FF9999;
 			font-weight: bold;
 		}
-		##MachIITraceDisplay .error {
+		##MachIIRequestLogDisplay .error {
 			background-color: ##FFCC66;
 			font-weight: bold;
 		}
-		##MachIITraceDisplay .warn {
+		##MachIIRequestLogDisplay .warn {
 			background-color: ##FFFF99;
 			font-weight: bold;
 		}
-		##MachIITraceDisplay .info {
+		##MachIIRequestLogDisplay .info {
 			background-color: ##CCFF99;
 			font-weight: bold;
 		}
-		##MachIITraceDisplay .strong {
+		##MachIIRequestLogDisplay .strong {
 			font-weight: bold;
 		}
 	-->
