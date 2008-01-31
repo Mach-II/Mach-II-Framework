@@ -84,19 +84,19 @@ do not have any adapters.
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
 		hint="Disables logging.">
 		
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfset variables.logAdapters[i].disableLogging() />
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfset variables.logAdapters[key].disableLogging() />
 		</cfloop>
 	</cffunction>
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging.">
 			
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfset variables.logAdapters[i].enableLogging() />
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfset variables.logAdapters[key].enableLogging() />
 		</cfloop>
 	</cffunction>
 	

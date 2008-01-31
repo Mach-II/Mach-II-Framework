@@ -58,13 +58,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].debug(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].debug(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -74,13 +74,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].error(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].error(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].error(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].error(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -90,13 +90,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].fatal(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].fatal(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -106,13 +106,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].info(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].info(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].info(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].info(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -122,13 +122,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].trace(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].trace(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -138,13 +138,13 @@ it allows you attach multiple loggers at once.
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
+		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[i].warn(getChannel(), arguments.message, arguments.caughtException) />
+				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message, arguments.caughtException) />
 			<cfelse>
-				<cfset variables.logAdapters[i].warn(getChannel(), arguments.message) />
+				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message) />
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -152,10 +152,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isDebugEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if debug level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isDebugEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isDebugEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
@@ -166,10 +166,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isErrorEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if error level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isErrorEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isErrorEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
@@ -180,10 +180,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isFatalEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if fatal level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isFatalEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isFatalEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
@@ -194,10 +194,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isInfoEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if info level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isInfoEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isInfoEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
@@ -208,10 +208,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isTraceEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if trace level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isTraceEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isTraceEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
@@ -222,10 +222,10 @@ it allows you attach multiple loggers at once.
 	<cffunction name="isWarnEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if warn level logging is enabled.">
 
-		<cfset var i = "" />
+		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="i">
-			<cfif variables.logAdapters[i].isWarnEnabled()>
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif variables.logAdapters[key].isWarnEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>

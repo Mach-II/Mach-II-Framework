@@ -76,7 +76,7 @@ will bind to root parameter values.
 		
 		<cfset var params = getParameters() />
 		<cfset var configured = false />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Set if logging is enabled (which is by default true) --->
 		<cfif isParameterDefined("loggingEnabled")>
@@ -85,9 +85,9 @@ will bind to root parameter values.
 		
 		<!--- Determine if we should load logger or use the default 
 			logger (e.g. MachII.logging.loggers.MachIILog.Logger) --->
-		<cfloop collection="#params#" item="i">
-			<cfif i NEQ "enableLogging" AND IsStruct(params[i])>
-				<cfset configureLogger(i, getParameter(i)) />
+		<cfloop collection="#params#" item="key">
+			<cfif key NEQ "enableLogging" AND IsStruct(params[key])>
+				<cfset configureLogger(key, getParameter(key)) />
 				<cfset configured = true />
 			</cfif>
 		</cfloop>
@@ -142,7 +142,7 @@ will bind to root parameter values.
 		
 		<cfset var type = "" />
 		<cfset var logger = "" />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
@@ -151,8 +151,8 @@ will bind to root parameter values.
 		</cfif>
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
-		<cfloop collection="#arguments.parameters#" item="i">
-			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
+		<cfloop collection="#arguments.parameters#" item="key">
+			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
 		<!--- Create, init and configure the logger --->
