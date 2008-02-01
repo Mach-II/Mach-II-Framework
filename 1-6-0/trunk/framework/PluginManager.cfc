@@ -463,8 +463,9 @@ Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception object." />
 
-		<cfset var i = 0 />
+		<cfset var loggingName = "" />
 		<cfset var log = "" />
+		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
 			<cfif isObject(getParent())>

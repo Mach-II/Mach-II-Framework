@@ -256,8 +256,6 @@ Configuration Example:
 			<cfif NOT IsDefined(getLoggingScope() & "." & getLoggingPath())>
 				<cfset scope[getLoggingPath()] = ArrayNew(1) />
 			</cfif>
-
-			<cfset logArray = scope[getLoggingPath()] />
 			
 			<cfset entry.channel = arguments.channel />
 			<cfset entry.logLevel = arguments.logLevel />

@@ -62,6 +62,7 @@ Notes:
 		<cfargument name="parentHandlerName" type="string" required="true" />
 		<cfargument name="parentHandlerType" type="string" required="true" />
 		
+		<cfset var command = "" />
 		<cfset var cacheHandler = "" />
 		<cfset var nestedCommandNodes = arguments.xml.xmlChildren />
 		<cfset var alias = "" />
