@@ -84,6 +84,9 @@ Notes:
 		<cfset request.event = arguments.event />
 
 		<cfif arguments.contentKey NEQ ''>
+			<cfif log.isWarnEnabled()>
+				<cfset log.warn("The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
+			</cfif>
 			<cfsavecontent variable="viewContent">
 				<cfinclude template="#viewPath#" />
 			</cfsavecontent>

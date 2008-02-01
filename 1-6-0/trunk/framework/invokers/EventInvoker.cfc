@@ -69,6 +69,9 @@ Notes:
 			
 			<!--- resultKey --->
 			<cfif arguments.resultKey NEQ ''>
+				<cfif log.isWarnEnabled()>
+					<cfset log.warn("The ResultKey attribute has been deprecated. This was called by listener '#arguments.listener.getComponentNameForLogging()#' invoking method '#arguments.method#'.") />
+				</cfif>
 				<cfset "#arguments.resultKey#" = resultValue />
 			</cfif>
 			<!--- resultArg --->
