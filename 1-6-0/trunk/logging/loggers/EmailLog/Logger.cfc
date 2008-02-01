@@ -33,19 +33,16 @@ Notes:
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the default display template if not defined -->
 				<key name="emailTemplateFile" value="/path/to/customEmailTemplate.cfm" />
-				<!-- Optional and defaults to 'Email Log' -->
-				<key name="emailSubject" value="Custom Email Subject" />
-				<!-- Required -->
-				<key name="emailTo" value="list,of,email,addresses" />
-				- OR -
-				<key name="emailTo">
-					<array>
-						<element value="array" />
-						<element value="of" />
-						<element value="email" />
-						<element value="addresses" />
-					</array>
-				</key>
+				<!-- Required - list of email addresses to send the log report to -->
+				<key name="to" value="list,of,email,addresses" />
+				<!-- Required - email address to send the log report from -->
+				<key name="from" value="logreports@example.com" />
+				<!-- Optional - the name of the subject of the log report email
+					defaults to 'Application Log' -->
+				<key name="subject" value="Application Log" />
+				<!-- Optional - list of mail server names or IPs
+					defaults to mail server specified in the coldfusion admin -->
+				<key name="servers" value="mail.example.com" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -
@@ -79,6 +76,10 @@ See that file header for configuration of filter criteria.
 	<cfset variables.emailTemplateFile = "/MachII/logging/loggers/EmailLog/defaultEmailTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
+	<cfset variables.to = "" />
+	<cfset variables.from = "" />
+	<cfset variables.subject = "" />
+	<cfset variables.servers = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -96,6 +97,10 @@ See that file header for configuration of filter criteria.
 		<cfset adapter.configure()>
 		<cfset setLogAdapter(adapter) />
 		
+		<!--- Apply configuration from adapter that is needed by the logger --->
+		<cfset setLoggingScope(adapter.getLoggingScope()) />
+		<cfset setLoggingPath(adapter.getLoggingPath()) />
+		
 		<!--- Add the adapter to the log factory --->
 		<cfset getLogFactory().addLogAdapter(adapter) />
 		
@@ -104,8 +109,22 @@ See that file header for configuration of filter criteria.
 			<cfset setEmailTemplateFile(getParamter("emailTemplateFile")) />
 		</cfif>
 		
-		<cfset setLoggingScope(adapter.getLoggingScope()) />
-		<cfset setLoggingPath(adapter.getLoggingPath()) />
+		<cfif isParameterDefined("to")>
+			<cfset setTo(getParameter("to")) />
+		<cfelse>
+			<cfthrow type="MachII.logging.loggers.EmailLog.Logger"
+				message="A parameter named 'to' is required. A list of email address(es) to send a log report to.">
+		</cfif>
+		
+		<cfif isParameterDefined("from")>
+			<cfset setFrom(getParameter("from")) />
+		<cfelse>
+			<cfthrow type="MachII.logging.loggers.EmailLog.Logger"
+				message="A parameter named 'from' is required. This indicates the email address to send a log report from.">
+		</cfif>
+		
+		<cfset setSubject(getParameter("subject", "Application Log")) />
+		<cfset setServers(getParameter("servers", "")) />
 	</cffunction>
 	
 	<!---
@@ -114,20 +133,24 @@ See that file header for configuration of filter criteria.
 	<cffunction name="displayOutput" access="public" returntype="void" output="false"
 		hint="Sends an email for this logger.">
 		
-		<!--- Note that leaving off the 'output' attribute requires all output to be
-			surrounded by cfoutput tags --->
-		
 		<cfset var body = "" />
-		<cfset var data = ArrayNew(1) />
 		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var data = scope[getLoggingPath()] />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled()>
-			<cfset data = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND ArrayLen(data)>
 			
+			<!--- Save the body of the email --->
 			<cfsavecontent variable="body">
 				<cfinclude template="#getEmailTemplateFile()#" />
 			</cfsavecontent>
+			
+			<!--- Send the email --->
+			<cfif NOT Len(getServers())>
+				<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
+			<cfelse>
+				<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#" server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -162,6 +185,38 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
 		hint="Gets the logging path.">
 		<cfreturn variables.loggingPath />
+	</cffunction>
+	
+	<cffunction name="setTo" access="private" returntype="void" output="false">
+		<cfargument name="to" type="string" required="true" />
+		<cfset variables.to = arguments.to />
+	</cffunction>
+	<cffunction name="getTo" access="public" returntype="string" output="false">
+		<cfreturn variables.to />
+	</cffunction>
+
+	<cffunction name="setFrom" access="private" returntype="void" output="false">
+		<cfargument name="from" type="string" required="true" />
+		<cfset variables.from = arguments.from />
+	</cffunction>
+	<cffunction name="getFrom" access="public" returntype="string" output="false">
+		<cfreturn variables.from />
+	</cffunction>
+
+	<cffunction name="setSubject" access="private" returntype="void" output="false">
+		<cfargument name="subject" type="string" required="true" />
+		<cfset variables.subject = arguments.subject />
+	</cffunction>
+	<cffunction name="getSubject" access="public" returntype="string" output="false">
+		<cfreturn variables.subject />
+	</cffunction>
+
+	<cffunction name="setServers" access="private" returntype="void" output="false">
+		<cfargument name="servers" type="string" required="true" />
+		<cfset variables.servers = arguments.servers />
+	</cffunction>
+	<cffunction name="getServers" access="public" returntype="string" output="false">
+		<cfreturn variables.servers />
 	</cffunction>
 	
 </cfcomponent>
