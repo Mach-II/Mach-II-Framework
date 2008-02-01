@@ -53,7 +53,7 @@ Notes:
 		
 		<cfif StructKeyExists(arguments.node.xmlAttributes, "value")>
 			<cfset value = arguments.node.xmlAttributes["value"] />
-		<cfelse>
+		<cfelseif ArrayLen(arguments.node.xmlChildren)>
 			<cfset child = arguments.node.xmlChildren[1] />
 			<cfif child.xmlName EQ "value">
 				<cfset value = child.xmlText />
