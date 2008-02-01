@@ -39,7 +39,7 @@ Re-built cleanup routine to ensure totatl cleanup of abandoned redirect persist 
 CF8 strips out the double "//" from the path info. This causes url params to become mismatched.
 (2007-11-13 pfarrell)
 
-* Event arguments not available in handleException plugin point or exception event
+* Fixed event arguments not available in handleException plugin point or exception event
 The missing event is placed in an event arg named 'missingEvent' in the exception event. Replumbed 
 when the exception event is placed in the queue, so getNextEvent() is now available in the 
 handleException plugin point.
@@ -60,6 +60,13 @@ plugin point.
 
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/14
 (2007-11-21 pfarrell)
+
+* Fixed EventContext.cfc failed to handle exception when an event-mapping exists
+If an exception occurs in an event which has an event-mapping defined, the handleException
+method of EventContext.cfc itself throws a new exception.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/24
+(2008-01-14 pfarrell)
 
 ------------------------------------------------
 Improvements / Enhancements
