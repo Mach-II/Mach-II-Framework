@@ -23,7 +23,8 @@ Updated version: 1.6.0
 
 Notes:
 --->
-<cfcomponent displayname="ThreadingAdapter"
+<cfcomponent
+	displayname="ThreadingAdapter"
 	output="false"
 	hint="Base threading adapter component. This is a base class. Please instantiate a concrete adapter.">
 

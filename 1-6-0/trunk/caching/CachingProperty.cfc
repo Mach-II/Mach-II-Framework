@@ -61,7 +61,7 @@ See individual caching strategies for more information on configuration.
 		
 		<cfset var params = getParameters() />
 		<cfset var configured = false />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<cftrace text="cachingproperty configure() called!">
 		
@@ -70,9 +70,9 @@ See individual caching strategies for more information on configuration.
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
 		</cfif>
 		
-		<cfloop collection="#params#" item="i">
-			<cfif IsStruct(params[i])>
-				<cfset configureStrategy(i, getParameter(i)) />
+		<cfloop collection="#params#" item="key">
+			<cfif IsStruct(params[key])>
+				<cfset configureStrategy(key, getParameter(key)) />
 				<cfset configured = true />
 			</cfif>
 		</cfloop>
@@ -113,7 +113,7 @@ See individual caching strategies for more information on configuration.
 		
 		<cfset var type = "" />
 		<cfset var strategy = "" />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
@@ -122,8 +122,8 @@ See individual caching strategies for more information on configuration.
 		</cfif>
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
-		<cfloop collection="#arguments.parameters#" item="i">
-			<cfset arguments.parameters[i] = bindValue(i, arguments.parameters[i]) />
+		<cfloop collection="#arguments.parameters#" item="key">
+			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
 		<!--- Create the adapter --->

@@ -73,6 +73,5 @@ Notes:
 	<cffunction name="getCacheStats" access="public" returntype="struct" output="false">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-
 	
 </cfcomponent>

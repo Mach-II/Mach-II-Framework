@@ -51,7 +51,7 @@ do not have any adapters.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="getLog" access="public" returntype="Log" output="false"
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
 		hint="Gets a new log instance. Returns a cached instance if the channel already exists.">
 		<cfargument name="channel" type="string" required="true"
 			hint="Channel to log. Typically 'getMetadata(this).name'" />
@@ -123,7 +123,7 @@ do not have any adapters.
 		<cfset variables.logCache[createChannelHash(arguments.channel)] = arguments.log />
 	</cffunction>
 	
-	<cffunction name="getFromCache" access="private" returntype="Log" output="false"
+	<cffunction name="getFromCache" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets a log from the cache.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfreturn variables.logCache[createChannelHash(arguments.channel)] />

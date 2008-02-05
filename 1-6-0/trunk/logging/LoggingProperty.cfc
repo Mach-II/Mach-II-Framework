@@ -86,7 +86,7 @@ will bind to root parameter values.
 		<!--- Determine if we should load logger or use the default 
 			logger (e.g. MachII.logging.loggers.MachIILog.Logger) --->
 		<cfloop collection="#params#" item="key">
-			<cfif key NEQ "enableLogging" AND IsStruct(params[key])>
+			<cfif IsStruct(params[key])>
 				<cfset configureLogger(key, getParameter(key)) />
 				<cfset configured = true />
 			</cfif>
