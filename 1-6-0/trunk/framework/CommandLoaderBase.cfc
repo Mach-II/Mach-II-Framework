@@ -100,15 +100,20 @@ Notes:
 		<cfset var command = "" />
 		<cfset var cacheAlias = "" />
 		<cfset var handlerId = "" />
+		<cfset var criteria = "" />
 		
 		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(commandNode, parentHandlerName, parentHandlerType) />
 		
-		<cfif structKeyExists(arguments.commandNode, "xmlAttributes") 
-			AND structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-			<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />			
+		<cfif structKeyExists(arguments.commandNode, "xmlAttributes") >
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />
+			</cfif>
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
+				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
+			</cfif>
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheAlias) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheAlias, criteria) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -120,6 +125,8 @@ Notes:
 		<cfset var command = "" />
 		<cfset var cacheAlias = "" />
 		<cfset var cacheCondition = "" />
+		<cfset var cacheName = "" />
+		<cfset var criteria = "" />
 		
 		<cfif structKeyExists(arguments.commandNode, "xmlAttributes")>
 			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
@@ -127,10 +134,16 @@ Notes:
 			</cfif>		
 			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "condition")>
 				<cfset cacheCondition = arguments.commandNode.xmlAttributes["condition"] />	
-			</cfif>		
+			</cfif>	
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
+				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
+			</cfif>
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
+				<cfset criteria = arguments.commandNode.xmlAttributes["cacheName"] />
+			</cfif>
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(cacheAlias, cacheCondition) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(cacheName, cacheAlias, cacheCondition, criteria) />
 		
 		<cfreturn command />
 	</cffunction>

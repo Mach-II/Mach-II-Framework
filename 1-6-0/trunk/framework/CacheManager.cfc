@@ -37,6 +37,8 @@ Notes:
 	<cfset variables.handlersByAliases = StructNew() />
 	<cfset variables.handlersByEventName = StructNew() />
 	<cfset variables.handlersBySubroutineName = StructNew() />
+	<cfset variables.cacheStrategies = StructNew() />
+	<cfset variables.log = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -53,6 +55,9 @@ Notes:
 			<cfset setParent(arguments.parentCacheManager) />
 		</cfif>
 		
+		<!--- Setup the log --->
+		<cfset setLog(getAppManager().getLogFactory()) />
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -66,30 +71,24 @@ Notes:
 		<cfset var cacheHandler = "" />
 		<cfset var nestedCommandNodes = arguments.xml.xmlChildren />
 		<cfset var alias = "" />
-		<cfset var type = "application" />
-		<cfset var cacheFor = 1 />
-		<cfset var cacheForUnit = "forever" />
+		<cfset var criteria = "" />
+		<cfset var cacheName = "" />
+		<cfset var cacheStrategy = "" />
 		<cfset var i = 0 />
 		
 		<cfif StructKeyExists(arguments.xml.xmlAttributes, "alias")>
 			<cfset alias = arguments.xml.xmlAttributes["alias"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "type")>
-			<cfset type = arguments.xml.xmlAttributes["type"] />
+		<cfif StructKeyExists(arguments.xml.xmlAttributes, "criteria")>
+			<cfset criteria = arguments.xml.xmlAttributes["criteria"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "cacheFor")>
-			<cfset cacheFor = arguments.xml.xmlAttributes["cacheFor"] />
-		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "cacheForUnit")>
-			<cfset cacheForUnit = arguments.xml.xmlAttributes["cacheForUnit"] />
+		<cfif StructKeyExists(arguments.xml.xmlAttributes, "cacheName")>
+			<cfset cacheName = arguments.xml.xmlAttributes["cacheName"] />
 		</cfif>
 		
-		<!--- Set temps for the commandLoaderBase. --->
-		<cfset variables.listenerMgr = getAppManager().getListenerManager() />
-		<cfset variables.filterMgr = getAppManager().getFilterManager() />
-
 		<!--- Build the cache handler --->
-		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(alias, type, cacheFor, cacheForUnit, arguments.parentHandlerName, arguments.parentHandlerType) />
+		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
+			alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
 			<cfset command = createCommand(nestedCommandNodes[i]) />
 			<cfset cacheHandler.addCommand(command) />
@@ -98,16 +97,20 @@ Notes:
 		<!--- Set the cache handler to the manager --->
 		<cfset addCacheHandler(cacheHandler) />
 		
-		<!--- Clear temps. --->
-		<cfset variables.listenerMgr = "" />
-		<cfset variables.filterMgr = "" />
-		
 		<cfreturn cacheHandler.getHandlerId() />		
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures manager.">
-		<!--- Does nothing --->
+		
+		<cfset var handlerId = "" />
+		
+		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
+			have been loaded up by the PropertyManger. --->
+		<cfloop list="#structKeyList(variables.handlers)#" index="handlerId">
+			<cfset variables.handlers[handlerId].setCacheStrategy(
+				getCacheStrategyByName(variables.handlers[handlerId].getCacheName())) />
+		</cfloop>
 	</cffunction>
 	
 	<!---
@@ -199,6 +202,8 @@ Notes:
 	<cffunction name="clearCachesByAlias" access="public" returntype="void" output="false"
 		hint="Clears caches by alias.">
 		<cfargument name="alias" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var i = 0 />
@@ -208,7 +213,7 @@ Notes:
 			<cfset cacheHandlers = variables.handlersByAliases[Hash(arguments.alias)] />
 
 			<cfloop collection="#cacheHandlers#" item="i">
-				<cfset getCacheHandler(i).clearCache() />
+				<cfset getCacheHandler(i).clearCache(event, criteria) />
 			</cfloop>
 		</cfif>
 	</cffunction>
@@ -262,6 +267,34 @@ Notes:
 		<cfreturn cacheHandlers />
 	</cffunction>
 	
+	<cffunction name="addCacheStrategy" access="public" returntype="void" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="cacheStrategy" type="MachII.caching.strategies.AbstractCacheStrategy" required="true" />
+		<cfset variables.cacheStrategies[arguments.name] = cacheStrategy />
+	</cffunction>
+	
+	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfreturn structKeyExists(variables.cacheStrategies, arguments.name) />
+	</cffunction>
+	
+	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false">
+		<cfreturn StructKeyArray(variables.cacheStrategies) />
+	</cffunction>
+	
+	<cffunction name="getCacheStrategyByName" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfif isCacheStrategyDefined(arguments.name)>
+			<cfreturn variables.cacheStrategies[arguments.name] />
+		<cfelseif isObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.name)>
+			<cfreturn getParent().getCacheStrategyByName(arguments.name) />
+		<cfelse>
+			<cfthrow type="MachII.framework.CacheStrategyNotDefined" 
+				message="Cache Strategy with name '#arguments.name#' is not defined. Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
+		</cfif>
+	</cffunction>
+	
+	
 	<!---
 	ACCESSORS
 	--->
@@ -281,6 +314,16 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent CacheManager instance this CacheManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentCacheManager />
+	</cffunction>
+	
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 	
 </cfcomponent>

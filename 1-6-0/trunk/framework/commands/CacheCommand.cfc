@@ -34,6 +34,7 @@ Notes:
 	<cfset variables.commandType = "cache" />
 	<cfset variables.handlerId = "" />
 	<cfset variables.alias = "" />
+	<cfset variables.criteria = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -42,9 +43,11 @@ Notes:
 		hint="Initializes the command.">
 		<cfargument name="handlerId" type="uuid" required="false" default="#CreateUUID()#" />
 		<cfargument name="alias" type="string" required="false" default="" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 
 		<cfset setHandlerId(arguments.handlerId) />
 		<cfset setAlias(arguments.alias) />
+		<cfset setCriteria(arguments.criteria) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -62,7 +65,7 @@ Notes:
 		<cfset var cacheHandler = "" />
 		
 		<cfset cacheHandler = cacheManager.getCacheHandler(getHandlerId()) />
-		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
+		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext, getCriteria()) />
 		
 		<cfreturn continue />
 	</cffunction>
@@ -84,6 +87,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getAlias" access="private" returntype="string" output="false">
 		<cfreturn variables.alias />
+	</cffunction>
+	
+	<cffunction name="setCriteria" access="private" returntype="void" output="false">
+		<cfargument name="criteria" type="string" required="true" />
+		<cfset variables.criteria = arguments.criteria />
+	</cffunction>
+	<cffunction name="getCriteria" access="public" returntype="string" output="false">
+		<cfreturn variables.criteria />
 	</cffunction>
 
 </cfcomponent>

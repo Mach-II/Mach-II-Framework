@@ -33,12 +33,11 @@ Notes:
 	<cfset variables.commands = ArrayNew(1) />
 	<cfset variables.handlerId = CreateUUID() />
 	<cfset variables.alias = ""/>
-	<cfset variables.type = "" />
-	<cfset variables.cacheFor = "" />
-	<cfset variables.cacheForUnit = "" />
+	<cfset variables.cacheName = "" />
+	<cfset variables.criteria = "" />
 	<cfset variables.parentHandlerName = "" />
 	<cfset variables.parentHandlerType = "" />
-	<cfset variables.cache = StructNew() />
+	<cfset variables.cacheStrategy = 0 />
 	<cfset variables.cacheOutputBuffer = "" />
 	
 	<!---
@@ -47,23 +46,17 @@ Notes:
 	<cffunction name="init" access="public" returntype="CacheHandler" output="false"
 		hint="Initializes the handler.">
 		<cfargument name="alias" type="string" required="false" default="" />
-		<cfargument name="type" type="string" required="false" default="" />
-		<cfargument name="cacheFor" type="string" required="false" default="" />
-		<cfargument name="cacheForUnit" type="string" required="false" default="" />
+		<cfargument name="cacheName" type="string" required="false" default="" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 	
 		<!--- run setters --->
 		<cfset setAlias(arguments.alias) />
-		<cfset setType(arguments.type) />
-		<cfset setCacheFor(arguments.cacheFor) />
-		<cfset setCacheForUnit(arguments.cacheForUnit) />
-		<cfset setParentHandlerName(arguments.parentHandlerName) >
+		<cfset setCacheName(arguments.cacheName) />
+		<cfset setCriteria(arguments.criteria) />
+		<cfset setParentHandlerName(arguments.parentHandlerName) />
 		<cfset setParentHandlerType(arguments.parentHandlerType) />
-		
-		<!--- setup --->
-		<cfset setHasCache(false) />
-		<cfset setCacheData(StructNew()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -75,15 +68,16 @@ Notes:
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var outputBuffer = "" />
 		<cfset var continue = true />
 		<cfset var command = "" />
 		<cfset var i = 0 />
+		<cfset var key = getKeyFromCriteria(arguments.criteria, event) />
 		
 		<!--- Create the cache since we do not have one --->
-		<cfif NOT useCache()>
-			
+		<cfif NOT useCache(key)>
 			<!--- Run commands and save output to the buffer --->
 			<cfsavecontent variable="outputBuffer">
 				<cfloop index="i" from="1" to="#ArrayLen(variables.commands)#">
@@ -96,15 +90,14 @@ Notes:
 			</cfsavecontent>
 			
 			<!--- Grab the change data and cache it for later --->
-			<cfset setCacheData(arguments.event.getArgs()) />
-			<cfset setCacheOutputBuffer(outputBuffer) />
-			<cfset setHasCache(true) />
+			<cfset setCacheData(key, arguments.event.getArgs()) />
+			<cfset setCacheOutputBuffer(key, outputBuffer) />
 			
-			<cfoutput>#getCacheOutputBuffer()#</cfoutput>
-		<!--- Replay the event from the cache --->
+			<cfoutput>#outputBuffer#</cfoutput>
 		<cfelse>
-			<cfset arguments.event.setArgs(getCacheData()) />
-			<cfoutput>#getCacheOutputBuffer()#</cfoutput>
+			<!--- Replay the event from the cache --->
+			<cfset arguments.event.setArgs(getCacheData(key)) />
+			<cfoutput>#getCacheOutputBuffer(key)#</cfoutput>
 		</cfif>
 		
 		<cfreturn continue />
@@ -112,9 +105,17 @@ Notes:
 	
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
 		hint="Clears the cache.">
-		<cfset setCacheData(StructNew()) />
-		<cfset setCacheOutputBuffer("") />
-		<cfset setHasCache(false) />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
+
+		<cfset var key = getKeyFromCriteria(arguments.criteria, arguments.event) />
+		
+		<cfif len(key)>
+			<cfset getCacheStrategy().remove(key) />
+			<cfset getCacheStrategy().remove(key & "_output") />
+		<cfelse>
+			<cfset getCacheStrategy().flush() />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="addCommand" access="public" returntype="void" output="false"
@@ -123,61 +124,28 @@ Notes:
 		<cfset ArrayAppend(variables.commands, arguments.command) />
 	</cffunction>
 	
-	<cffunction name="useCache" access="public" returntype="boolean" output="false"
-		hint="Checks if the cache should be used.">
-		<cfif NOT getHasCache() OR DateCompare(Now(), computeCacheUntilTimestamp()) GTE 0>
-			<cfreturn false />
-		<cfelse>
-			<cfreturn true />
-		</cfif>
-	</cffunction>
-	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
-		hint="Computes a cache until timestamp for this cache block.">
-		
-		<cfset var timestamp = Now() />
-		<cfset var cacheFor = getCacheFor() />
-		<cfset var unit = getCacheForUnit() />
-		
-		<cfif unit EQ "seconds">
-			<cfset timestamp = DateAdd("s", cacheFor, timestamp) />
-		<cfelseif unit EQ "minutes">
-			<cfset timestamp = DateAdd("n", cacheFor, timestamp) />
-		<cfelseif unit EQ "hours">
-			<cfset timestamp = DateAdd("h", cacheFor, timestamp) />
-		<cfelseif unit EQ "days">
-			<cfset timestamp = DateAdd("d", cacheFor, timestamp) />
-		<cfelseif unit EQ "forever">
-			<cfset timestamp = DateAdd("y", 100, timestamp) />
-		<cfelse>
-			<cfthrow type="MachII.framework.CacheHandler"
-				message="Invalid CacheForUnit of '#unit#'. Use 'seconds, 'minutes', 'hours', 'days' or 'forever'." />
-		</cfif>
-		
-		<cfreturn timestamp />
+	<cffunction name="useCache" access="private" returntype="boolean" output="false"
+		hint="Checks if the cache should be used.">
+		<cfargument name="key" type="string" required="true" />
+		<cfreturn getCacheStrategy().keyExists(key) />
 	</cffunction>
 	
-	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
-		hint="Gets the cache scope which is dependent on the storage location.">
+	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false">
+		<cfargument name="criteria" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var storage = "" />
+		<cfset var sortedCriteria = listSort(criteria, "text") />
+		<cfset var item = "" />
+		<cfset var key = "" />
 		
-		<cfif getType() EQ "application">
-			<cfset storage = variables.cache />
-		<cfelseif getType() EQ "session">
-			<cfset storage = StructGet("session") />
-			
-			<cfif NOT StructKeyExists(storage, "_MachIICache.#getHandlerId()#")>
-				<cfset storage._MachIICache[getHandlerId()] = StructNew() />
-			</cfif>
-			
-			<cfset storage = storage._MachIICache[getHandlerId()] />
-		</cfif>
+		<cfloop list="#sortedCriteria#" index="item">
+			<cfset key = key & "&#item#=#event.getArg("item")#">
+		</cfloop>
 		
-		<cfreturn storage />
+		<cfreturn key />
 	</cffunction>
 	
 	<!---
@@ -188,6 +156,14 @@ Notes:
 		<cfreturn variables.handlerId />
 	</cffunction>
 	
+	<cffunction name="setCacheStrategy" access="public" returntype="void" output="false">
+		<cfargument name="cacheStrategy" type="MachII.caching.strategies.AbstractCacheStrategy" required="true" />
+		<cfset variables.cacheStrategy = arguments.cacheStrategy />
+	</cffunction>
+	<cffunction name="getCacheStrategy" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false">
+		<cfreturn variables.cacheStrategy />
+	</cffunction>
+	
 	<cffunction name="setAlias" access="private" returntype="void" output="false">
 		<cfargument name="alias" type="string" required="true" />
 		<cfset variables.alias = arguments.alias />
@@ -196,28 +172,20 @@ Notes:
 		<cfreturn variables.alias />
 	</cffunction>
 
-	<cffunction name="setType" access="private" returntype="void" output="false">
-		<cfargument name="type" type="string" required="true" />
-		<cfset variables.type = arguments.type />
+	<cffunction name="setCacheName" access="private" returntype="void" output="false">
+		<cfargument name="cacheName" type="string" required="true" />
+		<cfset variables.cacheName = arguments.cacheName />
 	</cffunction>
-	<cffunction name="getType" access="public" returntype="string" output="false">
-		<cfreturn variables.type />
-	</cffunction>
-
-	<cffunction name="setCacheFor" access="private" returntype="void" output="false">
-		<cfargument name="cacheFor" type="string" required="true" />
-		<cfset variables.cacheFor = arguments.cacheFor />
-	</cffunction>
-	<cffunction name="getCacheFor" access="public" returntype="string" output="false">
-		<cfreturn variables.cacheFor />
+	<cffunction name="getCacheName" access="public" returntype="string" output="false">
+		<cfreturn variables.cacheName />
 	</cffunction>
 
-	<cffunction name="setCacheForUnit" access="private" returntype="void" output="false">
-		<cfargument name="cacheForUnit" type="string" required="true" />
-		<cfset variables.cacheForUnit = arguments.cacheForUnit />
+	<cffunction name="setCriteria" access="private" returntype="void" output="false">
+		<cfargument name="criteria" type="string" required="true" />
+		<cfset variables.criteria = arguments.criteria />
 	</cffunction>
-	<cffunction name="getCacheForUnit" access="public" returntype="string" output="false">
-		<cfreturn variables.cacheForUnit />
+	<cffunction name="getCriteria" access="public" returntype="string" output="false">
+		<cfreturn variables.criteria />
 	</cffunction>
 	
 	<cffunction name="setParentHandlerName" access="private" returntype="void" output="false">
@@ -236,28 +204,24 @@ Notes:
 		<cfreturn variables.parentHandlerType />
 	</cffunction>
 	
-	<cffunction name="setHasCache" access="private" returntype="void" output="false">
-		<cfargument name="hasCache" type="boolean" required="true" />
-		<cfset getCacheScope().hasCache = arguments.hasCache />
-	</cffunction>
-	<cffunction name="getHasCache" access="public" returntype="boolean" output="false">
-		<cfreturn getCacheScope().hasCache />
-	</cffunction>
-	
 	<cffunction name="setCacheData" access="private" returntype="void" output="false">
+		<cfargument name="key" type="string" required="true" />
 		<cfargument name="cacheData" type="struct" required="true" />
-		<cfset getCacheScope().cacheData = arguments.cacheData />
+		<cfset getCacheStrategy().put(arguments.key, arguments.cacheData) />
 	</cffunction>
 	<cffunction name="getCacheData" access="public" returntype="struct" output="false">
-		<cfreturn getCacheScope().cacheData />
+		<cfargument name="key" type="string" required="true" />
+		<cfreturn getCacheStrategy().get(arguments.key) />
 	</cffunction>
 	
 	<cffunction name="setCacheOutputBuffer" access="private" returntype="void" output="false">
+		<cfargument name="key" type="string" required="true" />
 		<cfargument name="cacheOutputBuffer" type="string" required="true" />
-		<cfset getCacheScope().cacheOutputBuffer = arguments.cacheOutputBuffer />
+		<cfset getCacheStrategy().put(arguments.key & "_output", arguments.cacheOutputBuffer) />
 	</cffunction>
 	<cffunction name="getCacheOutputBuffer" access="public" returntype="string" output="false">
-		<cfreturn getCacheScope().cacheOutputBuffer />
+		<cfargument name="key" type="string" required="true" />
+		<cfreturn getCacheStrategy().get(arguments.key & "_output") />
 	</cffunction>
 	
 </cfcomponent>

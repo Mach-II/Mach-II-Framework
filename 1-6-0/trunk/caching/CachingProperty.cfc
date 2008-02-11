@@ -63,8 +63,6 @@ See individual caching strategies for more information on configuration.
 		<cfset var configured = false />
 		<cfset var key = "" />
 		
-		<cftrace text="cachingproperty configure() called!">
-		
 		<!--- The default cache strategy if present --->
 		<cfif isParameterDefined("defaultCacheName")>
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />

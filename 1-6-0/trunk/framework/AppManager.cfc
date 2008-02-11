@@ -65,6 +65,7 @@ Notes:
 		<!--- In order in which the managers are called is important
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
 		<cfset getPropertyManager().configure() />
+		<cfset getCacheManager().configure() />
 		<cfset getRequestManager().configure() />
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />

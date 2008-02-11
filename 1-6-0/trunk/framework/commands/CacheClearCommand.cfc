@@ -34,17 +34,23 @@ Notes:
 	<cfset variables.commandType = "cache-clear" />
 	<cfset variables.alias = "" />
 	<cfset variables.condition = "" />
+	<cfset variables.criteria = "" />
+	<cfset variables.cacheName = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="CacheClearCommand" output="false"
 		hint="Initializes the command.">
+		<cfargument name="cacheName" type="string" required="false" default="" />
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="condition" type="string" required="false" default="" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 
 		<cfset setAlias(arguments.alias) />
 		<cfset setCondition(arguments.condition) />
+		<cfset setCacheName(arguments.cacheName) />
+		<cfset setCriteria(arguments.criteria) />
 
 		<cfreturn this />
 	</cffunction>
@@ -60,27 +66,27 @@ Notes:
 		<cfset var continue = true />
 		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
-		<cfset var log = getLog() />
+		<!--- <cfset var log = getLog() /> --->
 		
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT Len(getCondition())>
-			<cfif log.isDebugEnabled()>
+			<!--- <cfif log.isDebugEnabled()>
 				<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
-			</cfif>
+			</cfif> --->
 			<cfset clearCache = true />
 		<cfelseif evaluate(getCondition())>
-			<cfif log.isDebugEnabled()>
+			<!--- <cfif log.isDebugEnabled()>
 				<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
-			</cfif>
+			</cfif> --->
 			<cfset clearCache = true />
 		<cfelse>
-			<cfif log.isDebugEnabled()>
+			<!--- <cfif log.isDebugEnabled()>
 				<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
-			</cfif>
+			</cfif> --->
 		</cfif>
 
 		<cfif clearCache>
-			<cfset cacheManager.clearCachesByAlias(getAlias()) />
+			<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
 		</cfif>
 		
 		<cfreturn continue />
@@ -103,6 +109,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getCondition" access="private" returntype="string" output="false">
 		<cfreturn variables.condition />
+	</cffunction>
+
+	<cffunction name="setCriteria" access="private" returntype="void" output="false">
+		<cfargument name="criteria" type="string" required="true" />
+		<cfset variables.criteria = arguments.criteria />
+	</cffunction>
+	<cffunction name="getCriteria" access="public" returntype="string" output="false">
+		<cfreturn variables.criteria />
+	</cffunction>
+	
+	<cffunction name="setCacheName" access="private" returntype="void" output="false">
+		<cfargument name="cacheName" type="string" required="true" />
+		<cfset variables.cacheName = arguments.cacheName />
+	</cffunction>
+	<cffunction name="getCacheName" access="public" returntype="string" output="false">
+		<cfreturn variables.cacheName />
 	</cffunction>
 
 </cfcomponent>

@@ -167,15 +167,21 @@ Notes:
 		<!--- 
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important (do not change!):
-		utils, propertyManager, requestManager, listenerManager, messageManager, filterManager, 
+		utils, log factory, cacheManager, propertyManager, requestManager, listenerManager, messageManager, filterManager, 
 		subroutineManager, eventManager, viewManager, pluginManager and then moduleManager
 		--->
 		
 		<!--- Set the utils which is a singleton across the application --->
 		<cfset appManager.setUtils(utils) />
-
+		
 		<!--- Set the LogFactory which is a singleton across the application --->
 		<cfset appManager.setLogFactory(logFactory) />
+
+		<!--- The cacheManager does load in any xml. The cache commands are loaded in by the 
+			eventManager and the subroutineManager when looks through its commands. Needs to be loaded
+			before the property manager so its cache strategies can get loaded in. --->
+		<cfset cacheManager = CreateObject("component", "MachII.framework.CacheManager").init(appManager, parentCacheManager) />
+		<cfset appManager.setCacheManager(cacheManager) />
 		
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager, parentPropertyManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
@@ -234,11 +240,6 @@ Notes:
 		</cfif>
 		<cfset appManager.setSubroutineManager(subroutineManager) />
 				
-		<!--- The cacheManager does load in any xml. The cache commands are loaded in by the 
-			eventManager and the subroutineManager when looks through its commands. --->
-		<cfset cacheManager = CreateObject("component", "MachII.framework.CacheManager").init(appManager, parentCacheManager) />
-		<cfset appManager.setCacheManager(cacheManager) />
-		
 		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager, parentEventManager) />
 		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 			<cfset eventManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
