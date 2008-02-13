@@ -160,9 +160,7 @@ Notes:
 				<cfif log.isErrorEnabled()>
 					<cfset log.error("Subroutine '#arguments.subroutineName#' has caused an exception.", cfcatch) />
 				</cfif>
-				
-				<cfset exception = getRequestHandler().wrapException(cfcatch) />
-				<cfset handleException(exception, true) />
+				<cfrethrow />
 			</cfcatch>
 		</cftry>
 		
