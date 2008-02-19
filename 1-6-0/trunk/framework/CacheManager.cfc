@@ -148,6 +148,11 @@ Notes:
 		<cfreturn variables.handlers[arguments.handlerId] />
 	</cffunction>
 	
+	<cffunction name="getCacheHandlers" access="public" returntype="struct" output="false"
+		hint="Gets all cache handlers in a struct keyed by the handlerId (a hash of the alias).">
+		<cfreturn variables.handlers />
+	</cffunction>
+	
 	<cffunction name="removeCacheHandler" access="public" returntype="void" output="false"
 		hint="Removes a cache handler.">
 		<cfargument name="cacheHandler" type="MachII.framework.CacheHandler" required="true"
@@ -211,7 +216,7 @@ Notes:
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
 		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
 			<cfset cacheHandlers = variables.handlersByAliases[Hash(arguments.alias)] />
-
+			
 			<cfloop collection="#cacheHandlers#" item="i">
 				<cfset getCacheHandler(i).clearCache(event, criteria) />
 			</cfloop>
