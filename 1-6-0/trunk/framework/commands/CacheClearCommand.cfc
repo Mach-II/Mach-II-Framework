@@ -84,7 +84,7 @@ Notes:
 				<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
 			</cfif> --->
 		</cfif>
-
+		
 		<cfif clearCache>
 			<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
 		</cfif>

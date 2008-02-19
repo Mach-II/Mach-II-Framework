@@ -139,11 +139,12 @@ Notes:
 				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
 			</cfif>
 			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
-				<cfset criteria = arguments.commandNode.xmlAttributes["cacheName"] />
+				<cfset cacheName = arguments.commandNode.xmlAttributes["cacheName"] />
 			</cfif>
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(cacheName, cacheAlias, cacheCondition, criteria) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
+			cacheName, cacheAlias, cacheCondition, criteria) />
 		
 		<cfreturn command />
 	</cffunction>
