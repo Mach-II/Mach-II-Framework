@@ -42,7 +42,7 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the strategy. Override to provide custom functionality.">
+		hint="Configures the strategy.">
 
 		<cfif isParameterDefined("cacheFor")>
 			<cfset setCacheFor(getParameter("cacheFor")) />
@@ -58,24 +58,33 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="put" access="public" returntype="void" output="false">
+	<cffunction name="put" access="public" returntype="void" output="false"
+		hint="Puts data into the cache by key.">
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="data" type="any" required="true" />
+
 		<cfset var cache = getCacheScope() />
-		<cfif NOT structKeyExists(cache, arguments.key)>
-			<cfset cache[arguments.key] = structNew() />
+		
+		<!--- TODO: I think the cache key should be run through hash()
+			as it may contain illegal characters that cannot be used in a struct key
+			name.--->
+		<cfif NOT StructKeyExists(cache, arguments.key)>
+			<cfset cache[arguments.key] = StructNew() />
 			<cfset getCacheStats().totalElements = getCacheStats().totalElements + 1 />
 			<cfset getCacheStats().activeElements = getCacheStats().activeElements + 1 />
 		</cfif>
 		<cfset cache[arguments.key].data = arguments.data />
-		<cfset cache[arguments.key].timestamp = now() />
+		<cfset cache[arguments.key].timestamp = Now() />
 		<cfset setCacheScope(cache) />
 	</cffunction>
 	
-	<cffunction name="get" access="public" returntype="any" output="false">
+	<cffunction name="get" access="public" returntype="any" output="false"
+		hint="Gets data from the cache by key. Throws an exception if the key is not available.">
 		<cfargument name="key" type="string" required="true" />
+
 		<cfset var cache = getCacheScope() />
-		<cfif structKeyExists(cache, arguments.key) AND structKeyExists(cache[arguments.key], "data")>
+
+		<cfif StructKeyExists(cache, arguments.key) AND StructKeyExists(cache[arguments.key], "data")>
 			<cfset getCacheStats().cacheHits = getCacheStats().cacheHits + 1 />
 			<cfreturn cache[arguments.key].data />
 		<cfelse>
@@ -85,19 +94,26 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="flush" access="public" returntype="void" output="false">
+	<cffunction name="flush" access="public" returntype="void" output="false"
+		hint="Flushes the entire cache.">
+
 		<cfset var cache = getCacheScope() />
-		<cfset cache = structNew() />
+
+		<cfset cache = StructNew() />
 		<cfset setCacheScope(cache) />
 	</cffunction>
 	
-	<cffunction name="keyExists" access="public" returntype="boolean" output="false">
+	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
+		hint="Checkes if a key exists in the cache.">
 		<cfargument name="key" type="string" required="true" />
+
 		<cfset var cache = getCacheScope() />
-		<cfset var findKey = structKeyExists(cache, arguments.key) />
+		<cfset var findKey = StructKeyExists(cache, arguments.key) />
+
 		<cfif NOT findKey OR DateCompare(cache[arguments.key].timestamp, computeCacheUntilTimestamp()) GTE 0>
 			<cfset remove(arguments.key) />
-			<!--- TODO: is it ok to call this a cache miss? --->
+			<!--- TODO: is it ok to call this a cache miss?
+			pjf - I don't think it's a miss since we're only checking to see if it's there --->
 			<cfset getCacheStats().cacheMisses = getCacheStats().cacheMisses + 1 />
 			<cfreturn false />
 		<cfelse>
@@ -105,17 +121,31 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="remove" access="public" returntype="void" output="false">
+	<cffunction name="remove" access="public" returntype="void" output="false"
+		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true" />
+
 		<cfset var cache = getCacheScope() />
-		<cfif structKeyExists(cache, arguments.key)>
-			<cfset structDelete(cache, arguments.key) />
+
+		<cfif StructKeyExists(cache, arguments.key)>
+			<cfset StructDelete(cache, arguments.key) />
+			<!--- TODO: pjf - I think we should have a increment/decrement methods in the stats
+				with locks otherwise data could be funky if called concurrently
+				Also, this would let us not use the 'this' scope in the stats cfc --->
 			<cfset getCacheStats().evictions = getCacheStats().evictions + 1 />
 			<cfset getCacheStats().totalElements = getCacheStats().totalElements - 1 />
 			<cfset getCacheStats().activeElements = getCacheStats().activeElements - 1 />
 		</cfif>
+		
+		<!--- TODO: pjf - is this necessary? Structs are accessed by reference so the struct delete should update
+		the cache --->
 		<cfset setCacheScope(cache) />
 	</cffunction>
+	
+	<!--- TODO: pj - do we need a reap method that looks at the timestamps of the cache pieces
+	and throws out old ones? Could use the cfthreading adapter to do this asyncronisely
+	<cffunction name="reap">
+	 --->
 	
 	<!---
 	PROTECTED FUNCTIONS

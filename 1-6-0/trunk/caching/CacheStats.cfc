@@ -31,10 +31,16 @@ Cache hits
 Cache misses
 Cache active element count
 Cache total element count
-Cache evictions Ð number elements that the cache removed to make room for new elements 
+Cache evictions - number of elements that the cache removed to make room for new elements 
 --->
-<cfcomponent output="false">
+<cfcomponent
+	displayname="CacheStats"
+	output="false"
+	hint="Holds cache stats for a concrete strategy.">
 
+	<!---
+	PROPERTIES
+	--->
 	<cfproperty name="cacheHits" type="numeric" />
 	<cfproperty name="cacheMisses" type="numeric" />
 	<cfproperty name="activeElements" type="numeric" />
@@ -49,10 +55,17 @@ Cache evictions Ð number elements that the cache removed to make room for new el
 	
 	<cfset variables.extraStats = structNew() />
 	
-	<cffunction name="init" access="public" returntype="CacheStats" output="false">
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="init" access="public" returntype="CacheStats" output="false"
+		hint="Initializes the stats.">
 		<cfreturn this />
 	</cffunction>
 	
+	<!---
+	ACCESSORS
+	--->
 	<cffunction name="getExtraStats" access="public" returntype="struct" output="false">
 		<cfreturn variables.extraStats />
 	</cffunction>
