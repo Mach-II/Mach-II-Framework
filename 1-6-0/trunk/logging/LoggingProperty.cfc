@@ -75,7 +75,7 @@ will bind to root parameter values.
 		hint="Configures the property.">
 		
 		<cfset var params = getParameters() />
-		<cfset var configured = false />
+		<cfset var loggers = StructNew() />
 		<cfset var key = "" />
 		
 		<!--- Set if logging is enabled (which is by default true) --->
@@ -88,14 +88,20 @@ will bind to root parameter values.
 		<cfloop collection="#params#" item="key">
 			<cfif IsStruct(params[key])>
 				<cfset configureLogger(key, getParameter(key)) />
-				<cfset configured = true />
 			</cfif>
 		</cfloop>
 		
 		<!--- Configure the default logger since no loggers were set --->
-		<cfif NOT configured>
+		<cfif NOT StructCount(getLoggers())>
 			<cfset configureDefaultLogger() />
 		</cfif>
+		
+		<!--- Configure the loggers --->
+		<cfset loggers = getLoggers() />
+		
+		<cfloop collection="#loggers#" item="key">
+			<cfset loggers[key].configure() />
+		</cfloop>
 		
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT getLoggingEnabled()>
@@ -127,7 +133,9 @@ will bind to root parameter values.
 		
 		<!--- Create, init and configure the logger --->
 		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(parameters) />
-		<cfset logger.configure() />
+
+		<!--- Add callback to the RequestManager to the onRequestEnd method --->
+		<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
 
 		<!--- Set the logger --->
 		<cfset addLogger("logger", logger) />
@@ -157,11 +165,10 @@ will bind to root parameter values.
 		
 		<!--- Create, init and configure the logger --->
 		<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
-		<cfset logger.configure() />
 		
-		<!--- Add a callback to the request manager if there is display to output --->
-		<cfif logger.isDisplayOutputAvailable()>
-			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "displayOutput") />
+		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
+		<cfif logger.isOnRequestEndAvailable()>
+			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
 		</cfif>
 		
 		<!--- Add the logger --->

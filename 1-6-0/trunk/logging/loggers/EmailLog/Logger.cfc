@@ -72,7 +72,7 @@ See that file header for configuration of filter criteria.
 	PROPERTIES
 	--->
 	<cfset variables.loggerType = "Email Logger" />
-	<cfset variables.displayOutputAvailable = true />
+	<cfset variables.onRequestEndAvailable = true />
 	<cfset variables.emailTemplateFile = "/MachII/logging/loggers/EmailLog/defaultEmailTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
@@ -130,7 +130,7 @@ See that file header for configuration of filter criteria.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="displayOutput" access="public" returntype="void" output="false"
+	<cffunction name="onRequestEnd" access="public" returntype="void" output="false"
 		hint="Sends an email for this logger.">
 		
 		<cfset var body = "" />

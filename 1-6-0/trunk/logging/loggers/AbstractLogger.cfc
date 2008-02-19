@@ -32,7 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.loggerType = "undefined" />
-	<cfset variables.displayOutputAvailable = false />
+	<cfset variables.onRequestEndAvailable = false />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
@@ -59,8 +59,8 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="displayOutput" access="public" returntype="void" 
-		hint="Displays output for this logger. Override to provide custom display output.">
+	<cffunction name="onRequestEnd" access="public" returntype="void" 
+		hint="On request end for this logger. Override to provide custom on request end logic.">
 		<!--- Note that leaving off the 'output' attribute requires all output to be
 			surrounded by cfoutput tags --->
 		<cfabort showerror="This method is abstract and must be overrided." />
@@ -69,9 +69,9 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="isDisplayOutputAvailable" access="public" returntype="string" output="false"
-		hint="Checks if display output is available.">
-		<cfreturn variables.displayOutputAvailable />
+	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
+		hint="Checks if on request end method is available.">
+		<cfreturn variables.onRequestEndAvailable />
 	</cffunction>
 	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"

@@ -62,7 +62,7 @@ See that file header for configuration of filter criteria.
 	PROPERTIES
 	--->
 	<cfset variables.loggerType = "Mach-II Log" />
-	<cfset variables.displayOutputAvailable = true />
+	<cfset variables.onRequestEndAvailable = true />
 	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
@@ -98,7 +98,7 @@ See that file header for configuration of filter criteria.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="displayOutput" access="public" returntype="void"
+	<cffunction name="onRequestEnd" access="public" returntype="void"
 		hint="Displays output for this logger.">
 		
 		<!--- Note that leaving off the 'output' attribute requires all output to be
