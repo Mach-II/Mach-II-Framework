@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.cacheStats = createObject("component", "MachII.caching.CacheStats").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -78,8 +79,8 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="getCacheStats" access="public" returntype="struct" output="false">
-		<cfabort showerror="This method is abstract and must be overrided." />
+	<cffunction name="getCacheStats" access="public" returntype="MachII.caching.CacheStats" output="false">
+		<cfreturn variables.cacheStats />
 	</cffunction>
 	
 	<!---

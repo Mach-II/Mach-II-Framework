@@ -64,6 +64,8 @@ Notes:
 		<cfset var cache = getCacheScope() />
 		<cfif NOT structKeyExists(cache, arguments.key)>
 			<cfset cache[arguments.key] = structNew() />
+			<cfset getCacheStats().totalElements = getCacheStats().totalElements + 1 />
+			<cfset getCacheStats().activeElements = getCacheStats().activeElements + 1 />
 		</cfif>
 		<cfset cache[arguments.key].data = arguments.data />
 		<cfset cache[arguments.key].timestamp = now() />
@@ -73,10 +75,11 @@ Notes:
 	<cffunction name="get" access="public" returntype="any" output="false">
 		<cfargument name="key" type="string" required="true" />
 		<cfset var cache = getCacheScope() />
-		<!--- TODO: update stats --->
 		<cfif structKeyExists(cache, arguments.key) AND structKeyExists(cache[arguments.key], "data")>
+			<cfset getCacheStats().cacheHits = getCacheStats().cacheHits + 1 />
 			<cfreturn cache[arguments.key].data />
 		<cfelse>
+			<cfset getCacheStats().cacheMisses = getCacheStats().cacheMisses + 1 />
 			<cfthrow type="MachII.caching.strategies.MachIICache"
 				message="The key '#arguments.key#' does not exist in the cache." />
 		</cfif>
@@ -94,6 +97,8 @@ Notes:
 		<cfset var findKey = structKeyExists(cache, arguments.key) />
 		<cfif NOT findKey OR DateCompare(cache[arguments.key].timestamp, computeCacheUntilTimestamp()) GTE 0>
 			<cfset remove(arguments.key) />
+			<!--- TODO: is it ok to call this a cache miss? --->
+			<cfset getCacheStats().cacheMisses = getCacheStats().cacheMisses + 1 />
 			<cfreturn false />
 		<cfelse>
 			<cfreturn true />
@@ -105,15 +110,12 @@ Notes:
 		<cfset var cache = getCacheScope() />
 		<cfif structKeyExists(cache, arguments.key)>
 			<cfset structDelete(cache, arguments.key) />
+			<cfset getCacheStats().evictions = getCacheStats().evictions + 1 />
+			<cfset getCacheStats().totalElements = getCacheStats().totalElements - 1 />
+			<cfset getCacheStats().activeElements = getCacheStats().activeElements - 1 />
 		</cfif>
 		<cfset setCacheScope(cache) />
 	</cffunction>
-	
-	<cffunction name="getCacheStats" access="public" returntype="struct" output="false">
-		<!--- TODO: getCacheStats --->
-		<cfabort showerror="This method is abstract and must be overrided." />
-	</cffunction>
-	
 	
 	<!---
 	PROTECTED FUNCTIONS
