@@ -34,7 +34,9 @@ Notes:
 	
 	<description>Mach-II Framework</description>
 	
-	<!-- Properties -->
+	<!--
+	PROPERTIES
+	-->
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
 	<property name="majorVersion" value="1-6-0"/>
@@ -44,28 +46,31 @@ Notes:
 	<property name="ftp.server" value="mach-ii.com"/>
 	<property name="ftp.user" value="machii"/>
 	<property name="ftp.nightly.dir" value="/var/www/machii/m2website/public/nightly/"/>
-	
-	<!-- ReIDs -->
-	<fileset id="ftp.nightly.fileset"
-		dir="${zip}">
-		<include name="*.zip"/>
-		<include name="*.zip.MD5"/>
-	</fileset>
 
-	<!-- Task defitions -->
+	<!--
+	TASK DEFINITIONS
+	-->
 	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml"/>
 	
-	<!-- Targets -->
-	<target name="usage" description="Display main targets by running 'ant -projecthelp'">
+	<!--
+	TARGETS
+	-->
+	<target name="usage" description="Tells how to use the build file.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Help - Mach-II Framework Build File"/>
 		<echo message="---------------------------------------------"/>
 		<echo message="PUBLIC TARGETS"/>
 		<echo message="---------------------------------------------"/>
-		<echo message="Build: Creates a build in the 'dest' directory."/>
-		<echo message="BuildDuckTyped: Creates a duck-typed build"/>
-		<echo message="Zip: Creates a zipped build."/>
-		<echo message="ZipDuckTyped: Creates a zipped duck-typed build."/>
-		<echo message="ZipNightly: Creates a zipped nightly build."/>
-		<echo message="Ftp-ZipNightly: Creates a zipped nightly build and uploads it to mach.com/nightly"/>
+		<echo message="Build"/>
+		<echo message=" - Creates a build of the framework"/>
+		<echo message="BuildDuckTyped"/>
+		<echo message=" - Creates a duck-typed version build of the framework"/>
+		<echo message="Zip"/>
+		<echo message=" - Creates a zipped build of the framework"/>
+		<echo message="ZipDuckTyped"/>
+		<echo message=" - Creates a duck-typed zipped build of the framework"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Remaing targets are private targets that other targets depend on or are for use by Team Mach-II."/>
 	</target>
 	
 	<target name="clean">
@@ -196,14 +201,21 @@ Notes:
 		<echo message="Building nightly zip"/>
 		<echo message="---------------------------------------------"/>
 		<mkdir dir="${zip}"/>
+		<mkdir dir="${zip}/older/"/>
 		<tstamp>
 			<format property="formattedDatetime" pattern="yyyy-MM-dd_HH-mm-ss"/>
 		</tstamp>
-		<zip destfile="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
+		<zip destfile="${zip}/older/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
 			basedir="${dest}"/>
-		<checksum file="${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"/>
+		<checksum file="${zip}/older/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"/>
 		<echo message="---------------------------------------------"/>
 		<echo message="Created zip located at'${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip'"/>
+		<echo message="---------------------------------------------"/>
+		<zip destfile="${zip}/MachII_${majorVersion}_nightly.zip"
+					basedir="${dest}"/>
+		<checksum file="${zip}/MachII_${majorVersion}_nightly.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created generically named zip located at'${zip}/MachII_${majorVersion}_nightly.zip'"/>
 		<echo message="---------------------------------------------"/>
 	</target>
 	
@@ -223,7 +235,21 @@ Notes:
 			action="put"
 			remotedir="${ftp.nightly.dir}"
 			verbose="${debug}">
-			<fileset refid="ftp.nightly.fileset"/>
+			<fileset dir="${zip}">
+				<include name="*.zip"/>
+				<include name="*.zip.MD5"/>
+			</fileset>
+		</ftp>
+		<ftp server="${ftp.server}"
+			userid="${ftp.user}"
+			password="${ftp.password}"
+			action="put"
+			remotedir="${ftp.nightly.dir}/older/"
+			verbose="${debug}">
+			<fileset dir="${zip}/older/">
+				<include name="*.zip"/>
+				<include name="*.zip.MD5"/>
+			</fileset>
 		</ftp>
 	</target>
 	
