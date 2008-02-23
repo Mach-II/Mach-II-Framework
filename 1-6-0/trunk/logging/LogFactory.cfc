@@ -119,7 +119,7 @@ do not have any adapters.
 	<cffunction name="putToCache" access="private" returntype="void" output="false"
 		hint="Puts a log into the cache.">
 		<cfargument name="channel" type="string" required="true" />
-		<cfargument name="log" type="Log" required="true" />
+		<cfargument name="log" type="MachII.logging.Log" required="true" />
 		<cfset variables.logCache[createChannelHash(arguments.channel)] = arguments.log />
 	</cffunction>
 	
