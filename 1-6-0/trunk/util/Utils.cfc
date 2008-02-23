@@ -120,7 +120,7 @@ Notes:
 		<cfreturn resolvedPath />
 	</cffunction>
 
-	<cffunction name="createThreadingAdapter" access="public" returntype="any" output="false"
+	<cffunction name="createThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false"
 		hint="Creates a threading adapter if the ColdFusion engine has threading capabilities.">
 		
 		<cfset var threadingAdapter = "" />
