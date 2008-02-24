@@ -66,27 +66,26 @@ Notes:
 		<cfset var continue = true />
 		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
-		<!--- <cfset var log = getLog() /> --->
-		
+				
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT Len(getCondition())>
-			<!--- <cfif log.isDebugEnabled()>
-				<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
-			</cfif> --->
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (no condition to evaluate).") />
+			</cfif>
 			<cfset clearCache = true />
 		<cfelseif evaluate(getCondition())>
-			<!--- <cfif log.isDebugEnabled()>
-				<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
-			</cfif> --->
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated true).") />
+			</cfif>
 			<cfset clearCache = true />
 		<cfelse>
-			<!--- <cfif log.isDebugEnabled()>
-				<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
-			</cfif> --->
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cannot clear cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated false).") />
+			</cfif>
 		</cfif>
 		
 		<cfif clearCache>
-			<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
+			<cfset cacheManager.clearCachesByName(getCacheName(), arguments.event, getCriteria()) />
 		</cfif>
 		
 		<cfreturn continue />

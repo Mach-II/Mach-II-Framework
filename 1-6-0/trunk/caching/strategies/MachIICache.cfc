@@ -28,7 +28,7 @@ Notes:
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
 	hint="A default caching strategy.">
-	
+	<!--- TODO: rename to TimeSpanCache --->
 	<!---
 	PROPERTIES
 	--->
@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.cacheForUnit = "hours" />
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = createUUID() />
+	<cfset variables.utils = createObject("component", "MachII.util.Utils").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -60,37 +61,36 @@ Notes:
 	--->
 	<cffunction name="put" access="public" returntype="void" output="false"
 		hint="Puts data into the cache by key.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 		<cfargument name="data" type="any" required="true" />
 
 		<cfset var cache = getCacheScope() />
+		<cfset var hashedKey = hashKey(arguments.key) />
 		
-		<!--- TODO: I think the cache key should be run through hash()
-			as it may contain illegal characters that cannot be used in a struct key
-			name.--->
-		<cfif NOT StructKeyExists(cache, arguments.key)>
-			<cfset cache[arguments.key] = StructNew() />
-			<cfset getCacheStats().totalElements = getCacheStats().totalElements + 1 />
-			<cfset getCacheStats().activeElements = getCacheStats().activeElements + 1 />
+		<cfif NOT StructKeyExists(cache, hashedKey)>
+			<cfset cache[hashedKey] = StructNew() />
+			<cfset getCacheStats().incrementTotalElements(1) />
+			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
-		<cfset cache[arguments.key].data = arguments.data />
-		<cfset cache[arguments.key].timestamp = Now() />
+		<cfset cache[hashedKey].data = arguments.data />
+		<cfset cache[hashedKey].timestamp = Now() />
 		<cfset setCacheScope(cache) />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
-		hint="Gets data from the cache by key. Throws an exception if the key is not available.">
-		<cfargument name="key" type="string" required="true" />
+		hint="Gets data from the cache by key. Returns null if the key isn't in the cache.">
+		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
 		<cfset var cache = getCacheScope() />
-
-		<cfif StructKeyExists(cache, arguments.key) AND StructKeyExists(cache[arguments.key], "data")>
-			<cfset getCacheStats().cacheHits = getCacheStats().cacheHits + 1 />
-			<cfreturn cache[arguments.key].data />
+		<cfset var hashedKey = hashKey(arguments.key) />
+		
+		<cfset reap() />
+		
+		<cfif keyExists(arguments.key)>
+			<cfset getCacheStats().incrementCacheHits(1) />
+			<cfreturn cache[hashedKey].data />
 		<cfelse>
-			<cfset getCacheStats().cacheMisses = getCacheStats().cacheMisses + 1 />
-			<cfthrow type="MachII.caching.strategies.MachIICache"
-				message="The key '#arguments.key#' does not exist in the cache." />
+			<cfset getCacheStats().incrementCacheMisses(1) />
 		</cfif>
 	</cffunction>
 	
@@ -105,16 +105,14 @@ Notes:
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checkes if a key exists in the cache.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
 		<cfset var cache = getCacheScope() />
-		<cfset var findKey = StructKeyExists(cache, arguments.key) />
+		<cfset var hashedKey = hashKey(arguments.key) />
+		<cfset var findKey = StructKeyExists(cache, hashedKey) />
 
-		<cfif NOT findKey OR DateCompare(cache[arguments.key].timestamp, computeCacheUntilTimestamp()) GTE 0>
+		<cfif NOT findKey OR DateCompare(cache[hashedKey].timestamp, computeCacheUntilTimestamp()) GTE 0>
 			<cfset remove(arguments.key) />
-			<!--- TODO: is it ok to call this a cache miss?
-			pjf - I don't think it's a miss since we're only checking to see if it's there --->
-			<cfset getCacheStats().cacheMisses = getCacheStats().cacheMisses + 1 />
 			<cfreturn false />
 		<cfelse>
 			<cfreturn true />
@@ -123,33 +121,33 @@ Notes:
 	
 	<cffunction name="remove" access="public" returntype="void" output="false"
 		hint="Removes data from the cache by key.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
 		<cfset var cache = getCacheScope() />
+		<cfset var hashedKey = hashKey(arguments.key) />
 
-		<cfif StructKeyExists(cache, arguments.key)>
-			<cfset StructDelete(cache, arguments.key) />
-			<!--- TODO: pjf - I think we should have a increment/decrement methods in the stats
-				with locks otherwise data could be funky if called concurrently
-				Also, this would let us not use the 'this' scope in the stats cfc --->
-			<cfset getCacheStats().evictions = getCacheStats().evictions + 1 />
-			<cfset getCacheStats().totalElements = getCacheStats().totalElements - 1 />
-			<cfset getCacheStats().activeElements = getCacheStats().activeElements - 1 />
+		<cfif StructKeyExists(cache, hashedKey)>
+			<cfset StructDelete(cache, hashedKey) />
+			<cfset getCacheStats().incrementEvictions(1) />
+			<cfset getCacheStats().decrementTotalElements(1) />
+			<cfset getCacheStats().decrementActiveElements(1) />
 		</cfif>
-		
-		<!--- TODO: pjf - is this necessary? Structs are accessed by reference so the struct delete should update
-		the cache --->
-		<cfset setCacheScope(cache) />
 	</cffunction>
 	
-	<!--- TODO: pj - do we need a reap method that looks at the timestamps of the cache pieces
-	and throws out old ones? Could use the cfthreading adapter to do this asyncronisely
-	<cffunction name="reap">
-	 --->
+	<cffunction name="reap" access="private" returntype="void" output="false">
+		<!--- TODO: pj - do we need a reap method that looks at the timestamps of the cache pieces
+		and throws out old ones? Could use the cfthreading adapter to do this asyncronisely --->
+	</cffunction>
+	 
 	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="hashKey" access="private" returntype="string" output="false">
+		<cfargument name="key" type="string" required="true" />
+		<cfreturn Hash(UCase(arguments.key)) />
+	</cffunction>
+	
 	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
 		hint="Computes a cache until timestamp for this cache block.">
 		

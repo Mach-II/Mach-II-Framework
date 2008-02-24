@@ -40,6 +40,7 @@ Notes:
 	<cfset variables.parentHandlerType = "" />
 	<cfset variables.cacheStrategy = 0 />
 	<cfset variables.cacheOutputBuffer = "" />
+	<cfset variables.log = 0 />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -76,9 +77,12 @@ Notes:
 		<cfset var command = "" />
 		<cfset var i = 0 />
 		<cfset var key = getKeyFromCriteria(arguments.criteria, event) />
+		<cfset var dataFromCache = getCacheData(key) />
+		
+		<!--- TODO: Change so that data and output are stored in the same key in the cache --->
 		
 		<!--- Create the cache since we do not have one --->
-		<cfif NOT useCache(key)>
+		<cfif NOT IsDefined("dataFromCache")>
 			<!--- Run commands and save output to the buffer --->
 			<cfsavecontent variable="outputBuffer">
 				<cfloop index="i" from="1" to="#ArrayLen(variables.commands)#">
@@ -97,7 +101,7 @@ Notes:
 			<cfoutput>#outputBuffer#</cfoutput>
 		<cfelse>
 			<!--- Replay the event from the cache --->
-			<cfset arguments.event.setArgs(getCacheData(key)) />
+			<cfset arguments.event.setArgs(dataFromCache) />
 			<cfoutput>#getCacheOutputBuffer(key)#</cfoutput>
 		</cfif>
 		
@@ -128,12 +132,6 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="useCache" access="private" returntype="boolean" output="false"
-		hint="Checks if the cache should be used.">
-		<cfargument name="key" type="string" required="true" />
-		<cfreturn getCacheStrategy().keyExists(key) />
-	</cffunction>
-	
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false">
 		<cfargument name="criteria" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -210,7 +208,8 @@ Notes:
 		<cfargument name="cacheData" type="struct" required="true" />
 		<cfset getCacheStrategy().put(arguments.key, arguments.cacheData) />
 	</cffunction>
-	<cffunction name="getCacheData" access="public" returntype="struct" output="false">
+	<cffunction name="getCacheData" access="public" returntype="any" output="false" 
+		hint="Return type is any since it might return null if the key is not in the cache">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn getCacheStrategy().get(arguments.key) />
 	</cffunction>
@@ -223,6 +222,16 @@ Notes:
 	<cffunction name="getCacheOutputBuffer" access="public" returntype="string" output="false">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn getCacheStrategy().get(arguments.key & "_output") />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 	
 </cfcomponent>

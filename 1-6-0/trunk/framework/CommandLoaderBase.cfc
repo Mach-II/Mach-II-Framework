@@ -101,6 +101,7 @@ Notes:
 		<cfset var cacheAlias = "" />
 		<cfset var handlerId = "" />
 		<cfset var criteria = "" />
+		<cfset var cacheName = "" />
 		
 		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(commandNode, parentHandlerName, parentHandlerType) />
 		
@@ -111,9 +112,13 @@ Notes:
 			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
 			</cfif>
+			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
+				<cfset criteria = arguments.commandNode.xmlAttributes["cacheName"] />
+			</cfif>
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheAlias, criteria) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheName, cacheAlias, criteria) />
+		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -145,6 +150,7 @@ Notes:
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
 			cacheName, cacheAlias, cacheCondition, criteria) />
+		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
 	</cffunction>

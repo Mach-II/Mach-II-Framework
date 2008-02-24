@@ -77,6 +77,7 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var i = 0 />
 		
+		<!--- Currently alias is not implemented --->
 		<cfif StructKeyExists(arguments.xml.xmlAttributes, "alias")>
 			<cfset alias = arguments.xml.xmlAttributes["alias"] />
 		</cfif>
@@ -90,6 +91,7 @@ Notes:
 		<!--- Build the cache handler --->
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
 			alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
+		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
 			<cfset command = createCommand(nestedCommandNodes[i]) />
 			<cfset cacheHandler.addCommand(command) />
@@ -108,7 +110,7 @@ Notes:
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
-		<cfloop list="#structKeyList(variables.handlers)#" index="handlerId">
+		<cfloop collection="#variables.handlers#" item="handlerId">
 			<cfset variables.handlers[handlerId].setCacheStrategy(
 				getCacheStrategyByName(variables.handlers[handlerId].getCacheName())) />
 		</cfloop>
@@ -124,6 +126,7 @@ Notes:
 
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
 		<cfset var alias = arguments.cacheHandler.getAlias() />
+		<cfset var cacheName = arguments.cacheHandler.getCacheName() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 
 		<!--- Add the handler --->
@@ -135,6 +138,8 @@ Notes:
 		<cfelseif handlerType EQ "subroutine">
 			<cfset variables.handlersBySubroutineName[handlerId][Hash(arguments.cacheHandler.getParentHandlerName())] = true />
 		</cfif>
+		
+		<cfset variables.handlersByName[Hash(cacheName)] = handlerId />
 		
 		<!--- Register the alias if defined --->
 		<cfif Len(alias)>
@@ -172,6 +177,9 @@ Notes:
 		<cfelseif handlerType EQ "subroutine">
 			<cfset StructDelete(variables.handlersBySubroutineName[handlerId], Hash(arguments.cacheHandler.getParentHandlerName()), true) />
 		</cfif>
+		
+		<!--- Remove from cache name list --->
+		<cfset StructDelete(variables.handlersByName, Hash(cacheName)) />
 		
 		<!--- Unregister the alias if defined --->
 		<cfif Len(alias)>
@@ -214,6 +222,8 @@ Notes:
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var i = 0 />
 		
+		<!--- Currently alias is no longer used --->
+		
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
 		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
 			<cfset cacheHandlers = variables.handlersByAliases[Hash(arguments.alias)] />
@@ -221,6 +231,22 @@ Notes:
 			<cfloop collection="#cacheHandlers#" item="i">
 				<cfset getCacheHandler(i).clearCache(event, criteria) />
 			</cfloop>
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="clearCacheByName" access="public" returntype="void" output="false"
+		hint="Clears caches by cacheName.">
+		<cfargument name="cacheName" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
+		
+		<cfset var handlerId = "" />
+		<cfset var i = 0 />
+		
+		<!--- Only try to clear if there are cache handlers that are registered with this cacheName --->
+		<cfif StructKeyExists(variables.handlersByName, Hash(arguments.cacheName))>
+			<cfset handlerId = variables.handlersByName[Hash(arguments.cacheName)] />
+			<cfset getCacheHandler(handlerId).clearCache(event, criteria) />
 		</cfif>
 	</cffunction>
 	

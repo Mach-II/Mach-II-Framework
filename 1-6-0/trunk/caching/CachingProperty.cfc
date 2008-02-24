@@ -126,6 +126,7 @@ See individual caching strategies for more information on configuration.
 		
 		<!--- Create the adapter --->
 		<cfset strategy = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />
+		<cfset strategy.setLog(getAppManager().getLogFactory()) />
 		<cfset strategy.configure() />
 		
 		<!--- Set the strategy to the CacheManager --->

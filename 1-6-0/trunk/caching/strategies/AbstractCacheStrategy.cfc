@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.cacheStats = createObject("component", "MachII.caching.CacheStats").init() />
+	<cfset variables.log = 0 />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -66,6 +67,10 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="flush" access="public" returntype="void" output="false">
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+	
+	<cffunction name="reap" access="public" returntype="void" output="false">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
@@ -129,6 +134,16 @@ Notes:
 	<cffunction name="getParameters" access="public" returntype="struct" output="false"
 		hint="Gets the full set of configuration parameters for the component.">
 		<cfreturn variables.parameters />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 	
 </cfcomponent>

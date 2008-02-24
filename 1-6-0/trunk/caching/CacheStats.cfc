@@ -41,19 +41,12 @@ Cache evictions - number of elements that the cache removed to make room for new
 	<!---
 	PROPERTIES
 	--->
-	<cfproperty name="cacheHits" type="numeric" />
-	<cfproperty name="cacheMisses" type="numeric" />
-	<cfproperty name="activeElements" type="numeric" />
-	<cfproperty name="totalElements" type="numeric" />
-	<cfproperty name="evictions" type="numeric" />
-
-	<cfset this.cacheHits = 0 />
-	<cfset this.cacheMisses = 0 />
-	<cfset this.activeElements = 0 />
-	<cfset this.totalElements = 0 />
-	<cfset this.evictions = 0 />
-	
 	<cfset variables.extraStats = structNew() />
+	<cfset variables.cacheHits = 0 />
+	<cfset variables.cacheMisses = 0 />
+	<cfset variables.activeElements = 0 />
+	<cfset variables.totalElements = 0 />
+	<cfset variables.evictions = 0 />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -75,9 +68,6 @@ Cache evictions - number of elements that the cache removed to make room for new
 		<cfset variables.extraStats[statName] = statValue />
 	</cffunction>
 	
-	<!--- <cfset variables.cacheHits = 0 />
-	<cfset variables.cacheMisses = 0 />
-
 	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1">
 		<cfset variables.cacheHits = variables.cacheHits + arguments.amount />
@@ -92,6 +82,46 @@ Cache evictions - number of elements that the cache removed to make room for new
 	</cffunction>
 	<cffunction name="getcacheMisses" access="public" returntype="numeric" output="false">
 		<cfreturn variables.cacheMisses />
-	</cffunction> --->
+	</cffunction>
+	
+	<cffunction name="incrementEvictions" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1">
+		<cfset variables.evictions = variables.evictions + arguments.amount />
+	</cffunction>
+	<cffunction name="getEvictions" access="public" returntype="numeric" output="false">
+		<cfreturn variables.evictions />
+	</cffunction>
+	
+	<cffunction name="incrementTotalElements" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1">
+		<cfset variables.totalElements = variables.totalElements + arguments.amount />
+	</cffunction>
+	<cffunction name="decrementTotalElements" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1">
+		<cfset variables.totalElements = variables.totalElements - arguments.amount />
+	</cffunction>
+	<cffunction name="getTotalElements" access="public" returntype="numeric" output="false">
+		<cfreturn variables.totalElements />
+	</cffunction>
+	<cffunction name="setTotalElements" access="public" returntype="numeric" output="false">
+		<cfargument name="totalElements" type="numeric" required="true" />
+		<cfset variables.totalElements = arguments.totalElements />
+	</cffunction>
+	
+	<cffunction name="incrementActiveElements" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1">
+		<cfset variables.activeElements = variables.activeElements + arguments.amount />
+	</cffunction>
+	<cffunction name="decrementActiveElements" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1">
+		<cfset variables.activeElements = variables.activeElements - arguments.amount />
+	</cffunction>
+	<cffunction name="getActiveElements" access="public" returntype="numeric" output="false">
+		<cfreturn variables.activeElements />
+	</cffunction>
+	<cffunction name="setActiveElements" access="public" returntype="numeric" output="false">
+		<cfargument name="activeElements" type="numeric" required="true" />
+		<cfset variables.activeElements = arguments.activeElements />
+	</cffunction>
 
 </cfcomponent>
