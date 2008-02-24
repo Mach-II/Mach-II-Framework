@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
+Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id: CacheManager.cfc 595 2007-12-17 02:39:01Z kurtwiersma $
 
 Created version: 1.6.0
