@@ -46,7 +46,6 @@ Notes:
 	--->
 	<cffunction name="run" access="public" returntype="void" output="false"
 		hint="Runs a thread.">
-		<cfargument name="threadIds" type="struct" required="true" />
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />

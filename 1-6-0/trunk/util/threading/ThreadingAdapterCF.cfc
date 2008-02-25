@@ -45,18 +45,14 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="run" access="public" returntype="void" output="false"
+	<cffunction name="run" access="public" returntype="string" output="false"
 		hint="Runs a thread.">
-		<cfargument name="threadIds" type="struct" required="true" />
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
 		
 		<cfset var threadId = createThreadId() />
 		<cfset var collection = { action="run", name=threadId, threadId=threadId } />
-		
-		<!--- Set the thread id to the thread ids (passed by reference) --->
-		<cfset arguments.threadIds[threadId] = "" />
 		
 		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the even to the thread) --->
 		<cfset request._MachIIThreadingAdapter[threadId] = { component=arguments.callback, method=arguments.method, argumentCollection=arguments.parameters } />
@@ -72,16 +68,30 @@ Notes:
 				</cfcatch>
 			</cftry>
 		</cfthread>
+		
+		<cfreturn threadId />
 	</cffunction>
 	
 	<cffunction name="join" access="public" returntype="any" output="false"
 		hint="Joins a group of threads.">
-		<cfargument name="threadIds" type="struct" required="true" />
+		<cfargument name="threadIds" type="any" required="true"
+			hint="A list, struct or array of thread ids to join." />
 		<cfargument name="timeout" type="numeric" required="true" />
 		
-		<cfset var collection = { action="join", name=StructKeyList(arguments.threadIds) } />
+		<cfset var collection = StructNew() />
 		<cfset var error = "" />
 		<cfset var i = "" />
+		
+		<cfset collection.action = "join" />
+		
+		<!--- Convert the thread ids into a list --->
+		<cfif IsStruct(arguments.threadIds)>
+			<cfset collection.name = StructKeyList(arguments.threadIds) />
+		<cfelseif IsArray(arguments.threadIds)>
+			<cfset collection.name = ArrayToList(arguments.threadIds) />
+		<cfelse>
+			<cfset collection.name = arguments.threadIds />
+		</cfif>
 		
 		<!--- ColdFusion 8 does not allow a timeout="0" --->
 		<cfif arguments.timeout GT 0>
@@ -92,10 +102,10 @@ Notes:
 		<cfthread attributeCollection="#collection#" />
 		
 		<!--- Check for unhandled errors in the threads --->
-		<cfloop collection="#arguments.threadIds#" item="i">
+		<cfloop list="#collection.name#" index="i">
 			<!--- Check if the thread was terminated and return the error to be handled --->
 			<cfif cfthread[i].status is "terminated">
-				<cfset error = cfthread[i].error />
+				<cfset error = cfthread[collection.name[i]].error />
 				<cfbreak />
 			</cfif>
 		</cfloop>

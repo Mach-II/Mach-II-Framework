@@ -70,7 +70,7 @@ Notes:
 		
 		<cfset var invokers = getMessageSubscriberInvokers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
-		<cfset var threadIds = StructNew() />
+		<cfset var threadIds = ArrayNew(1) />
 		<cfset var publishThreadIdsInEvent = arguments.event.getArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
 		<cfset var error = "" />
@@ -91,7 +91,7 @@ Notes:
 			
 			<!--- Run all the threads --->
 			<cfloop collection="#invokers#" item="i">
-				<cfset threadingAdapter.run(threadIds, invokers[i], "invokeListener", parameters) />
+				<cfset ArrayAppend(threadIds, threadingAdapter.run(invokers[i], "invokeListener", parameters)) />
 			</cfloop>
 			
 			<!--- Wait and join --->
