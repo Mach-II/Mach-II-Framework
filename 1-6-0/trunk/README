@@ -19,6 +19,11 @@ web-applications.  The framework focuses on easing software development and
 maintenance.  Mach-II was the first object-oriented framework for ColdFusion 
 and continues to mature as a strong and viable framework choice for developers.
 
+The framework core is not a stand-alone application.  Do not expect to run the
+mach-ii.cfm and expect a "welcome" message. Download the Mach-II Skeleton
+available at mach-ii.com to start a new application or download a sample
+application.
+
 ------------------------------------------------
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
@@ -91,7 +96,7 @@ If you encounter problems:
 2.	Clear your template cache if you have caching on and restart your ColdFusion 
 	Application Server service.
 
-3.	If problems persist, please check out the Mach-II for ColdFusion Google Group:
+3.	If your problems persist, please check out the Mach-II for ColdFusion Google Group:
 	http://groups.google.com/group/mach-ii-for-coldfusion
 
 ------------------------------------------------                                       
