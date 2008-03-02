@@ -63,6 +63,7 @@ See that file header for configuration of filter criteria.
 	--->
 	<cfset variables.loggerType = "Mach-II Log" />
 	<cfset variables.onRequestEndAvailable = true />
+	<cfset variables.prePostRedirectAvailable = true />
 	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
@@ -108,10 +109,34 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled()>
-			<cfset data = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+			<cfset data = scope[getLoggingPath()].data />
 			
 			<cfinclude template="#getDisplayOutputTemplateFile()#" />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="preRedirect" access="public" returntype="void" output="false"
+		hint="Pre-redirect logic for this logger.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+			<cfset data["machiilogger"] = scope[getLoggingPath()] />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="postRedirect" access="public" returntype="void" output="false"
+		hint="Post-redirect logic for this logger.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+			<cfset scope[getLoggingPath()].data = arrayConcat(data["machiilogger"].data, scope[getLoggingPath()].data) />
 		</cfif>
 	</cffunction>
 	
@@ -161,6 +186,21 @@ See that file header for configuration of filter criteria.
 		</cfswitch>
 		
 		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
+	</cffunction>
+	
+	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
+		hint="Concats two arrays together.">
+		<cfargument name="array1" type="array" required="true" />
+		<cfargument name="array2" type="array" required="true" />
+		
+		<cfset var result = arguments.array1 />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.array2)#" index="i">
+			<cfset ArrayAppend(result, arguments.array2[i]) />
+		</cfloop>
+		
+		<cfreturn result />
 	</cffunction>
 	
 	<!---

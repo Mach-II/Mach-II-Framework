@@ -137,6 +137,10 @@ will bind to root parameter values.
 		<!--- Add callback to the RequestManager to the onRequestEnd method --->
 		<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
 
+		<!--- Add a callbacks to the RequestManager for pre/postRedirect methods --->
+		<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
+		<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
+
 		<!--- Set the logger --->
 		<cfset addLogger("logger", logger) />
 	</cffunction>
@@ -169,6 +173,12 @@ will bind to root parameter values.
 		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 		<cfif logger.isOnRequestEndAvailable()>
 			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
+		</cfif>
+		
+		<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
+		<cfif logger.isPrePostRedirectAvailable()>
+			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
+			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
 		</cfif>
 		
 		<!--- Add the logger --->

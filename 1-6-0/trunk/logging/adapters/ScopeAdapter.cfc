@@ -253,8 +253,9 @@ Configuration Example:
 		<!--- Filter the message by channel --->
 		<cfif NOT isFilterDefined() OR getFilter().decide(arguments)>		
 			<!--- See if we need to create a place to put the log messages --->
-			<cfif NOT IsDefined(getLoggingScope() & "." & getLoggingPath())>
-				<cfset scope[getLoggingPath()] = ArrayNew(1) />
+			<cfif NOT IsDefined(getLoggingScope() & "." & getLoggingPath() & ".data")>
+				<cfset scope[getLoggingPath()] = StructNew() />
+				<cfset scope[getLoggingPath()].data = ArrayNew(1) />
 			</cfif>
 			
 			<cfset entry.channel = arguments.channel />
@@ -268,7 +269,7 @@ Configuration Example:
 				<cfset entry.caughtException = "" />
 			</cfif>
 			
-			<cfset ArrayAppend(scope[getLoggingPath()], entry) />
+			<cfset ArrayAppend(scope[getLoggingPath()].data, entry) />
 		</cfif>
 	</cffunction>
 	

@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.loggerType = "undefined" />
 	<cfset variables.onRequestEndAvailable = false />
+	<cfset variables.prePostRedirectAvailable = false />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
@@ -60,9 +61,23 @@ Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="onRequestEnd" access="public" returntype="void" 
-		hint="On request end for this logger. Override to provide custom on request end logic.">
+		hint="On request end logic for this logger. Override to provide custom on request end logic.">
 		<!--- Note that leaving off the 'output' attribute requires all output to be
 			surrounded by cfoutput tags --->
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+	
+	<cffunction name="preRedirect" access="public" returntype="void" output="false"
+		hint="Pre-redirect logic for this logger. Override to provide custom pre-redirect logic.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+
+	<cffunction name="postRedirect" access="public" returntype="void" output="false"
+		hint="Post-redirect logic for this logger. Override to provide custom post-redirect logic.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 
@@ -72,6 +87,11 @@ Notes:
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
 		<cfreturn variables.onRequestEndAvailable />
+	</cffunction>
+	
+	<cffunction name="isPrePostRedirectAvailable" access="public" returntype="boolean" output="false"
+		hint="Checks if pre/post-redirect methods are available.">
+		<cfreturn variables.prePostRedirectAvailable />
 	</cffunction>
 	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"

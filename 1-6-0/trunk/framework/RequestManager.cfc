@@ -33,8 +33,6 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.requestHandler = "" />
-	<cfset variables.redirectPersistParameter = "" />
-	<cfset variables.redirectPersistScope = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.parameterPrecedence = "" />
@@ -44,8 +42,10 @@ Notes:
 	<cfset variables.pairDelimiter = "" />
 	<cfset varibales.moduleDelimiter = "" />
 	<cfset variables.maxEvents = 0 />
-	<cfset variables.cleanupDifference = -3 />
 	<cfset variables.onRequestEndCallbacks = ArrayNew(1) />
+	<cfset variables.preRedirectCallbacks = ArrayNew(1) />
+	<cfset variables.postRedirectCallbacks = ArrayNew(1) />
+	<cfset variables.requestRedirectPersist = "" />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -61,9 +61,7 @@ Notes:
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<!--- Setup defaults --->
-		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	
-		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
-		<cfset setRedirectPersistScope(getPropertyManager().getProperty("redirectPersistScope")) />
+		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	s
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
@@ -75,6 +73,9 @@ Notes:
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
+		
+		<!--- Setup the RequestRedirectPersist --->
+		<cfset setRequestRedirectPersist(CreateObject("component", "MachII.framework.RequestRedirectPersist").init(arguments.appManager)) />
 
 		<cfreturn this />
 	</cffunction>
@@ -207,53 +208,45 @@ Notes:
 		hint="Gets a persisted event by id if found in event args.">
 		<cfargument name="eventArgs" type="struct" required="true" />
 		
-		<cfset var persistId = "" />
-		<cfset var persistedData = StructNew() />
-		<cfset var dataStorage = "" />
-		<cfset var key = "" />
-		<cfset var log = getLog() />
+		<cfset var data = getRequestRedirectPersist().read(arguments.eventArgs) />
+		<cfset var postRedirectCallbacks = getPostRedirectCallbacks() />
+		<cfset var i = "" />
 		
-		<!--- Check they have a persistId in the event --->
-		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
-			<cfset persistId = arguments.eventArgs[getRedirectPersistParameter()] />
-			<cfset dataStorage = getPersistEventStorage() />
+		<!--- If there is data, run post-redirect callbacks --->
+		<cfif StructCount(data)>
 			
-			<!--- Get the data and cleanup --->
-			<cfif StructKeyExists(dataStorage.data, persistId)>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.") />
-				</cfif>
-				
-				<cftry>
-					<!--- Get the data and delete it from the dataStorage --->
-					<cfset persistedData = dataStorage.data[persistId]>
-					<cfset StructDelete(dataStorage.data, persistId, false) />
-					<cfset key = StructFindValue(dataStorage.timestamps, persistId, "one") />
-					<cfset StructDelete(dataStorage.timestamps, key[1].key, false) />
-					<cfcatch type="any">
-						<!--- Ingore this error --->
-					</cfcatch>
-				</cftry>
-			</cfif>
+			<cfloop from="1" to="#ArrayLen(postRedirectCallbacks)#" index="i">
+				<cfinvoke component="#postRedirectCallbacks[i].callback#"
+					method="#postRedirectCallbacks[i].method#">
+					<cfinvokeargument name="data" value="#data#" />
+				</cfinvoke>
+			</cfloop>
+			
+			<cfreturn data.eventArgs />	
+		<cfelse>
+			<cfreturn data />
 		</cfif>
-		
-		<cfreturn persistedData />
 	</cffunction>
 	
 	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
 		hint="Saves persisted event data and returns the persistId.">
 		<cfargument name="eventArgs" type="struct" required="true" />
 		
-		<cfset var persistId = createPersistId() />
-		<cfset var timestamp = createTimestamp() />
-		<cfset var dataStorage = getPersistEventStorage() />
+		<cfset var persistId = "" />
+		<cfset var data = StructNew() />
+		<cfset var preRedirectCallbacks = getPreRedirectCallbacks() />
+		<cfset var i = "" />
 		
-		<!--- Do cleanup --->
-		<cfset cleanupPersistEventStorage() />
+		<cfloop from="1" to="#ArrayLen(preRedirectCallbacks)#" index="i">
+			<cfinvoke component="#preRedirectCallbacks[i].callback#"
+				method="#preRedirectCallbacks[i].method#">
+				<cfinvokeargument name="data" value="#data#" />
+			</cfinvoke>
+		</cfloop>
 		
-		<!--- Save the data/timestamp --->
-		<cfset dataStorage.data[persistId] = arguments.eventArgs />
-		<cfset dataStorage.timestamps[timestamp & "_" & persistId] = persistId />
+		<cfset data.eventArgs = arguments.eventArgs />
+		
+		<cfset persistId = getRequestRedirectPersist().save(data) />
 		
 		<cfreturn persistId />
 	</cffunction>
@@ -267,6 +260,28 @@ Notes:
 	<cffunction name="getOnRequestEndCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the on request end callbacks.">
 		<cfreturn variables.onRequestEndCallbacks />
+	</cffunction>
+	
+	<cffunction name="addPreRedirectCallback" access="public" returntype="void" output="false"
+		hint="Adds a pre-redirect callback to be run before a redirect occurs.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.preRedirectCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="getPreRedirectCallbacks" access="public" returntype="array" output="false"
+		hints="Gets the pre-redirect callbacks.">
+		<cfreturn variables.preRedirectCallbacks />
+	</cffunction>
+
+	<cffunction name="addPostRedirectCallback" access="public" returntype="void" output="false"
+		hint="Adds a post-redirect callback to be run after a redirect occurs.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.postRedirectCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="getPostRedirectCallbacks" access="public" returntype="array" output="false"
+		hints="Gets the post-redirect callbacks.">
+		<cfreturn variables.postRedirectCallbacks />
 	</cffunction>
 
 	<!---
@@ -301,93 +316,6 @@ Notes:
 		<cfreturn params />
 	</cffunction>
 	
-	<cffunction name="getPersistEventStorage" access="private" returntype="struct" output="false"
-		hint="Helper function to get the event data store for persists.">
-		
-		<cfset var scope = "" />
-		
-		<!--- Select the right scope --->
-		<cfif getRedirectPersistScope() EQ "application">
-			<cfset scope = StructGet("application") />
-		<cfelseif  getRedirectPersistScope() EQ "session">
-			<cfset scope = StructGet("session") />
-		<cfelseif getRedirectPersistScope() EQ "server">
-			<cfset scope = StructGet("server") />
-		<cfelse>
-			<cfthrow type="MachII.framework.UnsupportedRedirectPersistScope"
-				message="You can only use session, application or server scopes." />
-		</cfif>
-		
-		<!--- Double check lock if default structure is not defined --->
-		<cfif NOT StructKeyExists(scope, "_MachIIPersistEventStorage")>
-			<cflock name="_MachIIPersistEventStorageCreate" type="exclusive" timeout="5" throwontimeout="false">
-				<cfif NOT StructKeyExists(scope, "_MachIIPersistEventStorage")>
-					<cfset scope._MachIIPersistEventStorage = StructNew() />
-					<cfset scope._MachIIPersistEventStorage.data = StructNew() />
-					<cfset scope._MachIIPersistEventStorage.timestamps = StructNew() />
-					<cfset scope._MachIIPersistEventStorage.lastCleanup = createTimestamp() />
-				</cfif>
-			</cflock>
-		</cfif>
-		
-		<cfreturn scope._MachIIPersistEventStorage />		
-	</cffunction>
-	
-	<cffunction name="cleanupPersistEventStorage" access="private" returntype="void" output="false"
-		hint="Cleanups the persist event data storage.">
-		
-		<cfset var timestamp = createTimestamp() />
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
-		<cfset var dataStorage = getPersistEventStorage() />
-		<cfset var dataTimestampArray = "" />
-		<cfset var key = "" />
-		<cfset var i = "" />
-		
-		<!--- Do cleanup --->
-		<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
-			<cflock name="_MachIIPersistEventStorageCleanup" type="exclusive" timeout="5" throwontimeout="false">
-				<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
-					
-					<!--- Get array of timestamps and sort --->
-					<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
-					<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
-					
-					<!--- Cleanup --->
-					<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
-						<cftry>
-							<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
-								<!--- The order of the deletes is important as the timestamp may be
-									around, but the data already deleted --->
-								<cfset key = dataTimestampArray[i] />
-								<cfset StructDelete(dataStorage.timestamps, key, false) />
-								<cfset StructDelete(dataStorage.data, ListLast(key, "_"), false) />
-							<cfelse>
-								<cfbreak />
-							</cfif>
-							<cfcatch type="any">
-								<!--- Ingore this error --->
-							</cfcatch>
-						</cftry>
-					</cfloop>
-				</cfif>
-				
-				<!--- Reset the timestamp of the last cleanup --->
-				<cfset dataStorage.lastCleanup = timestamp />
-			</cflock>
-		</cfif>
-	</cffunction>
-	
-	<cffunction name="createPersistId" access="private" returntype="string" output="false"
-		hint="Creates a persistId for use.">
-		<cfreturn REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
-	</cffunction>
-	
-	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp for use.">
-		<cfargument name="time" type="date" required="false" default="#Now()#" />
-		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
@@ -405,22 +333,6 @@ Notes:
 	
 	<cffunction name="getUtils" access="private" returntype="MachII.util.Utils" output="false">
 		<cfreturn getAppManager().getUtils() />
-	</cffunction>
-	
-	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
-		<cfargument name="redirectPersistParameter" type="string" required="true" />
-		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
-	</cffunction>
-	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
-		<cfreturn variables.redirectPersistParameter />
-	</cffunction>
-
-	<cffunction name="setRedirectPersistScope" access="private" returntype="void" output="false">
-		<cfargument name="redirectPersistScope" type="string" required="true" />
-		<cfset variables.redirectPersistScope = arguments.redirectPersistScope />
-	</cffunction>
-	<cffunction name="getRedirectPersistScope" access="private" returntype="string" output="false">
-		<cfreturn variables.redirectPersistScope />
 	</cffunction>
 	
 	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
@@ -488,11 +400,19 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setMaxEvents" access="private" returntype="void" output="false">
-		<cfargument name="maxEvents" required="true" type="numeric" />
+		<cfargument name="maxEvents" type="numeric" required="true" />
 		<cfset variables.maxEvents = arguments.maxEvents />
 	</cffunction>
 	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
 		<cfreturn variables.maxEvents />
+	</cffunction>
+
+	<cffunction name="setRequestRedirectPersist" access="public" returntype="void" output="false">
+		<cfargument name="requestRedirectPersist" type="any" required="true" />
+		<cfset variables.requestRedirectPersist = arguments.requestRedirectPersist />
+	</cffunction>
+	<cffunction name="getRequestRedirectPersist" access="public" returntype="any" output="false">
+		<cfreturn variables.requestRedirectPersist />
 	</cffunction>
 
 	<cffunction name="setLog" access="private" returntype="void" output="false"

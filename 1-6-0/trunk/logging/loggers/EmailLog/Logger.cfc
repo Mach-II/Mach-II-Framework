@@ -73,6 +73,7 @@ See that file header for configuration of filter criteria.
 	--->
 	<cfset variables.loggerType = "Email Logger" />
 	<cfset variables.onRequestEndAvailable = true />
+	<cfset variables.prePostRedirectAvailable = true />
 	<cfset variables.emailTemplateFile = "/MachII/logging/loggers/EmailLog/defaultEmailTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
@@ -135,7 +136,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfset var body = "" />
 		<cfset var scope = StructGet(getLoggingScope()) />
-		<cfset var data = scope[getLoggingPath()] />
+		<cfset var data = scope[getLoggingPath()].data />
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled() AND ArrayLen(data)>
@@ -153,7 +154,49 @@ See that file header for configuration of filter criteria.
 			</cfif>
 		</cfif>
 	</cffunction>
-	
+
+	<cffunction name="preRedirect" access="public" returntype="void" output="false"
+		hint="Pre-redirect logic for this logger.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+			<cfset arguments.data["emailLogger"] = scope[getLoggingPath()] />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="postRedirect" access="public" returntype="void" output="false"
+		hint="Post-redirect logic for this logger.">
+		<cfargument name="data" type="struct" required="true"
+			hint="Redirect persist data struct." />
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+			<cfset scope[getLoggingPath()].data = arrayConcat(data["emailLogger"].data, scope[getLoggingPath()].data) />
+		</cfif>
+	</cffunction>
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
+		hint="Concats two arrays together.">
+		<cfargument name="array1" type="array" required="true" />
+		<cfargument name="array2" type="array" required="true" />
+		
+		<cfset var result = arguments.array1 />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.array2)#" index="i">
+			<cfset ArrayAppend(result, arguments.array2[i]) />
+		</cfloop>
+		
+		<cfreturn result />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
