@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Peter J. Farrell (pjf@maestropublishing.com)
+Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.1.1
