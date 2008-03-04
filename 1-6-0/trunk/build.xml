@@ -23,6 +23,7 @@ Requirements:
 - ANT 1.5+
 - Apache Net-Commons (if using FTP options)
 - SVNAnt task
+- MXUnit ANT task and MXUnit (if using testing options)
 
 Notes:
 
@@ -46,11 +47,14 @@ Notes:
 	<property name="ftp.server" value="mach-ii.com"/>
 	<property name="ftp.user" value="machii"/>
 	<property name="ftp.nightly.dir" value="/var/www/machii/m2website/public/nightly/"/>
+	
+	<property name="mxunit.output" value="./tests/output"/>
 
 	<!--
 	TASK DEFINITIONS
 	-->
 	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml"/>
+	<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask"/>
 	
 	<!--
 	TARGETS
@@ -93,12 +97,13 @@ Notes:
 			<fileset dir="${basedir}">
 				<exclude name="dest/"/>
 				<exclude name="zip/"/>
+				<exclude name="tests/output/"/>
 			</fileset>
 			<filterset begintoken="@" endtoken="@">
 				<filter token="minorVersion" value="${buildVersion}"/>
 			</filterset>
 		</copy>
-		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and README to .txt files for windows"/>
+		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and READMEs to .txt files for windows"/>
 		<copy file="${dest}/MachII/CHANGELOG"
 			tofile="${dest}/MachII/CHANGELOG.txt"
 			preservelastmodified="true"
@@ -113,6 +118,10 @@ Notes:
 			verbose="${debug}"/>
 		<copy file="${dest}/MachII/README"
 			tofile="${dest}/MachII/README.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/tests/README"
+			tofile="${dest}/MachII/tests/README.txt"
 			preservelastmodified="true"
 			verbose="${debug}"/>
 		<echo message="Built as version '${buildVersion}'"/>
@@ -153,9 +162,26 @@ Notes:
 		<echo message="Gettting last commit revision number"/>
 		<echo message="---------------------------------------------"/>
 		<svn>
-			<status path="${basedir}" lastChangedRevisionProperty="buildVersion" />
+			<status path="${basedir}" lastChangedRevisionProperty="buildVersion"/>
 		</svn>
 		<echo message="Last commit revision number #${buildVersion}"/>
+	</target>
+	
+	<target name="test">
+		<echo message="---------------------------------------------"/>
+		<echo message="Testing the framework"/>
+		<echo message="---------------------------------------------"/>
+		<mxunit server="localhost"
+			outputdir="${mxunit.output}"
+			verbose="${debug}"
+			haltonerror="true">
+			<testcase name="MachII.tests.caching.strategies.MachIICacheTest" />
+			<testcase name="MachII.tests.logging.LogTest" />
+			<!--
+			This does not work yet because the it appears not to recurse directories yet
+			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
+			-->
+		</mxunit>
 	</target>
 	
 	<target name="zip-init">
