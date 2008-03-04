@@ -39,7 +39,7 @@ it allows you attach multiple loggers at once.
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="package" returntype="Log" output="false"
+	<cffunction name="init" access="public" returntype="Log" output="false"
 		hint="Initializes the logging facade.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="logAdapters" type="struct" required="true" />
