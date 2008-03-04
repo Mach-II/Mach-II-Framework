@@ -26,7 +26,7 @@ Notes:
 <cfcomponent
 	displayname="MachIICacheTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for the Timespan Cache in Mach-II.">
+	hint="Test cases for MachII.caching.strategies.MachIICache.">
 	
 	<!---
 	PROPERTIES
@@ -39,13 +39,13 @@ Notes:
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">
 
-		<cfset var parameters = structNew() />
+		<cfset var parameters = StructNew() />
 
 		<cfset parameters.cacheFor = 1 />
 		<cfset parameters.cacheForUnit = "hours" />
 		<cfset parameters.scope = "application" />
 
-		<cfset variables.cache = createObject("component", "MachII.caching.strategies.MachIICache").init(parameters) />
+		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.MachIICache").init(parameters) />
 		<cfset variables.cache.configure() />
 	</cffunction>
 	
@@ -64,10 +64,10 @@ Notes:
 		
 		<cfoutput>testPutExistsGet called<br /></cfoutput>
 
-		<cfset cache.put(testkey, "testing") />
+		<cfset variables.cache.put(testkey, "testing") />
 
-		<cfset assertTrue(cache.keyExists(testkey)) />
-		<cfset assertTrue(cache.get(testkey) eq "testing") />
+		<cfset assertTrue(variables.cache.keyExists(testkey)) />
+		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 
 		<cfoutput>testPutExistsGet done<br /></cfoutput>
 	</cffunction>
@@ -79,10 +79,10 @@ Notes:
 		
 		<cfoutput>testFlush called<br /></cfoutput>
 
-		<cfset cache.put(testkey, "testing") />
-		<cfset cache.flush() />
+		<cfset variables.cache.put(testkey, "testing") />
+		<cfset variables.cache.flush() />
 		
-		<cfset assertTrue(NOT cache.keyExists(testkey)) />
+		<cfset assertTrue(NOT variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testFlush done<br /></cfoutput>
 	</cffunction>
@@ -94,10 +94,10 @@ Notes:
 
 		<cfoutput>testRemove called<br /></cfoutput>
 
-		<cfset cache.put(testkey, "testing") />
-		<cfset cache.remove(testkey) />
+		<cfset variables.cache.put(testkey, "testing") />
+		<cfset variables.cache.remove(testkey) />
 		
-		<cfset assertTrue(NOT cache.keyExists(testkey)) />
+		<cfset assertTrue(NOT variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testRemove done<br /></cfoutput>
 	</cffunction>
