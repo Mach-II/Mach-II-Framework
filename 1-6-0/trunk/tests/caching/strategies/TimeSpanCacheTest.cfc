@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Kurt Wiersma (kur@mach-ii.com)
-$Id: mach-ii.cfc 625 2008-01-29 21:45:06Z peterfarrell $
+Author: Kurt Wiersma (kurt@mach-ii.com)
+$Id:$
 
 Created version: 1.6.0
 Updated version: 1.6.0
@@ -24,9 +24,9 @@ Updated version: 1.6.0
 Notes:
 --->
 <cfcomponent
-	displayname="MachIICacheTest"
+	displayname="TimeSpanCacheTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.caching.strategies.MachIICache.">
+	hint="Test cases for MachII.caching.strategies.TimeSpanCache.">
 	
 	<!---
 	PROPERTIES
@@ -45,7 +45,7 @@ Notes:
 		<cfset parameters.cacheForUnit = "hours" />
 		<cfset parameters.scope = "application" />
 
-		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.MachIICache").init(parameters) />
+		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
 		<cfset variables.cache.configure() />
 	</cffunction>
 	
@@ -65,7 +65,7 @@ Notes:
 		<cfoutput>testPutExistsGet called<br /></cfoutput>
 
 		<cfset variables.cache.put(testkey, "testing") />
-
+		
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 
@@ -80,8 +80,9 @@ Notes:
 		<cfoutput>testFlush called<br /></cfoutput>
 
 		<cfset variables.cache.put(testkey, "testing") />
-		<cfset variables.cache.flush() />
+		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		
+		<cfset variables.cache.flush() />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testFlush done<br /></cfoutput>
@@ -95,8 +96,9 @@ Notes:
 		<cfoutput>testRemove called<br /></cfoutput>
 
 		<cfset variables.cache.put(testkey, "testing") />
-		<cfset variables.cache.remove(testkey) />
+		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		
+		<cfset variables.cache.remove(testkey) />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testRemove done<br /></cfoutput>

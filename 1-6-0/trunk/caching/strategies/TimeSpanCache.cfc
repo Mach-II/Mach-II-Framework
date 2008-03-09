@@ -28,16 +28,21 @@ Notes:
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
 	hint="A default caching strategy.">
-	<!--- TODO: rename to TimeSpanCache --->
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.cache = structNew() />
+	<cfset variables.cache.data = structNew() />
+	<cfset variables.cache.timestamps = structNew() />
 	<cfset variables.cacheFor = 1 />
 	<cfset variables.cacheForUnit = "hours" />
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = createUUID() />
 	<cfset variables.utils = createObject("component", "MachII.util.Utils").init() />
+	<cfset variables.cleanupDifference = -3 />
+	<cfset variables.threadingAdapter = "" />
+	<cfset variables.lastCleanup = createTimestamp() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -54,6 +59,9 @@ Notes:
 		<cfif isParameterDefined("scope")>
 			<cfset setScope(getParameter("scope")) />
 		</cfif>
+		
+		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
+		
 	</cffunction>
 	
 	<!---
@@ -64,31 +72,32 @@ Notes:
 		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 		<cfargument name="data" type="any" required="true" />
 
-		<cfset var cache = getCacheScope() />
+		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
-		<cfif NOT StructKeyExists(cache, hashedKey)>
-			<cfset cache[hashedKey] = StructNew() />
+		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
+			<cfset dataStorage.data[hashedKey] = StructNew() />
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
-		<cfset cache[hashedKey].data = arguments.data />
-		<cfset cache[hashedKey].timestamp = Now() />
-		<cfset setCacheScope(cache) />
+		<cfset dataStorage.data[hashedKey] = arguments.data />
+		<cfset dataStorage.timestamps[createTimestamp() & "_" & hashedKey] = hashedKey />
+		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
 		hint="Gets data from the cache by key. Returns null if the key isn't in the cache.">
 		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
-		<cfset var cache = getCacheScope() />
+		<cfset var dataStorage = getCacheScope() />
+		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
-		<cfset reap() />
+		<cfset shouldCleanup() />
 		
 		<cfif keyExists(arguments.key)>
 			<cfset getCacheStats().incrementCacheHits(1) />
-			<cfreturn cache[hashedKey].data />
+			<cfreturn cache[hashedKey] />
 		<cfelse>
 			<cfset getCacheStats().incrementCacheMisses(1) />
 		</cfif>
@@ -96,22 +105,27 @@ Notes:
 	
 	<cffunction name="flush" access="public" returntype="void" output="false"
 		hint="Flushes the entire cache.">
+		
+		<cfset var dataStorage = getCacheScope() />
 
-		<cfset var cache = getCacheScope() />
-
-		<cfset cache = StructNew() />
-		<cfset setCacheScope(cache) />
+		<cfset dataStorage.data = StructNew() />
+		<cfset dataStorage.timestamps = StructNew() />
+		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checkes if a key exists in the cache.">
 		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
-		<cfset var cache = getCacheScope() />
+		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var findKey = StructKeyExists(cache, hashedKey) />
+		<cfset var findKey = StructKeyExists(dataStorage.data, hashedKey) />
+		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
+		<cfset var diffTimestamp = createTimestamp(computeCacheUntilTimestamp()) />
 
-		<cfif NOT findKey OR DateCompare(cache[hashedKey].timestamp, computeCacheUntilTimestamp()) GTE 0>
+		<cfif NOT findKey>
+			<cfreturn false />
+		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) GTE 0>
 			<cfset remove(arguments.key) />
 			<cfreturn false />
 		<cfelse>
@@ -123,29 +137,95 @@ Notes:
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
 
-		<cfset var cache = getCacheScope() />
+		<cfset var dataStorage = getCacheScope() />
+		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
+		<cfset var timeStampKey = "" />
 
 		<cfif StructKeyExists(cache, hashedKey)>
-			<cfset StructDelete(cache, hashedKey) />
+			<cfset StructDelete(cache, hashedKey, false) />
+			<cfset timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
+			<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
 			<cfset getCacheStats().incrementEvictions(1) />
 			<cfset getCacheStats().decrementTotalElements(1) />
 			<cfset getCacheStats().decrementActiveElements(1) />
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="reap" access="private" returntype="void" output="false">
-		<!--- TODO: pj - do we need a reap method that looks at the timestamps of the cache pieces
-		and throws out old ones? Could use the cfthreading adapter to do this asyncronisely --->
+	<cffunction name="reap" access="public" returntype="void" output="false"
+		hint="looks at the timestamps of the cache pieces and throws out old ones.">
+			
+		<cfset var diffTimestamp = createTimestamp(computeCacheUntilTimestamp()) />
+		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataTimestampArray = "" />
+		<cfset var key = "" />
+		<cfset var i = "" />
+		<cfset var log = getLog() />
+		
+		<cflock name="_MachIITimeSpanCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
+			
+			<!--- Reset the timestamp of the last cleanup --->
+			<cfset variables.lastCleanup = createTimestamp() />
+				
+			<!--- Get array of timestamps and sort --->
+			<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
+			<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
+			
+			<!--- Cleanup --->
+			<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
+				<cftry>
+					<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
+						<!--- The order of the deletes is important as the timestamp may be
+							around, but the data already deleted --->
+						<cfset key = dataTimestampArray[i] />
+						<cfset StructDelete(dataStorage.timestamps, key, false) />
+						<cfset StructDelete(dataStorage.data, ListLast(key, "_"), false) />
+					<cfelse>
+						<cfbreak />
+					</cfif>
+					<cfcatch type="any">
+						<!--- Ingore this error --->
+					</cfcatch>
+				</cftry>
+			</cfloop>
+		</cflock>
 	</cffunction>
 	 
 	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
+		hint="Cleanups the data storage.">
+		
+		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
+		<cfset var threadingAdapter = "" />
+		
+		<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
+		
+			<cfset threadingAdapter = getThreadingAdapter() />
+			
+			<cflock name="_MachIITimespanCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
+				<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
+					<cfif threadingAdapter.allowThreading()>
+						<cfset threadingAdapter.run(this, "reap") />
+					<cfelse>
+						<cfset reap() />
+					</cfif>
+				</cfif>
+			</cflock>
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="hashKey" access="private" returntype="string" output="false">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn Hash(UCase(arguments.key)) />
+	</cffunction>
+	
+	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
+		hint="Creates a timestamp for use.">
+		<cfargument name="time" type="date" required="false" default="#Now()#" />
+		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
 	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
@@ -172,7 +252,7 @@ Notes:
 		
 		<cfreturn timestamp />
 	</cffunction>
-	
+
 	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
 		hint="Gets the cache scope which is dependent on the storage location.">
 		
@@ -241,6 +321,14 @@ Notes:
 	
 	<cffunction name="getScopeKey" access="private" returntype="string" output="false">
 		<cfreturn variables.scopeKey />
+	</cffunction>
+	
+	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false">
+		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
+		<cfset variables.threadingAdapter = arguments.threadingAdapter />
+	</cffunction>
+	<cffunction name="getThreadingAdapter" access="private" returntype="MachII.util.threading.ThreadingAdapter" output="false">
+		<cfreturn variables.threadingAdapter />
 	</cffunction>
 	
 </cfcomponent>
