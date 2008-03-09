@@ -179,6 +179,7 @@ Notes:
 			<testcase name="MachII.tests.caching.strategies.MachIICacheTest" />
 			<testcase name="MachII.tests.logging.LogTest" />
 			<testcase name="MachII.tests.logging.LogFactoryTest" />
+			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest" />
 			<!--
 			This does not work yet because the it appears not to recurse directories yet
 			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 

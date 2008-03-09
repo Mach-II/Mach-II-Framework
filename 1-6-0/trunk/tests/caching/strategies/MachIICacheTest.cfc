@@ -82,7 +82,7 @@ Notes:
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset variables.cache.flush() />
 		
-		<cfset assertTrue(NOT variables.cache.keyExists(testkey)) />
+		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testFlush done<br /></cfoutput>
 	</cffunction>
@@ -97,7 +97,7 @@ Notes:
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset variables.cache.remove(testkey) />
 		
-		<cfset assertTrue(NOT variables.cache.keyExists(testkey)) />
+		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 		
 		<cfoutput>testRemove done<br /></cfoutput>
 	</cffunction>
