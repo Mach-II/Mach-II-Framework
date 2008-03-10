@@ -145,7 +145,8 @@ the rest of the framework. (pfarrell)
 						<cfcatch type="any">
 							<cfif StructKeyExists(cfcatch, "missingFileName")>
 								<cfthrow type="MachII.framework.CannotFindProperty"
-									message="Cannot find a CFC with the type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'.">
+									message="Cannot find a CFC with the type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'."
+									detail="Please check that a property exists and that there is not a misconfiguration in the XML configuration file.">
 							<cfelse>
 								<cfrethrow />
 							</cfif>

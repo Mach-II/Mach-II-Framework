@@ -127,7 +127,20 @@ Notes:
 				</cfloop>
 			</cfif>
 
-			<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
+			<cftry>
+				<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
+				
+				<cfcatch type="any">
+					<cfif StructKeyExists(cfcatch, "missingFileName")>
+						<cfthrow type="MachII.framework.CannotFindPlugin"
+							message="Cannot find a CFC with the type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+							detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file.">
+					<cfelse>
+						<cfrethrow />
+					</cfif>
+				</cfcatch>
+			</cftry>
+
 			<cfset addPlugin(pluginName, plugin, arguments.override) />
 		</cfloop>
 	</cffunction>

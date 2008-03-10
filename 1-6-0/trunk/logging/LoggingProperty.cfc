@@ -168,7 +168,19 @@ will bind to root parameter values.
 		</cfloop>
 		
 		<!--- Create, init and configure the logger --->
-		<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
+		<cftry>
+			<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
+
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.logging.CannotFindLogger"
+						message="The LoggingProperty in module named '#getAppManager().getModuleName()#' cannot find a logger located at '#arguments.parameters.type#'."
+						detail="Please check that this logger exists and that there is not a misconfiguration in the XML configuration file." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 		
 		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 		<cfif logger.isOnRequestEndAvailable()>

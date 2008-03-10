@@ -129,13 +129,37 @@ Notes:
 				</cfif>
 			
 				<!--- Setup the Listener. --->
-				<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
+				<cftry>
+					<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
+					
+					<cfcatch type="any">
+						<cfif StructKeyExists(cfcatch, "missingFileName")>
+							<cfthrow type="MachII.framework.CannotFindListener"
+								message="Cannot find a listener CFC with type of '#listenerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'."
+								detail="Please check that this listener exists and that there is not a misconfiguration in the XML configuration file." />
+						<cfelse>
+							<cfrethrow />
+						</cfif>						
+					</cfcatch>
+				</cftry>
 	
 				<!--- Use declared invoker from config file --->
 				<cfif StructKeyExists(listenerNodes[i], "invoker")>
 					<cfset invokerType = listenerNodes[i].invoker.xmlAttributes["type"] />
-	
-					<cfset invoker = CreateObject("component", invokerType).init() />
+
+					<cftry>	
+						<cfset invoker = CreateObject("component", invokerType).init() />
+
+						<cfcatch type="any">
+							<cfif StructKeyExists(cfcatch, "missingFileName")>
+								<cfthrow type="MachII.framework.CannotFindInvoker"
+									message="Cannot find an listener invoker CFC with type of '#invokerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'."
+									detail="Please check that the invoker exists for this listener and that there is not a misconfiguration in the XML configuration file." />
+							<cfelse>
+								<cfrethrow />
+							</cfif>
+						</cfcatch>
+					</cftry>
 				<!--- Use defaultInvoker --->
 				<cfelse>
 					<cfset invoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />

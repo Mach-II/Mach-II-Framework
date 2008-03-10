@@ -126,7 +126,20 @@ Notes:
 					</cfloop>
 				</cfif>
 				
-				<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
+				<cftry>
+					<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
+	
+					<cfcatch type="any">
+						<cfif StructKeyExists(cfcatch, "missingFileName")>
+							<cfthrow type="MachII.framework.CannotFindEventFilter"
+								message="Cannot find a CFC with the type of '#filterType#' for the event-filter named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+								detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file.">
+						<cfelse>
+							<cfrethrow />
+						</cfif>
+					</cfcatch>
+				</cftry>
+
 				<cfset addFilter(filterName, filter, arguments.override) />
 			</cfif>
 		</cfloop>
