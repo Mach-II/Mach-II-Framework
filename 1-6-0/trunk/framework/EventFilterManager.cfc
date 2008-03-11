@@ -132,7 +132,7 @@ Notes:
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName")>
 							<cfthrow type="MachII.framework.CannotFindEventFilter"
-								message="Cannot find a CFC with the type of '#filterType#' for the event-filter named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+								message="Cannot find a CFC with the type of '#filterType#' for the event-filter named '#filterName#' in module named '#getAppManager().getModuleName()#'."
 								detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file.">
 						<cfelse>
 							<cfrethrow />
