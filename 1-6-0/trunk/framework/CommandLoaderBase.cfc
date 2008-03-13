@@ -101,23 +101,26 @@ Notes:
 		<cfset var cacheAlias = "" />
 		<cfset var handlerId = "" />
 		<cfset var criteria = "" />
-		<cfset var cacheName = "" />
+		<cfset var name = "" />
 		
 		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(commandNode, parentHandlerName, parentHandlerType) />
 		
-		<cfif structKeyExists(arguments.commandNode, "xmlAttributes") >
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes") >
+			<!--- We cannot get the default cache strategy name because it has not been set
+				by the CachingProperty yet. We deal with getting the default cache strategy
+				in the configu() method of the CachingManager. --->
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
+				<cfset name = arguments.commandNode.xmlAttributes["name"] />
+			</cfif>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
 				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />
 			</cfif>
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
-			</cfif>
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
-				<cfset criteria = arguments.commandNode.xmlAttributes["cacheName"] />
 			</cfif>
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, cacheName, cacheAlias, criteria) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, cacheAlias, criteria) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
@@ -130,26 +133,26 @@ Notes:
 		<cfset var command = "" />
 		<cfset var cacheAlias = "" />
 		<cfset var cacheCondition = "" />
-		<cfset var cacheName = "" />
+		<cfset var name = "" />
 		<cfset var criteria = "" />
 		
-		<cfif structKeyExists(arguments.commandNode, "xmlAttributes")>
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "alias")>
+		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes")>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
 				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />	
 			</cfif>		
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "condition")>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
 				<cfset cacheCondition = arguments.commandNode.xmlAttributes["condition"] />	
 			</cfif>	
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
 			</cfif>
-			<cfif structKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
-				<cfset cacheName = arguments.commandNode.xmlAttributes["cacheName"] />
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
+				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
-			cacheName, cacheAlias, cacheCondition, criteria) />
+			name, cacheAlias, cacheCondition, criteria) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />

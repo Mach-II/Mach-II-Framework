@@ -66,6 +66,7 @@ Notes:
 		<cfset var continue = true />
 		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
+		<cfset var log = getLog() />
 				
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT Len(getCondition())>
@@ -85,7 +86,7 @@ Notes:
 		</cfif>
 		
 		<cfif clearCache>
-			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />
+			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event) />
 		</cfif>
 		
 		<cfreturn continue />

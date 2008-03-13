@@ -66,9 +66,22 @@ Notes:
 		<cfset var continue = true />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
 		<cfset var cacheHandler = "" />
+		<cfset var log = getLog() />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Cache-handler '#getHandlerId()#' in module named '#arguments.eventContext.getAppManager().getModuleName()#' beginning execution.") />
+		</cfif>
 		
 		<cfset cacheHandler = cacheManager.getCacheHandler(getHandlerId()) />
-		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext, getCriteria()) />
+		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
+
+		<cfif log.isWarnEnabled() and NOT continue>
+			<cfset log.warn("Cache-handler '#getHandlerId()#' has changed the flow of this event.") />
+		</cfif>
+
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Cache-handler '#getHandlerId()#' in module named '#arguments.eventContext.getAppManager().getModuleName()#' has ended.") />
+		</cfif>
 		
 		<cfreturn continue />
 	</cffunction>

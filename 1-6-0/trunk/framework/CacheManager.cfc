@@ -34,6 +34,7 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentCacheManager = "" />
+	<cfset variables.defaultCacheName = "" />
 	<cfset variables.handlers = StructNew() />
 	<cfset variables.handlersByAliases = StructNew() />
 	<cfset variables.handlersByEventName = StructNew() />
@@ -100,19 +101,29 @@ Notes:
 		<!--- Set the cache handler to the manager --->
 		<cfset addCacheHandler(cacheHandler) />
 		
-		<cfreturn cacheHandler.getHandlerId() />		
+		<cfreturn cacheHandler.getHandlerId() />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures manager.">
+		hint="Configures the cache handlers.">
 		
 		<cfset var handlerId = "" />
+		<cfset var cacheStrategy = "" />
+		<cfset var cacheName = "" />
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
 		<cfloop collection="#variables.handlers#" item="handlerId">
-			<cfset variables.handlers[handlerId].setCacheStrategy(
-				getCacheStrategyByName(variables.handlers[handlerId].getCacheName())) />
+			<cfset cacheName = variables.handlers[handlerId].getCacheName() />
+			
+			<!--- Check if we need to use the default cache name --->
+			<cfif NOT Len(cacheName)>
+				<cfset cacheName = getDefaultCacheName() />
+			</cfif>			
+			
+			<!--- Load the strategy into the handler --->
+			<cfset strategy = getCacheStrategyByName(cacheName) />
+			<cfset variables.handlers[handlerId].setCacheStrategy(strategy) />
 		</cfloop>
 	</cffunction>
 	
@@ -134,16 +145,16 @@ Notes:
 		
 		<!--- Register the handler by handler type --->
 		<cfif handlerType EQ "event">
-			<cfset variables.handlersByEventName[handlerId][Hash(arguments.cacheHandler.getParentHandlerName())] = true />
+			<cfset variables.handlersByEventName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
 		<cfelseif handlerType EQ "subroutine">
-			<cfset variables.handlersBySubroutineName[handlerId][Hash(arguments.cacheHandler.getParentHandlerName())] = true />
+			<cfset variables.handlersBySubroutineName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
 		</cfif>
 		
-		<cfset variables.handlersByName[Hash(cacheName)] = handlerId />
+		<cfset variables.handlersByName[getKeyHash(cacheName)] = handlerId />
 		
 		<!--- Register the alias if defined --->
 		<cfif Len(alias)>
-			<cfset variables.handlersByAliases[Hash(alias)][handlerId] = true />
+			<cfset variables.handlersByAliases[getKeyHash(alias)][handlerId] = true />
 		</cfif>
 	</cffunction>
 	
@@ -173,17 +184,17 @@ Notes:
 		
 		<!--- Unregiester the handler by handler type --->
 		<cfif handlerType EQ "event">
-			<cfset StructDelete(variables.handlersByEventName[handlerId], Hash(arguments.cacheHandler.getParentHandlerName()), true) />
+			<cfset StructDelete(variables.handlersByEventName[handlerId], getKeyHash(arguments.cacheHandler.getParentHandlerName()), true) />
 		<cfelseif handlerType EQ "subroutine">
-			<cfset StructDelete(variables.handlersBySubroutineName[handlerId], Hash(arguments.cacheHandler.getParentHandlerName()), true) />
+			<cfset StructDelete(variables.handlersBySubroutineName[handlerId], getKeyHash(arguments.cacheHandler.getParentHandlerName()), true) />
 		</cfif>
 		
 		<!--- Remove from cache name list --->
-		<cfset StructDelete(variables.handlersByName, Hash(cacheName)) />
+		<cfset StructDelete(variables.handlersByName, getKeyHash(cacheName)) />
 		
 		<!--- Unregister the alias if defined --->
 		<cfif Len(alias)>
-			<cfset StructDelete(variables.handlersByAliases[Hash(alias)], handlerId, false) />
+			<cfset StructDelete(variables.handlersByAliases[getKeyHash(alias)], handlerId, false) />
 		</cfif>
 	</cffunction>
 		
@@ -200,13 +211,13 @@ Notes:
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var handlerIds = StructNew() />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
-		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
-			<cfset handlerIds = variables.handlersByAliases[Hash(arguments.alias)] />
+		<cfif StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))>
+			<cfset handlerIds = variables.handlersByAliases[getKeyHash(arguments.alias)] />
 			
-			<cfloop collection="#handlerIds#" item="i">
-				<cfset StructInsert(cacheHandlers, i, getCacheHandler(i), true) />
+			<cfloop collection="#handlerIds#" item="key">
+				<cfset cacheHandlers[key] = getCacheHandler(key) />
 			</cfloop>
 		</cfif>
 		
@@ -220,16 +231,16 @@ Notes:
 		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var cacheHandlers = StructNew() />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Currently alias is no longer used --->
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
-		<cfif StructKeyExists(variables.handlersByAliases, Hash(arguments.alias))>
-			<cfset cacheHandlers = variables.handlersByAliases[Hash(arguments.alias)] />
+		<cfif StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))>
+			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />
 			
-			<cfloop collection="#cacheHandlers#" item="i">
-				<cfset getCacheHandler(i).clearCache(event, criteria) />
+			<cfloop collection="#cacheHandlers#" item="key">
+				<cfset getCacheHandler(key).clearCache(event, criteria) />
 			</cfloop>
 		</cfif>
 	</cffunction>
@@ -241,11 +252,10 @@ Notes:
 		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var handlerId = "" />
-		<cfset var i = 0 />
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this cacheName --->
-		<cfif StructKeyExists(variables.handlersByName, Hash(arguments.cacheName))>
-			<cfset handlerId = variables.handlersByName[Hash(arguments.cacheName)] />
+		<cfif StructKeyExists(variables.handlersByName, getKeyHash(arguments.cacheName))>
+			<cfset handlerId = variables.handlersByName[getKeyHash(arguments.cacheName)] />
 			<cfset getCacheHandler(handlerId).clearCache(event, criteria) />
 		</cfif>
 	</cffunction>
@@ -267,13 +277,13 @@ Notes:
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var handlerIds = StructNew() />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
-		<cfif StructKeyExists(variables.handlersByEventName, Hash(arguments.eventName))>
-			<cfset handlerIds = variables.handlersByEventName[Hash(arguments.eventName)] />
+		<cfif StructKeyExists(variables.handlersByEventName, getKeyHash(arguments.eventName))>
+			<cfset handlerIds = variables.handlersByEventName[getKeyHash(arguments.eventName)] />
 			
-			<cfloop collection="#handlerIds#" item="i">
-				<cfset StructInsert(cacheHandlers, i, getCacheHandler(i), true) />
+			<cfloop collection="#handlerIds#" item="key">
+				<cfset cacheHandlers[key] = getCacheHandler(key) />
 			</cfloop>
 		</cfif>
 		
@@ -286,13 +296,13 @@ Notes:
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var handlerIds = StructNew() />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
-		<cfif StructKeyExists(variables.handlersBySubroutineName, Hash(arguments.subroutineName))>
-			<cfset handlerIds = variables.handlersBySubroutineName[Hash(arguments.subroutineName)] />
+		<cfif StructKeyExists(variables.handlersBySubroutineName, getKeyHash(arguments.subroutineName))>
+			<cfset handlerIds = variables.handlersBySubroutineName[getKeyHash(arguments.subroutineName)] />
 			
-			<cfloop collection="#handlerIds#" item="i">
-				<cfset StructInsert(cacheHandlers, i, getCacheHandler(i), true) />
+			<cfloop collection="#handlerIds#" item="key">
+				<cfset cacheHandlers[key] = getCacheHandler(key) />
 			</cfloop>
 		</cfif>
 		
@@ -307,7 +317,7 @@ Notes:
 	
 	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false">
 		<cfargument name="name" type="string" required="true" />
-		<cfreturn structKeyExists(variables.cacheStrategies, arguments.name) />
+		<cfreturn StructKeyExists(variables.cacheStrategies, arguments.name) />
 	</cffunction>
 	
 	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false">
@@ -318,14 +328,35 @@ Notes:
 		<cfargument name="name" type="string" required="true" />
 		<cfif isCacheStrategyDefined(arguments.name)>
 			<cfreturn variables.cacheStrategies[arguments.name] />
-		<cfelseif isObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.name)>
+		<cfelseif IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.name)>
 			<cfreturn getParent().getCacheStrategyByName(arguments.name) />
 		<cfelse>
-			<cfthrow type="MachII.framework.CacheStrategyNotDefined" 
-				message="Cache Strategy with name '#arguments.name#' is not defined. Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
+			<cfif NOT StructCount(getCacheStrategies())>
+				<cfthrow type="MachII.framework.NoCacheStrategiesDefined" 
+					message="There are no cache strategies defined."
+					detail="Please add the MachII.caching.CachingProperty to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
+			<cfelse>
+				<cfthrow type="MachII.framework.CacheStrategyNotDefined" 
+					message="Cache strategy with name '#arguments.name#' is not defined."
+					detail="Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
+		hint="Gets all registered cache strategies.">
+		<cfreturn variables.cacheStrategies />
+	</cffunction>
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="getKeyHash" access="private" returntype="string" output="false"
+		hint="Gets a key name hash (uppercase and hash the key name)">
+		<cfargument name="keyName" type="string" required="true" />
+		<cfreturn Hash(UCase(arguments.keyName)) />
+	</cffunction>
+
 	
 	<!---
 	ACCESSORS
@@ -346,6 +377,14 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent CacheManager instance this CacheManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentCacheManager />
+	</cffunction>
+	
+	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
+		<cfreturn variables.defaultCacheName />
+	</cffunction>
+	<cffunction name="setDefaultCacheName" access="public" returntype="string" output="false">
+		<cfargument name="defaultCacheName" type="string" required="true" />
+		<cfset variables.defaultCacheName = arguments.defaultCacheName />
 	</cffunction>
 	
 	<cffunction name="setLog" access="private" returntype="void" output="false"

@@ -70,19 +70,23 @@ Notes:
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var outputBuffer = "" />
 		<cfset var continue = true />
 		<cfset var command = "" />
 		<cfset var i = 0 />
-		<cfset var key = getKeyFromCriteria(arguments.criteria, event) />
+		<cfset var key = getKeyFromCriteria(arguments.event) />
 		<cfset var dataFromCache = getCacheData(key) />
+		<cfset var log = getLog() />
 		
 		<!--- TODO: Change so that data and output are stored in the same key in the cache --->
 		
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache")>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cache-handler running commands and creating cache.") />
+			</cfif>
+		
 			<!--- Run commands and save output to the buffer --->
 			<cfsavecontent variable="outputBuffer">
 				<cfloop index="i" from="1" to="#ArrayLen(variables.commands)#">
@@ -100,6 +104,10 @@ Notes:
 			
 			<cfoutput>#outputBuffer#</cfoutput>
 		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cache-handler used data from cache.") />
+			</cfif>
+
 			<!--- Replay the event from the cache --->
 			<cfset arguments.event.setArgs(dataFromCache) />
 			<cfoutput>#getCacheOutputBuffer(key)#</cfoutput>
@@ -111,9 +119,8 @@ Notes:
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="criteria" type="string" required="false" default="" />
 
-		<cfset var key = getKeyFromCriteria(arguments.criteria, arguments.event) />
+		<cfset var key = getKeyFromCriteria(arguments.event) />
 		
 		<cfif len(key)>
 			<cfset getCacheStrategy().remove(key) />
@@ -133,15 +140,14 @@ Notes:
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false">
-		<cfargument name="criteria" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var sortedCriteria = listSort(criteria, "text") />
+		<cfset var criteria = getCriteria() />
 		<cfset var item = "" />
 		<cfset var key = "" />
 		
-		<cfloop list="#sortedCriteria#" index="item">
-			<cfset key = key & "&#item#=#event.getArg("item")#">
+		<cfloop list="#criteria#" index="item">
+			<cfset key = ListAppend(key, "#item#=#arguments.event.getArg(item)#", "&") />
 		</cfloop>
 		
 		<cfreturn key />
@@ -179,11 +185,13 @@ Notes:
 		<cfreturn variables.cacheName />
 	</cffunction>
 
-	<cffunction name="setCriteria" access="private" returntype="void" output="false">
+	<cffunction name="setCriteria" access="private" returntype="void" output="false"
+		hint="Automatically converts to uppercase and sorts the criteria list.">
 		<cfargument name="criteria" type="string" required="true" />
-		<cfset variables.criteria = arguments.criteria />
+		<cfset variables.criteria = ListSort(UCase(arguments.criteria), "text") />
 	</cffunction>
-	<cffunction name="getCriteria" access="public" returntype="string" output="false">
+	<cffunction name="getCriteria" access="public" returntype="string" output="false"
+		hint="Returns an uppercase and sorted criteria list.">
 		<cfreturn variables.criteria />
 	</cffunction>
 	
