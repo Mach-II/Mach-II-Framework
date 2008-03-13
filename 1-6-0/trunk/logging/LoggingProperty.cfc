@@ -60,7 +60,7 @@ will bind to root parameter values.
 	displayname="LoggingProperty"
 	extends="MachII.framework.Property"
 	output="false"
-	hint="Connects Mach-II Logging to the framework.">
+	hint="Allows you to configure the Mach-II logging features.">
 	
 	<!---
 	PROPERTIES
@@ -83,8 +83,7 @@ will bind to root parameter values.
 			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
 		</cfif>
 		
-		<!--- Determine if we should load logger or use the default 
-			logger (e.g. MachII.logging.loggers.MachIILog.Logger) --->
+		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
 			<cfif IsStruct(params[key])>
 				<cfset configureLogger(key, getParameter(key)) />
