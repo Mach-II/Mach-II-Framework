@@ -22,9 +22,10 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-
 Configuring with default timespan strategy with default parameters:
-<property name="Caching" type="MachII.caching.CachingProperty" />
+<property name="Caching" type="MachII.caching.CachingProperty"/>
+
+This will cache data for a timespan of 1 hour.
 
 Configuring multiple caching strategires:
 <property name="Caching" type="MachII.caching.CachingProperty">
@@ -65,8 +66,9 @@ See individual caching strategies for more information on configuration.
 		<cfset var params = getParameters() />
 		<cfset var strategies = ArrayNew(1) />
 		<cfset var key = "" />
-		
-		<!--- The default cache strategy if present --->
+
+		<!--- The default cache strategy (this must be done before default strategy 
+			is configured if required) --->
 		<cfset setDefaultCacheName(getParameter("defaultCacheName", "default")) />
 		
 		<!--- Load defined cache strategies --->
@@ -79,8 +81,11 @@ See individual caching strategies for more information on configuration.
 		<!--- Configure the default strategy if no strategies were set --->		
 		<cfif NOT StructCount(getAppManager().getCacheManager().getCacheStrategies())>
 			<cfset configureDefaultStrategy() />
-			<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
 		</cfif>
+		
+		<!--- Set the default cache strategy name (this must be done only after all strategies 
+			have been added)--->
+		<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
 		
 		<!--- Configure the registered stragies --->
 		<cfset strategies = getAppManager().getCacheManager().getCacheStrategies() />
@@ -155,12 +160,12 @@ See individual caching strategies for more information on configuration.
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
-		<cfreturn variables.defaultCacheName />
-	</cffunction>
 	<cffunction name="setDefaultCacheName" access="public" returntype="string" output="false">
 		<cfargument name="defaultCacheName" type="string" required="true" />
 		<cfset variables.defaultCacheName = arguments.defaultCacheName />
+	</cffunction>
+	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
+		<cfreturn variables.defaultCacheName />
 	</cffunction>
 	
 </cfcomponent>

@@ -378,13 +378,19 @@ Notes:
 		hint="Sets the parent CacheManager instance this CacheManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentCacheManager />
 	</cffunction>
-	
-	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
-		<cfreturn variables.defaultCacheName />
-	</cffunction>
+
 	<cffunction name="setDefaultCacheName" access="public" returntype="string" output="false">
 		<cfargument name="defaultCacheName" type="string" required="true" />
-		<cfset variables.defaultCacheName = arguments.defaultCacheName />
+		<cfif isCacheStrategyDefined(arguments.defaultCacheName)>
+			<cfset variables.defaultCacheName = arguments.defaultCacheName />
+		<cfelse>
+			<cfthrow type="MachII.framework.DefaultCacheNameNotAvailable"
+				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy that is not available. Please set the default to a stragety that is configured."
+				detail="Available strategies:#ArrayToList(getCacheStrategyNames())#" />
+		</cfif>
+	</cffunction>	
+	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
+		<cfreturn variables.defaultCacheName />
 	</cffunction>
 	
 	<cffunction name="setLog" access="private" returntype="void" output="false"
