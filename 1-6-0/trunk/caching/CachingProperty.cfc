@@ -64,7 +64,7 @@ See individual caching strategies for more information on configuration.
 		hint="Configures the property.">
 		
 		<cfset var params = getParameters() />
-		<cfset var strategies = ArrayNew(1) />
+		<cfset var strategies = StructNew() />
 		<cfset var key = "" />
 
 		<!--- The default cache strategy (this must be done before default strategy 
