@@ -23,7 +23,10 @@ Updated version: 1.6.0
 
 Notes:
 
-Configuring multiple caching adapters:
+Configuring with default timespan strategy with default parameters:
+<property name="Caching" type="MachII.caching.CachingProperty" />
+
+Configuring multiple caching strategires:
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
@@ -31,7 +34,7 @@ Configuring multiple caching adapters:
             <parameter name="defaultCacheName" value="default" />
             <parameter name="default">
                   <struct>
-                        <key name="type" value="MachII.caching.strategies.MachIICache" />
+                        <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
                         <key name="cacheUnit" value="hour" />
@@ -60,26 +63,31 @@ See individual caching strategies for more information on configuration.
 		hint="Configures the property.">
 		
 		<cfset var params = getParameters() />
-		<cfset var configured = false />
+		<cfset var strategies = ArrayNew(1) />
 		<cfset var key = "" />
 		
 		<!--- The default cache strategy if present --->
-		<cfif isParameterDefined("defaultCacheName")>
-			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
-		</cfif>
+		<cfset setDefaultCacheName(getParameter("defaultCacheName", "default")) />
 		
+		<!--- Load defined cache strategies --->
 		<cfloop collection="#params#" item="key">
 			<cfif IsStruct(params[key])>
 				<cfset configureStrategy(key, getParameter(key)) />
-				<cfset configured = true />
 			</cfif>
 		</cfloop>
-		
-		<!--- Configure the default adapter since no adapters were set
-		<cfif NOT configured>
+
+		<!--- Configure the default strategy if no strategies were set --->		
+		<cfif NOT StructCount(getAppManager().getCacheManager().getCacheStrategies())>
 			<cfset configureDefaultStrategy() />
-		</cfif>  --->
+			<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
+		</cfif>
 		
+		<!--- Configure the registered stragies --->
+		<cfset strategies = getAppManager().getCacheManager().getCacheStrategies() />
+		
+		<cfloop collection="#strategies#" item="key">
+			<cfset strategies[key].configure() />
+		</cfloop>
 	</cffunction>
 	
 	<!---
@@ -89,34 +97,34 @@ See individual caching strategies for more information on configuration.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<!--- <cffunction name="configureDefaultStrategy" access="private" returntype="void" output="false"
-		hint="Configures the default caching strategy (e.g. MachII.caching.strategies.MachIICache).">
+	<cffunction name="configureDefaultStrategy" access="private" returntype="void" output="false"
+		hint="Configures the default caching strategy (e.g. MachII.caching.strategies.TimeSpanCache).">
 		
 		<cfset var strategy = "" />
 		<cfset var parameters = StructNew() />
 		
-		<cfset strategy = CreateObject("component", "MachII.caching.strategies.MachIICache").init(parameters) />
-		<cfset strategy.configure() />
+		<!--- Create the strategy --->
+		<cfset strategy = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
+		<cfset strategy.setLog(getAppManager().getLogFactory()) />
 
-		<!--- Set the adapter to the CacheManager  --->
-		<cfset getAppManager().getCacheManager().addCacheStrategy("default", strategy) />	
-	</cffunction> --->
+		<!--- Set the strategy to the CacheManager  --->
+		<cfset getAppManager().getCacheManager().addCacheStrategy(getDefaultCacheName(), strategy) />	
+	</cffunction>
 	
 	<cffunction name="configureStrategy" access="private" returntype="void" output="false"
-		hint="Configures an strategy.">
+		hint="Configures a strategy.">
 		<cfargument name="name" type="string" required="true"
 			hint="Name of the strategy" />
 		<cfargument name="parameters" type="struct" required="true"
 			hint="Parameters for this strategy.">
-		
-		<cfset var type = "" />
+
 		<cfset var strategy = "" />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
-			<cfthrow type="MachII.caching.CachingProperty"
-				message="You must specify a 'type' for cache named '#arguments.name#'." />
+			<cfthrow type="MachII.caching.MissingCacheStrategyType"
+				message="You must specify a parameter named 'type' for cache named '#arguments.name#' in module named '#getAppManager().getModuleName()#'." />
 		</cfif>
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
@@ -124,10 +132,21 @@ See individual caching strategies for more information on configuration.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
-		<!--- Create the adapter --->
-		<cfset strategy = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />
-		<cfset strategy.setLog(getAppManager().getLogFactory()) />
-		<cfset strategy.configure() />
+		<!--- Create the strategy --->
+		<cftry>
+			<cfset strategy = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />
+			<cfset strategy.setLog(getAppManager().getLogFactory()) />
+
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.caching.CannotFindCacheStrategy"
+						message="The CachingProperty  in module named '#getAppManager().getModuleName()#' cannot find a cache strategy CFC with type of '#arguments.parameters.type#' for the cache named '#arguments.name#'."
+						detail="Please check that the cache strategy exists and that there is not a misconfiguration in the XML configuration file." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 		
 		<!--- Set the strategy to the CacheManager --->
 		<cfset getAppManager().getCacheManager().addCacheStrategy(arguments.name, strategy) />
