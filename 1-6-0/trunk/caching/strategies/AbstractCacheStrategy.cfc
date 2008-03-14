@@ -22,6 +22,17 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
+Caching strategies:
+
+* Are not Mach-II framework aware and do not have any access to the 
+Mach-II AppManager or other Mach-II Managers. All configuration data 
+should be passed into the strategy via the parameters.
+* Are not required to implement all the public methods, however you
+need to override the abstract methods if you do not want to have
+errors thrown.
+* Must make use the the CacheStats if you want caching stats available
+in the Mach-II dashboard.
+
 --->
 <cfcomponent
  	displayname="AbstractCacheStrategy"
@@ -32,7 +43,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.parameters = StructNew() />
-	<cfset variables.cacheStats = createObject("component", "MachII.caching.CacheStats").init() />
+	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
 	<cfset variables.log = 0 />
 	
 	<!---
@@ -55,36 +66,43 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="put" access="public" returntype="void" output="false">
+	<cffunction name="put" access="public" returntype="void" output="false"
+		hint="Puts an element by key into the cache.">
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="data" type="any" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="get" access="public" returntype="any" output="false">
+	<cffunction name="get" access="public" returntype="any" output="false"
+		hint="Gets an element by key from the cache.">
 		<cfargument name="key" type="string" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="flush" access="public" returntype="void" output="false">
+	<cffunction name="flush" access="public" returntype="void" output="false"
+		hint="Flushes all elements from the cache.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="reap" access="public" returntype="void" output="false">
+	<cffunction name="reap" access="public" returntype="void" output="false"
+		hint="Reaps 'expired' cache elements.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="keyExists" access="public" returntype="boolean" output="false">
+	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
+		hint="Checks if an element exists by key in the cache.">
 		<cfargument name="key" type="string" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="remove" access="public" returntype="void" output="false">
+	<cffunction name="remove" access="public" returntype="void" output="false"
+		hint="Removes a cached element by key.">
 		<cfargument name="key" type="string" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="getCacheStats" access="public" returntype="MachII.caching.CacheStats" output="false">
+	<cffunction name="getCacheStats" access="public" returntype="MachII.caching.CacheStats" output="false"
+		hint="Gets the cache stats for this caching strategy.">
 		<cfreturn variables.cacheStats />
 	</cffunction>
 	

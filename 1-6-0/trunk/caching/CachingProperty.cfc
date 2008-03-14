@@ -121,7 +121,7 @@ See individual caching strategies for more information on configuration.
 		<cfargument name="name" type="string" required="true"
 			hint="Name of the strategy" />
 		<cfargument name="parameters" type="struct" required="true"
-			hint="Parameters for this strategy.">
+			hint="Parameters for this strategy." />
 
 		<cfset var strategy = "" />
 		<cfset var key = "" />
