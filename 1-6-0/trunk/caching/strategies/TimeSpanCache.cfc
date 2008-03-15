@@ -39,10 +39,10 @@ Notes:
 </property>
 --->
 <cfcomponent
- 	displayname="MachIICache"
+ 	displayname="TimeSpanCache"
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
-	hint="A default caching strategy based on timespan of cached elements.">
+	hint="A default caching strategy which cache items for a specified time span.">
 
 	<!---
 	PROPERTIES
@@ -57,6 +57,7 @@ Notes:
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	<cfset variables.cleanupDifference = -3 />
 	<cfset variables.threadingAdapter = "" />
+	<cfset variables.currentDateTime = "" />
 	<cfset variables.lastCleanup = createTimestamp() />
 	
 	<!---
@@ -91,7 +92,6 @@ Notes:
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
-			<cfset dataStorage.data[hashedKey] = StructNew() />
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
@@ -155,19 +155,9 @@ Notes:
 		<cfargument name="key" type="string" required="true"
 			hint="The key does not need to be hashed." />
 
-		<cfset var dataStorage = getCacheScope() />
-		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var timeStampKey = "" />
-
-		<cfif StructKeyExists(cache, hashedKey)>
-			<cfset StructDelete(cache, hashedKey, false) />
-			<cfset timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
-			<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
-			<cfset getCacheStats().incrementEvictions(1) />
-			<cfset getCacheStats().decrementTotalElements(1) />
-			<cfset getCacheStats().decrementActiveElements(1) />
-		</cfif>
+		
+		<cfset removeHashedKey(hashedKey) />
 	</cffunction>
 	
 	<cffunction name="reap" access="public" returntype="void" output="false"
@@ -178,7 +168,6 @@ Notes:
 		<cfset var dataTimestampArray = "" />
 		<cfset var key = "" />
 		<cfset var i = "" />
-		<cfset var log = getLog() />
 		
 		<cflock name="_MachIITimeSpanCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
 			
@@ -193,11 +182,8 @@ Notes:
 			<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
 				<cftry>
 					<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
-						<!--- The order of the deletes is important as the timestamp may be
-							around, but the data already deleted --->
-						<cfset key = dataTimestampArray[i] />
-						<cfset StructDelete(dataStorage.timestamps, key, false) />
-						<cfset StructDelete(dataStorage.data, ListLast(key, "_"), false) />
+						<cfset key = listLast(dataTimestampArray[i], "_") />
+						<cfset removeHashedKey(key) />
 					<cfelse>
 						<cfbreak />
 					</cfif>
@@ -213,10 +199,27 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="removeHashedKey" access="private" returntype="void" output="false">
+		<cfargument name="hashedKey" type="string" required="true"
+			hint="The key does need to be hashed." />
+		<cfset var dataStorage = getCacheScope() />
+		<cfset var cache = dataStorage.data />
+		<cfset var timeStampKey = "" />
+
+		<cfif StructKeyExists(cache, arguments.hashedKey)>
+			<cfset StructDelete(cache, arguments.hashedKey, false) />
+			<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
+			<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
+			<cfset getCacheStats().incrementEvictions(1) />
+			<cfset getCacheStats().decrementTotalElements(1) />
+			<cfset getCacheStats().decrementActiveElements(1) />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
 		hint="Cleanups the data storage.">
 		
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
+		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, getCurrentDateTime())) />
 		<cfset var threadingAdapter = "" />
 		
 		<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
@@ -235,7 +238,7 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="hashKey" access="private" returntype="string" output="false"
+	<cffunction name="hashKey" access="public" returntype="string" output="false"
 		hint="Creates a hash from a key name.">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn Hash(UCase(arguments.key)) />
@@ -243,14 +246,14 @@ Notes:
 	
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
 		hint="Creates a timestamp for use.">
-		<cfargument name="time" type="date" required="false" default="#Now()#" />
+		<cfargument name="time" type="date" required="false" default="#getCurrentDateTime()#" />
 		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
 	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
 		hint="Computes a cache until timestamp for this cache block.">
 		
-		<cfset var timestamp = Now() />
+		<cfset var timestamp = getCurrentDateTime() />
 		<cfset var cacheFor = getCacheFor() />
 		<cfset var unit = getCacheForUnit() />
 		
@@ -326,6 +329,20 @@ Notes:
 	</cffunction>
 	<cffunction name="getCacheFor" access="private" returntype="string" output="false">
 		<cfreturn variables.cacheFor />
+	</cffunction>
+
+	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
+		hint="Used internally for unit testing.">
+		<cfif variables.currentDateTime neq "">
+			<cfreturn variables.currentDateTime />
+		<cfelse>
+			<cfreturn now() />
+		</cfif>
+	</cffunction>
+	<cffunction name="setCurrentDateTime" access="public" returntype="void" output="false" 
+		hint="Used internally for unit testing.">
+		<cfargument name="currentDateTime" type="date" required="true" />
+		<cfset variables.currentDateTime = arguments.currentDateTime />
 	</cffunction>
 
 	<cffunction name="setCacheForUnit" access="private" returntype="void" output="false">

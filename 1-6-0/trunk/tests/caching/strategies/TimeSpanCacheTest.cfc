@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id:$
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
@@ -62,30 +62,22 @@ Notes:
 
 		<cfset var testKey = "productID=1" />
 		
-		<cfoutput>testPutExistsGet called<br /></cfoutput>
-
 		<cfset variables.cache.put(testkey, "testing") />
 		
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
-
-		<cfoutput>testPutExistsGet done<br /></cfoutput>
 	</cffunction>
 	
 	<cffunction name="testFlush" access="public" returntype="void"
 		hint="Tests flushing the cache.">
 		
 		<cfset var testKey = "productID=1" />
-		
-		<cfoutput>testFlush called<br /></cfoutput>
 
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		
 		<cfset variables.cache.flush() />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
-		
-		<cfoutput>testFlush done<br /></cfoutput>
 	</cffunction>
 	
 	<cffunction name="testRemove" access="public" returntype="void"
@@ -93,15 +85,27 @@ Notes:
 		
 		<cfset var testKey = "productID=1" />
 
-		<cfoutput>testRemove called<br /></cfoutput>
-
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		
 		<cfset variables.cache.remove(testkey) />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
+	</cffunction>
+	
+	<cffunction name="testReap" access="public" returntype="void"
+		hint="Tests removing cached data by key.">
+		<cfset var i = 0 />
 		
-		<cfoutput>testRemove done<br /></cfoutput>
+		<cfloop from="1" to="2" index="i">
+			<cfset variables.cache.put("productID=#i#", "testing #i#") />
+		</cfloop>
+		
+		<cfset variables.cache.setCurrentDateTime(dateAdd("h", 2, now())) />
+		<cfset variables.cache.reap() />
+		
+		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
+		<cfset assertFalse(variables.cache.keyExists("productID=2")) />
+		
 	</cffunction>
 
 </cfcomponent>
