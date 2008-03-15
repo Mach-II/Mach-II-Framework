@@ -85,8 +85,8 @@ Notes:
 		<cfif StructKeyExists(arguments.xml.xmlAttributes, "criteria")>
 			<cfset criteria = arguments.xml.xmlAttributes["criteria"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "cacheName")>
-			<cfset cacheName = arguments.xml.xmlAttributes["cacheName"] />
+		<cfif StructKeyExists(arguments.xml.xmlAttributes, "name")>
+			<cfset cacheName = arguments.xml.xmlAttributes["name"] />
 		</cfif>
 		
 		<!--- Build the cache handler --->
@@ -130,6 +130,27 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="disableCaching" access="public" returntype="void" output="false"
+		hint="Disables caching.">
+		
+		<cfset var key = "" />
+		<cfset var handlers = getCacheHandlers() />
+		
+		<cfloop collection="#handlers#" item="key">
+			<cfset handlers[key].disableCaching() />
+		</cfloop>
+	</cffunction>
+	<cffunction name="enableCaching" access="public" returntype="void" output="false"
+		hint="Enables caching.">
+			
+		<cfset var key = "" />
+		<cfset var handlers = getCacheHandlers() />
+		
+		<cfloop collection="#handlers#" item="key">
+			<cfset handlers[key].enableCaching() />
+		</cfloop>
+	</cffunction>
+	
 	<cffunction name="addCacheHandler" access="public" returntype="void" output="false"
 		hint="Adds a cache handler.">
 		<cfargument name="cacheHandler" type="MachII.framework.CacheHandler" required="true"
@@ -252,10 +273,17 @@ Notes:
 		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var handlerId = "" />
+		<cfset var keyHashed = getKeyHash(arguments.cacheName) />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("CacheManager clear cache for '#arguments.cacheName#' (#keyHashed#), " &
+					"exists: #StructKeyExists(variables.handlersByName, keyHashed)#, " &
+					"handler keys: #structKeyList(variables.handlersByName)#.") />
+		</cfif>
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this cacheName --->
-		<cfif StructKeyExists(variables.handlersByName, getKeyHash(arguments.cacheName))>
-			<cfset handlerId = variables.handlersByName[getKeyHash(arguments.cacheName)] />
+		<cfif StructKeyExists(variables.handlersByName, keyHashed)>
+			<cfset handlerId = variables.handlersByName[keyHashed] />
 			<cfset getCacheHandler(handlerId).clearCache(event, criteria) />
 		</cfif>
 	</cffunction>

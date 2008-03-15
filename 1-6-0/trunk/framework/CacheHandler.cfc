@@ -41,6 +41,7 @@ Notes:
 	<cfset variables.cacheStrategy = 0 />
 	<cfset variables.cacheOutputBuffer = "" />
 	<cfset variables.log = 0 />
+	<cfset variables.cachingEnabled = true />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -79,10 +80,8 @@ Notes:
 		<cfset var dataFromCache = getCacheData(key) />
 		<cfset var log = getLog() />
 		
-		<!--- TODO: Change so that data and output are stored in the same key in the cache --->
-		
 		<!--- Create the cache since we do not have one --->
-		<cfif NOT IsDefined("dataFromCache")>
+		<cfif NOT IsDefined("dataFromCache") OR NOT getCachingEnabled()>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler running commands and creating cache.") />
 			</cfif>
@@ -98,10 +97,15 @@ Notes:
 				</cfloop>
 			</cfsavecontent>
 			
-			<!--- Grab the change data and cache it for later --->
-			<cfset setCacheData(key, arguments.event.getArgs()) />
-			<cfset setCacheOutputBuffer(key, outputBuffer) />
-			
+			<cfif getCachingEnabled()>
+				<!--- Grab the data and output and cache it for later --->
+				<cfset setCacheData(key, arguments.event.getArgs(), outputBuffer) />
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Cache-handler caching is disabled so skipped caching.") />
+				</cfif>
+			</cfif>
+
 			<cfoutput>#outputBuffer#</cfoutput>
 		<cfelse>
 			<cfif log.isDebugEnabled()>
@@ -109,8 +113,8 @@ Notes:
 			</cfif>
 
 			<!--- Replay the event from the cache --->
-			<cfset arguments.event.setArgs(dataFromCache) />
-			<cfoutput>#getCacheOutputBuffer(key)#</cfoutput>
+			<cfset arguments.event.setArgs(dataFromCache.data) />
+			<cfoutput>#dataFromCache.output#</cfoutput>
 		</cfif>
 		
 		<cfreturn continue />
@@ -119,12 +123,21 @@ Notes:
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 
-		<cfset var key = getKeyFromCriteria(arguments.event) />
+		<cfset var item = "" />
+		<cfset var key = "" />
+		
+		<cfloop list="#arguments.criteria#" index="item">
+			<cfset key = ListAppend(key, "#item#=#arguments.event.getArg(item)#", "&") />
+		</cfloop>
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
+		</cfif>
 		
 		<cfif len(key)>
 			<cfset getCacheStrategy().remove(key) />
-			<cfset getCacheStrategy().remove(key & "_output") />
 		<cfelse>
 			<cfset getCacheStrategy().flush() />
 		</cfif>
@@ -134,6 +147,16 @@ Notes:
 		hint="Adds a Command.">
 		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
+	</cffunction>
+	
+	<cffunction name="disableCaching" access="public" returntype="void" output="false"
+		hint="Disables caching.">
+		<cfset setCachingEnabled(false) />
+	</cffunction>
+	
+	<cffunction name="enableCaching" access="public" returntype="void" output="false"
+		hint="Enables caching.">
+		<cfset setCachingEnabled(true) />
 	</cffunction>
 	
 	<!---
@@ -195,6 +218,16 @@ Notes:
 		<cfreturn variables.criteria />
 	</cffunction>
 	
+	<cffunction name="setCachingEnabled" access="public" returntype="void" output="false"
+		hint="Sets the caching enabled.">
+		<cfargument name="cachingEnabled" type="boolean" required="true" />
+		<cfset variables.cachingEnabled = arguments.cachingEnabled />
+	</cffunction>
+	<cffunction name="getCachingEnabled" access="public" returntype="boolean" output="false"
+		hint="Gets the caching enabled.">
+		<cfreturn variables.cachingEnabled />
+	</cffunction>
+	
 	<cffunction name="setParentHandlerName" access="private" returntype="void" output="false">
 		<cfargument name="parentHandlerName" type="string" required="true" />
 		<cfset variables.parentHandlerName = arguments.parentHandlerName />
@@ -214,22 +247,18 @@ Notes:
 	<cffunction name="setCacheData" access="private" returntype="void" output="false">
 		<cfargument name="key" type="string" required="true" />
 		<cfargument name="cacheData" type="struct" required="true" />
-		<cfset getCacheStrategy().put(arguments.key, arguments.cacheData) />
+		<cfargument name="output" type="string" required="true" />
+		
+		<cfset var element = structNew() />
+		
+		<cfset element.data = arguments.cacheData />
+		<cfset element.output = arguments.output />
+		<cfset getCacheStrategy().put(arguments.key, element) />
 	</cffunction>
 	<cffunction name="getCacheData" access="public" returntype="any" output="false" 
 		hint="Return type is any since it might return null if the key is not in the cache">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn getCacheStrategy().get(arguments.key) />
-	</cffunction>
-	
-	<cffunction name="setCacheOutputBuffer" access="private" returntype="void" output="false">
-		<cfargument name="key" type="string" required="true" />
-		<cfargument name="cacheOutputBuffer" type="string" required="true" />
-		<cfset getCacheStrategy().put(arguments.key & "_output", arguments.cacheOutputBuffer) />
-	</cffunction>
-	<cffunction name="getCacheOutputBuffer" access="public" returntype="string" output="false">
-		<cfargument name="key" type="string" required="true" />
-		<cfreturn getCacheStrategy().get(arguments.key & "_output") />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"

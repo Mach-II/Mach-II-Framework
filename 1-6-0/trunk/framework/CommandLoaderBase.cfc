@@ -146,7 +146,7 @@ Notes:
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
 			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "cacheName")>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
 		</cfif>
