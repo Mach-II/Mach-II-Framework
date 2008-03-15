@@ -48,7 +48,7 @@ in the application scope.
  	displayname="LRUCache"
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
-	hint="A default caching strategy.">
+	hint="A caching strategy which uses an LRU eviction policy.">
 
 	<!---
 	PROPERTIES
@@ -66,6 +66,7 @@ in the application scope.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the strategy.">
 
+		<!--- Validate and set parameters --->
 		<cfif isParameterDefined("size")>
 			<cfif NOT isNumeric(getParameter("size"))>
 				<cfthrow type="MachII.caching.strategies.LRUCache"

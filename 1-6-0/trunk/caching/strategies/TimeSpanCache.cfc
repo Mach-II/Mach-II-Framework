@@ -49,7 +49,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
  	displayname="TimeSpanCache"
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
-	hint="A default caching strategy which cache items for a specified time span.">
+	hint="A caching strategy which uses a time span eviction policy.">
 
 	<!---
 	PROPERTIES
