@@ -22,6 +22,27 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
+
+- The default setting for the LRU cache "size" is 100.
+- The default setting for the LRU cache "scope" is "application".
+
+Using all of the default settings will result in caching 100 elements of data
+in the application scope.
+
+<property name="Caching" type="MachII.caching.CachingProperty">
+      <parameters>
+            <!-- Naming a default cache name is not required, but required if you do not want 
+                 to specify the 'cacheName' attribute in the cache command -->
+            <parameter name="defaultCacheName" value="default" />
+            <parameter name="default">
+                  <struct>
+                        <key name="type" value="MachII.caching.strategies.LRUCache" />
+                        <key name="size" value="100" />
+                        <key name="scope" value="application" />
+                  </struct>
+            </parameter>
+      </parameters>
+</property>
 --->
 <cfcomponent
  	displayname="LRUCache"
@@ -35,7 +56,7 @@ Notes:
 	<cfset variables.cache = StructNew() />
 	<cfset variables.cache.data = StructNew() />
 	<cfset variables.cache.timestamps = StructNew() />
-	<cfset variables.size = 10 />
+	<cfset variables.size = 100 />
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = CreateUUID() />
 	

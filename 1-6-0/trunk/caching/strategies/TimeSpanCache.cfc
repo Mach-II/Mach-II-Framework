@@ -22,6 +22,13 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
+
+- The default setting for the "scope" is "application".
+- The default setting for the "cacheFor" length is "1".
+- The default setting for the "cacheUnit" is "hour".
+
+Using all of the default settings will result in caching data for 1 hour in the application scope.
+
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
@@ -343,10 +350,10 @@ Notes:
 
 	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
 		hint="Used internally for unit testing.">
-		<cfif variables.currentDateTime neq "">
+		<cfif variables.currentDateTime NEQ "">
 			<cfreturn variables.currentDateTime />
 		<cfelse>
-			<cfreturn now() />
+			<cfreturn Now() />
 		</cfif>
 	</cffunction>
 	<cffunction name="setCurrentDateTime" access="public" returntype="void" output="false" 
