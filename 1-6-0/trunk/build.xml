@@ -83,6 +83,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 		<delete dir="${dest}"/>
 		<delete dir="${zip}"/>
+		<delete dir="${mxunit.output}"/>
 	</target>
 
 	<target name="build" depends="clean,lastCommitRevision" description="Creates a build in the 'dest' directory.">
@@ -171,16 +172,19 @@ Notes:
 		<echo message="---------------------------------------------"/>
 		<echo message="Testing the framework"/>
 		<echo message="---------------------------------------------"/>
-		<mkdir dir="${mxunit.output}" />
+		<delete dir="${mxunit.output}"/>
+		<mkdir dir="${mxunit.output}"/>
 		<mxunit server="localhost"
 			outputdir="${mxunit.output}"
 			verbose="${debug}"
 			haltonerror="true">
-			<testcase name="MachII.tests.caching.strategies.TimeSpanCacheTest" />
-			<testcase name="MachII.tests.caching.strategies.LRUCacheTest" />
-			<testcase name="MachII.tests.logging.LogTest" />
-			<testcase name="MachII.tests.logging.LogFactoryTest" />
-			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest" />
+			<!-- caching -->
+			<testcase name="MachII.tests.caching.strategies.TimeSpanCacheTest"/>
+			<testcase name="MachII.tests.caching.strategies.LRUCacheTest"/>
+			<!-- logging -->
+			<testcase name="MachII.tests.logging.LogTest"/>
+			<testcase name="MachII.tests.logging.LogFactoryTest"/>
+			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
 			<!--
 			This does not work yet because the it appears not to recurse directories yet
 			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
@@ -191,7 +195,7 @@ Notes:
 	<target name="zip-init">
 		<echo message="Gettting last commit revision number"/>
 		<svn>
-			<status path="${basedir}" lastChangedRevisionProperty="svnBuildVersion" />
+			<status path="${basedir}" lastChangedRevisionProperty="svnBuildVersion"/>
 		</svn>
 		<input addProperty="buildVersion"
 			message="Input a build number or minor version level (0-9) (defaults to SVN build number):"
