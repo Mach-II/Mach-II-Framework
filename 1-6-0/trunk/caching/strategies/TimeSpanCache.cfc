@@ -66,18 +66,36 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the strategy.">
 
+		<!--- Validate and set parameters --->
 		<cfif isParameterDefined("cacheFor")>
-			<cfset setCacheFor(getParameter("cacheFor")) />
+			<cfif NOT isNumeric(getParameter("cacheFor"))>
+				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
+					message="Invalid CacheFor of '#getParameter("cacheFor")#'."
+					detail="CacheFor must be numeric." />
+			<cfelse>
+				<cfset setCacheFor(getParameter("cacheFor")) />
+			</cfif>
 		</cfif>
 		<cfif isParameterDefined("cacheForUnit")>
-			<cfset setCacheForUnit(getParameter("cacheForUnit")) />
+			<cfif NOT ListFindNoCase("seconds,minutes,hours,days,forever", getParameter("cacheForUnit"))>
+				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
+					message="Invalid CacheForUnit of '#getParameter("cacheForUnit")#'."
+					detail="Use 'seconds, 'minutes', 'hours', 'days' or 'forever'." />
+			<cfelse>
+				<cfset setCacheForUnit(getParameter("cacheForUnit")) />
+			</cfif>
 		</cfif>
 		<cfif isParameterDefined("scope")>
-			<cfset setScope(getParameter("scope")) />
+			<cfif NOT ListFindNoCase("application,server,session", getParameter("scope"))>
+				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
+					message="Invalid Scope of '#getParameter("scope")#'."
+					detail="Use 'application', 'server' or 'session'." />
+			<cfelse>
+				<cfset setScope(getParameter("scope")) />
+			</cfif>
 		</cfif>
 		
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
-		
 	</cffunction>
 	
 	<!---
@@ -136,11 +154,10 @@ Notes:
 
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var findKey = StructKeyExists(dataStorage.data, hashedKey) />
 		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
 		<cfset var diffTimestamp = createTimestamp(computeCacheUntilTimestamp()) />
 
-		<cfif NOT findKey>
+		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfreturn false />
 		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) GTE 0>
 			<cfset remove(arguments.key) />
@@ -279,7 +296,7 @@ Notes:
 		
 		<cfif getScope() EQ "application">
 			<cfset storage = variables.cache />
-		<cfelseif getType() EQ "session">
+		<cfelseif getScope() EQ "session">
 			<cfset storage = StructGet("session") />
 			
 			<cfif NOT StructKeyExists(storage, "_MachIITimespanCache.#getScopeKey()#")>
@@ -287,7 +304,7 @@ Notes:
 			</cfif>
 			
 			<cfset storage = storage._MachIITimespanCache[getScopeKey()] />
-		<cfelseif getType() EQ "server">
+		<cfelseif getScope() EQ "server">
 			<cfset storage = StructGet("server") />
 			
 			<cfif NOT StructKeyExists(storage, "_MachIITimespanCache.#getScopeKey()#")>
@@ -306,9 +323,9 @@ Notes:
 
 		<cfif getScope() EQ "application">
 			<cfset variables.cache = arguments.cache />
-		<cfelseif getType() EQ "session">
+		<cfelseif getScope() EQ "session">
 			<cfset session._MachIITimespanCache[getScopeKey()] = arguments.cache />
-		<cfelseif getType EQ "server">
+		<cfelseif getScope() EQ "server">
 			<cfset server._MachIITimespanCache[getScopeKey()] = arguments.cache />
 		</cfif>
 	</cffunction>
@@ -317,17 +334,10 @@ Notes:
 	ACCESSORS
 	--->
 	<cffunction name="setCacheFor" access="private" returntype="void" output="false">
-		<cfargument name="cacheFor" type="string" required="true" />
-
-		<cfif NOT isNumeric(arguments.cacheFor)>
-			<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-				message="Invalid CacheFor of '#arguments.cacheFor#'."
-				detail="CacheFor must be numeric." />
-		</cfif>
-
+		<cfargument name="cacheFor" type="numeric" required="true" />
 		<cfset variables.cacheFor = arguments.cacheFor />
 	</cffunction>
-	<cffunction name="getCacheFor" access="private" returntype="string" output="false">
+	<cffunction name="getCacheFor" access="public" returntype="numeric" output="false">
 		<cfreturn variables.cacheFor />
 	</cffunction>
 
@@ -347,31 +357,17 @@ Notes:
 
 	<cffunction name="setCacheForUnit" access="private" returntype="void" output="false">
 		<cfargument name="cacheForUnit" type="string" required="true" />
-		
-		<cfif NOT ListFindNoCase("seconds,minutes,hours,days,forever", arguments.cacheForUnit)>
-			<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-				message="Invalid CacheForUnit of '#arguments.cacheForUnit#'."
-				detail="Use 'seconds, 'minutes', 'hours', 'days' or 'forever'." />
-		</cfif>
-
 		<cfset variables.cacheForUnit = arguments.cacheForUnit />
 	</cffunction>
-	<cffunction name="getCacheForUnit" access="private" returntype="string" output="false">
+	<cffunction name="getCacheForUnit" access="public" returntype="string" output="false">
 		<cfreturn variables.cacheForUnit />
 	</cffunction>
 	
 	<cffunction name="setScope" access="private" returntype="void" output="false">
-		<cfargument name="scope" type="string" required="true" />
-		
-		<cfif NOT ListFindNoCase("application,server,session", arguments.scope)>
-			<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-				message="Invalid Scope of '#arguments.scope#'."
-				detail="Use 'application', 'server' or 'session'." />
-		</cfif>
-		
+		<cfargument name="scope" type="string" required="true" />		
 		<cfset variables.scope = arguments.scope />
 	</cffunction>
-	<cffunction name="getScope" access="private" returntype="string" output="false">
+	<cffunction name="getScope" access="public" returntype="string" output="false">
 		<cfreturn variables.scope />
 	</cffunction>
 	

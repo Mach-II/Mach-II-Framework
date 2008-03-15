@@ -32,12 +32,12 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.cache = structNew() />
-	<cfset variables.cache.data = structNew() />
-	<cfset variables.cache.timestamps = structNew() />
+	<cfset variables.cache = StructNew() />
+	<cfset variables.cache.data = StructNew() />
+	<cfset variables.cache.timestamps = StructNew() />
 	<cfset variables.size = 10 />
 	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = createUUID() />
+	<cfset variables.scopeKey = CreateUUID() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -46,12 +46,23 @@ Notes:
 		hint="Configures the strategy.">
 
 		<cfif isParameterDefined("size")>
-			<cfset setSize(getParameter("size")) />
+			<cfif NOT isNumeric(getParameter("size"))>
+				<cfthrow type="MachII.caching.strategies.LRUCache"
+					message="Invalid Size of '#getParameter("size")#'."
+					detail="Size must be numeric." />
+			<cfelse>			
+				<cfset setSize(getParameter("size")) />
+			</cfif>
 		</cfif>
 		<cfif isParameterDefined("scope")>
-			<cfset setScope(getParameter("scope")) />
+			<cfif NOT ListFindNoCase("application,server,session", getParameter("scope"))>
+				<cfthrow type="MachII.caching.strategies.LRUCache"
+					message="Invalid Scope of '#getParameter("scope")#'."
+					detail="Use 'application', 'server' or 'session'." />
+			<cfelse>
+				<cfset setScope(getParameter("scope")) />
+			</cfif>
 		</cfif>
-		
 	</cffunction>
 	
 	<!---
@@ -59,7 +70,8 @@ Notes:
 	--->
 	<cffunction name="put" access="public" returntype="void" output="false"
 		hint="Puts data into the cache by key.">
-		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
+		<cfargument name="key" type="string" required="true"
+			hint="Key does not need to be hashed." />
 		<cfargument name="data" type="any" required="true" />
 
 		<cfset var dataStorage = getCacheScope() />
@@ -78,8 +90,9 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
-		hint="Gets data from the cache by key. Returns null if the key isn't in the cache.">
-		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
+		hint="Gets data from the cache by key. Returns null if the key is not in the cache.">
+		<cfargument name="key" type="string" required="true"
+			hint="Key does not need to be hashed." />
 
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var cache = dataStorage.data />
@@ -107,13 +120,13 @@ Notes:
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checkes if a key exists in the cache.">
-		<cfargument name="key" type="string" required="true" hint="Doesn't needs to be hashed" />
+		<cfargument name="key" type="string" required="true"
+			hint="Key does not need to be hashed." />
 
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var findKey = StructKeyExists(dataStorage.data, hashedKey) />
 
-		<cfif NOT findKey>
+		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfreturn false />
 		<cfelse>
 			<cfreturn true />
@@ -136,17 +149,17 @@ Notes:
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var key = "" />
 		
-		<cfif (structCount(dataStorage.data) + 1) gt getSize()>
+		<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
 		
 			<cflock name="_MachIILRUCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
 				
-				<cfif (structCount(dataStorage.data) + 1) gt getSize()>
+				<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
 					<!--- Get array of timestamps and sorted by oldest (least) timestamp first --->
 					<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
 					<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
 					
 					<!--- Cleanup by removing the oldest entry --->
-					<cfset key = listLast(dataTimestampArray[1], "_") />
+					<cfset key = ListLast(dataTimestampArray[1], "_") />
 					<cfset removeHashedKey(key) />
 				</cfif>
 				
@@ -166,6 +179,7 @@ Notes:
 	<cffunction name="removeHashedKey" access="private" returntype="void" output="false">
 		<cfargument name="hashedKey" type="string" required="true"
 			hint="The key does need to be hashed." />
+
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var cache = dataStorage.data />
 		<cfset var timeStampKey = "" />
@@ -193,7 +207,7 @@ Notes:
 		
 		<cfif getScope() EQ "application">
 			<cfset storage = variables.cache />
-		<cfelseif getType() EQ "session">
+		<cfelseif getScope() EQ "session">
 			<cfset storage = StructGet("session") />
 			
 			<cfif NOT StructKeyExists(storage, "_MachIICache.#getScopeKey()#")>
@@ -201,7 +215,7 @@ Notes:
 			</cfif>
 			
 			<cfset storage = storage._MachIICache[getScopeKey()] />
-		<cfelseif getType() EQ "server">
+		<cfelseif getScope() EQ "server">
 			<cfset storage = StructGet("server") />
 			
 			<cfif NOT StructKeyExists(storage, "_MachIICache.#getScopeKey()#")>
@@ -218,9 +232,9 @@ Notes:
 		<cfargument name="cache" type="struct" required="true" />
 		<cfif getScope() EQ "application">
 			<cfset variables.cache = arguments.cache />
-		<cfelseif getType() EQ "session">
+		<cfelseif getScope() EQ "session">
 			<cfset session._MachIICache[getScopeKey()] = arguments.cache />
-		<cfelseif getType EQ "server">
+		<cfelseif getScope() EQ "server">
 			<cfset server._MachIICache[getScopeKey()] = arguments.cache />
 		</cfif>
 	</cffunction>
@@ -240,7 +254,7 @@ Notes:
 		<cfargument name="scope" type="string" required="true" />
 		<cfset variables.scope = arguments.scope />
 	</cffunction>
-	<cffunction name="getScope" access="private" returntype="string" output="false">
+	<cffunction name="getScope" access="public" returntype="string" output="false">
 		<cfreturn variables.scope />
 	</cffunction>
 	
