@@ -110,6 +110,14 @@ See individual caching strategies for more information on configuration.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="disableCaching" access="public" returntype="void" output="false"
+		hint="Disables caching. Same as calling getAppManager().getCacheManager().disableCaching()">
+		<cfset getAppManager().getCacheManager().disableCaching() />
+	</cffunction>
+	<cffunction name="enableCaching" access="public" returntype="void" output="false"
+		hint="Enables caching. Same as calling getAppManager().getCacheManager().enableCaching()">
+		<cfset getAppManager().getCacheManager().enableCaching() />
+	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS
