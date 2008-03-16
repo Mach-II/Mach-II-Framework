@@ -23,11 +23,30 @@ Updated version: 1.6.0
 
 Notes:
 
-- The default setting for the "scope" is "application".
-- The default setting for the "cacheFor" length is "1".
-- The default setting for the "cacheUnit" is "hour".
+Configuration parameters
 
-Using all of the default settings will result in caching data for 1 hour in the application scope.
+Scope
+- The scope that the cache should be placed in.
+- The default setting for "scope" is "application".
+- Valid values are "application", "server" and "session".
+
+CacheFor
+- The numeric length of time that the strategy should cache for.
+- The default setting for "cacheFor" length is "1".
+- Valid numeric value only.
+
+CacheUnit
+- The unit of time that the strategy should use for cache length.
+- The default setting for "cacheUnit" is "hour".
+- Valid values are "seconds", "minutes", "hours", "days" and "forever".
+
+CleanupIntervalInMinutes
+- The interval of time in minutes in which to run the reap() method.
+- The default setting for "cleanupIntervalInMinutes" is "3."
+- Valid numeric value only.
+
+Using all of the default settings will result in caching data for 1 hour in the 
+application scope which would be cleaned up via reap every 3 minutes.
 
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
@@ -40,6 +59,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
                         <key name="cacheUnit" value="hour" />
+						<key name="cleanupIntervalInMinutes" value="3" />
                   </struct>
             </parameter>
       </parameters>
@@ -54,15 +74,15 @@ Using all of the default settings will result in caching data for 1 hour in the 
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.cache = structNew() />
-	<cfset variables.cache.data = structNew() />
-	<cfset variables.cache.timestamps = structNew() />
+	<cfset variables.cache = StructNew() />
+	<cfset variables.cache.data = StructNew() />
+	<cfset variables.cache.timestamps = StructNew() />
 	<cfset variables.cacheFor = 1 />
 	<cfset variables.cacheForUnit = "hours" />
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = CreateUUID() />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
-	<cfset variables.cleanupDifference = -3 />
+	<cfset variables.cleanupInterval = 3 />
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.currentDateTime = "" />
 	<cfset variables.lastCleanup = createTimestamp() />
@@ -101,6 +121,15 @@ Using all of the default settings will result in caching data for 1 hour in the 
 				<cfset setScope(getParameter("scope")) />
 			</cfif>
 		</cfif>
+		<cfif isParameterDefined("cleanupIntervalInMinutes")>
+			<cfif NOT isNumeric(getParameter("cleanupIntervalInMinutes")) OR getParameter("cleanupIntervalInMinutes") LTE 0>
+				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
+					message="Invalid CleanupIntervalInMinutes of '#getParameter("cleanupIntervalInMinutes")#'."
+					detail="CleanupIntervalInMinutes must be numeric and greater than 0." />
+			<cfelse>
+				<cfset setCleanupInterval(getParameter("cleanupIntervalInMinutes")) />
+			</cfif>
+		</cfif>
 		
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
 	</cffunction>
@@ -122,7 +151,6 @@ Using all of the default settings will result in caching data for 1 hour in the 
 		</cfif>
 		<cfset dataStorage.data[hashedKey] = arguments.data />
 		<cfset dataStorage.timestamps[createTimestamp() & "_" & hashedKey] = hashedKey />
-		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -151,7 +179,6 @@ Using all of the default settings will result in caching data for 1 hour in the 
 
 		<cfset dataStorage.data = StructNew() />
 		<cfset dataStorage.timestamps = StructNew() />
-		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
@@ -243,7 +270,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
 		hint="Cleanups the data storage.">
 		
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, getCurrentDateTime())) />
+		<cfset var diffTimestamp = createTimestamp(DateAdd("n", - getCleanupInterval(), getCurrentDateTime())) />
 		<cfset var threadingAdapter = "" />
 		
 		<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
@@ -323,19 +350,6 @@ Using all of the default settings will result in caching data for 1 hour in the 
 		
 		<cfreturn storage />
 	</cffunction>
-	
-	<cffunction name="setCacheScope" access="private" returntype="void" output="false"
-		hint="Sets the cache to the desired scope.">
-		<cfargument name="cache" type="struct" required="true" />
-
-		<cfif getScope() EQ "application">
-			<cfset variables.cache = arguments.cache />
-		<cfelseif getScope() EQ "session">
-			<cfset session._MachIITimespanCache[getScopeKey()] = arguments.cache />
-		<cfelseif getScope() EQ "server">
-			<cfset server._MachIITimespanCache[getScopeKey()] = arguments.cache />
-		</cfif>
-	</cffunction>
 
 	<!---
 	ACCESSORS
@@ -380,6 +394,14 @@ Using all of the default settings will result in caching data for 1 hour in the 
 	
 	<cffunction name="getScopeKey" access="private" returntype="string" output="false">
 		<cfreturn variables.scopeKey />
+	</cffunction>
+
+	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false">
+		<cfargument name="cleanupInterval" type="numeric" required="true" />		
+		<cfset variables.cleanupInterval = arguments.cleanupInterval />
+	</cffunction>
+	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false">
+		<cfreturn variables.cleanupInterval />
 	</cffunction>
 	
 	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false">
