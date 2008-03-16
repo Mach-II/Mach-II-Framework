@@ -99,6 +99,7 @@ Notes:
 				<exclude name="dest/"/>
 				<exclude name="zip/"/>
 				<exclude name="tests/output/"/>
+				<exclude name=".project"/>
 			</fileset>
 			<filterset begintoken="@" endtoken="@">
 				<filter token="minorVersion" value="${buildVersion}"/>
