@@ -23,8 +23,17 @@ Updated version: 1.6.0
 
 Notes:
 
+Configuration parameters
+
+Size
+- The size of the LRU cache size.
 - The default setting for the LRU cache "size" is 100.
-- The default setting for the LRU cache "scope" is "application".
+- Valid numeric value only.
+
+Scope
+- The scope that the cache should be placed in.
+- The default setting for "scope" is "application".
+- Valid values are "application", "server" and "session".
 
 Using all of the default settings will result in caching 100 elements of data
 in the application scope.
@@ -68,10 +77,10 @@ in the application scope.
 
 		<!--- Validate and set parameters --->
 		<cfif isParameterDefined("size")>
-			<cfif NOT isNumeric(getParameter("size"))>
+			<cfif NOT isNumeric(getParameter("size")) OR getParameter("size") LTE 0>
 				<cfthrow type="MachII.caching.strategies.LRUCache"
 					message="Invalid Size of '#getParameter("size")#'."
-					detail="Size must be numeric." />
+					detail="Size must be numeric and greater than 0." />
 			<cfelse>			
 				<cfset setSize(getParameter("size")) />
 			</cfif>
@@ -108,7 +117,6 @@ in the application scope.
 		</cfif>
 		<cfset dataStorage.data[hashedKey] = arguments.data />
 		<cfset dataStorage.timestamps[createTimestamp() & "_" & hashedKey] = hashedKey />
-		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -137,7 +145,6 @@ in the application scope.
 
 		<cfset dataStorage.data = StructNew() />
 		<cfset dataStorage.timestamps = StructNew() />
-		<cfset setCacheScope(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
@@ -248,17 +255,6 @@ in the application scope.
 		</cfif>
 		
 		<cfreturn storage />
-	</cffunction>
-	
-	<cffunction name="setCacheScope" access="private" returntype="void" output="false">
-		<cfargument name="cache" type="struct" required="true" />
-		<cfif getScope() EQ "application">
-			<cfset variables.cache = arguments.cache />
-		<cfelseif getScope() EQ "session">
-			<cfset session._MachIICache[getScopeKey()] = arguments.cache />
-		<cfelseif getScope() EQ "server">
-			<cfset server._MachIICache[getScopeKey()] = arguments.cache />
-		</cfif>
 	</cffunction>
 
 	<!---
