@@ -176,6 +176,7 @@ in the application scope.
 		hint="Looks at the timestamps of the cache pieces and throws out oldest one if the cache has more then the its max size.">
 			
 		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataTimestampArray = ArrayNew(1) />
 		<cfset var key = "" />
 		
 		<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
