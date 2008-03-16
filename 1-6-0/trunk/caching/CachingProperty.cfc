@@ -56,7 +56,7 @@ See individual caching strategies for more information on configuration.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.defaultCacheName = "" />
+	<cfset variables.defaultCacheName = "default" />
 	<cfset variables.cachingEnabled = true />
 	
 	<!---
@@ -69,14 +69,13 @@ See individual caching strategies for more information on configuration.
 		<cfset var strategies = StructNew() />
 		<cfset var key = "" />
 
-		<!--- The default cache strategy (this must be done before default strategy 
-			is configured if required) --->
+		<!--- Set the default cache strategy
+			(this must be done before default strategy is configured if required) --->
 		<cfset setDefaultCacheName(getParameter("defaultCacheName", "default")) />
 		
-		<!--- Set if caching is enabled (which is by default true) --->
-		<cfif isParameterDefined("cachingEnabled")>
-			<cfset setCachingEnabled(getParameter("cachingEnabled")) />
-		</cfif>
+		<!--- Set caching mode
+			(which is by default true) --->
+		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
 		
 		<!--- Load defined cache strategies --->
 		<cfloop collection="#params#" item="key">

@@ -119,11 +119,11 @@ Notes:
 			<!--- Check if we need to use the default cache name --->
 			<cfif NOT Len(cacheName)>
 				<cfset cacheName = getDefaultCacheName() />
-			</cfif>			
+			</cfif>
 			
 			<!--- Load the strategy into the handler --->
-			<cfset strategy = getCacheStrategyByName(cacheName) />
-			<cfset variables.handlers[handlerId].setCacheStrategy(strategy) />
+			<cfset cacheStrategy = getCacheStrategyByName(cacheName) />
+			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
 	</cffunction>
 	
