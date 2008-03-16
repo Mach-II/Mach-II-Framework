@@ -193,7 +193,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
 		<cfset var key = "" />
 		<cfset var i = "" />
 		
-		<cflock name="_MachIITimeSpanCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
+		<cflock name="_MachIITimeSpanCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
 			<cfset variables.lastCleanup = createTimestamp() />
@@ -250,7 +250,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
 		
 			<cfset threadingAdapter = getThreadingAdapter() />
 			
-			<cflock name="_MachIITimespanCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
+			<cflock name="_MachIITimespanCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
 				<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
 					<cfif threadingAdapter.allowThreading()>
 						<cfset threadingAdapter.run(this, "reap") />
@@ -262,7 +262,7 @@ Using all of the default settings will result in caching data for 1 hour in the 
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="hashKey" access="public" returntype="string" output="false"
+	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hash from a key name.">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn Hash(UCase(arguments.key)) />

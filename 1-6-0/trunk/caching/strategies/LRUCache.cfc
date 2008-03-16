@@ -173,7 +173,7 @@ in the application scope.
 		
 		<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
 		
-			<cflock name="_MachIILRUCacheCleanup" type="exclusive" timeout="5" throwontimeout="false">
+			<cflock name="_MachIILRUCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
 				
 				<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
 					<!--- Get array of timestamps and sorted by oldest (least) timestamp first --->
@@ -188,11 +188,6 @@ in the application scope.
 			</cflock>
 			
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="hashKey" access="public" returntype="string" output="false">
-		<cfargument name="key" type="string" required="true" />
-		<cfreturn Hash(UCase(arguments.key)) />
 	</cffunction>
 	
 	<!---
@@ -214,6 +209,11 @@ in the application scope.
 			<cfset getCacheStats().decrementTotalElements(1) />
 			<cfset getCacheStats().decrementActiveElements(1) />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="hashKey" access="private" returntype="string" output="false">
+		<cfargument name="key" type="string" required="true" />
+		<cfreturn Hash(UCase(arguments.key)) />
 	</cffunction>
 	
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
