@@ -93,6 +93,17 @@ functionality.
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/5
 (2007-11-10 pfarrell)
 
+* Caching Enhancement
+Added a generic interface that allows developers to implement their own caching strategy 
+for caching at the controller level. Developers may specify which caching strategy they 
+want to use through a special Mach-II caching property (MachII.caching.CachingProperty).
+Additional configuration parameters may also be passed in to the caching strategy through 
+the caching property. The default Mach-II caching strategy will leverage storing cached 
+items in the application scope using the TimeSpanCache (MachII.caching.strategies.TimeSpanCache).
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/2
+(2008-03-15 kwiersma)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements
 ------------------------------------------------
