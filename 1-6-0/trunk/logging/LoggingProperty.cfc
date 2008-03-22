@@ -24,13 +24,13 @@ Updated version: 1.6.0
 Notes:
 
 Configuring for Mach-II logging only:
-<property name="Logging" type="MachII.properties.LoggingProperty" />
+<property name="Logging" type="MachII.logging.LoggingProperty" />
 
 This will turn on the MachIILog logger and display the log message 
 in the request output.
 
 Configuring multiple logging adapters:
-<property name="Logging" type="MachII.properties.LoggingProperty">
+<property name="Logging" type="MachII.logging.LoggingProperty">
 	<parameters>
 		<!-- Optionally turns logging on/off (loggingEnabled values in the adapters are still adhered to)-->
 		<parameter name="loggingEnabled" value="false"/>
@@ -131,7 +131,7 @@ will bind to root parameter values.
 		<cfset var parameters = StructNew() />
 		
 		<!--- Create, init and configure the logger --->
-		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(parameters) />
+		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(getAppManager().getLogFactory(), parameters) />
 
 		<!--- Add callback to the RequestManager to the onRequestEnd method --->
 		<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
