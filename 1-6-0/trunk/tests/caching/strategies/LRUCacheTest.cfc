@@ -92,7 +92,8 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="testReap" access="public" returntype="void"
-		hint="Tests removing cached data by key.">
+		hint="Tests reap by simulating load on LRU.">
+		
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="4" index="i">
@@ -103,7 +104,6 @@ Notes:
 		
 		<cfset assertFalse(variables.cache.keyExists("productID=2")) />
 		<cfset assertTrue(variables.cache.keyExists("productID=3")) />
-		
 	</cffunction>
 
 </cfcomponent>
