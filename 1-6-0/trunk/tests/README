@@ -8,6 +8,8 @@
 $Id$
 ------------------------------------------------
 
-All unit tests for the Mach-II framework have been written to use MXUnit.
-
-MXUnit is available at http://www.mxunit.org
+* The official unit testing framework of Mach-II is MXUnit.
+* MXUnit is available at http://www.mxunit.org
+* You can use MXUnit's Eclipse based or html test runners to
+	run individual test cases.
+* Or you can use our ANT task 'test' to run the test suite.

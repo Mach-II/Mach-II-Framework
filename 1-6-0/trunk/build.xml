@@ -184,6 +184,7 @@ Notes:
 			verbose="${debug}"
 			haltonerror="true">
 			<!-- caching -->
+			<testcase name="MachII.tests.caching.CacheStatsTest"/>
 			<testcase name="MachII.tests.caching.strategies.TimeSpanCacheTest"/>
 			<testcase name="MachII.tests.caching.strategies.LRUCacheTest"/>
 			<!-- logging -->
