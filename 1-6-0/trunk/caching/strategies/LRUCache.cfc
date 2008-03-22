@@ -41,7 +41,7 @@ in the application scope.
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
-                 to specify the 'cacheName' attribute in the cache command -->
+                 to specify the 'name' attribute in the cache command -->
             <parameter name="defaultCacheName" value="default" />
             <parameter name="default">
                   <struct>
@@ -219,7 +219,8 @@ in the application scope.
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="hashKey" access="private" returntype="string" output="false">
+	<cffunction name="hashKey" access="private" returntype="string" output="false"
+		hint="Creates a hashed version of the passed key.">
 		<cfargument name="key" type="string" required="true" />
 		<cfreturn Hash(UCase(arguments.key)) />
 	</cffunction>
@@ -265,7 +266,8 @@ in the application scope.
 		<cfargument name="size" type="numeric" required="true" />
 		<cfset variables.size = arguments.size />
 	</cffunction>
-	<cffunction name="getSize" access="public" returntype="string" output="false">
+	<cffunction name="getSize" access="public" returntype="string" output="false"
+		hint="Returns the configured maximum size of the LRU cache.">
 		<cfreturn variables.size />
 	</cffunction>
 
@@ -273,11 +275,13 @@ in the application scope.
 		<cfargument name="scope" type="string" required="true" />
 		<cfset variables.scope = arguments.scope />
 	</cffunction>
-	<cffunction name="getScope" access="public" returntype="string" output="false">
+	<cffunction name="getScope" access="public" returntype="string" output="false"
+		hint="Returns the scope where the LRU cache is stored.">
 		<cfreturn variables.scope />
 	</cffunction>
 	
-	<cffunction name="getScopeKey" access="private" returntype="string" output="false">
+	<cffunction name="getScopeKey" access="public" returntype="string" output="false"
+		hint="Gets the unique scope key for this cache strategy.">
 		<cfreturn variables.scopeKey />
 	</cffunction>
 	

@@ -31,7 +31,7 @@ Configuring multiple caching strategires:
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
-                 to specify the 'cacheName' attribute in the cache command -->
+                 to specify the 'name' attribute in the cache command -->
 			<parameter name="cachingEnabled" value="true" />
             <parameter name="defaultCacheName" value="default" />
             <parameter name="default">

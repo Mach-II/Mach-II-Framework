@@ -86,7 +86,7 @@ Notes:
 		</cfif>
 		
 		<cfif clearCache>
-			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />
+			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event) />
 		</cfif>
 		
 		<cfreturn continue />

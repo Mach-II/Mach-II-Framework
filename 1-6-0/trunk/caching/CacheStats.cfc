@@ -62,13 +62,15 @@ tracked by Mach-II are as follows:
 	<cffunction name="getExtraStats" access="public" returntype="struct" output="false">
 		<cfreturn variables.extraStats />
 	</cffunction>
-	<cffunction name="setExtraStat" access="public" returntype="void" output="false">
+	<cffunction name="setExtraStat" access="public" returntype="void" output="false"
+		hint="Sets an extra stats value by stat name.">
 		<cfargument name="statName" type="string" required="true" />
 		<cfargument name="statValue" type="any" required="true" />
 		<cfset variables.extraStats[statName] = statValue />
 	</cffunction>
 	
-	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false">
+	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false"
+		hint="Increments the number of hits by the default of 1 or by the amount passed.">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.cacheHits = variables.cacheHits + arguments.amount />
 	</cffunction>

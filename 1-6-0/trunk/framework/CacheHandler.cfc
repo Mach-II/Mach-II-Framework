@@ -83,7 +83,7 @@ Notes:
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache") OR NOT getCachingEnabled()>
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler running commands and creating cache.") />
+				<cfset log.debug("Cache-handler creating cache with key '#key#'.") />
 			</cfif>
 		
 			<!--- Run commands and save output to the buffer --->
@@ -109,7 +109,7 @@ Notes:
 			<cfoutput>#outputBuffer#</cfoutput>
 		<cfelse>
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler used data from cache.") />
+				<cfset log.debug("Cache-handler used data from cache with key '#key#'.") />
 			</cfif>
 
 			<!--- Replay the event from the cache --->
@@ -123,20 +123,14 @@ Notes:
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="criteria" type="string" required="false" default="" />
 
-		<cfset var item = "" />
-		<cfset var key = "" />
-		
-		<cfloop list="#arguments.criteria#" index="item">
-			<cfset key = ListAppend(key, "#item#=#arguments.event.getArg(item)#", "&") />
-		</cfloop>
+		<cfset var key = getKeyFromCriteria(arguments.event) />
 		
 		<cfif log.isDebugEnabled()>
 			<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
 		</cfif>
 		
-		<cfif len(key)>
+		<cfif Len(key)>
 			<cfset getCacheStrategy().remove(key) />
 		<cfelse>
 			<cfset getCacheStrategy().flush() />
@@ -162,15 +156,24 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false">
+	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false"
+		hint="Build a key from the cache handler criteria with data from the event object.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var criteria = getCriteria() />
 		<cfset var item = "" />
-		<cfset var key = "" />
+		<cfset var arg = "" />
+		<cfset var key = "handlerId=" & getHandlerId() />
 		
 		<cfloop list="#criteria#" index="item">
-			<cfset key = ListAppend(key, "#item#=#arguments.event.getArg(item)#", "&") />
+			<cfset arg = arguments.event.getArg(item, "") />	
+		
+			<!--- Accept only simple values and ignore complex values --->	
+			<cfif IsSimpleValue(arg)>
+				<cfset key = ListAppend(key, item & "=" & arg, "&") />
+			<cfelse>
+				<cfset key = ListAppend(key, item & "=", "&") />
+			</cfif>
 		</cfloop>
 		
 		<cfreturn key />
@@ -249,11 +252,11 @@ Notes:
 		<cfargument name="cacheData" type="struct" required="true" />
 		<cfargument name="output" type="string" required="true" />
 		
-		<cfset var element = structNew() />
+		<cfset var dataToCache = structNew() />
 		
-		<cfset element.data = arguments.cacheData />
-		<cfset element.output = arguments.output />
-		<cfset getCacheStrategy().put(arguments.key, element) />
+		<cfset dataToCache.data = arguments.cacheData />
+		<cfset dataToCache.output = arguments.output />
+		<cfset getCacheStrategy().put(arguments.key, dataToCache) />
 	</cffunction>
 	<cffunction name="getCacheData" access="public" returntype="any" output="false" 
 		hint="Return type is any since it might return null if the key is not in the cache">

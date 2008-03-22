@@ -51,7 +51,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
-                 to specify the 'cacheName' attribute in the cache command -->
+                 to specify the 'name' attribute in the cache command -->
             <parameter name="defaultCacheName" value="default" />
             <parameter name="default">
                   <struct>
@@ -139,7 +139,8 @@ application scope which would be cleaned up via reap every 3 minutes.
 	--->
 	<cffunction name="put" access="public" returntype="void" output="false"
 		hint="Puts an element by key into the cache.">
-		<cfargument name="key" type="string" required="true" hint="Doesn't need to be hashed" />
+		<cfargument name="key" type="string" required="true"
+			hint="The key should not be a hashed key." />
 		<cfargument name="data" type="any" required="true" />
 
 		<cfset var dataStorage = getCacheScope() />
@@ -154,9 +155,9 @@ application scope which would be cleaned up via reap every 3 minutes.
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
-		hint="Gets en elementby key from the cache. Returns null if the key is not in the cache.">
+		hint="Gets en elementby key from the cache. Returns 'null' if the key is not in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key does not need to be hashed." />
+			hint="The key should not be a hashed key." />
 
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var cache = dataStorage.data />
@@ -184,7 +185,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checks if an element exists by key in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key does not need to be hashed." />
+			hint="The key should not be a hashed key." />
 
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
@@ -204,11 +205,11 @@ application scope which would be cleaned up via reap every 3 minutes.
 	<cffunction name="remove" access="public" returntype="void" output="false"
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key does not need to be hashed." />
+			hint="The key should not be a hashed key." />
 
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
-		<cfset removeHashedKey(hashedKey) />
+		<cfset removeByHashedKey(hashedKey) />
 	</cffunction>
 	
 	<cffunction name="reap" access="public" returntype="void" output="false"
@@ -234,7 +235,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 				<cftry>
 					<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
 						<cfset key = listLast(dataTimestampArray[i], "_") />
-						<cfset removeHashedKey(key) />
+						<cfset removeByHashedKey(key) />
 					<cfelse>
 						<cfbreak />
 					</cfif>
@@ -250,9 +251,11 @@ application scope which would be cleaned up via reap every 3 minutes.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="removeHashedKey" access="private" returntype="void" output="false">
+	<cffunction name="removeByHashedKey" access="private" returntype="void" output="false"
+		hint="Removes data from the cache by hashed key.">
 		<cfargument name="hashedKey" type="string" required="true"
-			hint="The key does need to be hashed." />
+			hint="The passed key needs to be a hashed key." />
+
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var cache = dataStorage.data />
 		<cfset var timeStampKey = "" />
