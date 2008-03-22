@@ -26,6 +26,14 @@ The RequestRedirectPersist abstracts the machinery behind the redirect persist
 and provides an interface for other implementations.  This replaces the built-in
 machinery for redirect persist in the RequestManager that was added in Mach-II
 1.5.0.
+
+Custom redirect persist machinery can be written and overrided by setting an
+instantiated version to:
+
+getAppManager().getRequestManager().setRequestRedirectPersist(obj)
+
+This can be accomplished by using a Property.cfc to load in the custom 
+machinery.
 --->
 <cfcomponent
 	displayname="RequestRedirectPersist"
@@ -35,6 +43,8 @@ machinery for redirect persist in the RequestManager that was added in Mach-II
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.appManager = "" />
+	<cfset variables.propertyManager = "" />
 	<cfset variables.redirectPersistParameter = "" />
 	<cfset variables.redirectPersistScope = "" />
 	<cfset variables.cleanupDifference = -3 />
@@ -50,9 +60,17 @@ machinery for redirect persist in the RequestManager that was added in Mach-II
 
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setLog(getAppManager().getLogFactory()) />
+
+		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
 		
-		<cfset setRedirectPersistParameter(getAppManager().getPropertyManager().getProperty("redirectPersistParameter")) />
-		<cfset setRedirectPersistScope(getAppManager().getPropertyManager().getProperty("redirectPersistScope")) />
+		<cfif NOT ListFindNoCase("server,application,session", getPropertyManager().getProperty("redirectPersistScope"))>
+			<cfthrow type="MachII.framework.InvalidRequestRedirectPersistScope"
+				message="Invalid value for 'redirectPersistScope' property."
+				detail="Valid values 'server', 'application' or 'session'." />
+		<cfelse>
+			<cfset setRedirectPersistScope(getPropertyManager().getProperty("redirectPersistScope")) />
+		</cfif>
+
 		<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 
 		<cfreturn this />
@@ -63,7 +81,8 @@ machinery for redirect persist in the RequestManager that was added in Mach-II
 	--->
 	<cffunction name="read" access="public" returntype="struct" output="false"
 		hint="Gets a persisted event by id if found in event args.">
-		<cfargument name="eventArgs" type="struct" required="true" />
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The eventArgs struct is built before MachII.framework.Event is available." />
 		
 		<cfset var persistId = "" />
 		<cfset var persistedData = StructNew() />
@@ -178,9 +197,6 @@ machinery for redirect persist in the RequestManager that was added in Mach-II
 			<cfset scope = StructGet("session") />
 		<cfelseif getRedirectPersistScope() EQ "server">
 			<cfset scope = StructGet("server") />
-		<cfelse>
-			<cfthrow type="MachII.framework.RequestRedirectPersist.UnsupportedRedirectPersistScope"
-				message="You can only use session, application or server scopes." />
 		</cfif>
 		
 		<!--- Double check lock if default structure is not defined --->
@@ -241,6 +257,10 @@ machinery for redirect persist in the RequestManager that was added in Mach-II
 	</cffunction>
 	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+
+	<cffunction name="getPropertyManager" access="private" returntype="MachII.framework.PropertyManager" output="false">
+		<cfreturn getAppManager().getPropertyManager() />
 	</cffunction>
 
 	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
