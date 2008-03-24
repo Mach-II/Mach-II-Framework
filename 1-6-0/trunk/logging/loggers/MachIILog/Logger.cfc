@@ -33,6 +33,13 @@ Notes:
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the default display template if not defined -->
 				<key name="displayOutputTemplateFile" value="/path/to/customOutputTemplate.cfm" />
+				<!-- Optional and defaults to 'false'
+					Shows output only if CF's debug mode is enabled -->
+				<key name="debugModeOnly" value="false" />
+				<!-- Optional and defaults to 'suppressDebug'
+					Name of event arg that suppresses debug output
+					(useful when a request returns xml, json or images) -->
+				<key name="suppressDebugArg" value="supressDebug" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -
@@ -65,6 +72,8 @@ See that file header for configuration of filter criteria.
 	<cfset variables.onRequestEndAvailable = true />
 	<cfset variables.prePostRedirectAvailable = true />
 	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />
+	<cfset variables.debugModeOnly = false />
+	<cfset variables.suppressDebugArg = "suppressDebug" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
 	
@@ -92,6 +101,20 @@ See that file header for configuration of filter criteria.
 			<cfset setDisplayOutputTemplateFile(getParamter("displayOutputTemplateFile")) />
 		</cfif>
 		
+		<cfif isParameterDefined("debugModeOnly")>
+			<cfif NOT IsBoolean(getParameter("debugModeOnly"))>
+				<cfthrow type="MachII.logging.strategies.MachIILog.Logger"
+					message="The value of 'debugModeOnly' must be boolean."
+					detail="Current value '#getParameter('debugModeOnly')#'" />
+			<cfelse>
+				<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
+			</cfif>
+		</cfif>
+		
+		<cfif isParameterDefined("suppressDebugArg")>
+			<cfset setSuppressDebugArg(getParamter("suppressDebugArg")) />
+		</cfif>
+		
 		<cfset setLoggingScope(adapter.getLoggingScope()) />
 		<cfset setLoggingPath(adapter.getLoggingPath()) />
 	</cffunction>
@@ -109,7 +132,11 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled()
+			AND StructKeyExists(scope, getLoggingPath())
+			AND ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly())
+			AND NOT arguments.event.isArgDefined(getSuppressDebugArg())>
+
 			<cfset data = scope[getLoggingPath()].data />
 			
 			<cfinclude template="#getDisplayOutputTemplateFile()#" />
@@ -215,7 +242,27 @@ See that file header for configuration of filter criteria.
 		hint="Gets the output template location which is used for display output.">
 		<cfreturn variables.displayOutputTemplateFile />
 	</cffunction>
+
+	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
+		hint="Sets if the output is shown only if CF's debug mode is enabled.">
+		<cfargument name="debugModeOnly" type="boolean" required="true" />
+		<cfset variables.debugModeOnly = arguments.debugModeOnly />
+	</cffunction>
+	<cffunction name="getDebugModeOnly" access="public" returntype="boolean" output="false"
+		hint="Gets if the output is shown only if CF's debug mode is enabled.">
+		<cfreturn variables.debugModeOnly />
+	</cffunction>
 	
+	<cffunction name="setSuppressDebugArg" access="private" returntype="void" output="false"
+		hint="Sets the event-arg the suppresses debug output if it is present.">
+		<cfargument name="suppressDebugArg" type="string" required="true" />
+		<cfset variables.suppressDebugArg = arguments.suppressDebugArg />
+	</cffunction>
+	<cffunction name="getSuppressDebugArg" access="public" returntype="string" output="false"
+		hint="Gets the event-arg the suppresses debug output if it is present.">
+		<cfreturn variables.suppressDebugArg />
+	</cffunction>
+
 	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
 		hint="Sets the logging scope.">
 		<cfargument name="loggingScope" type="string" required="true" />
