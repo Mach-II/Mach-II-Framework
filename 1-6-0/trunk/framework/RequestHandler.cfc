@@ -258,6 +258,7 @@ Notes:
 			<cfinvoke component="#onRequestEndCallbacks[i].callback#"
 				method="#onRequestEndCallbacks[i].method#">
 				<cfinvokeargument name="appManager" value="#getAppManager()#" />
+				<cfinvokeargument name="event" value="#getEventContext().getPreviousEvent()#" />
 			</cfinvoke>
 		</cfloop>
 		
