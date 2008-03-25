@@ -190,6 +190,7 @@ Notes:
 			<!-- logging -->
 			<testcase name="MachII.tests.logging.LogTest"/>
 			<testcase name="MachII.tests.logging.LogFactoryTest"/>
+			<testcase name="MachII.tests.logging.adapters.CFLogAdapterTest"/>
 			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
 			<!--
 			This does not work yet because the it appears not to recurse directories yet
