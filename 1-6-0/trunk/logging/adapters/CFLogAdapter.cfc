@@ -193,7 +193,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		hint="Checks if the passed log level is enabled.">
 		<cfargument name="logLevel" type="numeric" required="true"
 			hint="Log levels are numerically ordered for easier comparison." />
-		<cfif variables.loggingEnabled>
+		<cfif getLoggingEnabled()>
 			<cfreturn arguments.logLevel GTE getLevel() />
 		<cfelse>
 			<cfreturn false />
