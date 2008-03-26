@@ -133,11 +133,13 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setModuleName" access="public" returntype="void" output="false">
+	<cffunction name="setModuleName" access="public" returntype="void" output="false"
+		hint="Sets the module name for this instance of the AppManager.">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfset variables.moduleName = arguments.moduleName />
 	</cffunction>
-	<cffunction name="getModuleName" access="public" returntype="string" output="false">
+	<cffunction name="getModuleName" access="public" returntype="string" output="false"
+		hint="Gets the module name for this instance of the AppManager.">
 		<cfreturn variables.moduleName />
 	</cffunction>
 	

@@ -55,7 +55,7 @@ the rest of the framework. (pfarrell)
 		<cfset setAppManager(arguments.appManager) />
 		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif isObject(arguments.parentPropertyManager)>
+		<cfif IsObject(arguments.parentPropertyManager)>
 			<cfset setParent(arguments.parentPropertyManager) />
 		</cfif>
 		
@@ -78,7 +78,7 @@ the rest of the framework. (pfarrell)
 		<cfset var paramsNodes = "" />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -234,7 +234,7 @@ the rest of the framework. (pfarrell)
 
 		<!--- Put a reference of the log factory into properties if this is the parent --->
 		<cfif NOT IsObject(getParent())>
-			<cfset setProperty("logFactory", getAppManager().getLogFactory()) /	>
+			<cfset setProperty("logFactory", getAppManager().getLogFactory()) />
 		</cfif>
 		
 		<!--- Run configure on all configurable properties --->
@@ -256,7 +256,7 @@ the rest of the framework. (pfarrell)
 		
 		<cfif isPropertyDefined(arguments.propertyName)>
 			<cfreturn variables.properties[arguments.propertyName] />
-		<cfelseif isObject(getParent()) AND getParent().isPropertyDefined(arguments.propertyName)>
+		<cfelseif IsObject(getParent()) AND getParent().isPropertyDefined(arguments.propertyName)>
 			<cfreturn getParent().getProperty(arguments.propertyName)>
 		<cfelseif StructKeyExists(arguments, "defaultValue")>
 			<cfreturn arguments.defaultValue />
@@ -279,7 +279,7 @@ the rest of the framework. (pfarrell)
 			applicationRoot, eventParameter, parameterPredence, maxEvents, redirectPreists, redirectPeristscope,
 			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
 		--->
-		<cfif isObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
+		<cfif IsObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
 			<cfthrow type="MachII.framework.propertyNotAllowed"
 				message="The '#arguments.propertyName#' property cannot be set inside of a module." />
 		<cfelse>

@@ -47,7 +47,7 @@ Notes:
 		<cfset setAppManager(arguments.appManager) />
 		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif isObject(arguments.parentListenerManager)>
+		<cfif IsObject(arguments.parentListenerManager)>
 			<cfset setParent(arguments.parentListenerManager) />
 		</cfif>
 		
@@ -69,7 +69,7 @@ Notes:
 		<cfset var invokerType = "" />
 		<cfset var invoker = "" />
 		<cfset var listener = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -197,7 +197,7 @@ Notes:
 		
 		<cfif isListenerDefined(arguments.listenerName)>
 			<cfreturn variables.listeners[arguments.listenerName] />
-		<cfelseif isObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
+		<cfelseif IsObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
 			<cfreturn getParent().getListener(arguments.listenerName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ListenerNotDefined" 

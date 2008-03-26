@@ -47,7 +47,7 @@ Notes:
 				
 		<cfset setAppManager(arguments.appManager) />
 		
-		<cfif isObject(arguments.parentEventManager)>
+		<cfif IsObject(arguments.parentEventManager)>
 			<cfset setParent(arguments.parentEventManager) />
 		</cfif>
 		
@@ -65,7 +65,7 @@ Notes:
 		<cfset var eventAccess = "" />
 		<cfset var eventName = "" />
 		<cfset var command = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -208,7 +208,7 @@ Notes:
 		<cfset var moduleManager = 0 />
 		
 		<cfif arguments.moduleName neq "">
-			<cfif NOT isObject(getAppManager().getParent())>
+			<cfif NOT IsObject(getAppManager().getParent())>
 				<cfset moduleManager = getAppManager().getModuleManager() />
 			<cfelse>
 				<cfset moduleManager = getAppManager().getParent().getModuleManager() />
@@ -217,7 +217,7 @@ Notes:
 			<cfreturn moduleEventManager.getEventHandler(arguments.eventName) />
 		<cfelseif isEventDefined(arguments.eventName)>
 			<cfreturn variables.handlers[arguments.eventName] />
-		<cfelseif isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+		<cfelseif IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
 			<cfreturn getParent().getEventHandler(arguments.eventName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
@@ -245,7 +245,7 @@ Notes:
 		<cfset var moduleEventManager = "" />
 		
 		<cfif arguments.moduleName neq "">
-			<cfif NOT isObject(getAppManager().getParent())>
+			<cfif NOT IsObject(getAppManager().getParent())>
 				<cfset moduleManager = getAppManager().getModuleManager() />
 			<cfelse>
 				<cfset moduleManager = getAppManager().getParent().getModuleManager() />
@@ -263,7 +263,7 @@ Notes:
 		<cfelse>
 			<cfif StructKeyExists(variables.handlers, arguments.eventName)>
 				<cfreturn true />
-			<cfelseif arguments.checkParent AND isObject(getParent())>
+			<cfelseif arguments.checkParent AND IsObject(getParent())>
 				<cfreturn getParent().isEventDefined(arguments.eventName, false, arguments.moduleName) />
 			<cfelse>
 				<cfreturn false />
@@ -280,7 +280,7 @@ Notes:
 		
 		<cfif isEventDefined(arguments.eventName)>
 			<cfset eventHandler = getEventHandler(arguments.eventName) />
-		<cfelseif arguments.checkParent AND isObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
 			<cfset eventHandler = getParent().getEventHandler(arguments.eventName) />
 		<cfelse>
 			<cfreturn false />

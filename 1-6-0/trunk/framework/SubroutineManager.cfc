@@ -47,7 +47,7 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		
-		<cfif isObject(arguments.parentSubroutineManager)>
+		<cfif IsObject(arguments.parentSubroutineManager)>
 			<cfset setParent(arguments.parentSubroutineManager) />
 		</cfif>
 		
@@ -64,7 +64,7 @@ Notes:
 		<cfset var subroutineName = "" />
 		<cfset var commandNode = "" />
 		<cfset var command = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -144,7 +144,7 @@ Notes:
 		
 		<cfif isSubroutineDefined(arguments.subroutineName)>
 			<cfreturn variables.handlers[arguments.subroutineName] />
-		<cfelseif isObject(getParent()) AND getParent().isSubroutineDefined(arguments.subroutineName)>
+		<cfelseif IsObject(getParent()) AND getParent().isSubroutineDefined(arguments.subroutineName)>
 			<cfreturn getParent().getSubroutineHandler(arguments.subroutineName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.SubroutineHandlerNotDefined" 

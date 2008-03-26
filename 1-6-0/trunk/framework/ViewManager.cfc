@@ -46,7 +46,7 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		
-		<cfif isObject(arguments.parentViewManager)>
+		<cfif IsObject(arguments.parentViewManager)>
 			<cfset setParent(arguments.parentViewManager) />
 		</cfif>
 		
@@ -61,7 +61,7 @@ Notes:
 		<cfset var viewNodes = "" />
 		<cfset var name = "" />
 		<cfset var page = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		
@@ -124,7 +124,7 @@ Notes:
 		
 		<cfif isViewDefined(arguments.viewName)>
 			<cfreturn variables.viewPaths[arguments.viewName] />
-		<cfelseif isObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
+		<cfelseif IsObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
 			<cfreturn getParent().getViewPath(arguments.viewName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ViewNotDefined" 

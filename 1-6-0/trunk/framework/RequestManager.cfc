@@ -53,7 +53,8 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="RequestManager" output="false"
 		hint="Initializes the manager.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="Sets the base AppManager." />
 
 		<cfset var urlDelimiters = "" />	
 		

@@ -71,7 +71,7 @@ Notes:
 		<cfset setAppManager(arguments.appManager) />
 		<cfset variables.utils = getAppManager().getUtils() />
 
-		<cfif isObject(arguments.parentPluginManager)>
+		<cfif IsObject(arguments.parentPluginManager)>
 			<cfset setParent(arguments.parentPluginManager) />
 		</cfif>
 
@@ -168,7 +168,7 @@ Notes:
 
 		<cfif isPluginDefined(arguments.pluginName)>
 			<cfreturn variables.plugins[arguments.pluginName] />
-		<cfelseif isObject(getParent()) AND getParent().isPluginDefined(arguments.pluginName)>
+		<cfelseif IsObject(getParent()) AND getParent().isPluginDefined(arguments.pluginName)>
 			<cfreturn getParent().getPlugin(arguments.pluginName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.PluginNotDefined"
@@ -265,7 +265,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -281,7 +281,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -297,7 +297,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -313,7 +313,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -329,7 +329,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -345,7 +345,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -361,7 +361,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preView(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -377,7 +377,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().preView(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -393,7 +393,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postView(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -409,7 +409,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postView(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -425,7 +425,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -441,7 +441,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().postProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
@@ -481,7 +481,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfif getRunParent() eq "before">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 			</cfif>
 		</cfif>
@@ -497,7 +497,7 @@ Notes:
 		</cfloop>
 
 		<cfif getRunParent() eq "after" OR getRunParent() eq "">
-			<cfif isObject(getParent())>
+			<cfif IsObject(getParent())>
 				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 			</cfif>
 		</cfif>

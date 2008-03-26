@@ -158,7 +158,7 @@ the rest of the framework. (pfarrell)
 		hint="DEPRECATED - use isParameterDefined() instead. Checks to see whether or not a configuration parameter is defined.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-				
+		
 		<cfset getLog().warn("The hasParameter() method has been deprecated. Please use isParameterDefined() instead. Called from component '#getComponentNameForLogging()#'.") />
 		
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
@@ -191,8 +191,10 @@ the rest of the framework. (pfarrell)
 	--->
 	<cffunction name="bindValue" access="private" returntype="any" output="false"
 		hint="Binds placeholders to any passed value.">
-		<cfargument name="parameterName" type="string" required="true" />
-		<cfargument name="parameterValue" type="any" required="true" />
+		<cfargument name="parameterName" type="string" required="true"
+			hint="The name of the parameter to bind." />
+		<cfargument name="parameterValue" type="any" required="true"
+			hint="The current value of the parameter." />
 		
 		<cfset var propertyName = "" />
 		<cfset var value =  arguments.parameterValue />
@@ -217,7 +219,8 @@ the rest of the framework. (pfarrell)
 	--->
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="parameters" type="struct" required="true"
+			hint="Struct to set as parameters" />
 		
 		<cfset var key = "" />
 		

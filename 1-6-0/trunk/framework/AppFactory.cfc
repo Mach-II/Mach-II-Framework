@@ -198,7 +198,7 @@ Notes:
 		<cfelse>
 			<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
 		</cfif>
-		<cfif isObject(appManager.getParent())>
+		<cfif IsObject(appManager.getParent())>
 			<cfset appManager.setRequestManager(appManager.getParent().getRequestManager()) />
 		<cfelse>
 			<cfset appManager.setRequestManager(requestManager) />

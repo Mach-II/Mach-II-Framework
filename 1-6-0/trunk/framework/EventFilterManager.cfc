@@ -47,7 +47,7 @@ Notes:
 		<cfset setAppManager(arguments.appManager) />
 		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif isObject(arguments.parentFilterManager)>
+		<cfif IsObject(arguments.parentFilterManager)>
 			<cfset setParent(arguments.parentFilterManager) />
 		</cfif>
 		
@@ -67,7 +67,7 @@ Notes:
 		<cfset var filter = "" />
 		<cfset var filterName = "" />
 		<cfset var filterType = "" />
-		<cfset var hasParent = isObject(getParent()) />
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -181,7 +181,7 @@ Notes:
 		
 		<cfif isFilterDefined(arguments.filterName)>
 			<cfreturn variables.filters[arguments.filterName] />
-		<cfelseif isObject(getParent()) AND getParent().isFilterDefined(arguments.filterName)>
+		<cfelseif IsObject(getParent()) AND getParent().isFilterDefined(arguments.filterName)>
 			<cfreturn getParent().getFilter(arguments.filterName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.FilterNotDefined" 
@@ -202,6 +202,14 @@ Notes:
 	</cffunction>
 	
 	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getFilterNames" access="public" returntype="array" output="false"
+		hint="Returns an array of filter names.">
+		<cfreturn StructKeyArray(variables.filters) />
+	</cffunction>
+	
+	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setAppManager" access="public" returntype="void" output="false">
@@ -219,11 +227,6 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent FilterManager instance this FilterManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentFilterManager />
-	</cffunction>
-	
-	<cffunction name="getFilterNames" access="public" returntype="array" output="false"
-		hint="Returns an array of filter names.">
-		<cfreturn StructKeyArray(variables.filters) />
 	</cffunction>
 	
 </cfcomponent>

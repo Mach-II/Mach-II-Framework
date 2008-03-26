@@ -50,7 +50,8 @@ Notes:
 			hint="The full path to the configuration XML file." />
 		<cfargument name="dtdPath" type="string" required="true"
 			hint="The full path to the Mach-II DTD file." />
-		<cfargument name="appkey" type="string" required="true" hint="Unqiue key for this application.">
+		<cfargument name="appkey" type="string" required="true"
+			hint="Unqiue key for this application.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		<cfargument name="parentAppManager" type="any" required="false" default=""
@@ -61,6 +62,7 @@ Notes:
 			hint="Optional argument for the name of a module. Defaults to empty string." />
 		
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
+		
 		<cfset setAppFactory(appFactory) />
 
 		<cfset setConfigPath(arguments.configPath) />
@@ -92,6 +94,7 @@ Notes:
 	
 	<cffunction name="shouldReloadModuleConfig" access="public" returntype="boolean" output="false"
 		hint="Determines if any of the module configuration files should be reloaded.">
+
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var module = 0 />
 		<cfset var result = false />
@@ -160,6 +163,7 @@ Notes:
 	--->
 	<cffunction name="getConfigFileReloadHash" access="private" returntype="string" output="false"
 		hint="Get the current reload hash of the master config file and any include files which is based on dateLastModified and size.">
+
 		<cfset var configFilePaths = getAppFactory().getConfigFilePaths() />
 		<cfset var directoryResults = "" />
 		<cfset var hashableString = "" />
