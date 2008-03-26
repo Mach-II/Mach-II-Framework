@@ -92,7 +92,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 		<mkdir dir="${dest}"/>
 		<tstamp>
-			<format property="formattedDatetime" pattern="yyyy-MM-dd HH:mm:ss"/>
+			<format property="buildDatetime" pattern="yyyy-MM-dd HH:mm:ss"/>
 		</tstamp>
 		<echo message="Copying files to dest"/>
 		<copy todir="${dest}/MachII/"
@@ -106,7 +106,7 @@ Notes:
 			</fileset>
 			<filterset begintoken="@" endtoken="@">
 				<filter token="minorVersion" value="${buildVersion}"/>
-				<filter token="buildDatetime" value="${formattedDatetime}"/>
+				<filter token="buildDatetime" value="${buildDatetime}"/>
 			</filterset>
 		</copy>
 		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and READMEs to .txt files for windows"/>
