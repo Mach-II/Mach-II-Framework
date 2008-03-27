@@ -174,7 +174,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void"
-		hint="Configures each of the registered Listeners and its' invoker.">
+		hint="Configures each of the registered listeners and its' invoker.">
 
 		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var aListener = 0 />
@@ -192,7 +192,7 @@ Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="getListener" access="public" returntype="MachII.framework.Listener" output="false"
-		hint="Gets a Listener with the specified name.">
+		hint="Gets a listener with the specified name.">
 		<cfargument name="listenerName" type="string" required="true" />
 		
 		<cfif isListenerDefined(arguments.listenerName)>
@@ -206,7 +206,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="addListener" access="public" returntype="void" output="false"
-		hint="Registers a Listener with the specified name.">
+		hint="Registers a listener with the specified name.">
 		<cfargument name="listenerName" type="string" required="true" />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
@@ -226,7 +226,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="isListenerDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if a Listener is registered with the specified name. Does NOT check parent.">
+		hint="Returns true if a listener is registered with the specified name. Does NOT check parent.">
 		<cfargument name="listenerName" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.listeners, arguments.listenerName) />
 	</cffunction>
