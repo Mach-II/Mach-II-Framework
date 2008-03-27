@@ -22,24 +22,33 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Configuring with default timespan strategy with default parameters:
+Simple configuration that uses the timespan strategy with its' default parameters
+as the basic strategy:
 <property name="Caching" type="MachII.caching.CachingProperty"/>
 
-This will cache data for a timespan of 1 hour.
+This will cache data for a timespan of 1 hour by using the 
+MachII.caching.strategies.TimeSpanCache
 
-Configuring multiple caching strategires:
+Example configuration of multiple caching strategires:
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
                  to specify the 'name' attribute in the cache command -->
 			<parameter name="cachingEnabled" value="true" />
-            <parameter name="defaultCacheName" value="default" />
-            <parameter name="default">
+            <parameter name="defaultCacheName" value="foo" />
+            <parameter name="foo">
                   <struct>
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
                         <key name="cacheUnit" value="hour" />
+                  </struct>
+            </parameter>
+            <parameter name="bar">
+                  <struct>
+                        <key name="type" value="MachII.caching.strategies.LRUCache" />
+                        <key name="size" value="100" />
+                        <key name="scope" value="application" />
                   </struct>
             </parameter>
       </parameters>
