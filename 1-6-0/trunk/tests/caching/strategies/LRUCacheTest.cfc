@@ -95,15 +95,15 @@ Notes:
 		hint="Tests reap by simulating load on LRU.">
 		
 		<cfset var i = 0 />
+		<cfset var thread = CreateObject("java", "java.lang.Thread") />
 		
-		<cfloop from="1" to="4" index="i">
+		<cfloop from="1" to="10" index="i">
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
+			<cfset thread.sleep(250) />
 		</cfloop>
 		
-		<!--- <cfset debug(variables.cache.getCacheScope()) /> --->
-		
-		<cfset assertFalse(variables.cache.keyExists("productID=2")) />
-		<cfset assertTrue(variables.cache.keyExists("productID=3")) />
+		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
+		<cfset assertTrue(variables.cache.keyExists("productID=10")) />
 	</cffunction>
 
 </cfcomponent>
