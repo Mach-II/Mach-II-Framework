@@ -62,12 +62,9 @@ in the application scope.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.cache = StructNew() />
-	<cfset variables.cache.data = StructNew() />
-	<cfset variables.cache.timestamps = StructNew() />
 	<cfset variables.size = 100 />
 	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = CreateUUID() />
+	<cfset variables.scopeKey = REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -226,7 +223,7 @@ in the application scope.
 	</cffunction>
 	
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp for use.">
+		hint="Creates a timestamp which is safe to use as a key.">
 		<cfargument name="time" type="date" required="false" default="#Now()#" />
 		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
@@ -234,26 +231,13 @@ in the application scope.
 	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
 		hint="Gets the cache scope which is dependent on the storage location.">
 		
-		<cfset var storage = variables.cache />
+		<!--- StructGet will create the cache key if it does not exist --->
+		<cfset var storage = StructGet(getScope() & "._MachIICache." & getScopeKey()) />
 		
-		<cfif getScope() EQ "application">
-			<cfset storage = variables.cache />
-		<cfelseif getScope() EQ "session">
-			<cfset storage = StructGet("session") />
-			
-			<cfif NOT StructKeyExists(storage, "_MachIICache.#getScopeKey()#")>
-				<cfset storage._MachIICache[getScopeKey()] = StructNew() />
-			</cfif>
-			
-			<cfset storage = storage._MachIICache[getScopeKey()] />
-		<cfelseif getScope() EQ "server">
-			<cfset storage = StructGet("server") />
-			
-			<cfif NOT StructKeyExists(storage, "_MachIICache.#getScopeKey()#")>
-				<cfset storage._MachIICache[getScopeKey()] = StructNew() />
-			</cfif>
-			
-			<cfset storage = storage._MachIICache[getScopeKey()] />
+		<!--- Check to see if the cache data structure is initialized --->
+		<cfif NOT StructCount(storage)>
+			<cfset storage.data = StructNew() />
+			<cfset storage.timestamps = StructNew() />
 		</cfif>
 		
 		<cfreturn storage />
