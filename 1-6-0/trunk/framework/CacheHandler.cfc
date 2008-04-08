@@ -75,6 +75,7 @@ Notes:
 		<cfset var outputBuffer = "" />
 		<cfset var continue = true />
 		<cfset var command = "" />
+		<cfset var data = StructNew() />
 		<cfset var i = 0 />
 		<cfset var key = getKeyFromCriteria(arguments.event) />
 		<cfset var dataFromCache = getCacheData(key) />
@@ -98,8 +99,11 @@ Notes:
 			</cfsavecontent>
 			
 			<cfif getCachingEnabled()>
+				<!--- Use StructAppend on an empty struct so any subroutines
+					later on in the event do not contaminate this data by reference --->
+				<cfset StructAppend(data, arguments.event.getArgs()) />
 				<!--- Grab the data and output and cache it for later --->
-				<cfset setCacheData(key, arguments.event.getArgs(), outputBuffer) />
+				<cfset setCacheData(key, data, outputBuffer) />
 			<cfelse>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Cache-handler caching is disabled so skipped caching.") />
