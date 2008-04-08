@@ -141,7 +141,13 @@ the rest of the framework. (pfarrell)
 					
 					<!--- Create the configurable property and append to array of configurable property names --->
 					<cftry>
-						<cfset propertyValue = CreateObject("component", propertyType).init(getAppManager(), propertyParams) />
+						<!--- Do not method chain the init() on the instantiation
+							or objects that have their init() overridden will
+							cause the variable the object is assigned to will 
+							be deleted if init() returns void --->
+						<cfset propertyValue = CreateObject("component", propertyType) />
+						<cfset propertyValue.init(getAppManager(), propertyParams) />
+
 						<cfcatch type="any">
 							<cfif StructKeyExists(cfcatch, "missingFileName")>
 								<cfthrow type="MachII.framework.CannotFindProperty"

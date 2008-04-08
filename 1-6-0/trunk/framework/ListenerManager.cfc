@@ -128,9 +128,14 @@ Notes:
 					</cfloop>
 				</cfif>
 			
-				<!--- Setup the Listener. --->
+				<!--- Setup the Listener --->
 				<cftry>
-					<cfset listener = CreateObject("component", listenerType).init(getAppManager(), listenerParams) />
+					<!--- Do not method chain the init() on the instantiation
+						or objects that have their init() overridden will
+						cause the variable the object is assigned to will 
+						be deleted if init() returns void --->
+					<cfset listener = CreateObject("component", listenerType) />
+					<cfset listener.init(getAppManager(), listenerParams) />
 					
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName")>
@@ -165,7 +170,7 @@ Notes:
 					<cfset invoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
 				</cfif>
 	
-				<!--- Continue setup on the Listener. --->
+				<!--- Continue setup on the Listener --->
 				<cfset listener.setInvoker(invoker) />
 				<!--- Add the Listener to the Manager. --->
 				<cfset addListener(listenerName, listener, arguments.override) />

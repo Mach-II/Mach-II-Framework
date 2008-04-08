@@ -127,7 +127,12 @@ Notes:
 				</cfif>
 				
 				<cftry>
-					<cfset filter = CreateObject("component", filterType).init(getAppManager(), filterParams) />			
+					<!--- Do not method chain the init() on the instantiation
+						or objects that have their init() overridden will
+						cause the variable the object is assigned to will 
+						be deleted if init() returns void --->
+					<cfset filter = CreateObject("component", filterType) />
+					<cfset filter.init(getAppManager(), filterParams) />
 	
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName")>

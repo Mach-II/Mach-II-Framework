@@ -128,7 +128,12 @@ Notes:
 			</cfif>
 
 			<cftry>
-				<cfset plugin = CreateObject("component", pluginType).init(getAppManager(), pluginParams) />
+				<!--- Do not method chain the init() on the instantiation
+					or objects that have their init() overridden will
+					cause the variable the object is assigned to will 
+					be deleted if init() returns void --->
+				<cfset plugin = CreateObject("component", pluginType) />
+				<cfset plugin.init(getAppManager(), pluginParams) />
 				
 				<cfcatch type="any">
 					<cfif StructKeyExists(cfcatch, "missingFileName")>
