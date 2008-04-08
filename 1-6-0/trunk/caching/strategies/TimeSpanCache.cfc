@@ -127,9 +127,11 @@ application scope which would be cleaned up via reap every 3 minutes.
 				<cfset setCleanupInterval(getParameter("cleanupIntervalInMinutes")) />
 			</cfif>
 		</cfif>
-		
+
+		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />		
 		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
-		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
+		
+		<cfset flush() />
 	</cffunction>
 	
 	<!---

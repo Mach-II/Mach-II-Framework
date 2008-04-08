@@ -93,6 +93,8 @@ in the application scope.
 		</cfif>
 		
 		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
+		
+		<cfset flush() />
 	</cffunction>
 	
 	<!---
