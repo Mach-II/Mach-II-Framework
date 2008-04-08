@@ -160,6 +160,9 @@ See individual caching strategies for more information on configuration.
 			<cfthrow type="MachII.caching.MissingCacheStrategyType"
 				message="You must specify a parameter named 'type' for cache named '#arguments.name#' in module named '#getAppManager().getModuleName()#'." />
 		</cfif>
+
+		<!--- Add in cacheIdKey as a parameter --->
+		<cfset arguments.parameters.cacheIdKey = createCacheIdKey(arguments.name) />
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
@@ -184,6 +187,19 @@ See individual caching strategies for more information on configuration.
 		
 		<!--- Set the strategy to the CacheManager --->
 		<cfset getAppManager().getCacheManager().addCacheStrategy(arguments.name, strategy) />
+	</cffunction>
+	
+	<cffunction name="createCacheIdKey" access="private" returntype="string" output="false"
+		hint="Creates a cache indentifier key.">
+		<cfargument name="cacheName" type="string" required="true" />
+		
+		<cfset var moduleName = getAppManager().getModuleName() />
+		
+		<cfif NOT Len(moduleName)>
+			<cfset moduleName = "base" />
+		</cfif>
+		
+		<cfreturn getAppManager().getAppKey() & "._MachIICache." & moduleName & "." & arguments.cacheName />
 	</cffunction>
 	
 	<!---

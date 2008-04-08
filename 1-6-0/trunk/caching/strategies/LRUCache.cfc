@@ -64,7 +64,7 @@ in the application scope.
 	--->
 	<cfset variables.size = 100 />
 	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
+	<cfset variables.scopeKey = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -91,6 +91,8 @@ in the application scope.
 				<cfset setScope(getParameter("scope")) />
 			</cfif>
 		</cfif>
+		
+		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
 	</cffunction>
 	
 	<!---
@@ -232,7 +234,7 @@ in the application scope.
 		hint="Gets the cache scope which is dependent on the storage location.">
 		
 		<!--- StructGet will create the cache key if it does not exist --->
-		<cfset var storage = StructGet(getScope() & "._MachIICache." & getScopeKey()) />
+		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />
 		
 		<!--- Check to see if the cache data structure is initialized --->
 		<cfif NOT StructCount(storage)>
@@ -264,8 +266,12 @@ in the application scope.
 		<cfreturn variables.scope />
 	</cffunction>
 	
+	<cffunction name="setScopeKey" access="private" returntype="void" output="false">
+		<cfargument name="scopeKey" type="string" required="true" />
+		<cfset variables.scopeKey = arguments.scopeKey />
+	</cffunction>
 	<cffunction name="getScopeKey" access="public" returntype="string" output="false"
-		hint="Gets the unique scope key for this cache strategy.">
+		hint="Gets the unique cache key for this cache strategy.">
 		<cfreturn variables.scopeKey />
 	</cffunction>
 	

@@ -46,7 +46,7 @@ machinery.
 	<cfset variables.appManager = "" />
 	<cfset variables.propertyManager = "" />
 	<cfset variables.redirectPersistParameter = "" />
-	<cfset variables.redirectPersistScope = "" />
+	<cfset variables.redirectPersistScope = "application" />
 	<cfset variables.cleanupDifference = -3 />
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.log = "" />
@@ -179,6 +179,7 @@ machinery.
 					</cfcatch>
 				</cftry>
 			</cfloop>
+		
 		</cflock>
 	</cffunction>
 	
@@ -188,30 +189,22 @@ machinery.
 	<cffunction name="getStorage" access="private" returntype="struct" output="false"
 		hint="Helper function to get the event data store for persists.">
 		
-		<cfset var scope = "" />
-		
-		<!--- Select the right scope --->
-		<cfif getRedirectPersistScope() EQ "application">
-			<cfset scope = StructGet("application") />
-		<cfelseif  getRedirectPersistScope() EQ "session">
-			<cfset scope = StructGet("session") />
-		<cfelseif getRedirectPersistScope() EQ "server">
-			<cfset scope = StructGet("server") />
-		</cfif>
+		<cfset var storage = StructGet(getRedirectPersistScope() & "." & getAppManager().getAppKey() & "._MachIIRequestRedirectPersistStorage") />
 		
 		<!--- Double check lock if default structure is not defined --->
-		<cfif NOT StructKeyExists(scope, "_MachIIRequestRedirectPersistStorage")>
+		<cfif NOT StructCount(storage)>
+
 			<cflock name="_MachIIRequestRedirectPersistCreate" type="exclusive" timeout="5" throwontimeout="false">
-				<cfif NOT StructKeyExists(scope, "_MachIIRequestRedirectPersistStorage")>
-					<cfset scope._MachIIRequestRedirectPersistStorage = StructNew() />
-					<cfset scope._MachIIRequestRedirectPersistStorage.data = StructNew() />
-					<cfset scope._MachIIRequestRedirectPersistStorage.timestamps = StructNew() />
-					<cfset scope._MachIIRequestRedirectPersistStorage.lastCleanup = createTimestamp() />
+				<cfif NOT StructCount(storage)>
+					<cfset storage.data = StructNew() />
+					<cfset storage.timestamps = StructNew() />
+					<cfset storage.lastCleanup = createTimestamp() />
 				</cfif>
 			</cflock>
+
 		</cfif>
 		
-		<cfreturn scope._MachIIRequestRedirectPersistStorage />		
+		<cfreturn storage />
 	</cffunction>
 	
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
@@ -234,6 +227,7 @@ machinery.
 					</cfif>
 				</cfif>
 			</cflock>
+
 		</cfif>
 	</cffunction>
 	
@@ -243,7 +237,7 @@ machinery.
 	</cffunction>
 	
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp for use.">
+		hint="Creates a timestamp which is safe to use as a key.">
 		<cfargument name="time" type="date" required="false" default="#Now()#" />
 		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>

@@ -77,7 +77,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 	<cfset variables.cacheFor = 1 />
 	<cfset variables.cacheForUnit = "hours" />
 	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
+	<cfset variables.scopeKey = "" />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	<cfset variables.cleanupInterval = 3 />
 	<cfset variables.threadingAdapter = "" />
@@ -128,6 +128,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 			</cfif>
 		</cfif>
 		
+		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
 	</cffunction>
 	
@@ -327,7 +328,7 @@ application scope which would be cleaned up via reap every 3 minutes.
 		hint="Gets the cache scope which is dependent on the storage location.">
 		
 		<!--- StructGet will create the cache key if it does not exist --->
-		<cfset var storage = StructGet(getScope() & "._MachIICache." & getScopeKey()) />
+		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />
 		
 		<!--- Check to see if the cache data structure is initialized --->
 		<cfif NOT StructCount(storage)>
@@ -378,7 +379,11 @@ application scope which would be cleaned up via reap every 3 minutes.
 	<cffunction name="getScope" access="public" returntype="string" output="false">
 		<cfreturn variables.scope />
 	</cffunction>
-	
+
+	<cffunction name="setScopeKey" access="private" returntype="void" output="false">
+		<cfargument name="scopeKey" type="string" required="true" />
+		<cfset variables.scopeKey = arguments.scopeKey />
+	</cffunction>
 	<cffunction name="getScopeKey" access="private" returntype="string" output="false">
 		<cfreturn variables.scopeKey />
 	</cffunction>
