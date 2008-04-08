@@ -497,10 +497,13 @@ application.serviceFactory_account variable.
 					<!--- Get bean by setter name and if not found then get by type --->
 					<cfif beanFactory.containsBean(setterName)>
 						<cfset beanName = setterName />
-					<cfelse>
+					<cfelseif ArrayLen(functionMetadata.parameters) GT 0
+						AND StructKeyExists(functionMetadata.parameters[1], "type")>
 						<cfset beanName = beanFactory.findBeanNameByType(functionMetadata.parameters[1].type) />
+					<cfelse>
+						<cfset beanName = "" />
 					</cfif>
-					
+										
 					<!--- If we found a bean, put the bean by calling the target object's setter --->
 					<cfif Len(beanName)>
 						<cfinvoke component="#arguments.targetObj#" method="set#setterName#">
