@@ -35,7 +35,7 @@ CacheFor
 - The default setting for "cacheFor" length is "1".
 - Valid numeric value only.
 
-CacheUnit
+CacheForUnit
 - The unit of time that the strategy should use for cache length.
 - The default setting for "cacheUnit" is "hour".
 - Valid values are "seconds", "minutes", "hours", "days" and "forever".
@@ -58,7 +58,7 @@ application scope which would be cleaned up via reap every 3 minutes.
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
-                        <key name="cacheUnit" value="hour" />
+                        <key name="cacheForUnit" value="hour" />
 						<key name="cleanupIntervalInMinutes" value="3" />
                   </struct>
             </parameter>
