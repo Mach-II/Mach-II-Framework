@@ -75,10 +75,10 @@ Notes:
 		<cfset var outputBuffer = "" />
 		<cfset var continue = true />
 		<cfset var command = "" />
-		<cfset var data = StructNew() />
-		<cfset var i = 0 />
+		<cfset var eventSnapshot = StructNew() />
 		<cfset var key = getKeyFromCriteria(arguments.event) />
 		<cfset var dataFromCache = getCacheData(key) />
+		<cfset var i = 0 />
 		<cfset var log = getLog() />
 		
 		<!--- Create the cache since we do not have one --->
@@ -86,10 +86,13 @@ Notes:
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler creating cache with key '#key#'.") />
 			</cfif>
+			
+			<!--- Get a snapshot of the event before we run the commands --->
+			<cfset StructAppend(eventSnapshot, arguments.event.getArgs()) />
 		
 			<!--- Run commands and save output to the buffer --->
 			<cfsavecontent variable="outputBuffer">
-				<cfloop index="i" from="1" to="#ArrayLen(variables.commands)#">
+				<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
 					<cfset command = variables.commands[i] />
 					<cfset continue = command.execute(arguments.event, arguments.eventContext) />
 					<cfif continue IS false>
@@ -99,11 +102,10 @@ Notes:
 			</cfsavecontent>
 			
 			<cfif getCachingEnabled()>
-				<!--- Use StructAppend on an empty struct so any subroutines
-					later on in the event do not contaminate this data by reference --->
-				<cfset StructAppend(data, arguments.event.getArgs()) />
 				<!--- Grab the data and output and cache it for later --->
-				<cfset setCacheData(key, data, outputBuffer) />
+				<cfset setCacheData(key, compareEventData(eventSnapshot, arguments.event.getArgs()), outputBuffer) />
+				
+				<cfset log.debug("Set cache-handler data with keys '#StructKeyList(data)#'.") />
 			<cfelse>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Cache-handler caching is disabled so skipped caching.") />
@@ -114,6 +116,7 @@ Notes:
 		<cfelse>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler used data from cache with key '#key#'.") />
+				<cfset log.debug("Cache-handler data with keys '#StructKeyList(dataFromCache.data)#'.") />
 			</cfif>
 
 			<!--- Replay the event from the cache --->
@@ -181,6 +184,70 @@ Notes:
 		</cfloop>
 		
 		<cfreturn key />
+	</cffunction>
+	
+	<cffunction name="compareEventData" access="private" returntype="struct" output="false"
+		hint="Compares pre-cache and post-cache event data.">
+		<cfargument name="preEventData" type="struct" required="true" />
+		<cfargument name="postEventData" type="struct" required="true" />
+		
+		<cfset var dataCache = StructNew() />
+		<cfset var keys = "" />
+		<cfset var keysNoDups = "" />
+		<cfset var results = StructNew() />
+		<cfset var pre = "" />
+		<cfset var post = "" />
+		<cfset var test = StructNew() />
+		<cfset var i = "" />
+		
+		<!--- Merge the two struct key lists --->
+		<cfset keys = ListToArray(ListAppend(StructKeyList(arguments.preEventData), StructKeyList(arguments.postEventData))) >
+		
+		<!--- Remove duplicates in the key array --->
+		<cfloop from="1" to="#ArrayLen(keys)#" index="i">
+			<cfif NOT ListFindNoCase(keysNoDups, keys[i])>
+				<cfset keysNoDups = ListAppend(keysNoDups, keys[i]) />
+			</cfif>
+		</cfloop>
+		
+		<cfset keysNoDups = ListToArray(keysNoDups) />
+		
+		<!--- Compare the pre/post event data --->
+		<cfloop from="1" to="#ArrayLen(keysNoDups)#" index="i">
+			<!--- If new event arg is there --->
+			<cfif NOT StructKeyExists(arguments.preEventData, keysNoDups[i]) AND StructKeyExists(arguments.postEventData, keysNoDups[i])>
+				<cfset results[keysNoDups[i]] = arguments.postEventData[keysNoDups[i]]>
+			<!--- Compare --->
+			<cfelseif StructKeyExists(arguments.preEventData, keysNoDups[i]) AND StructKeyExists(arguments.postEventData, keysNoDups[i])>
+				<cfset pre = arguments.preEventData[keysNoDups[i]] />
+				<cfset post = arguments.postEventData[keysNoDups[i]] />
+				
+				<!--- We need to check for objects before structs because in CF objects are structs when using IsStruct --->
+				<cfif IsSimpleValue(pre) AND IsSimpleValue(post)>
+					<cfif NOT pre.equals(post)>
+						<cfset results[i] = post />
+					</cfif>
+				<cfelseif IsArray(pre) AND IsArray(post)>
+					<cfif NOT pre.equals(post)>
+						<cfset results[i] = post />
+					</cfif>
+				<cfelseif IsObject(pre) AND IsObject(post)>
+					<cfset test = StructNew() />
+					<cfset test.obj = pre />
+					<cfif NOT test.contains(post)>
+						<cfset results[i] = post />
+					</cfif>
+				<cfelseif IsStruct(pre) AND IsStruct(post)>
+					<cfif NOT pre.equals(post)>
+						<cfset results[i] = post />
+					</cfif>
+				<cfelse>
+					<cfset results[i] = post />
+				</cfif>
+			</cfif>
+		</cfloop>
+
+		<cfreturn results />
 	</cffunction>
 	
 	<!---
