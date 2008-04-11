@@ -71,27 +71,25 @@ Notes:
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
-		<cfset var outputBuffer = "" />
-		<cfset var continue = true />
-		<cfset var command = "" />
-		<cfset var eventSnapshot = StructNew() />
+
+		<cfset var preCommandEventDataSnapshot = StructNew() />
+		<cfset var dataToCache = StructNew() />
 		<cfset var key = getKeyFromCriteria(arguments.event) />
-		<cfset var dataFromCache = getCacheData(key) />
+		<cfset var dataFromCache = getCacheStrategy().get(key) />
+		<cfset var command = "" />
+		<cfset var continue = true />
 		<cfset var i = 0 />
 		<cfset var log = getLog() />
 		
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache") OR NOT getCachingEnabled()>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler creating cache with key '#key#'.") />
-			</cfif>
-			
-			<!--- Get a snapshot of the event before we run the commands --->
-			<cfset StructAppend(eventSnapshot, arguments.event.getArgs()) />
+
+			<!--- Get a snapshot of the event before we run the commands
+				Used StructAppend so this is not updated by reference when the event is used in the commands --->
+			<cfset StructAppend(preCommandEventDataSnapshot, arguments.event.getArgs()) />
 		
-			<!--- Run commands and save output to the buffer --->
-			<cfsavecontent variable="outputBuffer">
+			<!--- Run commands and save output --->
+			<cfsavecontent variable="dataToCache.output">
 				<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
 					<cfset command = variables.commands[i] />
 					<cfset continue = command.execute(arguments.event, arguments.eventContext) />
@@ -101,27 +99,31 @@ Notes:
 				</cfloop>
 			</cfsavecontent>
 			
+			<!--- Run only if caching is enabled --->
 			<cfif getCachingEnabled()>
-				<!--- Grab the data and output and cache it for later --->
-				<cfset setCacheData(key, compareEventData(eventSnapshot, arguments.event.getArgs()), outputBuffer) />
+				<!--- Compare pre-command event data snapshot to current event data  --->
+				<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+
+				<!--- Cache the data and output --->
+				<cfset getCacheStrategy().put(key, dataToCache) />
 				
-				<cfset log.debug("Set cache-handler data with keys '#StructKeyList(data)#'.") />
+				<!--- Log messages --->
+				<cfset log.debug("Creating cache with key '#key#'.") />
+				<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
 			<cfelse>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Cache-handler caching is disabled so skipped caching.") />
-				</cfif>
+				<cfset log.debug("Caching is curently disabled for this cache-handler.") />
 			</cfif>
 
-			<cfoutput>#outputBuffer#</cfoutput>
+			<!--- Output the saved output from the commands --->
+			<cfoutput>#dataToCache.output#</cfoutput>
 		<cfelse>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler used data from cache with key '#key#'.") />
-				<cfset log.debug("Cache-handler data with keys '#StructKeyList(dataFromCache.data)#'.") />
-			</cfif>
-
-			<!--- Replay the event from the cache --->
-			<cfset arguments.event.setArgs(dataFromCache.data) />
+			<!--- Replay the data and output from the cache --->
 			<cfoutput>#dataFromCache.output#</cfoutput>
+			<cfset arguments.event.setArgs(dataFromCache.data) />
+			
+			<!--- Log messages --->
+			<cfset log.debug("Using data and output from cache with key '#key#'.") />
+			<cfset log.debug("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.") />
 		</cfif>
 		
 		<cfreturn continue />
@@ -162,7 +164,7 @@ Notes:
 	
 	<!---
 	PROTECTED FUNCTIONS
-	--->
+	--->	
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false"
 		hint="Build a key from the cache handler criteria with data from the event object.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -186,68 +188,72 @@ Notes:
 		<cfreturn key />
 	</cffunction>
 	
-	<cffunction name="compareEventData" access="private" returntype="struct" output="false"
-		hint="Compares pre-cache and post-cache event data.">
-		<cfargument name="preEventData" type="struct" required="true" />
-		<cfargument name="postEventData" type="struct" required="true" />
+	<cffunction name="computeDataToCache" access="private" returntype="struct" output="false"
+		hint="Computes event data to cache based on the pre-command and post-command event data snapshots.">
+		<cfargument name="preCommandDataSnapshot" type="struct" required="true" />
+		<cfargument name="postCommandDataSnapshot" type="struct" required="true" />
 		
-		<cfset var dataCache = StructNew() />
-		<cfset var keys = "" />
-		<cfset var keysNoDups = "" />
-		<cfset var results = StructNew() />
+		<cfset var keys = mergeStructKeys(arguments.preCommandDataSnapshot, arguments.postCommandDataSnapshot) />
+		<cfset var dataToCache = StructNew() />
 		<cfset var pre = "" />
 		<cfset var post = "" />
-		<cfset var test = StructNew() />
+		<cfset var objTest = StructNew() />
+		<cfset var keyName = "" />
 		<cfset var i = "" />
-		
-		<!--- Merge the two struct key lists --->
-		<cfset keys = ListToArray(ListAppend(StructKeyList(arguments.preEventData), StructKeyList(arguments.postEventData))) >
-		
-		<!--- Remove duplicates in the key array --->
-		<cfloop from="1" to="#ArrayLen(keys)#" index="i">
-			<cfif NOT ListFindNoCase(keysNoDups, keys[i])>
-				<cfset keysNoDups = ListAppend(keysNoDups, keys[i]) />
-			</cfif>
-		</cfloop>
-		
-		<cfset keysNoDups = ListToArray(keysNoDups) />
-		
-		<!--- Compare the pre/post event data --->
-		<cfloop from="1" to="#ArrayLen(keysNoDups)#" index="i">
-			<!--- If new event arg is there --->
-			<cfif NOT StructKeyExists(arguments.preEventData, keysNoDups[i]) AND StructKeyExists(arguments.postEventData, keysNoDups[i])>
-				<cfset results[keysNoDups[i]] = arguments.postEventData[keysNoDups[i]]>
-			<!--- Compare --->
-			<cfelseif StructKeyExists(arguments.preEventData, keysNoDups[i]) AND StructKeyExists(arguments.postEventData, keysNoDups[i])>
-				<cfset pre = arguments.preEventData[keysNoDups[i]] />
-				<cfset post = arguments.postEventData[keysNoDups[i]] />
 				
-				<!--- We need to check for objects before structs because in CF objects are structs when using IsStruct --->
-				<cfif IsSimpleValue(pre) AND IsSimpleValue(post)>
+		<!--- Compare the pre/post event data --->
+		<cfloop from="1" to="#ArrayLen(keys)#" index="i">
+			<cfset keyName = keys[i] />
+			
+			<!--- Add if new arg in post --->
+			<cfif NOT StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
+				<cfset dataToCache[keyName] = arguments.postCommandDataSnapshot [keyName]>
+			<!--- Check equality --->
+			<cfelseif StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
+				<cfset pre = arguments.preCommandDataSnapshot[keyName] />
+				<cfset post = arguments.postCommandDataSnapshot [keyName] />
+				
+				<!--- Check for objects first because CF evaluates objects as structs as well --->
+				<cfif IsObject(pre) AND IsObject(post)>
+					<cfset objTest = StructNew() />
+					<cfset objTest.obj = pre />
+					<cfif NOT objTest.contains(post)>
+						<cfset dataToCache[i] = post />
+					</cfif>
+				<!--- Check for simple datatypes, arrays and structs --->
+				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))
+					OR (IsArray(pre) AND IsArray(post))
+					OR (IsStruct(pre) AND IsStruct(post))>
 					<cfif NOT pre.equals(post)>
-						<cfset results[i] = post />
+						<cfset dataToCache[i] = post />
 					</cfif>
-				<cfelseif IsArray(pre) AND IsArray(post)>
-					<cfif NOT pre.equals(post)>
-						<cfset results[i] = post />
-					</cfif>
-				<cfelseif IsObject(pre) AND IsObject(post)>
-					<cfset test = StructNew() />
-					<cfset test.obj = pre />
-					<cfif NOT test.contains(post)>
-						<cfset results[i] = post />
-					</cfif>
-				<cfelseif IsStruct(pre) AND IsStruct(post)>
-					<cfif NOT pre.equals(post)>
-						<cfset results[i] = post />
-					</cfif>
+				<!--- Nothing else has evaluated true, so the datatype has changed --->
 				<cfelse>
-					<cfset results[i] = post />
+					<cfset dataToCache[i] = post />
 				</cfif>
 			</cfif>
 		</cfloop>
 
-		<cfreturn results />
+		<cfreturn dataToCache />
+	</cffunction>
+	
+	<cffunction name="mergeStructKeys" access="private" returntype="array" output="false"
+		hint="Returns an array of struct keys with duplicates deleted.">
+		<cfargument name="struct1" type="struct" required="true" />
+		<cfargument name="struct2" type="struct" required="true" />
+
+		<cfset var mergedKeys = StructKeyList(arguments.struct1) & "," & StructKeyList(arguments.struct2) />
+		<cfset var cleanedKeys = "" />
+		<cfset var item = "" />
+		
+		<!--- Remove duplicates in the merged keys --->
+		<cfloop list="#mergedKeys#" index="item">
+			<cfif NOT ListFindNoCase(cleanedKeys, item)>
+				<cfset cleanedKeys = ListAppend(cleanedKeys, item) />
+			</cfif>
+		</cfloop>
+
+		<cfreturn ListToArray(cleanedKeys) />
 	</cffunction>
 	
 	<!---
@@ -316,23 +322,6 @@ Notes:
 	</cffunction>
 	<cffunction name="getParentHandlerType" access="public" returntype="string" output="false">
 		<cfreturn variables.parentHandlerType />
-	</cffunction>
-	
-	<cffunction name="setCacheData" access="private" returntype="void" output="false">
-		<cfargument name="key" type="string" required="true" />
-		<cfargument name="cacheData" type="struct" required="true" />
-		<cfargument name="output" type="string" required="true" />
-		
-		<cfset var dataToCache = structNew() />
-		
-		<cfset dataToCache.data = arguments.cacheData />
-		<cfset dataToCache.output = arguments.output />
-		<cfset getCacheStrategy().put(arguments.key, dataToCache) />
-	</cffunction>
-	<cffunction name="getCacheData" access="public" returntype="any" output="false" 
-		hint="Return type is any since it might return null if the key is not in the cache">
-		<cfargument name="key" type="string" required="true" />
-		<cfreturn getCacheStrategy().get(arguments.key) />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
