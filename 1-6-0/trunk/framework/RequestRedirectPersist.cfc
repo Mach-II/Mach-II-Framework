@@ -249,11 +249,11 @@ machinery.
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
-	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
 
-	<cffunction name="getPropertyManager" access="private" returntype="MachII.framework.PropertyManager" output="false">
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false">
 		<cfreturn getAppManager().getPropertyManager() />
 	</cffunction>
 
@@ -261,7 +261,7 @@ machinery.
 		<cfargument name="redirectPersistParameter" type="string" required="true" />
 		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
 	</cffunction>
-	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
+	<cffunction name="getRedirectPersistParameter" access="public" returntype="string" output="false">
 		<cfreturn variables.redirectPersistParameter />
 	</cffunction>
 
@@ -269,7 +269,7 @@ machinery.
 		<cfargument name="redirectPersistScope" type="string" required="true" />
 		<cfset variables.redirectPersistScope = arguments.redirectPersistScope />
 	</cffunction>
-	<cffunction name="getRedirectPersistScope" access="private" returntype="string" output="false">
+	<cffunction name="getRedirectPersistScope" access="public" returntype="string" output="false">
 		<cfreturn variables.redirectPersistScope />
 	</cffunction>
 
@@ -277,7 +277,7 @@ machinery.
 		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 		<cfset variables.threadingAdapter = arguments.threadingAdapter />
 	</cffunction>
-	<cffunction name="getThreadingAdapter" access="private" returntype="MachII.util.threading.ThreadingAdapter" output="false">
+	<cffunction name="getThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false">
 		<cfreturn variables.threadingAdapter />
 	</cffunction>
 
