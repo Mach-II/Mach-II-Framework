@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Original license from the ColdSpring project (http://www.coldspringframework.org):
 ------------------------------------------------------------------------------------------
@@ -66,23 +66,28 @@ Usage:
 			Default: FALSE -->
 		<parameter name="resolveMachIIDependencies" value="false"/>
 		
-		<!-- Indicate a scope to pull in a parent bean factory into a child bean factory 
+		<!-- Indicates a scope to pull in a parent bean factory into a child bean factory 
 			 Default: application -->
 		<parameter name="parentBeanFactoryScope" value="application"/>
 		
-		<!-- Indicate a key to pull in a parent bean factory from the application scope
+		<!-- Indicates a key to pull in a parent bean factory from the application scope
 			Default: FALSE -->
 		<parameter name="parentBeanFactoryKey" value="serviceFactory"/>
 			
-		<!-- Indicate whether or not to place the bean factory in the application scope 
+		<!-- Indicates whether or not to place the bean factory in the application scope 
 			 Default: FALSE -->
 		<parameter name="placeFactoryInApplicationScope" value="false" />
 
-		<!-- Indicate whether or not to place the bean factory in the server scope 
+		<!-- Indicates whether or not to place the bean factory in the server scope 
 			 Default: FALSE -->
 		<parameter name="placeFactoryInServerScope" value="false" />
 		
-		<!-- Indicate the autowire attribute name to introspect for in cfcomponent tags
+		<!-- Flag to indicate whether to automatically generate remote proxies for you
+			Does not generate remote proxies in parent bean factories.
+			Default: FALSE -->
+		<parameter name="generateRemoteProxies" value="true" />
+		
+		<!-- Indicates the autowire attribute name to introspect in cfcomponent tags
 			Default: 'depends' -->
 		<parameter name="autowireAttributeName" value="depends" />
 		
@@ -144,12 +149,12 @@ be placed in the server scope.
 
 The [autowireAttributeName] parameters indicates the name of the attribute to introspect
 for in cfcomponent tags when using the dynamic autowire getter/setter method generation feature of the
-Coldspring Property.  Dynamic autowire getter/setter method generation allows you to put a list of ColdSpring
+Coldspring Property.  Autowire method generation injection allows you to put a list of ColdSpring
 bean names in the autowire attribute (which default to 'depends') in cfcomponent tag of your 
-listeners, filters, plugins and properties CFC in Mach-II. ColdSpring will automatically 
+listeners, filters, plugins and properties CFC in Mach-II. ColdSpring property will automatically 
 generate and dynamically inject getters/setters for the listed bean names into your target 
 cfc at runtime.  This does not modify the contents of the cfc file, but injects dynamically 
-while the cfc is in memory.  This feature allows you to stop having type out getters/setters
+while the cfc is in memory.  This feature allows you to stop having to type out getters/setters
 for the service that you want ColdSpring to inject into your cfc.
 
 Example:
@@ -157,7 +162,7 @@ Example:
 	... additional code ...
 </cfcomponent>
 
-This will dynamically inject a getSomeService() and setSomeService method into this listener.
+This will dynamically inject a getSomeService() and setSomeService() method into this listener.
 ColdSpring will then use the bean name and use setter injection to inject the bean into the
 listener.
 
@@ -319,6 +324,11 @@ application.serviceFactory_account variable.
 			<cfset resolveDependencies(autowireAttributeName) />
 		</cfif>
 		
+		<!--- Generate the remote proxies if required --->
+		<cfif getParameter("generateRemoteProxies", false)>
+			<cfset generateRemoteProxies() />
+		</cfif>
+		
 		<!--- Place bean references into the Mach-II properties if required --->
 		<cfif isParameterDefined("beansToMachIIProperties")>
 			<cfif IsStruct(getParameter("beansToMachIIProperties"))>
@@ -345,6 +355,31 @@ application.serviceFactory_account variable.
 		</cfif>
 		
 		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="generateRemoteProxies" access="public" returntype="void" output="false"
+		hint="Generates all the remote proxies that are of type 'coldspring.aop.framework.RemoteFactoryBean'.">
+		
+		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
+		<!--- Names of remote proxies. Do not check the parent since remote proxy generation. --->
+		<cfset var remoteProxyNames = beanFactory.findAllBeanNamesByType("coldspring.aop.framework.RemoteFactoryBean", false) />
+		<cfset var remoteProxy = "" />
+		<cfset var i = "" />
+		
+		<!--- Generate all the remote proxies --->
+		<cfloop from="1" to="#ArrayLen(remoteProxyNames)#" index="i">
+			<!--- Get the remote proxy api by using the ampersand with the bean name --->
+			<cfset remoteProxy = beanFactory.getBean("&" & remoteProxyNames[i]) />
+			
+			<!--- Destroy the proxy if already constructed. 
+				Must check if already constructed or it will cause an exception --->
+			<cfif remoteProxy.isConstructed()>
+				<cfset remoteProxy.destoryRemoteProxy() />
+			</cfif>
+			
+			<!--- Create the proxy --->
+			<cfset remoteProxy.createRemoteProxy() />
+		</cfloop>
 	</cffunction>
 	
 	<!---
