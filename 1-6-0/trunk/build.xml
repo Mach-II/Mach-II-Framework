@@ -183,6 +183,11 @@ Notes:
 			outputdir="${mxunit.output}"
 			verbose="${debug}"
 			haltonerror="true">
+			<!--
+			This does not work yet because MXUnit appears not to recurse directories yet
+			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
+			-->
+			<!-- framework -->
 			<!-- caching -->
 			<testcase name="MachII.tests.caching.CacheStatsTest"/>
 			<testcase name="MachII.tests.caching.strategies.TimeSpanCacheTest"/>
@@ -192,10 +197,6 @@ Notes:
 			<testcase name="MachII.tests.logging.LogFactoryTest"/>
 			<testcase name="MachII.tests.logging.adapters.CFLogAdapterTest"/>
 			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
-			<!--
-			This does not work yet because the it appears not to recurse directories yet
-			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
-			-->
 		</mxunit>
 	</target>
 	
