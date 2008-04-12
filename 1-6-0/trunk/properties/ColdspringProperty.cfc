@@ -392,24 +392,23 @@ application.serviceFactory_account variable.
 		<cfset var targets = StructNew() />
 		<cfset var targetObj = 0 />
 		<cfset var targetMetadata = "" />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Get listener/filter/plugin/property targets --->
-		<cfset targets.data = ArrayNew(1) />
 		<cfset getListeners(targets) />
 		<cfset getFilters(targets) />
 		<cfset getPlugins(targets) />
 		<cfset getConfigurableProperties(targets) />
 		
-		<cfloop from="1" to="#ArrayLen(targets.data)#" index="i">
+		<cfloop collection="#targets#" item="key">
 			<!--- Get this iteration target object for easy use --->
-			<cfset targetObj = targets.data[i] />
+			<cfset targetObj = targets[key] />
 			
 			<!--- Look for autowirable collaborators for any setters --->
 			<cfset targetMetadata = GetMetadata(targetObj) />
 			
 			<!--- Autowire by dynamic method generation --->
-			<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, arguments.autowireAttributeName) />
+			<cfset autowireByDynamicMethodGeneration(key, targetObj, targetMetadata, arguments.autowireAttributeName) />
 
 			<!--- Autowire by defined setters --->
 			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
@@ -419,6 +418,7 @@ application.serviceFactory_account variable.
 
 	<cffunction name="autowireByDynamicMethodGeneration" access="private" returntype="void" output="false"
 		hint="Autowires by dynamic method generation.">
+		<cfargument name="targetKey" type="string" required="true" />
 		<cfargument name="targetObj" type="any" required="true" />
 		<cfargument name="targetObjMetadata" type="any" required="true" />
 		<cfargument name="autowireAttributeName" type="string" required="true" />
@@ -427,6 +427,8 @@ application.serviceFactory_account variable.
 		<cfset var autowireBeanNames = "" />
 		<cfset var beanName = "" />
 		<cfset var autowireCfc = "" />
+		<cfset var targetType = "" />
+		<cfset var targetName = "" />
 		<cfset var i = 0 />
 
 		<!--- Autowire by concrete setters (dynamically injected setters do not show up in the metadata) --->
@@ -452,7 +454,13 @@ application.serviceFactory_account variable.
 					<cfif beanFactory.containsBean(beanName)>
 						<cfinvoke component="#arguments.targetObj#" method="set#beanName#">
 							<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
-						</cfinvoke>	
+						</cfinvoke>
+					<cfelse>
+						<cfset targetType = ListFirst(arguments.targetKey, "_") />
+						<cfset targetName = ListDeleteAt(arguments.targetKey, 1, "_") />
+						<cfthrow type="MachII.properties.ColdspringProperty"
+							message="Cannot find bean named '#beanName#' to autowire by method injection in a #targetType# named '#targetName#' in module '#getAppManager().getModuleName()#'."
+							detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
 					</cfif>
 				</cfif>
 				
@@ -525,7 +533,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved listener and its' invoker to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(listenerNames)#" index="i">
-			<cfset ArrayAppend(targets.data, listenerManager.getListener(listenerNames[i])) />
+			<cfset targets["listener_" & listenerNames[i]] = listenerManager.getListener(listenerNames[i]) />
 		</cfloop>
 	</cffunction>
 		
@@ -539,7 +547,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved filter to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(filterNames)#" index="i">
-			<cfset ArrayAppend(targets.data, filterManager.getFilter(filterNames[i])) />
+			<cfset targets["filter_" & filterNames[i]] = filterManager.getFilter(filterNames[i]) />
 		</cfloop>
 	</cffunction>
 		
@@ -553,7 +561,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved plugin to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(pluginNames)#" index="i">
-			<cfset ArrayAppend(targets.data, pluginManager.getPlugin(pluginNames[i])) />
+			<cfset targets["plugin_" & pluginNames[i]] = pluginManager.getPlugin(pluginNames[i]) />
 		</cfloop>
 	</cffunction>
 	
@@ -567,7 +575,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved plugin to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(configurablePropertyNames)#" index="i">
-			<cfset ArrayAppend(targets.data, propertyManager.getProperty(configurablePropertyNames[i])) />
+			<cfset targets["property_" & configurablePropertyNames[i]] = propertyManager.getProperty(configurablePropertyNames[i]) />
 		</cfloop>
 	</cffunction>
 	
@@ -589,8 +597,10 @@ application.serviceFactory_account variable.
 		<cfloop from="1" to="#ArrayLen(arguments.autowireBeanNames)#" index="i">
 			<!--- Clean any spaces from the bean name --->
 			<cfset beanName = Trim(arguments.autowireBeanNames[i]) />
-			<cfset cfcData = cfcData & '<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></cffunction>' />
-			<cfset cfcData = cfcData & '<cffunction name="get#beanName#" access="public" returntype="any" output="false"><creturn variables.#beanName# /></cffunction>' />
+
+			<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
+			<cfset cfcData = cfcData & '<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></' & 'cffunction>' />
+			<cfset cfcData = cfcData & '<cffunction name="get#beanName#" access="public" returntype="any" output="false"><creturn variables.#beanName# /></' & 'cffunction>' />
 		</cfloop>
 
 		<!--- Add the closing cfcomponent tag --->
