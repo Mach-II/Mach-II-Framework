@@ -480,10 +480,19 @@ application.serviceFactory_account variable.
 				
 				<cfset beanName = Trim(autowireBeanNames[i]) />
 				
+				<!--- Inject the _methodInject() so we can get the methods into the variables scope
+					in addition to the this scope of the component --->
+				<cfset arguments.targetObj["_methodInject"] = autowireCfc["_methodInject"] />
+
+				<!--- Only dynamically inject the setter if there isn't a concrete getter --->
+				<cfif NOT StructKeyExists(arguments.targetObj, "get" & beanName)>
+					<cfset arguments.targetObj._methodInject("get" & beanName, autowireCfc["get" & beanName]) />
+				</cfif>
+				
 				<!--- Only dynamically inject the setter if there isn't a concrete setter --->
 				<cfif NOT StructKeyExists(arguments.targetObj, "set" & beanName)>
 					
-					<cfset arguments.targetObj["set" & beanName] = autowireCfc["set" & beanName] />
+					<cfset arguments.targetObj._methodInject("set" & beanName, autowireCfc["set" & beanName]) />
 					
 					<!--- Inject appropriate bean if the factory has a bean by that name --->
 					<cfif beanFactory.containsBean(beanName)>
@@ -499,10 +508,8 @@ application.serviceFactory_account variable.
 					</cfif>
 				</cfif>
 				
-				<!--- Only dynamically inject the setter if there isn't a concrete getter --->
-				<cfif NOT StructKeyExists(arguments.targetObj, "get" & beanName)>
-					<cfset arguments.targetObj["get" & beanName] = autowireCfc["get" & beanName] />
-				</cfif>
+				<!--- Delete the _methodInject() from the target --->
+				<cfset StructDelete(arguments.targetObj, "_methodInject") />
 			</cfloop>
 		</cfif>	
 	</cffunction>
@@ -628,6 +635,8 @@ application.serviceFactory_account variable.
 		<!--- Add the opening cfcomponent tag --->
 		<cfset cfcData = cfcData & "<cfcomponent>" />
 		
+		<cfset cfcData = cfcData & '<cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>' />
+				
 		<!--- Create the getter/setter methods for each beanName --->
 		<cfloop from="1" to="#ArrayLen(arguments.autowireBeanNames)#" index="i">
 			<!--- Clean any spaces from the bean name --->
@@ -635,7 +644,7 @@ application.serviceFactory_account variable.
 
 			<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
 			<cfset cfcData = cfcData & '<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></' & 'cffunction>' />
-			<cfset cfcData = cfcData & '<cffunction name="get#beanName#" access="public" returntype="any" output="false"><creturn variables.#beanName# /></' & 'cffunction>' />
+			<cfset cfcData = cfcData & '<cffunction name="get#beanName#" access="public" returntype="any" output="false"><cfreturn variables.#beanName# /></' & 'cffunction>' />
 		</cfloop>
 
 		<!--- Add the closing cfcomponent tag --->
