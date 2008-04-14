@@ -130,6 +130,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfset var data = ArrayNew(1) />
 		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var local = StructNew() />
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()

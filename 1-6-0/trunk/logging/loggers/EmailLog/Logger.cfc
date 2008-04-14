@@ -136,21 +136,26 @@ See that file header for configuration of filter criteria.
 		
 		<cfset var body = "" />
 		<cfset var scope = StructGet(getLoggingScope()) />
-		<cfset var data = scope[getLoggingPath()].data />
+		<cfset var data = ArrayNew(1) />
+		<cfset var local = StructNew() />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled() AND ArrayLen(data)>
+		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
 			
-			<!--- Save the body of the email --->
-			<cfsavecontent variable="body">
-				<cfinclude template="#getEmailTemplateFile()#" />
-			</cfsavecontent>
+			<cfset data = scope[getLoggingPath()].data />
 			
-			<!--- Send the email --->
-			<cfif NOT Len(getServers())>
-				<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
-			<cfelse>
-				<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#" server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
+			<cfif ArrayLen(data)>
+				<!--- Save the body of the email --->
+				<cfsavecontent variable="body">
+					<cfinclude template="#getEmailTemplateFile()#" />
+				</cfsavecontent>
+				
+				<!--- Send the email --->
+				<cfif NOT Len(getServers())>
+					<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
+				<cfelse>
+					<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#" server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
+				</cfif>
 			</cfif>
 		</cfif>
 	</cffunction>

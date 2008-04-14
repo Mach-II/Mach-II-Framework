@@ -23,47 +23,52 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
+You must use the 'local' prefix for all variables created in this template 
+since this display template is rendered inside a *non-thread safe* CFC.
+
+Not using the 'local' prefix can cause errors due to threading.
+
 --->
 </cfsilent>
 <cfoutput>
 <h3>General Information</h3>
 <table>
-	<tr class="shade">
-		<td class="strong">Request Event Name</td>
-		<td>#arguments.appManager.getRequestHandler().getRequestEventName()#</td>
+	<tr>
+		<td><h4>Request Event Name</h4></td>
+		<td><p>#arguments.appManager.getRequestHandler().getRequestEventName()#</p></td>
 	</tr>
 	<tr>
-		<td class="strong">Request Module Name</td>
-		<td>#arguments.appManager.getRequestHandler().getRequestModuleName()#</td>
-	</tr>
-	<tr class="shade">
-		<td class="strong">Server Name</td>
-		<td>#cgi.SERVER_NAME#</td>
+		<td><h4>Request Module Name</h4></td>
+		<td><p>#arguments.appManager.getRequestHandler().getRequestModuleName()#</p></td>
 	</tr>
 	<tr>
-		<td class="strong">Timestamp</td>
-		<td>#DateFormat(Now())# #TimeFormat(Now())#</td>
+		<td><h4>Server Name</h4></td>
+		<td><p>#cgi.SERVER_NAME#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Timestamp</h4></td>
+		<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
 	</tr>
 </table>
 
 <h3>Application Log</h3>
 <table>
 	<tr>
-		<td class="lineBottom strong" style="width:30%;">Channel</td>
-		<td class="lineBottom strong" style="width:7.5%;">Log Level</td>
-		<td class="lineBottom strong" style="width:55%;">Message</td>
-		<td class="lineBottom strong" style="width:7.5%;">Timing (ms)</td>
+		<td style="width:30%;"><h4>Channel</h4></td>
+		<td style="width:7.5%;"><h4>Log Level</h4></td>
+		<td style="width:55%;"><h4>Message</h4></td>
+		<td style="width:7.5%;"><h4>Timing (ms)</h4></td>
 	</tr>
-<cfloop from="1" to="#ArrayLen(data)#" index="i">
-	<tr class="<cfif i MOD 2>shade</cfif> #data[i].logLevelName#">
-		<td><p>#data[i].channel#</p></td>
-		<td><p>#data[i].logLevelName#</p></td>
-		<td><p>#data[i].message#</p></td>
-		<td><p><cfif i EQ 1>0<cfelse>#data[i].currentTick - data[i - 1].currentTick#</cfif></p></td>
+<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
+	<tr class="<cfif local.i MOD 2>shade </cfif>#data[local.i].logLevelName#">
+		<td><p>#data[local.i].channel#</p></td>
+		<td><p>#data[local.i].logLevelName#</p></td>
+		<td><p>#data[local.i].message#</p></td>
+		<td><p><cfif local.i EQ 1>0<cfelse>#data[local.i].currentTick - data[local.i - 1].currentTick#</cfif></p></td>
 	</tr>
-	<cfif NOT IsSimpleValue(data[i].caughtException)>
+	<cfif NOT IsSimpleValue(data[local.i].caughtException)>
 	<tr>
-		<td colspan="4"><cfdump var="#data[i].caughtException#"  expand="false" /></td>
+		<td colspan="4"><cfdump var="#data[local.i].caughtException#" expand="false" /></td>
 	</tr>
 	</cfif>
 </cfloop>
