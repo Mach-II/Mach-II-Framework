@@ -18,9 +18,11 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.1
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
+This bootstrapper is DEPRECATED since Mach-II no longer officially 
+supports ColdFusion 6.1. Use Application.cfc and mach-ii.cfc.
 --->
 <!--- Set the path to the application's mach-ii.xml file. Default to ./config/mach-ii.xml. --->
 <cfparam name="MACHII_CONFIG_PATH" type="string" default="#ExpandPath('./config/mach-ii.xml')#" />

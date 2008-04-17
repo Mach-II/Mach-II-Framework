@@ -106,7 +106,7 @@ See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticke
 (2008-03-15 kwiersma)
 
 ------------------------------------------------
-Internal Framework Improvements / Enhancements
+Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
 * Removed superfluous Application.cfm and index.cfm files
 These files are no longer required for backwards compatibility and cause confusion to new
@@ -114,3 +114,11 @@ users that thinking they can run index.cfm instead of using the skeleton.
 
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/16
 (2007-12-7 pfarrell)
+
+* Deprecated mach-ii.cfm
+All supported CF engines now support Application.cfc.  The mach-ii.cfm bootstrapper for
+Application.cfm has been deprecated as Application.cfc offers application events and Abobe
+has stopped selling support for ColdFusion MX 6.1 thus the decision to deprecate this
+bootstrapper.
+
+(2008-04-17 pfarrell)
