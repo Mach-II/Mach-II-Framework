@@ -113,19 +113,19 @@ Notes:
 			hint="Name of cache strategy name." />
 		<cfargument name="cacheStrategyType" type="string" required="true"
 			hint="Dot path to the cache strategy." />
-		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
-			hint="Configuration parameters." />
+		<cfargument name="cacheStrategyParameters" type="struct" required="false" default="#StructNew()#"
+			hint="Configuration parameters for the cache strategy." />
 		
 		<cfset var strategy = "" />
 		
 		<!--- Create the strategy --->
 		<cftry>
-			<cfset strategy = CreateObject("component", arguments.type).init(arguments.parameters) />
+			<cfset strategy = CreateObject("component", arguments.cacheStrategyType).init(arguments.cacheStrategyParameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName")>
 					<cfthrow type="MachII.caching.CannotFindCacheStrategy"
-						message="Cannot find a cache strategy CFC with type of '#arguments.type#' for the cache named '#arguments.name#'."
+						message="Cannot find a cache strategy CFC with type of '#arguments.cacheStrategyType#' for the cache named '#arguments.cacheStrategyName#'."
 						detail="Please check that the cache strategy exists and that there is not a misconfiguration." />
 				<cfelse>
 					<cfrethrow />
@@ -133,7 +133,7 @@ Notes:
 			</cfcatch>
 		</cftry>
 
-		<cfset addCacheStrategy(arguments.name, strategy) />
+		<cfset addCacheStrategy(arguments.cacheStrategyName, strategy) />
 	</cffunction>
 
 	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
