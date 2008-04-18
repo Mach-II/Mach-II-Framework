@@ -34,12 +34,12 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentCacheManager = "" />
+	<cfset variables.cacheStrategyManager = "" />
 	<cfset variables.defaultCacheName = "" />
 	<cfset variables.handlers = StructNew() />
 	<cfset variables.handlersByAliases = StructNew() />
 	<cfset variables.handlersByEventName = StructNew() />
 	<cfset variables.handlersBySubroutineName = StructNew() />
-	<cfset variables.cacheStrategies = StructNew() />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -110,6 +110,7 @@ Notes:
 		<cfset var handlerId = "" />
 		<cfset var cacheStrategy = "" />
 		<cfset var cacheName = "" />
+		<cfset var cacheStrategyManager = getCacheStrategyManager() />
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
@@ -122,7 +123,7 @@ Notes:
 			</cfif>
 			
 			<!--- Load the strategy into the handler --->
-			<cfset cacheStrategy = getCacheStrategyByName(cacheName) />
+			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(cacheName) />
 			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
 	</cffunction>
@@ -335,60 +336,6 @@ Notes:
 		
 		<cfreturn cacheHandlers />
 	</cffunction>
-	
-	<cffunction name="getCacheStrategyByName" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false"
-		hint="Gets a cache strategy with the specified name.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
-		
-		<cfif isCacheStrategyDefined(arguments.cacheStrategyName)>
-			<cfreturn variables.cacheStrategies[arguments.cacheStrategyName] />
-		<cfelseif IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.cacheStrategyName)>
-			<cfreturn getParent().getCacheStrategyByName(arguments.cacheStrategyName) />
-		<cfelse>
-			<cfif NOT StructCount(getCacheStrategies())>
-				<cfthrow type="MachII.framework.NoCacheStrategiesDefined" 
-					message="There are no cache strategies defined."
-					detail="Please add the MachII.caching.CachingProperty to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
-			<cfelse>
-				<cfthrow type="MachII.framework.CacheStrategyNotDefined" 
-					message="Cache strategy with name '#arguments.cacheStrategyName#' is not defined."
-					detail="Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
-			</cfif>
-		</cfif>
-	</cffunction>
-
-	<cffunction name="addCacheStrategy" access="public" returntype="void" output="false"
-		hint="Registers a cache strategy with the specified name.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
-		<cfargument name="cacheStrategy" type="MachII.caching.strategies.AbstractCacheStrategy" required="true" />
-		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
-		
-		<cfif NOT arguments.overrideCheck AND isCacheStrategyDefined(arguments.cacheStrategyName)>
-			<cfthrow type="MachII.framework.CacheStrategyAlreadyDefined"
-				message="A Cache Strategy with name '#arguments.cacheStrategyName#' is already registered." />
-		<cfelse>
-			<cfset variables.cacheStrategies[arguments.cacheStrategyName] = cacheStrategy />
-		</cfif>
-	</cffunction>
-
-	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if a cache strategy is registered with the specified name. Does NOT check parent.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.cacheStrategies, arguments.cacheStrategyName) />
-	</cffunction>
-
-	<!---
-	PUBLIC FUNCTIONS - UTILS
-	--->
-	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
-		hint="Gets all registered cache strategies.">
-		<cfreturn variables.cacheStrategies />
-	</cffunction>
-
-	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false"
-		hint="Returns an array of cache strategy names.">
-		<cfreturn StructKeyArray(variables.cacheStrategies) />
-	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
@@ -420,14 +367,24 @@ Notes:
 		<cfreturn variables.parentCacheManager />
 	</cffunction>
 
+	<cffunction name="setCacheStrategyManager" access="public" returntype="void" output="false"
+		hint="Returns the CacheStrategyManager.">
+		<cfargument name="cacheStrategyManager" type="MachII.framework.CacheManager" required="true" />
+		<cfset variables.cacheStrategyManager = arguments.cacheStrategyManager />
+	</cffunction>
+	<cffunction name="getCacheStrategyManager" access="public" returntype="any" output="false"
+		hint="Sets the CacheStrategyManager. Returns empty string if no manager is defind.">
+		<cfreturn variables.cacheStrategyManager />
+	</cffunction>
+
 	<cffunction name="setDefaultCacheName" access="public" returntype="string" output="false">
 		<cfargument name="defaultCacheName" type="string" required="true" />
-		<cfif isCacheStrategyDefined(arguments.defaultCacheName)>
+		<cfif getCacheStrategyManager().isCacheStrategyDefined(arguments.defaultCacheName)>
 			<cfset variables.defaultCacheName = arguments.defaultCacheName />
 		<cfelse>
 			<cfthrow type="MachII.framework.DefaultCacheNameNotAvailable"
 				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy that is not available. Please set the default to a stragety that is configured."
-				detail="Available strategies:#ArrayToList(getCacheStrategyNames())#" />
+				detail="Available strategies:#ArrayToList(getCacheStrategyManager().getCacheStrategyNames())#" />
 		</cfif>
 	</cffunction>	
 	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">

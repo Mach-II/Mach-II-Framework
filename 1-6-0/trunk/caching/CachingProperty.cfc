@@ -74,9 +74,21 @@ See individual caching strategies for more information on configuration.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
+		<cfset var cacheStrategyManager = CreateObject("component", "MachII.caching.CacheStrategyManager") />
+		<cfset var cacheStrategyManagerParent = "" />
 		<cfset var params = getParameters() />
-		<cfset var strategies = StructNew() />
 		<cfset var key = "" />
+		
+		<!--- Create the CacheStrategyManager --->
+		<cfif IsObject(getAppManager().getParent())
+			AND IsObject(getAppManager().getCacheManager().getCacheStrategyManager())>
+			<cfset cacheStrategyManagerParent = getAppManager().getCacheManager().getCacheStrategyManager() />
+			<cfset cacheStrategyManager.init(cacheStrategyManagerParent) />
+		<cfelse>
+			<cfset cacheStrategyManager.init() />
+		</cfif>
+
+		<cfset getAppManager().getCacheManager().setCacheStrategyManager(cacheStrategyManager) />
 
 		<!--- Set the default cache strategy
 			(this must be done before default strategy is configured if required) --->
@@ -94,7 +106,7 @@ See individual caching strategies for more information on configuration.
 		</cfloop>
 
 		<!--- Configure the default strategy if no strategies were set --->		
-		<cfif NOT StructCount(getAppManager().getCacheManager().getCacheStrategies())>
+		<cfif NOT StructCount(getAppManager().getCacheManager().getCacheStrategyManager().getCacheStrategies())>
 			<cfset configureDefaultStrategy() />
 		</cfif>
 		
@@ -105,15 +117,10 @@ See individual caching strategies for more information on configuration.
 		<!--- Set caching enabled/disabled --->
 		<cfif NOT getCachingEnabled()>
 			<cfset getAppManager().getCacheManager().disableCaching() />
-		</cfif>
-		
+		</cfif>		
 		
 		<!--- Configure the registered stragies --->
-		<cfset strategies = getAppManager().getCacheManager().getCacheStrategies() />
-		
-		<cfloop collection="#strategies#" item="key">
-			<cfset strategies[key].configure() />
-		</cfloop>
+		<cfset getAppManager().getCacheManager().getCacheStrategyManager().configure() />
 	</cffunction>
 	
 	<!---
@@ -133,16 +140,13 @@ See individual caching strategies for more information on configuration.
 	--->
 	<cffunction name="configureDefaultStrategy" access="private" returntype="void" output="false"
 		hint="Configures the default caching strategy (e.g. MachII.caching.strategies.TimeSpanCache).">
-		
-		<cfset var strategy = "" />
+			
 		<cfset var parameters = StructNew() />
 		
-		<!--- Create the strategy --->
-		<cfset strategy = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
-		<cfset strategy.setLog(getAppManager().getLogFactory()) />
-
-		<!--- Set the strategy to the CacheManager  --->
-		<cfset getAppManager().getCacheManager().addCacheStrategy(getDefaultCacheName(), strategy) />	
+		<cfset parameters.type = "MachII.caching.strategies.TimeSpanCache" />
+		<cfset parameters.cacheIdKey = createCacheIdKey(arguments.name) />
+		
+		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(getDefaultCacheName(), parameters.type, parameters) />	
 	</cffunction>
 	
 	<cffunction name="configureStrategy" access="private" returntype="void" output="false"
@@ -152,7 +156,6 @@ See individual caching strategies for more information on configuration.
 		<cfargument name="parameters" type="struct" required="true"
 			hint="Parameters for this strategy." />
 
-		<cfset var strategy = "" />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
@@ -169,24 +172,8 @@ See individual caching strategies for more information on configuration.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
-		<!--- Create the strategy --->
-		<cftry>
-			<cfset strategy = CreateObject("component", arguments.parameters.type).init(arguments.parameters) />
-			<cfset strategy.setLog(getAppManager().getLogFactory()) />
-
-			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
-					<cfthrow type="MachII.caching.CannotFindCacheStrategy"
-						message="The CachingProperty  in module named '#getAppManager().getModuleName()#' cannot find a cache strategy CFC with type of '#arguments.parameters.type#' for the cache named '#arguments.name#'."
-						detail="Please check that the cache strategy exists and that there is not a misconfiguration in the XML configuration file." />
-				<cfelse>
-					<cfrethrow />
-				</cfif>
-			</cfcatch>
-		</cftry>
-		
-		<!--- Set the strategy to the CacheManager --->
-		<cfset getAppManager().getCacheManager().addCacheStrategy(arguments.name, strategy) />
+		<!--- Load the strategy  --->
+		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.name, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
 	<cffunction name="createCacheIdKey" access="private" returntype="string" output="false"
