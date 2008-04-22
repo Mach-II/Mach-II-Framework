@@ -46,7 +46,7 @@ Notes:
 	
 	<property name="ftp.server" value="mach-ii.com"/>
 	<property name="ftp.user" value="machii"/>
-	<property name="ftp.nightly.dir" value="/var/www/machii/m2website/public/nightly/"/>
+	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
 	
 	<property name="mxunit.output" value="./tests/output"/>
 
@@ -275,7 +275,7 @@ Notes:
 			userid="${ftp.user}"
 			password="${ftp.password}"
 			action="put"
-			remotedir="${ftp.nightly.dir}"
+			remotedir="${ftp.webroot}/nightly/"
 			verbose="${debug}">
 			<fileset dir="${zip}">
 				<include name="*.zip"/>
@@ -286,11 +286,21 @@ Notes:
 			userid="${ftp.user}"
 			password="${ftp.password}"
 			action="put"
-			remotedir="${ftp.nightly.dir}/older/"
+			remotedir="${ftp.webroot}/nightly/older/"
 			verbose="${debug}">
 			<fileset dir="${zip}/older/">
 				<include name="*.zip"/>
 				<include name="*.zip.MD5"/>
+			</fileset>
+		</ftp>
+		<ftp server="${ftp.server}"
+			userid="${ftp.user}"
+			password="${ftp.password}"
+			action="put"
+			remotedir="${ftp.webroot}/dtds/"
+			verbose="${debug}" >
+			<fileset dir="${dest}/MachII/">
+				<include name="*.dtd"/>
 			</fileset>
 		</ftp>
 	</target>
