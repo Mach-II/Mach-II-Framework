@@ -138,6 +138,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	multithreaded (true|false) #IMPLIED
 	waitForThreads (true|false) #IMPLIED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
 >
 <!ELEMENT subscribe EMPTY>
 <!ATTLIST subscribe
@@ -365,6 +367,15 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT execute (parameter*)>
 <!ATTLIST execute 
 	subroutine CDATA #REQUIRED
+>
+
+<!--
+	A "publish" element will publish a message for listener subscriber.
+		message - the name of message to be published
+-->
+<!ELEMENT publish EMPTY>
+<!ATTLIST publish 
+	message CDATA #REQUIRED
 >
 
 <!--
