@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
+Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
@@ -79,14 +80,14 @@ Notes:
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
-		<!--- Search for listeners --->
+		<!--- Search for messages --->
 		<cfif NOT arguments.override>
 			<cfset messageSubscribersNodes = XMLSearch(arguments.configXML, "mach-ii/message-subscribers/message") />
 		<cfelse>
 			<cfset messageSubscribersNodes = XMLSearch(arguments.configXML, ".//message-subscribers/message") />
 		</cfif>
 		
-		<!--- Setup up each Listener --->
+		<!--- Setup up each message --->
 		<cfloop from="1" to="#ArrayLen(messageSubscribersNodes)#" index="i">
 			<cfset messageName = messageSubscribersNodes[i].xmlAttributes["name"] />
 			
