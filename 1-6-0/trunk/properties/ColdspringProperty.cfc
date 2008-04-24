@@ -296,6 +296,9 @@ application.serviceFactory_account variable.
 			<cfset serviceDefXmlLocation = ExpandPath(serviceDefXmlLocation) />
 		</cfif>
 		
+		<!--- Place a temporary reference of the AppManager into the request scope for the UtilityConnector --->
+		<cfset request._MachIIAppManager = getAppManager() />
+		
 		<!--- Load the bean defs --->
 		<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
 
