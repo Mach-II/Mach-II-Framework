@@ -9,6 +9,9 @@ Version: 1.6.0.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
+If version number and built-on are placeholders, you are using a bleeding
+edge release of the framework.
+------------------------------------------------
 
 Copyright 2008 GreatBizTools, LLC
 
@@ -72,15 +75,6 @@ See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticke
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
-* Message Subscriber Listeners Enhancement (AKA Broadcast Style Listeners Invocation)
-This enhancement allows developers another way to invoke listeners by publishing messages.
-This lets developers easily swap different listener methods or add addition listeners that 
-respond to a message by changing the subscribes directive instead of changing the a bunch 
-of notify commands throughout an XML file since listeners are decoupled from the event-handlers.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/4
-(2007-11-11 pfarrell)
-
 * Application.cfc Bootstrapper Enhancements and OnSessionStart / OnSessionEnd Integration
 Add onSessionStart / onSessionEnd integration as new plugin point.  This enhancement helps 
 developers to integrate third-party modules into a base application with ease and/or to 
@@ -94,6 +88,15 @@ functionality.
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/5
 (2007-11-10 pfarrell)
 
+* Message Subscriber Listeners Enhancement (AKA Broadcast Style Listeners Invocation)
+This enhancement allows developers another way to invoke listeners by publishing messages.
+This lets developers easily swap different listener methods or add addition listeners that 
+respond to a message by changing the subscribes directive instead of changing the a bunch 
+of notify commands throughout an XML file since listeners are decoupled from the event-handlers.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/4
+(2007-11-11 pfarrell)
+
 * Caching Enhancement
 Added a generic interface that allows developers to implement their own caching strategy 
 for caching at the controller level. Developers may specify which caching strategy they 
@@ -105,6 +108,14 @@ items in the application scope using the TimeSpanCache (MachII.caching.strategie
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/2
 (2008-03-15 kwiersma)
 
+* Utility Connector for ColdSpring
+Added connector for easy use of Mach-II managed LogFactory and CacheStrategyManager components
+inside of the ColdSpring.  Allows you to use logging and caching functionality in your model 
+layer.
+
+See file header comments on how to setup and configure the MachII.util.UtilityConector.
+(2008-04-24 pfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
@@ -115,10 +126,20 @@ users that thinking they can run index.cfm instead of using the skeleton.
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/16
 (2007-12-7 pfarrell)
 
+* ColdspringProperty Part of Mach-II Core
+Moved development of the ColdspringProperty into the Mach-II core. Use 
+MachII.properties.ColdspringProperty instead of any of the CS loaders available
+in the ColdSpring core files.
+(2008-03-15 pfarrell)
+
 * Deprecated mach-ii.cfm
 All supported CF engines now support Application.cfc.  The mach-ii.cfm bootstrapper for
 Application.cfm has been deprecated as Application.cfc offers application events and Abobe
 has stopped selling support for ColdFusion MX 6.1 thus the decision to deprecate this
 bootstrapper.
-
 (2008-04-17 pfarrell)
+
+* Add MXUnit Test Cases
+Mach-II officially uses MXUnit for unit testing framework components. Not all components
+currently have test cases, but all new features introduced in this release do.
+(2008-04-24 pfarrell)
