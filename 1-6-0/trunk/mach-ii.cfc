@@ -71,7 +71,7 @@ the handleRequest() method in the onRequest() application event.
 		<cfargument name="targetPage" type="string" required="true" />
 
 		<!--- Handle Mach-II request --->
-		<cfif FindNoCase(getProperty("urlBase"), arguments.targetPage)>
+		<cfif FindNoCase("index.cfm", arguments.targetPage)>
 			<cfset handleRequest() />
 		</cfif>
 	</cffunction>
@@ -111,7 +111,7 @@ the handleRequest() method in the onRequest() application event.
 			<cfset MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
 		
-		<!--- Create the AppLoader if necessary. Double check required for proper multi-threading. --->
+		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
 		<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
 			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
 				<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
