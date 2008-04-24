@@ -237,11 +237,6 @@ the rest of the framework. (pfarrell)
 
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
-
-		<!--- Put a reference of the log factory into properties if this is the parent --->
-		<cfif NOT IsObject(getParent())>
-			<cfset setProperty("logFactory", getAppManager().getLogFactory()) />
-		</cfif>
 		
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurableProperties)#" index="i">
