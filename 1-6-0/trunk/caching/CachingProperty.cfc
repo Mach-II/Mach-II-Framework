@@ -74,21 +74,9 @@ See individual caching strategies for more information on configuration.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
-		<cfset var cacheStrategyManager = CreateObject("component", "MachII.caching.CacheStrategyManager") />
-		<cfset var cacheStrategyManagerParent = "" />
+		<cfset var cacheStrategyManager = getAppManager().getCacheManager().getCacheStrategyManager() />
 		<cfset var params = getParameters() />
 		<cfset var key = "" />
-		
-		<!--- Create the CacheStrategyManager --->
-		<cfif IsObject(getAppManager().getParent())
-			AND IsObject(getAppManager().getCacheManager().getCacheStrategyManager())>
-			<cfset cacheStrategyManagerParent = getAppManager().getCacheManager().getCacheStrategyManager() />
-			<cfset cacheStrategyManager.init(cacheStrategyManagerParent) />
-		<cfelse>
-			<cfset cacheStrategyManager.init() />
-		</cfif>
-
-		<cfset getAppManager().getCacheManager().setCacheStrategyManager(cacheStrategyManager) />
 
 		<!--- Set the default cache strategy
 			(this must be done before default strategy is configured if required) --->
@@ -106,7 +94,7 @@ See individual caching strategies for more information on configuration.
 		</cfloop>
 
 		<!--- Configure the default strategy if no strategies were set --->		
-		<cfif NOT StructCount(getAppManager().getCacheManager().getCacheStrategyManager().getCacheStrategies())>
+		<cfif NOT StructCount(cacheStrategyManager.getCacheStrategies())>
 			<cfset configureDefaultStrategy() />
 		</cfif>
 		
@@ -117,10 +105,7 @@ See individual caching strategies for more information on configuration.
 		<!--- Set caching enabled/disabled --->
 		<cfif NOT getCachingEnabled()>
 			<cfset getAppManager().getCacheManager().disableCaching() />
-		</cfif>		
-		
-		<!--- Configure the registered stragies --->
-		<cfset getAppManager().getCacheManager().getCacheStrategyManager().configure() />
+		</cfif>
 	</cffunction>
 	
 	<!---

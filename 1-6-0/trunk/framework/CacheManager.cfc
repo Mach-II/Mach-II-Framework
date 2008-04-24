@@ -53,8 +53,11 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		
+		<cfset setCacheStrategyManager(CreateObject("component", "MachII.caching.CacheStrategyManager").init()) />
+		
 		<cfif IsObject(arguments.parentCacheManager)>
 			<cfset setParent(arguments.parentCacheManager) />
+			<cfset getCacheStrategyManager().setParent(getParent().getCacheStrategyManager()) />
 		</cfif>
 		
 		<!--- Setup the log --->
@@ -111,6 +114,9 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var cacheName = "" />
 		<cfset var cacheStrategyManager = getCacheStrategyManager() />
+		
+		<!--- Configure all loaded cache strategies --->
+		<cfset cacheStrategyManager.configure() />
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
