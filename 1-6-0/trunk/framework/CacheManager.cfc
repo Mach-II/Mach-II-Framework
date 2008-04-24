@@ -375,7 +375,7 @@ Notes:
 
 	<cffunction name="setCacheStrategyManager" access="public" returntype="void" output="false"
 		hint="Returns the CacheStrategyManager.">
-		<cfargument name="cacheStrategyManager" type="MachII.framework.CacheManager" required="true" />
+		<cfargument name="cacheStrategyManager" type="MachII.caching.CacheStrategyManager" required="true" />
 		<cfset variables.cacheStrategyManager = arguments.cacheStrategyManager />
 	</cffunction>
 	<cffunction name="getCacheStrategyManager" access="public" returntype="any" output="false"

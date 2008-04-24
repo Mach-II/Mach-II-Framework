@@ -151,7 +151,7 @@ Notes:
 	--->
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent CacheManager instance this CacheManager belongs to.">
-		<cfargument name="parentCacheStrategyManager" type="MachII.framework.CacheManager" required="true" />
+		<cfargument name="parentCacheStrategyManager" type="MachII.caching.CacheStrategyManager" required="true" />
 		<cfset variables.parent = arguments.parentCacheStrategyManager />
 	</cffunction>
 	<cffunction name="getParent" access="public" returntype="any" output="false"
