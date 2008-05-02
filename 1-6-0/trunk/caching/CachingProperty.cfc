@@ -66,6 +66,7 @@ See individual caching strategies for more information on configuration.
 	PROPERTIES
 	--->
 	<cfset variables.defaultCacheName = "default" />
+	<cfset variables.defaultCacheType = "MachII.caching.strategies.TimeSpanCache" />
 	<cfset variables.cachingEnabled = true />
 	
 	<!---
@@ -128,8 +129,8 @@ See individual caching strategies for more information on configuration.
 			
 		<cfset var parameters = StructNew() />
 		
-		<cfset parameters.type = "MachII.caching.strategies.TimeSpanCache" />
-		<cfset parameters.cacheIdKey = createCacheIdKey(arguments.name) />
+		<cfset parameters.type = variables.defaultCacheType />
+		<cfset parameters.cacheIdKey = createCacheIdKey(getDefaultCacheName()) />
 		
 		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(getDefaultCacheName(), parameters.type, parameters) />	
 	</cffunction>
