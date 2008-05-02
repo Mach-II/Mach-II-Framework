@@ -36,7 +36,7 @@ limitations under the License.
 Bug Fixes
 ------------------------------------------------
 * Fixed Inconsistent Cleanup of Abandoned Redirect Persist Data
-Re-built cleanup routine to ensure totatl cleanup of abandoned redirect persist data.
+Re-built cleanup routine to ensure total cleanup of abandoned redirect persist data.
 (2007-10-20 pfarrell)
 
 * Fixed SES / Friendly URLs with zero length param value breaks parseSES()
