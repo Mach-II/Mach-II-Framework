@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id$
+Author: Peter J. Farrell(peter@mach-ii.com)
+$Id: $
 
 Created version: 1.6.0
 Updated version: 1.6.0
