@@ -94,6 +94,7 @@ Notes:
 	
 	<cffunction name="testReap" access="public" returntype="void"
 		hint="Tests removing cached data by key.">
+		
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="2" index="i">
