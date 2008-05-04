@@ -41,7 +41,7 @@ Example configuration of multiple caching strategires:
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
-                        <key name="cacheForUnit" value="hour" />
+                        <key name="cacheForUnit" value="hours" />
                   </struct>
             </parameter>
             <parameter name="bar">
