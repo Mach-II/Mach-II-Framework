@@ -39,7 +39,7 @@ Notes:
 				<!-- Optional and defaults to 'suppressDebug'
 					Name of event arg that suppresses debug output
 					(useful when a request returns xml, json or images) -->
-				<key name="suppressDebugArg" value="supressDebug" />
+				<key name="suppressDebugArg" value="suppressDebug" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -
