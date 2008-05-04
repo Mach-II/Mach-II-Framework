@@ -126,7 +126,13 @@ Notes:
 		<cfset var threadingAdapter = "" />
 		<cfset var serverName = server.coldfusion.productname />
 		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
-		<cfset var serverMinorVersion = ListGetAt(server.coldfusion.productversion, 2, ",") />
+		<!--- Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release 
+				but this will be added; however, probably not wise to always assume it's there. Set a 
+				default of 0 in case it doesn't exist. --->
+		<cfset var serverMinorVersion = 0 />
+		<cfif ListLen(server.coldfusion.productversion, ",") gt 1>
+			<cfset serverMinorVersion = ListGetAt(server.coldfusion.productversion, 2, ",") />
+		</cfif>
 		
 		<!--- Adobe ColdFusion 8+ --->
 		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
