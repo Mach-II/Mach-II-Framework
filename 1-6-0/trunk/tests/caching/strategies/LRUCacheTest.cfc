@@ -67,6 +67,16 @@ Notes:
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 	</cffunction>
 	
+	<cffunction name="testPutGetGet" access="public" returntype="void"
+		hint="Tests put, exist and getting a piece of data from the cache.">
+
+		<cfset var testKey = "productID=1" />
+		
+		<cfset variables.cache.put(testkey, "testing") />
+		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
+		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
+	</cffunction>
+	
 	<cffunction name="testFlush" access="public" returntype="void"
 		hint="Tests flushing the cache.">
 		
@@ -99,7 +109,7 @@ Notes:
 		
 		<cfloop from="1" to="10" index="i">
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
-			<cfset thread.sleep(250) />
+			<!--- <cfset thread.sleep(250) /> --->
 		</cfloop>
 		
 		<cfset assertFalse(variables.cache.keyExists("productID=1")) />

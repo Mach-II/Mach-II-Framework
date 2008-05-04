@@ -132,7 +132,8 @@ in the application scope.
 		
 		<cfif keyExists(arguments.key)>
 			<cfset getCacheStats().incrementCacheHits(1) />
-			<cfset dataStorage.timestamps[timeStampKey[1].key] = createTimeStamp() />
+			<cfset structDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
+			<cfset dataStorage.timestamps[createTimeStamp() & "_" & hashedKey] = hashedKey />
 			<cfreturn cache[hashedKey] />
 		<cfelse>
 			<cfset getCacheStats().incrementCacheMisses(1) />
@@ -229,7 +230,8 @@ in the application scope.
 	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
 		hint="Creates a timestamp which is safe to use as a key.">
 		<cfargument name="time" type="date" required="false" default="#Now()#" />
-		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
+		<!--- Need to have a time stamp that includes milliseconds and is an integer with no punctuation --->
+		<cfreturn REReplace(arguments.time & ":" & getTickCount(), "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
 	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
