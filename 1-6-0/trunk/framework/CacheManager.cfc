@@ -81,7 +81,7 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var i = 0 />
 		
-		<!--- Currently alias is not implemented --->
+		<!--- TODO: implement alias --->
 		<cfif StructKeyExists(arguments.xml.xmlAttributes, "alias")>
 			<cfset alias = arguments.xml.xmlAttributes["alias"] />
 		</cfif>
@@ -260,9 +260,7 @@ Notes:
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var key = "" />
-		
-		<!--- Currently alias is no longer used --->
-		
+
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
 		<cfif StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))>
 			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />

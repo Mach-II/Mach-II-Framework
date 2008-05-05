@@ -75,11 +75,17 @@ Notes:
 		<cfset var preCommandEventDataSnapshot = StructNew() />
 		<cfset var dataToCache = StructNew() />
 		<cfset var key = getKeyFromCriteria(arguments.event) />
-		<cfset var dataFromCache = getCacheStrategy().get(key) />
+		<cfset var dataFromCache = "" />
 		<cfset var command = "" />
 		<cfset var continue = true />
 		<cfset var i = 0 />
 		<cfset var log = getLog() />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Looking for data in the cache for key '#key#'") />
+		</cfif>
+		
+		<cfset dataFromCache = getCacheStrategy().get(key) />
 		
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache") OR NOT getCachingEnabled()>
@@ -108,10 +114,14 @@ Notes:
 				<cfset getCacheStrategy().put(key, dataToCache) />
 				
 				<!--- Log messages --->
-				<cfset log.debug("Creating cache with key '#key#'.") />
-				<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Creating cache with key '#key#'.") />
+					<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
+				</cfif>
 			<cfelse>
-				<cfset log.debug("Caching is curently disabled for this cache-handler.") />
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Caching is curently disabled for this cache-handler.") />
+				</cfif>
 			</cfif>
 
 			<!--- Output the saved output from the commands --->
@@ -122,8 +132,10 @@ Notes:
 			<cfset arguments.event.setArgs(dataFromCache.data) />
 			
 			<!--- Log messages --->
-			<cfset log.debug("Using data and output from cache with key '#key#'.") />
-			<cfset log.debug("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.") />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Using data and output from cache with key '#key#'.") />
+				<cfset log.debug("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.") />
+			</cfif>
 		</cfif>
 		
 		<cfreturn continue />
@@ -132,8 +144,9 @@ Notes:
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 
-		<cfset var key = getKeyFromCriteria(arguments.event) />
+		<cfset var key = getKeyFromCriteria(arguments.event, arguments.criteria) />
 		
 		<cfif log.isDebugEnabled()>
 			<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
@@ -168,15 +181,35 @@ Notes:
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false"
 		hint="Build a key from the cache handler criteria with data from the event object.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default=""
+			hint="If criteria is not passed in the criteria from the cache command will be used." />
 		
-		<cfset var criteria = getCriteria() />
+		<cfset var criteriaToUse =  ""/>
 		<cfset var item = "" />
 		<cfset var arg = "" />
 		<cfset var key = "handlerId=" & getHandlerId() />
 		
-		<cfloop list="#criteria#" index="item">
-			<cfset arg = arguments.event.getArg(item, "") />	
+		<!--- If there is an alias for this cache handler then include it in the key --->
+		<cfif len(getAlias())>
+			<cfset key = key & "&alias=" & getAlias() />
+		</cfif>
 		
+		<cfif arguments.criteria eq "">
+			<cfset criteriaToUse = getCriteria() />
+		<cfelse>
+			<cfset criteriaToUse = arguments.criteria />
+		</cfif>
+
+		<!--- Criteria can have notation like 'id=product_id' where product_id is the event arg that needs to be part of the
+			key as the id --->		
+		<cfloop list="#criteriaToUse#" index="item">
+			<cfif listLen(item, "=") eq 2>
+				<cfset arg = arguments.event.getArg(listGetAt(item, 2, "="), "") />
+				<cfset item = listGetAt(item, 1, "=") />
+			<cfelse>
+				<cfset arg = arguments.event.getArg(item, "") />	
+			</cfif>
+
 			<!--- Accept only simple values and ignore complex values --->	
 			<cfif IsSimpleValue(arg)>
 				<cfset key = ListAppend(key, item & "=" & arg, "&") />

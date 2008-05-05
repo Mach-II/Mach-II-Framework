@@ -70,23 +70,46 @@ Notes:
 				
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT Len(getCondition())>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (no condition to evaluate).") />
+			<cfif len(getAlias())>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
+				</cfif>
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (no condition to evaluate).") />
+				</cfif>
 			</cfif>
 			<cfset clearCache = true />
 		<cfelseif evaluate(getCondition())>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated true).") />
+			<cfif len(getAlias())>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
+				</cfif>
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated true).") />
+				</cfif>
 			</cfif>
 			<cfset clearCache = true />
 		<cfelse>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cannot clear cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated false).") />
+			<cfif len(getAlias())>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
+				</cfif>
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Cannot clear cache by cacheName '#getCacheName()#' (condition '#getCondition()#' evaluated false).") />
+				</cfif>
 			</cfif>
 		</cfif>
 		
-		<cfif clearCache>
-			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event) />
+		<!--- TODO: need to implement criteria for cache clear where you can map an event arg like fantasyteam_id to the key
+			in the cache like id. --->
+		
+		<cfif clearCache AND NOT len(getAlias())>
+			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />
+		<cfelseif clearCache AND len(getAlias())>
+			<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
 		</cfif>
 		
 		<cfreturn continue />
