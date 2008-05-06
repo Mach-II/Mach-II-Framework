@@ -62,6 +62,9 @@ Not using the 'local' prefix can cause errors due to threading.
 		##MachIIRequestLogDisplay .small {
 			font-size: 0.9em;
 		}
+		##MachIIRequestLogDisplay .right {
+			text-align: right;
+		}
 		##MachIIRequestLogDisplay .fatal {
 			color: ##FFF;
 			background-color: ##FF9999;
@@ -93,19 +96,31 @@ Not using the 'local' prefix can cause errors due to threading.
 			<td class="lineBottom" style="width:55%;"><h4>Message</h4></td>
 			<td class="lineBottom" style="width:7.5%;"><h4>Timing (ms)</h4></td>
 		</tr>
-	<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
-		<tr class="<cfif local.i MOD 2>shade </cfif>#data[local.i].logLevelName#">
-			<td><p>#data[local.i].channel#</p></td>
-			<td><p>#data[local.i].logLevelName#</p></td>
-			<td><p>#data[local.i].message#</p></td>
-			<td><p><cfif local.i EQ 1>0<cfelse>#data[local.i].currentTick - data[local.i - 1].currentTick#</cfif></p></td>
-		</tr>
-		<cfif NOT IsSimpleValue(data[local.i].caughtException)>
+	<cfif ArrayLen(data)>
+		<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
+			<tr class="<cfif local.i MOD 2>shade </cfif>#data[local.i].logLevelName#">
+				<td><p>#data[local.i].channel#</p></td>
+				<td><p>#data[local.i].logLevelName#</p></td>
+				<td><p>#data[local.i].message#</p></td>
+				<td><p class="right"><cfif local.i EQ 1>0<cfelse>#data[local.i].currentTick - data[local.i - 1].currentTick#</cfif></p></td>
+			</tr>
+			<cfif NOT IsSimpleValue(data[local.i].caughtException)>
+			<tr>
+				<td colspan="4"><cfdump var="#data[local.i].caughtException#"  expand="false" /></td>
+			</tr>
+			</cfif>
+		</cfloop>
 		<tr>
-			<td colspan="4"><cfdump var="#data[local.i].caughtException#"  expand="false" /></td>
+			<td class="lineTop">&nbsp;</td>
+			<td class="lineTop">&nbsp;</td>
+			<td class="lineTop"><h4 class="right">First / Last Message Timing Difference</h4></td>
+			<td class="lineTop"><p class="right"><strong>#data[ArrayLen(data)].currentTick - data[1].currentTick#</strong></p></td>
 		</tr>
-		</cfif>
-	</cfloop>
+	<cfelse>
+		<tr>
+			<td colspan="4"><p><em>No messages available</em></p></td>
+		</tr>
+	</cfif>
 	</table>
 
 	<h3>General Information</h3>
