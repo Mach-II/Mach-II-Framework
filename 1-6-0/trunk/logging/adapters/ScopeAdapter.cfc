@@ -157,7 +157,7 @@ Configuration Example:
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="caughtException" type="any" required="false" />
 
-		<cfif isFatalEnabled()>
+		<cfif isInfoEnabled()>
 			<cfif StructKeyExists(arguments, "caughtException")>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message, arguments.caughtException) />
 			<cfelse>
