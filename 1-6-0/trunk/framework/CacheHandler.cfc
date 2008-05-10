@@ -248,8 +248,8 @@ Notes:
 				
 				<!--- Check for objects first because CF evaluates objects as structs as well --->
 				<cfif IsObject(pre) AND IsObject(post)>
-					<cfset objTest = StructNew() />
-					<cfset objTest.obj = pre />
+					<cfset objTest = ArrayNew(1) />
+					<cfset ArrayAppend(objTest, pre) />
 					<cfif NOT objTest.contains(post)>
 						<cfset dataToCache[i] = post />
 					</cfif>
@@ -257,7 +257,7 @@ Notes:
 				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))
 					OR (IsArray(pre) AND IsArray(post))
 					OR (IsStruct(pre) AND IsStruct(post))>
-					<cfif NOT pre.equals(post)>
+					<cfif NOT pre.equals(post)>	
 						<cfset dataToCache[i] = post />
 					</cfif>
 				<!--- Nothing else has evaluated true, so the datatype has changed --->
