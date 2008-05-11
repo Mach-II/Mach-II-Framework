@@ -76,7 +76,8 @@ Notes:
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="any" required="true"
 			hint="A list, struct or array of thread ids to join." />
-		<cfargument name="timeout" type="numeric" required="true" />
+		<cfargument name="timeout" type="numeric" required="true"
+			hint="How long to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
 		
 		<cfset var collection = StructNew() />
 		<cfset var error = "" />
