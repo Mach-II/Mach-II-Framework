@@ -106,7 +106,7 @@ Notes:
 		<cfloop list="#collection.name#" index="i">
 			<!--- Check if the thread was terminated and return the error to be handled --->
 			<cfif cfthread[i].status is "terminated">
-				<cfset error = cfthread[collection.name[i]].error />
+				<cfset error = cfthread[i].error />
 				<cfbreak />
 			</cfif>
 		</cfloop>
