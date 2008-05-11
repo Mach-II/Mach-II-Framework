@@ -35,6 +35,7 @@ Notes:
 	<cfset variables.argName = "" />
 	<cfset variables.argValue = "" />
 	<cfset variables.argVariable = "" />
+	<cfset variables.overwrite = true />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -44,10 +45,12 @@ Notes:
 		<cfargument name="argName" type="string" required="true" />
 		<cfargument name="argValue" type="string" required="false" default="" />
 		<cfargument name="argVariable" type="string" required="false" default="" />
+		<cfargument name="overwrite" type="boolean" required="false" default="true" />
 		
 		<cfset setArgName(arguments.argName) />
 		<cfset setArgValue(arguments.argValue) />
 		<cfset setArgVariable(arguments.argVariable) />
+		<cfset setOverwrite(arguments.overwrite) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -55,29 +58,64 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="execute" access="public" returntype="boolean"
+	<cffunction name="execute" access="public" returntype="boolean" output="false"
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var value = "" />
-		<cfset var log = getLog() />
+		<cfset var log = getLog() />		
 		
-		<cfif isArgVariableDefined()>
-			<cfset value = getArgVariableValue() />
-		<cfelseif isArgValueDefined()>
-			<cfset value = getArgValue() />
+		<!--- Set event-arg if overwrite is true or if event-arg is not defined
+			No need to check if overwrite is false since CF uses short-circuit logic --->
+		<cfif getOverwrite() OR NOT arguments.event.isArgDefined(getArgName())>
+			<!--- Get variables arg values --->
+			<cfif isArgVariableDefined()>
+				<cfset value = getArgVariableValue() />
+			<cfelseif isArgValueDefined()>
+				<cfset value = getArgValue() />
+			</cfif>
+			
+			<cfif log.isDebugEnabled()>
+				<cfif NOT IsSimpleValue(value)>
+					<cfset value = "[complex value]" />
+				</cfif>
+				
+				<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
+			</cfif>
+			
+			<cfset arguments.event.setArg(getArgName(), value) />
 		<cfelse>
-			<cfset value = "" />
+			<cfif log.isDebugEnabled()>
+				<cfset value = arguments.event.getArg(getArgName()) />
+				
+				<cfif NOT IsSimpleValue(value)>
+					<cfset value = "[complex value]" />
+				</cfif>
+				
+				<cfset log.debug("An event-arg named '#getArgName()#' with overwrite 'false' is already defined. Current event-arg value '#value#'.") />
+			</cfif>
 		</cfif>
-		
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
-		</cfif>
-		
-		<cfset arguments.event.setArg(getArgName(), value) />
 		
 		<cfreturn true />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="getArgVariableValue" access="private" returntype="any" output="false"
+		hint="Gets an arg variable value by using evaluate.">
+		
+		<cfset var value = "" />
+		<cfset var log = getLog() />
+		
+		<cfif IsDefined(getArgVariable())>
+			<cfset value = Evaluate(getArgVariable()) />
+		<cfelseif log.isDebugEnabled()>
+			<cfset log.debug("No value found for arg variable named '#getArgVariable()#' for event-arg named '#getArgName()#'.") />
+		</cfif>
+		
+		<cfreturn value />
 	</cffunction>
 	
 	<!---
@@ -99,7 +137,7 @@ Notes:
 		<cfreturn variables.argValue />
 	</cffunction>
 	<cffunction name="isArgValueDefined" access="private" returntype="boolean" output="false">
-		<cfreturn NOT getArgValue() EQ '' />
+		<cfreturn Len(variables.argValue) />
 	</cffunction>
 	
 	<cffunction name="setArgVariable" access="private" returntype="void" output="false">
@@ -110,14 +148,15 @@ Notes:
 		<cfreturn variables.argVariable />
 	</cffunction>
 	<cffunction name="isArgVariableDefined" access="private" returntype="boolean" output="false">
-		<cfreturn NOT getArgVariable() EQ '' />
+		<cfreturn Len(variables.argVariable) />
 	</cffunction>
-	<cffunction name="getArgVariableValue" access="private" returntype="any" output="false">
-		<cfset var value = "" />
-		<cfif IsDefined(getArgVariable())>
-			<cfset value = Evaluate(getArgVariable()) />
-		</cfif>
-		<cfreturn value />
+
+	<cffunction name="setOverwrite" access="private" returntype="void" output="false">
+		<cfargument name="overwrite" type="boolean" required="true" />
+		<cfset variables.overwrite = arguments.overwrite />
+	</cffunction>
+	<cffunction name="getOverwrite" access="private" returntype="boolean" output="false">
+		<cfreturn variables.overwrite />
 	</cffunction>
 
 </cfcomponent>

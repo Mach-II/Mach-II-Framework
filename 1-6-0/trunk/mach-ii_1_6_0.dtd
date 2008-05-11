@@ -277,6 +277,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
 	variable CDATA #IMPLIED
+	overwrite (true|false) "true"
 >
 
 <!--

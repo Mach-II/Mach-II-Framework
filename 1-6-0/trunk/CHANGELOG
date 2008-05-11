@@ -116,6 +116,13 @@ layer.
 See file header comments on how to setup and configure the MachII.util.UtilityConector.
 (2008-04-24 pfarrell)
 
+* <event-arg> Overwrite Enhancement
+Added the "overwrite" attribute (defaults to true) that allows you optionally set an
+event-arg by setting the "overwrite" attribute to false. Use to set a default if an
+event-arg is not currently in the Event. Works similarly to <cfparam>.
+
+(2008-05-10 pfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------

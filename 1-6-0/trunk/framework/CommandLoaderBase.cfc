@@ -379,6 +379,7 @@ Notes:
 		<cfset var command = "" />
 		<cfset var argValue = "" />
 		<cfset var argVariable = "" />
+		<cfset var overwrite = true />
 		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
@@ -387,8 +388,11 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "variable")>
 			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
 		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "overwrite")>
+			<cfset overwrite = arguments.commandNode.xmlAttributes["overwrite"] />
+		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite) />
 		
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
