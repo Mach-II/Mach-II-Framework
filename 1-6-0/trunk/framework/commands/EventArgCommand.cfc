@@ -152,8 +152,9 @@ Notes:
 	</cffunction>
 
 	<cffunction name="setOverwrite" access="private" returntype="void" output="false">
-		<cfargument name="overwrite" type="boolean" required="true" />
-		<cfset variables.overwrite = arguments.overwrite />
+		<cfargument name="overwrite" type="string" required="true" />
+		<!--- Enforce that overwrite is always true unless 'false' is passed --->
+		<cfset variables.overwrite = (arguments.overwrite IS NOT "false") />
 	</cffunction>
 	<cffunction name="getOverwrite" access="private" returntype="boolean" output="false">
 		<cfreturn variables.overwrite />
