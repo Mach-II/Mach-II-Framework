@@ -150,3 +150,8 @@ bootstrapper.
 Mach-II officially uses MXUnit for unit testing framework components. Not all components
 currently have test cases, but all new features introduced in this release do.
 (2008-04-24 pfarrell)
+
+* Made MachII.util.BeanUtil a singleton per CommandLoaderBase
+In previous versions, a new instance of BeanUtil was created for each event-bean command.
+This improves performance a drastically fewer number of BeanUtils are created during
+the loading of the framework.
