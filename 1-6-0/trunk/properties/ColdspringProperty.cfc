@@ -629,16 +629,16 @@ application.serviceFactory_account variable.
 		<cfargument name="autowireBeanNames" type="array" required="true" />
 		
 		<cfset var beanName = "" />
-		<cfset var cfcData = "" />
+		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var cfcName = Replace(CreateUUID(), "-", "", "all") />
 		<cfset var cfcDirectory = GetDirectoryFromPath(GetCurrentTemplatePath()) />
 		<cfset var autowireCfc = "" />
 		<cfset var i = "" />
 		
 		<!--- Add the opening cfcomponent tag --->
-		<cfset cfcData = cfcData & "<cfcomponent>" />
+		<cfset cfcData.append('<cfcomponent>') />
 		
-		<cfset cfcData = cfcData & '<cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>' />
+		<cfset cfcData.append('<cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>') />
 				
 		<!--- Create the getter/setter methods for each beanName --->
 		<cfloop from="1" to="#ArrayLen(arguments.autowireBeanNames)#" index="i">
@@ -646,15 +646,15 @@ application.serviceFactory_account variable.
 			<cfset beanName = Trim(arguments.autowireBeanNames[i]) />
 
 			<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
-			<cfset cfcData = cfcData & '<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></' & 'cffunction>' />
-			<cfset cfcData = cfcData & '<cffunction name="get#beanName#" access="public" returntype="any" output="false"><cfreturn variables.#beanName# /></' & 'cffunction>' />
+			<cfset cfcData.append('<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></' & 'cffunction>') />
+			<cfset cfcData.append('<cffunction name="get#beanName#" access="public" returntype="any" output="false"><cfreturn variables.#beanName# /></' & 'cffunction>') />
 		</cfloop>
 
 		<!--- Add the closing cfcomponent tag --->
-		<cfset cfcData = cfcData & "</cfcomponent>" />
+		<cfset cfcData.append('</cfcomponent>') />
 		
 		<!--- Write the cfc data to a temp file --->
-		<cffile action="write" output="#cfcData#" file="#cfcDirectory##cfcName#.cfc" />
+		<cffile action="write" output="#cfcData.toString()#" file="#cfcDirectory##cfcName#.cfc" />
 		
 		<!--- Instantiate the component --->
 		<cfset autowireCfc = CreateObject("component", cfcName) />
