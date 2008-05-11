@@ -51,6 +51,8 @@ Notes:
 			<cfset setParent(arguments.parentEventManager) />
 		</cfif>
 		
+		<cfset super.init() />
+		
 		<cfreturn this />
 	</cffunction>
 	

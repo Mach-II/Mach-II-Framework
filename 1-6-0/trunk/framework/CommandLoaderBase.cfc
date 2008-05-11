@@ -29,11 +29,16 @@ Notes:
 	hint="Base component to load commands for the framework.">
 	
 	<!---
+	PROPERTIES
+	--->
+	<cfset variables.beanUtil = "" />
+	
+	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initialization function called by the framework.">
-		<!--- Does nothing --->
+		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 	</cffunction>
 		
 	<!---
@@ -319,7 +324,7 @@ Notes:
 			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit, variables.beanUtil) />
 		
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 

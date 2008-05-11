@@ -47,13 +47,13 @@ Notes:
 		<cfargument name="beanType" type="string" required="true" />
 		<cfargument name="beanFields" type="string" required="true" />
 		<cfargument name="reinit" type="boolean" required="true" />
+		<cfargument name="beanUtil" type="MachII.util.BeanUtil" required="true" />
 		
 		<cfset setBeanName(arguments.beanName) />
 		<cfset setBeanType(arguments.beanType) />
 		<cfset setBeanFields(arguments.beanFields) />
 		<cfset setReinit(arguments.reinit) />
-		
-		<cfset setBeanUtil(CreateObject("component", "MachII.util.BeanUtil").init()) />
+		<cfset setBeanUtil(arguments.beanUtil) />
 		
 		<cfreturn this />
 	</cffunction>
