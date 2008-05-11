@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.6
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
 Beans are expected to follow the standard Java bean pattern of having
@@ -27,10 +27,17 @@ a no argument constuctor (an init() function with no required arguments)
 and setter functions with name setXyz() (with a single argument named xyz) 
 for field xyz and getters functions with name getXyz() (that accept no 
 arguments).
+
+This utility is thread-safe (no instance data) and can be used as a singleton.
 --->
 <cfcomponent
 	displayname="BeanUtil"
+	output="false"
 	hint="A utility class for working with bean components.">
+	
+	<!---
+	PROPERTIES
+	--->
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -50,13 +57,28 @@ arguments).
 		<cfargument name="initArgs" type="struct" required="false" 
 			hint="Optional. The set of arguments to pass to the init() function as an argument collection." />
 		
-		<cfset var bean = CreateObject("component", arguments.beanType) />
+		<cfset var bean = "" />
 		
-		<cfif StructKeyExists(arguments, "initArgs")>
-			<cfset bean.init(argumentcollection=arguments.initArgs) />
-		<cfelse>
-			<cfset bean.init() />
-		</cfif>
+		<cftry>
+			<!--- Do not method chain the init() method on to the instantiation of the bean --->
+			<cfset bean = CreateObject("component", arguments.beanType) />
+			
+			<cfif StructKeyExists(arguments, "initArgs")>
+				<cfset bean.init(argumentcollection=arguments.initArgs) />
+			<cfelse>
+				<cfset bean.init() />
+			</cfif>
+		
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.framework.CannotFindBean"
+						message="Cannot find a bean CFC with type of '#beanType#'."
+						detail="Please check that a CFC exists at this dot path location." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 
 		<cfreturn bean />
 	</cffunction>
@@ -98,9 +120,12 @@ arguments).
 	
 	<cffunction name="setBeanField" access="public" returntype="void" output="false"
 		hint="Sets the value of a field in a bean using method call setBeanField(beanField=value).">
-		<cfargument name="bean" type="any" required="true" />
-		<cfargument name="field" type="string" required="true" />
-		<cfargument name="value" type="any" required="true" />
+		<cfargument name="bean" type="any" required="true"
+			hint="The bean to populate." />
+		<cfargument name="field" type="string" required="true"
+			hint="The field name to populate." />
+		<cfargument name="value" type="any" required="true"
+			hint="The value to populate the field name with." />
 		
 		<cfinvoke component="#arguments.bean#" method="set#arguments.field#">
 			<cfinvokeargument name="#arguments.field#" value="#arguments.value#" />
@@ -109,18 +134,23 @@ arguments).
 	
 	<cffunction name="getBeanField" access="public" returntype="any" output="false"
 		hint="Returns the value of a field in a bean using method call getBeanField().">
-		<cfargument name="bean" type="any" required="true" />
-		<cfargument name="field" type="string" required="true" />
+		<cfargument name="bean" type="any" required="true"
+			hint="The bean to get the data from." />
+		<cfargument name="field" type="string" required="true"
+			hint="The field to get the data from." />
 		
 		<cfset var fieldValue = "" />
+		
 		<cfinvoke component="#arguments.bean#" method="get#arguments.field#" 
 			returnvariable="fieldValue" />
+			
 		<cfreturn fieldValue />
 	</cffunction>
 	
 	<cffunction name="describeBean" access="public" returntype="struct" output="false"
 		hint="Returns a struct of bean properties/values based on getters.">
-		<cfargument name="bean" type="any" required="true" />
+		<cfargument name="bean" type="any" required="true"
+			hint="The bean to find all getters on." />
 		
 		<cfset var map = StructNew() />
 		<cfset var meta = GetMetaData(arguments.bean) />
