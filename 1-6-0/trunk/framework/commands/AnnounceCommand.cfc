@@ -83,8 +83,9 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setCopyEventArgs" access="private" returntype="void" output="false">
-		<cfargument name="copyEventArgs" type="boolean" required="false" default="true" />
-		<cfset variables.copyEventArgs = arguments.copyEventArgs />
+		<cfargument name="copyEventArgs" type="string" required="false" default="true" />
+		<!--- Enforce that copyEventsArgs is always true unless 'false' is passed--->
+		<cfset variables.copyEventArgs = (arguments.copyEventArgs NOT IS "false") />
 	</cffunction>
 	<cffunction name="isCopyEventArgs" access="private" returntype="boolean" output="false">
 		<cfreturn variables.copyEventArgs />

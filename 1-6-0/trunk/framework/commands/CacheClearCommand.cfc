@@ -69,8 +69,8 @@ Notes:
 		<cfset var log = getLog() />
 				
 		<!--- Make decision on whether or not to clear a cache by alias --->
-		<cfif NOT Len(getCondition())>
-			<cfif len(getAlias())>
+		<cfif NOT isConditionDefined()>
+			<cfif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
 				</cfif>
@@ -80,8 +80,8 @@ Notes:
 				</cfif>
 			</cfif>
 			<cfset clearCache = true />
-		<cfelseif evaluate(getCondition())>
-			<cfif len(getAlias())>
+		<cfelseif Evaluate(getCondition())>
+			<cfif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
 				</cfif>
@@ -92,7 +92,7 @@ Notes:
 			</cfif>
 			<cfset clearCache = true />
 		<cfelse>
-			<cfif len(getAlias())>
+			<cfif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
 				</cfif>
@@ -106,10 +106,12 @@ Notes:
 		<!--- TODO: need to implement criteria for cache clear where you can map an event arg like fantasyteam_id to the key
 			in the cache like id. --->
 		
-		<cfif clearCache AND NOT len(getAlias())>
-			<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />
-		<cfelseif clearCache AND len(getAlias())>
-			<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
+		<cfif clearCache>
+			<cfif isAliasDefined()>
+				<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
+			<cfelse>
+				<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />				
+			</cfif>
 		</cfif>
 		
 		<cfreturn continue />
@@ -125,6 +127,10 @@ Notes:
 	<cffunction name="getAlias" access="private" returntype="string" output="false">
 		<cfreturn variables.alias />
 	</cffunction>
+	<cffunction name="isAliasDefined" access="private" returntype="boolean" output="false"
+		hint="Checks if an alias is defined.">
+		<cfreturn Len(variables.alias) />
+	</cffunction>
 	
 	<cffunction name="setCondition" access="private" returntype="void" output="false">
 		<cfargument name="condition" type="string" required="true" />
@@ -132,6 +138,10 @@ Notes:
 	</cffunction>
 	<cffunction name="getCondition" access="private" returntype="string" output="false">
 		<cfreturn variables.condition />
+	</cffunction>
+	<cffunction name="isConditionDefined" access="private" returntype="boolean" output="false"
+		hint="Checks if a condition is defined.">
+		<cfreturn Len(variables.condition) />
 	</cffunction>
 
 	<cffunction name="setCriteria" access="private" returntype="void" output="false">

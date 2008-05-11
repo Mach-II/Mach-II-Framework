@@ -61,7 +61,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="execute" access="public" returntype="boolean"
+	<cffunction name="execute" access="public" returntype="boolean" output="false"
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -127,7 +127,7 @@ Notes:
 		<cfreturn variables.beanFields />
 	</cffunction>
 	<cffunction name="isBeanFieldsDefined" access="public" returntype="boolean" output="false">
-		<cfreturn NOT getBeanFields() EQ '' />
+		<cfreturn Len(variables.beanFields) />
 	</cffunction>
 	
 	<cffunction name="setReinit" access="private" returntype="void" output="false">

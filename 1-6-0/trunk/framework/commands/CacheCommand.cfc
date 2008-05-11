@@ -75,7 +75,7 @@ Notes:
 		<cfset cacheHandler = cacheManager.getCacheHandler(getHandlerId()) />
 		<cfset continue = cacheHandler.handleCache(arguments.event, arguments.eventContext) />
 
-		<cfif log.isWarnEnabled() and NOT continue>
+		<cfif log.isWarnEnabled() AND NOT continue>
 			<cfset log.warn("Cache-handler '#getHandlerId()#' has changed the flow of this event.") />
 		</cfif>
 

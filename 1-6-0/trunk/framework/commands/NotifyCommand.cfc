@@ -97,7 +97,7 @@ Notes:
 		<cfreturn variables.resultKey />
 	</cffunction>
 	<cffunction name="hasResultKey" access="private" returntype="boolean" output="false">
-		<cfreturn getResultKey() NEQ '' />
+		<cfreturn Len(variables.resultKey) />
 	</cffunction>
 	
 	<cffunction name="setResultArg" access="private" returntype="void" output="false">
@@ -108,7 +108,7 @@ Notes:
 		<cfreturn variables.resultArg />
 	</cffunction>
 	<cffunction name="hasResultArg" access="private" returntype="boolean" output="false">
-		<cfreturn variables.resultArg NEQ '' />
+		<cfreturn Len(variables.resultArg) />
 	</cffunction>
 
 </cfcomponent>

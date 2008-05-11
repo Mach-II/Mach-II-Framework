@@ -87,7 +87,7 @@ Notes:
 		<cfreturn variables.contentKey />
 	</cffunction>
 	<cffunction name="hasContentKey" access="private" returntype="boolean" output="false">
-		<cfreturn variables.contentKey NEQ '' />
+		<cfreturn Len(variables.contentKey) />
 	</cffunction>
 	
 	<cffunction name="setContentArg" access="private" returntype="void" output="false">
@@ -98,12 +98,12 @@ Notes:
 		<cfreturn variables.contentArg />
 	</cffunction>
 	<cffunction name="hasContentArg" access="private" returntype="boolean" output="false">
-		<cfreturn variables.contentArg NEQ '' />
+		<cfreturn Len(variables.contentArg) />
 	</cffunction>
 
 	<cffunction name="setAppend" access="private" returntype="void" output="false">
 		<cfargument name="append" type="string" required="true" />
-		<cfset variables.append = (arguments.append is "true") />
+		<cfset variables.append = (arguments.append IS "true") />
 	</cffunction>
 	<cffunction name="getAppend" access="private" returntype="boolean" output="false">
 		<cfreturn variables.append />
