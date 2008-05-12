@@ -630,7 +630,7 @@ application.serviceFactory_account variable.
 		
 		<cfset var beanName = "" />
 		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
-		<cfset var cfcName = Replace(CreateUUID(), "-", "", "all") />
+		<cfset var cfcName = "" />
 		<cfset var cfcDirectory = GetDirectoryFromPath(GetCurrentTemplatePath()) />
 		<cfset var autowireCfc = "" />
 		<cfset var i = "" />
@@ -652,6 +652,9 @@ application.serviceFactory_account variable.
 
 		<!--- Add the closing cfcomponent tag --->
 		<cfset cfcData.append('</cfcomponent>') />
+		
+		<!--- Create a name for the CFC (Hash() is faster than UUID) --->
+		<cfset cfcName = Hash(cfcData.toString()) />
 		
 		<!--- Write the cfc data to a temp file --->
 		<cffile action="write" output="#cfcData.toString()#" file="#cfcDirectory##cfcName#.cfc" />

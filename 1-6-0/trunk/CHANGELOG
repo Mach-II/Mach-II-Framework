@@ -139,6 +139,11 @@ MachII.properties.ColdspringProperty instead of any of the CS loaders available
 in the ColdSpring core files.
 (2008-03-15 pfarrell)
 
+* ColdspringProperty Improved Performance
+Improved performance of the ColdspringProperty:
+- Used java.lang.StringBuffer for string concatenation
+- Used hash instead of UUID for name of CFC in dynamic method generation (15-18% faster than UUID)
+
 * Deprecated mach-ii.cfm
 All supported CF engines now support Application.cfc.  The mach-ii.cfm bootstrapper for
 Application.cfm has been deprecated as Application.cfc offers application events and Abobe
@@ -155,3 +160,4 @@ currently have test cases, but all new features introduced in this release do.
 In previous versions, a new instance of BeanUtil was created for each event-bean command.
 This improves performance a drastically fewer number of BeanUtils are created during
 the loading of the framework.
+(2008-05-09 pfarrell)
