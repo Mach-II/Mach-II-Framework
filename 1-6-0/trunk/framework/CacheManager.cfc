@@ -190,7 +190,7 @@ Notes:
 	
 	<cffunction name="getCacheHandler" access="public" returntype="MachII.framework.CacheHandler" output="false"
 		hint="Gets a cache handler by handlerId.">
-		<cfargument name="handlerId" type="uuid" required="true"
+		<cfargument name="handlerId" type="string" required="true"
 			hint="Handler id of the cache handler you want to get." />
 		<cfreturn variables.handlers[arguments.handlerId] />
 	</cffunction>
@@ -230,7 +230,7 @@ Notes:
 		
 	<cffunction name="isCacheHandlerDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if a cache handler is defined.">
-		<cfargument name="handlerId" type="uuid" required="true" 
+		<cfargument name="handlerId" type="string" required="true" 
 			hint="Handler id of the cache handler you want to check." />
 		<cfreturn StructKeyExists(variables.handlers, arguments.handlerId) />
 	</cffunction>
