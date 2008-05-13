@@ -68,28 +68,30 @@ Notes:
 	
 	<cffunction name="loadCacheHandlerFromXml" access="public" returntype="uuid" output="false"
 		hint="Loads a cache handler from Xml.">
-		<cfargument name="xml" type="any" required="true" />
+		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="true" />
 		<cfargument name="parentHandlerType" type="string" required="true" />
 		
+		<cfset var nestedCommandNodes = arguments.configXML.xmlChildren />
 		<cfset var command = "" />
-		<cfset var cacheHandler = "" />
-		<cfset var nestedCommandNodes = arguments.xml.xmlChildren />
+
+		<cfset var cacheStrategy = "" />
+		<cfset var cacheHandler = "" />		
+
 		<cfset var alias = "" />
 		<cfset var criteria = "" />
 		<cfset var cacheName = "" />
-		<cfset var cacheStrategy = "" />
 		<cfset var i = 0 />
 		
 		<!--- TODO: implement alias --->
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "alias")>
-			<cfset alias = arguments.xml.xmlAttributes["alias"] />
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "alias")>
+			<cfset alias = arguments.configXML.xmlAttributes["alias"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "criteria")>
-			<cfset criteria = arguments.xml.xmlAttributes["criteria"] />
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "criteria")>
+			<cfset criteria = arguments.configXML.xmlAttributes["criteria"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.xml.xmlAttributes, "name")>
-			<cfset cacheName = arguments.xml.xmlAttributes["name"] />
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "name")>
+			<cfset cacheName = arguments.configXML.xmlAttributes["name"] />
 		</cfif>
 		
 		<!--- Build the cache handler --->

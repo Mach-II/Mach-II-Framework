@@ -59,16 +59,19 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfset var listenerNodes = "" />
+		<cfset var listenerNodes = ArrayNew(1) />
 		<cfset var listenerParams = "" />
 		<cfset var listenerName = "" />
 		<cfset var listenerType = "" />
-		<cfset var paramNodes = "" />
+		<cfset var listener = "" />
+		
+		<cfset var paramNodes = ArrayNew(1) />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
+		
 		<cfset var invokerType = "" />
 		<cfset var invoker = "" />
-		<cfset var listener = "" />
+
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

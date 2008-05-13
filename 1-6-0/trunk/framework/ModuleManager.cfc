@@ -64,12 +64,13 @@ Notes:
 		<cfargument name="configXml" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfset var moduleNodes = "" />
+		<cfset var moduleNodes = ArrayNew(1) />
 		<cfset var modulesNode = "" />
 		<cfset var modulesNodes = "" />
+		<cfset var module = "" />
+		
 		<cfset var name = "" />
 		<cfset var file = "" />
-		<cfset var module = "" />
 		<cfset var overrideXml = "" />
 		<cfset var baseName = "" />
 		<cfset var i = 0 />
@@ -80,9 +81,9 @@ Notes:
 		<cfelse>
 			<cfset modulesNode = XMLSearch(arguments.configXML, ".//modules") />
 		</cfif>
-		<cfif arrayLen(modulesNode) eq 1>
+		<cfif ArrayLen(modulesNode) eq 1>
 			<cfset modulesNode = modulesNode[1]>
-			<cfif structKeyExists(modulesNode[1].xmlAttributes, "baseName")>
+			<cfif StructKeyExists(modulesNode[1].xmlAttributes, "baseName")>
 				<cfset baseName = modulesNode[1].xmlAttributes["baseName"] />
 			</cfif>
 			<cfset setBaseName(baseName) />

@@ -60,18 +60,19 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 
-		<cfset var messageSubscribersNodes = "" />
+		<cfset var messageSubscribersNodes = ArrayNew(1) />
 		<cfset var messageParams = "" />
 		<cfset var messageName = "" />
 		<cfset var messageMultithreaded = "" />
 		<cfset var messageWaitForThreads = "" />
 		<cfset var messageTimeout = "" />
 		
-		<cfset var subscriberNodes = "" />
+		<cfset var subscriberNodes = ArrayNew(1) />
 		<cfset var subscriberListenerName = "" />
 		<cfset var subscriberListener = "" />
 		<cfset var subscriberMethod = "" />
 		<cfset var subscriberResultArg = "" />
+		
 		<cfset var messageHandler = "" />
 		<cfset var messageSubscriberInvoker = "" />
 		

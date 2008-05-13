@@ -70,14 +70,16 @@ the rest of the framework. (pfarrell)
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfset var propertyNodes = "" />
+		<cfset var propertyNodes = ArrayNew(1) />
 		<cfset var propertyName = "" />
 		<cfset var propertyValue = "" />
 		<cfset var propertyType = "" />
 		<cfset var propertyParams = "" />
-		<cfset var paramsNodes = "" />
+		
+		<cfset var paramsNodes = ArrayNew(1) />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
+		
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

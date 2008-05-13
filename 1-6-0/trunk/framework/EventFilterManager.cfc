@@ -59,14 +59,16 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 					
-		<cfset var filterNodes = "" />
+		<cfset var filterNodes = ArrayNew(1) />
 		<cfset var filterParams = "" />
-		<cfset var paramNodes = "" />
-		<cfset var paramName = "" />
-		<cfset var paramValue = "" />
-		<cfset var filter = "" />
 		<cfset var filterName = "" />
 		<cfset var filterType = "" />
+		<cfset var filter = "" />
+		
+		<cfset var paramNodes = ArrayNew(1) />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
+
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

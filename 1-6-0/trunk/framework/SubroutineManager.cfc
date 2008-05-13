@@ -61,11 +61,13 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 				
-		<cfset var subroutineNodes = "" />
+		<cfset var subroutineNodes = ArrayNew(1) />
 		<cfset var subroutineHandler = "" />
 		<cfset var subroutineName = "" />
+		
 		<cfset var commandNode = "" />
 		<cfset var command = "" />
+		
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

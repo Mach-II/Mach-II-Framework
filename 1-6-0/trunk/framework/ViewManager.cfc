@@ -58,9 +58,11 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 				
-		<cfset var viewNodes = "" />
+		<cfset var viewNodes = ArrayNew(1) />
+
 		<cfset var name = "" />
 		<cfset var page = "" />
+
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

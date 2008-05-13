@@ -61,12 +61,14 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfset var commandNode = "" />
-		<cfset var eventNodes = "" />
+		<cfset var eventNodes = ArrayNew(1) />
 		<cfset var eventHandler = "" />
 		<cfset var eventAccess = "" />
 		<cfset var eventName = "" />
+		
+		<cfset var commandNode = "" />
 		<cfset var command = "" />
+		
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />

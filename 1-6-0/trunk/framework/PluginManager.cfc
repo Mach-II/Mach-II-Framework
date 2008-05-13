@@ -83,14 +83,16 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 
-		<cfset var pluginNodes = 0 />
-		<cfset var paramNodes = 0 />
-		<cfset var paramName = 0 />
-		<cfset var paramValue = 0 />
-		<cfset var plugin = 0 />
-		<cfset var pluginName = 0 />
-		<cfset var pluginType = 0 />
-		<cfset var pluginParams = 0 />
+		<cfset var pluginNodes = ArrayNew(1) />
+		<cfset var pluginName = "" />
+		<cfset var pluginType = "" />
+		<cfset var pluginParams = StructNew() />
+		<cfset var plugin = "" />
+
+		<cfset var paramNodes = ArrayNew(1) />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
+
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
