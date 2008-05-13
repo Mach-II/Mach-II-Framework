@@ -42,7 +42,7 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="CacheCommand" output="false"
 		hint="Initializes the command.">
-		<cfargument name="handlerId" type="string" required="false" default="#CreateUUID()#" />
+		<cfargument name="handlerId" type="string" required="false" default="" />
 		<cfargument name="cacheName" type="string" required="false" default="" />
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
