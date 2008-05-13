@@ -66,7 +66,7 @@ Notes:
 		<cfreturn this />
 	</cffunction>
 	
-	<cffunction name="loadCacheHandlerFromXml" access="public" returntype="uuid" output="false"
+	<cffunction name="loadCacheHandlerFromXml" access="public" returntype="string" output="false"
 		hint="Loads a cache handler from Xml.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="true" />
@@ -171,7 +171,7 @@ Notes:
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 
 		<!--- Add the handler --->
-		<cfset variables.handlers[handlerId] = arguments.cacheHandler />
+		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 		
 		<!--- Register the handler by handler type --->
 		<cfif handlerType EQ "event">

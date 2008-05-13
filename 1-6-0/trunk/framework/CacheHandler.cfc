@@ -32,7 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.commands = ArrayNew(1) />
-	<cfset variables.handlerId = CreateUUID() />
+	<cfset variables.handlerId = "" />
 	<cfset variables.alias = ""/>
 	<cfset variables.cacheName = "" />
 	<cfset variables.criteria = "" />
@@ -54,12 +54,13 @@ Notes:
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 	
-		<!--- run setters --->
+		<!--- Run setters --->
 		<cfset setAlias(arguments.alias) />
 		<cfset setCacheName(arguments.cacheName) />
 		<cfset setCriteria(arguments.criteria) />
 		<cfset setParentHandlerName(arguments.parentHandlerName) />
 		<cfset setParentHandlerType(arguments.parentHandlerType) />
+		<cfset setHandlerId(createHandlerId()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -289,10 +290,19 @@ Notes:
 		<cfreturn ListToArray(cleanedKeys) />
 	</cffunction>
 	
+	<cffunction name="createHandlerId" access="private" returntype="string" output="false"
+		hint="Creates a random handler id. Does not use UUID for performance reasons.">
+		<cfreturn Hash(getTickCount() & RandRange(0, 100000))/>
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getHandlerId" access="public" returntype="uuid" output="false"
+	<cffunction name="setHandlerId" access="private" returntype="void" output="false">
+		<cfargument name="handlerId" type="string" required="true" />
+		<cfset variables.handlerId = arguments.handlerId />
+	</cffunction>
+	<cffunction name="getHandlerId" access="public" returntype="string" output="false"
 		hint="Returns the handler id.">
 		<cfreturn variables.handlerId />
 	</cffunction>

@@ -42,7 +42,7 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="CacheCommand" output="false"
 		hint="Initializes the command.">
-		<cfargument name="handlerId" type="uuid" required="false" default="#CreateUUID()#" />
+		<cfargument name="handlerId" type="string" required="false" default="#CreateUUID()#" />
 		<cfargument name="cacheName" type="string" required="false" default="" />
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
@@ -90,10 +90,10 @@ Notes:
 	ACCESSORS
 	--->
 	<cffunction name="setHandlerId" access="private" returntype="void" output="false">
-		<cfargument name="handlerId" type="uuid" required="true" />
+		<cfargument name="handlerId" type="string" required="true" />
 		<cfset variables.handlerId = arguments.handlerId />
 	</cffunction>
-	<cffunction name="getHandlerId" access="private" returntype="uuid" output="false">
+	<cffunction name="getHandlerId" access="private" returntype="string" output="false">
 		<cfreturn variables.handlerId />
 	</cffunction>
 	
