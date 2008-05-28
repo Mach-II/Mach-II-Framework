@@ -131,7 +131,13 @@ Not using the 'local' prefix can cause errors due to threading.
 		</tr>
 		<tr>
 			<td><h4>Request Module Name</h4></td>
-			<td><p>#arguments.appManager.getRequestHandler().getRequestModuleName()#</p></td>
+			<td>
+			<cfif Len(arguments.appManager.getRequestHandler().getRequestModuleName())>
+				<p>#arguments.appManager.getRequestHandler().getRequestModuleName()#</p>
+			<cfelse>
+				<p><em>Base Application</em></p>
+			</cfif>
+			</td>
 		</tr>
 		<tr class="shade">
 			<td><h4>Mach-II Version</h4></td>
