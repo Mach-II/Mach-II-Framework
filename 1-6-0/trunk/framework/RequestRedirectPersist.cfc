@@ -143,7 +143,7 @@ machinery.
 		hint="Reaps the storage of old redirect persists.">
 		
 		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
-		<cfset var dataStorage = getPersistEventStorage() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var dataTimestampArray = "" />
 		<cfset var key = "" />
 		<cfset var i = "" />
