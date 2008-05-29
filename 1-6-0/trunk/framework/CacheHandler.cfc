@@ -254,6 +254,11 @@ Notes:
 					<cfif NOT objTest.contains(post)>
 						<cfset dataToCache[i] = post />
 					</cfif>
+				<!--- Check for queries --->
+				<cfelseif IsQuery(pre) AND IsQuery(post)>
+					<cfif pre.toString() NEQ post.toString()>
+						<cfset dataToCache[i] = post />
+					</cfif>
 				<!--- Check for simple datatypes, arrays and structs --->
 				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))
 					OR (IsArray(pre) AND IsArray(post))
