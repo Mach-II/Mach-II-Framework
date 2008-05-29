@@ -33,6 +33,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!DOCTYPE mach-ii SYSTEM
 	"http://localhost:8500/MachII/mach-ii_1_6_0.dtd">
+	
+<!DOCTYPE mach-ii SYSTEM
+	"http://pathToMachII/mach-ii_1_6_0.dtd">
 -->
 
 <!--
@@ -138,6 +141,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	multithreaded (true|false) #IMPLIED
 	waitForThreads (true|false) #IMPLIED
+	timeout CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
@@ -175,7 +179,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		access - the access attribute of the event handler (public|private)
 -->
 <!ELEMENT event-handlers (event-handler*)>
-<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache | cache-clear)*>
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish | cache | cache-clear)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
 	access (public|private) "public"
@@ -191,7 +195,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		subroutine - the name of the subroutine to handle
 -->
 <!ELEMENT subroutines (subroutine*)>
-<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | cache | cache-clear)*>
+<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish |cache | cache-clear)*>
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
 	overrideAction (useParent|addFromParent) #IMPLIED
@@ -384,7 +388,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		cacheName - the name of the cache being referenced, this cacheName should match a cacheName specified in a CacheProperty
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 -->
-<!ELEMENT cache (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | execute)*>
+<!ELEMENT cache (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | execute | publish | cache-clear)*>
 <!ATTLIST cache 
 	name CDATA #IMPLIED
 	criteria CDATA #IMPLIED
