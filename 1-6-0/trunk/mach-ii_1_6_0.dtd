@@ -135,7 +135,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	the framework. Message-subscribers respond to publish commands.
 	Message-subscribers are references by message name.
 -->
-<!ELEMENT message-subscribers (message-subscribers*)>
+<!ELEMENT message-subscribers (message*)>
 <!ELEMENT message (subscribe*)>
 <!ATTLIST message
 	name CDATA #REQUIRED
