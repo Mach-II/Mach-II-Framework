@@ -245,30 +245,30 @@ Notes:
 			<!--- Check equality --->
 			<cfelseif StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
 				<cfset pre = arguments.preCommandDataSnapshot[keyName] />
-				<cfset post = arguments.postCommandDataSnapshot [keyName] />
+				<cfset post = arguments.postCommandDataSnapshot[keyName] />
 				
 				<!--- Check for objects first because CF evaluates objects as structs as well --->
 				<cfif IsObject(pre) AND IsObject(post)>
 					<cfset objTest = ArrayNew(1) />
 					<cfset ArrayAppend(objTest, pre) />
 					<cfif NOT objTest.contains(post)>
-						<cfset dataToCache[i] = post />
+						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Check for queries --->
 				<cfelseif IsQuery(pre) AND IsQuery(post)>
 					<cfif pre.toString() NEQ post.toString()>
-						<cfset dataToCache[i] = post />
+						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Check for simple datatypes, arrays and structs --->
 				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))
 					OR (IsArray(pre) AND IsArray(post))
 					OR (IsStruct(pre) AND IsStruct(post))>
 					<cfif NOT pre.equals(post)>	
-						<cfset dataToCache[i] = post />
+						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Nothing else has evaluated true, so the datatype has changed --->
 				<cfelse>
-					<cfset dataToCache[i] = post />
+					<cfset dataToCache[keyName] = post />
 				</cfif>
 			</cfif>
 		</cfloop>
