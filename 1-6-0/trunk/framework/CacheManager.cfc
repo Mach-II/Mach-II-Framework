@@ -120,6 +120,12 @@ Notes:
 		<!--- Configure all loaded cache strategies --->
 		<cfset cacheStrategyManager.configure() />
 		
+		<!--- Get the parent default cache name if this is a child manager
+			with no default cache name defined --->
+		<cfif IsObject(getParent()) AND NOT Len(getDefaultCacheName())>
+			<cfset setDefaultCacheName(getParent().getDefaultCacheName()) />
+		</cfif>
+		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
 		<cfloop collection="#variables.handlers#" item="handlerId">
@@ -385,7 +391,7 @@ Notes:
 
 	<cffunction name="setDefaultCacheName" access="public" returntype="string" output="false">
 		<cfargument name="defaultCacheName" type="string" required="true" />
-		<cfif getCacheStrategyManager().isCacheStrategyDefined(arguments.defaultCacheName)>
+		<cfif getCacheStrategyManager().isCacheStrategyDefined(arguments.defaultCacheName, true)>
 			<cfset variables.defaultCacheName = arguments.defaultCacheName />
 		<cfelse>
 			<cfthrow type="MachII.framework.DefaultCacheNameNotAvailable"

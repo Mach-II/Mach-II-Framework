@@ -100,8 +100,18 @@ Notes:
 
 	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a cache strategy is registered with the specified name. Does NOT check parent.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.cacheStrategies, arguments.cacheStrategyName) />
+		<cfargument name="cacheStrategyName" type="string" required="true"
+			hint="Name of cache strategy to check if defined." />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent strategy." />
+		
+		<cfif StructKeyExists(variables.cacheStrategies, arguments.cacheStrategyName)>
+			<cfreturn true />
+		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.cacheStrategyName)>
+			<cfreturn true />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 
 	<!---
