@@ -494,21 +494,20 @@ application.serviceFactory_account variable.
 				
 				<!--- Only dynamically inject the setter if there isn't a concrete setter --->
 				<cfif NOT StructKeyExists(arguments.targetObj, "set" & beanName)>
-					
 					<cfset arguments.targetObj._methodInject("set" & beanName, autowireCfc["set" & beanName]) />
+				</cfif>
 					
-					<!--- Inject appropriate bean if the factory has a bean by that name --->
-					<cfif beanFactory.containsBean(beanName)>
-						<cfinvoke component="#arguments.targetObj#" method="set#beanName#">
-							<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
-						</cfinvoke>
-					<cfelse>
-						<cfset targetType = ListFirst(arguments.targetKey, "_") />
-						<cfset targetName = ListDeleteAt(arguments.targetKey, 1, "_") />
-						<cfthrow type="MachII.properties.ColdspringProperty"
-							message="Cannot find bean named '#beanName#' to autowire by method injection in a #targetType# named '#targetName#' in module '#getAppManager().getModuleName()#'."
-							detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
-					</cfif>
+				<!--- Inject appropriate bean if the factory has a bean by that name --->
+				<cfif beanFactory.containsBean(beanName)>
+					<cfinvoke component="#arguments.targetObj#" method="set#beanName#">
+						<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
+					</cfinvoke>
+				<cfelse>
+					<cfset targetType = ListFirst(arguments.targetKey, "_") />
+					<cfset targetName = ListDeleteAt(arguments.targetKey, 1, "_") />
+					<cfthrow type="MachII.properties.ColdspringProperty"
+						message="Cannot find bean named '#beanName#' to autowire by method injection in a #targetType# named '#targetName#' in module '#getAppManager().getModuleName()#'."
+						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
 				</cfif>
 				
 				<!--- Delete the _methodInject() from the target --->
