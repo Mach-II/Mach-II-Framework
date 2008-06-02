@@ -110,12 +110,14 @@ Not using the 'local' prefix can cause errors due to threading.
 			</tr>
 			</cfif>
 		</cfloop>
-		<tr>
-			<td class="lineTop">&nbsp;</td>
-			<td class="lineTop">&nbsp;</td>
-			<td class="lineTop"><h4 class="right">First / Last Message Timing Difference</h4></td>
-			<td class="lineTop"><p class="right"><strong>#data[ArrayLen(data)].currentTick - data[1].currentTick#</strong></p></td>
-		</tr>
+		<cfif ArrayLen(data) GT 1>
+			<tr>
+				<td class="lineTop">&nbsp;</td>
+				<td class="lineTop">&nbsp;</td>
+				<td class="lineTop"><h4 class="right">First / Last Message Timing Difference</h4></td>
+				<td class="lineTop"><p class="right"><strong>#data[ArrayLen(data)].currentTick - data[1].currentTick#</strong></p></td>
+			</tr>
+		</cfif>
 	<cfelse>
 		<tr>
 			<td colspan="4"><p><em>No messages available</em></p></td>

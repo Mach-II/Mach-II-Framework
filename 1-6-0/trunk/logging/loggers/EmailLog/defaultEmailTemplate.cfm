@@ -72,5 +72,13 @@ Not using the 'local' prefix can cause errors due to threading.
 	</tr>
 	</cfif>
 </cfloop>
+<cfif ArrayLen(data) GT 1>
+	<tr>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td><h4 class="right">First / Last Message Timing Difference</h4></td>
+		<td><p class="right"><strong>#data[ArrayLen(data)].currentTick - data[1].currentTick#</strong></p></td>
+	</tr>
+</cfif>
 </table>
 </cfoutput>
