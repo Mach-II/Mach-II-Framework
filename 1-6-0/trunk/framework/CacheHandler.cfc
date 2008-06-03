@@ -256,7 +256,7 @@ Notes:
 					</cfif>
 				<!--- Check for queries --->
 				<cfelseif IsQuery(pre) AND IsQuery(post)>
-					<cfif pre.toString() NEQ post.toString()>
+					<cfif NOT pre.equals(post)>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Check for simple datatypes, arrays and structs --->
@@ -266,7 +266,7 @@ Notes:
 					<cfif NOT pre.equals(post)>	
 						<cfset dataToCache[keyName] = post />
 					</cfif>
-				<!--- Nothing else has evaluated true, so the datatype has changed --->
+				<!--- Since nothing else has evaluated to true then datatype has changed --->
 				<cfelse>
 					<cfset dataToCache[keyName] = post />
 				</cfif>
