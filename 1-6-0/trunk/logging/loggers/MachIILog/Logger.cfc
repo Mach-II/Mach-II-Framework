@@ -98,7 +98,7 @@ See that file header for configuration of filter criteria.
 		
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("displayOutputTemplateFile")>
-			<cfset setDisplayOutputTemplateFile(getParamter("displayOutputTemplateFile")) />
+			<cfset setDisplayOutputTemplateFile(getParameter("displayOutputTemplateFile")) />
 		</cfif>
 		
 		<cfif isParameterDefined("debugModeOnly")>
@@ -112,7 +112,7 @@ See that file header for configuration of filter criteria.
 		</cfif>
 		
 		<cfif isParameterDefined("suppressDebugArg")>
-			<cfset setSuppressDebugArg(getParamter("suppressDebugArg")) />
+			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
 		
 		<cfset setLoggingScope(adapter.getLoggingScope()) />

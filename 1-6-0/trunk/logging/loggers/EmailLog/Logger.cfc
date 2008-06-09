@@ -107,7 +107,7 @@ See that file header for configuration of filter criteria.
 		
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("emailTemplateFile")>
-			<cfset setEmailTemplateFile(getParamter("emailTemplateFile")) />
+			<cfset setEmailTemplateFile(getParameter("emailTemplateFile")) />
 		</cfif>
 		
 		<cfif isParameterDefined("to")>
