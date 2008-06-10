@@ -51,7 +51,7 @@ Notes:
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
 		
-		<cfset var threadId = createThreadId() />
+		<cfset var threadId = createThreadId(arguments.method) />
 		<cfset var collection = { action="run", name=threadId, threadId=threadId } />
 		
 		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the even to the thread) --->

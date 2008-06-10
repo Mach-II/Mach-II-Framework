@@ -297,7 +297,7 @@ Notes:
 	
 	<cffunction name="createHandlerId" access="private" returntype="string" output="false"
 		hint="Creates a random handler id. Does not use UUID for performance reasons.">
-		<cfreturn Hash(getTickCount() & RandRange(0, 100000)) />
+		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	</cffunction>
 	
 	<!---

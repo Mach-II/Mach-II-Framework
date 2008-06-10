@@ -67,8 +67,10 @@ Notes:
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="createThreadId" access="private" returntype="string" output="false"
-		hint="Creates a thread id.">
-		<cfreturn "_MachIIThreadingAdapter_" & Replace(CreateUUID(), "-", "", "all") />
+		hint="Creates a random tread id. Does not use UUID for performance reasons.">
+		<cfargument name="method" type="string" required="true"
+			hint="Name of method. Adds additional data for seed.">
+		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000) & arguments.method) />
 	</cffunction>
 
 </cfcomponent>
