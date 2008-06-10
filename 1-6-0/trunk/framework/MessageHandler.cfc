@@ -70,14 +70,14 @@ Notes:
 		
 		<cfset var invokers = getMessageSubscriberInvokers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
-		<cfset var threadIds = ArrayNew(1) />
+		<cfset var threadIds = StructNew() />
 		<cfset var publishThreadIdsInEvent = arguments.event.getArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
 		<cfset var error = "" />
 		<cfset var exception = "" />
 		<cfset var continue = true />
 		<cfset var log = getLog() />
-		<cfset var i = 0 />
+		<cfset var key = "" />
 		
 		<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
 		<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
@@ -90,8 +90,8 @@ Notes:
 			<cfset parameters.event = arguments.event />
 			
 			<!--- Run all the threads --->
-			<cfloop collection="#invokers#" item="i">
-				<cfset ArrayAppend(threadIds, threadingAdapter.run(invokers[i], "invokeListener", parameters)) />
+			<cfloop collection="#invokers#" item="key">
+				<cfset threadIds[threadingAdapter.run(invokers[key], "invokeListener", parameters)] = key />
 			</cfloop>
 			
 			<!--- Wait and join --->
@@ -125,8 +125,8 @@ Notes:
 				<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
 			</cfif>
 
-			<cfloop collection="#invokers#" item="i">
-				<cfset invokers[i].invokeListener(arguments.event) />
+			<cfloop collection="#invokers#" item="key">
+				<cfset invokers[key].invokeListener(arguments.event) />
 			</cfloop>
 		</cfif>
 		
