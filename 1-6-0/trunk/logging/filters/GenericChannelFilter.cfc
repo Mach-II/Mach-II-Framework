@@ -36,6 +36,8 @@ FilterCriteria can be an comma delimited list or an array.
 no !	= Indicates that you should match
 * 		= Wildcard (can only occur at the end of a pattern string)
 
+Pattern matches are not case sensitive
+
 --->
 <cfcomponent
 	displayname="GenericChannelFilter"

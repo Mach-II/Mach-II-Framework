@@ -23,11 +23,16 @@ Updated version: 1.6.0
 
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
-it allows you attach multiple loggers at once.
+it allows you attach multiple loggers at once. Thank you to the Apache project for the 
+inspiration for our implementation.
 
 Log adapters must be stored as a struct so they can be passed by reference. Otherwise some
 logs are requested before adapters have been setup and will not log any messages since they
 do not have any adapters.
+
+Implementation Notes:
+* Channel names are not case-sensitive as the channel name is converted useable struct key
+first [Hash(UCase(arguments.channell))]
 --->
 <cfcomponent
 	displayname="LogFactory"
