@@ -30,63 +30,66 @@ Not using the 'local' prefix can cause errors due to threading.
 --->
 </cfsilent>
 <cfoutput>
+<cfsavecontent variable="local.style">
+<style type="text/css"><!--
+	##MachIIRequestLogDisplay {
+		color: ##000;
+		background-color: ##FFF;
+	}
+	##MachIIRequestLogDisplay h3 {
+		color: ##000;
+	}
+	##MachIIRequestLogDisplay table {
+		border: 1px solid ##D0D0D0;
+		padding: 0.5em;
+		width:100%;
+	}
+	##MachIIRequestLogDisplay table td {
+		vertical-align: top;
+	}
+	##MachIIRequestLogDisplay table td.lineBottom {
+		border-bottom: 1px solid ##000;
+	}
+	##MachIIRequestLogDisplay table td.lineTop {
+		border-top: 1px solid ##000;
+	}
+	##MachIIRequestLogDisplay .shade {
+		background-color: ##F5F5F5;
+	}
+	##MachIIRequestLogDisplay ul li {
+		margin-left:15px;
+	}
+	##MachIIRequestLogDisplay .small {
+		font-size: 0.9em;
+	}
+	##MachIIRequestLogDisplay .right {
+		text-align: right;
+	}
+	##MachIIRequestLogDisplay .fatal {
+		color: ##FFF;
+		background-color: ##FF9999;
+		font-weight: bold;
+	}
+	##MachIIRequestLogDisplay .error {
+		background-color: ##FFCC66;
+		font-weight: bold;
+	}
+	##MachIIRequestLogDisplay .warn {
+		background-color: ##FFFF99;
+		font-weight: bold;
+	}
+	##MachIIRequestLogDisplay .info {
+		background-color: ##CCFF99;
+		font-weight: bold;
+	}
+	##MachIIRequestLogDisplay .strong {
+		font-weight: bold;
+	}
+-->
+</style>
+</cfsavecontent>
+<cfhtmlhead text="#local.style#" />
 <div id="MachIIRequestLogDisplay">
-	<style type="text/css"><!--
-		##MachIIRequestLogDisplay {
-			color: ##000;
-			background-color: ##FFF;
-		}
-		##MachIIRequestLogDisplay h3 {
-			color: ##000;
-		}
-		##MachIIRequestLogDisplay table {
-			border: 1px solid ##D0D0D0;
-			padding: 0.5em;
-			width:100%;
-		}
-		##MachIIRequestLogDisplay table td {
-			vertical-align: top;
-		}
-		##MachIIRequestLogDisplay table td.lineBottom {
-			border-bottom: 1px solid ##000;
-		}
-		##MachIIRequestLogDisplay table td.lineTop {
-			border-top: 1px solid ##000;
-		}
-		##MachIIRequestLogDisplay .shade {
-			background-color: ##F5F5F5;
-		}
-		##MachIIRequestLogDisplay ul li {
-			margin-left:15px;
-		}
-		##MachIIRequestLogDisplay .small {
-			font-size: 0.9em;
-		}
-		##MachIIRequestLogDisplay .right {
-			text-align: right;
-		}
-		##MachIIRequestLogDisplay .fatal {
-			color: ##FFF;
-			background-color: ##FF9999;
-			font-weight: bold;
-		}
-		##MachIIRequestLogDisplay .error {
-			background-color: ##FFCC66;
-			font-weight: bold;
-		}
-		##MachIIRequestLogDisplay .warn {
-			background-color: ##FFFF99;
-			font-weight: bold;
-		}
-		##MachIIRequestLogDisplay .info {
-			background-color: ##CCFF99;
-			font-weight: bold;
-		}
-		##MachIIRequestLogDisplay .strong {
-			font-weight: bold;
-		}
-	-->
-	</style>
 
 	<h3>Mach-II Request Log</h3>
 	<table>

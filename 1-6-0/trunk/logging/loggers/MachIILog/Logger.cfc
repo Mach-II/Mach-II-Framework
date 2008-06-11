@@ -131,6 +131,10 @@ See that file header for configuration of filter criteria.
 		<cfset var data = ArrayNew(1) />
 		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var local = StructNew() />
+		<cfset var out = getPageContext().getOut() />
+		<cfset var buffer = out.getString() />
+		<cfset var count = 0 />
+		<cfset var loggerOutput = "" />
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()
@@ -140,7 +144,20 @@ See that file header for configuration of filter criteria.
 
 			<cfset data = scope[getLoggingPath()].data />
 			
-			<cfinclude template="#getDisplayOutputTemplateFile()#" />
+			<cfsavecontent variable="loggerOutput">
+				<cfinclude template="#getDisplayOutputTemplateFile()#" />
+			</cfsavecontent>
+			
+			<cfset count = FindNoCase("</body>", buffer) />
+			
+			<cfif count>
+				<cfset buffer = Insert(loggerOutput, buffer, count - 1) />
+				<cfset out.clearAll() />
+				<cfoutput>#buffer#</cfoutput>
+			<cfelse>
+				<cfoutput>#loggerOutput#</cfoutput>
+			</cfif>
+			
 		</cfif>
 	</cffunction>
 	
