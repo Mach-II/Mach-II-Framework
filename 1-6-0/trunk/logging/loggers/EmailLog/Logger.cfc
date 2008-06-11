@@ -22,7 +22,7 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-<property name="logging" type="MachII.properties.LoggingProperty">
+<property name="Logging" type="MachII.logging.LoggingProperty">
 	<parameters>
 		<parameter name="MachIILog">
 			<struct>
