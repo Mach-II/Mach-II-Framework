@@ -109,7 +109,7 @@ Notes:
 		
 		<cfloop from="1" to="10" index="i">
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
-			<!--- <cfset thread.sleep(250) /> --->
+			<cfset thread.sleep(250) />
 		</cfloop>
 		
 		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
