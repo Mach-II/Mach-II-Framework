@@ -122,7 +122,8 @@ Notes:
 		
 		<!--- Get the parent default cache name if this is a child manager
 			with no default cache name defined --->
-		<cfif IsObject(getParent()) AND NOT Len(getDefaultCacheName())>
+		<cfif IsObject(getParent()) AND Len(getParent().getDefaultCacheName()) 
+			AND NOT Len(getDefaultCacheName())>
 			<cfset setDefaultCacheName(getParent().getDefaultCacheName()) />
 		</cfif>
 		
@@ -395,7 +396,7 @@ Notes:
 			<cfset variables.defaultCacheName = arguments.defaultCacheName />
 		<cfelse>
 			<cfthrow type="MachII.framework.DefaultCacheNameNotAvailable"
-				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy that is not available. Please set the default to a stragety that is configured."
+				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy that is not available. Please set the default to a strategy that is configured."
 				detail="Available strategies:#ArrayToList(getCacheStrategyManager().getCacheStrategyNames())#" />
 		</cfif>
 	</cffunction>	
