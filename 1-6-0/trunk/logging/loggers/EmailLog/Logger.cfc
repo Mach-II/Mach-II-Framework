@@ -180,7 +180,7 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset scope[getLoggingPath()].data = arrayConcat(data["emailLogger"].data, scope[getLoggingPath()].data) />
+			<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data["emailLogger"].data, scope[getLoggingPath()].data) />
 		</cfif>
 	</cffunction>
 
