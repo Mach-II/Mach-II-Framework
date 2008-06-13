@@ -164,8 +164,10 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 			<cfset metaFunction = metaFunctions[i] />
 			<cfif metaFunction.name.toLowerCase().startsWith("get")
 				AND metaFunction.access.equalsIgnoreCase("public")
-				AND ArrayLen(metaFunction.parameters) EQ 0>
+				AND NOT ArrayLen(metaFunction.parameters)>
+				<!--- Get the name without the "get" from the method name --->
 				<cfset fieldName = Right(metaFunction.name, Len(metaFunction.name)-3) />
+				<!--- Lowercase the first letter of the field name --->
 				<cfset fieldName = LCase(Left(fieldName,1)) & Right(fieldName, Len(fieldName)-1) />
 				<cfinvoke component="#arguments.bean#" method="#metaFunction.name#" 
 					returnVariable="fieldValue" />

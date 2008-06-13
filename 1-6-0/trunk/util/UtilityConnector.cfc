@@ -50,7 +50,7 @@ Using the CacheStrategyManager:
 	<property name="cacheStrategyManager"><ref bean="cacheStrategyManager"/></property>
 </bean>
 
-Do not inject the UtilityConnector into beans, use the 'factory' like methods insteads.
+Do not inject the UtilityConnector into beans, use the 'factory' like methods instead.
 --->
 <cfcomponent
 	displayname="UtilityConnector"
