@@ -105,8 +105,11 @@ the handleRequest() method in the onRequest() application event.
 
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
-		<!--- Default is request.MachIIConfigMode if it is defined temporarily override the config mode
-			DO NOT USE THIS LEGACY CODE --->
+		<!---
+		Default is request.MachIIConfigMode if it is defined temporarily override the config mode
+		DO NOT USE THIS LEGACY CODE
+		THIS HAS BEEN DEPRECATED AND WILL BE REMOVED IN MACH-II 2.0
+		--->
 		<cfif StructKeyExists(request,"MachIIConfigMode")>
 			<cfset MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
