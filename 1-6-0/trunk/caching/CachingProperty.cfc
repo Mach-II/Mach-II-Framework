@@ -79,12 +79,12 @@ See individual caching strategies for more information on configuration.
 		<cfset var params = getParameters() />
 		<cfset var key = "" />
 
-		<!--- Set the default cache strategy
-			(this must be done before default strategy is configured if required) --->
-		<cfset setDefaultCacheName(getParameter("defaultCacheName", "default")) />
+		<!--- Set the default cache strategy if defined --->
+		<cfif isParameterDefined("defaultCacheName")>
+			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
+		</cfif>
 		
-		<!--- Set caching mode
-			(which is by default true) --->
+		<!--- Set caching mode (default: true) --->
 		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
 		
 		<!--- Load defined cache strategies --->
@@ -97,6 +97,12 @@ See individual caching strategies for more information on configuration.
 		<!--- Configure the default strategy if no strategies were set --->		
 		<cfif NOT StructCount(cacheStrategyManager.getCacheStrategies())>
 			<cfset configureDefaultStrategy() />
+		</cfif>
+		
+		<!--- Set the default cache name if there is only one strategy defined 
+			and there is not default cache name defined --->
+		<cfif NOT Len(getDefaultCacheName()) AND StructCount(cacheStrategyManager.getCacheStrategies()) EQ 1>
+			<cfset setDefaultCacheName(ListGetAt(StructKeyList(cacheStrategyManager.getCacheStrategies()), 1)) />
 		</cfif>
 		
 		<!--- Set the default cache strategy name (this must be done only after all strategies 
@@ -128,6 +134,9 @@ See individual caching strategies for more information on configuration.
 		hint="Configures the default caching strategy (e.g. MachII.caching.strategies.TimeSpanCache).">
 			
 		<cfset var parameters = StructNew() />
+
+		<!--- Set the default cache name since we had to load the default strategy --->
+		<cfset setDefaultCacheName("default") />
 		
 		<cfset parameters.type = variables.defaultCacheType />
 		<cfset parameters.cacheIdKey = createCacheIdKey(getDefaultCacheName()) />
