@@ -31,7 +31,10 @@ Scope
 - Valid values are "application", "server" and "session".
 
 CacheFor
-- The numeric length of time that the strategy should cache for.
+- The numeric length of time that the strategy should cache an element for. Once
+an element exceeds the "cacheFor" length, it will be removed on the next reap().
+An element will be put back into the cache the next time an event-handler requests
+that data.
 - The default setting for "cacheFor" length is "1".
 - Valid numeric value only.
 
@@ -39,14 +42,22 @@ CacheForUnit
 - The unit of time that the strategy should use for cache length.
 - The default setting for "cacheUnit" is "hour".
 - Valid values are "seconds", "minutes", "hours", "days" and "forever".
+- If the value is "forever", any numeric value is required in the "cacheFor"
+attribute, but the value does not affect the length an element will be cached.
+- Forever is until the CFML engine or your application restarted.
 
 CleanupIntervalInMinutes
-- The interval of time in minutes in which to run the reap() method.
+- The interval of time in minutes in which to run the reap() method. Reap will
+remove expired elements from the cache, but does not "refresh" the data. If an 
+element is not available in the cache and an event-handler requests that data,
+only that point will the data be "refreshed" and added back into the cache.
 - The default setting for "cleanupIntervalInMinutes" is "3."
 - Valid numeric value only.
+- This attribute will rarely need to be changed.
 
-Using all of the default settings will result in caching data for 1 hour in the 
-application scope which would be cleaned up via reap every 3 minutes.
+Using all of the default settings will result in caching each element of data 
+for 1 hour in the application scope. Expired cache elements will be cleaned up 
+via reap() which is run every 3 minutes.
 
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
