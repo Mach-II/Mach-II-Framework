@@ -154,7 +154,7 @@ via reap() which is run every 3 minutes.
 			hint="The key should not be a hashed key." />
 		<cfargument name="data" type="any" required="true" />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
@@ -170,7 +170,7 @@ via reap() which is run every 3 minutes.
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
@@ -187,7 +187,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="flush" access="public" returntype="void" output="false"
 		hint="Flushes all elements from the cache.">
 		
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 
 		<cfset dataStorage.data = StructNew() />
 		<cfset dataStorage.timestamps = StructNew() />
@@ -198,7 +198,7 @@ via reap() which is run every 3 minutes.
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
 		<cfset var diffTimestamp = createTimestamp() />
@@ -227,7 +227,7 @@ via reap() which is run every 3 minutes.
 		hint="Inspects the timestamps of cached elements and throws out the expired ones.">
 			
 		<cfset var diffTimestamp = createTimestamp() />
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var dataTimestampArray = "" />
 		<cfset var key = "" />
 		<cfset var i = "" />
@@ -267,7 +267,7 @@ via reap() which is run every 3 minutes.
 		<cfargument name="hashedKey" type="string" required="true"
 			hint="The passed key needs to be a hashed key." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var timeStampKey = "" />
 
@@ -337,8 +337,8 @@ via reap() which is run every 3 minutes.
 		<cfreturn createTimestamp(timestamp) />
 	</cffunction>
 
-	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
-		hint="Gets the cache scope which is dependent on the storage location.">
+	<cffunction name="getStorage" access="private" returntype="struct" output="false"
+		hint="Gets a reference to the cache data storage.">
 		
 		<!--- StructGet will create the cache key if it does not exist --->
 		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />

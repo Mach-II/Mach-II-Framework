@@ -106,7 +106,7 @@ in the application scope.
 			hint="Key does not need to be hashed." />
 		<cfargument name="data" type="any" required="true" />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		
 		<!--- Clean out the cache if neccessary --->
@@ -125,7 +125,7 @@ in the application scope.
 		<cfargument name="key" type="string" required="true"
 			hint="Key does not need to be hashed." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
@@ -143,7 +143,7 @@ in the application scope.
 	<cffunction name="flush" access="public" returntype="void" output="false"
 		hint="Flushes the entire cache.">
 		
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 
 		<cfset dataStorage.data = StructNew() />
 		<cfset dataStorage.timestamps = StructNew() />
@@ -154,7 +154,7 @@ in the application scope.
 		<cfargument name="key" type="string" required="true"
 			hint="Key does not need to be hashed." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
@@ -177,7 +177,7 @@ in the application scope.
 	<cffunction name="reap" access="public" returntype="void" output="false"
 		hint="Looks at the timestamps of the cache pieces and throws out oldest one if the cache has more then the its max size.">
 			
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var dataTimestampArray = ArrayNew(1) />
 		<cfset var key = "" />
 		
@@ -207,7 +207,7 @@ in the application scope.
 		<cfargument name="hashedKey" type="string" required="true"
 			hint="The key does need to be hashed." />
 
-		<cfset var dataStorage = getCacheScope() />
+		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var timeStampKey = "" />
 
@@ -234,8 +234,8 @@ in the application scope.
 		<cfreturn REReplace(arguments.time & ":" & getTickCount(), "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
-	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
-		hint="Gets the cache scope which is dependent on the storage location.">
+	<cffunction name="getStorage" access="private" returntype="struct" output="false"
+		hint="Gets a reference to the cache data storage.">
 		
 		<!--- StructGet will create the cache key if it does not exist --->
 		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />
