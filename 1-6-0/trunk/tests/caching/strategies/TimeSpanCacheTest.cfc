@@ -101,12 +101,20 @@ Notes:
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
 		</cfloop>
 		
+		<!--- Increase time to  --->
+		<cfset variables.cache.setCurrentDateTime(dateAdd("n", 55, now())) />
+		<cfset variables.cache.reap() />
+		<cfset variables.cache.setCurrentDateTime("") />
+		
+		<cfset assertTrue(variables.cache.keyExists("productID=1")) />
+		<cfset assertTrue(variables.cache.keyExists("productID=2")) />
+
 		<cfset variables.cache.setCurrentDateTime(dateAdd("h", 2, now())) />
 		<cfset variables.cache.reap() />
+		<cfset variables.cache.setCurrentDateTime("") />
 		
 		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
-		<cfset assertFalse(variables.cache.keyExists("productID=2")) />
-		
+		<cfset assertFalse(variables.cache.keyExists("productID=2")) />		
 	</cffunction>
 
 </cfcomponent>

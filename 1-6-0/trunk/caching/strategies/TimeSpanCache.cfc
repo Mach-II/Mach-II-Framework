@@ -162,7 +162,7 @@ via reap() which is run every 3 minutes.
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
 		<cfset dataStorage.data[hashedKey] = arguments.data />
-		<cfset dataStorage.timestamps[createTimestamp() & "_" & hashedKey] = hashedKey />
+		<cfset dataStorage.timestamps[computeCacheUntilTimestamp() & "_" & hashedKey] = hashedKey />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -201,11 +201,11 @@ via reap() which is run every 3 minutes.
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
-		<cfset var diffTimestamp = createTimestamp(computeCacheUntilTimestamp()) />
+		<cfset var diffTimestamp = createTimestamp() />
 
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfreturn false />
-		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) GTE 0>
+		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) LTE 0>
 			<cfset remove(arguments.key) />
 			<cfreturn false />
 		<cfelse>
@@ -226,7 +226,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="reap" access="public" returntype="void" output="false"
 		hint="Inspects the timestamps of cached elements and throws out the expired ones.">
 			
-		<cfset var diffTimestamp = createTimestamp(computeCacheUntilTimestamp()) />
+		<cfset var diffTimestamp = createTimestamp() />
 		<cfset var dataStorage = getCacheScope() />
 		<cfset var dataTimestampArray = "" />
 		<cfset var key = "" />
@@ -244,7 +244,7 @@ via reap() which is run every 3 minutes.
 			<!--- Cleanup --->
 			<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
 				<cftry>
-					<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
+					<cfif (ListFirst(dataTimestampArray[i], "_") - diffTimestamp) LTE 0>
 						<cfset key = listLast(dataTimestampArray[i], "_") />
 						<cfset removeByHashedKey(key) />
 					<cfelse>
@@ -318,7 +318,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
 		hint="Computes a cache until timestamp for this cache block.">
 		
-		<cfset var timestamp = getCurrentDateTime() />
+		<cfset var timestamp = Now() />
 		<cfset var cacheFor = getCacheFor() />
 		<cfset var unit = getCacheForUnit() />
 		
@@ -334,7 +334,7 @@ via reap() which is run every 3 minutes.
 			<cfset timestamp = DateAdd("y", 100, timestamp) />
 		</cfif>
 		
-		<cfreturn timestamp />
+		<cfreturn createTimestamp(timestamp) />
 	</cffunction>
 
 	<cffunction name="getCacheScope" access="private" returntype="struct" output="false"
@@ -365,7 +365,7 @@ via reap() which is run every 3 minutes.
 
 	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
 		hint="Used internally for unit testing.">
-		<cfif variables.currentDateTime NEQ "">
+		<cfif IsDate(variables.currentDateTime)>
 			<cfreturn variables.currentDateTime />
 		<cfelse>
 			<cfreturn Now() />
@@ -373,7 +373,7 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 	<cffunction name="setCurrentDateTime" access="public" returntype="void" output="false" 
 		hint="Used internally for unit testing.">
-		<cfargument name="currentDateTime" type="date" required="true" />
+		<cfargument name="currentDateTime" type="string" required="true" />
 		<cfset variables.currentDateTime = arguments.currentDateTime />
 	</cffunction>
 
