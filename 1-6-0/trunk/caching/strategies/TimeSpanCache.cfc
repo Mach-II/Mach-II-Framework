@@ -331,7 +331,7 @@ via reap() which is run every 3 minutes.
 		<cfelseif unit EQ "days">
 			<cfset timestamp = DateAdd("d", cacheFor, timestamp) />
 		<cfelseif unit EQ "forever">
-			<cfset timestamp = DateAdd("y", 100, timestamp) />
+			<cfset timestamp = DateAdd("yyyy", 100, timestamp) />
 		</cfif>
 		
 		<cfreturn createTimestamp(timestamp) />
