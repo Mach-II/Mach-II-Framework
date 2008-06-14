@@ -133,6 +133,13 @@ Notes:
 		<echo message="Built as version '${buildVersion}'"/>
 	</target>
 	
+	<target name="buildNightly">
+		<svn>
+			<update dir="${basedir}" revision="HEAD" />
+		</svn>
+		<antcall target="build"/>
+	</target>
+	
 	<target name="buildDuckTyped" depends="build" description="Creates a duck-typed build in the 'dest' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Duck typing the build"/>
@@ -239,7 +246,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipNightly" depends="build" description="Creates a nightly build zip in the 'zip' directory.">
+	<target name="zipNightly" depends="buildNightly" description="Creates a nightly build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Building nightly zip"/>
 		<echo message="---------------------------------------------"/>
