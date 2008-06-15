@@ -83,7 +83,6 @@ Notes:
 		<cfset var cacheName = "" />
 		<cfset var i = 0 />
 		
-		<!--- TODO: implement alias --->
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "alias")>
 			<cfset alias = arguments.configXML.xmlAttributes["alias"] />
 		</cfif>
