@@ -256,7 +256,7 @@ Notes:
 					</cfif>
 				<!--- Check for queries --->
 				<cfelseif IsQuery(pre) AND IsQuery(post)>
-					<cfif NOT pre.equals(post)>
+					<cfif pre.hashCode() NEQ post.hashCode()>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Check for simple datatypes, arrays and structs --->

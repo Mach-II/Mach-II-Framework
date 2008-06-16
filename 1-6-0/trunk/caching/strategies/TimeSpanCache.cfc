@@ -315,7 +315,7 @@ via reap() which is run every 3 minutes.
 		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
 	</cffunction>
 	
-	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="date" output="false"
+	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="string" output="false"
 		hint="Computes a cache until timestamp for this cache block.">
 		
 		<cfset var timestamp = Now() />
