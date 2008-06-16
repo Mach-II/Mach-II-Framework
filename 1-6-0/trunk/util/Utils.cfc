@@ -126,10 +126,11 @@ Notes:
 		<cfset var threadingAdapter = "" />
 		<cfset var serverName = server.coldfusion.productname />
 		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
+		<cfset var serverMinorVersion = 0 />
+		
 		<!--- Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release 
 				but this will be added; however, probably not wise to always assume it's there. Set a 
 				default of 0 in case it doesn't exist. --->
-		<cfset var serverMinorVersion = 0 />
 		<cfif ListLen(server.coldfusion.productversion, ",") gt 1>
 			<cfset serverMinorVersion = ListGetAt(server.coldfusion.productversion, 2, ",") />
 		</cfif>
@@ -137,12 +138,13 @@ Notes:
 		<!--- Adobe ColdFusion 8+ --->
 		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
-		<!--- NewAtlanta BlueDragon 7+ threading engine is not currently compatible
+		<!--- NewAtlanta BlueDragon 7+ threading engine is not currently compatible,
+			however will be compatiable in future versions
 		<cfelseif FindNoCase("BlueDragon", serverName) AND serverMajorVersion GTE 7>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
 		 --->
-		<!--- Railo 2.1 will introduce a threading engine
-		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 2 AND serverMinorVersion GTE 1>
+		<!--- Railo 3.0 will introduce a threading engine
+		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 3>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRailo").init() />
 		 --->
 		<!--- Default theading adapter (used to check if threading is allowed on this engine) --->

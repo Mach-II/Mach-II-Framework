@@ -47,9 +47,12 @@ Notes:
 	--->
 	<cffunction name="run" access="public" returntype="string" output="false"
 		hint="Runs a thread.">
-		<cfargument name="callback" type="any" required="true" />
-		<cfargument name="method" type="string" required="true" />
-		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="callback" type="component" required="true"
+			hint="A CFC to perform the callback on." />
+		<cfargument name="method" type="string" required="true"
+			hint="Name of method to call on the callback CFC." />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="Arguments to pass to the callback method." />
 		
 		<cfset var threadId = createThreadId(arguments.method) />
 		<cfset var collection = { action="run", name=threadId, threadId=threadId } />
