@@ -139,7 +139,7 @@ See individual caching strategies for more information on configuration.
 		<cfset setDefaultCacheName("default") />
 		
 		<cfset parameters.type = variables.defaultCacheType />
-		<cfset parameters.cacheIdKey = createCacheIdKey(getDefaultCacheName()) />
+		<cfset parameters.generatedScopeKey = createCacheIdKey(getDefaultCacheName()) />
 		
 		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(getDefaultCacheName(), parameters.type, parameters) />	
 	</cffunction>
@@ -159,8 +159,8 @@ See individual caching strategies for more information on configuration.
 				message="You must specify a parameter named 'type' for cache named '#arguments.name#' in module named '#getAppManager().getModuleName()#'." />
 		</cfif>
 
-		<!--- Add in cacheIdKey as a parameter --->
-		<cfset arguments.parameters.cacheIdKey = createCacheIdKey(arguments.name) />
+		<!--- Add in scopeKey as a parameter --->
+		<cfset arguments.parameters.generatedScopeKey = createCacheIdKey(arguments.name) />
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
@@ -181,7 +181,7 @@ See individual caching strategies for more information on configuration.
 			<cfset moduleName = "base" />
 		</cfif>
 		
-		<cfreturn getAppManager().getAppKey() & "._MachIICache." & moduleName & "." & arguments.cacheName />
+		<cfreturn "_MachIICache." & Hash(getAppManager().getAppKey() & "_" & moduleName & "_" & arguments.cacheName) />
 	</cffunction>
 	
 	<!---

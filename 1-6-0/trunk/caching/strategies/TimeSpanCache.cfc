@@ -30,6 +30,11 @@ Scope
 - The default setting for "scope" is "application".
 - Valid values are "application", "server" and "session".
 
+ScopeKey
+- The key place the cache in the choosen scope.
+- Optional and by default the cache will be placed in scope._MachIICache.Hash(appKey & moduleName & cacheName)
+- Rarely will this need to be used
+
 CacheFor
 - The numeric length of time that the strategy should cache an element for. Once
 an element exceeds the "cacheFor" length, it will be removed on the next reap().
@@ -129,6 +134,19 @@ via reap() which is run every 3 minutes.
 				<cfset setScope(getParameter("scope")) />
 			</cfif>
 		</cfif>
+		<cfif isParameterDefined("scopeKey")>
+			<cfif NOT Len(getParameter("scopeKey"))>
+				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
+					message="Invalid ScopeKey of '#getParameter("ScopeKey")#'."
+					detail="ScopeKey must have a length greater than 0 and be a valid struct key." />
+			<cfelse>
+				<cfset setScopeKey(getParameter("scopeKey")) />
+			</cfif>
+		<cfelseif isParameterDefined("generatedScopeKey")>
+			<cfset setScopeKey(getParameter("generatedScopeKey")) />
+		<cfelse>
+			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+		</cfif>
 		<cfif isParameterDefined("cleanupIntervalInMinutes")>
 			<cfif NOT isNumeric(getParameter("cleanupIntervalInMinutes")) OR getParameter("cleanupIntervalInMinutes") LTE 0>
 				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
@@ -139,9 +157,9 @@ via reap() which is run every 3 minutes.
 			</cfif>
 		</cfif>
 
-		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />		
-		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
+		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
 		
+		<!--- Setup and clear the cache by running a flush() --->
 		<cfset flush() />
 	</cffunction>
 	

@@ -35,6 +35,11 @@ Scope
 - The default setting for "scope" is "application".
 - Valid values are "application", "server" and "session".
 
+ScopeKey
+- The key place the cache in the choosen scope.
+- Optional and by default the cache will be placed in scope._MachIICache.Hash(appKey & moduleName & cacheName)
+- Rarely will this need to be used
+
 Using all of the default settings will result in caching 100 elements of data
 in the application scope.
 
@@ -91,7 +96,20 @@ in the application scope.
 				<cfset setScope(getParameter("scope")) />
 			</cfif>
 		</cfif>
-		
+		<cfif isParameterDefined("scopeKey")>
+			<cfif NOT Len(getParameter("scopeKey"))>
+				<cfthrow type="MachII.caching.strategies.LRUCache"
+					message="Invalid ScopeKey of '#getParameter("ScopeKey")#'."
+					detail="ScopeKey must have a length greater than 0 and be a valid struct key." />
+			<cfelse>
+				<cfset setScopeKey(getParameter("scopeKey")) />
+			</cfif>
+		<cfelseif isParameterDefined("generatedScopeKey")>
+			<cfset setScopeKey(getParameter("generatedScopeKey")) />
+		<cfelse>
+			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+		</cfif>
+
 		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
 		
 		<cfset flush() />
