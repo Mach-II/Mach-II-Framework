@@ -22,7 +22,7 @@ Updated version: 1.6.0
 
 Notes:
 This bootstrapper is DEPRECATED since Mach-II no longer officially 
-supports ColdFusion 6.1. Use Application.cfc and mach-ii.cfc.
+supports ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 --->
 <!--- Set the path to the application's mach-ii.xml file. Default to ./config/mach-ii.xml. --->
 <cfparam name="MACHII_CONFIG_PATH" type="string" default="#ExpandPath('./config/mach-ii.xml')#" />
@@ -36,6 +36,9 @@ supports ColdFusion 6.1. Use Application.cfc and mach-ii.cfc.
 <cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_6_0.dtd')#" />
 <!--- Set the request timeout for loading of the framework. Defaults to 120 --->
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
+
+<!--- Clean the AppKey --->
+<cfset MACHII_APP_KEY = REReplace(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
 
 <!--- default is request.MachIIConfigMode if it is defined, else use cfparam --->
 <cfif StructKeyExists(request,"MachIIConfigMode")>

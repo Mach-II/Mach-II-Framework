@@ -86,25 +86,31 @@ the handleRequest() method in the onRequest() application event.
 		<cfargument name="sessionScope" type="struct" required="true" />
 		<cfargument name="applicationScope" type="struct" required="true" />
 		<!--- Access to the application and session scopes are passed in --->	
-		<cfset arguments.applicationScope[MACHII_APP_KEY].appLoader.getAppManager().onSessionEnd(arguments.sessionScope) />
+		<cfset arguments.applicationScope[getAppKey()].appLoader.getAppManager().onSessionEnd(arguments.sessionScope) />
 	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="loadFramework" access="public" returntype="void" output="false"
-		hint="Loads the framework. Only call in onApplicationStart() event.">		
+		hint="Loads the framework. Only call in onApplicationStart() event.">
+		
+		<cfset var appKey = getAppKey() />
+		
 		<!--- Set the timeout --->
 		<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 		
 		<!--- Create the AppLoader. No locking requires if called during the onApplicationStart() event. --->
-		<cfset application[MACHII_APP_KEY] = StructNew() />
-		<cfset application[MACHII_APP_KEY].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_APP_KEY, MACHII_VALIDATE_XML) />
+		<cfset application[appKey] = StructNew() />
+		<cfset application[appKey].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, AppKey, MACHII_VALIDATE_XML) />
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
 
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
+
+		<cfset var appKey = getAppKey() />
+		
 		<!---
 		Default is request.MachIIConfigMode if it is defined temporarily override the config mode
 		DO NOT USE THIS LEGACY CODE
@@ -115,9 +121,9 @@ the handleRequest() method in the onRequest() application event.
 		</cfif>
 		
 		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
-		<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
-			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-				<cfif NOT IsDefined("application.#MACHII_APP_KEY#.appLoader") OR NOT IsObject(application[MACHII_APP_KEY].appLoader)>
+		<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+				<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
 					<cfset loadFramework() />
 				</cfif>
 			</cflock>
@@ -127,21 +133,21 @@ the handleRequest() method in the onRequest() application event.
 		<cfif MACHII_CONFIG_MODE EQ -1>
 			<!--- Do not reload config. --->
 		<cfelseif MACHII_CONFIG_MODE EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
-			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-				<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
-		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadBaseConfig()>
-			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-				<cfset application[MACHII_APP_KEY].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
+		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadBaseConfig()>
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
-		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[MACHII_APP_KEY].appLoader.shouldReloadModuleConfig()>
-			<cflock name="application_#MACHII_APP_KEY#_reload" type="exclusive" timeout="120">
-				<cfset application[MACHII_APP_KEY].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
+		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadModuleConfig()>
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+				<cfset application[appKey].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		</cfif>
 
 		<!--- Handle the request --->
-		<cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() />
+		<cfset application[appKey].appLoader.getAppManager().getRequestHandler().handleRequest() />
 	</cffunction>
 
 	<!---
@@ -167,12 +173,17 @@ the handleRequest() method in the onRequest() application event.
 	
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Get the Mach-II AppManager. Not available until loadFramework has been called.">
-		<cfreturn application[MACHII_APP_KEY].appLoader.getAppManager() />
+		<cfreturn application[getAppKey()].appLoader.getAppManager() />
 	</cffunction>
 	
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Returns if the config should be dynamically reloaded.">
-		<cfreturn application[MACHII_APP_KEY].appLoader.shouldReloadConfig() />
+		<cfreturn application[getAppKey()].appLoader.shouldReloadConfig() />
+	</cffunction>
+	
+	<cffunction name="getAppKey" access="public" returntype="string" output="false"
+		hint="Returns a clean AppKey.">
+		<cfreturn REReplace(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
 	</cffunction>
 
 </cfcomponent>
