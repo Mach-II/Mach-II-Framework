@@ -256,6 +256,7 @@ Notes:
 					</cfif>
 				<!--- Check for queries --->
 				<cfelseif IsQuery(pre) AND IsQuery(post)>
+					<!--- Cannot use equals() because BD does not support it --->
 					<cfif pre.hashCode() NEQ post.hashCode()>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
