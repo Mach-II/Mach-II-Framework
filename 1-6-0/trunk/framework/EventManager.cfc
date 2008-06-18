@@ -181,7 +181,7 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="createEvent" access="public" returntype="MachII.framework.Event" output="true"
+	<cffunction name="createEvent" access="public" returntype="MachII.framework.Event" output="false"
 		hint="Creates an Event instance.">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="eventName" type="string" required="true" />
@@ -202,7 +202,7 @@ Notes:
 		<cfreturn event />
 	</cffunction>
 	
-	<cffunction name="getEventHandler" access="public" returntype="MachII.framework.EventHandler"
+	<cffunction name="getEventHandler" access="public" returntype="MachII.framework.EventHandler" output="false"
 		hint="Returns the EventHandler for the named Event.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
