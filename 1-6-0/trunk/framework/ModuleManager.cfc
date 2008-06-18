@@ -72,22 +72,7 @@ Notes:
 		<cfset var name = "" />
 		<cfset var file = "" />
 		<cfset var overrideXml = "" />
-		<cfset var baseName = "" />
 		<cfset var i = 0 />
-
-		<!--- Set the module baseName if defined in the xml --->
-		<cfif NOT arguments.override>
-			<cfset modulesNode = XMLSearch(arguments.configXML, "mach-ii/modules") />
-		<cfelse>
-			<cfset modulesNode = XMLSearch(arguments.configXML, ".//modules") />
-		</cfif>
-		<cfif ArrayLen(modulesNode) eq 1>
-			<cfset modulesNode = modulesNode[1]>
-			<cfif StructKeyExists(modulesNode[1].xmlAttributes, "baseName")>
-				<cfset baseName = modulesNode[1].xmlAttributes["baseName"] />
-			</cfif>
-			<cfset setBaseName(baseName) />
-		</cfif>
 		
 		<!--- Setup up each Module. --->
 		<cfif NOT arguments.override>
@@ -205,14 +190,6 @@ Notes:
 	</cffunction>
 	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
 		<cfreturn variables.dtdPath />
-	</cffunction>
-	
-	<cffunction name="setBaseName" access="public" returntype="void" output="false">
-		<cfargument name="baseName" type="string" required="true" />
-		<cfset variables.baseName = arguments.baseName />
-	</cffunction>
-	<cffunction name="getBaseName" access="public" returntype="string" output="false">
-		<cfreturn variables.baseName />
 	</cffunction>
 	
 	<cffunction name="setValidateXML" access="public" returntype="void" output="false">
