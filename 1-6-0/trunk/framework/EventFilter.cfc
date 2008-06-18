@@ -26,6 +26,10 @@ Updated version: 1.5.0
 	extends="MachII.framework.BaseComponent"
 	output="false"
 	hint="Base EventFilter component.">
+
+	<!---
+	PROPERTIES
+	--->
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
