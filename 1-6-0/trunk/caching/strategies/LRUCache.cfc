@@ -109,8 +109,6 @@ in the application scope.
 		<cfelse>
 			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
-
-		<cfset setScopeKey(getParameter("cacheIdKey", REReplace(CreateUUID(), "[[:punct:]]", "", "ALL"))) />
 		
 		<cfset flush() />
 	</cffunction>
