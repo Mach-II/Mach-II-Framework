@@ -108,8 +108,10 @@ Notes:
 		<cfset variables.cache.setCurrentDateTime("") />
 		
 		<!--- Check for elements should still be cached --->
-		<cfset assertTrue(variables.cache.keyExists("productID=1")) />
-		<cfset assertTrue(variables.cache.keyExists("productID=2")) />
+		<cfset assertTrue(variables.cache.keyExists("productID=1"), 
+			"Check for elements should still be cached (productID=1)") />
+		<cfset assertTrue(variables.cache.keyExists("productID=2"), 
+			"Check for elements should still be cached (productID=2)") />
 
 		<!--- 
 		"Fake" passing of time that exceeds cache 
@@ -120,8 +122,10 @@ Notes:
 		<cfset variables.cache.setCurrentDateTime("") />
 		
 		<!--- Check for elements that should have been reaped --->
-		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
-		<cfset assertFalse(variables.cache.keyExists("productID=2")) />		
+		<cfset assertFalse(variables.cache.keyExists("productID=1"), 
+			"Check for elements that should have been reaped (productID=1)") />
+		<cfset assertFalse(variables.cache.keyExists("productID=2"), 
+			"Check for elements that should have been reaped (productID=2)") />		
 	</cffunction>
 
 </cfcomponent>
