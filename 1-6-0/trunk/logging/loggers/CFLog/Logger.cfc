@@ -32,7 +32,7 @@ Notes:
 				<!-- Optional and defaults to 'fatal' -->
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the application.log if not defined -->
-				<key name="loggingFile" value="nameOfCFLogFile" />
+				<key name="logFile" value="nameOfCFLogFile" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -

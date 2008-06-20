@@ -45,7 +45,7 @@ that data.
 
 CacheForUnit
 - The unit of time that the strategy should use for cache length.
-- The default setting for "cacheUnit" is "hour".
+- The default setting for "cacheUnit" is "hours".
 - Valid values are "seconds", "minutes", "hours", "days" and "forever".
 - If the value is "forever", any numeric value is required in the "cacheFor"
 attribute, but the value does not affect the length an element will be cached.
@@ -74,7 +74,7 @@ via reap() which is run every 3 minutes.
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
                         <key name="cacheFor" value="1" />
-                        <key name="cacheForUnit" value="hour" />
+                        <key name="cacheForUnit" value="hours" />
 						<key name="cleanupIntervalInMinutes" value="3" />
                   </struct>
             </parameter>
