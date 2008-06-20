@@ -174,29 +174,37 @@ via reap() which is run every 3 minutes.
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
+		<cfset var cacheElement = createObject("component", "MachII.caching.CacheElement").init() />
 		
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
-		<cfset dataStorage.data[hashedKey] = arguments.data />
+		<cfset cacheElement.setData(arguments.data) />
+		<cfset dataStorage.data[hashedKey] = cacheElement />
 		<cfset dataStorage.timestamps[computeCacheUntilTimestamp() & "_" & hashedKey] = hashedKey />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
-		hint="Gets en elementby key from the cache. Returns 'null' if the key is not in the cache.">
+		hint="Gets en element by key from the cache. Returns 'null' if the key is not in the cache.">
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
+		<cfset var cacheElement = "" />
 		
 		<cfset shouldCleanup() />
 		
 		<cfif keyExists(arguments.key)>
-			<cfset getCacheStats().incrementCacheHits(1) />
-			<cfreturn cache[hashedKey] />
+			<cfset cacheElement = cache[hashedKey]>
+			<cfif NOT cacheElement.getIsStale()>
+				<cfset getCacheStats().incrementCacheHits(1) />
+				<cfreturn cacheElement.getData() />
+			<cfelse>
+				<cfset getCacheStats().incrementCacheMisses(1) />
+			</cfif>
 		<cfelse>
 			<cfset getCacheStats().incrementCacheMisses(1) />
 		</cfif>
@@ -220,14 +228,20 @@ via reap() which is run every 3 minutes.
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
 		<cfset var diffTimestamp = createTimestamp() />
+		<cfset var cacheElement = "" />
 
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfreturn false />
 		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) LTE 0>
 			<cfset remove(arguments.key) />
 			<cfreturn false />
-		<cfelse>
-			<cfreturn true />
+		<cfelseif StructKeyExists(dataStorage.data, hashedKey)>
+			<cfset cacheElement = dataStorage.data[hashedKey] />
+			<cfif cacheElement.getIsStale()>
+				<cfreturn false />
+			<cfelse>
+				<cfreturn true />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -288,14 +302,21 @@ via reap() which is run every 3 minutes.
 		<cfset var dataStorage = getStorage() />
 		<cfset var cache = dataStorage.data />
 		<cfset var timeStampKey = "" />
+		<cfset var cacheElement = "" />
 
 		<cfif StructKeyExists(cache, arguments.hashedKey)>
-			<cfset StructDelete(cache, arguments.hashedKey, false) />
-			<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
-			<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
-			<cfset getCacheStats().incrementEvictions(1) />
-			<cfset getCacheStats().decrementTotalElements(1) />
-			<cfset getCacheStats().decrementActiveElements(1) />
+			<cfset cacheElement = cache[arguments.hashedKey] />
+			<cfif cacheElement.getIsStale()>
+				<cfset StructDelete(cache, arguments.hashedKey, false) />
+				<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
+				<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
+				<cfset getCacheStats().incrementEvictions(1) />
+				<cfset getCacheStats().decrementTotalElements(1) />
+				<cfset getCacheStats().decrementActiveElements(1) />
+			<cfelse>
+				<cfset cacheElement.setIsStale(true) />
+				<cfset getCacheStats().decrementActiveElements(1) />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
