@@ -96,16 +96,21 @@ Notes:
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
+		<!--- Set runParent attribute if this is a child PluginManager --->
+		<cfif IsObject(getParent())>
+			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
+			<cfif ArrayLen(pluginNodes) gt 0 AND StructKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
+				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
+			</cfif>
+		</cfif>
+
 		<!--- Scoped argument variable - configXML --->
 		<cfif NOT arguments.override>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, "mach-ii/plugins/plugin") />
 		<cfelse>
-			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
-			<cfif arrayLen(pluginNodes) gt 0 AND structKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
-				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
-			</cfif>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") />
 		</cfif>
+		
 		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
 			<cfset pluginName = pluginNodes[i].XmlAttributes["name"] />
 			<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
