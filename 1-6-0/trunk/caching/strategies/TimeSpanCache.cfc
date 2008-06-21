@@ -174,13 +174,14 @@ via reap() which is run every 3 minutes.
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var cacheElement = createObject("component", "MachII.caching.CacheElement").init() />
+		<cfset var cacheElement = structNew() />
 		
 		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
-		<cfset cacheElement.setData(arguments.data) />
+		<cfset cacheElement.data  = arguments.data />
+		<cfset cacheElement.isStale = false />
 		<cfset dataStorage.data[hashedKey] = cacheElement />
 		<cfset dataStorage.timestamps[computeCacheUntilTimestamp() & "_" & hashedKey] = hashedKey />
 	</cffunction>
@@ -199,9 +200,9 @@ via reap() which is run every 3 minutes.
 		
 		<cfif keyExists(arguments.key)>
 			<cfset cacheElement = cache[hashedKey]>
-			<cfif NOT cacheElement.getIsStale()>
+			<cfif NOT cacheElement.isStale>
 				<cfset getCacheStats().incrementCacheHits(1) />
-				<cfreturn cacheElement.getData() />
+				<cfreturn cacheElement.data />
 			<cfelse>
 				<cfset getCacheStats().incrementCacheMisses(1) />
 			</cfif>
@@ -237,7 +238,7 @@ via reap() which is run every 3 minutes.
 			<cfreturn false />
 		<cfelseif StructKeyExists(dataStorage.data, hashedKey)>
 			<cfset cacheElement = dataStorage.data[hashedKey] />
-			<cfif cacheElement.getIsStale()>
+			<cfif cacheElement.isStale>
 				<cfreturn false />
 			<cfelse>
 				<cfreturn true />
@@ -306,7 +307,7 @@ via reap() which is run every 3 minutes.
 
 		<cfif StructKeyExists(cache, arguments.hashedKey)>
 			<cfset cacheElement = cache[arguments.hashedKey] />
-			<cfif cacheElement.getIsStale()>
+			<cfif cacheElement.isStale>
 				<cfset StructDelete(cache, arguments.hashedKey, false) />
 				<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
 				<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
@@ -314,7 +315,7 @@ via reap() which is run every 3 minutes.
 				<cfset getCacheStats().decrementTotalElements(1) />
 				<cfset getCacheStats().decrementActiveElements(1) />
 			<cfelse>
-				<cfset cacheElement.setIsStale(true) />
+				<cfset cacheElement.isStale = true />
 				<cfset getCacheStats().decrementActiveElements(1) />
 			</cfif>
 		</cfif>
