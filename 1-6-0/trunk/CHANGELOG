@@ -33,7 +33,7 @@ limitations under the License.
 \_| |(_|| |(_|(/_  |_(_)(_|
             _|           _|
 ------------------------------------------------
-Bug Fixes
+Fixed Defects
 ------------------------------------------------
 * Fixed Inconsistent Cleanup of Abandoned Redirect Persist Data
 Re-built cleanup routine to ensure total cleanup of abandoned redirect persist data.
@@ -71,6 +71,27 @@ method of EventContext.cfc itself throws a new exception.
 
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/24
 (2008-01-14 pfarrell)
+
+* AppKey with invalid characters for struct keys caused redirect persists to fail
+The boostrappers now "clean" AppKeys so StructGet() built-in function does not
+fail.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/39
+(2008-06-15 pfarrell)
+
+* Redirect caused exception when statusType is set 'permanent' or 'prg'
+The redirect would occur, but an exception would occur causing the handleException()
+plugin point to be run.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/43
+(2008-06-20 pfarrell)
+
+* Plugins in modules failed to run before parent plugins if runParent="before"
+The PluginManager only set the runParent attribute when the XML was being parsed
+as override XML.
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/50
+(2008-06-20 pfarrell)
 
 ------------------------------------------------
 Improvements / Enhancements
