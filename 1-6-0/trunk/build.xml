@@ -208,6 +208,7 @@ Notes:
 			<!-- util -->
 			<testcase name="MachII.tests.util.BeanUtilTest"/>
 			<testcase name="MachII.tests.util.QueueTest"/>
+			<testcase name="MachII.tests.util.UtilsTest"/>
 		</mxunit>
 	</target>
 	
