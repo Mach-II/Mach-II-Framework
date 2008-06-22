@@ -51,8 +51,11 @@ Updated version: 1.1.0
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
 		hint="Dequeues and returns the next item in the queue.">
+
 		<cfset var nextItem = variables.queueArray[1] />
+
 		<cfset ArrayDeleteAt(variables.queueArray, 1) />
+
 		<cfreturn nextItem />
 	</cffunction>
 	
