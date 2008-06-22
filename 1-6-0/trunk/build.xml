@@ -205,6 +205,8 @@ Notes:
 			<testcase name="MachII.tests.logging.LogFactoryTest"/>
 			<testcase name="MachII.tests.logging.adapters.CFLogAdapterTest"/>
 			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
+			<!-- util -->
+			<testcase name="MachII.tests.util.BeanUtilTest"/>
 		</mxunit>
 	</target>
 	
