@@ -51,7 +51,7 @@ Notes:
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
 	<cffunction name="testComprehensive" access="public" returntype="void" output="false"
-		hint="Queues the item.">
+		hint="A comprehensive test for SizedQueue.">
 			
 		<cfset var item = StructNew() />
 		<cfset var cfcatch = "" />
