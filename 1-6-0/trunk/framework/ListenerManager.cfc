@@ -160,6 +160,7 @@ Notes:
 				<cfif StructKeyExists(listenerNodes[i], "invoker")>
 					<cfset invokerType = listenerNodes[i].invoker.xmlAttributes["type"] />
 
+					<!--- Uses the flyweight pattern to reduce the number of instantiations of invokers --->
 					<cfif NOT StructKeyExists(instantiatedInvokers, Hash(invokerType))>
 						<cftry>	
 							<cfset instantiatedInvokers[Hash(invokerType)] = CreateObject("component", invokerType).init() />
