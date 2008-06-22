@@ -80,7 +80,7 @@ first [Hash(UCase(arguments.channell))]
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
 		hint="Adds a log adapter">
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset variables.logAdapters["_" & Replace(CreateUUID(), "-", "", "all")] = arguments.logAdapter />
+		<cfset variables.logAdapters[Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000))] = arguments.logAdapter />
 	</cffunction>
 	
 	<!---
