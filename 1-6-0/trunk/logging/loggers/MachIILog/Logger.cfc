@@ -152,7 +152,7 @@ See that file header for configuration of filter criteria.
 			
 			<cfif count>
 				<cfset buffer = Insert(loggerOutput, buffer, count - 1) />
-				<cfset out.clearAll() />
+				<cfset out.clearBuffer() />
 				<cfoutput>#buffer#</cfoutput>
 			<cfelse>
 				<cfoutput>#loggerOutput#</cfoutput>
