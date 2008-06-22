@@ -63,6 +63,7 @@ Notes:
 		<cfset var name = "" />
 		<cfset var page = "" />
 
+		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
@@ -103,7 +104,7 @@ Notes:
 				<cfif StructKeyExists(viewNodes[i].xmlAttributes, "useParentAppRoot") AND viewNodes[i].xmlAttributes["useParentAppRoot"]>
 					<cfset page = getAppManager().getParent().getPropertyManager().getProperty("applicationRoot") & viewNodes[i].xmlAttributes["page"] />
 				<cfelse>
-					<cfset page = getAppManager().getPropertyManager().getProperty("applicationRoot") & viewNodes[i].xmlAttributes["page"] />
+					<cfset page = appRoot & viewNodes[i].xmlAttributes["page"] />
 				</cfif>
 			
 				<cfset variables.viewPaths[name] = page />

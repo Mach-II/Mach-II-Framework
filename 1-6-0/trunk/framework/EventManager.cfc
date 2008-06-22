@@ -173,9 +173,14 @@ Notes:
 		<cfargument name="eventHandler" type="MachII.framework.EventHandler" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif NOT arguments.overrideCheck AND isEventDefined(arguments.eventName)>
-			<cfthrow type="MachII.framework.EventHandlerAlreadyDefined"
-				message="An EventHandler with name '#arguments.eventName#' is already registered." />
+		<cfif NOT arguments.overrideCheck>
+			<cftry>
+				<cfset StructInsert(variables.handlers, arguments.eventName, arguments.eventHandler, false) />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.EventHandlerAlreadyDefined"
+						message="An EventHandler with name '#arguments.eventName#' is already registered." />
+				</cfcatch>
+			</cftry>
 		<cfelse>
 			<cfset variables.handlers[arguments.eventName] = arguments.eventHandler />
 		</cfif>

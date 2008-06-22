@@ -133,9 +133,14 @@ Notes:
 		<cfargument name="subroutineHandler" type="MachII.framework.SubroutineHandler" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 		
-		<cfif NOT arguments.overrideCheck AND isSubroutineDefined(arguments.subroutineName)>
-			<cfthrow type="MachII.framework.SubroutineHandlerAlreadyDefined"
-				message="A SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
+		<cfif NOT arguments.overrideCheck>
+			<cftry>
+				<cfset StructInsert(variables.handlers, arguments.subroutineName, arguments.subroutineHandler, false) />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.SubroutineHandlerAlreadyDefined"
+						message="A SubroutineHandler with name '#arguments.subroutineName#' is already registered." />
+				</cfcatch>
+			</cftry>
 		<cfelse>
 			<cfset variables.handlers[arguments.subroutineName] = arguments.subroutineHandler />
 		</cfif>
