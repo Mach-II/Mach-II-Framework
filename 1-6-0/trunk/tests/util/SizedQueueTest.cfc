@@ -24,9 +24,9 @@ Updated version: 1.6.0
 Notes:
 --->
 <cfcomponent
-	displayname="BeanUtilTest"
+	displayname="SizedQueue"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.util.BeanUtil.">
+	hint="Test cases for MachII.util.SizedQueue.">
 	
 	<!---
 	PROPERTIES
