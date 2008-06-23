@@ -207,6 +207,7 @@ Notes:
 			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
 			<!-- util -->
 			<testcase name="MachII.tests.util.BeanUtilTest"/>
+			<testcase name="MachII.tests.util.ExceptionTest"/>
 			<testcase name="MachII.tests.util.QueueTest"/>
 			<testcase name="MachII.tests.util.UtilsTest"/>
 		</mxunit>
