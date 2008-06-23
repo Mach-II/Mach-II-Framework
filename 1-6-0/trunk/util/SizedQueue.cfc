@@ -19,7 +19,9 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.6.0
+
+Notes:
 --->
 <cfcomponent 
 	displayname="SizedQueue" 
@@ -55,7 +57,8 @@ Updated version: 1.1.0
 		<cfif NOT isFull()>
 			<cfset super.put(arguments.item) />
 		<cfelse>
-			<cfthrow message="Max size of SizedQueue is #getMaxSize()# and has been exceeded." />
+			<cfthrow type="MachII.util.SizedQueue"
+				message="Max size of SizedQueue is #getMaxSize()# and has been exceeded." />
 		</cfif>
 	</cffunction>
 	
