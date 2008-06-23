@@ -71,7 +71,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.loggerType = "Mach-II Log" />
 	<cfset variables.onRequestEndAvailable = true />
 	<cfset variables.prePostRedirectAvailable = true />
-	<cfset variables.displayOutputTemplateFile = "/MachII/logging/loggers/MachIILog/defaultOutputTemplate.cfm" />
+	<cfset variables.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.debugModeOnly = false />
 	<cfset variables.suppressDebugArg = "suppressDebug" />
 	<cfset variables.loggingScope = "" />

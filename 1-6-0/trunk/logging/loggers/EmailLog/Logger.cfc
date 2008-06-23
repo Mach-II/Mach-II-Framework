@@ -74,7 +74,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.loggerType = "Email Logger" />
 	<cfset variables.onRequestEndAvailable = true />
 	<cfset variables.prePostRedirectAvailable = true />
-	<cfset variables.emailTemplateFile = "/MachII/logging/loggers/EmailLog/defaultEmailTemplate.cfm" />
+	<cfset variables.emailTemplateFile = "defaultEmailTemplate.cfm" />
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
 	<cfset variables.to = "" />
