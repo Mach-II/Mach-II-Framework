@@ -48,7 +48,7 @@ N.B.
 Compatible with Mach-II 1.5.0 or higher.
 
 Usage:
-<property name="coldSpringProperty" type="coldspring.machii.ColdspringProperty">
+<property name="coldSpringProperty" type="MachII.properties.ColdspringProperty">
 	<parameters>
 		<!-- Name of a Mach-II property name that will hold a reference to the ColdSpring beanFactory
 			Default: 'coldspring.beanfactory.root' -->
@@ -176,7 +176,7 @@ feature to inject your model objects into the Mach-II property manager.
 Parent/Child Bean Factories Configuration for Use with Modules:
 
 Base Mach-II Config File (i.e. Parent Factory)
-<property name="ColdSpring" type="coldspring.machii.ColdspringProperty">
+<property name="ColdSpring" type="MachII.properties.ColdspringProperty">
 	<parameters>
 		<parameter name="beanFactoryPropertyName" value="serviceFactory"/>
 		<parameter name="configFile" value="/path/to/config/services.xml"/>
@@ -191,7 +191,7 @@ for a module to inherit from a parent factory. This example put the parent facto
 into the application.serviceFactory variable.
 
 Account Module Config File (i.e. Child Factory):
-<property name="ColdSpring" type="coldspring.machii.ColdspringProperty">
+<property name="ColdSpring" type="MachII.properties.ColdspringProperty">
 	<parameters>
 		<parameter name="beanFactoryPropertyName" value="serviceFactory"/>
 		<parameter name="configFile" value="/path/to/modules/account/config/services_account.xml"/>
