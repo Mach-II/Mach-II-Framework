@@ -22,7 +22,8 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
+Special thanks to the Simple Log in Apache Commons Logging project for 
+inspiration for this component.
 --->
 <cfcomponent
 	displayname="CFLogAdapter"
@@ -44,6 +45,7 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 	
 	<cfset variables.level = variables.LOG_LEVEL_FATAL />
 	<cfset variables.logFile = "application" />
+	<cfset variables.debugModeOnly = false />
 	<cfset variables.filter = "" />
 	
 	<!---
@@ -60,6 +62,15 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		</cfif>
 		<cfif isParameterDefined("loggingEnabled")>
 			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
+		</cfif>
+		<cfif isParameterDefined("debugModeOnly")>
+			<cfif NOT IsBoolean(getParameter("debugModeOnly"))>
+				<cfthrow type="MachII.logging.strategies.MachIILog.Logger"
+					message="The value of 'debugModeOnly' must be boolean."
+					detail="Current value '#getParameter('debugModeOnly')#'" />
+			<cfelse>
+				<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -211,7 +222,8 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		<cfset var text = "[" & arguments.channel & "] " />
 		
 		<!--- Use the filter if defined, otherwise continue --->
-		<cfif NOT isFilterDefined() OR getFilter().decide(arguments)>
+		<cfif ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly()) 
+			AND NOT isFilterDefined() OR getFilter().decide(arguments)>
 			<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
 				does not have these levels and are logged on the "Information" level--->
 			<cfif arguments.logLevel EQ 1>
@@ -352,5 +364,15 @@ Special thanks to the Simple Log in Apache Commons Logging project for inspirati
 		hint="Gets the value for the cflog 'file' attribute">
 		<cfreturn variables.logFile />
 	</cffunction>
-	
+
+	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
+		hint="Sets if the adapter will log if CF's debug mode is enabled.">
+		<cfargument name="debugModeOnly" type="boolean" required="true" />
+		<cfset variables.debugModeOnly = arguments.debugModeOnly />
+	</cffunction>
+	<cffunction name="getDebugModeOnly" access="public" returntype="boolean" output="false"
+		hint="Gets if the adapter will log if CF's debug mode is enabled.">
+		<cfreturn variables.debugModeOnly />
+	</cffunction>
+
 </cfcomponent>

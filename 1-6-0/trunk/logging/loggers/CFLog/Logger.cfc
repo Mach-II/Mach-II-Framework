@@ -24,7 +24,7 @@ Updated version: 1.6.0
 Notes:
 <property name="Logging" type="MachII.logging.LoggingProperty">
 	<parameters>
-		<parameter name="MachIILog">
+		<parameter name="CFLog">
 			<struct>
 				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
 				<!-- Optional and defaults to true -->
@@ -33,6 +33,9 @@ Notes:
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the application.log if not defined -->
 				<key name="logFile" value="nameOfCFLogFile" />
+				<!-- Optional and defaults to 'false'
+					logs messages only if CF's debug mode is enabled -->
+				<key name="debugModeOnly" value="false" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -
