@@ -24,7 +24,7 @@ Updated version: 1.6.0
 Notes:
 <property name="Logging" type="MachII.logging.LoggingProperty">
 	<parameters>
-		<parameter name="MachIILog">
+		<parameter name="EmailLog">
 			<struct>
 				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
 				<!-- Optional and defaults to true -->
