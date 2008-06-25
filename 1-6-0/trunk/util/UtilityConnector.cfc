@@ -102,9 +102,9 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	
 	<cffunction name="getCacheStrategyByName" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false"
 		hint="Gets a cache strategy with the specified name.">
-		<cfargument name="cacheStrategyName" type="string" required="true"
+		<cfargument name="name" type="string" required="true"
 			hint="Name of the cache strategy to get." />
-		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.cacheStrategyName) />
+		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.name) />
 	</cffunction>
 	
 	<!---
