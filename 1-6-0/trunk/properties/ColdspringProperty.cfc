@@ -634,10 +634,9 @@ application.serviceFactory_account variable.
 		<cfset var autowireCfc = "" />
 		<cfset var i = "" />
 		
-		<!--- Add the opening cfcomponent tag --->
-		<cfset cfcData.append('<cfcomponent>') />
-		
-		<cfset cfcData.append('<cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>') />
+		<!--- Add the opening cfcomponent tag and _methodInject method --->		
+		<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
+		<cfset cfcData.append('<cfcomponent><cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>') />
 				
 		<!--- Create the getter/setter methods for each beanName --->
 		<cfloop from="1" to="#ArrayLen(arguments.autowireBeanNames)#" index="i">
@@ -653,7 +652,7 @@ application.serviceFactory_account variable.
 		<cfset cfcData.append('</cfcomponent>') />
 		
 		<!--- Create a name for the CFC (Hash() is faster than UUID) --->
-		<cfset cfcName = Hash(cfcData.toString()) />
+		<cfset cfcName = Hash(getTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
 		
 		<!--- Write the cfc data to a temp file --->
 		<cffile action="write" output="#cfcData.toString()#" file="#cfcDirectory##cfcName#.cfc" />
