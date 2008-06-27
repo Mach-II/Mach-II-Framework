@@ -24,9 +24,17 @@ Updated version: 1.6.0
 
 Notes:
 You must use the 'local' prefix for all variables created in this template 
-since this display template is rendered inside a *non-thread safe* CFC.
+since this display template is rendered inside a *non-thread safe* CFC
+unlike using views in ViewContext.
 
-Not using the 'local' prefix can cause errors due to threading.
+*** WARNING ***
+Not using the 'local' prefix will cause concurency errors due 
+to multiple threading.
+*** WARNING ***
+
+If you are creating a custom output template and using custom CSS, create a
+reference to your CSS in the local.style variable and the MachIILogger will
+automatically put your CSS in the head section via <cfhtmlhead />
 --->
 </cfsilent>
 <cfoutput>
@@ -88,7 +96,6 @@ Not using the 'local' prefix can cause errors due to threading.
 -->
 </style>
 </cfsavecontent>
-<cfhtmlhead text="#local.style#" />
 <div id="MachIIRequestLogDisplay">
 
 	<h3>Mach-II Request Log</h3>

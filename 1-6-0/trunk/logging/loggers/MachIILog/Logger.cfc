@@ -150,11 +150,15 @@ See that file header for configuration of filter criteria.
 			
 			<cfset count = FindNoCase("</body>", buffer) />
 			
-			<cfif count>
+			<cfif NOT count>
 				<cfset buffer = Insert(loggerOutput, buffer, count - 1) />
 				<cfset out.clearBuffer() />
+				<!--- Set this to the head only after the buffer has been cleared
+					otherwise the head elements will be duplicated in certain situations --->
+				<cfhtmlhead text="#local.style#" />
 				<cfoutput>#buffer#</cfoutput>
 			<cfelse>
+				<cfhtmlhead text="#local.style#" />
 				<cfoutput>#loggerOutput#</cfoutput>
 			</cfif>
 			
