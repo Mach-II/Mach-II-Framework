@@ -134,7 +134,7 @@ See that file header for configuration of filter criteria.
 		<cfset var out = getPageContext().getOut() />
 		<cfset var buffer = out.getString() />
 		<cfset var count = 0 />
-		<cfset var loggerOutput = "" />
+		<cfset var output = "" />
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()
@@ -144,23 +144,21 @@ See that file header for configuration of filter criteria.
 
 			<cfset data = scope[getLoggingPath()].data />
 			
-			<cfsavecontent variable="loggerOutput">
+			<cfsavecontent variable="output">
 				<cfinclude template="#getDisplayOutputTemplateFile()#" />
 			</cfsavecontent>
 			
 			<cfset count = FindNoCase("</body>", buffer) />
 			
 			<cfif count>
-				<cfset buffer = Insert(loggerOutput, buffer, count - 1) />
+				<cfset output = Insert(output, buffer, count - 1) />
 				<cfset out.clearBuffer() />
-				<!--- Set this to the head only after the buffer has been cleared
-					otherwise the head elements will be duplicated in certain situations --->
-				<cfhtmlhead text="#local.style#" />
-				<cfoutput>#buffer#</cfoutput>
-			<cfelse>
-				<cfhtmlhead text="#local.style#" />
-				<cfoutput>#loggerOutput#</cfoutput>
 			</cfif>
+
+			<!--- Set this to the head only after the buffer has been cleared
+				otherwise the head elements will be duplicated in certain situations --->
+			<cfhtmlhead text="#local.style#" />
+			<cfoutput>#output#</cfoutput>
 			
 		</cfif>
 	</cffunction>
@@ -173,7 +171,7 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset arguments.data["machiilogger"] = scope[getLoggingPath()] />
+			<cfset arguments.data[getLoggerId()] = scope[getLoggingPath()] />
 		</cfif>
 	</cffunction>
 
@@ -185,7 +183,7 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data["machiilogger"].data, scope[getLoggingPath()].data) />
+			<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
 		</cfif>
 	</cffunction>
 	

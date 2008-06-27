@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.loggerType = "undefined" />
+	<cfset variables.loggerId = "" />
 	<cfset variables.onRequestEndAvailable = false />
 	<cfset variables.prePostRedirectAvailable = false />
 	<cfset variables.logFactory = "" />
@@ -43,9 +44,11 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="AbstractLogger" output="false"
 		hint="Initializes the logger. Do not override.">
+		<cfargument name="loggerId" type="string" required="true" />
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
 		<cfargument name="parameters" type="struct" required="true" />
 		
+		<cfset setLoggerId(arguments.loggerId) />
 		<cfset setLogFactory(arguments.logFactory) />
 		<cfset setParameters(arguments.parameters) />
 		
@@ -136,6 +139,16 @@ Notes:
 	<cffunction name="getLoggerType" access="public" returntype="string" output="false"
 		hint="Returns the type of the logger. Required for Dashboard integration.">
 		<cfreturn variables.loggerType />
+	</cffunction>
+
+	<cffunction name="setLoggerId" access="private" returntype="void" output="false"
+		hint="Sets the id of the logger.">
+		<cfargument name="loggerId" type="string" required="true" />
+		<cfset variables.loggerId = arguments.loggerId />
+	</cffunction>
+	<cffunction name="getLoggerId" access="public" returntype="string" output="false"
+		hint="Returns the id of the logger. Used for preRedirect/postRedirect id.">
+		<cfreturn variables.loggerId />
 	</cffunction>
 	
 	<cffunction name="setLogFactory" access="private" returntype="void" output="false"
