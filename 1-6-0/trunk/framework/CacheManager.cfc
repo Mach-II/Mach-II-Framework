@@ -98,7 +98,7 @@ Notes:
 			alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
-			<cfset command = createCommand(nestedCommandNodes[i]) />
+			<cfset command = createCommand(nestedCommandNodes[i], arguments.parentHandlerName, arguments.parentHandlerType) />
 			<cfset cacheHandler.addCommand(command) />
 		</cfloop>
 		
@@ -106,6 +106,23 @@ Notes:
 		<cfset addCacheHandler(cacheHandler) />
 		
 		<cfreturn cacheHandler.getHandlerId() />
+	</cffunction>
+	
+	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
+		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		
+		<!--- If we see a event-mapping, announce, or redirect commands an error should be thrown 
+			since those are not replayed when the event is cached. --->
+		<cfif arguments.commandNode.xmlName EQ "announce" OR arguments.commandNode.xmlName EQ "event-mapping"
+			OR arguments.commandNode.xmlName EQ "redirect">
+			<cfthrow type="MachII.framework.InvalidNestedCommand"
+					message="The #arguments.commandNode.xmlName# command in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' is not valid inside a cache command."
+					detail="The commands announce, event-mapping and redirect are now allowed inside a cache command since they cannot be replayed." />
+		</cfif>
+		
+		<cfreturn super.createCommand(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
