@@ -150,7 +150,7 @@ See that file header for configuration of filter criteria.
 			
 			<cfset count = FindNoCase("</body>", buffer) />
 			
-			<cfif NOT count>
+			<cfif count>
 				<cfset buffer = Insert(loggerOutput, buffer, count - 1) />
 				<cfset out.clearBuffer() />
 				<!--- Set this to the head only after the buffer has been cleared
