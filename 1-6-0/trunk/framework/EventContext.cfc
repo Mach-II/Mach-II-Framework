@@ -361,8 +361,8 @@ Notes:
 			
 		<cfset var log = getLog() />
 		
-		<cfif log.isWarnEnabled()>
-			<cfset log.warn("Event queue has been cleared.") />
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Event queue has been cleared.") />
 		</cfif>
 		
 		<cfset getEventQueue().clear() />

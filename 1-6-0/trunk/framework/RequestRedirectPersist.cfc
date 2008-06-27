@@ -97,10 +97,6 @@ machinery.
 			
 			<!--- Get the data and cleanup --->
 			<cfif StructKeyExists(dataStorage.data, persistId)>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.") />
-				</cfif>
-				
 				<cftry>
 					<!--- Get the data and delete it from the dataStorage --->
 					<cfset persistedData = dataStorage.data[persistId]>
@@ -111,6 +107,15 @@ machinery.
 						<!--- Ingore this error --->
 					</cfcatch>
 				</cftry>
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.") />
+					<cfif StructKeyExists(persistedData, "eventArgs")>
+						<cfset log.debug("Setting redirect persist data with key names of '#StructKeyList(persistedData.eventArgs)#'.") />
+					<cfelse>
+						<cfset log.debug("Found no redirect persist data.") />
+					</cfif>
+				</cfif>
 			</cfif>
 		</cfif>
 		
