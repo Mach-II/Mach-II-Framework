@@ -128,10 +128,11 @@ will bind to root parameter values.
 		hint="Configures the default logger (e.g. MachII.logging.loggers.MachIILog.Logger).">
 		
 		<cfset var logger = "" />
+		<cfset var loggerId = "MachII" & "_" & getAppManager().getModuleName() />
 		<cfset var parameters = StructNew() />
 		
 		<!--- Create, init and configure the logger --->
-		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(getAppManager().getLogFactory(), parameters) />
+		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(loggerId, getAppManager().getLogFactory(), parameters) />
 
 		<!--- Add callback to the RequestManager to the onRequestEnd method --->
 		<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
@@ -146,19 +147,20 @@ will bind to root parameter values.
 	
 	<cffunction name="configureLogger" access="private" returntype="void" output="false"
 		hint="Configures an logger.">
-		<cfargument name="name" type="string" required="true"
-			hint="Name of the logger" />
+		<cfargument name="loggerName" type="string" required="true"
+			hint="Name of the logger." />
 		<cfargument name="parameters" type="struct" required="true"
-			hint="Parameters for thislogger.">
+			hint="Parameters for this logger.">
 		
 		<cfset var type = "" />
 		<cfset var logger = "" />
+		<cfset var loggerId = arguments.loggerName & "_" & getAppManager().getModuleName() />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
 			<cfthrow type="MachII.properties.LoggingProperty"
-				message="You must specify a 'type' for log adapter named '#arguments.name#'." />
+				message="You must specify a 'type' for log adapter named '#arguments.loggerName#'." />
 		</cfif>
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
@@ -168,7 +170,7 @@ will bind to root parameter values.
 		
 		<!--- Create, init and configure the logger --->
 		<cftry>
-			<cfset logger = CreateObject("component", arguments.parameters.type).init(getAppManager().getLogFactory(), arguments.parameters) />
+			<cfset logger = CreateObject("component", arguments.parameters.type).init(loggerId, getAppManager().getLogFactory(), arguments.parameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName")>
@@ -193,7 +195,7 @@ will bind to root parameter values.
 		</cfif>
 		
 		<!--- Add the logger --->
-		<cfset addLogger(arguments.name, logger) />
+		<cfset addLogger(arguments.loggerName, logger) />
 	</cffunction>
 	
 	<!---
