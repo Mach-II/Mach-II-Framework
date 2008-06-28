@@ -103,9 +103,6 @@ Notes:
 			</cfif>
 		</cfif>
 		
-		<!--- TODO: need to implement criteria for cache clear where you can map an event arg like fantasyteam_id to the key
-			in the cache like id. --->
-		
 		<cfif clearCache>
 			<cfif isAliasDefined()>
 				<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />

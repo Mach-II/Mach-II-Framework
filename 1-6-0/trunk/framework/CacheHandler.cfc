@@ -147,15 +147,22 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default="" />
 
-		<cfset var key = getKeyFromCriteria(arguments.event, arguments.criteria) />
+		<cfset var key = "" />
 		
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
+		<cfif criteria neq "">
+			<cfset key = getKeyFromCriteria(arguments.event, arguments.criteria) />
 		</cfif>
 		
-		<cfif Len(key)>
+		<!--- If we don't get any criteria passed we want to clear the whole cache --->
+		<cfif len(key)>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
+			</cfif>
 			<cfset getCacheStrategy().remove(key) />
 		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Cache-handler flushing data from cache since no criteria was defined.") />
+			</cfif>
 			<cfset getCacheStrategy().flush() />
 		</cfif>
 	</cffunction>
@@ -195,7 +202,11 @@ Notes:
 			<cfset key = key & "&alias=" & getAlias() />
 		</cfif>
 		
-		<cfif arguments.criteria eq "">
+		<!--- __M2NULL is passed as the criteria if there is no criteria specified when clearning the cache. Otherwise
+			the citeria from the cache command will be used. --->
+		<cfif arguments.criteria eq "__M2NULL">
+			<cfset criteriaToUse =  "" />
+		<cfelseif arguments.criteria eq "">
 			<cfset criteriaToUse = getCriteria() />
 		<cfelse>
 			<cfset criteriaToUse = arguments.criteria />
