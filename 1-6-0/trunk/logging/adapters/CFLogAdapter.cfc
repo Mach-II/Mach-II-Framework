@@ -204,7 +204,7 @@ inspiration for this component.
 		hint="Checks if the passed log level is enabled.">
 		<cfargument name="logLevel" type="numeric" required="true"
 			hint="Log levels are numerically ordered for easier comparison." />
-		<cfif getLoggingEnabled()>
+		<cfif getLoggingEnabled() AND ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly())>
 			<cfreturn arguments.logLevel GTE getLevel() />
 		<cfelse>
 			<cfreturn false />
@@ -222,8 +222,7 @@ inspiration for this component.
 		<cfset var text = "[" & arguments.channel & "] " />
 		
 		<!--- Use the filter if defined, otherwise continue --->
-		<cfif ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly()) 
-			AND NOT isFilterDefined() OR getFilter().decide(arguments)>
+		<cfif NOT isFilterDefined() OR getFilter().decide(arguments)>
 			<!--- Add downgrade notice if log level is Trace, Debug or Info since cflog 
 				does not have these levels and are logged on the "Information" level--->
 			<cfif arguments.logLevel EQ 1>
