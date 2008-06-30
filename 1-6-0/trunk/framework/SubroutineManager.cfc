@@ -147,7 +147,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getSubroutineHandler" access="public" returntype="MachII.framework.SubroutineHandler"
-		hint="Returns the SubroutineHandler for the named Subroutine.">
+		hint="Returns the SubroutineHandler for the named Subroutine. Checks parent.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
 		
@@ -169,7 +169,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="isSubroutineDefined" access="public" returntype="boolean" output="false"
-		hint="Returns true if a SubroutineHandler for the named Subroutine is defined; otherwise false.">
+		hint="Checks if a subroutine is defined. Does not check parent.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
 		<cfreturn StructKeyExists(variables.handlers, arguments.subroutineName) />
