@@ -212,10 +212,18 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getCacheHandler" access="public" returntype="MachII.framework.CacheHandler" output="false"
-		hint="Gets a cache handler by handlerId.">
+		hint="Gets a cache handler by handlerId. Checks parent.">
 		<cfargument name="handlerId" type="string" required="true"
 			hint="Handler id of the cache handler you want to get." />
-		<cfreturn variables.handlers[arguments.handlerId] />
+
+		<cfif isCacheHandlerDefined(arguments.handlerId)>
+			<cfreturn variables.handlers[arguments.handlerId] />
+		<cfelseif IsObject(getParent()) AND getParent().isCacheHandlerDefined(arguments.handlerId)>
+			<cfreturn getParent().getCacheHandler(arguments.handlerId) />
+		<cfelse>
+			<cfthrow type="MachII.framework.CacheHandlerNotDefined" 
+				message="CacheHandler for cache '#arguments.handlerId#' is not defined." />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="getCacheHandlers" access="public" returntype="struct" output="false"
@@ -224,7 +232,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="removeCacheHandler" access="public" returntype="void" output="false"
-		hint="Removes a cache handler.">
+		hint="Removes a cache handler. Does NOT remove from the parent.">
 		<cfargument name="cacheHandler" type="MachII.framework.CacheHandler" required="true"
 			hint="The cache handler you want to remove." />
 
@@ -252,7 +260,7 @@ Notes:
 	</cffunction>
 		
 	<cffunction name="isCacheHandlerDefined" access="public" returntype="boolean" output="false"
-		hint="Checks if a cache handler is defined.">
+		hint="Checks if a cache handler is defined. Does NOT check the parent.">
 		<cfargument name="handlerId" type="string" required="true" 
 			hint="Handler id of the cache handler you want to check." />
 		<cfreturn StructKeyExists(variables.handlers, arguments.handlerId) />
