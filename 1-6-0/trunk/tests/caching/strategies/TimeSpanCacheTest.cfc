@@ -41,8 +41,7 @@ Notes:
 
 		<cfset var parameters = StructNew() />
 
-		<cfset parameters.cacheFor = 1 />
-		<cfset parameters.cacheForUnit = "hours" />
+		<cfset parameters.timespan = "0,1,0,0" />
 		<cfset parameters.scope = "application" />
 
 		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />

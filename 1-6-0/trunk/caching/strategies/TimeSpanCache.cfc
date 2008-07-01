@@ -35,21 +35,10 @@ ScopeKey
 - Optional and by default the cache will be placed in scope._MachIICache.Hash(appKey & moduleName & cacheName)
 - Rarely will this need to be used
 
-CacheFor
-- The numeric length of time that the strategy should cache an element for. Once
-an element exceeds the "cacheFor" length, it will be removed on the next reap().
-An element will be put back into the cache the next time an event-handler requests
-that data.
-- The default setting for "cacheFor" length is "1".
-- Valid numeric value only.
-
-CacheForUnit
-- The unit of time that the strategy should use for cache length.
-- The default setting for "cacheUnit" is "hours".
-- Valid values are "seconds", "minutes", "hours", "days" and "forever".
-- If the value is "forever", any numeric value is required in the "cacheFor"
-attribute, but the value does not affect the length an element will be cached.
-- Forever is until the CFML engine or your application restarted.
+Timespan
+- Takes a string formatted like ColdFusion's createTimeSpan() function. The list is days, hours, minutes, seconds.
+- Can also take "forever" for a non-expiring cache.
+- The default is to cache for 1 hour.
 
 CleanupIntervalInMinutes
 - The interval of time in minutes in which to run the reap() method. Reap will
@@ -73,8 +62,7 @@ via reap() which is run every 3 minutes.
                   <struct>
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
-                        <key name="cacheFor" value="1" />
-                        <key name="cacheForUnit" value="hours" />
+                        <key name="timespan" value="0,1,0,0"/><!-- Cache for 1 hour -->
 						<key name="cleanupIntervalInMinutes" value="3" />
                   </struct>
             </parameter>
@@ -90,8 +78,7 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.cacheFor = 1 />
-	<cfset variables.cacheForUnit = "hours" />
+	<cfset variables.timespan = "" />
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = "" />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
@@ -107,22 +94,14 @@ via reap() which is run every 3 minutes.
 		hint="Configures the strategy.">
 
 		<!--- Validate and set parameters --->
-		<cfif isParameterDefined("cacheFor")>
-			<cfif NOT isNumeric(getParameter("cacheFor"))>
+		<cfif isParameterDefined("timespan")>
+			<cfif (getParameter("timespan") neq "forever" AND listLen(getParameter("timespan")) neq 4)
+				OR listLen(getParameter("timespan")) neq 4>
 				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid CacheFor of '#getParameter("cacheFor")#'."
-					detail="CacheFor must be numeric." />
+					message="Invalid timespan of '#getParameter("timespan")#'."
+					detail="Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds)." />
 			<cfelse>
-				<cfset setCacheFor(getParameter("cacheFor")) />
-			</cfif>
-		</cfif>
-		<cfif isParameterDefined("cacheForUnit")>
-			<cfif NOT ListFindNoCase("seconds,minutes,hours,days,forever", getParameter("cacheForUnit"))>
-				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid CacheForUnit of '#getParameter("cacheForUnit")#'."
-					detail="Use 'seconds, 'minutes', 'hours', 'days' or 'forever'." />
-			<cfelse>
-				<cfset setCacheForUnit(getParameter("cacheForUnit")) />
+				<cfset setTimespan(getParameter("timespan")) />
 			</cfif>
 		</cfif>
 		<cfif isParameterDefined("scope")>
@@ -359,19 +338,23 @@ via reap() which is run every 3 minutes.
 		hint="Computes a cache until timestamp for this cache block.">
 		
 		<cfset var timestamp = Now() />
-		<cfset var cacheFor = getCacheFor() />
-		<cfset var unit = getCacheForUnit() />
+		<cfset var timespan = getTimespan() />
 		
-		<cfif unit EQ "seconds">
-			<cfset timestamp = DateAdd("s", cacheFor, timestamp) />
-		<cfelseif unit EQ "minutes">
-			<cfset timestamp = DateAdd("n", cacheFor, timestamp) />
-		<cfelseif unit EQ "hours">
-			<cfset timestamp = DateAdd("h", cacheFor, timestamp) />
-		<cfelseif unit EQ "days">
-			<cfset timestamp = DateAdd("d", cacheFor, timestamp) />
-		<cfelseif unit EQ "forever">
+		<cfif timespan EQ "forever">
 			<cfset timestamp = DateAdd("yyyy", 100, timestamp) />
+		<cfelse>
+			<cfif listGetAt(timespan, 4) gt 0>
+				<cfset timestamp = DateAdd("s", listGetAt(timespan, 4), timestamp) />
+			</cfif>
+			<cfif listGetAt(timespan, 3) gt 0>
+				<cfset timestamp = DateAdd("n", listGetAt(timespan, 3), timestamp) />
+			</cfif>
+			<cfif listGetAt(timespan, 2) gt 0>
+				<cfset timestamp = DateAdd("h", listGetAt(timespan, 2), timestamp) />
+			</cfif>
+			<cfif listGetAt(timespan, 1) gt 0>
+				<cfset timestamp = DateAdd("d", listGetAt(timespan, 1), timestamp) />
+			</cfif>
 		</cfif>
 		
 		<cfreturn createTimestamp(timestamp) />
@@ -395,12 +378,12 @@ via reap() which is run every 3 minutes.
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setCacheFor" access="private" returntype="void" output="false">
-		<cfargument name="cacheFor" type="numeric" required="true" />
-		<cfset variables.cacheFor = arguments.cacheFor />
+	<cffunction name="setTimespan" access="private" returntype="void" output="false">
+		<cfargument name="timespan" type="string" required="true" />
+		<cfset variables.timespan = arguments.timespan />
 	</cffunction>
-	<cffunction name="getCacheFor" access="public" returntype="numeric" output="false">
-		<cfreturn variables.cacheFor />
+	<cffunction name="getTimespan" access="public" returntype="string" output="false">
+		<cfreturn variables.timespan />
 	</cffunction>
 
 	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
@@ -417,14 +400,6 @@ via reap() which is run every 3 minutes.
 		<cfset variables.currentDateTime = arguments.currentDateTime />
 	</cffunction>
 
-	<cffunction name="setCacheForUnit" access="private" returntype="void" output="false">
-		<cfargument name="cacheForUnit" type="string" required="true" />
-		<cfset variables.cacheForUnit = arguments.cacheForUnit />
-	</cffunction>
-	<cffunction name="getCacheForUnit" access="public" returntype="string" output="false">
-		<cfreturn variables.cacheForUnit />
-	</cffunction>
-	
 	<cffunction name="setScope" access="private" returntype="void" output="false">
 		<cfargument name="scope" type="string" required="true" />		
 		<cfset variables.scope = arguments.scope />
