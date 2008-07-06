@@ -280,6 +280,8 @@ Notes:
 			<cfloop collection="#handlerIds#" item="key">
 				<cfset cacheHandlers[key] = getCacheHandler(key) />
 			</cfloop>
+		<cfelseif isObject(getParent())>
+			<cfset cacheHandlers = getParent().getCacheHandlersByAlias(arguments.alias)>
 		</cfif>
 		
 		<cfreturn cacheHandlers />
@@ -299,8 +301,10 @@ Notes:
 			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />
 			
 			<cfloop collection="#cacheHandlers#" item="key">
-				<cfset getCacheHandler(key).clearCache(event, criteria) />
+				<cfset getCacheHandler(key).clearCache(arguments.event, arguments.criteria) />
 			</cfloop>
+		<cfelseif isObject(getParent())>
+			<cfset getParent().clearCachesByAlias(arguments.alias, arguments.event, arguments.criteria) />
 		</cfif>
 	</cffunction>
 	
@@ -322,6 +326,8 @@ Notes:
 		<cfif StructKeyExists(variables.handlersByName, keyHashed)>
 			<cfset handlerId = variables.handlersByName[keyHashed] />
 			<cfset getCacheHandler(handlerId).clearCache(arguments.event) />
+		<cfelseif isObject(getParent())>
+			<cfset getParent().clearCacheByName(arguments.cacheName, arguments.event) />
 		</cfif>
 	</cffunction>
 	
