@@ -78,7 +78,7 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.timespan = "" />
+	<cfset variables.timespan = "0,1,0,0" /><!--- Default to 1 hour --->
 	<cfset variables.scope = "application" />
 	<cfset variables.scopeKey = "" />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
