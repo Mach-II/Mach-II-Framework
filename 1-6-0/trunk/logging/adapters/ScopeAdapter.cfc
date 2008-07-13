@@ -110,11 +110,11 @@ Configuration Example:
 		hint="Logs a message with debug log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		
 		<cfif isDebugEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_DEBUG, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_DEBUG, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_DEBUG, arguments.message) />
 			</cfif>
@@ -125,11 +125,11 @@ Configuration Example:
 		hint="Logs a message with error log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		
 		<cfif isErrorEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_ERROR, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_ERROR, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_ERROR, arguments.message) />
 			</cfif>
@@ -140,11 +140,11 @@ Configuration Example:
 		hint="Logs a message with fatal log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		
 		<cfif isFatalEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message) />
 			</cfif>
@@ -155,11 +155,11 @@ Configuration Example:
 		hint="Logs a message with info log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfif isInfoEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message) />
 			</cfif>
@@ -170,11 +170,11 @@ Configuration Example:
 		hint="Logs a message with trace log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfif isTraceEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_TRACE, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_TRACE, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_TRACE, arguments.message) />
 			</cfif>
@@ -185,11 +185,11 @@ Configuration Example:
 		hint="Logs a message with warn log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfif isWarnEnabled()>
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_WARN, arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_WARN, arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_WARN, arguments.message) />
 			</cfif>
@@ -245,7 +245,7 @@ Configuration Example:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="logLevel" type="numeric" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		
 		<cfset var entry = StructNew() />
 		<cfset var scope = StructGet(getLoggingScope()) />
@@ -263,10 +263,11 @@ Configuration Example:
 			<cfset entry.logLevelName = translateLevelToName(arguments.logLevel) />
 			<cfset entry.message = arguments.message />
 			<cfset entry.currentTick = getTickCount() />
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset entry.caughtException = arguments.caughtException />
+			
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset entry.additionalInformation = arguments.additionalInformation />
 			<cfelse>
-				<cfset entry.caughtException = "" />
+				<cfset entry.additionalInformation = "" />
 			</cfif>
 			
 			<cfset ArrayAppend(scope[getLoggingPath()].data, entry) />

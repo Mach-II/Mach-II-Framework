@@ -22,8 +22,7 @@ Created version: 1.6.0
 Updated version: 1.6.0
 
 Notes:
-Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
-it allows you attach multiple loggers at once.
+Mach-II Logging is heavily based on Apache Commons Logging interface.
 --->
 <cfcomponent
 	displayname="Log"
@@ -56,13 +55,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="debug" access="public" returntype="void" output="false"
 		hint="Logs a message with debug log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message) />
 			</cfif>
@@ -72,13 +71,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="error" access="public" returntype="void" output="false"
 		hint="Logs a message with error log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].error(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].error(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].error(getChannel(), arguments.message) />
 			</cfif>
@@ -88,13 +87,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="fatal" access="public" returntype="void" output="false"
 		hint="Logs a message with fatal log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message) />
 			</cfif>
@@ -104,13 +103,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="info" access="public" returntype="void" output="false"
 		hint="Logs a message with info log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].info(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].info(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].info(getChannel(), arguments.message) />
 			</cfif>
@@ -120,13 +119,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="trace" access="public" returntype="void" output="false"
 		hint="Logs a message with trace log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message) />
 			</cfif>
@@ -136,13 +135,13 @@ it allows you attach multiple loggers at once.
 	<cffunction name="warn" access="public" returntype="void" output="false"
 		hint="Logs a message with warn log level.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "caughtException")>
-				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message, arguments.caughtException) />
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message, arguments.additionalInformation) />
 			<cfelse>
 				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message) />
 			</cfif>

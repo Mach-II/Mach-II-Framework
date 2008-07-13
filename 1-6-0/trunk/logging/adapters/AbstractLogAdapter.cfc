@@ -59,7 +59,7 @@ Notes:
 		hint="Logs a message with debug log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
@@ -67,7 +67,7 @@ Notes:
 		hint="Logs a message with error log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
@@ -75,7 +75,7 @@ Notes:
 		hint="Logs a message with fatal log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 
@@ -83,7 +83,7 @@ Notes:
 		hint="Logs a message with info log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 
@@ -91,7 +91,7 @@ Notes:
 		hint="Logs a message with trace log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
@@ -99,7 +99,7 @@ Notes:
 		hint="Logs a message with warn log level.">
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="caughtException" type="any" required="false" />
+		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	

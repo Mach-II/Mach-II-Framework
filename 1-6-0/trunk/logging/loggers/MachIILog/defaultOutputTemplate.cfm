@@ -114,9 +114,9 @@ automatically put your CSS in the head section via <cfhtmlhead />
 				<td><p>#data[local.i].message#</p></td>
 				<td><p class="right"><cfif local.i NEQ ArrayLen(data)>#data[local.i + 1].currentTick - data[local.i].currentTick#<cfelse>0</cfif></p></td>
 			</tr>
-			<cfif NOT IsSimpleValue(data[local.i].caughtException)>
+			<cfif NOT IsSimpleValue(data[local.i].additionalInformation)>
 			<tr>
-				<td colspan="4"><cfdump var="#data[local.i].caughtException#" expand="false" /></td>
+				<td colspan="4"><cfdump var="#data[local.i].additionalInformation#" expand="false" /></td>
 			</tr>
 			</cfif>
 		</cfloop>

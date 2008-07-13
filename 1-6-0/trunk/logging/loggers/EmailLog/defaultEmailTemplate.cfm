@@ -66,9 +66,9 @@ Not using the 'local' prefix can cause errors due to threading.
 		<td><p>#data[local.i].message#</p></td>
 		<td><p><cfif local.i EQ 1>0<cfelse>#data[local.i].currentTick - data[local.i - 1].currentTick#</cfif></p></td>
 	</tr>
-	<cfif NOT IsSimpleValue(data[local.i].caughtException)>
+	<cfif NOT IsSimpleValue(data[local.i].additionalInformation)>
 	<tr>
-		<td colspan="4"><cfdump var="#data[local.i].caughtException#" expand="false" /></td>
+		<td colspan="4"><cfdump var="#data[local.i].additionalInformation#" expand="false" /></td>
 	</tr>
 	</cfif>
 </cfloop>
