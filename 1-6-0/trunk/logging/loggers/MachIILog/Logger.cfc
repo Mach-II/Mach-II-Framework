@@ -132,7 +132,7 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var local = StructNew() />
 		<cfset var out = getPageContext().getOut() />
-		<cfset var buffer = out.getString() />
+		<cfset var buffer = "" />
 		<cfset var count = 0 />
 		<cfset var output = "" />
 		
@@ -148,18 +148,24 @@ See that file header for configuration of filter criteria.
 				<cfinclude template="#getDisplayOutputTemplateFile()#" />
 			</cfsavecontent>
 			
+			<!--- Get the buffer which differs on Adobe CF --->
+			<cftry>
+				<cfset buffer = out.getBuffer().toString() />
+				<cfcatch type="any">
+					<!--- Do nothing --->
+				</cfcatch>
+			</cftry>
+
+			<cfhtmlhead text="#local.style#" />
+				
+			<!--- Inserting output before the body tag only works on Adobe CF --->
 			<cfset count = FindNoCase("</body>", buffer) />
-			
 			<cfif count>
 				<cfset output = Insert(output, buffer, count - 1) />
 				<cfset out.clearBuffer() />
 			</cfif>
-
-			<!--- Set this to the head only after the buffer has been cleared
-				otherwise the head elements will be duplicated in certain situations --->
-			<cfhtmlhead text="#local.style#" />
-			<cfoutput>#output#</cfoutput>
 			
+			<cfoutput>#output#</cfoutput>			
 		</cfif>
 	</cffunction>
 	
