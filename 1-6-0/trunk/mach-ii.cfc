@@ -52,8 +52,8 @@ the handleRequest() method in the onRequest() application event.
 	<cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 	<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_1.dtd. --->
 	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_6_0.dtd')#" />	
-	<!--- Set the request timeout for loading of the framework. Defaults to 120 --->
-	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
+	<!--- Set the request timeout for loading of the framework. Defaults to 240 --->
+	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
 
 	<!---
 	APPLICATION SPECIFIC EVENTS
@@ -122,7 +122,7 @@ the handleRequest() method in the onRequest() application event.
 		
 		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
 		<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
-			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
 				<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
 					<cfset loadFramework() />
 				</cfif>
@@ -133,21 +133,24 @@ the handleRequest() method in the onRequest() application event.
 		<cfif MACHII_CONFIG_MODE EQ -1>
 			<!--- Do not reload config. --->
 		<cfelseif MACHII_CONFIG_MODE EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
-			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
+				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadBaseConfig()>
-			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
+				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadModuleConfig()>
-			<cflock name="application_#appKey#_reload" type="exclusive" timeout="120">
+			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
+				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		</cfif>
 
 		<!--- Handle the request --->
-		<cfset application[appKey].appLoader.getAppManager().getRequestHandler().handleRequest() />
+		<cfset 	getAppManager().getRequestHandler().handleRequest() />
 	</cffunction>
 
 	<!---
