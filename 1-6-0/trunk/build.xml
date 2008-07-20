@@ -195,6 +195,7 @@ Notes:
 			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
 			-->
 			<!-- framework -->
+			<testcase name="MachII.tests.framework.EventTest"/>
 			<!-- caching -->
 			<testcase name="MachII.tests.caching.CacheStrategyManagerTest"/>
 			<testcase name="MachII.tests.caching.CacheStatsTest"/>
