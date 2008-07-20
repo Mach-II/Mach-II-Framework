@@ -655,13 +655,23 @@ application.serviceFactory_account variable.
 		<cfset cfcName = Hash(getTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
 		
 		<!--- Write the cfc data to a temp file --->
-		<cffile action="write" output="#cfcData.toString()#" file="#cfcDirectory##cfcName#.cfc" />
+		<cftry>
+			<cffile action="write" 
+				output="#cfcData.toString()#" 
+				file="#cfcDirectory##cfcName#.cfc" />
+			<cfcatch type="all">
+				<cfthrow type="MachII.properties.ColdspringProperty.writePermissions"
+					message="Cannot write temporary CFC for autowiring to '#cfcDirectory#'. Does your CFML engine have write permissions to this directory?"
+					detail="Original message: #cfcatch.message#" />
+			</cfcatch>
+		</cftry>
 		
 		<!--- Instantiate the component --->
 		<cfset autowireCfc = CreateObject("component", cfcName) />
 		
 		<!--- Delete the temp cfc --->
-		<cffile action="delete" file="#cfcDirectory##cfcName#.cfc" />
+		<cffile action="delete" 
+			file="#cfcDirectory##cfcName#.cfc" />
 		
 		<cfreturn autowireCfc />
 	</cffunction>
