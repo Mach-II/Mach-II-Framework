@@ -58,20 +58,21 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var continue = false />
+		<cfset var filter = getFilter() />
 		<cfset var log = getFilter().getLog() />
 		
 		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Filter '#getFilter().getComponentNameForLogging()#' beginning execution.") />
+			<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with runtime paramArgs.", getParamArgs()) />
 		</cfif>
 		
-		<cfinvoke component="#getFilter()#" method="filterEvent" returnVariable="continue">
+		<cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
 			<cfinvokeargument name="event" value="#arguments.event#" />
 			<cfinvokeargument name="eventContext" value="#arguments.eventContext#" />
 			<cfinvokeargument name="paramArgs" value="#getParamArgs()#" />
 		</cfinvoke>
 
 		<cfif NOT continue AND log.isInfoEnabled()>
-			<cfset log.info("Filter '#getFilter().getComponentNameForLogging()# has changed the flow of this event.") />
+			<cfset log.info("Filter '#filter.getComponentNameForLogging()# has changed the flow of this event.") />
 		</cfif>
 		
 		<cfreturn continue />
