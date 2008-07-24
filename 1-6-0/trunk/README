@@ -9,16 +9,16 @@ Version: 1.6.0.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
-If version number and built-on are placeholders, you are using a bleeding
-edge release of the framework.
+If version number and built-on are placeholders (e.g. @xyz@), you are using 
+a bleeding edge release (BER) of the framework.
 ------------------------------------------------
 ___                                
  | ._ _|_ ._ _  _|    _ _|_ o _ ._ 
 _|_| | |_ | (_)(_||_|(_  |_ |(_)| |
 ------------------------------------------------
 Mach-II is a framework for developing object oriented Model-View-Controller 
-web-applications.  The framework focuses on easing software development and 
-maintenance.  Mach-II was the first object-oriented framework for ColdFusion 
+web applications.  The framework focuses on easing software development and 
+maintenance.  Mach-II was the first object-oriented framework for CFML 
 and continues to mature as a strong and viable framework choice for developers.
 
 The framework core is not a stand-alone application.  Do not expect to run the
@@ -49,8 +49,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 
-Documentation and logos are not licensed under the Apache 2.0 documentation:
-Copright 2008 GreatBizTools, LLC All rights reserved.
+Mach-II's documentation and logos are *not* licensed under the Apache 2.0 license:
+Copyright 2008 GreatBizTools, LLC All rights reserved.
 
 ------------------------------------------------
 ___                            
@@ -62,29 +62,26 @@ _|_| |_>  |_(_|||(_| |_ |(_)| |
 2.	Unzip the framework to your web root. 
 
 	a.	For example, on Windows the default web root is [DRIVE]:\Inetpub\wwwroot, 
-		or if you are using ColdFusion's built-in web server, your web root is 
+		or if you are using your CFML server's built-in web server, your web root is 
 		likely [DRIVE]:\CFusionMX\wwwroot.  If you are on a Unix system, your web 
 		root will vary.
 
 	b.	The end result of this step is that you should have the directory MachII 
-		(No hyphen) in your web root.  Inside this directory you will find the core 
+		(no hyphen) in your web root.  Inside this directory you will find the core 
 		framework files.
 
 	c.	If you wish to place the core Mach-II framework files in a location that is 
 		different from your webroot, just create a mapping called "MachII" in the 
-		ColdFusion Administrator that points this mapping to the location where you 
-		placed the framework files.
+		CFML administrator / control panel that points this mapping to the location 
+		where you placed the framework files.
 
-3.	If you use sandbox security on your ColdFusion server, you may have to add the 
-	framework's directory to your sandbox otherwise ColdFusion may throw an java 
-	security exception.
+3.	If you use sandbox security on your CFML server, you may have to add the 
+	framework's directory to your sandbox otherwise your CFML server may throw an 
+	java  security exception.
 
-Just three simple steps and you are done.  The Mach-II framework is just a ColdFusion 
-application, so it will operate and behave just like any other ColdFusion application.
+Just three simple steps and you are done.  The Mach-II framework is just a CFML 
+application, so it will operate and behave just like any other CFML application.
 Please read the Upgrading Note below if you are upgrading your installation of Mach-II.
-
-Mach-II uses absolute pathing for CFCs, so installation of both core framework files 
-(the MachII directory).
 
 If your webroot is "wwwroot", your directory structure should look like this:
 |-+ wwwroot
@@ -98,10 +95,10 @@ If you encounter problems:
 	or that your "MachII" mapping is pointing to the right directory if you are
 	using a mapping.
 
-2.	Clear your template cache if you have caching on and restart your ColdFusion 
-	Application Server service.
+2.	Clear your template cache if you have caching on and restart your CFML server 
+	service.
 
-3.	If your problems persist, please check out the Mach-II for ColdFusion Google Group:
+3.	If your problems persist, please check out the Mach-II for CFML Google Group:
 	http://groups.google.com/group/mach-ii-for-coldfusion
 
 ------------------------------------------------                                       
@@ -109,12 +106,12 @@ If you encounter problems:
 |_||_)(_|| (_|(_||| |(_|  | \|(_) |_(/_
    |   _|             _|     
 ------------------------------------------------
-If you are updating your Mach-II installation from an older version, you must clear 
-your template cache and restart your ColdFusion Application Server after you replace 
-your older version with a newer version.
+If you are updating your Mach-II installation from an older version, you *must* clear 
+your template cache and restart your CFML server after you replace  your older version 
+of Mach-II with a newer version.
 
 If you do not clear your template cache and restart your server, you will receive 
-an error similar such as:
+an exceptions similar to:
 
 - The value returned from function getAppFactory() is not of type MachII.framework.AppFactory.
 - The value returned from function getMessageManager() is not of type MachII.framework.MessageManager.
@@ -129,17 +126,17 @@ an error similar such as:
 * The best way of contacting Team Mach-II or helping the Mach-II project is 
 info@mach-ii.com.
 
-* All defect (bug) reports and enhancment requests shoud be logged as a new ticket
+* All defect (bug) reports and enhancement requests should be logged as a new ticket
 on our Trac installation at http://trac.mach-ii.com.  Please search the tickets for
-duplicate / similar defect reports or enhancmemt requests before submitting a new
+duplicate / similar defect reports or enhancement requests before submitting a new
 ticket.
 
 * The best place to get quick help from other developers is to join our public 
-email listserv/forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
+email list / forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
 
 * Check out http://www.mach-ii.com for Quick Starts, FAQs and additional sample 
 applications and documentation.
 
-* If you wish to submit code for defect fix or feature enhancemtn, your submission
+* If you wish to submit code for defect fix or feature enhancements, your submission
 is governed under the license in which Mach-II is released. For more information, 
 please read the accompanying license.

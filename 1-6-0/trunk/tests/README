@@ -10,6 +10,13 @@ $Id$
 
 * The official unit testing framework of Mach-II is MXUnit.
 * MXUnit is available at http://www.mxunit.org
-* You can use MXUnit's Eclipse based or html test runners to
-	run individual test cases.
-* Or you can use our ANT task 'test' to run the test suite.
+
+HOW TO RUN TESTS
+------------------------------------------------
+MXUnit must be installed on your local development environment.
+
+Test Runners:
+* Use MXUnit's Eclipse based plugin
+* Use MXUnit's html test runner to run individual test cases
+* Use our ANT task 'test' in build.xml to run the test suite
+	You must have the MXUnit jars in your ANT class path  

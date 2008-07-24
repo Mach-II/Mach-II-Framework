@@ -9,8 +9,8 @@ Version: 1.6.0.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
-If version number and built-on are placeholders, you are using a bleeding
-edge release of the framework.
+If version number and built-on are placeholders (e.g. @xyz@), you are 
+using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 
 Copyright 2008 GreatBizTools, LLC

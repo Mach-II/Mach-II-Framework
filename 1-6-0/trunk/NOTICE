@@ -1,11 +1,11 @@
 Copyright: 2003-2008 GreatBizTools, LLC All rights reserved.
 
-On Going Contributors:
+On Going Committers:
 - Peter J. Farrell (peter@mach-ii.com)
 - Matthew Woodward (matt@mach-ii.com)
 - Kurt Wiersma (kurt@mach-ii.com)
 - And all additional contributors that have work submitted 
-by contributors on their behalf
+by committers on their behalf
 
 Originally Created By:
 - Benjamin Edwards (ben@ben-edwards.com)
@@ -34,7 +34,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 
-Documentation and logos are not licensed under the Apache 2.0 documentation:
+Mach-II's documentation and logos are *not* licensed under the Apache 2.0 license:
 Copright 2008 GreatBizTools, LLC All rights reserved.
 
 $Id$

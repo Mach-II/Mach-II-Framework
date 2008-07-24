@@ -37,7 +37,7 @@ the handleRequest() method in the onRequest() application event.
 <cfcomponent
 	displayname="mach-ii"
 	output="false"
-	hint="Base component for Application.cfc integration">
+	hint="Bootstrapper for Application.cfc integration">
 	
 	<!---
 	PROPERTIES - DEFAULTS
