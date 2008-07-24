@@ -95,8 +95,7 @@ via reap() which is run every 3 minutes.
 
 		<!--- Validate and set parameters --->
 		<cfif isParameterDefined("timespan")>
-			<cfif (getParameter("timespan") neq "forever" AND listLen(getParameter("timespan")) neq 4)
-				OR listLen(getParameter("timespan")) neq 4>
+			<cfif getParameter("timespan") NEQ "forever" AND ListLen(getParameter("timespan")) NEQ 4>
 				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
 					message="Invalid timespan of '#getParameter("timespan")#'."
 					detail="Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds)." />
@@ -127,7 +126,8 @@ via reap() which is run every 3 minutes.
 			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		<cfif isParameterDefined("cleanupIntervalInMinutes")>
-			<cfif NOT isNumeric(getParameter("cleanupIntervalInMinutes")) OR getParameter("cleanupIntervalInMinutes") LTE 0>
+			<cfif NOT isNumeric(getParameter("cleanupIntervalInMinutes")) 
+				OR getParameter("cleanupIntervalInMinutes") LTE 0>
 				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
 					message="Invalid CleanupIntervalInMinutes of '#getParameter("cleanupIntervalInMinutes")#'."
 					detail="CleanupIntervalInMinutes must be numeric and greater than 0." />
@@ -310,7 +310,12 @@ via reap() which is run every 3 minutes.
 		
 			<cfset threadingAdapter = getThreadingAdapter() />
 			
-			<cflock name="_MachIITimespanCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
+			<!--- Don't wait because an exclusive lock that has already been obtained
+				indicates that a clean is in progress and we should not wait for the
+				second check in the double-lock-check routine
+				Setting the timeout to 0 indicates to wait indefinitely --->
+			<cflock name="_MachIITimespanCacheCleanup_#getScopeKey()#" type="exclusive" 
+				timeout=".05" throwontimeout="false">
 				<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
 					<cfif threadingAdapter.allowThreading()>
 						<cfset threadingAdapter.run(this, "reap") />
