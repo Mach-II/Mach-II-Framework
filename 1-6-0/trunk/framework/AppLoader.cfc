@@ -71,6 +71,7 @@ Notes:
 		<cfset setOverrideXml(arguments.overrideXml) />
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setAppKey(arguments.appkey) />
+		
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
 		
@@ -136,6 +137,7 @@ Notes:
 				getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset getAppManager().setAppLoader(this) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
+		<cfset setLog(getAppManager().getLogFactory()) />
 	</cffunction>
 	
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false"
@@ -264,6 +266,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getAppKey" access="public" type="string" output="false">
 		<cfreturn variables.appkey />
+	</cffunction>
+	
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

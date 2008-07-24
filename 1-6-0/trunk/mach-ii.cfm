@@ -90,5 +90,8 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 	</cflock>
 </cfif>
 
-<!--- Handle the Request. --->
+<!--- Log a message that the mach-ii.cfm bootstrapper is deprecated --->
+<cfset application[MACHII_APP_KEY].appLoader.getLog().warn("The mach-ii.cfm bootstrapper is deprecated. Please use the mach-ii.cfc bootstrapper for Application.cfc.") />
+
+<!--- Handle the Request --->
 <cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() />
