@@ -198,8 +198,13 @@ in the application scope.
 		<cfset var key = "" />
 		
 		<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
-		
-			<cflock name="_MachIILRUCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
+	
+			<!--- Don't wait because an exclusive lock that has already been obtained
+				indicates that a reap is in progress and we should not wait for the
+				second check in the double-lock-check routine
+				Setting the timeout to 0 indicates to wait indefinitely --->
+			<cflock name="_MachIILRUCacheCleanup_#getScopeKey()#" type="exclusive" 
+				timeout=".05" throwontimeout="false">
 				
 				<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
 					<!--- Get array of timestamps and sorted by oldest (least) timestamp first --->
