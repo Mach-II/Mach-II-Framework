@@ -244,7 +244,8 @@ via reap() which is run every 3 minutes.
 		<cfset var key = "" />
 		<cfset var i = "" />
 		
-		<cflock name="_MachIITimeSpanCacheCleanup_#getScopeKey()#" type="exclusive" timeout="5" throwontimeout="false">
+		<cflock name="_MachIITimeSpanCacheCleanup_#getScopeKey()#" type="exclusive" 
+			timeout=".05" throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
 			<cfset variables.lastCleanup = createTimestamp() />
