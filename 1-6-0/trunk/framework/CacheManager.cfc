@@ -81,6 +81,7 @@ Notes:
 		<cfset var alias = "" />
 		<cfset var criteria = "" />
 		<cfset var cacheName = "" />
+		<cfset var id = "" />
 		<cfset var i = 0 />
 		
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "alias")>
@@ -92,10 +93,13 @@ Notes:
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "name")>
 			<cfset cacheName = arguments.configXML.xmlAttributes["name"] />
 		</cfif>
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "id")>
+			<cfset id = arguments.configXML.xmlAttributes["id"] />
+		</cfif>
 		
 		<!--- Build the cache handler --->
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
-			alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
+			id, alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
 			<cfset command = createCommand(nestedCommandNodes[i], arguments.parentHandlerName, arguments.parentHandlerType) />
@@ -196,12 +200,12 @@ Notes:
 		<!--- Add the handler --->
 		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 		
-		<!--- Register the handler by handler type --->
-		<cfif handlerType EQ "event">
+		<!--- TODO: see if this is needed: Register the handler by handler type  --->
+		<!--- <cfif handlerType EQ "event">
 			<cfset variables.handlersByEventName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
 		<cfelseif handlerType EQ "subroutine">
 			<cfset variables.handlersBySubroutineName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
-		</cfif>
+		</cfif>  --->
 		
 		<cfset variables.handlersByName[getKeyHash(cacheName)] = handlerId />
 		
@@ -281,7 +285,7 @@ Notes:
 				<cfset cacheHandlers[key] = getCacheHandler(key) />
 			</cfloop>
 		<cfelseif isObject(getParent())>
-			<cfset cacheHandlers = getParent().getCacheHandlersByAlias(arguments.alias)>
+			<cfset cacheHandlers = getParent().getCacheHandlersByAlias(arguments.alias) />
 		</cfif>
 		
 		<cfreturn cacheHandlers />
@@ -301,7 +305,7 @@ Notes:
 			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />
 			
 			<cfloop collection="#cacheHandlers#" item="key">
-				<cfset getCacheHandler(key).clearCache(arguments.event, arguments.criteria) />
+				<cfset getCacheHandler(key).clearCache(arguments.event, arguments.criteria, arguments.alias) />
 			</cfloop>
 		<cfelseif isObject(getParent())>
 			<cfset getParent().clearCachesByAlias(arguments.alias, arguments.event, arguments.criteria) />

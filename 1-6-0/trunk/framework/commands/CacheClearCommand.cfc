@@ -67,6 +67,7 @@ Notes:
 		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
 		<cfset var log = getLog() />
+		<cfset var currentAlias = "" />
 				
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT isConditionDefined()>
@@ -105,7 +106,9 @@ Notes:
 		
 		<cfif clearCache>
 			<cfif isAliasDefined()>
-				<cfset cacheManager.clearCachesByAlias(getAlias(), arguments.event, getCriteria()) />
+				<cfloop list="#getAlias()#" index="currentAlias">
+					<cfset cacheManager.clearCachesByAlias(currentAlias, arguments.event, getCriteria()) />
+				</cfloop>
 			<cfelse>
 				<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />				
 			</cfif>

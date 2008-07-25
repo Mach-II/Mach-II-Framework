@@ -387,7 +387,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 <!ELEMENT cache (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | execute | publish | cache-clear)*>
 <!ATTLIST cache 
+	id CDATA #IMPLIED
 	name CDATA #IMPLIED
+	alias CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 >
 
@@ -400,6 +402,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear
 	name CDATA #REQUIRED
+	alias CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 	condition CDATA #IMPLIED
 >

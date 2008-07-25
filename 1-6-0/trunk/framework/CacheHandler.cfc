@@ -42,17 +42,21 @@ Notes:
 	<cfset variables.cacheOutputBuffer = "" />
 	<cfset variables.log = 0 />
 	<cfset variables.cachingEnabled = true />
+	<cfset variables.aliasKeyLists = structNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="CacheHandler" output="false"
 		hint="Initializes the handler.">
+		<cfargument name="id" type="string" required="false" default="" />
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="cacheName" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		
+		<cfset var currentAlias = "" />
 	
 		<!--- Run setters --->
 		<cfset setAlias(arguments.alias) />
@@ -60,7 +64,15 @@ Notes:
 		<cfset setCriteria(arguments.criteria) />
 		<cfset setParentHandlerName(arguments.parentHandlerName) />
 		<cfset setParentHandlerType(arguments.parentHandlerType) />
-		<cfset setHandlerId(createHandlerId()) />
+		<cfif len(arguments.id)>
+			<cfset setHandlerId(arguments.id) />
+		<cfelse>
+			<cfset setHandlerId(createHandlerId()) />
+		</cfif>
+		
+		<cfloop list="#arguments.alias#" index="currentAlias">
+			<cfset variables.aliasKeyLists[hash(currentAlias)] = "" />
+		</cfloop>
 		
 		<cfreturn this />
 	</cffunction>
@@ -113,6 +125,7 @@ Notes:
 
 				<!--- Cache the data and output --->
 				<cfset getCacheStrategy().put(key, dataToCache) />
+				<cfset addKeyToAlias(key) />
 				
 				<!--- Log messages --->
 				<cfif log.isDebugEnabled()>
@@ -146,19 +159,32 @@ Notes:
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default="" />
+		<cfargument name="alias" type="string" required="false" default="" />
 
 		<cfset var key = "" />
+		<cfset var currentAlias = "" />
+		<cfset var currentKey = "" />
 		
-		<cfif criteria neq "">
+		<cfif arguments.criteria neq "">
 			<cfset key = getKeyFromCriteria(arguments.event, arguments.criteria) />
+		<cfelse>
+			<cfset key = getKey() />
 		</cfif>
 		
 		<!--- If we don't get any criteria passed we want to clear the whole cache --->
-		<cfif len(key)>
+		<cfif arguments.criteria neq "" or arguments.alias neq "">
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler clearing data from cache using key '#key#'.") />
+				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', alias '#arguments.alias#'.") />
 			</cfif>
-			<cfset getCacheStrategy().remove(key) />
+			<cfif arguments.criteria neq "">
+				<cfset getCacheStrategy().remove(key) />
+			<cfelse>
+				<cfloop list="#arguments.alias#" index="currentAlias">
+					<cfloop list="#variables.aliasKeyLists[currentAlias]#" index="currentKey">
+						<cfset getCacheStrategy().remove(currentKey) />
+					</cfloop>
+				</cfloop>
+			</cfif>
 		<cfelse>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler flushing data from cache since no criteria was defined.") />
@@ -186,6 +212,9 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->	
+	<cffunction name="getKey" access="private" returntype="string" output="false">
+		<cfreturn "handlerId=" & getHandlerId() />
+	</cffunction>
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false"
 		hint="Build a key from the cache handler criteria with data from the event object.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -195,18 +224,10 @@ Notes:
 		<cfset var criteriaToUse =  ""/>
 		<cfset var item = "" />
 		<cfset var arg = "" />
-		<cfset var key = "handlerId=" & getHandlerId() />
+		<cfset var key = getKey() />
 		
-		<!--- If there is an alias for this cache handler then include it in the key --->
-		<cfif len(getAlias())>
-			<cfset key = key & "&alias=" & getAlias() />
-		</cfif>
-		
-		<!--- __M2NULL is passed as the criteria if there is no criteria specified when clearning the cache. Otherwise
-			the citeria from the cache command will be used. --->
-		<cfif arguments.criteria eq "__M2NULL">
-			<cfset criteriaToUse =  "" />
-		<cfelseif arguments.criteria eq "">
+		<!--- The criteria from the cache command will be used if criteria passed in is empty string. --->
+		<cfif arguments.criteria eq "">
 			<cfset criteriaToUse = getCriteria() />
 		<cfelse>
 			<cfset criteriaToUse = arguments.criteria />
@@ -219,7 +240,7 @@ Notes:
 				<cfset arg = arguments.event.getArg(listGetAt(item, 2, "="), "") />
 				<cfset item = listGetAt(item, 1, "=") />
 			<cfelse>
-				<cfset arg = arguments.event.getArg(item, "") />	
+				<cfset arg = arguments.event.getArg(item, "") />
 			</cfif>
 
 			<!--- Accept only simple values and ignore complex values --->	
@@ -231,6 +252,17 @@ Notes:
 		</cfloop>
 		
 		<cfreturn key />
+	</cffunction>
+	
+	<cffunction name="addKeyToAlias" access="private" returntype="void" output="false">
+		<cfargument name="key" type="string" required="true">
+		<cfset var hashedAlias = "">
+		<cfif len(getAlias())>
+			<cfset hashedAlias = hash(getAlias())>
+			<cfif NOT listFindNoCase(variables.aliasKeyLists[hashedAlias], key)>
+				<cfset variables.aliasKeyLists[hashedAlias] = listAppend(variables.aliasKeyLists[hashedAlias], key, "|")>
+			</cfif>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="computeDataToCache" access="private" returntype="struct" output="false"
@@ -252,7 +284,7 @@ Notes:
 			
 			<!--- Add if new arg in post --->
 			<cfif NOT StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
-				<cfset dataToCache[keyName] = arguments.postCommandDataSnapshot [keyName]>
+				<cfset dataToCache[keyName] = arguments.postCommandDataSnapshot [keyName] />
 			<!--- Check equality --->
 			<cfelseif StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
 				<cfset pre = arguments.preCommandDataSnapshot[keyName] />
