@@ -42,6 +42,7 @@ preEvent plugin point, then remove the remaining points. (pfarrell)
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the plugin.">
+		<!--- Put configuration logic here --->
 	</cffunction>
 	
 	<!---
@@ -80,7 +81,6 @@ preEvent plugin point, then remove the remaining points. (pfarrell)
 	<cffunction name="onSessionStart" access="public" returntype="void" output="true">
 		<!--- There is no access to the eventContext since sessions start asynchronously 
 			from the Mach-II request life cycle--->
-		<cfoutput>&nbsp;SimplePlugin.onSessionStart()<br /></cfoutput>
 	</cffunction>
 	
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="true">
@@ -88,7 +88,6 @@ preEvent plugin point, then remove the remaining points. (pfarrell)
 			hint="The session scope is passed in since direct access to it is not available." />
 		<!--- There is no access to the eventContext since sessions end asynchronously
 			from the Mach-II request life cycle--->
-		<cfoutput>&nbsp;SimplePlugin.onSessionEnd()<br /></cfoutput>
 	</cffunction>
 	
 	<cffunction name="handleException" access="public" returntype="void" output="true">
