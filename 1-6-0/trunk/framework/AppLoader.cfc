@@ -39,7 +39,7 @@ Notes:
 	<cfset variables.validateXML = 0 />
 	<cfset variables.overrideXml = "" />
 	<cfset variables.lastReloadDatetime = "" />
-	<cfset variables.appkey = "" />
+	<cfset variables.appKey = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -50,7 +50,7 @@ Notes:
 			hint="The full path to the configuration XML file." />
 		<cfargument name="dtdPath" type="string" required="true"
 			hint="The full path to the Mach-II DTD file." />
-		<cfargument name="appkey" type="string" required="true"
+		<cfargument name="appKey" type="string" required="true"
 			hint="Unqiue key for this application.">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
@@ -70,7 +70,7 @@ Notes:
 		<cfset setValidateXml(arguments.validateXml) />
 		<cfset setOverrideXml(arguments.overrideXml) />
 		<cfset setModuleName(arguments.moduleName) />
-		<cfset setAppKey(arguments.appkey) />
+		<cfset setAppKey(arguments.appKey) />
 		
 		<!--- (Re)Load the configuration. --->
 		<cfset reloadConfig(arguments.validateXml, arguments.parentAppManager) />
@@ -218,7 +218,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setValidateXML" access="public" returntype="void" output="false">
-		<cfargument name="validateXML" type="string" required="true" />
+		<cfargument name="validateXML" type="boolean" required="true" />
 		<cfset variables.validateXML = arguments.validateXML />
 	</cffunction>
 	<cffunction name="getValidateXML" access="public" returntype="boolean" output="false">
