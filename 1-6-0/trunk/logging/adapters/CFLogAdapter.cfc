@@ -46,7 +46,6 @@ inspiration for this component.
 	<cfset variables.level = variables.LOG_LEVEL_FATAL />
 	<cfset variables.logFile = "application" />
 	<cfset variables.debugModeOnly = false />
-	<cfset variables.filter = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
