@@ -69,8 +69,6 @@ See that file header for configuration of filter criteria.
 	PROPERTIES
 	--->
 	<cfset variables.loggerType = "Mach-II Log" />
-	<cfset variables.onRequestEndAvailable = true />
-	<cfset variables.prePostRedirectAvailable = true />
 	<cfset variables.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.debugModeOnly = false />
 	<cfset variables.suppressDebugArg = "suppressDebug" />

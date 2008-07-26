@@ -33,8 +33,6 @@ Notes:
 	--->
 	<cfset variables.loggerType = "undefined" />
 	<cfset variables.loggerId = "" />
-	<cfset variables.onRequestEndAvailable = false />
-	<cfset variables.prePostRedirectAvailable = false />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
@@ -67,21 +65,21 @@ Notes:
 		hint="On request end logic for this logger. Override to provide custom on request end logic.">
 		<!--- Note that leaving off the 'output' attribute requires all output to be
 			surrounded by cfoutput tags --->
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overrided if onRequestEnd functionality is required." />
 	</cffunction>
 	
 	<cffunction name="preRedirect" access="public" returntype="void" output="false"
-		hint="Pre-redirect logic for this logger. Override to provide custom pre-redirect logic.">
+		hint="Pre-redirect logic for this logger. Override to provide custom pre-redirect logic. Must be overriden in unison with postRedirect.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overrided if preRedirect functionality is required." />
 	</cffunction>
 
 	<cffunction name="postRedirect" access="public" returntype="void" output="false"
-		hint="Post-redirect logic for this logger. Override to provide custom post-redirect logic.">
+		hint="Post-redirect logic for this logger. Override to provide custom post-redirect logic. Must be overriden in unison with preRedirect.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overrided if postRedirect functionality is required." />
 	</cffunction>
 
 	<!---
@@ -89,12 +87,12 @@ Notes:
 	--->
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
-		<cfreturn variables.onRequestEndAvailable />
+		<cfreturn isMethodDefined("onRequestEnd") />
 	</cffunction>
 	
 	<cffunction name="isPrePostRedirectAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if pre/post-redirect methods are available.">
-		<cfreturn variables.prePostRedirectAvailable />
+		<cfreturn isMethodDefined("preRedirect") AND isMethodDefined("postRedirect") />
 	</cffunction>
 	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
@@ -131,6 +129,34 @@ Notes:
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="isMethodDefined" access="private" returntype="boolean" output="false"
+		hint="Checks if an abstract function was overridden in the concrete class. Does not walk the inheritance tree.">
+		<cfargument name="methodName" type="string" required="true" />
+
+		<cfset var md = GetMetadata(this) />
+		<cfset var methods = ArrayNew(1) />
+		<cfset var i = 0 />
+		<cfset var result = false />
+		
+		<!--- "functions" key only exists when there at least one defined method --->
+		<cfif StructKeyExists(md, "functions")>
+			<cfset methods = md.functions />
+			
+			<!--- Find if the method exists --->
+			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
+				<cfif methods[i].name EQ arguments.methodName>
+					<cfset result = true />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		</cfif>
+		
+		<cfreturn result />		
 	</cffunction>
 	
 	<!---
