@@ -132,7 +132,7 @@ the rest of the framework. (pfarrell)
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-		<cfargument name="value" required="true"
+		<cfargument name="value" type="any" required="true"
 			hint="The parameter value." />
 		<cfset variables.parameters[arguments.name] = arguments.value />
 	</cffunction>

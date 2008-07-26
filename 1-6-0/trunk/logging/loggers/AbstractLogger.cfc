@@ -108,7 +108,7 @@ Notes:
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-		<cfargument name="value" required="true"
+		<cfargument name="value" type="any" required="true"
 			hint="The parameter value." />
 		<cfset variables.parameters[arguments.name] = arguments.value />
 	</cffunction>
@@ -116,7 +116,7 @@ Notes:
 		hint="Gets a configuration parameter value, or a default value if not defined.">
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
-		<cfargument name="defaultValue" type="string" required="false" default=""
+		<cfargument name="defaultValue" type="any" required="false" default=""
 			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
 		<cfif isParameterDefined(arguments.name)>
 			<cfreturn variables.parameters[arguments.name] />
