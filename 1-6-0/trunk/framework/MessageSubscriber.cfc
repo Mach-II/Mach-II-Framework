@@ -39,8 +39,8 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="MessageSubscriberInvoker" output="false"
-		hint="Initializes the invoker.">
+	<cffunction name="init" access="public" returntype="MessageSubscriber" output="false"
+		hint="Initializes the subscriber.">
 		<cfargument name="listenerName" type="string" required="true" />
 		<cfargument name="listener" type="MachII.framework.Listener" required="true" />
 		<cfargument name="method" type="string" required="true" />

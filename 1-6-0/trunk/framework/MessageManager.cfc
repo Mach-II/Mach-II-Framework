@@ -43,7 +43,7 @@ Notes:
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="parentMessageManager" type="any" required="false" default=""
-			hint="Optional argument for a parent message manager. If there isn't one default to empty string." />	
+			hint="Optional argument for a parent message manager. If there isn't one, defaults to empty string." />	
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
@@ -74,7 +74,7 @@ Notes:
 		<cfset var subscriberResultArg = "" />
 		
 		<cfset var messageHandler = "" />
-		<cfset var messageSubscriberInvoker = "" />
+		<cfset var messageSubscriber = "" />
 		
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
@@ -151,9 +151,9 @@ Notes:
 						
 						<cfset subscriberListener = getAppManager().getListenerManager().getListener(subscriberListenerName) />
 						
-						<cfset messageSubscriberInvoker = CreateObject("component", "MachII.framework.MessageSubscriberInvoker").init(subscriberListenerName, subscriberListener, subscriberMethod, subscriberResultArg) />
+						<cfset messageSubscriber = CreateObject("component", "MachII.framework.MessageSubscriber").init(subscriberListenerName, subscriberListener, subscriberMethod, subscriberResultArg) />
 						
-						<cfset messageHandler.addMessageSubscriberInvoker(messageSubscriberInvoker) />
+						<cfset messageHandler.addMessageSubscriber(messageSubscriber) />
 					</cfloop>
 				</cfif>
 
@@ -189,7 +189,8 @@ Notes:
 			<cfreturn getParent().getMessageHandler(arguments.messageName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.MessageHandlerNotDefined" 
-				message="A message-subscriber with name '#arguments.messageName#' is not defined. Available Messages: '#ArrayToList(getMessageHandlerNames())#'" />
+				message="A message-subscriber with name '#arguments.messageName#' is not defined."
+				detail="Available Messages: '#ArrayToList(getMessageHandlerNames())#'" />
 		</cfif>
 	</cffunction>
 	
@@ -201,7 +202,7 @@ Notes:
 		
 		<cfif NOT arguments.overrideCheck AND isMessageHandlerDefined(arguments.messageName)>
 			<cfthrow type="MachII.framework.MessageHandlerAlreadyDefined"
-				message="A Message Handler with name '#arguments.messageName#' is already registered." />
+				message="A message-subscriber with name '#arguments.messageName#' is already registered." />
 		<cfelse>
 			<cfset variables.messageHandlers[arguments.messageName] = arguments.messageHandler />
 		</cfif>

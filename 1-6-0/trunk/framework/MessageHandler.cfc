@@ -36,7 +36,7 @@ Notes:
 	<cfset variables.waitForThreads = "" />
 	<cfset variables.timeout = "" />
 	<cfset variables.threadingAdapter = "" />
-	<cfset variables.messageSubscriberInvokers = StructNew() />
+	<cfset variables.messageSubscribers = StructNew() />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -68,7 +68,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset var invokers = getMessageSubscriberInvokers() />
+		<cfset var subscribers = getMessageSubscribers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
 		<cfset var threadIds = StructNew() />
 		<cfset var publishThreadIdsInEvent = arguments.event.getArg("_publishThreadIds", StructNew()) />
@@ -90,8 +90,8 @@ Notes:
 			<cfset parameters.event = arguments.event />
 			
 			<!--- Run all the threads --->
-			<cfloop collection="#invokers#" item="key">
-				<cfset threadIds[threadingAdapter.run(invokers[key], "invokeListener", parameters)] = key />
+			<cfloop collection="#subscribers#" item="key">
+				<cfset threadIds[threadingAdapter.run(subscribers[key], "invokeListener", parameters)] = key />
 			</cfloop>
 			
 			<!--- Wait and join --->
@@ -125,26 +125,26 @@ Notes:
 				<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
 			</cfif>
 
-			<cfloop collection="#invokers#" item="key">
-				<cfset invokers[key].invokeListener(arguments.event) />
+			<cfloop collection="#subscribers#" item="key">
+				<cfset subscribers[key].invokeListener(arguments.event) />
 			</cfloop>
 		</cfif>
 		
 		<cfreturn continue />
 	</cffunction>
 	
-	<cffunction name="addMessageSubscriberInvoker" access="public" returntype="void" output="false"
+	<cffunction name="addMessageSubscriber" access="public" returntype="void" output="false"
 		hint="Registers a subscriber to this message.">
-		<cfargument name="messageSubscriberInvoker" type="MachII.framework.MessageSubscriberInvoker" />
+		<cfargument name="messageSubscriber" type="MachII.framework.MessageSubscriber" />
 		
-		<cfset var key = arguments.messageSubscriberInvoker.getListenerName() & "_" & arguments.messageSubscriberInvoker.getMethod() />
+		<cfset var key = arguments.messageSubscriber.getListenerName() & "_" & arguments.messageSubscriber.getMethod() />
 		
-		<cfset variables.messageSubscriberInvokers[key] = arguments.messageSubscriberInvoker />
+		<cfset variables.messageSubscribers[key] = arguments.messageSubscriber />
 	</cffunction>
 	
-	<cffunction name="getMessageSubscriberInvokers" access="public" returntype="struct" output="false"
-		hint="Gets all message subscriber invokers.">
-		<cfreturn variables.messageSubscriberInvokers />
+	<cffunction name="getMessageSubscribers" access="public" returntype="struct" output="false"
+		hint="Gets all message subscribers.">
+		<cfreturn variables.messageSubscribers />
 	</cffunction>
 	
 	<!---
@@ -152,7 +152,7 @@ Notes:
 	--->
 	<cffunction name="getSubscriberNames" access="public" returntype="array" output="false"
 		hint="Gets an array of message subscriber invoker names.">
-		<cfreturn StructKeyArray(variables.messageSubscriberInvokers) />
+		<cfreturn StructKeyArray(variables.messageSubscribers) />
 	</cffunction>
 	
 	<!---
