@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id: CFLogAdapter.cfc 584 2007-12-15 08:44:43Z peterfarrell $
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
