@@ -462,11 +462,27 @@ Notes:
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="onSessionStart() is called at the start of a session.">
 
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
-			<cfset variables.onSessionStartPlugins[i].onSessionStart() />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
+				<cfset loggingName = variables.onSessionStartPlugins[i].getComponentNameForLogging() />
+				<cfset log = variables.onSessionStartPlugins[i].getLog() />
+			
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
+				</cfif>
+				
+				<cfset variables.onSessionStartPlugins[i].onSessionStart() />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.onSessionStartPluginPointException"
+					message="An exception occured in the onSessionStart point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
+					detail="Orginal message: #cfcatch.message# | Orginal detail: #cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
@@ -474,11 +490,27 @@ Notes:
 		<cfargument name="sessionScope" type="struct" required="true"
 			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
 		
+		<cfset var loggingName = "" />
+		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
-			<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
+				<cfset loggingName = variables.onSessionEndPlugins[i].getComponentNameForLogging() />
+				<cfset log = variables.onSessionEndPlugins[i].getLog() />
+			
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
+				</cfif>
+				
+				<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
+					message="An exception occured in the onSessionEnd point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
+					detail="Orginal message: #cfcatch.message# | Orginal detail: #cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="handleException" access="public" returntype="void" output="true"
@@ -544,7 +576,8 @@ Notes:
 			</cfloop>
 		</cfif>
 
-		<cfif StructKeyExists(arguments.metadata, "extends") and arguments.metadata.extends.name neq "MachII.framework.Plugin">
+		<cfif StructKeyExists(arguments.metadata, "extends") 
+			AND arguments.metadata.extends.name NEQ "MachII.framework.Plugin">
 			<cfset gatherPluginMetaData(arguments.metadata.extends, arguments.points) />
 		</cfif>
 	</cffunction>
