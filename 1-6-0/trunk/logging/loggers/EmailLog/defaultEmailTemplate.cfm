@@ -64,7 +64,7 @@ Not using the 'local' prefix can cause errors due to threading.
 		<td><p>#data[local.i].channel#</p></td>
 		<td><p>#data[local.i].logLevelName#</p></td>
 		<td><p>#data[local.i].message#</p></td>
-		<td><p><cfif local.i EQ 1>0<cfelse>#data[local.i].currentTick - data[local.i - 1].currentTick#</cfif></p></td>
+		<td><p><cfif local.i NEQ ArrayLen(data)>#data[local.i + 1].currentTick - data[local.i].currentTick#<cfelse>0</cfif></p></td>
 	</tr>
 	<cfif NOT IsSimpleValue(data[local.i].additionalInformation)>
 	<tr>
