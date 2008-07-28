@@ -77,11 +77,11 @@ Notes:
 			</cfif>
 			
 			<cfif log.isDebugEnabled()>
-				<cfif NOT IsSimpleValue(value)>
-					<cfset value = "[complex value]" />
+				<cfif IsSimpleValue(value)>
+					<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
+				<cfelse>
+					<cfset log.debug("Set event-arg named '#getArgName()#'.", value) />
 				</cfif>
-				
-				<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
 			</cfif>
 			
 			<cfset arguments.event.setArg(getArgName(), value) />
