@@ -44,7 +44,7 @@ Pattern matches are not case sensitive.
 	displayname="GenericChannelFilter"
 	extends="MachII.logging.filters.AbstractFilter"
 	output="false"
-	hint="">
+	hint="Makes decisions on whether to log or not based on channel name and known criteria.">
 	
 	<!---
 	PROPERTIES

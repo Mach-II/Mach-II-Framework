@@ -27,7 +27,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 <cfcomponent
 	displayname="Log"
 	output="false"
-	hint="A simple logging interface abstracting logging APIs. This is abstract and must be extend by a concrete implementation.">
+	hint="A simple logging API.">
 	
 	<!---
 	PROPERTIES
