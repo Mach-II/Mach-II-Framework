@@ -92,7 +92,20 @@ Notes:
 	
 	<cffunction name="isPrePostRedirectAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if pre/post-redirect methods are available.">
-		<cfreturn isMethodDefined("preRedirect") AND isMethodDefined("postRedirect") />
+		
+		<cfset var preRedirectResult = isMethodDefined("preRedirect") />
+		<cfset var postRedirectResult = isMethodDefined("postRedirect") />
+		<cfset var result = false />
+		
+		<cfif preRedirectResult AND postRedirectResult>
+			<cfset result = true />
+		<cfelseif preRedirectResult + postRedirectResult EQ 1>
+			<cfthrow type="MachII.logging.loggers.bothPrePostRedirectMethodsRequired" 
+				message="Both PreRedirect and PostRedirect methods must be implemented in '#getLoggerId()#'." 
+				detail="Available Methods: preRedirectResult=#preRedirectResult#, postRedirectResult=#postRedirectResult#" />
+		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
