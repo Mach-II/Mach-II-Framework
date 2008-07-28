@@ -237,7 +237,14 @@ inspiration for this component.
 			
 			<!--- Append and serialize to string the additional information if available --->
 			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset text = text & " :: " & arguments.additionalInformation.toString() />
+				<cftry>
+					<cfset text = text & " :: " & arguments.additionalInformation.toString() />
+					<cfcatch type="any">
+						<!--- Easier to try and serialize the additional information with toString and
+							fail then to try and see if toString is available --->
+							<cfset text = text & " :: [Complex Value]" />
+					</cfcatch>
+				</cftry>
 			</cfif>
 			
 			<!--- Make the cflog call --->
