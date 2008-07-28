@@ -44,7 +44,8 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
+	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false"
+		hint="Loads and instantiates a command from an XML fragment.">
 		<cfargument name="commandNode" type="any" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
@@ -406,8 +407,12 @@ Notes:
 	
 	<cffunction name="setupDefault" access="private" returntype="MachII.framework.Command" output="false"
 		hint="Sets up a default command.">
+		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = CreateObject("component", "MachII.framework.Command").init() />
+		
+		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
+		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
 	</cffunction>

@@ -50,21 +50,17 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
+		<cfset var log = getLog() />
+		
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Executing a default command named '#getParameter("commandName")#'. This is not a concrete command. Check your configuration file.") />
+		</cfif>
+		
 		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="setParameter" access="public" returntype="void" output="false">
-		<cfargument name="name" type="string" required="true" />
-		<cfargument name="value" type="any" required="true" />
-		<cfset variables.parameters[arguments.name] = arguments.value />
-	</cffunction>
-	<cffunction name="getParameter" access="public" returntype="any" output="false">
-		<cfargument name="name" type="string" required="true" />
-		<cfreturn variables.parameters[arguments.name] />
-	</cffunction>
-	
 	<!---
-	ACCESSORS
+	PUBLIC FUNCTIONS - UTIL
 	--->
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets a struct of parameters to this command.">
@@ -75,6 +71,19 @@ Notes:
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, parameters[key]) />
 		</cfloop>
+	</cffunction>
+	
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="setParameter" access="public" returntype="void" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="any" required="true" />
+		<cfset variables.parameters[arguments.name] = arguments.value />
+	</cffunction>
+	<cffunction name="getParameter" access="public" returntype="any" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfreturn variables.parameters[arguments.name] />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
