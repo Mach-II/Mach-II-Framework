@@ -53,16 +53,16 @@ Notes:
 			hint="Name of method to call on the callback CFC." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="Arguments to pass to the callback method." />
-		<cfabort showerror="Unimplemented." />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0" />
 	</cffunction>
 	
-	<cffunction name="join" access="public" returntype="any" output="false"
+	<cffunction name="join" access="public" returntype="void" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="any" required="true"
 			hint="A list, struct or array of thread ids to join." />
 		<cfargument name="timeout" type="numeric" required="true"
-			hint="How long to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
-		<cfabort showerror="Unimplemented." />
+			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0" />
 	</cffunction>
 
 </cfcomponent>

@@ -121,7 +121,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="createThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false"
-		hint="Creates a threading adapter if the ColdFusion engine has threading capabilities.">
+		hint="Creates a threading adapter if the CFML engine has threading capabilities.">
 		
 		<cfset var threadingAdapter = "" />
 		<cfset var serverName = server.coldfusion.productname />
@@ -138,14 +138,14 @@ Notes:
 		<!--- Adobe ColdFusion 8+ --->
 		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
-		<!--- NewAtlanta BlueDragon 7+ threading engine is not currently compatible,
+		<!--- Open / NewAtlanta BlueDragon 7+ threading engine is not currently compatible,
 			however will be compatiable in future versions
 		<cfelseif FindNoCase("BlueDragon", serverName) AND serverMajorVersion GTE 7>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
 		 --->
 		<!--- Railo 3.0 will introduce a threading engine
 		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 3>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRailo").init() />
+			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
 		 --->
 		<!--- Default theading adapter (used to check if threading is allowed on this engine) --->
 		<cfelse>

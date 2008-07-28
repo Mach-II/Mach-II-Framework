@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id: MessageHandler.cfc 549 2007-11-11 22:19:47Z peterfarrell $
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
@@ -25,26 +25,27 @@ Notes:
 --->
 <cfcomponent
 	displayname="ThreadingAdapter"
+	extends="MachII.util.threading.ThreadingAdapter"
 	output="false"
-	hint="Base threading adapter component. This is a base class. Please instantiate a concrete adapter.">
+	hint="Threading adapter for Railo 3+.">
 
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.allowThreading = FALSE />
+	<cfset variables.allowThreading = TRUE />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ThreadingAdapter" output="false"
-		hint="This is the base class. Please instantiate a concrete adapter.">
+		hint="This initializes the adapter for Railo 3+.">
 		<cfreturn this />
 	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="run" access="public" returntype="void" output="false"
+	<cffunction name="run" access="public" returntype="string" output="false"
 		hint="Runs a thread.">
 		<cfargument name="callback" type="any" required="true"
 			hint="A CFC to perform the callback on." />
@@ -52,7 +53,7 @@ Notes:
 			hint="Name of method to call on the callback CFC." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="Arguments to pass to the callback method." />
-		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0 if BD has implemented a fix for their limitations." />
 	</cffunction>
 	
 	<cffunction name="join" access="public" returntype="void" output="false"
@@ -61,25 +62,7 @@ Notes:
 			hint="A list, struct or array of thread ids to join." />
 		<cfargument name="timeout" type="numeric" required="true"
 			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
-		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
-	</cffunction>
-	
-	<!---
-	PUBLIC FUNCTIONS - UTIL
-	--->
-	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
-		hint="Returns a boolean if threading is allowed.">
-		<cfreturn variables.allowThreading />
-	</cffunction>
-	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="createThreadId" access="private" returntype="string" output="false"
-		hint="Creates a random tread id. Does not use UUID for performance reasons.">
-		<cfargument name="method" type="string" required="true"
-			hint="Name of method. Adds additional data for seed.">
-		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000) & arguments.method) />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0 if BD has implemented a fix for their limitations." />
 	</cffunction>
 
 </cfcomponent>
