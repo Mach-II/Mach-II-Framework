@@ -75,7 +75,7 @@ Configuration Example:
 	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
 	<cfset variables.loggerName = "Scope Logging" />
 	<cfset variables.loggingScope = "request" />
-	<cfset variables.loggingPath = "_ScopeLogging" & "_" & Replace(CreateUUID(), "-", "", "all") />
+	<cfset variables.loggingPath = "_ScopeLogging" & "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	<cfset variables.debugModeOnly = false />
 	
 	<!---
@@ -385,7 +385,7 @@ Configuration Example:
 		<cfset variables.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
 	<cffunction name="getDebugModeOnly" access="public" returntype="string" output="false"
-		hint="Gets the value of if we should log only if debug mode is on in CF.">
+		hint="Gets the value of if we should log only if CFML debugging is on.">
 		<cfreturn variables.debugModeOnly />
 	</cffunction>
 	
