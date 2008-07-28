@@ -41,7 +41,7 @@ Notes:
 	<cffunction name="init" access="public" returntype="PublishCommand" output="false"
 		hint="Used by the framework for initialization.">
 		<cfargument name="message" type="string" required="true" />
-		<cfargument name="messageHandler" type="MachII.framework.MessageHandler" >
+		<cfargument name="messageHandler" type="MachII.framework.MessageHandler" required="true" />
 		
 		<cfset setMessage(arguments.message) />
 		<cfset setMessageHandler(arguments.messageHandler) />
