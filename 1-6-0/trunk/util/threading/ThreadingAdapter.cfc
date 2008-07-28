@@ -82,4 +82,10 @@ Notes:
 		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000) & arguments.method) />
 	</cffunction>
 
+	<cffunction name="convertSecondsToMilliseconds" access="private" returntype="numeric" output="false"
+		hint="Convert seconds to milliseconds.">
+		<cfargument name="seconds" type="numeric" required="true" />
+		<cfreturn arguments.seconds * 1000 />
+	</cffunction>
+
 </cfcomponent>

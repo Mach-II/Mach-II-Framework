@@ -117,13 +117,4 @@ Notes:
 		<cfreturn error />
 	</cffunction>
 
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="convertSecondsToMilliseconds" access="private" returntype="numeric" output="false"
-		hint="Convert seconds to milliseconds.">
-		<cfargument name="seconds" type="numeric" required="true" />
-		<cfreturn arguments.seconds * 1000 />
-	</cffunction>
-
 </cfcomponent>
