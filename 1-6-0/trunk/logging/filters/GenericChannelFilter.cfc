@@ -26,18 +26,19 @@ FilterCriteria can be an comma delimited list or an array.
 -----------------------------------------------------------------------------------------
 |	Pattern				|	Matches Channels											|
 -----------------------------------------------------------------------------------------
+|	*					|	Matches everything (unless you have another pattern that	| 
+|						|		specifies not to match a channel name) 					|
 |	!*					|	Nothing (unless you have another pattern that matches)		|
 |	MachII.*			|	Matches all channels that start with 'MachII.'				|
 |	!myApp.model.*		|	Does not match any channels that start with 'myApp.model.'	|
 |	MachII				|	Matches only 'MachII' literal not 'MachII.framework.etc'	|
 ----------------------------------------------------------------------------------------|
 
-! 		= Do not match (can only occur at the beginning of a pattern string)
-no !	= Indicates that you should match
-* 		= Wildcard (can only occur at the end of a pattern string)
+! 			= Do not match (can only occur at the beginning of a pattern string)
+no ! or *	= Indicates that you should match exact channel name
+* 			= Wildcard (can only occur at the end of a pattern string)
 
-Pattern matches are not case sensitive
-
+Pattern matches are not case sensitive.
 --->
 <cfcomponent
 	displayname="GenericChannelFilter"
@@ -124,7 +125,13 @@ Pattern matches are not case sensitive
 				<!--- Check restriction (will always be the first character)--->
 				<cfif Left(channel, 1)  EQ "!">
 					<cfset temp.restrict = true />
-					<cfset channel = Right(channel, Len(channel) -1) />
+					
+					<!--- If there is no channel and only a directive of ! --->
+					<cfif Len(channel) GT 1>
+						<cfset channel = Right(channel, Len(channel) -1) />
+					<cfelse>
+						<cfset channel = "" />
+					</cfif>
 				<cfelse>
 					<cfset temp.restrict = false />
 				</cfif>
@@ -132,6 +139,8 @@ Pattern matches are not case sensitive
 				<!--- Check for Wildcard (will always be the last character)--->
 				<cfif Right(channel, 1) EQ "*">
 					<cfset temp.wildcard = true />
+					
+					<!--- If there is no channel and only a directive of * --->
 					<cfif Len(channel) GT 1>
 						<cfset channel = Left(channel, Len(channel) -1) />
 					<cfelse>
