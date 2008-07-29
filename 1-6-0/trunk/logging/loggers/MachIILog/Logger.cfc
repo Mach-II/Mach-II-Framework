@@ -187,7 +187,13 @@ See that file header for configuration of filter criteria.
 		<cfset var scope = StructGet(getLoggingScope()) />
 		
 		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+			<cftry>
+				<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+				<cfcatch type="any">
+					<!--- Do nothing as the configuration may have changed between start of
+					the redirect and now --->
+				</cfcatch>
+			</cftry>
 		</cfif>
 	</cffunction>
 	
