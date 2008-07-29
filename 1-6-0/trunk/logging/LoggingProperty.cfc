@@ -128,7 +128,7 @@ will bind to root parameter values.
 		hint="Configures the default logger (e.g. MachII.logging.loggers.MachIILog.Logger).">
 		
 		<cfset var logger = "" />
-		<cfset var loggerId = "MachII" & "_" & getAppManager().getModuleName() />
+		<cfset var loggerId = createLoggerId("MachII") />
 		<cfset var parameters = StructNew() />
 		
 		<!--- Create, init and configure the logger --->
@@ -154,7 +154,7 @@ will bind to root parameter values.
 		
 		<cfset var type = "" />
 		<cfset var logger = "" />
-		<cfset var loggerId = arguments.loggerName & "_" & getAppManager().getModuleName() />
+		<cfset var loggerId = createLoggerId(arguments.loggerName) />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
@@ -196,6 +196,12 @@ will bind to root parameter values.
 		
 		<!--- Add the logger --->
 		<cfset addLogger(arguments.loggerName, logger) />
+	</cffunction>
+	
+	<cffunction name="createLoggerId" access="private" returntype="string" output="false"
+		hint="Creates a logger id.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfreturn Hash(arguments.loggerName & getAppManager().getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
 	</cffunction>
 	
 	<!---
