@@ -106,12 +106,12 @@ in the Mach-II dashboard.
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="getCacheStats" access="public" returntype="struct" output="false"
+	<cffunction name="getCacheStats" access="public" returntype="MachII.caching.CacheStats" output="false"
 		hint="Gets the cache stats for this caching strategy.">
 		<cfreturn variables.cacheStats />
 	</cffunction>
 	
-	<cffunction name="getConfigurationData" access="public" returntype="MachII.caching.CacheStats" output="false"
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets the configuration data for this caching strategy.">
 		<cfreturn variables.instance />
 	</cffunction>
