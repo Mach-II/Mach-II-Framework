@@ -257,7 +257,9 @@ machinery.
 			done in the application or server scopes will only run actions
 			collectively --->
 		<cfif getRedirectPersistScope() EQ "session">
-			<cfset name = name & "_" & session.sessionId />
+			<!--- Cannot directly access session scope because most CFML
+			engine will throw an error if session is disabled --->
+			<cfset name = name & "_" & StructGet("session").sessionId />
 		</cfif>
 
 		<cfreturn name />
