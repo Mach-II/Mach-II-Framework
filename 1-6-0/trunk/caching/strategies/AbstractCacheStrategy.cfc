@@ -42,6 +42,7 @@ in the Mach-II dashboard.
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.isCacheEnabled = true />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
 	<cfset variables.log = 0 />
@@ -108,7 +109,7 @@ in the Mach-II dashboard.
 	
 	<!---
 	PUBLIC FUNCTIONS - UTILS
-	--->
+	--->	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -138,7 +139,17 @@ in the Mach-II dashboard.
 	
 	<!---
 	ACCESSORS
-	--->	
+	--->
+	<cffunction name="setCacheEnabled" access="public" returntype="void" output="false"
+		hint="Sets the boolean suggestion that isCacheEnabled() returns.">
+		<cfargument name="isCacheEnabled" type="boolean" required="true" />
+		<cfset variables.isCacheEnabled = arguments.isCacheEnabled />
+	</cffunction>
+	<cffunction name="isCacheEnabled" access="public" returntype="boolean" output="false"
+		hint="Provides a boolean suggestion to the *calling code* if caching should be used. This does not explicitly turn caching on/off.">
+		<cfreturn variables.isCacheEnabled />
+	</cffunction>
+
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
@@ -146,7 +157,7 @@ in the Mach-II dashboard.
 		<cfset var key = "" />
 		
 		<cfloop collection="#arguments.parameters#" item="key">
-			<cfset setParameter(key, parameters[key]) />
+			<cfset setParameter(key, arguments.parameters[key]) />
 		</cfloop>
 	</cffunction>
 	<cffunction name="getParameters" access="public" returntype="struct" output="false"

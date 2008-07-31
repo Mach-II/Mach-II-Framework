@@ -101,7 +101,7 @@ Notes:
 		<cfset dataFromCache = getCacheStrategy().get(key) />
 		
 		<!--- Create the cache since we do not have one --->
-		<cfif NOT IsDefined("dataFromCache") OR NOT getCachingEnabled()>
+		<cfif NOT IsDefined("dataFromCache") OR NOT getCacheStrategy().isCacheEnabled()>
 
 			<!--- Get a snapshot of the event before we run the commands
 				Used StructAppend so this is not updated by reference when the event is used in the commands --->
@@ -119,7 +119,7 @@ Notes:
 			</cfsavecontent>
 			
 			<!--- Run only if caching is enabled --->
-			<cfif getCachingEnabled()>
+			<cfif getCacheStrategy().isCacheEnabled()>
 				<!--- Compare pre-command event data snapshot to current event data  --->
 				<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
 
@@ -197,16 +197,6 @@ Notes:
 		hint="Adds a Command.">
 		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
-	</cffunction>
-	
-	<cffunction name="disableCaching" access="public" returntype="void" output="false"
-		hint="Disables caching.">
-		<cfset setCachingEnabled(false) />
-	</cffunction>
-	
-	<cffunction name="enableCaching" access="public" returntype="void" output="false"
-		hint="Enables caching.">
-		<cfset setCachingEnabled(true) />
 	</cffunction>
 	
 	<!---
@@ -388,16 +378,6 @@ Notes:
 	<cffunction name="getCriteria" access="public" returntype="string" output="false"
 		hint="Returns an uppercase and sorted criteria list.">
 		<cfreturn variables.criteria />
-	</cffunction>
-	
-	<cffunction name="setCachingEnabled" access="public" returntype="void" output="false"
-		hint="Sets the caching enabled.">
-		<cfargument name="cachingEnabled" type="boolean" required="true" />
-		<cfset variables.cachingEnabled = arguments.cachingEnabled />
-	</cffunction>
-	<cffunction name="getCachingEnabled" access="public" returntype="boolean" output="false"
-		hint="Gets the caching enabled.">
-		<cfreturn variables.cachingEnabled />
 	</cffunction>
 	
 	<cffunction name="setParentHandlerName" access="private" returntype="void" output="false">

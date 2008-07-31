@@ -162,13 +162,6 @@ Notes:
 			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(cacheName) />
 			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
-		
-		<!--- Disable caching if all caching strategies are inherited --->
-		<cfif IsObject(getParent()) AND NOT StructCount(cacheStrategyManager.getCacheStrategies())>
-			<cfif NOT getParent().getCachingEnabled()>
-				<cfset disableCaching() />
-			</cfif>
-		</cfif>
 	</cffunction>
 	
 	<!---
@@ -378,24 +371,20 @@ Notes:
 		hint="Disables caching.">
 		
 		<cfset var key = "" />
-		<cfset var handlers = getCacheHandlers() />
+		<cfset var strategies = getCacheStrategyManager().getCacheStrategies() />
 		
-		<cfset setCachingEnabled(false) />
-		
-		<cfloop collection="#handlers#" item="key">
-			<cfset handlers[key].disableCaching() />
+		<cfloop collection="#strategies#" item="key">
+			<cfset strategies[key].setCacheEnabled(false) />
 		</cfloop>
 	</cffunction>
 	<cffunction name="enableCaching" access="public" returntype="void" output="false"
 		hint="Enables caching.">
 			
 		<cfset var key = "" />
-		<cfset var handlers = getCacheHandlers() />
+		<cfset var strategies = getCacheStrategyManager().getCacheStrategies() />
 		
-		<cfset setCachingEnabled(true) />
-		
-		<cfloop collection="#handlers#" item="key">
-			<cfset handlers[key].enableCaching() />
+		<cfloop collection="#strategies#" item="key">
+			<cfset strategies[key].setCacheEnabled(true) />
 		</cfloop>
 	</cffunction>
 
@@ -451,14 +440,6 @@ Notes:
 	</cffunction>	
 	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
 		<cfreturn variables.defaultCacheName />
-	</cffunction>
-	
-	<cffunction name="setCachingEnabled" access="private" returntype="void" output="false">
-		<cfargument name="cachingEnabled" type="boolean" required="true" />
-		<cfset variables.cachingEnabled = arguments.cachingEnabled />
-	</cffunction>	
-	<cffunction name="getCachingEnabled" access="public" returntype="boolean" output="false">
-		<cfreturn variables.cachingEnabled />
 	</cffunction>
 	
 	<cffunction name="setLog" access="private" returntype="void" output="false"
