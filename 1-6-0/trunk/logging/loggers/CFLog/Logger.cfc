@@ -64,7 +64,7 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggerType = "CFLog" />
+	<cfset variables.instance.loggerType = "CFLog" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION

@@ -31,8 +31,9 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggerType = "undefined" />
-	<cfset variables.loggerId = "" />
+	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.loggerType = "undefined" />
+	<cfset variables.instance.loggerId = "" />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
@@ -85,6 +86,16 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets the configuration data for this logger including adapter and filter.">
+		
+		<cfset var data = variables.instance />
+		
+		<cfset data.adapter = getLogAdapter().getConfigurationData() />
+		
+		<cfreturn data />
+	</cffunction>
+	
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
 		<cfreturn isMethodDefined("onRequestEnd") />
@@ -177,17 +188,17 @@ Notes:
 	--->
 	<cffunction name="getLoggerType" access="public" returntype="string" output="false"
 		hint="Returns the type of the logger. Required for Dashboard integration.">
-		<cfreturn variables.loggerType />
+		<cfreturn variables.instance.loggerType />
 	</cffunction>
 
 	<cffunction name="setLoggerId" access="private" returntype="void" output="false"
 		hint="Sets the id of the logger.">
 		<cfargument name="loggerId" type="string" required="true" />
-		<cfset variables.loggerId = arguments.loggerId />
+		<cfset variables.instance.loggerId = arguments.loggerId />
 	</cffunction>
 	<cffunction name="getLoggerId" access="public" returntype="string" output="false"
 		hint="Returns the id of the logger. Used for preRedirect/postRedirect id.">
-		<cfreturn variables.loggerId />
+		<cfreturn variables.instance.loggerId />
 	</cffunction>
 	
 	<cffunction name="setLogFactory" access="private" returntype="void" output="false"

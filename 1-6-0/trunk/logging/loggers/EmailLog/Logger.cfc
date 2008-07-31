@@ -71,14 +71,15 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggerType = "Email Logger" />
-	<cfset variables.emailTemplateFile = "defaultEmailTemplate.cfm" />
+	<cfset variables.instance.loggerType = "Email Logger" />
+	<cfset variables.instance.emailTemplateFile = "defaultEmailTemplate.cfm" />
+	<cfset variables.instance.to = "" />
+	<cfset variables.instance.from = "" />
+	<cfset variables.instance.subject = "" />
+	<cfset variables.instance.servers = "" />
+	
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
-	<cfset variables.to = "" />
-	<cfset variables.from = "" />
-	<cfset variables.subject = "" />
-	<cfset variables.servers = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -212,11 +213,11 @@ See that file header for configuration of filter criteria.
 	<cffunction name="setEmailTemplateFile" access="private" returntype="void" output="false"
 		hint="Sets the email template location.">
 		<cfargument name="emailTemplateFile" type="string" required="true" />
-		<cfset variables.emailTemplateFile = arguments.emailTemplateFile />
+		<cfset variables.instance.emailTemplateFile = arguments.emailTemplateFile />
 	</cffunction>
 	<cffunction name="getEmailTemplateFile" access="public" returntype="string" output="false"
 		hint="Gets the email template location.">
-		<cfreturn variables.emailTemplateFile />
+		<cfreturn variables.instance.emailTemplateFile />
 	</cffunction>
 	
 	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
@@ -241,34 +242,34 @@ See that file header for configuration of filter criteria.
 	
 	<cffunction name="setTo" access="private" returntype="void" output="false">
 		<cfargument name="to" type="string" required="true" />
-		<cfset variables.to = arguments.to />
+		<cfset variables.instance.to = arguments.to />
 	</cffunction>
 	<cffunction name="getTo" access="public" returntype="string" output="false">
-		<cfreturn variables.to />
+		<cfreturn variables.instance.to />
 	</cffunction>
 
 	<cffunction name="setFrom" access="private" returntype="void" output="false">
 		<cfargument name="from" type="string" required="true" />
-		<cfset variables.from = arguments.from />
+		<cfset variables.instance.from = arguments.from />
 	</cffunction>
 	<cffunction name="getFrom" access="public" returntype="string" output="false">
-		<cfreturn variables.from />
+		<cfreturn variables.instance.from />
 	</cffunction>
 
 	<cffunction name="setSubject" access="private" returntype="void" output="false">
 		<cfargument name="subject" type="string" required="true" />
-		<cfset variables.subject = arguments.subject />
+		<cfset variables.instance.subject = arguments.subject />
 	</cffunction>
 	<cffunction name="getSubject" access="public" returntype="string" output="false">
-		<cfreturn variables.subject />
+		<cfreturn variables.instance.subject />
 	</cffunction>
 
 	<cffunction name="setServers" access="private" returntype="void" output="false">
 		<cfargument name="servers" type="string" required="true" />
-		<cfset variables.servers = arguments.servers />
+		<cfset variables.instance.servers = arguments.servers />
 	</cffunction>
 	<cffunction name="getServers" access="public" returntype="string" output="false">
-		<cfreturn variables.servers />
+		<cfreturn variables.instance.servers />
 	</cffunction>
 	
 </cfcomponent>

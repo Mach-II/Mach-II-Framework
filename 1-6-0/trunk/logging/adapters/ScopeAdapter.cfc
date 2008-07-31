@@ -73,10 +73,10 @@ Configuration Example:
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
 	<cfset variables.level = variables.LOG_LEVEL_DEBUG />
-	<cfset variables.loggerName = "Scope Logging" />
-	<cfset variables.loggingScope = "request" />
-	<cfset variables.loggingPath = "_ScopeLogging" & "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	<cfset variables.debugModeOnly = false />
+	
+	<cfset variables.instance.loggingScope = "request" />
+	<cfset variables.instance.loggingPath = "_ScopeLogging" & "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -362,30 +362,30 @@ Configuration Example:
 	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
 		hint="Sets the logging scope.">
 		<cfargument name="loggingScope" type="string" required="true" />
-		<cfset variables.loggingScope = arguments.loggingScope />
+		<cfset variables.instance.loggingScope = arguments.loggingScope />
 	</cffunction>
 	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
 		hint="Gets the logging scope.">
-		<cfreturn variables.loggingScope />
+		<cfreturn variables.instance.loggingScope />
 	</cffunction>
 
 	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
 		hint="Sets the logging path.">
 		<cfargument name="loggingPath" type="string" required="true" />
-		<cfset variables.loggingPath = arguments.loggingPath />
+		<cfset variables.instance.loggingPath = arguments.loggingPath />
 	</cffunction>
 	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
 		hint="Gets the logging path.">
-		<cfreturn variables.loggingPath />
+		<cfreturn variables.instance.loggingPath />
 	</cffunction>
 	
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
-		hint="Sets if we should log only if debug mode is on in CF.">
+		hint="Sets if the adapter will log if the CFML server debug mode is enabled.">
 		<cfargument name="debugModeOnly" type="boolean" required="true" />
 		<cfset variables.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
 	<cffunction name="getDebugModeOnly" access="public" returntype="string" output="false"
-		hint="Gets the value of if we should log only if CFML debugging is on.">
+		hint="Gets if the adapter will log if the CFML server debug mode is enabled.">
 		<cfreturn variables.debugModeOnly />
 	</cffunction>
 	

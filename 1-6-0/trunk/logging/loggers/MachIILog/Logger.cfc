@@ -68,10 +68,11 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggerType = "Mach-II Log" />
-	<cfset variables.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
-	<cfset variables.debugModeOnly = false />
-	<cfset variables.suppressDebugArg = "suppressDebug" />
+	<cfset variables.instance.loggerType = "Mach-II Log" />
+	<cfset variables.instance.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
+	<cfset variables.instance.debugModeOnly = false />
+	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
+	
 	<cfset variables.loggingScope = "" />
 	<cfset variables.loggingPath = "" />
 	
@@ -266,31 +267,31 @@ See that file header for configuration of filter criteria.
 	<cffunction name="setDisplayOutputTemplateFile" access="private" returntype="void" output="false"
 		hint="Sets the output template location which is used for display output.">
 		<cfargument name="displayOutputTemplateFile" type="string" required="true" />
-		<cfset variables.displayOutputTemplateFile = arguments.displayOutputTemplateFile />
+		<cfset variables.instance.displayOutputTemplateFile = arguments.displayOutputTemplateFile />
 	</cffunction>
 	<cffunction name="getDisplayOutputTemplateFile" access="public" returntype="string" output="false"
 		hint="Gets the output template location which is used for display output.">
-		<cfreturn variables.displayOutputTemplateFile />
+		<cfreturn variables.instance.displayOutputTemplateFile />
 	</cffunction>
 
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
 		hint="Sets if the output is shown only if CF's debug mode is enabled.">
 		<cfargument name="debugModeOnly" type="boolean" required="true" />
-		<cfset variables.debugModeOnly = arguments.debugModeOnly />
+		<cfset variables.instance.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
 	<cffunction name="getDebugModeOnly" access="public" returntype="boolean" output="false"
 		hint="Gets if the output is shown only if CF's debug mode is enabled.">
-		<cfreturn variables.debugModeOnly />
+		<cfreturn variables.instance.debugModeOnly />
 	</cffunction>
 	
 	<cffunction name="setSuppressDebugArg" access="private" returntype="void" output="false"
 		hint="Sets the event-arg the suppresses debug output if it is present.">
 		<cfargument name="suppressDebugArg" type="string" required="true" />
-		<cfset variables.suppressDebugArg = arguments.suppressDebugArg />
+		<cfset variables.instance.suppressDebugArg = arguments.suppressDebugArg />
 	</cffunction>
 	<cffunction name="getSuppressDebugArg" access="public" returntype="string" output="false"
 		hint="Gets the event-arg the suppresses debug output if it is present.">
-		<cfreturn variables.suppressDebugArg />
+		<cfreturn variables.instance.suppressDebugArg />
 	</cffunction>
 
 	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"

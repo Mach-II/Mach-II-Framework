@@ -199,7 +199,7 @@ will bind to root parameter values.
 		
 		<cfif StructKeyExists(variables.loggers, arguments.loggerName)>
 			<cfthrow type="MachII.properties.LoggingProperty"
-				message="A logger named '#arguments.loggerName#' already exists. Logger names must be unique." />
+				message="A logger named '#arguments.loggerName#' already exists in module '#getAppManager().getModuleName()#'. Logger names must be unique." />
 		<cfelse>
 			<cfset variables.loggers[arguments.loggerName] = arguments.logger />
 		</cfif>

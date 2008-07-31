@@ -31,7 +31,9 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggingEnabled = true />
+	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.loggingEnabled = true />
+	
 	<cfset variables.filter = "" />
 	<cfset variables.parameters = StructNew() />
 	
@@ -146,6 +148,12 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets the configuration data for this logging adapter.">
+		<!--- TODO: Consider pulling in filter configuration data --->		
+		<cfreturn variables.instance />
+	</cffunction>
+	
 	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if a filter has been defined for this adapter.">
 		<cfreturn IsObject(variables.filter) />
@@ -189,11 +197,11 @@ Notes:
 	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
 		hint="Sets the logging enabled.">
 		<cfargument name="loggingEnabled" type="boolean" required="true" />
-		<cfset variables.loggingEnabled = arguments.loggingEnabled />
+		<cfset variables.instance.loggingEnabled = arguments.loggingEnabled />
 	</cffunction>
 	<cffunction name="getLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the logging enabled.">
-		<cfreturn variables.loggingEnabled />
+		<cfreturn variables.instance.loggingEnabled />
 	</cffunction>
 	
 	<cffunction name="setFilter" access="public" returntype="void" output="false"

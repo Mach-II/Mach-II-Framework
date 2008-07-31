@@ -44,8 +44,8 @@ inspiration for this component.
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 	
 	<cfset variables.level = variables.LOG_LEVEL_FATAL />
-	<cfset variables.logFile = "application" />
 	<cfset variables.debugModeOnly = false />
+	<cfset variables.instance.logFile = "application" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -363,20 +363,20 @@ inspiration for this component.
 	<cffunction name="setLogFile" access="private" returntype="void" output="false"
 		hint="Sets the value for the cflog 'file' attribute.">
 		<cfargument name="logFile" type="string" required="true" />
-		<cfset variables.logFile = arguments.logFile />
+		<cfset variables.instance.logFile = arguments.logFile />
 	</cffunction>
 	<cffunction name="getLogFile" access="public" returntype="string" output="false"
 		hint="Gets the value for the cflog 'file' attribute">
-		<cfreturn variables.logFile />
+		<cfreturn variables.instance.logFile />
 	</cffunction>
 
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
-		hint="Sets if the adapter will log if CF's debug mode is enabled.">
+		hint="Sets if the adapter will log if the CFML server debug mode is enabled.">
 		<cfargument name="debugModeOnly" type="boolean" required="true" />
 		<cfset variables.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
 	<cffunction name="getDebugModeOnly" access="public" returntype="boolean" output="false"
-		hint="Gets if the adapter will log if CF's debug mode is enabled.">
+		hint="Gets if the adapter will log if the CFML server debug mode is enabled.">
 		<cfreturn variables.debugModeOnly />
 	</cffunction>
 
