@@ -78,14 +78,15 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.timespan = "0,1,0,0" /><!--- Default to 1 hour --->
-	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = "" />
-	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
-	<cfset variables.cleanupInterval = 3 />
-	<cfset variables.threadingAdapter = "" />
+	<cfset variables.instance.timespan = "0,1,0,0" /><!--- Default to 1 hour --->
+	<cfset variables.instance.scope = "application" />
+	<cfset variables.instance.scopeKey = "" />
+	<cfset variables.instance.cleanupInterval = 3 />
+	
 	<cfset variables.currentDateTime = "" />
 	<cfset variables.lastCleanup = createTimestamp() />
+	<cfset variables.threadingAdapter = "" />
+	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -386,10 +387,10 @@ via reap() which is run every 3 minutes.
 	--->
 	<cffunction name="setTimespan" access="private" returntype="void" output="false">
 		<cfargument name="timespan" type="string" required="true" />
-		<cfset variables.timespan = arguments.timespan />
+		<cfset variables.instance.timespan = arguments.timespan />
 	</cffunction>
 	<cffunction name="getTimespan" access="public" returntype="string" output="false">
-		<cfreturn variables.timespan />
+		<cfreturn variables.instance.timespan />
 	</cffunction>
 
 	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
@@ -408,26 +409,26 @@ via reap() which is run every 3 minutes.
 
 	<cffunction name="setScope" access="private" returntype="void" output="false">
 		<cfargument name="scope" type="string" required="true" />		
-		<cfset variables.scope = arguments.scope />
+		<cfset variables.instance.scope = arguments.scope />
 	</cffunction>
 	<cffunction name="getScope" access="public" returntype="string" output="false">
-		<cfreturn variables.scope />
+		<cfreturn variables.instance.scope />
 	</cffunction>
 
 	<cffunction name="setScopeKey" access="private" returntype="void" output="false">
 		<cfargument name="scopeKey" type="string" required="true" />
-		<cfset variables.scopeKey = arguments.scopeKey />
+		<cfset variables.instance.scopeKey = arguments.scopeKey />
 	</cffunction>
 	<cffunction name="getScopeKey" access="private" returntype="string" output="false">
-		<cfreturn variables.scopeKey />
+		<cfreturn variables.instance.scopeKey />
 	</cffunction>
 
 	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false">
 		<cfargument name="cleanupInterval" type="numeric" required="true" />		
-		<cfset variables.cleanupInterval = arguments.cleanupInterval />
+		<cfset variables.instance.cleanupInterval = arguments.cleanupInterval />
 	</cffunction>
 	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false">
-		<cfreturn variables.cleanupInterval />
+		<cfreturn variables.instance.cleanupInterval />
 	</cffunction>
 	
 	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false">

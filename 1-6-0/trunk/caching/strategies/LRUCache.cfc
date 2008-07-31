@@ -67,9 +67,9 @@ in the application scope.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.size = 100 />
-	<cfset variables.scope = "application" />
-	<cfset variables.scopeKey = "" />
+	<cfset variables.instance.size = 100 />
+	<cfset variables.instance.scope = "application" />
+	<cfset variables.instance.scopeKey = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -275,29 +275,29 @@ in the application scope.
 	--->
 	<cffunction name="setSize" access="private" returntype="void" output="false">
 		<cfargument name="size" type="numeric" required="true" />
-		<cfset variables.size = arguments.size />
+		<cfset variables.instance.size = arguments.size />
 	</cffunction>
 	<cffunction name="getSize" access="public" returntype="string" output="false"
 		hint="Returns the configured maximum size of the LRU cache.">
-		<cfreturn variables.size />
+		<cfreturn variables.instance.size />
 	</cffunction>
 
 	<cffunction name="setScope" access="private" returntype="void" output="false">
 		<cfargument name="scope" type="string" required="true" />
-		<cfset variables.scope = arguments.scope />
+		<cfset variables.instance.scope = arguments.scope />
 	</cffunction>
 	<cffunction name="getScope" access="public" returntype="string" output="false"
 		hint="Returns the scope where the LRU cache is stored.">
-		<cfreturn variables.scope />
+		<cfreturn variables.instance.scope />
 	</cffunction>
 	
 	<cffunction name="setScopeKey" access="private" returntype="void" output="false">
 		<cfargument name="scopeKey" type="string" required="true" />
-		<cfset variables.scopeKey = arguments.scopeKey />
+		<cfset variables.instance.scopeKey = arguments.scopeKey />
 	</cffunction>
 	<cffunction name="getScopeKey" access="public" returntype="string" output="false"
 		hint="Gets the unique cache key for this cache strategy.">
-		<cfreturn variables.scopeKey />
+		<cfreturn variables.instance.scopeKey />
 	</cffunction>
 	
 </cfcomponent>

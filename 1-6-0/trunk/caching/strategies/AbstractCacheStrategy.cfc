@@ -42,7 +42,8 @@ in the Mach-II dashboard.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.isCacheEnabled = true />
+	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.isCacheEnabled = true />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
 	<cfset variables.log = 0 />
@@ -102,14 +103,19 @@ in the Mach-II dashboard.
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
 	<cffunction name="getCacheStats" access="public" returntype="MachII.caching.CacheStats" output="false"
 		hint="Gets the cache stats for this caching strategy.">
 		<cfreturn variables.cacheStats />
 	</cffunction>
 	
-	<!---
-	PUBLIC FUNCTIONS - UTILS
-	--->	
+	<cffunction name="getConfigurationData" access="public" returntype="MachII.caching.CacheStats" output="false"
+		hint="Gets the configuration data for this caching strategy.">
+		<cfreturn variables.instance />
+	</cffunction>
+	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -143,11 +149,11 @@ in the Mach-II dashboard.
 	<cffunction name="setCacheEnabled" access="public" returntype="void" output="false"
 		hint="Sets the boolean suggestion that isCacheEnabled() returns.">
 		<cfargument name="isCacheEnabled" type="boolean" required="true" />
-		<cfset variables.isCacheEnabled = arguments.isCacheEnabled />
+		<cfset variables.instance.isCacheEnabled = arguments.isCacheEnabled />
 	</cffunction>
 	<cffunction name="isCacheEnabled" access="public" returntype="boolean" output="false"
 		hint="Provides a boolean suggestion to the *calling code* if caching should be used. This does not explicitly turn caching on/off.">
-		<cfreturn variables.isCacheEnabled />
+		<cfreturn variables.instance.isCacheEnabled />
 	</cffunction>
 
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
