@@ -203,7 +203,7 @@ in the application scope.
 				indicates that a reap is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
-			<cflock name="_MachIILRUCacheCleanup_#getScopeKey()#" type="exclusive" 
+			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 				timeout=".05" throwontimeout="false">
 				
 				<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
@@ -242,6 +242,9 @@ in the application scope.
 		</cfif>
 	</cffunction>
 	
+	<!---
+	PROTECTED FUNCTIONS - UTIL
+	--->
 	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hashed version of the passed key.">
 		<cfargument name="key" type="string" required="true" />
@@ -263,11 +266,34 @@ in the application scope.
 		
 		<!--- Check to see if the cache data structure is initialized --->
 		<cfif NOT StructCount(storage)>
-			<cfset storage.data = StructNew() />
-			<cfset storage.timestamps = StructNew() />
+			<cflock name="#getNamedLockName("create")#" type="exclusive" 
+				timeout=".05" throwontimeout="false">
+				<cfif NOT StructCount(storage)>
+					<cfset storage.data = StructNew() />
+					<cfset storage.timestamps = StructNew() />
+				</cfif>
+			</cflock>
 		</cfif>
 		
 		<cfreturn storage />
+	</cffunction>
+	
+	<cffunction name="getNamedLockName" access="private" returntype="string" output="false"
+		hint="Gets a named lock name based on choosen scope and other factors">
+		<cfargument name="actionType" type="string" required="true" />
+		
+		<cfset var name = "_MachIILRUCache_" & arguments.actionType & "_" & getScopeKey() />
+		
+		<!--- We don't want all sessions to share the same named lock
+			since they will run reap independently whereas reap 
+			done in the application or server scopes will only run once --->
+		<cfif getScope() EQ "session">
+			<!--- Cannot directly access session scope because most CFML
+			engine will throw an error if session is disabled --->
+			<cfset name = name & "_" & StructGet("session").sessionId />
+		</cfif>
+
+		<cfreturn name />
 	</cffunction>
 
 	<!---
