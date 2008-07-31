@@ -48,8 +48,6 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		color: ##000;
 	}
 	##MachIIRequestLogDisplay table {
-		border: 1px solid ##D0D0D0;
-		padding: 0.5em;
 		width:100%;
 	}
 	##MachIIRequestLogDisplay table td {
