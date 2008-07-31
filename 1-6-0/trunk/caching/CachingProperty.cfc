@@ -77,15 +77,13 @@ See individual caching strategies for more information on configuration.
 		
 		<cfset var cacheStrategyManager = getAppManager().getCacheManager().getCacheStrategyManager() />
 		<cfset var params = getParameters() />
+		<cfset var defaultCacheParameters = StructNew() />
 		<cfset var key = "" />
 
 		<!--- Set the default cache strategy if defined --->
 		<cfif isParameterDefined("defaultCacheName")>
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
 		</cfif>
-		
-		<!--- Set caching mode (default: true) --->
-		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
 		
 		<!--- Load defined cache strategies --->
 		<cfloop collection="#params#" item="key">
@@ -96,7 +94,8 @@ See individual caching strategies for more information on configuration.
 
 		<!--- Configure the default strategy if no strategies were set --->		
 		<cfif NOT StructCount(cacheStrategyManager.getCacheStrategies())>
-			<cfset configureDefaultStrategy() />
+			<cfset defaultCacheParameters.type = variables.defaultCacheType />
+			<cfset configureStrategy(variables.defaultCacheName, defaultCacheParameters) />
 		</cfif>
 		
 		<!--- Set the default cache name if there is only one strategy defined 
@@ -110,7 +109,7 @@ See individual caching strategies for more information on configuration.
 		<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
 		
 		<!--- Set caching enabled/disabled --->
-		<cfif NOT getCachingEnabled()>
+		<cfif NOT getParameter("cachingEnabled", true)>
 			<cfset getAppManager().getCacheManager().disableCaching() />
 		</cfif>
 	</cffunction>
@@ -130,20 +129,6 @@ See individual caching strategies for more information on configuration.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="configureDefaultStrategy" access="private" returntype="void" output="false"
-		hint="Configures the default caching strategy (e.g. MachII.caching.strategies.TimeSpanCache).">
-			
-		<cfset var parameters = StructNew() />
-
-		<!--- Set the default cache name since we had to load the default strategy --->
-		<cfset setDefaultCacheName("default") />
-		
-		<cfset parameters.type = variables.defaultCacheType />
-		<cfset parameters.generatedScopeKey = createCacheId(getDefaultCacheName()) />
-		
-		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(getDefaultCacheName(), parameters.type, parameters) />	
-	</cffunction>
-	
 	<cffunction name="configureStrategy" access="private" returntype="void" output="false"
 		hint="Configures a strategy.">
 		<cfargument name="name" type="string" required="true"
