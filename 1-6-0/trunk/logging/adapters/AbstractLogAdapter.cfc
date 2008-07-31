@@ -213,7 +213,7 @@ Notes:
 		<cfset var key = "" />
 		
 		<cfloop collection="#arguments.parameters#" item="key">
-			<cfset setParameter(key, parameters[key]) />
+			<cfset setParameter(key, arguments.parameters[key]) />
 		</cfloop>
 	</cffunction>
 	<cffunction name="getParameters" access="public" returntype="struct" output="false"
