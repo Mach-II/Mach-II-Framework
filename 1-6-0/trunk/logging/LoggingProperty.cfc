@@ -65,8 +65,10 @@ will bind to root parameter values.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loggingEnabled = true />
+	<cfset variables.defaultLoggerName = "MachII" />
+	<cfset variables.defaultLoggerType = "MachII.logging.loggers.MachIILog.Logger" />
 	<cfset variables.loggers = StructNew() />
+	<cfset variables.loggingEnabled = true />
 	
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -75,13 +77,9 @@ will bind to root parameter values.
 		hint="Configures the property.">
 		
 		<cfset var params = getParameters() />
+		<cfset var defaultLoggerParameters = StructNew() />
 		<cfset var loggers = StructNew() />
 		<cfset var key = "" />
-		
-		<!--- Set if logging is enabled (which is by default true) --->
-		<cfif isParameterDefined("loggingEnabled")>
-			<cfset setLoggingEnabled(getParameter("loggingEnabled")) />
-		</cfif>
 		
 		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
@@ -90,9 +88,10 @@ will bind to root parameter values.
 			</cfif>
 		</cfloop>
 		
-		<!--- Configure the default logger since no loggers were set --->
+		<!--- Configure the default logger since no loggers are registered --->
 		<cfif NOT StructCount(getLoggers())>
-			<cfset configureDefaultLogger() />
+			<cfset defaultLoggerParameters.type = variables.defaultLoggerType />
+			<cfset configureLogger(variables.defaultLoggerName, defaultLoggerParameters) />
 		</cfif>
 		
 		<!--- Configure the loggers --->
@@ -103,7 +102,7 @@ will bind to root parameter values.
 		</cfloop>
 		
 		<!--- Set logging enabled/disabled --->
-		<cfif NOT getLoggingEnabled()>
+		<cfif NOT getParameter("loggingEnabled", true)>
 			<cfset getAppManager().getLogFactory().disableLogging() />
 		</cfif>
 	</cffunction>
@@ -124,27 +123,6 @@ will bind to root parameter values.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="configureDefaultLogger" access="private" returntype="void" output="false"
-		hint="Configures the default logger (e.g. MachII.logging.loggers.MachIILog.Logger).">
-		
-		<cfset var logger = "" />
-		<cfset var loggerId = createLoggerId("MachII") />
-		<cfset var parameters = StructNew() />
-		
-		<!--- Create, init and configure the logger --->
-		<cfset logger = CreateObject("component", "MachII.logging.loggers.MachIILog.Logger").init(loggerId, getAppManager().getLogFactory(), parameters) />
-
-		<!--- Add callback to the RequestManager to the onRequestEnd method --->
-		<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
-
-		<!--- Add a callbacks to the RequestManager for pre/postRedirect methods --->
-		<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
-		<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
-
-		<!--- Set the logger --->
-		<cfset addLogger("logger", logger) />
-	</cffunction>
-	
 	<cffunction name="configureLogger" access="private" returntype="void" output="false"
 		hint="Configures an logger.">
 		<cfargument name="loggerName" type="string" required="true"
@@ -213,17 +191,7 @@ will bind to root parameter values.
 	
 	<!---
 	ACCESSORS
-	--->
-	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
-		hint="Sets if logging is enabled.">
-		<cfargument name="loggingEnabled" type="boolean" required="true" />
-		<cfset variables.loggingEnabled = arguments.loggingEnabled />
-	</cffunction>
-	<cffunction name="getLoggingEnabled" access="public" returntype="boolean" output="false"
-		hint="Gets the value if logging is enabled.">
-		<cfreturn variables.loggingEnabled />
-	</cffunction>
-	
+	--->	
 	<cffunction name="addLogger" access="private" returntype="void" output="false"
 		hint="Adds a logger to the struct of registered loggers.">
 		<cfargument name="loggerName" type="string" required="true" />
