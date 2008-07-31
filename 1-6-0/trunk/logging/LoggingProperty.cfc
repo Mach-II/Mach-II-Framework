@@ -201,7 +201,14 @@ will bind to root parameter values.
 	<cffunction name="createLoggerId" access="private" returntype="string" output="false"
 		hint="Creates a logger id.">
 		<cfargument name="loggerName" type="string" required="true" />
-		<cfreturn Hash(arguments.loggerName & getAppManager().getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
+		
+		<cfset var moduleName = getAppManager().getModuleName() />
+		
+		<cfif NOT Len(moduleName)>
+			<cfset moduleName = "_base_" />
+		</cfif>
+		
+		<cfreturn Hash(arguments.loggerName & moduleName & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
 	</cffunction>
 	
 	<!---

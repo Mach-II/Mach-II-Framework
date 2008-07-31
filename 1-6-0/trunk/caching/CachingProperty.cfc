@@ -139,7 +139,7 @@ See individual caching strategies for more information on configuration.
 		<cfset setDefaultCacheName("default") />
 		
 		<cfset parameters.type = variables.defaultCacheType />
-		<cfset parameters.generatedScopeKey = createCacheIdKey(getDefaultCacheName()) />
+		<cfset parameters.generatedScopeKey = createCacheId(getDefaultCacheName()) />
 		
 		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(getDefaultCacheName(), parameters.type, parameters) />	
 	</cffunction>
@@ -160,7 +160,7 @@ See individual caching strategies for more information on configuration.
 		</cfif>
 
 		<!--- Add in scopeKey as a parameter --->
-		<cfset arguments.parameters.generatedScopeKey = createCacheIdKey(arguments.name) />
+		<cfset arguments.parameters.generatedScopeKey = createCacheId(arguments.name) />
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
@@ -171,17 +171,17 @@ See individual caching strategies for more information on configuration.
 		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.name, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
-	<cffunction name="createCacheIdKey" access="private" returntype="string" output="false"
-		hint="Creates a cache indentifier key.">
+	<cffunction name="createCacheId" access="private" returntype="string" output="false"
+		hint="Creates a cache indentifier.">
 		<cfargument name="cacheName" type="string" required="true" />
 		
 		<cfset var moduleName = getAppManager().getModuleName() />
 		
 		<cfif NOT Len(moduleName)>
-			<cfset moduleName = "base" />
+			<cfset moduleName = "_base_" />
 		</cfif>
 		
-		<cfreturn "_MachIICache." & Hash(getAppManager().getAppKey() & "_" & moduleName & "_" & arguments.cacheName) />
+		<cfreturn "_MachIICache." & Hash(getAppManager().getAppKey() & moduleName & arguments.cacheName) />
 	</cffunction>
 	
 	<!---
