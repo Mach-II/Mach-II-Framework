@@ -35,7 +35,7 @@ the rest of the framework. (pfarrell)
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.properties = StructNew() />
-	<cfset variables.configurableProperties = ArrayNew(1) />
+	<cfset variables.configurablePropertyNames = ArrayNew(1) />
 	<cfset variables.parentPropertyManager = "">
 	<cfset variables.majorVersion = "1.6.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
@@ -160,7 +160,7 @@ the rest of the framework. (pfarrell)
 							</cfif>
 						</cfcatch>
 					</cftry>
-					<cfset ArrayAppend(variables.configurableProperties, propertyName) />
+					<cfset ArrayAppend(variables.configurablePropertyNames, propertyName) />
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
 					<cftry>
@@ -237,12 +237,13 @@ the rest of the framework. (pfarrell)
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Prepares the configurable properties for use.">
 
+		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
 		
 		<!--- Run configure on all configurable properties --->
-		<cfloop from="1" to="#ArrayLen(variables.configurableProperties)#" index="i">
-			<cfset aConfigurableProperty = getProperty(variables.configurableProperties[i]) />
+		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
+			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
 	</cffunction>
@@ -339,7 +340,7 @@ the rest of the framework. (pfarrell)
 	
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
 		hint="Returns an array of property names that we can call a configure() method on.">
-		<cfreturn variables.configurableProperties />
+		<cfreturn variables.configurablePropertyNames />
 	</cffunction>
 	
 	<!---
