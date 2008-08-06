@@ -92,7 +92,7 @@ Notes:
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		
-		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		<cfset var appKey = getAppManager().getAppKey() />
 		
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfset request["_MachIIRequestHandler_" & appKey] = 

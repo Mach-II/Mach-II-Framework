@@ -71,7 +71,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
 			
-		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		<cfset var appKey = getAppManager().getAppKey() />
 		
 		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
@@ -89,7 +89,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
 		
-		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		<cfset var appKey = getAppManager().getAppKey() />
 		
 		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
@@ -107,7 +107,7 @@ the rest of the framework. (pfarrell)
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 			
-		<cfset var appKey = getAppManager().getAppLoader().getAppKey() />
+		<cfset var appKey = getAppManager().getAppKey() />
 			
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = request["_MachIIRequestHandler_" & appKey].getEventContext().getAppManager().getModuleName() />
