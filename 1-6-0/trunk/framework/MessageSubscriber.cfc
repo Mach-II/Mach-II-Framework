@@ -26,7 +26,7 @@ Notes:
 <cfcomponent
 	displayname="MessageSubscriberInvoker"
 	output="false"
-	hint="A invoker for message subscribers.">
+	hint="Handles processing of a subscriber to a message.">
 
 	<!---
 	PROPERTIES
