@@ -141,7 +141,12 @@ Notes:
 					be deleted if init() returns void --->
 				<cfset plugin = CreateObject("component", pluginType) />
 				<cfset plugin.init(getAppManager(), pluginParams) />
-				
+
+				<cfcatch type="expression">
+					<cfthrow type="MachII.framework.PluginSyntaxException"
+						message="Mach-II could not register a plugin with type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+						detail="#cfcatch.detail#" />
+				</cfcatch>		
 				<cfcatch type="any">
 					<cfif StructKeyExists(cfcatch, "missingFileName")>
 						<cfthrow type="MachII.framework.CannotFindPlugin"

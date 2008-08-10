@@ -135,7 +135,12 @@ Notes:
 						be deleted if init() returns void --->
 					<cfset filter = CreateObject("component", filterType) />
 					<cfset filter.init(getAppManager(), filterParams) />
-	
+
+					<cfcatch type="expression">
+						<cfthrow type="MachII.framework.EventFilterSyntaxException"
+							message="Mach-II could not register an event-filter with type of '#filterType#' for the event-filter named '#filterName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+							detail="#cfcatch.detail#" />
+					</cfcatch>	
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName")>
 							<cfthrow type="MachII.framework.CannotFindEventFilter"

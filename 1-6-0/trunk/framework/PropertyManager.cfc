@@ -150,6 +150,11 @@ the rest of the framework. (pfarrell)
 						<cfset propertyValue = CreateObject("component", propertyType) />
 						<cfset propertyValue.init(getAppManager(), propertyParams) />
 
+						<cfcatch type="expression">
+							<cfthrow type="MachII.framework.PropertySyntaxException"
+								message="Mach-II could not register a property with type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+								detail="#cfcatch.detail#" />
+						</cfcatch>
 						<cfcatch type="any">
 							<cfif StructKeyExists(cfcatch, "missingFileName")>
 								<cfthrow type="MachII.framework.CannotFindProperty"

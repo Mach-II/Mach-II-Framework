@@ -145,6 +145,11 @@ Notes:
 					<cfset listener = CreateObject("component", listenerType) />
 					<cfset listener.init(getAppManager(), listenerParams) />
 					
+					<cfcatch type="expression">
+						<cfthrow type="MachII.framework.ListenerSyntaxException"
+							message="Mach-II could not register a listener with type of '#listenerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+							detail="#cfcatch.detail#" />
+					</cfcatch>
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName")>
 							<cfthrow type="MachII.framework.CannotFindListener"
