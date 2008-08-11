@@ -353,18 +353,18 @@ via reap() which is run every 3 minutes.
 		<cfif timespan EQ "forever">
 			<cfset timestamp = DateAdd("yyyy", 100, timestamp) />
 		<cfelse>
-			<cfif listGetAt(timespan, 4) gt 0>
-				<cfset timestamp = DateAdd("s", listGetAt(timespan, 4), timestamp) />
-			</cfif>
-			<cfif listGetAt(timespan, 3) gt 0>
-				<cfset timestamp = DateAdd("n", listGetAt(timespan, 3), timestamp) />
-			</cfif>
-			<cfif listGetAt(timespan, 2) gt 0>
-				<cfset timestamp = DateAdd("h", listGetAt(timespan, 2), timestamp) />
-			</cfif>
-			<cfif listGetAt(timespan, 1) gt 0>
-				<cfset timestamp = DateAdd("d", listGetAt(timespan, 1), timestamp) />
-			</cfif>
+			<!--- 
+				Peter did 10,000 iterations of each method call (just have a method on a scribble page)
+				9:25 Normal (the code being used now) 172ms
+				Timespan (the code below in this comment) 234ms
+				
+				<cfset timestamp = DateAdd("s", CreateTimespan(listGetAt(timespan, 1), 
+					listGetAt(timespan, 2), listGetAt(timespan, 3), listGetAt(timespan, 4)) * 86400, timestamp) />
+			--->
+			<cfset timestamp = DateAdd("s", listGetAt(timespan, 4), timestamp) />
+			<cfset timestamp = DateAdd("n", listGetAt(timespan, 3), timestamp) />
+			<cfset timestamp = DateAdd("h", listGetAt(timespan, 2), timestamp) />
+			<cfset timestamp = DateAdd("d", listGetAt(timespan, 1), timestamp) />
 		</cfif>
 		
 		<cfreturn createTimestamp(timestamp) />
