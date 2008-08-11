@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id: $
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
@@ -28,7 +28,10 @@ and simple properties from the property manager (${properties.propName}).
 
 ${scope.key}
 --->
-<cfcomponent output="false">
+<cfcomponent 
+	output="false"
+	hint="Evaluates expressions and returns data.">
+	
 	<!---
 	PROPERTIES
 	--->
@@ -57,25 +60,29 @@ ${scope.key}
 		<cfif isExpression(arguments.expression)>
 			<cfset body = Mid(arguments.expression, 3, Len(arguments.expression) - 3) />
 			<cfif listLen(body, ".") gt 1>
+				
+				<!--- Scope is always up to the first dot --->
 				<cfset scope  = listGetAt(body, 1, ".") />
-				<cfset key = listGetAt(body, 2, ".") />
+				<!--- Keys can contain dots so just remove the scope --->
+				<cfset key = Right(body, Len(body) - Len(scope) - 1) />
+				
 				<cfswitch expression="#scope#">
 					<cfcase value="event">
 						<cfif arguments.event.isArgDefined(key)>
 							<cfset result = event.getArg(key) />
 						<cfelse>
 							<cfthrow type="MachII.util.InvalidExpression" 
-								message="The event argument '#arguments.key#' from the expression '#arguments.expression#' does not exist in the current event." />
+								message="The event argument '#key#' from the expression '#arguments.expression#' does not exist in the current event." />
 						</cfif>
 					</cfcase>
 					<cfcase value="properties">
 						<cfif arguments.propertyManager.isPropertyDefined(key) 
-							OR (IsObject(getAppManager().getParent()) 
-								AND getAppManager().getParent().getPropertyManager().isPropertyDefined(key))>
-							<cfset result = getProperty(key) />
+							OR (IsObject(arguments.propertyManager.getParent()) 
+								AND arguments.propertyManager.getParent().isPropertyDefined(key))>
+							<cfset result = arguments.propertyManager.getProperty(key) />
 						<cfelse>
 							<cfthrow type="MachII.util.InvalidExpression" 
-								message="The property '#arguments.key#' from the expression '#arguments.expression#' was not found as a valid property name." />
+								message="The property '#key#' from the expression '#arguments.expression#' was not found as a valid property name." />
 						</cfif>
 					</cfcase>
 				</cfswitch>
@@ -91,13 +98,10 @@ ${scope.key}
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="isExpression" access="public" returntype="boolean" output="false">
+	<cffunction name="isExpression" access="public" returntype="boolean" output="false"
+		hint="Checks if passed argument is a valid expression.">
 		<cfargument name="expression" type="string" required="true" />
-		<cfset var expressionFound = false />
-		<cfif REFindNoCase("\${(.)*?}", arguments.expression)>
-			<cfset expressionFound = true />
-		</cfif>
-		<cfreturn expressionFound />
+		<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
 	</cffunction>
 	
 </cfcomponent>

@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id: $
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
@@ -49,19 +49,39 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testEventArgExistsExpression" access="public" returntype="void" output="false">
-		<cfset var expression = "${event.argExists}" />
+	<cffunction name="testEventArgExistsExpressionWithEvent" access="public" returntype="void" output="false">
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
 		<cfset var propertyManager = getPropertyManager() />
 
 		<cfset event.setArg("argExists", "foobar") />
+		<cfset event.setArg("dot.argExists", "foobar") />
 		
-		<cfset result = variables.expressionEvaluator.evaluateExpression(expression, event, propertyManager) />
-		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.argExists}", event, propertyManager) />	
+		<cfset assertTrue(result eq "foobar", "Event arg returned did not equal 'foobar'") />
+
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.dot.argExists}", event, propertyManager) />
 		<cfset assertTrue(result eq "foobar", "Event arg returned did not equal 'foobar'") />
 	</cffunction>
+
+	<cffunction name="testEventArgExistsExpressionWithProperty" access="public" returntype="void" output="false">
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+
+		<cfset propertyManager.setProperty("argExists", "foobar") />
+		<cfset propertyManager.setProperty("dot.argExists", "foobar") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${properties.argExists}", event, propertyManager) />	
+		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
+
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${properties.dot.argExists}", event, propertyManager) />
+		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
+	</cffunction>
 	
+	<!---
+	PROTECTED FUNTIONS - UTIL
+	--->
 	<cffunction name="getEvent" access="private" returntype="MachII.framework.Event" output="false">
 		<cfreturn CreateObject("component", "MachII.framework.Event").init() />
 	</cffunction>
