@@ -142,6 +142,10 @@ in the Mach-II dashboard.
 			hint="The parameter name." />
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
+	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
+		hint="Returns a comma delimited list of parameter names.">
+		<cfreturn StructKeyList(variables.parameters) />
+	</cffunction>
 	
 	<!---
 	ACCESSORS
