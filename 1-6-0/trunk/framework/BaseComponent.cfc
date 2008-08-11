@@ -160,6 +160,10 @@ the rest of the framework. (pfarrell)
 			hint="The parameter name." />
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
+	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
+		hint="Returns a comma delimited list of parameter names.">
+		<cfreturn StructKeyList(variables.parameters) />
+	</cffunction>
 	<cffunction name="hasParameter" access="public" returntype="boolean" output="false"
 		hint="DEPRECATED - use isParameterDefined() instead. Checks to see whether or not a configuration parameter is defined.">
 		<cfargument name="name" type="string" required="true"
