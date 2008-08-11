@@ -43,6 +43,8 @@ automatically put your CSS in the head section via <cfhtmlhead />
 	##MachIIRequestLogDisplay {
 		color: ##000;
 		background-color: ##FFF;
+		text-align: left;
+		margin: 25px;
 	}
 	##MachIIRequestLogDisplay h3 {
 		color: ##000;
@@ -102,7 +104,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<td class="lineBottom" style="width:30%;"><h4>Channel</h4></td>
 			<td class="lineBottom" style="width:7.5%;"><h4>Log Level</h4></td>
 			<td class="lineBottom" style="width:55%;"><h4>Message</h4></td>
-			<td class="lineBottom" style="width:7.5%;"><h4>Timing (ms)</h4></td>
+			<td class="lineBottom" style="width:7.5%;"><h4 class="right">Timing (ms)</h4></td>
 		</tr>
 	<cfif ArrayLen(data)>
 		<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
