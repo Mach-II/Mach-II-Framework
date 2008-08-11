@@ -43,6 +43,7 @@ Notes:
 	<cfset variables.log = 0 />
 	<cfset variables.cachingEnabled = true />
 	<cfset variables.aliasKeyLists = structNew() />
+	<cfset variables.expressionEvaluator = 0 />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -69,6 +70,7 @@ Notes:
 		<cfelse>
 			<cfset setHandlerId(createHandlerId()) />
 		</cfif>
+		<cfset setExpressionEvaluator(CreateObject("component", "MachII.util.ExpressionEvaluator").init()) />
 		
 		<cfloop list="#arguments.alias#" index="currentAlias">
 			<cfset variables.aliasKeyLists[hash(currentAlias)] = "" />
@@ -213,8 +215,9 @@ Notes:
 		
 		<cfset var criteriaToUse =  ""/>
 		<cfset var item = "" />
-		<cfset var arg = "" />
+		<cfset var element = "" />
 		<cfset var key = getKey() />
+		<cfset var arg = "" />
 		
 		<!--- The criteria from the cache command will be used if criteria passed in is empty string. --->
 		<cfif arguments.criteria eq "">
@@ -223,16 +226,19 @@ Notes:
 			<cfset criteriaToUse = arguments.criteria />
 		</cfif>
 
-		<!--- Criteria can have notation like 'id=product_id' where product_id is the event arg that needs to be part of the
-			key as the id --->		
+		<!--- Criteria can have notation like 'id=${event.product_id},type=print' where product_id is the event arg and type is a string 
+			that needs to be part of the key as the id. --->		
 		<cfloop list="#criteriaToUse#" index="item">
 			<cfif listLen(item, "=") eq 2>
-				<cfset arg = arguments.event.getArg(listGetAt(item, 2, "="), "") />
+				<cfset element = listGetAt(item, 2, "=") />
 				<cfset item = listGetAt(item, 1, "=") />
+				<cfif getExpressionEvaluator().isExpression(element)>
+					<cfset arg = getExpressionEvaluator().evaluateExpression(element, arguments.event, getAppManager().getPropertyManager()) />
+				</cfif>
 			<cfelse>
 				<cfset arg = arguments.event.getArg(item, "") />
 			</cfif>
-
+			
 			<!--- Accept only simple values and ignore complex values --->	
 			<cfif IsSimpleValue(arg)>
 				<cfset key = ListAppend(key, item & "=" & arg, "&") />
@@ -394,6 +400,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getParentHandlerType" access="public" returntype="string" output="false">
 		<cfreturn variables.parentHandlerType />
+	</cffunction>
+	
+	<cffunction name="setExpressionEvaluator" access="private" returntype="void" output="false">
+		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
+		<cfset variables.expressionEvaluator = arguments.expressionEvaluator />
+	</cffunction>
+	<cffunction name="getExpressionEvaluator" access="public" returntype="MachII.util.ExpressionEvaluator" output="false">
+		<cfreturn variables.expressionEvaluator />
+	</cffunction>
+	
+	<cffunction name="setAppManager" access="public" returntype="void" output="false">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
+		<cfreturn variables.appManager />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"

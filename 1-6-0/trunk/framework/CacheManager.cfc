@@ -102,6 +102,7 @@ Notes:
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
 			id, alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
+		<cfset cacheHandler.setAppManager(getAppManager()) />
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
 			<cfset command = createCommand(nestedCommandNodes[i], arguments.parentHandlerName, arguments.parentHandlerType) />
 			<cfset cacheHandler.addCommand(command) />
