@@ -138,7 +138,52 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
+
+	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
+		hint="Adds a HTML head element.">
+		<cfargument name="text" type="string" required="true" />
+
+		<cfset var appKey = getAppManager().getAppKey() />
+
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().addHTMLHeadElement(arguments.text) />
+		<cfelse>
+			<cfthrow message="The required RequestHandler is necessary to add HTML head elements is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
+		</cfif>
+	</cffunction>
 	
+	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+		<cfargument name="name" type="string" required="false" />
+		<cfargument name="value" type="string" required="false" />
+		<cfargument name="statusCode" type="numeric" required="false" />
+		<cfargument name="statusText" type="string" required="false" />
+		<cfargument name="charset" type="string" required="false" />
+		
+		<cfset var appKey = getAppManager().getAppKey() />
+		
+		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().addHTTPHeader(argumentcollection=arguments) />
+		<cfelse>
+			<cfthrow message="The required RequestHandler is necessary to add HTTP headers is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by name/value.">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="string" required="true" />
+		<cfargument name="charset" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by statusCode/statusText.">
+		<cfargument name="statuscode" type="string" required="true" />
+		<cfargument name="statustext" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->

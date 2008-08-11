@@ -39,6 +39,8 @@ Notes:
 	<cfset variables.previousEvent = "" />
 	<cfset variables.mappings = StructNew() />
 	<cfset variables.exceptionEventName = "" />
+	<cfset variables.HTMLHeadElementCallbacks = ArrayNew(1) />
+	<cfset variables.HTTPHeaderCallbacks = ArrayNew(1) />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -313,6 +315,71 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
+	
+	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
+		hint="Adds a HTML head element.">
+		<cfargument name="text" type="string" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfhtmlhead text="#arguments.text#" />
+		
+		<!--- Notify any registered observers --->
+		<cfloop from="1" to="#ArrayLen(variables.HTMLHeadElementCallbacks)#" index="i">
+			<cfinvoke component="#variables.HTMLHeadElementCallbacks[i].callback#"
+				method="#variables.HTMLHeadElementCallbacks[i].method#" 
+				argumentcollection="#arguments#" />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+		<cfargument name="name" type="string" required="false" />
+		<cfargument name="value" type="string" required="false" default="" />
+		<cfargument name="statusCode" type="numeric" required="false" />
+		<cfargument name="statusText" type="string" required="false" default="" />
+		<cfargument name="charset" type="string" required="false" />
+		
+		<cfif StructKeyExists(arguments, "name")>
+			<cfif StructKeyExists(arguments, "charset")>
+				<cfheader name="#arguments.name#" 
+					value="#arguments.value#" 
+					charset="#arguments.charset#" />			
+			<cfelse>
+				<cfheader name="#arguments.name#" 
+					value="#arguments.value#" />
+			</cfif>
+		<cfelseif StructKeyExists(arguments, "statusCode")>
+			<cfheader statuscode="#arguments.statusCode#" 
+				statustext="#arguments.statusText#" />
+		<cfelse>
+			<cfthrow type="MachII.framework.invalidHTTPHeaderArguments"
+				message="The method addHTTPHeader required arguments must be 'name,value' or 'statusCode'."
+				detail="Passed arguments:#arguments.toString()#" />
+		</cfif>
+		
+		<!--- Notify any registered observers --->
+		<cfloop from="1" to="#ArrayLen(variables.HTTPHeaderCallbacks)#" index="i">
+			<cfinvoke component="#variables.HTTPHeaderCallbacks[i].callback#"
+				method="#variables.HTTPHeaderCallbacks[i].method#" 
+				argumentcollection="#arguments#" />
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by name/value.">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="string" required="true" />
+		<cfargument name="charset" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by statusCode/statusText.">
+		<cfargument name="statuscode" type="string" required="true" />
+		<cfargument name="statustext" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
@@ -371,6 +438,48 @@ Notes:
 	<cffunction name="getEventCount" access="public" returntype="numeric" output="false"
 		hint="Returns the number of events that have been processed for this context.">
 		<cfreturn getRequestHandler().getEventCount() />
+	</cffunction>
+	
+	<cffunction name="addHTMLHeadElementCallback" access="public" returntype="void" output="false"
+		hint="Adds callback to notify when addHTMLHeadElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.HTMLHeadElementCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeHTMLHeadElementCallback" access="public" returntype="void" output="false"
+		hint="Removes callback to notify when addHTMLHeadElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.HTMLHeadElementCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.HTMLHeadElementCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.HTMLHeadElementCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderCallback" access="public" returntype="void" output="false"
+		hint="Adds callback to notify when addHTMLHeadElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.HTTPHeaderCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeHTTPHeaderCallback" access="public" returntype="void" output="false"
+		hint="Removes callback to notify when addHTTPHeaderCallback is run.">
+		<cfargument name="callback" type="any" required="true" />
+
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.HTTPHeaderCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.HTTPHeaderCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.HTTPHeaderCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
 	</cffunction>
 
 	<!---

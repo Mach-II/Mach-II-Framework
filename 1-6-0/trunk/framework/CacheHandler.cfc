@@ -104,26 +104,46 @@ Notes:
 		
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache") OR NOT getCacheStrategy().isCacheEnabled()>
-
-			<!--- Get a snapshot of the event before we run the commands
+		
+			<cfif getCacheStrategy().isCacheEnabled()>
+				<!--- Get a snapshot of the event before we run the commands
 				Used StructAppend so this is not updated by reference when the event is used in the commands --->
-			<cfset StructAppend(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+				<cfset StructAppend(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+				
+				<!--- Register observers for HTMLHeadElement and HTTPHeader --->
+				<cfset arguments.eventContext.addHTMLHeadElementCallback(this, "observeHTMLHeadElement") />
+				<cfset arguments.eventContext.addHTTPHeaderCallback(this, "observeHTTPHeader") />
+			</cfif>
 		
 			<!--- Run commands and save output --->
-			<cfsavecontent variable="dataToCache.output">
-				<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
-					<cfset command = variables.commands[i] />
-					<cfset continue = command.execute(arguments.event, arguments.eventContext) />
-					<cfif continue IS false>
-						<cfbreak />
-					</cfif>
-				</cfloop>
-			</cfsavecontent>
+			<cftry>
+				<cfsavecontent variable="dataToCache.output">
+					<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
+						<cfset command = variables.commands[i] />
+						<cfset continue = command.execute(arguments.event, arguments.eventContext) />
+						<cfif continue IS false>
+							<cfbreak />
+						</cfif>
+					</cfloop>
+				</cfsavecontent>
+				<cfcatch type="any">
+					<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
+					<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
+					<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
+					<cfrethrow />
+				</cfcatch>
+			</cftry>
 			
 			<!--- Run only if caching is enabled --->
 			<cfif getCacheStrategy().isCacheEnabled()>
+				<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
+				<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
+				<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
+
 				<!--- Compare pre-command event data snapshot to current event data  --->
 				<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+				<cfset dataToCache.HTMLHeadElements = getObservedHTMLHeadElements() />
+				<cfset dataToCache.HTTPHeaders = getObservedHTTPHeaders() />
 
 				<!--- Cache the data and output --->
 				<cfset getCacheStrategy().put(key, dataToCache) />
@@ -132,7 +152,11 @@ Notes:
 				<!--- Log messages --->
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Creating cache with key '#key#'.") />
-					<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
+				</cfif>
+				<cfif log.isTraceEnabled()>
+					<cfset log.trace("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.", dataToCache.data) />
+					<cfset log.trace("Set cache HTML head elements.", dataToCache.HTMLHeadElements) />
+					<cfset log.trace("Set cache HTTP headers.", dataToCache.HTTPHeaders) />
 				</cfif>
 			<cfelse>
 				<cfif log.isDebugEnabled()>
@@ -146,11 +170,17 @@ Notes:
 			<!--- Replay the data and output from the cache --->
 			<cfoutput>#dataFromCache.output#</cfoutput>
 			<cfset arguments.event.setArgs(dataFromCache.data) />
+			<cfset replayHTMLHeadElements(dataFromCache.HTMLHeadElements, arguments.eventContext) />
+			<cfset replayHTTPHeaders(dataFromCache.HTTPHeaders, arguments.eventContext) />
 			
 			<!--- Log messages --->
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Using data and output from cache with key '#key#'.") />
-				<cfset log.debug("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.") />
+			</cfif>
+			<cfif log.isTraceEnabled()>
+				<cfset log.trace("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.", dataFromCache.data) />
+				<cfset log.trace("Using cache HTML head elements.", dataFromCache.HTMLHeadElements) />
+				<cfset log.trace("Using cache HTTP headers.", dataFromCache.HTTPHeaders) />
 			</cfif>
 		</cfif>
 		
@@ -199,6 +229,29 @@ Notes:
 		hint="Adds a Command.">
 		<cfargument name="command" type="MachII.framework.Command" required="true" />
 		<cfset ArrayAppend(variables.commands, arguments.command) />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="observeHTMLHeadElement" access="public" returntype="void" output="false"
+		hint="Observes a HTML head element.">
+		
+		<cfif NOT IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTMLHeadElements")>
+			<cfset request["_MachIICacheHandler_#getHandlerId()#_HTMLHeadElements"] = ArrayNew(1) />
+		</cfif>
+		
+		<cfset ArrayAppend(request["_MachIICacheHandler_#getHandlerId()#_HTMLHeadElements"], arguments) />
+	</cffunction>
+	
+	<cffunction name="observeHTTPHeader" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+		
+		<cfif NOT IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTTPHeaders")>
+			<cfset request["_MachIICacheHandler_#getHandlerId()#_HTTPHeaders"] = ArrayNew(1) />
+		</cfif>
+		
+		<cfset ArrayAppend(request["_MachIICacheHandler_#getHandlerId()#_HTTPHeaders"], arguments) />
 	</cffunction>
 	
 	<!---
@@ -270,7 +323,6 @@ Notes:
 		<cfset var dataToCache = StructNew() />
 		<cfset var pre = "" />
 		<cfset var post = "" />
-		<cfset var objTest = StructNew() />
 		<cfset var keyName = "" />
 		<cfset var i = "" />
 				
@@ -288,9 +340,7 @@ Notes:
 				
 				<!--- Check for objects first because CF evaluates objects as structs as well --->
 				<cfif IsObject(pre) AND IsObject(post)>
-					<cfset objTest = ArrayNew(1) />
-					<cfset ArrayAppend(objTest, pre) />
-					<cfif NOT objTest.contains(post)>
+					<cfif NOT getAppManager().getUtils().assertSame(pre, post)>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
 				<!--- Check for queries --->
@@ -338,6 +388,46 @@ Notes:
 	<cffunction name="createHandlerId" access="private" returntype="string" output="false"
 		hint="Creates a random handler id. Does not use UUID for performance reasons.">
 		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
+	</cffunction>
+	
+	<cffunction name="getObservedHTMLHeadElements" access="private" returntype="array" output="false"
+		hint="Gets observed HTML head elements.">		
+		<cfif IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTMLHeadElements")>
+			<cfreturn request["_MachIICacheHandler_#getHandlerId()#_HTMLHeadElements"] />
+		<cfelse>
+			<cfreturn ArrayNew(1) />
+		</cfif>
+	</cffunction>
+	<cffunction name="replayHTMLHeadElements" access="private" returntype="void" output="false"
+		hint="Replays cached HTML head elements.">
+		<cfargument name="HTMLHeadElements" type="array" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.HTMLHeadElements)#" index="i">
+			<cfset arguments.eventContext.addHTMLHeadElement(argumentcollection=arguments.HTMLHeadElements[i]) />
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="getObservedHTTPHeaders" access="private" returntype="array" output="false"
+		hint="Gets observed HTTP headers.">
+		<cfif IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTTPHeaders")>
+			<cfreturn request["_MachIICacheHandler_#getHandlerId()#_HTTPHeaders"] />
+		<cfelse>
+			<cfreturn ArrayNew(1) />
+		</cfif>
+	</cffunction>
+	<cffunction name="replayHTTPHeaders" access="private" returntype="void" output="false"
+		hint="Replays cached HTTP header.">
+		<cfargument name="HTTPHeaders" type="array" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.HTTPHeaders)#" index="i">
+			<cfset arguments.eventContext.addHTTPHeader(argumentcollection=arguments.HTTPHeaders[i]) />
+		</cfloop>
 	</cffunction>
 	
 	<!---

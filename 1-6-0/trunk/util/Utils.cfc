@@ -154,5 +154,21 @@ Notes:
 		
 		<cfreturn threadingAdapter />
 	</cffunction>
+	
+	<cffunction name="assertSame" access="public" returntype="boolean" output="false"
+		hint="Asserts of the passed objects are the same instance or not.">
+		<cfargument name="reference" type="any" required="true" />
+		<cfargument name="comparison" type="any" required="true" />
+		
+		<cfset var system = CreateObject("java", "java.lang.System") />
+		<cfset var referenceHashCode = system.identityHashCode(arguments.reference) />
+		<cfset var comparisonHashCode = system.identityHashCode(arguments.comparison) />
+		
+		<cfif referenceHashCode EQ comparisonHashCode>
+			<cfreturn true />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
+	</cffunction>
 
 </cfcomponent>
