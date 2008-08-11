@@ -53,7 +53,7 @@ Notes:
 		</cfif>
 		
 		<!--- Instantiate the default invoker (invokers are stateless) --->
-		<cfset defaultInvoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
+		<cfset variables.defaultInvoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
 		
 		<cfreturn this />
 	</cffunction>

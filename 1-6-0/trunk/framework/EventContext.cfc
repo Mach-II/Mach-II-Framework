@@ -340,6 +340,8 @@ Notes:
 		<cfargument name="statusText" type="string" required="false" default="" />
 		<cfargument name="charset" type="string" required="false" />
 		
+		<cfset var i = 0 />
+		
 		<cfif StructKeyExists(arguments, "name")>
 			<cfif StructKeyExists(arguments, "charset")>
 				<cfheader name="#arguments.name#" 

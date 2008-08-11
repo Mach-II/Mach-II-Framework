@@ -106,6 +106,7 @@ Notes:
 		hint="Tests recurseComplexValues() with struct syntax.">
 		
 		<cfset var xml = XmlParse('<root><struct name="test"><key name="a" value="1"/><key name="b"><array name="test"><element value="1"/><element><value>2</value></element></array></key><key name="c"><value>simple</value></key></struct></root>') />
+		<cfset var comparison = StructNew() />
 
 		<!--- Create comparison data --->
 		<cfset comparison.a = 1 />
