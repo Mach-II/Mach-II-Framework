@@ -78,7 +78,7 @@ Please use EventInvoker.cfc instead.
 			<!--- resultArg not supported. --->
 			
 			<cfif log.isWarnEnabled()>
-				<cfset log.warn("Listener '#arguments.listener.getComponentNameForLogging()#' is using the CFCInvoker_Event which has been deprecated. Please use the EventInvoker.") />
+				<cfset log.warn("DEPRECATED: Listener '#arguments.listener.getComponentNameForLogging()#' is using the CFCInvoker_Event which has been deprecated. Please use the EventInvoker.") />
 			</cfif>
 
 			<cfcatch type="Any">

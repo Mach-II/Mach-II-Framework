@@ -316,7 +316,7 @@ the rest of the framework. (pfarrell)
 		<cfset var log = getLog() />
 		
 		<cfif log.isWarnEnabled()>
-			<cfset log.warn("The hasProperty() method has been deprecated. Please use isPropertyDefined() instead.") />
+			<cfset log.warn("DEPRECATED: The hasProperty() method has been deprecated. Please use isPropertyDefined() instead.") />
 		</cfif>
 		
 		<cfreturn StructKeyExists(variables.properties, arguments.propertyName) />

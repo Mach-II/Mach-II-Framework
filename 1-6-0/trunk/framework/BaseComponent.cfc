@@ -165,7 +165,9 @@ the rest of the framework. (pfarrell)
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
 		
-		<cfset getLog().warn("The hasParameter() method has been deprecated. Please use isParameterDefined() instead. Called from component '#getComponentNameForLogging()#'.") />
+		<cfif getLog().isWarnEnabled()>
+			<cfset getLog().warn("DEPRECATED: The hasParameter() method has been deprecated. Please use isParameterDefined() instead. Called from component '#getComponentNameForLogging()#'.") />
+		</cfif>
 		
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>

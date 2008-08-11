@@ -167,7 +167,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfset var log = getLog() />
 		
 		<cfif log.isWarnEnabled()>
-			<cfset log.warn("TracePlugin is deprecated. Please use the new logging functionality.") />
+			<cfset log.warn("DEPRECATED: TracePlugin is deprecated. Please use the new logging functionality.") />
 		</cfif>
 		
 		<!--- Set the if we should trace this request or temporarily suppress it --->

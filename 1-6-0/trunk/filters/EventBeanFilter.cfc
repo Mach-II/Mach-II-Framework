@@ -90,7 +90,7 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 		<cfset var log = getLog() />
 		
 		<cfif log.isWarnEnabled()>
-			<cfset log.warn("Filter '#getComponentNameForLogging()#' has been deprecated. Use the <event-bean> command.") />
+			<cfset log.warn("DEPRECATED: Filter '#getComponentNameForLogging()#' has been deprecated. Use the <event-bean> command.") />
 		</cfif>
 		
 		<!--- beanName --->
