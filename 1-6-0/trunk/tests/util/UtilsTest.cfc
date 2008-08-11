@@ -82,7 +82,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="testRecurseComplexValuesWithArray" access="public" returntype="void" output="false"
-		hint="Tests recurseComplexValues() with struct syntax.">
+		hint="Tests recurseComplexValues() with array syntax.">
 		
 		<cfset var xml = XmlParse('<root><array name="test"><element value="1"/><element><value>2</value></element></array></root>') />
 		<cfset var comparison = ArrayNew(1) />
@@ -95,7 +95,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="testRecurseComplexValuesWithSimple" access="public" returntype="void" output="false"
-		hint="Tests recurseComplexValues() with struct syntax.">
+		hint="Tests recurseComplexValues() with simple value syntax.">
 		
 		<cfset var xml = XmlParse('<root><value>simple</value></root>') />
 		
@@ -115,6 +115,19 @@ Notes:
 		<cfset comparison.c = "simple" />
 		
 		<cfset assertTrue(comparison.equals(variables.utils.recurseComplexValues(xml.root))) />
+	</cffunction>
+	
+	<cffunction name="testAssertSame" access="public" returntype="void" output="false"
+		hint="Tests assertSame().">
+		
+		<cfset var obj1 = CreateObject("component", "MachII.framework.Event").init() />
+		<cfset var obj2 = CreateObject("component", "MachII.framework.Event").init() />
+		
+		<!--- Compare the same object instance which usually would be a different variable name --->
+		<cfset assertTrue(variables.utils.assertSame(obj1, obj1)) />
+		
+		<!--- This should fail because it's not the same object instance --->
+		<cfset assertFalse(variables.utils.assertSame(obj1, obj2)) />
 	</cffunction>
 
 </cfcomponent>
