@@ -48,6 +48,7 @@ Notes:
 	<cfset variables.viewManager = "" />
 	<cfset variables.parentAppManager = "" />
 	<cfset variables.appkey = "" />
+	<cfset variables.loading = TRUE />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -79,6 +80,9 @@ Notes:
 		<cfif NOT IsObject(getParent())>
 			<cfset getModuleManager().configure() />
 		</cfif>
+		
+		<!--- Flip loading to false --->
+		<cfset setLoading(false) />
 	</cffunction>
 	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
@@ -271,6 +275,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getAppKey" access="public" type="string" output="false">
 		<cfreturn variables.appkey />
+	</cffunction>
+	
+	<cffunction name="setLoading" access="private" returntype="void" output="false">
+		<cfargument name="loading" type="boolean" required="true" />
+		<cfset variables.loading = arguments.loading />
+	</cffunction>
+	<cffunction name="isLoading" access="public" type="boolean" output="false">
+		<cfreturn variables.loading />
 	</cffunction>
 	
 </cfcomponent>

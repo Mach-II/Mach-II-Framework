@@ -109,8 +109,14 @@ the rest of the framework. (pfarrell)
 			
 		<cfset var appKey = getAppManager().getAppKey() />
 			
+		<!--- If we are loading, then fall back to current module, because this means
+			BuildUrl is being called during configure() and there is no current request --->
+		<cfif getAppManager().isLoading()>
+			<cfset arguments.moduleName = getAppManager().getModuleName() />
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = request["_MachIIRequestHandler_" & appKey].getEventContext().getAppManager().getModuleName() />
+		<cfelse>
+			<cfset arguments.moduleName = request["_MachIIRequestHandler_" & appKey].getEventContext().getAppManager().getModuleName() />
+		</cfif>
 		
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
