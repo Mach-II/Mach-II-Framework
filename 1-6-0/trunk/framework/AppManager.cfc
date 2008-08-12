@@ -31,24 +31,29 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.moduleName = "" />
+
 	<cfset variables.appLoader = "" />
+	<cfset variables.parentAppManager = "" />
+	<cfset variables.cacheManager = "" />
+	<cfset variables.eventManager = "" />
 	<cfset variables.filterManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.messageManager = "" />
-	<cfset variables.eventManager = "" />
 	<cfset variables.moduleManager = "" />
 	<cfset variables.propertyManager = "" />
 	<cfset variables.pluginManager = "" />
 	<cfset variables.requestManager = "" />
 	<cfset variables.subroutineManager = "" />
-	<cfset variables.cacheManager = "" />
-	<cfset variables.utils = "" />
-	<cfset variables.logFactory = "" />
 	<cfset variables.viewManager = "" />
-	<cfset variables.parentAppManager = "" />
+
+	<cfset variables.utils = "" />
+	<cfset variables.expressionEvaluator = "" />
+	<cfset variables.logFactory = "" />
+
 	<cfset variables.appkey = "" />
 	<cfset variables.loading = TRUE />
+	<cfset variables.moduleName = "" />
+
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
