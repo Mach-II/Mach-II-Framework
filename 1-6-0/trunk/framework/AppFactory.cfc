@@ -65,6 +65,7 @@ Notes:
 			
 		<cfset var appManager = "" />
 		<cfset var utils = "" />
+		<cfset var expressionEvaluator = "" />
 		<cfset var logFactory = "" />
 		<cfset var propertyManager = "" />
 		<cfset var parentPropertyManager = "" />
@@ -100,9 +101,11 @@ Notes:
 		<!--- Utils and LogFactory is a singleton --->
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset utils = arguments.parentAppManager.getUtils() />
+			<cfset expressionEvaluator = arguments.parentAppManager.getExpressionEvaluator() />
 			<cfset logFactory = arguments.parentAppManager.getLogFactory() />
 		<cfelse>
 			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+			<cfset expressionEvaluator = CreateObject("component", "MachII.util.ExpressionEvaluator").init() />
 			<cfset logFactory = CreateObject("component", "MachII.logging.LogFactory").init() />	
 		</cfif>
 		
@@ -173,6 +176,9 @@ Notes:
 		
 		<!--- Set the utils which is a singleton across the application --->
 		<cfset appManager.setUtils(utils) />
+		
+		<!--- Set the ExpressionEvaluator which is a singleton across the application --->
+		<cfset appManager.setExpressionEvaluator(expressionEvaluator) />
 		
 		<!--- Set the LogFactory which is a singleton across the application --->
 		<cfset appManager.setLogFactory(logFactory) />

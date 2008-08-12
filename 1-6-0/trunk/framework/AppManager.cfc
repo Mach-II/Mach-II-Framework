@@ -244,6 +244,14 @@ Notes:
 	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
 		<cfreturn variables.utils />
 	</cffunction>
+	
+	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false">
+		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
+		<cfset variables.expressionEvaluator = arguments.expressionEvaluator />
+	</cffunction>
+	<cffunction name="getExpressionEvaluator" access="public" returntype="MachII.util.ExpressionEvaluator" output="false">
+		<cfreturn variables.expressionEvaluator />
+	</cffunction>
 
 	<cffunction name="setViewManager" access="public" returntype="void" output="false">
 		<cfargument name="viewManager" type="MachII.framework.ViewManager" required="true" />
