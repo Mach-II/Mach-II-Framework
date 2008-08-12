@@ -73,7 +73,7 @@ Notes:
 		<cfset var threadIds = StructNew() />
 		<cfset var publishThreadIdsInEvent = arguments.event.getArg("_publishThreadIds", StructNew()) />
 		<cfset var parameters = StructNew() />
-		<cfset var error = "" />
+		<cfset var results = StructNew() />
 		<cfset var exception = "" />
 		<cfset var continue = true />
 		<cfset var log = getLog() />
@@ -100,15 +100,16 @@ Notes:
 					<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
 				</cfif>
 
-				<cfset error = threadingAdapter.join(threadIds, getTimeout()) />
+				<cfset results = threadingAdapter.join(threadIds, getTimeout()) />
 				
 				<!--- Create an exception --->
-				<cfif IsStruct(error)>
+				<cfif ArrayLen(results.errors)>
 					<cfset continue = false />
+					<!--- We can only handle one exception at once so use the first error --->
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("#error.message#", error) />
+						<cfset log.error("#results[results.errors[1]].error.message#", results[results.errors[1]].error) />
 					</cfif>					
-					<cfset exception = arguments.eventContext.getRequestHandler().wrapException(error) />
+					<cfset exception = arguments.eventContext.getRequestHandler().wrapException(results[results.errors[1]].error) />
 					<cfset arguments.eventContext.handleException(exception, true) />
 				</cfif>
 			<!--- Or set thread ids into the event --->

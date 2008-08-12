@@ -58,12 +58,24 @@ Notes:
 		<cfset var collection = { action="run", name=threadId, threadId=threadId } />
 		
 		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the even to the thread) --->
-		<cfset request._MachIIThreadingAdapter[threadId] = { component=arguments.callback, method=arguments.method, argumentCollection=arguments.parameters } />
+		<cfset request._MachIIThreadingAdapter[threadId] = { 
+				component=arguments.callback
+				, method=arguments.method
+				, argumentCollection=arguments.parameters
+				, returnVariable="resultData" } />
 		
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread attributeCollection="#collection#">
 			<cftry>
 				<cfinvoke attributeCollection="#request._MachIIThreadingAdapter[threadId]#" />
+				
+				<cfif IsDefined("resultData")>
+					<cfset thread.result = true />
+					<cfset thread.resultData = resultData />
+				<cfelse>
+					<cfset thread.result = false />
+					<cfset thread.resultData = "" />
+				</cfif>
 					
 				<!--- Catch and rethrow so this will be logged --->
 				<cfcatch type="any">
@@ -83,7 +95,7 @@ Notes:
 			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
 		
 		<cfset var collection = StructNew() />
-		<cfset var error = "" />
+		<cfset var results = StructNew() />
 		<cfset var i = "" />
 		
 		<cfset collection.action = "join" />
@@ -105,16 +117,25 @@ Notes:
 		<!--- ResultArgs are automatically put into the event so we just have to wait for all threads --->
 		<cfthread attributeCollection="#collection#" />
 		
+		<cfset results.errors = ArrayNew(1) />
+		
 		<!--- Check for unhandled errors in the threads --->
 		<cfloop list="#collection.name#" index="i">
+			
+			<!--- CF will error out for some reason if you don't pre-create the struct --->
+			<cfset results[i] = StructNew() />
+			
 			<!--- Check if the thread was terminated and return the error to be handled --->
 			<cfif cfthread[i].status is "terminated">
-				<cfset error = cfthread[i].error />
-				<cfbreak />
+				<cfset ArrayAppend(results.errors, i) />
+				<cfset results[i].error = cfthread[i].error />
+			<cfelse>
+				<cfset results[i].result = cfthread[i].result />
+				<cfset results[i].resultData = cfthread[i].resultData />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn error />
+		<cfreturn results />
 	</cffunction>
 
 </cfcomponent>
