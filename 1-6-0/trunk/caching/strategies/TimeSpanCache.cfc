@@ -83,8 +83,8 @@ via reap() which is run every 3 minutes.
 	<cfset variables.instance.scopeKey = "" />
 	<cfset variables.instance.cleanupInterval = 3 />
 	
-	<cfset variables.currentDateTime = "" />
-	<cfset variables.lastCleanup = createTimestamp() />
+	<cfset variables.currentTickCount = "" />
+	<cfset variables.lastCleanup = getCurrentTickCount() />
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	
@@ -154,16 +154,21 @@ via reap() which is run every 3 minutes.
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var cacheElement = structNew() />
+		<cfset var cacheElement = StructNew() />
+		<cfset var cacheUntilTimestamp = computeCacheUntilTimestamp() />
 		
-		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
+		<!--- Only increment if the element did not previous exist in the cache --->
+		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
+		
+		<!--- Build the cache element --->
 		<cfset cacheElement.data  = arguments.data />
 		<cfset cacheElement.isStale = false />
-		<cfset dataStorage.data[hashedKey] = cacheElement />
-		<cfset dataStorage.timestamps[computeCacheUntilTimestamp() & "_" & hashedKey] = hashedKey />
+		<cfset cacheElement.timestamp = cacheUntilTimestamp />
+		
+		<cfset dataStorage[hashedKey] = cacheElement />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -172,14 +177,14 @@ via reap() which is run every 3 minutes.
 			hint="The key should not be a hashed key." />
 
 		<cfset var dataStorage = getStorage() />
-		<cfset var cache = dataStorage.data />
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var cacheElement = "" />
 		
 		<cfset shouldCleanup() />
 		
 		<cfif keyExists(arguments.key)>
-			<cfset cacheElement = cache[hashedKey]>
+			<cfset cacheElement = dataStorage[hashedKey]>
+
 			<cfif NOT cacheElement.isStale>
 				<cfset getCacheStats().incrementCacheHits(1) />
 				<cfreturn cacheElement.data />
@@ -195,9 +200,8 @@ via reap() which is run every 3 minutes.
 		hint="Flushes all elements from the cache.">
 		
 		<cfset var dataStorage = getStorage() />
-
-		<cfset dataStorage.data = StructNew() />
-		<cfset dataStorage.timestamps = StructNew() />
+		
+		<cfset StructClear(dataStorage) />		
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
@@ -207,18 +211,17 @@ via reap() which is run every 3 minutes.
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
-		<cfset var diffTimestamp = createTimestamp() />
 		<cfset var cacheElement = "" />
 
-		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
+		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
 			<cfreturn false />
-		<cfelseif (ListFirst(timeStampKey[1].key, "_") - diffTimestamp) LTE 0>
-			<cfset remove(arguments.key) />
-			<cfreturn false />
-		<cfelseif StructKeyExists(dataStorage.data, hashedKey)>
-			<cfset cacheElement = dataStorage.data[hashedKey] />
+		<cfelse>
+			<cfset cacheElement = dataStorage[hashedKey] />
+			
 			<cfif cacheElement.isStale>
+				<cfreturn false />
+			<cfelseif cacheElement.timestamp - getCurrentTickCount() LTE 0>
+				<cfset removeByHashedKey(hashedKey) />
 				<cfreturn false />
 			<cfelse>
 				<cfreturn true />
@@ -230,39 +233,30 @@ via reap() which is run every 3 minutes.
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
-
-		<cfset var hashedKey = hashKey(arguments.key) />
-		
-		<cfset removeByHashedKey(hashedKey) />
+		<cfset removeByHashedKey(hashKey(arguments.key)) />
 	</cffunction>
 	
 	<cffunction name="reap" access="public" returntype="void" output="false"
 		hint="Inspects the timestamps of cached elements and throws out the expired ones.">
 			
-		<cfset var diffTimestamp = createTimestamp() />
+		<cfset var timestamp = getCurrentTickCount() />
 		<cfset var dataStorage = getStorage() />
-		<cfset var dataTimestampArray = "" />
-		<cfset var key = "" />
+		<cfset var keyArray = "" />
 		<cfset var i = "" />
 		
 		<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 			timeout=".05" throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
-			<cfset variables.lastCleanup = createTimestamp() />
-				
-			<!--- Get array of timestamps and sort --->
-			<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
-			<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
+			<cfset variables.lastCleanup = timestamp />
+			
+			<cfset keyArray = StructKeyArray(dataStorage) />
 			
 			<!--- Cleanup --->
-			<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
+			<cfloop from="1" to="#ArrayLen(keyArray)#" index="i">
 				<cftry>
-					<cfif (ListFirst(dataTimestampArray[i], "_") - diffTimestamp) LTE 0>
-						<cfset key = listLast(dataTimestampArray[i], "_") />
-						<cfset removeByHashedKey(key) />
-					<cfelse>
-						<cfbreak />
+					<cfif dataStorage[i].timestamp - timestamp LTE 0>
+						<cfset removeByHashedKey(i) />
 					</cfif>
 					<cfcatch type="any">
 						<!--- Ingore this error --->
@@ -271,10 +265,9 @@ via reap() which is run every 3 minutes.
 			</cfloop>
 		</cflock>
 	</cffunction>
-	 
 	
 	<!---
-	PROTECTED FUNCTIONS
+	PROTECTED FUNCTIONS - GENERAL
 	--->
 	<cffunction name="removeByHashedKey" access="private" returntype="void" output="false"
 		hint="Removes data from the cache by hashed key.">
@@ -282,16 +275,13 @@ via reap() which is run every 3 minutes.
 			hint="The passed key needs to be a hashed key." />
 
 		<cfset var dataStorage = getStorage() />
-		<cfset var cache = dataStorage.data />
-		<cfset var timeStampKey = "" />
 		<cfset var cacheElement = "" />
 
-		<cfif StructKeyExists(cache, arguments.hashedKey)>
-			<cfset cacheElement = cache[arguments.hashedKey] />
-			<cfif cacheElement.isStale>
-				<cfset StructDelete(cache, arguments.hashedKey, false) />
-				<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
-				<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
+		<cfif StructKeyExists(dataStorage, arguments.hashedKey)>
+			<cfset cacheElement = dataStorage[arguments.hashedKey] />
+			
+ 			<cfif cacheElement.isStale>
+				<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
 				<cfset getCacheStats().incrementEvictions(1) />
 				<cfset getCacheStats().decrementTotalElements(1) />
 				<cfset getCacheStats().decrementActiveElements(1) />
@@ -305,22 +295,18 @@ via reap() which is run every 3 minutes.
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
 		hint="Cleanups the data storage.">
 		
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", - getCleanupInterval(), getCurrentDateTime())) />
-		<cfset var threadingAdapter = "" />
+		<cfset var diffTimestamp = getCurrentTickCount() - getCleanupInterval() />
 		
-		<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
-		
-			<cfset threadingAdapter = getThreadingAdapter() />
-			
+		<cfif diffTimestamp - variables.lastCleanup GTE 0>
 			<!--- Don't wait because an exclusive lock that has already been obtained
 				indicates that a clean is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 				timeout=".05" throwontimeout="false">
-				<cfif (diffTimestamp - variables.lastCleanup) GTE 0>
-					<cfif threadingAdapter.allowThreading()>
-						<cfset threadingAdapter.run(this, "reap") />
+				<cfif diffTimestamp - variables.lastCleanup GTE 0>
+					<cfif getThreadingAdapter().allowThreading()>
+						<cfset getThreadingAdapter().run(this, "reap") />
 					<cfelse>
 						<cfset reap() />
 					</cfif>
@@ -335,73 +321,46 @@ via reap() which is run every 3 minutes.
 	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hash from a key name.">
 		<cfargument name="key" type="string" required="true" />
-		<cfreturn Hash(UCase(arguments.key)) />
+		<cfreturn Hash(UCase(Trim(arguments.key))) />
 	</cffunction>
 	
-	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp which is safe to use as a key.">
-		<cfargument name="time" type="date" required="false" default="#getCurrentDateTime()#" />
-		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
-	</cffunction>
-	
-	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="string" output="false"
-		hint="Computes a cache until timestamp for this cache block.">
-		
-		<cfset var timestamp = Now() />
+	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="numeric" output="false"
+		hint="Computes a cache until timestamp in ms.">
+
+		<cfset var timestamp = getCurrentTickCount() />
 		<cfset var timespan = getTimespan() />
 		
 		<cfif timespan EQ "forever">
-			<cfset timestamp = DateAdd("yyyy", 100, timestamp) />
+			<!--- 864000000ms = 10 years in ms --->
+			<cfreturn Javacast("long", timestamp + 864000000) />
 		<cfelse>
-			<!--- 
-				Peter did 10,000 iterations of each method call (just have a method on a scribble page)
-				9:25 Normal (the code being used now) 172ms
-				Timespan (the code below in this comment) 234ms
-				
-				<cfset timestamp = DateAdd("s", CreateTimespan(listGetAt(timespan, 1), 
-					listGetAt(timespan, 2), listGetAt(timespan, 3), listGetAt(timespan, 4)) * 86400, timestamp) />
-			--->
-			<cfset timestamp = DateAdd("s", listGetAt(timespan, 4), timestamp) />
-			<cfset timestamp = DateAdd("n", listGetAt(timespan, 3), timestamp) />
-			<cfset timestamp = DateAdd("h", listGetAt(timespan, 2), timestamp) />
-			<cfset timestamp = DateAdd("d", listGetAt(timespan, 1), timestamp) />
+			<!--- 86400000ms = 1 day, 360000ms = 1 hour, 60000ms = 1 minute, 1000ms = 1 second --->
+			<cfreturn Javacast("long", timestamp 
+						+ (ListGetAt(timespan, 4) * 1000) 
+						+ (ListGetAt(timespan, 3) * 60000) 
+						+ (ListGetAt(timespan, 2) * 360000)) 
+						+ (ListGetAt(timespan, 1) * 86400000)) /> 
 		</cfif>
-		
-		<cfreturn createTimestamp(timestamp) />
 	</cffunction>
 
 	<cffunction name="getStorage" access="private" returntype="struct" output="false"
 		hint="Gets a reference to the cache data storage.">
-		
-		<!--- StructGet will create the cache key if it does not exist --->
-		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />
-		
-		<!--- Check to see if the cache data structure is initialized --->
-		<cfif NOT StructCount(storage)>
-			<cflock name="#getNamedLockName("create")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
-				<cfif NOT StructCount(storage)>
-					<cfset storage.data = StructNew() />
-					<cfset storage.timestamps = StructNew() />
-				</cfif>
-			</cflock>
-		</cfif>
-		
-		<cfreturn storage />
+		<cfreturn StructGet(getScope() & "." & getScopeKey()) />
 	</cffunction>
 	
 	<cffunction name="getNamedLockName" access="private" returntype="string" output="false"
 		hint="Gets a named lock name based on choosen scope and other factors">
 		<cfargument name="actionType" type="string" required="true" />
 		
-		<cfset var name = "_MachIITimespanCache_" & arguments.actionType & "_" & getScopeKey() />
+		<cfset var name = "_MachIITimeSpanCache_" & arguments.actionType & "_" & getScopeKey() />
 		
 		<!--- We don't want all sessions to share the same named lock
 			since they will run reap independently whereas reap 
 			done in the application or server scopes will only run once --->
 		<cfif getScope() EQ "session">
 			<!--- Cannot directly access session scope because most CFML
-			engine will throw an error if session is disabled --->
+			engine will throw an error if sessions are disabled and you 
+			directly access the session scope --->
 			<cfset name = name & "_" & StructGet("session").sessionId />
 		</cfif>
 
@@ -419,18 +378,18 @@ via reap() which is run every 3 minutes.
 		<cfreturn variables.instance.timespan />
 	</cffunction>
 
-	<cffunction name="getCurrentDateTime" access="public" returntype="date" output="false"
+	<cffunction name="getCurrentTickCount" access="public" returntype="string" output="false"
 		hint="Used internally for unit testing.">
-		<cfif IsDate(variables.currentDateTime)>
-			<cfreturn variables.currentDateTime />
+		<cfif IsNumeric(variables.currentTickCount)>
+			<cfreturn variables.currentTickCount />
 		<cfelse>
-			<cfreturn Now() />
+			<cfreturn getTickCount() />
 		</cfif>
 	</cffunction>
-	<cffunction name="setCurrentDateTime" access="public" returntype="void" output="false" 
-		hint="Used internally for unit testing.">
-		<cfargument name="currentDateTime" type="string" required="true" />
-		<cfset variables.currentDateTime = arguments.currentDateTime />
+	<cffunction name="setCurrentTickCount" access="public" returntype="void" output="false" 
+		hint="Used internally for unit testing. Set to '' when you want to use the current tick count.">
+		<cfargument name="currentTickCount" type="string" required="true" />
+		<cfset variables.currentTickCount = arguments.currentTickCount />
 	</cffunction>
 
 	<cffunction name="setScope" access="private" returntype="void" output="false">
@@ -449,11 +408,13 @@ via reap() which is run every 3 minutes.
 		<cfreturn variables.instance.scopeKey />
 	</cffunction>
 
-	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false">
+	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false"
+		hint="This converts the incoming minutes into ms.">
 		<cfargument name="cleanupInterval" type="numeric" required="true" />		
-		<cfset variables.instance.cleanupInterval = arguments.cleanupInterval />
+		<cfset variables.instance.cleanupInterval = arguments.cleanupInterval * 60000 />
 	</cffunction>
-	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false">
+	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false"
+		hint="Cleanup interval in ms.">
 		<cfreturn variables.instance.cleanupInterval />
 	</cffunction>
 	

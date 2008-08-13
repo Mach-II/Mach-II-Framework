@@ -99,11 +99,14 @@ Notes:
 			<cfset log.debug("Looking for data in the cache for key '#key#'") />
 		</cfif>
 		
-		<cfset dataFromCache = getCacheStrategy().get(key) />
+		<cflock name="#key#" type="readonly" timeout="20">
+			<cfset dataFromCache = getCacheStrategy().get(key) />
+		</cflock>
 		
 		<!--- Create the cache since we do not have one --->
 		<cfif NOT IsDefined("dataFromCache") OR NOT getCacheStrategy().isCacheEnabled()>
 		
+			<cflock name="#key#" type="exclusive" timeout="20">
 			<cfif getCacheStrategy().isCacheEnabled()>
 				<!--- Get a snapshot of the event before we run the commands
 				Used StructAppend so this is not updated by reference when the event is used in the commands --->
@@ -151,11 +154,11 @@ Notes:
 				<!--- Log messages --->
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Creating cache with key '#key#'.") />
+					<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
 				</cfif>
 				<cfif log.isTraceEnabled()>
-					<cfset log.trace("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.", dataToCache.data) />
-					<cfset log.trace("Set cache HTML head elements.", dataToCache.HTMLHeadElements) />
-					<cfset log.trace("Set cache HTTP headers.", dataToCache.HTTPHeaders) />
+					<cfset log.trace("Set cache HTML head elements  (#ArrayLen(dataToCache.HTMLHeadElements)#).") />
+					<cfset log.trace("Set cache HTTP headers (#ArrayLen(dataToCache.HTTPHeaders)#).") />
 				</cfif>
 			<cfelse>
 				<cfif log.isDebugEnabled()>
@@ -165,6 +168,8 @@ Notes:
 
 			<!--- Output the saved output from the commands --->
 			<cfoutput>#dataToCache.output#</cfoutput>
+			
+			</cflock>
 		<cfelse>
 			<!--- Replay the data and output from the cache --->
 			<cfoutput>#dataFromCache.output#</cfoutput>
@@ -175,11 +180,11 @@ Notes:
 			<!--- Log messages --->
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Using data and output from cache with key '#key#'.") />
+				<cfset log.debug("Using cached data with key names of '#StructKeyList(dataFromCache.data)#'.") />
 			</cfif>
 			<cfif log.isTraceEnabled()>
-				<cfset log.trace("Using cache data with key names of '#StructKeyList(dataFromCache.data)#'.", dataFromCache.data) />
-				<cfset log.trace("Using cache HTML head elements.", dataFromCache.HTMLHeadElements) />
-				<cfset log.trace("Using cache HTTP headers.", dataFromCache.HTTPHeaders) />
+				<cfset log.trace("Using cached HTML head elements (#ArrayLen(dataFromCache.HTMLHeadElements)#).") />
+				<cfset log.trace("Using cached HTTP headers (#ArrayLen(dataFromCache.HTMLHeadElements)#).") />
 			</cfif>
 		</cfif>
 		
@@ -255,7 +260,14 @@ Notes:
 	
 	<!---
 	PROTECTED FUNCTIONS
-	--->	
+	--->
+	<cffunction name="executeCommands" returntype="void" output="false"
+		hints="E">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+	</cffunction>
+	
 	<cffunction name="getKey" access="private" returntype="string" output="false">
 		<cfreturn "handlerId=" & getHandlerId() />
 	</cffunction>

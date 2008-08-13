@@ -101,10 +101,10 @@ Notes:
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
 		</cfloop>
 		
-		<!--- "Fake" passing of time and force a reap  --->
-		<cfset variables.cache.setCurrentDateTime(dateAdd("n", 55, now())) />
+		<!--- "Fake" 55 minutes passing of time and force a reap  --->
+		<cfset variables.cache.setCurrentTickCount(getTickCount() + 3300000) />
 		<cfset variables.cache.reap() />
-		<cfset variables.cache.setCurrentDateTime("") />
+		<cfset variables.cache.setCurrentTickCount("") />
 		
 		<!--- Check for elements should still be cached --->
 		<cfset assertTrue(variables.cache.keyExists("productID=1"), 
@@ -112,13 +112,10 @@ Notes:
 		<cfset assertTrue(variables.cache.keyExists("productID=2"), 
 			"Check for elements should still be cached (productID=2)") />
 
-		<!--- 
-		"Fake" passing of time that exceeds cache 
-		element timestamps and force a reap
-		--->
-		<cfset variables.cache.setCurrentDateTime(dateAdd("h", 2, now())) />
+		<!--- "Fake" 2 hours passing of time that exceeds cache element timestamps and force a reap --->
+		<cfset variables.cache.setCurrentTickCount(getTickCount() + 7200000) />
 		<cfset variables.cache.reap() />
-		<cfset variables.cache.setCurrentDateTime("") />
+		<cfset variables.cache.setCurrentTickCount("") />
 		
 		<!--- Check for elements that should have been reaped --->
 		<cfset assertFalse(variables.cache.keyExists("productID=1"), 
