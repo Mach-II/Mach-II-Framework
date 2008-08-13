@@ -90,105 +90,100 @@ Notes:
 		<cfset var dataToCache = StructNew() />
 		<cfset var key = getKeyFromCriteria(arguments.event) />
 		<cfset var dataFromCache = "" />
-		<cfset var command = "" />
-		<cfset var continue = true />
-		<cfset var i = 0 />
+		<cfset var commandResult = StructNew() />
 		<cfset var log = getLog() />
 		
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Looking for data in the cache for key '#key#'") />
-		</cfif>
-		
-		<cflock name="#key#" type="readonly" timeout="20">
-			<cfset dataFromCache = getCacheStrategy().get(key) />
-		</cflock>
-		
-		<!--- Create the cache since we do not have one --->
-		<cfif NOT IsDefined("dataFromCache") OR NOT getCacheStrategy().isCacheEnabled()>
-		
-			<cflock name="#key#" type="exclusive" timeout="20">
-			<cfif getCacheStrategy().isCacheEnabled()>
-				<!--- Get a snapshot of the event before we run the commands
-				Used StructAppend so this is not updated by reference when the event is used in the commands --->
-				<cfset StructAppend(preCommandEventDataSnapshot, arguments.event.getArgs()) />
-				
-				<!--- Register observers for HTMLHeadElement and HTTPHeader --->
-				<cfset arguments.eventContext.addHTMLHeadElementCallback(this, "observeHTMLHeadElement") />
-				<cfset arguments.eventContext.addHTTPHeaderCallback(this, "observeHTTPHeader") />
+		<cfif getCacheStrategy().isCacheEnabled()>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Looking for data in the cache for key '#key#'") />
 			</cfif>
-		
-			<!--- Run commands and save output --->
-			<cftry>
-				<cfsavecontent variable="dataToCache.output">
-					<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
-						<cfset command = variables.commands[i] />
-						<cfset continue = command.execute(arguments.event, arguments.eventContext) />
-						<cfif continue IS false>
-							<cfbreak />
-						</cfif>
-					</cfloop>
-				</cfsavecontent>
-				<cfcatch type="any">
+			
+			<cflock name="#key#" type="readonly" timeout="120">
+				<cfset dataFromCache = getCacheStrategy().get(key) />
+			</cflock>
+
+			<!--- Create the cache since we do not have one --->
+			<cfif NOT IsDefined("dataFromCache")>
+				<cflock name="#key#" type="exclusive" timeout="120">
+					<!--- Get a snapshot of the event before we run the commands
+					Used StructAppend so this is not updated by reference when the event is used in the commands --->
+					<cfset StructAppend(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+					
+					<!--- Register observers for HTMLHeadElement and HTTPHeader --->
+					<cfset arguments.eventContext.addHTMLHeadElementCallback(this, "observeHTMLHeadElement") />
+					<cfset arguments.eventContext.addHTTPHeaderCallback(this, "observeHTTPHeader") />
+			
+					<!--- Run commands and save output --->
+					<cftry>
+						<cfset commandResult = executeCommands(arguments.event, arguments.eventContext) />
+						<cfcatch type="any">
+							<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
+							<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
+							<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
+							<cfrethrow />
+						</cfcatch>
+					</cftry>
+				
 					<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 					<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
 					<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
-					<cfrethrow />
-				</cfcatch>
-			</cftry>
-			
-			<!--- Run only if caching is enabled --->
-			<cfif getCacheStrategy().isCacheEnabled()>
-				<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
-				<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
-				<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
-
-				<!--- Compare pre-command event data snapshot to current event data  --->
-				<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
-				<cfset dataToCache.HTMLHeadElements = getObservedHTMLHeadElements() />
-				<cfset dataToCache.HTTPHeaders = getObservedHTTPHeaders() />
-
-				<!--- Cache the data and output --->
-				<cfset getCacheStrategy().put(key, dataToCache) />
-				<cfset addKeyToAlias(key) />
+	
+					<!--- Build the data to cache structure up  --->
+					<cfset dataToCache.output = commandResult.output />
+					<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
+					<cfset dataToCache.HTMLHeadElements = getObservedHTMLHeadElements() />
+					<cfset dataToCache.HTTPHeaders = getObservedHTTPHeaders() />
+	
+					<!--- Cache the data and output --->
+					<cfset getCacheStrategy().put(key, dataToCache) />
+					<cfset addKeyToAlias(key) />
+					
+					<!--- Log messages --->
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("Created cache with key '#key#'.") />
+						<cfset log.debug("Cached data contained key names of '#StructKeyList(dataToCache.data)#'.") />
+					</cfif>
+					<cfif log.isTraceEnabled()>
+						<cfset log.trace("Cached #ArrayLen(dataToCache.HTMLHeadElements)# HTML head elements.") />
+						<cfset log.trace("Cached #ArrayLen(dataToCache.HTTPHeaders)# HTTP headers.") />
+					</cfif>
+				</cflock>
+				
+				<cfreturn commandResult.continue />
+				
+			<!--- Replay the data and output from the cache --->
+			<cfelse>
+				<cfoutput>#dataFromCache.output#</cfoutput>
+				<cfset arguments.event.setArgs(dataFromCache.data) />
+				<cfset replayHTMLHeadElements(dataFromCache.HTMLHeadElements, arguments.eventContext) />
+				<cfset replayHTTPHeaders(dataFromCache.HTTPHeaders, arguments.eventContext) />
 				
 				<!--- Log messages --->
 				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Creating cache with key '#key#'.") />
-					<cfset log.debug("Set cache data with key names of '#StructKeyList(dataToCache.data)#'.") />
+					<cfset log.debug("Replayed data and output from cache with key '#key#'.") />
+					<cfset log.debug("Cached data contained key names of '#StructKeyList(dataFromCache.data)#'.") />
 				</cfif>
 				<cfif log.isTraceEnabled()>
-					<cfset log.trace("Set cache HTML head elements  (#ArrayLen(dataToCache.HTMLHeadElements)#).") />
-					<cfset log.trace("Set cache HTTP headers (#ArrayLen(dataToCache.HTTPHeaders)#).") />
+					<cfset log.trace("Replayed #ArrayLen(dataFromCache.HTMLHeadElements)# cached HTML head elements.") />
+					<cfset log.trace("Replayed #ArrayLen(dataFromCache.HTTPHeaders)# cached HTTP headers.") />
 				</cfif>
-			<cfelse>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Caching is curently disabled for this cache-handler.") />
-				</cfif>
+				
+				<cfreturn true />		
 			</cfif>
-
-			<!--- Output the saved output from the commands --->
-			<cfoutput>#dataToCache.output#</cfoutput>
-			
-			</cflock>
-		<cfelse>
-			<!--- Replay the data and output from the cache --->
-			<cfoutput>#dataFromCache.output#</cfoutput>
-			<cfset arguments.event.setArgs(dataFromCache.data) />
-			<cfset replayHTMLHeadElements(dataFromCache.HTMLHeadElements, arguments.eventContext) />
-			<cfset replayHTTPHeaders(dataFromCache.HTTPHeaders, arguments.eventContext) />
-			
-			<!--- Log messages --->
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Using data and output from cache with key '#key#'.") />
-				<cfset log.debug("Using cached data with key names of '#StructKeyList(dataFromCache.data)#'.") />
-			</cfif>
-			<cfif log.isTraceEnabled()>
-				<cfset log.trace("Using cached HTML head elements (#ArrayLen(dataFromCache.HTMLHeadElements)#).") />
-				<cfset log.trace("Using cached HTTP headers (#ArrayLen(dataFromCache.HTMLHeadElements)#).") />
-			</cfif>
-		</cfif>
 		
-		<cfreturn continue />
+		<!--- Caching is disable so run normally --->
+		<cfelse>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Caching is curently disabled for this cache-handler.") />
+			</cfif>
+		
+			<!--- Run the commands, out the result and continue decision --->
+			<cfset commandResult = executeCommands(arguments.event, arguments.eventContext) />
+			
+			<cfoutput>#commandResult.output#</cfoutput>
+			
+			<cfreturn commandResult.continue />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="clearCache" access="public" returntype="void" output="false"
@@ -261,11 +256,28 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="executeCommands" returntype="void" output="false"
-		hints="E">
+	<cffunction name="executeCommands" access="public" returntype="struct" output="false" 
+		hints="Executes a block of commands and returns any output and continue status.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
+		<cfset var result = StructNew() />
+		<cfset var command = "" />
+		
+		<cfset result.continue = true />
+		<cfset result.output = "" />
+		
+		<cfsavecontent variable="result.output">
+			<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
+				<cfset command = variables.commands[i] />
+				<cfset result.continue = command.execute(arguments.event, arguments.eventContext) />
+				<cfif result.continue IS false>
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		</cfsavecontent>
+		
+		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="getKey" access="private" returntype="string" output="false">

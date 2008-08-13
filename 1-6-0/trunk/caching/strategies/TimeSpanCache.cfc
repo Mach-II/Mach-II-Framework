@@ -331,14 +331,14 @@ via reap() which is run every 3 minutes.
 		<cfset var timespan = getTimespan() />
 		
 		<cfif timespan EQ "forever">
-			<!--- 864000000ms = 10 years in ms --->
+			<!--- 864000000ms = 10 years --->
 			<cfreturn Javacast("long", timestamp + 864000000) />
 		<cfelse>
 			<!--- 86400000ms = 1 day, 360000ms = 1 hour, 60000ms = 1 minute, 1000ms = 1 second --->
 			<cfreturn Javacast("long", timestamp 
 						+ (ListGetAt(timespan, 4) * 1000) 
 						+ (ListGetAt(timespan, 3) * 60000) 
-						+ (ListGetAt(timespan, 2) * 360000)) 
+						+ (ListGetAt(timespan, 2) * 360000) 
 						+ (ListGetAt(timespan, 1) * 86400000)) /> 
 		</cfif>
 	</cffunction>
