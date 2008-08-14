@@ -62,16 +62,17 @@ Notes:
 				component=arguments.callback
 				, method=arguments.method
 				, argumentCollection=arguments.parameters
-				, returnVariable="resultData" } />
+				, returnVariable="thread.resultData" } />
 		
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread attributeCollection="#collection#">
 			<cftry>
-				<cfinvoke attributeCollection="#request._MachIIThreadingAdapter[threadId]#" />
+				<cfset thread.collection = request._MachIIThreadingAdapter[threadId]>
 				
-				<cfif IsDefined("resultData")>
+				<cfinvoke attributeCollection="#thread.collection#" />
+				
+				<cfif IsDefined("thread.resultData")>
 					<cfset thread.result = true />
-					<cfset thread.resultData = resultData />
 				<cfelse>
 					<cfset thread.result = false />
 					<cfset thread.resultData = "" />
