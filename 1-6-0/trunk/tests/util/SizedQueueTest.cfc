@@ -50,11 +50,11 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testComprehensive" access="public" returntype="void" output="false"
+	<cffunction name="SizedQueueTest" access="public" returntype="void" output="false"
 		hint="A comprehensive test for SizedQueue.">
 			
 		<cfset var item = StructNew() />
-		<cfset var cfcatch = "" />
+		<cfset var error = false />
 		<cfset var i = "" />
 
 		<cfset item.firstName = "Mach-II" />
@@ -78,10 +78,10 @@ Notes:
 		<cftry>
 			<cfset variables.sizedQueue.put(item) />
 			<cfcatch type="any">
-				<!--- Do nothing --->
+				<cfset error = true />
 			</cfcatch>
 		</cftry>		
-		<cfif NOT IsStruct(cfcatch)>
+		<cfif NOT error>
 			<cfset fail("The sized queue failed to throw an error that the queue was full.") />
 		</cfif>
 		
