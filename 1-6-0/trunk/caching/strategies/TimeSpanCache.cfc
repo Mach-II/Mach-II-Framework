@@ -220,7 +220,7 @@ via reap() which is run every 3 minutes.
 			
 			<cfif cacheElement.isStale>
 				<cfreturn false />
-			<cfelseif NOT cacheElement.timestamp.compareTo(getCurrentTickCount())>
+			<cfelseif cacheElement.timestamp.compareTo(getCurrentTickCount()) LT 1>
 				<cfset removeByHashedKey(hashedKey) />
 				<cfreturn false />
 			<cfelse>
@@ -257,7 +257,6 @@ via reap() which is run every 3 minutes.
 			<cfloop from="1" to="#ArrayLen(keyArray)#" index="i">
 				<cftry>
 					<cfif currentTick.compareTo(dataStorage[keyArray[i]].timestamp) GT 0>
-						<cflog file="lightpost" text="I reaped '#keyArray[i]#' at currentTick.toString()" />
 						<cfset removeByHashedKey(keyArray[i]) />
 					</cfif>
 					<cfcatch type="any">
@@ -299,17 +298,20 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var diffTimestamp = getCurrentTickCount() />
 		
-		<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval())>
+		<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
 		
-		<cfif variables.lastCleanup.compareTo(diffTimestamp)>
+		<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
 			<!--- Don't wait because an exclusive lock that has already been obtained
 				indicates that a clean is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 				timeout="1" throwontimeout="false">
-				<cfif variables.lastCleanup.compareTo(diffTimestamp)>
+				<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
 					<cfif getThreadingAdapter().allowThreading()>
+						<!--- We have to set last cleanup here because execlusive
+						threads locks in cfthread are not shared --->
+						<cfset variables.lastCleanup = getCurrentTickCount() />
 						<cfset getThreadingAdapter().run(this, "reap") />
 					<cfelse>
 						<cfset reap() />
@@ -388,7 +390,7 @@ via reap() which is run every 3 minutes.
 			</cfif>
 			<cfif ListGetAt(timespan, 3) NEQ 0>
 				<!--- Minute --->
-				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("6000") />
+				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("60000") />
 				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 3)) />
 				
 				<cfset val1 = val1.multiply(val2) />
@@ -405,7 +407,7 @@ via reap() which is run every 3 minutes.
 			<cfif ListGetAt(timespan, 1) NEQ 0>
 				<!--- Day --->
 				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("86400000") />
-				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 2)) />
+				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 1)) />
 				
 				<cfset val1 = val1.multiply(val2) />
 				<cfset offset = offset.add(val1) />
@@ -451,7 +453,13 @@ via reap() which is run every 3 minutes.
 	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false"
 		hint="This converts the incoming minutes into ms.">
 		<cfargument name="cleanupInterval" type="numeric" required="true" />		
-		<cfset variables.instance.cleanupInterval = arguments.cleanupInterval * 60000 />
+		
+		<cfset var minute = CreateObject("java", "java.math.BigInteger").init("60000") />
+		<cfset var interval = CreateObject("java", "java.math.BigInteger").init(arguments.cleanupInterval) />
+		
+		<cfset interval = interval.multiply(minute) />
+		
+		<cfset variables.instance.cleanupInterval = interval />
 	</cffunction>
 	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false"
 		hint="Cleanup interval in ms.">
