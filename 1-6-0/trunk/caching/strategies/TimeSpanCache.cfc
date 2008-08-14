@@ -78,10 +78,10 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.timespan = "0,1,0,0" /><!--- Default to 1 hour --->
+	<cfset variables.instance.timespan = CreateObject("java", "java.math.BigInteger").init("3600000") /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
-	<cfset variables.instance.cleanupInterval = 180000 /><!--- Internally we use ms --->
+	<cfset variables.instance.cleanupInterval = CreateObject("java", "java.math.BigInteger").init("180000") /><!--- Internally we use ms --->
 	
 	<cfset variables.currentTickCount = "" />
 	<cfset variables.lastCleanup = getCurrentTickCount() />
@@ -204,7 +204,7 @@ via reap() which is run every 3 minutes.
 		<cfset StructClear(dataStorage) />		
 	</cffunction>
 	
-	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
+	<cffunction name="keyExists" access="public" returntype="any" output="false"
 		hint="Checks if an element exists by key in the cache.">
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
@@ -220,7 +220,7 @@ via reap() which is run every 3 minutes.
 			
 			<cfif cacheElement.isStale>
 				<cfreturn false />
-			<cfelseif Javacast("long", cacheElement.timestamp - getCurrentTickCount()) LTE 0>
+			<cfelseif NOT cacheElement.timestamp.compareTo(getCurrentTickCount())>
 				<cfset removeByHashedKey(hashedKey) />
 				<cfreturn false />
 			<cfelse>
@@ -239,23 +239,25 @@ via reap() which is run every 3 minutes.
 	<cffunction name="reap" access="public" returntype="void" output="false"
 		hint="Inspects the timestamps of cached elements and throws out the expired ones.">
 			
-		<cfset var timestamp = getCurrentTickCount() />
+		<cfset var currentTick = getCurrentTickCount() />
 		<cfset var dataStorage = getStorage() />
 		<cfset var keyArray = "" />
 		<cfset var i = "" />
+		<cfset var count = 0 />
 		
 		<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 			timeout="1" throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
-			<cfset variables.lastCleanup = timestamp />
+			<cfset variables.lastCleanup = currentTick />
 			
 			<cfset keyArray = StructKeyArray(dataStorage) />
 			
 			<!--- Cleanup --->
 			<cfloop from="1" to="#ArrayLen(keyArray)#" index="i">
 				<cftry>
-					<cfif Javacast("long", dataStorage[keyArray[i]].timestamp - timestamp) LTE 0>
+					<cfif currentTick.compareTo(dataStorage[keyArray[i]].timestamp) GT 0>
+						<cflog file="lightpost" text="I reaped '#keyArray[i]#' at currentTick.toString()" />
 						<cfset removeByHashedKey(keyArray[i]) />
 					</cfif>
 					<cfcatch type="any">
@@ -295,16 +297,18 @@ via reap() which is run every 3 minutes.
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
 		hint="Cleanups the data storage.">
 		
-		<cfset var diffTimestamp = JavaCast("long", getCurrentTickCount() - getCleanupInterval()) />
+		<cfset var diffTimestamp = getCurrentTickCount() />
 		
-		<cfif JavaCast("long", diffTimestamp - variables.lastCleanup) GTE 0>
+		<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval())>
+		
+		<cfif variables.lastCleanup.compareTo(diffTimestamp)>
 			<!--- Don't wait because an exclusive lock that has already been obtained
 				indicates that a clean is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 				timeout="1" throwontimeout="false">
-				<cfif JavaCast("long", diffTimestamp - variables.lastCleanup) GTE 0>
+				<cfif variables.lastCleanup.compareTo(diffTimestamp)>
 					<cfif getThreadingAdapter().allowThreading()>
 						<cfset getThreadingAdapter().run(this, "reap") />
 					<cfelse>
@@ -328,19 +332,11 @@ via reap() which is run every 3 minutes.
 		hint="Computes a cache until timestamp in ms.">
 
 		<cfset var timestamp = getCurrentTickCount() />
-		<cfset var timespan = getTimespan() />
 		
-		<cfif timespan EQ "forever">
-			<!--- 864000000ms = 10 years --->
-			<cfreturn Javacast("long", timestamp + 864000000) />
-		<cfelse>
-			<!--- 86400000ms = 1 day, 3600000ms = 1 hour, 60000ms = 1 minute, 1000ms = 1 second --->
-			<cfreturn Javacast("long", timestamp 
-						+ (ListGetAt(timespan, 4) * 1000) 
-						+ (ListGetAt(timespan, 3) * 60000) 
-						+ (ListGetAt(timespan, 2) * 3600000) 
-						+ (ListGetAt(timespan, 1) * 86400000)) /> 
-		</cfif>
+		<!--- Add the timespan offset to the current tick count --->
+		<cfset timestamp = timestamp.add(getTimespan()) />
+			
+		<cfreturn timestamp />
 	</cffunction>
 
 	<cffunction name="getStorage" access="private" returntype="struct" output="false"
@@ -372,18 +368,62 @@ via reap() which is run every 3 minutes.
 	--->
 	<cffunction name="setTimespan" access="private" returntype="void" output="false">
 		<cfargument name="timespan" type="string" required="true" />
-		<cfset variables.instance.timespan = arguments.timespan />
+		
+		<cfset offset = CreateObject("java", "java.math.BigInteger") />
+		<cfset val1 = "" />
+		<cfset val2 = "" />
+		
+		<cfif arguments.timespan EQ "forever">
+			<cfset offset = offset.init("1228000000000") />
+		<cfelse>
+			<cfset offset = offset.init("0") />
+			<!--- Cannot multiply by zero --->
+			<cfif ListGetAt(timespan, 4) NEQ 0>
+				<!--- Second --->
+				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("1000") />
+				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 4)) />
+				
+				<cfset val1 = val1.multiply(val2) />
+				<cfset offset = offset.add(val1) />
+			</cfif>
+			<cfif ListGetAt(timespan, 3) NEQ 0>
+				<!--- Minute --->
+				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("6000") />
+				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 3)) />
+				
+				<cfset val1 = val1.multiply(val2) />
+				<cfset offset = offset.add(val1) />
+			</cfif>
+			<cfif ListGetAt(timespan, 2) NEQ 0>
+				<!--- Hour --->
+				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("3600000") />
+				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 2)) />
+				
+				<cfset val1 = val1.multiply(val2) />
+				<cfset offset = offset.add(val1) />
+			</cfif>
+			<cfif ListGetAt(timespan, 1) NEQ 0>
+				<!--- Day --->
+				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("86400000") />
+				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 2)) />
+				
+				<cfset val1 = val1.multiply(val2) />
+				<cfset offset = offset.add(val1) />
+			</cfif>
+		</cfif>
+				
+		<cfset variables.instance.timespan = offset />
 	</cffunction>
-	<cffunction name="getTimespan" access="public" returntype="string" output="false">
+	<cffunction name="getTimespan" access="public" returntype="any" output="false">
 		<cfreturn variables.instance.timespan />
 	</cffunction>
 
-	<cffunction name="getCurrentTickCount" access="private" returntype="string" output="false"
+	<cffunction name="getCurrentTickCount" access="public" returntype="any" output="false"
 		hint="Used internally for unit testing.">
-		<cfif IsNumeric(variables.currentTickCount)>
-			<cfreturn variables.currentTickCount />
+		<cfif Len(variables.currentTickCount)>
+			<cfreturn CreateObject("java", "java.math.BigInteger").init(variables.currentTickCount) />
 		<cfelse>
-			<cfreturn getTickCount() />
+			<cfreturn CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
 		</cfif>
 	</cffunction>
 	<cffunction name="setCurrentTickCount" access="public" returntype="void" output="false" 
