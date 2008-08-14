@@ -81,7 +81,7 @@ via reap() which is run every 3 minutes.
 	<cfset variables.instance.timespan = "0,1,0,0" /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
-	<cfset variables.instance.cleanupInterval = 3 />
+	<cfset variables.instance.cleanupInterval = 180000 /><!--- Internally we use ms --->
 	
 	<cfset variables.currentTickCount = "" />
 	<cfset variables.lastCleanup = getCurrentTickCount() />
@@ -220,7 +220,7 @@ via reap() which is run every 3 minutes.
 			
 			<cfif cacheElement.isStale>
 				<cfreturn false />
-			<cfelseif cacheElement.timestamp - getCurrentTickCount() LTE 0>
+			<cfelseif Javacast("long", cacheElement.timestamp - getCurrentTickCount()) LTE 0>
 				<cfset removeByHashedKey(hashedKey) />
 				<cfreturn false />
 			<cfelse>
@@ -245,7 +245,7 @@ via reap() which is run every 3 minutes.
 		<cfset var i = "" />
 		
 		<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-			timeout=".05" throwontimeout="false">
+			timeout="1" throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
 			<cfset variables.lastCleanup = timestamp />
@@ -255,11 +255,11 @@ via reap() which is run every 3 minutes.
 			<!--- Cleanup --->
 			<cfloop from="1" to="#ArrayLen(keyArray)#" index="i">
 				<cftry>
-					<cfif dataStorage[i].timestamp - timestamp LTE 0>
-						<cfset removeByHashedKey(i) />
+					<cfif Javacast("long", dataStorage[keyArray[i]].timestamp - timestamp) LTE 0>
+						<cfset removeByHashedKey(keyArray[i]) />
 					</cfif>
 					<cfcatch type="any">
-						<!--- Ingore this error --->
+						<!--- Do nothing --->
 					</cfcatch>
 				</cftry>
 			</cfloop>
@@ -295,7 +295,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
 		hint="Cleanups the data storage.">
 		
-		<cfset var diffTimestamp = getCurrentTickCount() - getCleanupInterval() />
+		<cfset var diffTimestamp = JavaCast("long", getCurrentTickCount() - getCleanupInterval()) />
 		
 		<cfif diffTimestamp - variables.lastCleanup GTE 0>
 			<!--- Don't wait because an exclusive lock that has already been obtained
@@ -303,7 +303,7 @@ via reap() which is run every 3 minutes.
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
+				timeout="1" throwontimeout="false">
 				<cfif diffTimestamp - variables.lastCleanup GTE 0>
 					<cfif getThreadingAdapter().allowThreading()>
 						<cfset getThreadingAdapter().run(this, "reap") />
@@ -334,11 +334,11 @@ via reap() which is run every 3 minutes.
 			<!--- 864000000ms = 10 years --->
 			<cfreturn Javacast("long", timestamp + 864000000) />
 		<cfelse>
-			<!--- 86400000ms = 1 day, 360000ms = 1 hour, 60000ms = 1 minute, 1000ms = 1 second --->
+			<!--- 86400000ms = 1 day, 3600000ms = 1 hour, 60000ms = 1 minute, 1000ms = 1 second --->
 			<cfreturn Javacast("long", timestamp 
 						+ (ListGetAt(timespan, 4) * 1000) 
 						+ (ListGetAt(timespan, 3) * 60000) 
-						+ (ListGetAt(timespan, 2) * 360000) 
+						+ (ListGetAt(timespan, 2) * 3600000) 
 						+ (ListGetAt(timespan, 1) * 86400000)) /> 
 		</cfif>
 	</cffunction>
@@ -378,7 +378,7 @@ via reap() which is run every 3 minutes.
 		<cfreturn variables.instance.timespan />
 	</cffunction>
 
-	<cffunction name="getCurrentTickCount" access="public" returntype="string" output="false"
+	<cffunction name="getCurrentTickCount" access="private" returntype="string" output="false"
 		hint="Used internally for unit testing.">
 		<cfif IsNumeric(variables.currentTickCount)>
 			<cfreturn variables.currentTickCount />

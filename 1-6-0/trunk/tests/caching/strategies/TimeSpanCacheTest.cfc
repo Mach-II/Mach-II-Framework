@@ -95,6 +95,7 @@ Notes:
 		hint="Tests removing cached data by key.">
 		
 		<cfset var i = 0 />
+		<cfset var timestamp = getTickCount() />
 		
 		<!--- Load the cache --->
 		<cfloop from="1" to="2" index="i">
@@ -102,7 +103,8 @@ Notes:
 		</cfloop>
 		
 		<!--- "Fake" 55 minutes passing of time and force a reap  --->
-		<cfset variables.cache.setCurrentTickCount(getTickCount() + 3300000) />
+		<cfset timestamp = javacast("long", timestamp + 3300000) />
+		<cfset variables.cache.setCurrentTickCount(timestamp) />
 		<cfset variables.cache.reap() />
 		<cfset variables.cache.setCurrentTickCount("") />
 		
@@ -113,7 +115,8 @@ Notes:
 			"Check for elements should still be cached (productID=2)") />
 
 		<!--- "Fake" 2 hours passing of time that exceeds cache element timestamps and force a reap --->
-		<cfset variables.cache.setCurrentTickCount(getTickCount() + 7200000) />
+		<cfset timestamp = javacast("long", timestamp + 7200000) />
+		<cfset variables.cache.setCurrentTickCount(timestamp) />
 		<cfset variables.cache.reap() />
 		<cfset variables.cache.setCurrentTickCount("") />
 		
@@ -121,7 +124,9 @@ Notes:
 		<cfset assertFalse(variables.cache.keyExists("productID=1"), 
 			"Check for elements that should have been reaped (productID=1)") />
 		<cfset assertFalse(variables.cache.keyExists("productID=2"), 
-			"Check for elements that should have been reaped (productID=2)") />		
+			"Check for elements that should have been reaped (productID=2)") />
+		
+		<cfset debug(variables.cache.getStorage())>	
 	</cffunction>
 
 </cfcomponent>
