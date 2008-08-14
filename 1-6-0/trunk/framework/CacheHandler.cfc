@@ -123,6 +123,8 @@ Notes:
 							<cfrethrow />
 						</cfcatch>
 					</cftry>
+					
+					<cfoutput>#commandResult.output#</cfoutput>
 				
 					<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 					<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
