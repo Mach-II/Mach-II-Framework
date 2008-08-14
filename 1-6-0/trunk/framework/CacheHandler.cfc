@@ -140,7 +140,7 @@ Notes:
 					
 					<!--- Log messages --->
 					<cfif log.isDebugEnabled()>
-						<cfset log.warn("Created cache with key '#key#'.") />
+						<cfset log.debug("Created cache with key '#key#'.") />
 						<cfset log.debug("Cached data contained key names of '#StructKeyList(dataToCache.data)#'.") />
 					</cfif>
 					<cfif log.isTraceEnabled()>
