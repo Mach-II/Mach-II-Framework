@@ -297,14 +297,14 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var diffTimestamp = JavaCast("long", getCurrentTickCount() - getCleanupInterval()) />
 		
-		<cfif diffTimestamp - variables.lastCleanup GTE 0>
+		<cfif JavaCast("long", diffTimestamp - variables.lastCleanup) GTE 0>
 			<!--- Don't wait because an exclusive lock that has already been obtained
 				indicates that a clean is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
 				timeout="1" throwontimeout="false">
-				<cfif diffTimestamp - variables.lastCleanup GTE 0>
+				<cfif JavaCast("long", diffTimestamp - variables.lastCleanup) GTE 0>
 					<cfif getThreadingAdapter().allowThreading()>
 						<cfset getThreadingAdapter().run(this, "reap") />
 					<cfelse>
