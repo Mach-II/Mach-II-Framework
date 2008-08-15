@@ -429,7 +429,7 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 
 	<cffunction name="getCurrentTickCount" access="public" returntype="any" output="false"
-		hint="Gets the current tick count as a big integer.  Has logig that is that is used internally for unit testing.">
+		hint="Gets the current tick count as a big integer.  Has logic that is that is used internally for unit testing.">
 		<cfif Len(variables.currentTickCount)>
 			<cfreturn createBigInteger(variables.currentTickCount) />
 		<cfelse>
