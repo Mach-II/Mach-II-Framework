@@ -78,10 +78,15 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.timespan = CreateObject("java", "java.math.BigInteger").init("3600000") /><!--- Default to 1 hour --->
+	<cfset variables.SECOND = createBigInteger("1000") />
+	<cfset variables.MINUTE = createBigInteger("60000") />
+	<cfset variables.HOUR = createBigInteger("3600000") />
+	<cfset variables.DAY = createBigInteger("86400000") />
+	
+	<cfset variables.instance.timespan = variables.HOUR /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
-	<cfset variables.instance.cleanupInterval = CreateObject("java", "java.math.BigInteger").init("180000") /><!--- Internally we use ms --->
+	<cfset variables.instance.cleanupInterval = createBigInteger("180000") /><!--- Default to 3 minutes --->
 	
 	<cfset variables.currentTickCount = "" />
 	<cfset variables.lastCleanup = getCurrentTickCount() />
@@ -310,7 +315,7 @@ via reap() which is run every 3 minutes.
 				<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
 					<cfif getThreadingAdapter().allowThreading()>
 						<!--- We have to set last cleanup here because execlusive
-						threads locks in cfthread are not shared --->
+						threads locks in cfthread are not shared in the parent thread --->
 						<cfset variables.lastCleanup = getCurrentTickCount() />
 						<cfset getThreadingAdapter().run(this, "reap") />
 					<cfelse>
@@ -364,53 +369,56 @@ via reap() which is run every 3 minutes.
 
 		<cfreturn name />
 	</cffunction>
+	
+	<cffunction name="createBigInteger" access="private" returntype="any" output="false"
+		hint="Helper method that creates a java.math.BigInteger with the passed value.">
+		<cfargument name="value" type="any" required="true" />
+		<cfreturn CreateObject("java", "java.math.BigInteger").init(arguments.value) />
+	</cffunction>
 
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setTimespan" access="private" returntype="void" output="false">
-		<cfargument name="timespan" type="string" required="true" />
+	<cffunction name="setTimespan" access="private" returntype="void" output="false"
+		hint="Sets and builds a timespan in ms.">
+		<cfargument name="timespan" type="string" required="true"
+			hint="Must be in format of 0,0,0,0 (days,hours,minutes,seconds) or 'forever'." />
 		
-		<cfset offset = CreateObject("java", "java.math.BigInteger") />
-		<cfset val1 = "" />
-		<cfset val2 = "" />
+		<cfset var offset = "" />
+		<cfset var value = "" />
 		
 		<cfif arguments.timespan EQ "forever">
-			<cfset offset = offset.init("1228000000000") />
+			<cfset offset = createBigInteger("1228000000000") />
 		<cfelse>
-			<cfset offset = offset.init("0") />
-			<!--- Cannot multiply by zero --->
+			<cfset offset = createBigInteger("0") />
+			<!--- Cannot multiply by zero otherwise an exception will occur --->
+			
+			<!--- Second --->
 			<cfif ListGetAt(timespan, 4) NEQ 0>
-				<!--- Second --->
-				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("1000") />
-				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 4)) />
-				
-				<cfset val1 = val1.multiply(val2) />
-				<cfset offset = offset.add(val1) />
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 4)) />	
+				<cfset value = value.multiply(variables.SECOND) />
+				<cfset offset = offset.add(value) />
 			</cfif>
+			
+			<!--- Minute --->
 			<cfif ListGetAt(timespan, 3) NEQ 0>
-				<!--- Minute --->
-				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("60000") />
-				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 3)) />
-				
-				<cfset val1 = val1.multiply(val2) />
-				<cfset offset = offset.add(val1) />
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 3)) />
+				<cfset value = value.multiply(variables.MINUTE) />
+				<cfset offset = offset.add(value) />
 			</cfif>
+			
+			<!--- Hour --->
 			<cfif ListGetAt(timespan, 2) NEQ 0>
-				<!--- Hour --->
-				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("3600000") />
-				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 2)) />
-				
-				<cfset val1 = val1.multiply(val2) />
-				<cfset offset = offset.add(val1) />
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 2)) />
+				<cfset value = value.multiply(variables.HOUR) />
+				<cfset offset = offset.add(value) />
 			</cfif>
+			
+			<!--- Day --->
 			<cfif ListGetAt(timespan, 1) NEQ 0>
-				<!--- Day --->
-				<cfset val1 = CreateObject("java", "java.math.BigInteger").init("86400000") />
-				<cfset val2 = CreateObject("java", "java.math.BigInteger").init(ListGetAt(arguments.timespan, 1)) />
-				
-				<cfset val1 = val1.multiply(val2) />
-				<cfset offset = offset.add(val1) />
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 1)) />
+				<cfset value = value.multiply(variables.DAY) />
+				<cfset offset = offset.add(value) />
 			</cfif>
 		</cfif>
 				
@@ -421,11 +429,11 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 
 	<cffunction name="getCurrentTickCount" access="public" returntype="any" output="false"
-		hint="Used internally for unit testing.">
+		hint="Gets the current tick count as a big integer.  Has logig that is that is used internally for unit testing.">
 		<cfif Len(variables.currentTickCount)>
-			<cfreturn CreateObject("java", "java.math.BigInteger").init(variables.currentTickCount) />
+			<cfreturn createBigInteger(variables.currentTickCount) />
 		<cfelse>
-			<cfreturn CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
+			<cfreturn createBigInteger(getTickCount()) />
 		</cfif>
 	</cffunction>
 	<cffunction name="setCurrentTickCount" access="public" returntype="void" output="false" 
@@ -451,13 +459,13 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 
 	<cffunction name="setCleanupInterval" access="private" returntype="void" output="false"
-		hint="This converts the incoming minutes into ms.">
-		<cfargument name="cleanupInterval" type="numeric" required="true" />		
+		hint="Sets and converts the incoming minutes into ms.">
+		<cfargument name="cleanupInterval" type="numeric" required="true"
+			hint="Cleanup interval in minutes." />		
 		
-		<cfset var minute = CreateObject("java", "java.math.BigInteger").init("60000") />
-		<cfset var interval = CreateObject("java", "java.math.BigInteger").init(arguments.cleanupInterval) />
+		<cfset var interval = createBigInteger(arguments.cleanupInterval) />
 		
-		<cfset interval = interval.multiply(minute) />
+		<cfset interval = interval.multiply(variables.MINUTE) />
 		
 		<cfset variables.instance.cleanupInterval = interval />
 	</cffunction>
