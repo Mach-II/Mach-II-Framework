@@ -44,11 +44,8 @@ machinery.
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.propertyManager = "" />
 	<cfset variables.redirectPersistParameter = "persistId" />
-	<cfset variables.redirectPersistScope = "session" />
-	<cfset variables.cleanupDifference = -3 />
-	<cfset variables.threadingAdapter = "" />
+	<cfset variables.timeSpanCache = "" />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -58,13 +55,22 @@ machinery.
 		hint="Initializes the redirect persist machinery.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 
+		<cfset var parameters = StructNew() />
+
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setLog(getAppManager().getLogFactory()) />
 		
-		<cfset setRedirectPersistParameter(getPropertyManager().getProperty("redirectPersistParameter")) />
-		<cfset setRedirectPersistScope(getPropertyManager().getProperty("redirectPersistScope")) />
-
-		<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
+		<!--- Setup "persistId" which is used as a cache key --->
+		<cfset setRedirectPersistParameter(getAppManager().getPropertyManager().getProperty("redirectPersistParameter")) />
+		
+		<!--- Setup and configure a time span cache --->
+		<cfset parameters.timespan = "0,0,3,0" />
+		<cfset parameters.scope = getAppManager().getPropertyManager().getProperty("redirectPersistScope") />
+		<cfset parameters.scopeKey = getAppManager().getAppKey() & "._MachIIRequestRedirectPersistStorage" />
+		<cfset parameters.cleanupIntervalInMinutes = 1 />
+		
+		<cfset variables.timeSpanCache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
+		<cfset variables.timeSpanCache.configure() />
 
 		<cfreturn this />
 	</cffunction>
@@ -78,32 +84,32 @@ machinery.
 			hint="The eventArgs struct is built before MachII.framework.Event is available." />
 		
 		<cfset var persistId = "" />
-		<cfset var persistedData = StructNew() />
-		<cfset var dataStorage = "" />
+		<cfset var persistData = StructNew() />
 		<cfset var key = "" />
 		<cfset var log = getLog() />
 		
 		<!--- Check they have a persistId in the event --->
 		<cfif StructKeyExists(arguments.eventArgs, getRedirectPersistParameter())>
+
 			<cfset persistId = arguments.eventArgs[getRedirectPersistParameter()] />
-			<cfset dataStorage = getStorage() />
 			
 			<!--- Get the data and cleanup --->
-			<cfif StructKeyExists(dataStorage.data, persistId)>
-				<cftry>
-					<!--- Get the data and delete it from the dataStorage --->
-					<cfset persistedData = dataStorage.data[persistId]>
-					<cfset StructDelete(dataStorage.data, persistId, false) />
-					<cfset key = StructFindValue(dataStorage.timestamps, persistId, "one") />
-					<cfset StructDelete(dataStorage.timestamps, key[1].key, false) />
-					<cfcatch type="any">
-						<!--- Ingore this error --->
-					</cfcatch>
-				</cftry>
+			<cfif variables.timeSpanCache.keyExists(persistId)>
+				
+				<cfset persistData = variables.timeSpanCache.get(persistId) />
+
+				<!--- get() may return null which deleted the variable
+					if for some reason the element is deleted between the 
+					keyExists() and the get() --->
+				<cfif NOT IsDefined("persistData")>
+					<cfreturn StructNew() />
+				</cfif>
+				
+				<cfset variables.timeSpanCache.remove(persistId) />
 				
 				<cfif log.isDebugEnabled()>
-					<cfif StructKeyExists(persistedData, "eventArgs")>
-						<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.", persistedData.eventArgs) />
+					<cfif StructKeyExists(persistData, "eventArgs")>
+						<cfset log.debug("Found redirect persist event data under persist id '#persistId#'.", persistData.eventArgs) />
 					<cfelse>
 						<cfset log.debug("Found no redirect persist data.") />
 					</cfif>
@@ -111,7 +117,7 @@ machinery.
 			</cfif>
 		</cfif>
 		
-		<cfreturn persistedData />
+		<cfreturn persistData />
 	</cffunction>
 	
 	<cffunction name="save" access="public" returntype="string" output="false"
@@ -119,118 +125,17 @@ machinery.
 		<cfargument name="data" type="struct" required="true" />
 		
 		<cfset var persistId = createPersistId() />
-		<cfset var dataStorage = getStorage() />
 		<cfset var log = getLog() />
 		
-		<!--- Do cleanup --->
-		<cfset shouldCleanup() />
-		
+		<!--- Save the persist data --->		
 		<cfif log.isDebugEnabled()>
 			<cfset log.debug("Saving redirect persist event data under persist id '#persistId#'.") />
 		</cfif>
 		
-		<!--- Save the data/timestamp --->
-		<cfset dataStorage.data[persistId] = arguments.data />
-		<cfset dataStorage.timestamps[createTimestamp() & "_" & persistId] = persistId />
+		<cfset variables.timeSpanCache.put(persistId, arguments.data) />
 		
 		<cfreturn persistId />
-	</cffunction>
-	
-	<cffunction name="reap" access="public" returntype="void" output="false"
-		hint="Reaps the storage of old redirect persists.">
-		
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
-		<cfset var dataStorage = getStorage() />
-		<cfset var dataTimestampArray = "" />
-		<cfset var key = "" />
-		<cfset var i = "" />
-		<cfset var log = getLog() />
-		
-		<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-			timeout=".05" throwontimeout="false">
-			
-			<cfif log.isTraceEnabled()>
-				<cfset log.trace("Reaping old redirect persists.") />
-			</cfif>
-			
-			<!--- Reset the timestamp of the last cleanup --->
-			<cfset dataStorage.lastCleanup = createTimestamp() />
-				
-			<!--- Get array of timestamps and sort --->
-			<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
-			<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
-			
-			<!--- Cleanup --->
-			<cfloop from="1" to="#ArrayLen(dataTimestampArray)#" index="i">
-				<cftry>
-					<cfif (diffTimestamp - ListFirst(dataTimestampArray[i], "_")) GTE 0>
-						<!--- The order of the deletes is important as the timestamp may be
-							around, but the data already deleted --->
-						<cfset key = dataTimestampArray[i] />
-						<cfset StructDelete(dataStorage.timestamps, key, false) />
-						<cfset StructDelete(dataStorage.data, ListLast(key, "_"), false) />
-					<cfelse>
-						<cfbreak />
-					</cfif>
-					<cfcatch type="any">
-						<!--- Ingore this error --->
-					</cfcatch>
-				</cftry>
-			</cfloop>
-		
-		</cflock>
-	</cffunction>
-	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="getStorage" access="private" returntype="struct" output="false"
-		hint="Helper function to get the event data store for persists.">
-		
-		<cfset var storage = StructGet(getRedirectPersistScope() & "." & getAppManager().getAppKey() & "._MachIIRequestRedirectPersistStorage") />
-		
-		<!--- Double check lock if default structure is not defined --->
-		<cfif NOT StructCount(storage)>
-
-			<cflock name="#getNamedLockName("create")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
-				<cfif NOT StructCount(storage)>
-					<cfset storage.data = StructNew() />
-					<cfset storage.timestamps = StructNew() />
-					<cfset storage.lastCleanup = createTimestamp() />
-				</cfif>
-			</cflock>
-
-		</cfif>
-		
-		<cfreturn storage />
-	</cffunction>
-	
-	<cffunction name="shouldCleanup" access="private" returntype="void" output="false"
-		hint="Cleanups the data storage.">
-		
-		<cfset var diffTimestamp = createTimestamp(DateAdd("n", variables.cleanupDifference, now())) />
-		<cfset var dataStorage = getStorage() />
-		<cfset var threadingAdapter = "" />
-		
-		<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
-		
-			<cfset threadingAdapter = getThreadingAdapter() />
-			
-			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
-				<cfif (diffTimestamp - dataStorage.lastCleanup) GTE 0>
-					<cfif threadingAdapter.allowThreading()>
-						<cfset threadingAdapter.run(this, "reap") />
-					<cfelse>
-						<cfset reap() />
-					</cfif>
-				</cfif>
-			</cflock>
-
-		</cfif>
-	</cffunction>
-	
+	</cffunction>	
 	
 	<!---
 	PROTECTED FUNCTIONS - UTIL
@@ -239,32 +144,7 @@ machinery.
 		hint="Creates a persistId for use.">
 		<cfreturn REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
 	</cffunction>
-	
-	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp which is safe to use as a key.">
-		<cfargument name="time" type="date" required="false" default="#Now()#" />
-		<cfreturn REReplace(arguments.time, "[ts[:punct:][:space:]]", "", "ALL") />
-	</cffunction>
-	
-	<cffunction name="getNamedLockName" access="private" returntype="string" output="false"
-		hint="Gets a named lock name based on choosen persist scope and other factors">
-		<cfargument name="actionType" type="string" required="true" />
 		
-		<cfset var name = "_MachIIRequestRedirectPersist_" & arguments.actionType />
-		
-		<!--- We don't want all sessions to share the same named lock
-			since they will run actions independently whereas persists 
-			done in the application or server scopes will only run actions
-			collectively --->
-		<cfif getRedirectPersistScope() EQ "session">
-			<!--- Cannot directly access session scope because most CFML
-			engine will throw an error if session is disabled --->
-			<cfset name = name & "_" & StructGet("session").sessionId />
-		</cfif>
-
-		<cfreturn name />
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
@@ -276,39 +156,12 @@ machinery.
 		<cfreturn variables.appManager />
 	</cffunction>
 
-	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false">
-		<cfreturn getAppManager().getPropertyManager() />
-	</cffunction>
-
 	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
 		<cfargument name="redirectPersistParameter" type="string" required="true" />
 		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
 	</cffunction>
 	<cffunction name="getRedirectPersistParameter" access="public" returntype="string" output="false">
 		<cfreturn variables.redirectPersistParameter />
-	</cffunction>
-
-	<cffunction name="setRedirectPersistScope" access="private" returntype="void" output="false">
-		<cfargument name="redirectPersistScope" type="string" required="true" />
-		
-		<cfif NOT ListFindNoCase("server,application,session", arguments.redirectPersistScope)>
-			<cfthrow type="MachII.framework.InvalidRequestRedirectPersistScope"
-				message="Invalid value for 'redirectPersistScope' property."
-				detail="Valid values 'server', 'application' or 'session'." />
-		<cfelse>
-			<cfset variables.redirectPersistScope = arguments.redirectPersistScope />
-		</cfif>
-	</cffunction>
-	<cffunction name="getRedirectPersistScope" access="public" returntype="string" output="false">
-		<cfreturn variables.redirectPersistScope />
-	</cffunction>
-
-	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false">
-		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
-		<cfset variables.threadingAdapter = arguments.threadingAdapter />
-	</cffunction>
-	<cffunction name="getThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false">
-		<cfreturn variables.threadingAdapter />
 	</cffunction>
 
 	<cffunction name="setLog" access="private" returntype="void" output="false"

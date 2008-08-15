@@ -198,6 +198,7 @@ Notes:
 			-->
 			<!-- framework -->
 			<testcase name="MachII.tests.framework.EventTest"/>
+			<testcase name="MachII.tests.framework.RequestRedirectPersistTest"/>
 			<!-- caching -->
 			<testcase name="MachII.tests.caching.CacheStrategyManagerTest"/>
 			<testcase name="MachII.tests.caching.CacheStatsTest"/>
