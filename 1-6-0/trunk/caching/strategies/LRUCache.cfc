@@ -123,17 +123,21 @@ in the application scope.
 		<cfargument name="data" type="any" required="true" />
 
 		<cfset var dataStorage = getStorage() />
-		<cfset var hashedKey = hashKey(arguments.key) />
+		<cfset var cacheElement = StructNew() />
 		
-		<!--- Clean out the cache if neccessary --->
+		<!--- Clean out the cache --->
 		<cfset reap() />
 		
-		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
+		<!--- Update the cache stats --->
+		<cfif NOT keyExists(arguments.key)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		</cfif>
-		<cfset dataStorage.data[hashedKey] = arguments.data />
-		<cfset dataStorage.timestamps[createTimestamp() & "_" & hashedKey] = hashedKey />
+		
+		<!--- Build and set the cache element --->
+		<cfset cacheElement.data = arguments.data />
+		<cfset cacheElement.timestamp = getCurrentTickCount() />
+		<cfset dataStorage[hashKey(arguments.key)] = cacheElement />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -142,15 +146,16 @@ in the application scope.
 			hint="Key does not need to be hashed." />
 
 		<cfset var dataStorage = getStorage() />
-		<cfset var cache = dataStorage.data />
+		<cfset var cacheElement = "" />
 		<cfset var hashedKey = hashKey(arguments.key) />
-		<cfset var timeStampKey = StructFindValue(dataStorage.timestamps, hashedKey, "one") />
 		
 		<cfif keyExists(arguments.key)>
+			<cfset cacheElement = dataStorage[hashedKey] />
+			<cfset cacheElement.timestamp = getCurrentTickCount() />
+
 			<cfset getCacheStats().incrementCacheHits(1) />
-			<cfset structDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
-			<cfset dataStorage.timestamps[createTimeStamp() & "_" & hashedKey] = hashedKey />
-			<cfreturn cache[hashedKey] />
+
+			<cfreturn cacheElement.data />
 		<cfelse>
 			<cfset getCacheStats().incrementCacheMisses(1) />
 		</cfif>
@@ -161,19 +166,14 @@ in the application scope.
 		
 		<cfset var dataStorage = getStorage() />
 
-		<cfset dataStorage.data = StructNew() />
-		<cfset dataStorage.timestamps = StructNew() />
+		<cfset StructClear(dataStorage) />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checkes if a key exists in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="Key does not need to be hashed." />
-
-		<cfset var dataStorage = getStorage() />
-		<cfset var hashedKey = hashKey(arguments.key) />
-
-		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
+			hint="Key should not be hashed." />
+		<cfif NOT StructKeyExists(getStorage(), hashKey(arguments.key))>
 			<cfreturn false />
 		<cfelse>
 			<cfreturn true />
@@ -184,38 +184,42 @@ in the application scope.
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true"
 			hint="The key does not need to be hashed." />
-
-		<cfset var hashedKey = hashKey(arguments.key) />
-		
-		<cfset removeHashedKey(hashedKey) />
+		<cfset removeHashedKey(hashKey(arguments.key)) />
 	</cffunction>
 	
 	<cffunction name="reap" access="public" returntype="void" output="false"
 		hint="Looks at the timestamps of the cache pieces and throws out oldest one if the cache has more then the its max size.">
 			
 		<cfset var dataStorage = getStorage() />
-		<cfset var dataTimestampArray = ArrayNew(1) />
-		<cfset var key = "" />
+		<cfset var sortedTimestamps = "" />
+		<cfset var i = "" />
 		
-		<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
+		<cfif (StructCount(dataStorage) + 1) GT getSize()>
 	
 			<!--- Don't wait because an exclusive lock that has already been obtained
 				indicates that a reap is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
 			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
+				timeout="20" throwontimeout="false">
 				
-				<cfif (StructCount(dataStorage.data) + 1) GT getSize()>
-					<!--- Get array of timestamps and sorted by oldest (least) timestamp first --->
-					<cfset dataTimestampArray = StructKeyArray(dataStorage.timestamps) />
-					<cfset ArraySort(dataTimestampArray, "textnocase", "asc") />
+				<cfif (StructCount(dataStorage) + 1) GT getSize()>
+				
+					<cfset sortedTimestamps = StructSort(dataStorage, "numeric", "asc", "timestamp") />
 					
-					<!--- Cleanup by removing the oldest entry --->
-					<cfset key = ListLast(dataTimestampArray[1], "_") />
-					<cfset removeHashedKey(key) />
+					<cfloop from="1" to="#ArrayLen(sortedTimestamps)#" index="i">
+						<cftry>
+							<cfif (StructCount(dataStorage) + 1) GT getSize()>
+								<cfset removeHashedKey(sortedTimestamps[i]) />
+							<cfelse>
+								<cfbreak />
+							</cfif>
+							<cfcatch type="any">
+								<!--- Do nothing --->
+							</cfcatch>
+						</cftry>
+					</cfloop>
 				</cfif>
-				
 			</cflock>
 			
 		</cfif>
@@ -224,18 +228,15 @@ in the application scope.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="removeHashedKey" access="private" returntype="void" output="false">
+	<cffunction name="removeHashedKey" access="private" returntype="void" output="false"
+		hint="Removes a cached element by hashed key.">
 		<cfargument name="hashedKey" type="string" required="true"
-			hint="The key does need to be hashed." />
+			hint="The key must be hashed." />
 
 		<cfset var dataStorage = getStorage() />
-		<cfset var cache = dataStorage.data />
-		<cfset var timeStampKey = "" />
 
-		<cfif StructKeyExists(cache, arguments.hashedKey)>
-			<cfset StructDelete(cache, arguments.hashedKey, false) />
-			<cfset timeStampKey = StructFindValue(dataStorage.timestamps, arguments.hashedKey, "one") />
-			<cfset StructDelete(dataStorage.timestamps, timeStampKey[1].key, false) />
+		<cfif StructKeyExists(dataStorage, arguments.hashedKey)>
+			<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
 			<cfset getCacheStats().incrementEvictions(1) />
 			<cfset getCacheStats().decrementTotalElements(1) />
 			<cfset getCacheStats().decrementActiveElements(1) />
@@ -248,34 +249,17 @@ in the application scope.
 	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hashed version of the passed key.">
 		<cfargument name="key" type="string" required="true" />
-		<cfreturn Hash(UCase(arguments.key)) />
+		<cfreturn Hash(UCase(Trim(arguments.key))) />
 	</cffunction>
 	
-	<cffunction name="createTimestamp" access="private" returntype="string" output="false"
-		hint="Creates a timestamp which is safe to use as a key.">
-		<cfargument name="time" type="date" required="false" default="#Now()#" />
-		<!--- Need to have a time stamp that includes milliseconds and is an integer with no punctuation --->
-		<cfreturn REReplace(arguments.time & ":" & getTickCount(), "[ts[:punct:][:space:]]", "", "ALL") />
+	<cffunction name="getCurrentTickCount" access="private" returntype="any" output="false"
+		hint="Gets the current tick count.">
+		<cfreturn getTickCount() />
 	</cffunction>
 	
-	<cffunction name="getStorage" access="private" returntype="struct" output="false"
+	<cffunction name="getStorage" access="public" returntype="struct" output="false"
 		hint="Gets a reference to the cache data storage.">
-		
-		<!--- StructGet will create the cache key if it does not exist --->
-		<cfset var storage = StructGet(getScope() & "." & getScopeKey()) />
-		
-		<!--- Check to see if the cache data structure is initialized --->
-		<cfif NOT StructCount(storage)>
-			<cflock name="#getNamedLockName("create")#" type="exclusive" 
-				timeout=".05" throwontimeout="false">
-				<cfif NOT StructCount(storage)>
-					<cfset storage.data = StructNew() />
-					<cfset storage.timestamps = StructNew() />
-				</cfif>
-			</cflock>
-		</cfif>
-		
-		<cfreturn storage />
+		<cfreturn StructGet(getScope() & "." & getScopeKey()) />
 	</cffunction>
 	
 	<cffunction name="getNamedLockName" access="private" returntype="string" output="false"
