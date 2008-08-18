@@ -265,6 +265,7 @@ Notes:
 		
 		<cfset var result = StructNew() />
 		<cfset var command = "" />
+		<cfset var i = 0 />
 		
 		<cfset result.continue = true />
 		<cfset result.output = "" />
