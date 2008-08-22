@@ -335,7 +335,7 @@ via reap() which is run every 3 minutes.
 		<cfreturn Hash(UCase(Trim(arguments.key))) />
 	</cffunction>
 	
-	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="numeric" output="false"
+	<cffunction name="computeCacheUntilTimestamp" access="private" returntype="any" output="false"
 		hint="Computes a cache until timestamp in ms.">
 
 		<cfset var timestamp = getCurrentTickCount() />
@@ -469,7 +469,7 @@ via reap() which is run every 3 minutes.
 		
 		<cfset variables.instance.cleanupInterval = interval />
 	</cffunction>
-	<cffunction name="getCleanupInterval" access="public" returntype="numeric" output="false"
+	<cffunction name="getCleanupInterval" access="public" returntype="any" output="false"
 		hint="Cleanup interval in ms.">
 		<cfreturn variables.instance.cleanupInterval />
 	</cffunction>

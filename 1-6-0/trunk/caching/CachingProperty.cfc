@@ -166,7 +166,7 @@ See individual caching strategies for more information on configuration.
 			<cfset moduleName = "_base_" />
 		</cfif>
 		
-		<cfreturn getAppManager().getAppKey() & "._MachIICaching." & Hash(moduleName & "_" & arguments.cacheName) />
+		<cfreturn getAppManager().getAppKey() & "._MachIICaching._" & Hash(moduleName & "_" & arguments.cacheName) />
 	</cffunction>
 	
 	<!---
