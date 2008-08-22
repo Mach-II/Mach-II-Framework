@@ -371,16 +371,17 @@ Notes:
 					<cfif NOT getAppManager().getUtils().assertSame(pre, post)>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
-				<!--- Check for queries --->
-				<cfelseif IsQuery(pre) AND IsQuery(post)>
+				<!--- Check for queries and structs
+					BD fails with equals() on structs and arrays so use hashCode() --->
+				<cfelseif IsQuery(pre) AND IsQuery(post)
+					OR (IsStruct(pre) AND IsStruct(post))
+					OR (IsArray(pre) AND IsArray(post))>
 					<!--- Cannot use equals() because BD does not support it --->
 					<cfif pre.hashCode() NEQ post.hashCode()>
 						<cfset dataToCache[keyName] = post />
 					</cfif>
-				<!--- Check for simple datatypes, arrays and structs --->
-				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))
-					OR (IsArray(pre) AND IsArray(post))
-					OR (IsStruct(pre) AND IsStruct(post))>
+				<!--- Check for simple datatypes --->
+				<cfelseif (IsSimpleValue(pre) AND IsSimpleValue(post))>
 					<cfif NOT pre.equals(post)>	
 						<cfset dataToCache[keyName] = post />
 					</cfif>
