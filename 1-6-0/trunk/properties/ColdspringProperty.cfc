@@ -62,43 +62,65 @@ Usage:
 			Default: FALSE (absolute path) -->
 		<parameter name="configFilePathIsRelative" value="true"/>
 		
-		<!-- Flag to indicate whether to resolve dependencies for listeners/filters/plugins 
+		<!-- Flag to indicate whether to resolve dependencies for 
+			listeners/filters/plugins/properties using introspection and new
+			dynamic autowire method generation feature. 
 			Default: FALSE -->
 		<parameter name="resolveMachIIDependencies" value="false"/>
 		
 		<!-- Indicates a scope to pull in a parent bean factory into a child bean factory 
-			 Default: application -->
+			 Default: application
 		<parameter name="parentBeanFactoryScope" value="application"/>
+		-->
 		
 		<!-- Indicates a key to pull in a parent bean factory from the application scope
-			Default: FALSE -->
+			Default: FALSE
 		<parameter name="parentBeanFactoryKey" value="serviceFactory"/>
+		-->
 			
 		<!-- Indicates whether or not to place the bean factory in the application scope 
-			 Default: FALSE -->
+			 Default: FALSE
 		<parameter name="placeFactoryInApplicationScope" value="false" />
+		-->
 
 		<!-- Indicates whether or not to place the bean factory in the server scope 
-			 Default: FALSE -->
+			 Default: FALSE 
 		<parameter name="placeFactoryInServerScope" value="false" />
+		-->
 		
 		<!-- Flag to indicate whether to automatically generate remote proxies for you
 			Does not generate remote proxies in parent bean factories.
-			Default: FALSE -->
+			Default: FALSE
 		<parameter name="generateRemoteProxies" value="true" />
+		-->
 		
 		<!-- Indicates the autowire attribute name to introspect in cfcomponent tags
-			Default: 'depends' -->
+			Default: 'depends' 
 		<parameter name="autowireAttributeName" value="depends" />
+		-->
+		
+		<!-- Indicates where to write the temporary CFCs of the dynamic autowire method
+			generation feature. Specify a path that can be expanded via expandPath().
+			Default: to current location of ColdspringProperty.cfc
+			DO NOT DEFINE THESE PARAMETERS UNLESS YOU WANT TO OVERRIDE THE DEFAULT
+		<parameter name="cfcGenerationLocation" value="PathThatCanBeExpanded" />
+		-->
+		
+		<!-- Indicates the dot path to where the temporary CFCs of the dynamic autowire method
+			generation feature.
+			DO NOT DEFINE THESE PARAMETERS UNLESS YOU WANT TO OVERRIDE THE DEFAULT
+		<parameter name="dotPathToCfcGenerationLocation" value="DotPathToCFCGenerationLocation" />
+		-->
 		
 		<!-- Struct of bean names and corresponding Mach-II property names for injecting back into Mach-II
-			Default: does nothing if struct is not defined -->
+			Default: does nothing if struct is not defined 
 		<parameter name="beansToMachIIProperties">
 			<struct>
 				<key name="ColdSpringBeanName1" value="MachIIPropertyName1" />
 				<key name="ColdSpringBeanName2" value="MachIIPropertyName2" />
 			</struct>
 		</parameter>
+		-->
 	</parameters>
 </property>
 
@@ -147,8 +169,8 @@ is append to the end of the key to eliminate namespace conflicts in the server s
 This parameter defaults to 'false' if not defined and indicates that this bean factory should not
 be placed in the server scope.
 
-The [autowireAttributeName] parameters indicates the name of the attribute to introspect
-for in cfcomponent tags when using the dynamic autowire getter/setter method generation feature of the
+The [autowireAttributeName] parameter indicates the name of the attribute to introspect
+for in cfcomponent tags when using the dynamic autowire method generation feature of the
 Coldspring Property.  Autowire method generation injection allows you to put a list of ColdSpring
 bean names in the autowire attribute (which default to 'depends') in cfcomponent tag of your 
 listeners, filters, plugins and properties CFC in Mach-II. ColdSpring property will automatically 
@@ -165,6 +187,15 @@ Example:
 This will dynamically inject a getSomeService() and setSomeService() method into this listener.
 ColdSpring will then use the bean name and use setter injection to inject the bean into the
 listener.
+
+The [cfcGenerationLocation] parameter indicates where to write the temporary CFCs of the 
+dynamic autowire method generation feature. Specify a path that can be expanded via 
+expandPath(). Defaults to current location of ColdspringProperty.cfc.
+DO NOT DEFINE THESE PARAMETERS UNLESS YOU WANT TO OVERRIDE THE DEFAULT
+
+The [dotPathToCfcGenerationLocation] parameter indicates the dot path to where temporary CFCs
+are written for the dynamic autowire method generation feature.
+DO NOT DEFINE THESE PARAMETERS UNLESS YOU WANT TO OVERRIDE THE DEFAULT
 
 The [beansToMachIIProperties] parameter holds a struct of bean names and corresponding
 Mach-II property names. This parameter will inject the specified beans in the Mach-II property
@@ -259,6 +290,20 @@ application.serviceFactory_account variable.
 		
 		<!--- Get the autowire attribute name --->
 		<cfset var autowireAttributeName = getParameter("autowireAttributeName", "depends") />
+		
+		<!--- Setup CFC generation location --->
+		<cfif isParameterDefined("cfcGenerationLocation")>
+			<cfset setCfcGenerationLocation(ExpandPath(getParameter("cfcGenerationLocation"))) />
+		<cfelse>
+			<cfset setCfcGenerationLocation(GetDirectoryFromPath(GetCurrentTemplatePath())) />
+		</cfif>
+		
+		<!--- Setup the dot path to the CFC generation location --->
+		<cfif isParameterDefined("dotPathTocfcGenerationLocation")>
+			<cfset setDotPathToCfcGenerationLocation(getParameter("dotPathTocfcGenerationLocation") & ".") />
+		<cfelse>
+			<cfset setDotPathToCfcGenerationLocation("") />
+		</cfif>
 		
 		<!--- Get the config file path --->
 		<cfif isParameterDefined("configFile")>
@@ -630,7 +675,7 @@ application.serviceFactory_account variable.
 		<cfset var beanName = "" />
 		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var cfcName = "" />
-		<cfset var cfcDirectory = GetDirectoryFromPath(GetCurrentTemplatePath()) />
+		<cfset var cfcDirectory = getCfcGenerationLocation() />
 		<cfset var autowireCfc = "" />
 		<cfset var i = "" />
 		
@@ -651,27 +696,38 @@ application.serviceFactory_account variable.
 		<!--- Add the closing cfcomponent tag --->
 		<cfset cfcData.append('</cfcomponent>') />
 		
-		<!--- Create a name for the CFC (Hash() is faster than UUID) --->
+		<!--- Create a name for the CFC using Hash() since that is faster than creating a UUID --->
 		<cfset cfcName = Hash(getTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
 		
 		<!--- Write the cfc data to a temp file --->
 		<cftry>
 			<cffile action="write" 
 				output="#cfcData.toString()#" 
-				file="#cfcDirectory##cfcName#.cfc" />
+				file="#cfcDirectory#/#cfcName#.cfc" />
 			<cfcatch type="all">
-				<cfthrow type="MachII.properties.ColdspringProperty.writePermissions"
+				<cfthrow type="MachII.properties.ColdspringProperty.CFCWritePermissions"
 					message="Cannot write temporary CFC for autowiring to '#cfcDirectory#'. Does your CFML engine have write permissions to this directory?"
 					detail="Original message: #cfcatch.message#" />
 			</cfcatch>
 		</cftry>
 		
 		<!--- Instantiate the component --->
-		<cfset autowireCfc = CreateObject("component", cfcName) />
+		<cftry>
+			<cfset autowireCfc = CreateObject("component", getDotPathToCfcGenerationLocation() & cfcName) />
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.properties.ColdspringProperty.CannotFindCFC"
+						message="Cannot find a temporary CFC at '#getDotPathToCfcGenerationLocation() & cfcName#'."
+						detail="Please check that the dot path location '#getDotPathToCfcGenerationLocation() & cfcName#' and cfcGenerationLocation '#cfcDirectory#' point to the same directory." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>						
+			</cfcatch>
+		</cftry>
 		
 		<!--- Delete the temp cfc --->
 		<cffile action="delete" 
-			file="#cfcDirectory##cfcName#.cfc" />
+			file="#cfcDirectory#/#cfcName#.cfc" />
 		
 		<cfreturn autowireCfc />
 	</cffunction>
@@ -708,6 +764,22 @@ application.serviceFactory_account variable.
 	</cffunction>
 	<cffunction name="getLastReloadDatetime" access="public" returntype="date" output="false">
 		<cfreturn variables.instance.lastReloadDatetime />
+	</cffunction>
+	
+	<cffunction name="setCfcGenerationLocation" access="private" returntype="void" output="false">
+		<cfargument name="cfcGenerationLocation" type="string" required="true" />
+		<cfset variables.instance.cfcGenerationLocation = arguments.cfcGenerationLocation />
+	</cffunction>
+	<cffunction name="getCfcGenerationLocation" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.cfcGenerationLocation />
+	</cffunction>
+	
+	<cffunction name="setDotPathToCfcGenerationLocation" access="private" returntype="void" output="false">
+		<cfargument name="dotPathToCfcGenerationLocation" type="string" required="true" />
+		<cfset variables.instance.dotPathToCfcGenerationLocation = arguments.dotPathToCfcGenerationLocation />
+	</cffunction>
+	<cffunction name="getDotPathToCfcGenerationLocation" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.dotPathToCfcGenerationLocation />
 	</cffunction>
 	
 	<cffunction name="setConfigFilePaths" access="private" returntype="void" output="false">
