@@ -67,7 +67,7 @@ Notes:
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread attributeCollection="#collection#">
 			<cftry>
-				<cfset thread.collection = request._MachIIThreadingAdapter[threadId]>
+				<cfset thread.collection = request._MachIIThreadingAdapter[threadId] />
 				
 				<cfinvoke attributeCollection="#thread.collection#" />
 				
