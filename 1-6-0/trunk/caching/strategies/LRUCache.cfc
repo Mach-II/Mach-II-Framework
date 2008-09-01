@@ -167,6 +167,7 @@ in the application scope.
 		<cfset var dataStorage = getStorage() />
 
 		<cfset StructClear(dataStorage) />
+		<cfset getCacheStats().reset() />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"

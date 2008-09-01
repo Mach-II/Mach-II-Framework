@@ -206,7 +206,8 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var dataStorage = getStorage() />
 		
-		<cfset StructClear(dataStorage) />		
+		<cfset StructClear(dataStorage) />	
+		<cfset getCacheStats().reset() />	
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="any" output="false"
@@ -290,7 +291,6 @@ via reap() which is run every 3 minutes.
 				<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
 				<cfset getCacheStats().incrementEvictions(1) />
 				<cfset getCacheStats().decrementTotalElements(1) />
-				<cfset getCacheStats().decrementActiveElements(1) />
 			<cfelse>
 				<cfset cacheElement.isStale = true />
 				<cfset getCacheStats().decrementActiveElements(1) />

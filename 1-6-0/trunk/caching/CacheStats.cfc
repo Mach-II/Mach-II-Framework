@@ -125,5 +125,13 @@ tracked by Mach-II are as follows:
 	<cffunction name="getActiveElements" access="public" returntype="numeric" output="false">
 		<cfreturn variables.activeElements />
 	</cffunction>
+	
+	<cffunction name="reset" access="public" returntype="void" output="false">
+		<cfset variables.cacheHits = 0 />
+		<cfset variables.cacheMisses = 0 />
+		<cfset variables.evictions = 0 />
+		<cfset variables.totalElements = 0 />
+		<cfset variables.activeElements = 0 />
+	</cffunction>
 
 </cfcomponent>
