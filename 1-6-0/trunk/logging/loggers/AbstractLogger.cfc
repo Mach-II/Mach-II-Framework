@@ -119,6 +119,11 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 	
+	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
+		hint="Returns the logging level by name. Convenience method for dashboard.">
+		<cfreturn getLogAdapter().getLoggingLevel() />
+	</cffunction>
+	
 	<cffunction name="disableLogging" access="public" returntype="void" output="false"
 		hint="Disables logging. Convenience method for dashboard.">
 		<cfset getLogAdapter().setLoggingEnabled(false) />
@@ -126,6 +131,10 @@ Notes:
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging. Convenience method for dashboard.">
 		<cfset getLogAdapter().setLoggingEnabled(true) />
+	</cffunction>
+	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
+		hint="Checkes if logging is currently enabled.">
+		<cfreturn getLogAdapter().getLoggingEnabled() />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
@@ -216,7 +225,7 @@ Notes:
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
 		<cfset variables.logAdapter = arguments.logAdapter />
 	</cffunction>
-	<cffunction name="getLogAdapter" access="private" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
+	<cffunction name="getLogAdapter" access="public" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
 		hint="Gets the log adapter for this logger.">
 		<cfreturn variables.logAdapter />
 	</cffunction>
