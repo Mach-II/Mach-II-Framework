@@ -119,8 +119,14 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 	
+	<cffunction name="setLoggingLevel" access="public" returntype="string" output="false"
+		hint="Sets the logging level by name.">
+		<cfargument name="loggingLevelName" type="string" required="true"
+			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
+		<cfset getLogAdapter().setLoggingLevel(arguments.loggingLevelName) />
+	</cffunction>
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
-		hint="Returns the logging level by name. Convenience method for dashboard.">
+		hint="Returns the logging level by name.">
 		<cfreturn getLogAdapter().getLoggingLevel() />
 	</cffunction>
 	

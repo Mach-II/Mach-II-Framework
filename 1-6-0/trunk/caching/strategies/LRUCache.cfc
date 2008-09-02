@@ -68,6 +68,7 @@ in the application scope.
 	PROPERTIES
 	--->
 	<cfset variables.instance.size = 100 />
+	<cfset variables.instance.strategyType = "LRU" />
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
 	

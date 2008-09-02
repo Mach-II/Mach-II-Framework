@@ -83,6 +83,7 @@ via reap() which is run every 3 minutes.
 	<cfset variables.HOUR = createBigInteger("3600000") />
 	<cfset variables.DAY = createBigInteger("86400000") />
 	
+	<cfset variables.instance.strategyType = "Time Span" />
 	<cfset variables.instance.timespan = variables.HOUR /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />

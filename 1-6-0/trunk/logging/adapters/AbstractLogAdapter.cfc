@@ -178,7 +178,13 @@ Notes:
 	
 	<!---
 	ACCESSORS
-	--->	
+	--->
+	<cffunction name="setLoggingLevel" access="public" returntype="string" output="false"
+		hint="Returns the logging level by name. Required for Dashboard integration.">
+		<cfargument name="loggingLevelName" type="string" required="true"
+			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
 		hint="Returns the logging level by name. Required for Dashboard integration.">
 		<cfabort showerror="This method is abstract and must be overrided." />
