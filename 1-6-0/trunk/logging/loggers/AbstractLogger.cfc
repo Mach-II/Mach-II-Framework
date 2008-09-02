@@ -124,13 +124,10 @@ Notes:
 		<cfreturn getLogAdapter().getLoggingLevel() />
 	</cffunction>
 	
-	<cffunction name="disableLogging" access="public" returntype="void" output="false"
-		hint="Disables logging. Convenience method for dashboard.">
-		<cfset getLogAdapter().setLoggingEnabled(false) />
-	</cffunction>
-	<cffunction name="enableLogging" access="public" returntype="void" output="false"
-		hint="Enables logging. Convenience method for dashboard.">
-		<cfset getLogAdapter().setLoggingEnabled(true) />
+	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
+		hint="Sets logging. Convenience method for dashboard.">
+		<cfargument name="loggingEnabled" type="boolean" required="true" />
+		<cfset getLogAdapter().setLoggingEnabled(arguments.loggingEnabled) />
 	</cffunction>
 	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Checkes if logging is currently enabled.">

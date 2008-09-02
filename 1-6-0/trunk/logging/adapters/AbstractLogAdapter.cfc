@@ -135,16 +135,6 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
-	<cffunction name="disableLogging" access="public" returntype="void" output="false"
-		hint="Disables logging.">
-		<cfset setLoggingEnabled(false) />
-	</cffunction>
-	
-	<cffunction name="enableLogging" access="public" returntype="void" output="false"
-		hint="Enables logging.">
-		<cfset setLoggingEnabled(true) />
-	</cffunction>
-	
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
