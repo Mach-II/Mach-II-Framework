@@ -167,6 +167,10 @@ via reap() which is run every 3 minutes.
 		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
+		<cfelse>
+			<cfif dataStorage[hashedKey].isStale>
+				<cfset getCacheStats().incrementActiveElements(1) />
+			</cfif>
 		</cfif>
 		
 		<!--- Build the cache element --->
