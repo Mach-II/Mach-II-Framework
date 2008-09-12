@@ -211,7 +211,7 @@ Notes:
 				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', alias '#arguments.alias#', criteria '#arguments.criteria#'.") />
 			</cfif>
 			<cfif arguments.criteria neq "">
-				<!--- TODO: Loop through the list of alias' keys and determine if criteria matches and then if 
+				<!--- Loop through the list of alias' keys and determine if criteria matches and then if 
 					so the key should be removed. --->
 				<cfloop list="#arguments.alias#" index="currentAlias">
 					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
