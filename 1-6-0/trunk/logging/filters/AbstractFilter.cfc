@@ -31,6 +31,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.filterType = "undefined" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -46,6 +48,19 @@ Notes:
 	<cffunction name="decide" access="public" returntype="boolean" output="false"
 		hint="Decides whether or not the log message elements meet the filter criteria and should be logged.">
 		<cfargument name="logMessageElements" type="struct" required="true" />
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getFilterType" access="public" returntype="string" output="false"
+		hint="Returns the type of the filter. Required for Dashboard integration.">
+		<cfreturn variables.instance.filterType />
+	</cffunction>
+	
+	<cffunction name="getFilterCriteriaData" access="public" returntype="any" output="false"
+		hint="Gets a struct of filter criteria. Return struct or array with strings as values. Required for dashboard integration.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
