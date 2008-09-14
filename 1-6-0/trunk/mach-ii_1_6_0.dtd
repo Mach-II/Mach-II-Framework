@@ -50,20 +50,21 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!--
 	The "includes" element defines includes you get inserted into that document before Mach II parses
 	and validates the xml file.
-	Attributes: file - the path relative to app root where the file is located
+		file - the path relative to app root where the include file is located
+		[override] - whether or not the include should override any conflicts when applied to the base configuration
 -->
 
 <!ELEMENT includes (include*)>
 <!ELEMENT include EMPTY>
 <!ATTLIST include 
 	file CDATA #REQUIRED
-	override CDATA #IMPLIED
+	override (true|false) "false"
 >
 
 <!--
-	The "module" element defines Mach-II modules (sub-applications).
-	and validates the xml file.
-	Attributes: name - the name of the module that this node defines
+	"module" element defines Mach-II modules (sub-applications) and validates the xml file.
+		name - the name of the module that this node defines
+		file - the path relative to app root where the module config file is located
 -->
 
 <!ELEMENT modules (module*)>
@@ -85,12 +86,16 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		eventParameter - the name of the request parameter that will define the event (defaults to 'event')
 		applicationRoot - the path to the application's folder relative to the web-server root (i.e. '/SampleApp')
 		parameterPrecedence - form | url : which to favor for conflicting request parameters
-	
-	"property"
-		name - the name of the property
-		value - the value of the property
 -->
 <!ELEMENT properties (property*)>
+<!--
+	"property"
+		name - the name of the property
+		[value] - the value of the property
+		[type] - the type of the property if defining a property CFC (fully qualified CFC dot path) 
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
 <!ELEMENT property (parameters?, array?, struct?)>
 <!ATTLIST property 
 	name CDATA #REQUIRED
@@ -104,15 +109,15 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	The "listeners" element defines all of the listeners to be registered with the framework.
 	Listeners are the components that contain application logic.
 	Listeners are referenced by name.
-	
-	"listener"
-		name - the name of the listener
-		type - the type of the listener (fully qualified path)
-	
-	"invoker"
-		type - the type of the invoker (fully qualified path)
 -->
 <!ELEMENT listeners (listener*)>
+<!--
+	"listener"
+		name - the name of the listener
+		type - the type of the listener (fully qualified CFC dot path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
 <!ELEMENT listener (invoker?, parameters?)>
 <!ATTLIST listener 
 	name CDATA #REQUIRED
@@ -120,6 +125,10 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
+<!--
+	"invoker"
+		type - the type of the invoker (fully qualified CFC dot path)
+-->
 <!ELEMENT invoker EMPTY>
 <!ATTLIST invoker 
 	type CDATA #REQUIRED
@@ -131,12 +140,20 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	Message-subscribers are references by message name.
 -->
 <!ELEMENT message-subscribers (message*)>
+<!--
+	"message"
+		name - the name of the message
+		[multithreaded] - whether or not the subscribers should be run in multiple threads (automatically downgrades when not supported by the CFML engine)
+		[timeout] - the number of seconds to wait to join threads before throwing an exception (0 = wait until request timeout is exceed)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
 <!ELEMENT message (subscribe*)>
 <!ATTLIST message
 	name CDATA #REQUIRED
-	multithreaded (true|false) #IMPLIED
-	waitForThreads (true|false) #IMPLIED
-	timeout CDATA #IMPLIED
+	multithreaded (true|false) "true"
+	waitForThreads (true|false) "true"
+	timeout CDATA "0"
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
@@ -151,12 +168,15 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	The "event-filters" element defines all of the event-filters to be registered with the framework.
 	Event-filters can manipulate events and can abort/continue event processing.
 	Event-filters are referenced by name.
-	
+-->
+<!ELEMENT event-filters (event-filter*)>
+<!--
 	"event-filter"
 		name - the name of the event-filter
 		type - the type of the event-filter (fully qualified path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
 -->
-<!ELEMENT event-filters (event-filter*)>
 <!ELEMENT event-filter (parameters?)>
 <!ATTLIST event-filter 
 	name CDATA #REQUIRED
@@ -167,13 +187,16 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	The "event-handlers" element defines all of the logical elements for handling an event.
-	Event-handlers are referenced by the event property (target event name).
-	
+	Event-handlers are referenced by the event property (target event name).	
+-->
+<!ELEMENT event-handlers (event-handler*)>
+<!--
 	"event-handler"
 		event - the name of the event to handle
 		access - the access attribute of the event handler (public|private)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
 -->
-<!ELEMENT event-handlers (event-handler*)>
 <!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish | cache | cache-clear)*>
 <!ATTLIST event-handler 
 	event CDATA #REQUIRED 
@@ -185,11 +208,14 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!--
 	The "subroutine-handlers" element defines all of the logical elements for handling an subroutine.
 	Subroutine-handlers are referenced by the subroutine property (target subroutine name).
-	
-	"subroutine-handler"
-		subroutine - the name of the subroutine to handle
 -->
 <!ELEMENT subroutines (subroutine*)>
+<!--
+	"subroutine-handler"
+		subroutine - the name of the subroutine to handle
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
 <!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish |cache | cache-clear)*>
 <!ATTLIST subroutine 
 	name CDATA #REQUIRED
@@ -200,38 +226,45 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!--
 	The "page-views" element defines all of the views to be registered with the framework.
 	Views are referenced by name.
-	
+-->
+<!ELEMENT page-views (page-view*)>
+<!--
 	"page-view"
 		name - the name of the view
 		page - relative path to the view file
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+		[useParentAppRoot] - defined if the parernt's app root should be substituted for the app root instead of the app root defined in the module
 -->
-<!ELEMENT page-views (page-view*)>
 <!ELEMENT page-view EMPTY>
 <!ATTLIST page-view 
 	name CDATA #REQUIRED
 	page CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
-	useParentAppRoot (true|false) #IMPLIED
 	mapping CDATA #IMPLIED
+	useParentAppRoot (true|false) #IMPLIED
 >
 
 <!--
 	The "plugins" element defines all of the plugins to be registered with the framework.
-	Plugins are referenced by name.
-	
-	"plugin"
-		name - the name of the plugin
-		type - the type of the plugin (fully qualified path)
+	Plugins are referenced by name.	
 -->
 <!ELEMENT plugins (plugin*)>
 <!ATTLIST plugins
 	runParent (none|after|before) #IMPLIED
 >
 
+<!--
+	A "plugin" element to be registered that contains plugin points that will be executed at specified points in a request.
+		name - the name of the plugin
+		type - the type of the plugin (fully qualified CFC dot path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
 <!ELEMENT plugin (parameters?)>
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
-	type CDATA #REQUIRED
+	type CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
@@ -306,14 +339,14 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	name CDATA #REQUIRED
 	contentKey CDATA #IMPLIED
 	contentArg CDATA #IMPLIED
-	append CDATA #IMPLIED
+	append (true|false) "false"
 >
 
 <!--
 	An "announce" element will broadcast an event to registered listeners.
 		event - the event name to announce
-		module - the module name to announce
-		copyEventArgs - whether or not to copy the event args of the current event into the event being announced
+		[module] - the module name to announce
+		[copyEventArgs] - whether or not to copy the event args of the current event into the event being announced
 -->
 <!ELEMENT announce EMPTY>
 <!ATTLIST announce
@@ -393,13 +426,13 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	An "cache-clear" causes a cache to be completely cleared or clears a specific cache key through the use of the criteria attribute.
-		cacheName - the name of the cache being referenced, this cacheName should match a cacheName specified in a CacheProperty
+		[name] - the name of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 		[condition] - a boolean expression that determines if the cache should be cleared
 -->
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear
-	name CDATA #REQUIRED
+	name CDATA #IMPLIED
 	alias CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 	condition CDATA #IMPLIED
