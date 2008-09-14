@@ -201,7 +201,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfswitch expression="#ListLast(arguments.version, ".")#">
 			<cfcase value="0">
-				<cfset release = "Bleeding Edge Release - Unknown build" />
+				<cfset release = "BER - Unknown build" />
 			</cfcase>
 			<cfcase value="1">
 				<cfset release = "Alpha" />
@@ -225,13 +225,13 @@ See that file header for configuration of filter criteria.
 				<cfset release = "RC5" />
 			</cfcase>
 			<cfcase value="8">
-				<cfset release = "Development and Production Stable (non-duck typed core)" />
+				<cfset release = "Production Stable" />
 			</cfcase>
 			<cfcase value="9">
-				<cfset release = "Production-Only Stable (duck-typed core for performance)" />
+				<cfset release = "Production-Only Stable (duck-typed)" />
 			</cfcase>
 			<cfdefaultcase>
-				<cfset release = "Bleeding Edge Release - Build " & ListLast(arguments.version, ".") />
+				<cfset release = "BER - Build " & ListLast(arguments.version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
 		

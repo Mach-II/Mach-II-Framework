@@ -44,22 +44,39 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		color: ##000;
 		background-color: ##FFF;
 		text-align: left;
-		margin: 25px;
+		padding: 1em;
 	}
 	##MachIIRequestLogDisplay h3 {
 		color: ##000;
 	}
 	##MachIIRequestLogDisplay table {
+		margin: 1em 0 1em 0;
 		width:100%;
 	}
 	##MachIIRequestLogDisplay table td {
 		vertical-align: top;
 	}
+	##MachIIRequestLogDisplay table th {
+		padding: 0.5em;
+		color: ##FFF;
+		background-color: ##999;
+		border-top: 1px solid ##666;
+		border-bottom: 1px solid ##666; 
+	}
+	##MachIIRequestLogDisplay table th h3 {
+		margin: 0;
+		color: ##FFF; 
+	}
+	##MachIIRequestLogDisplay table td {
+		padding: 0.5em;
+		border-top: 1px dotted ##D0D0D0;
+		border-bottom: 1px dotted ##D0D0D0;
+	}
 	##MachIIRequestLogDisplay table td.lineBottom {
-		border-bottom: 1px solid ##000;
+		border-bottom: 1px dotted ##666;
 	}
 	##MachIIRequestLogDisplay table td.lineTop {
-		border-top: 1px solid ##000;
+		border-top: 1px dotted ##666;
 	}
 	##MachIIRequestLogDisplay .shade {
 		background-color: ##F5F5F5;
@@ -97,14 +114,12 @@ automatically put your CSS in the head section via <cfhtmlhead />
 </style>
 </cfsavecontent>
 <div id="MachIIRequestLogDisplay">
-
-	<h3>Mach-II Request Log</h3>
 	<table>
 		<tr>
-			<td class="lineBottom" style="width:30%;"><h4>Channel</h4></td>
-			<td class="lineBottom" style="width:7.5%;"><h4>Log Level</h4></td>
-			<td class="lineBottom" style="width:55%;"><h4>Message</h4></td>
-			<td class="lineBottom" style="width:7.5%;"><h4 class="right">Timing (ms)</h4></td>
+			<th style="width:30%;"><h3>Channel</h3></th>
+			<th style="width:10%;"><h3>Log Level</h3></th>
+			<th style="width:50%;"><h3>Message</h3></th>
+			<th style="width:10%;"><h3>Timing</h3></th>
 		</tr>
 	<cfif ArrayLen(data)>
 		<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
@@ -122,10 +137,8 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		</cfloop>
 		<cfif ArrayLen(data) GT 1>
 			<tr>
-				<td class="lineTop">&nbsp;</td>
-				<td class="lineTop">&nbsp;</td>
-				<td class="lineTop"><h4 class="right">First / Last Message Timing Difference</h4></td>
-				<td class="lineTop"><p class="right"><strong>#data[ArrayLen(data)].currentTick - data[1].currentTick#</strong></p></td>
+				<td class="lineTop lineBottom" colspan="3"><h3 class="right">First / Last Message Timing Difference (ms)</h3></td>
+				<td class="lineTop lineBottom"><h3 class="right">#data[ArrayLen(data)].currentTick - data[1].currentTick#</h3></td>
 			</tr>
 		</cfif>
 	<cfelse>
@@ -135,13 +148,15 @@ automatically put your CSS in the head section via <cfhtmlhead />
 	</cfif>
 	</table>
 
-	<h3>General Information</h3>
 	<table>
-		<tr class="shade">
+		<tr>
+			<th colspan="2"><h3>General Information</h3></th>
+		</tr>
+		<tr>
 			<td><h4>Request Event Name</h4></td>
 			<td><p>#arguments.appManager.getRequestHandler().getRequestEventName()#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Request Module Name</h4></td>
 			<td>
 			<cfif Len(arguments.appManager.getRequestHandler().getRequestModuleName())>
@@ -151,11 +166,11 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			</cfif>
 			</td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Mach-II Version</h4></td>
 			<td><p>#getMachIIVersion(arguments.appManager.getPropertyManager().getVersion())#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
 		</tr>
