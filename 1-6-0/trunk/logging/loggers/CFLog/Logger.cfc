@@ -79,7 +79,7 @@ See that file header for configuration of filter criteria.
 		<cfset adapter.setFilter(filter) />
 		
 		<!--- Configure and set the adapter --->
-		<cfset adapter.configure()>
+		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
 		
 		<!--- Add the adapter to the log factory --->
