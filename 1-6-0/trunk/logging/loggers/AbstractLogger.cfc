@@ -32,7 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.instance = StructNew() />
-	<cfset variables.instance.loggerType = "undefined" />
+	<cfset variables.instance.loggerTypeName = "undefined" />
 	<cfset variables.instance.loggerId = "" />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
@@ -202,9 +202,13 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="getLoggerTypeName" access="public" returntype="string" output="false"
+		hint="Returns the type name of the logger. Required for Dashboard integration.">
+		<cfreturn variables.instance.loggerTypeName />
+	</cffunction>
 	<cffunction name="getLoggerType" access="public" returntype="string" output="false"
-		hint="Returns the type of the logger. Required for Dashboard integration.">
-		<cfreturn variables.instance.loggerType />
+		hint="Returns the dot path type of the logger. Required for Dashboard integration.">
+		<cfreturn GetMetadata(this).name />
 	</cffunction>
 
 	<cffunction name="setLoggerId" access="private" returntype="void" output="false"

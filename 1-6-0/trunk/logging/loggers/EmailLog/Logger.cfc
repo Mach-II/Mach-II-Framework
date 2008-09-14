@@ -71,7 +71,7 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.loggerType = "Email Log" />
+	<cfset variables.instance.loggerTypeName = "Email" />
 	<cfset variables.instance.emailTemplateFile = "defaultEmailTemplate.cfm" />
 	<cfset variables.instance.to = "" />
 	<cfset variables.instance.from = "" />

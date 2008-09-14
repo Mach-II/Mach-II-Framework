@@ -68,7 +68,7 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.loggerType = "Mach-II Log" />
+	<cfset variables.instance.loggerTypeName = "Mach-II" />
 	<cfset variables.instance.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
