@@ -68,6 +68,12 @@ tracked by Mach-II are as follows:
 		<cfset variables.activeElements = 0 />
 	</cffunction>
 
+	<cffunction name="setExtraStat" access="public" returntype="void" output="false"
+		hint="Sets an extra stats value by stat name.">
+		<cfargument name="statName" type="string" required="true" />
+		<cfargument name="statValue" type="any" required="true" />
+		<cfset variables.extraStats[statName] = statValue />
+	</cffunction>
 	<cffunction name="getExtraStats" access="public" returntype="struct" output="false"
 		hint="Gets the extra stats which must be a key of this struct.">
 		<cfreturn variables.extraStats />
