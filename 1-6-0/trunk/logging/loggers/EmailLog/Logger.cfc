@@ -78,9 +78,6 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.subject = "" />
 	<cfset variables.instance.servers = "" />
 	
-	<cfset variables.loggingScope = "" />
-	<cfset variables.loggingPath = "" />
-	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -96,10 +93,6 @@ See that file header for configuration of filter criteria.
 		<!--- Configure and set the adapter --->
 		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
-		
-		<!--- Apply configuration from adapter that is needed by the logger --->
-		<cfset setLoggingScope(adapter.getLoggingScope()) />
-		<cfset setLoggingPath(adapter.getLoggingPath()) />
 		
 		<!--- Add the adapter to the log factory --->
 		<cfset getLogFactory().addLogAdapter(adapter) />
@@ -216,26 +209,6 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getEmailTemplateFile" access="public" returntype="string" output="false"
 		hint="Gets the email template location.">
 		<cfreturn variables.instance.emailTemplateFile />
-	</cffunction>
-	
-	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
-		hint="Sets the logging scope.">
-		<cfargument name="loggingScope" type="string" required="true" />
-		<cfset variables.loggingScope = arguments.loggingScope />
-	</cffunction>
-	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
-		hint="Gets the logging scope.">
-		<cfreturn variables.loggingScope />
-	</cffunction>
-
-	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
-		hint="Sets the logging path.">
-		<cfargument name="loggingPath" type="string" required="true" />
-		<cfset variables.loggingPath = arguments.loggingPath />
-	</cffunction>
-	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
-		hint="Gets the logging path.">
-		<cfreturn variables.loggingPath />
 	</cffunction>
 	
 	<cffunction name="setTo" access="private" returntype="void" output="false">

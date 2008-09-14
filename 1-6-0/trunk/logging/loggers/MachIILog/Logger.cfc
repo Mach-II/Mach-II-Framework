@@ -73,9 +73,6 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
 	
-	<cfset variables.loggingScope = "" />
-	<cfset variables.loggingPath = "" />
-	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -113,9 +110,6 @@ See that file header for configuration of filter criteria.
 		<cfif isParameterDefined("suppressDebugArg")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
-		
-		<cfset setLoggingScope(adapter.getLoggingScope()) />
-		<cfset setLoggingPath(adapter.getLoggingPath()) />
 	</cffunction>
 	
 	<!---
@@ -290,26 +284,6 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getSuppressDebugArg" access="public" returntype="string" output="false"
 		hint="Gets the event-arg the suppresses debug output if it is present.">
 		<cfreturn variables.instance.suppressDebugArg />
-	</cffunction>
-
-	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
-		hint="Sets the logging scope.">
-		<cfargument name="loggingScope" type="string" required="true" />
-		<cfset variables.loggingScope = arguments.loggingScope />
-	</cffunction>
-	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
-		hint="Gets the logging scope.">
-		<cfreturn variables.loggingScope />
-	</cffunction>
-
-	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
-		hint="Sets the logging path.">
-		<cfargument name="loggingPath" type="string" required="true" />
-		<cfset variables.loggingPath = arguments.loggingPath />
-	</cffunction>
-	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
-		hint="Gets the logging path.">
-		<cfreturn variables.loggingPath />
 	</cffunction>
 	
 </cfcomponent>
