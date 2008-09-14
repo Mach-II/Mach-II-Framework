@@ -50,7 +50,7 @@ Pattern matches are not case sensitive.
 	PROPERTIES
 	--->
 	<cfset variables.filterChannels = ArrayNew(1) />
-	<cfset variables.instance.filterType = "Channel" />
+	<cfset variables.instance.filterTypeName = "Channel" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
