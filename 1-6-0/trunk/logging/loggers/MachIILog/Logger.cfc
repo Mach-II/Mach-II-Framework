@@ -128,7 +128,6 @@ See that file header for configuration of filter criteria.
 			surrounded by cfoutput tags --->
 		
 		<cfset var data = ArrayNew(1) />
-		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var local = StructNew() />
 		<cfset var out = getPageContext().getOut() />
 		<cfset var buffer = "" />
@@ -137,11 +136,11 @@ See that file header for configuration of filter criteria.
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()
-			AND StructKeyExists(scope, getLoggingPath())
+			AND getLogAdapter().isLoggingDataDefined()
 			AND ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly())
 			AND NOT arguments.event.isArgDefined(getSuppressDebugArg())>
 
-			<cfset data = scope[getLoggingPath()].data />
+			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<cfsavecontent variable="output">
 				<cfinclude template="#getDisplayOutputTemplateFile()#" />
@@ -164,7 +163,7 @@ See that file header for configuration of filter criteria.
 				<cfset out.clearBuffer() />
 			</cfif>
 			
-			<cfoutput>#output#</cfoutput>			
+			<cfoutput>#output#</cfoutput>
 		</cfif>
 	</cffunction>
 	
@@ -172,11 +171,9 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-
-		<cfset var scope = StructGet(getLoggingScope()) />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset arguments.data[getLoggerId()] = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
 	</cffunction>
 
@@ -185,11 +182,12 @@ See that file header for configuration of filter criteria.
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
 
-		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var loggingData = StructNew() />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cftry>
-				<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+				<cfset loggingData = getLogAdapter().getLoggingData() />
+				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
 					<!--- Do nothing as the configuration may have changed between start of
 					the redirect and now --->

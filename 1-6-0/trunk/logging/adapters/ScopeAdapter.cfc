@@ -227,6 +227,25 @@ Configuration Example:
 	</cffunction>
 	
 	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="isLoggingDataDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if logging data is defined.">
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfreturn StructKeyExists(scope, getLoggingPath()) />
+	</cffunction>
+	
+	<cffunction name="getLoggingData" access="public" returntype="struct" output="false"
+		hint="Gets logging data. Call isLoggingDataDefined() first to check if defined.">
+
+		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfreturn scope[getLoggingPath()] />
+	</cffunction>
+	
+	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="isLevelEnabled" access="private" returntype="boolean" output="false"

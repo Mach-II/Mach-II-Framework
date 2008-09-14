@@ -134,14 +134,13 @@ See that file header for configuration of filter criteria.
 		hint="Sends an email for this logger.">
 		
 		<cfset var body = "" />
-		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var data = ArrayNew(1) />
 		<cfset var local = StructNew() />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			
-			<cfset data = scope[getLoggingPath()].data />
+			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<cfif ArrayLen(data)>
 				<!--- Save the body of the email --->
@@ -163,11 +162,9 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-
-		<cfset var scope = StructGet(getLoggingScope()) />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset arguments.data[getLoggerId()] = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
 	</cffunction>
 
@@ -176,11 +173,12 @@ See that file header for configuration of filter criteria.
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
 
-		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var loggingData = StructNew() />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cftry>
-				<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+				<cfset loggingData = getLogAdapter().getLoggingData() />
+				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
 					<!--- Do nothing as the configuration may have changed between start of
 					the redirect and now --->
