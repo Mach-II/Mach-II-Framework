@@ -86,4 +86,18 @@ See that file header for configuration of filter criteria.
 		<cfset getLogFactory().addLogAdapter(adapter) />
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets the configuration data for this logger including adapter and filter.">
+		
+		<cfset var data = StructNew() />
+		
+		<cfset data["Log File Name"] = getLogAdapter().getLogFile() />
+		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
+		
+		<cfreturn data />
+	</cffunction>
+	
 </cfcomponent>

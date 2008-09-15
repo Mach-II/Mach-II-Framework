@@ -84,18 +84,8 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS - UTILS
-	--->
-	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
-		hint="Gets the configuration data for this logger including adapter and filter.">
-		
-		<cfset var data = variables.instance />
-		
-		<cfset data.adapter = getLogAdapter().getConfigurationData() />
-		
-		<cfreturn data />
-	</cffunction>
-	
+	PUBLIC FUNCTIONS
+	--->	
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
 		<cfreturn isMethodDefined("onRequestEnd") />
@@ -119,25 +109,17 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="setLoggingLevel" access="public" returntype="string" output="false"
-		hint="Sets the logging level by name.">
-		<cfargument name="loggingLevelName" type="string" required="true"
-			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
-		<cfset getLogAdapter().setLoggingLevel(arguments.loggingLevelName) />
-	</cffunction>
-	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
-		hint="Returns the logging level by name.">
-		<cfreturn getLogAdapter().getLoggingLevel() />
-	</cffunction>
-	
-	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
-		hint="Sets logging. Convenience method for dashboard.">
-		<cfargument name="loggingEnabled" type="boolean" required="true" />
-		<cfset getLogAdapter().setLoggingEnabled(arguments.loggingEnabled) />
-	</cffunction>
-	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
-		hint="Checkes if logging is currently enabled.">
-		<cfreturn getLogAdapter().getLoggingEnabled() />
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets pretty configuration data for this logger. Override for better Dashboard integration data.">
+		
+		<cfset var data = variables.instance />
+		
+		<cfset data.adapter = getLogAdapter().getConfigurationData() />
+		
+		<cfreturn data />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
@@ -202,6 +184,27 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setLoggingLevel" access="public" returntype="string" output="false"
+		hint="Sets the logging level by name.">
+		<cfargument name="loggingLevelName" type="string" required="true"
+			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
+		<cfset getLogAdapter().setLoggingLevel(arguments.loggingLevelName) />
+	</cffunction>
+	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
+		hint="Returns the logging level by name.">
+		<cfreturn getLogAdapter().getLoggingLevel() />
+	</cffunction>
+	
+	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
+		hint="Sets logging. Convenience method for dashboard.">
+		<cfargument name="loggingEnabled" type="boolean" required="true" />
+		<cfset getLogAdapter().setLoggingEnabled(arguments.loggingEnabled) />
+	</cffunction>
+	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
+		hint="Checkes if logging is currently enabled.">
+		<cfreturn getLogAdapter().getLoggingEnabled() />
+	</cffunction>
+
 	<cffunction name="getLoggerTypeName" access="public" returntype="string" output="false"
 		hint="Returns the type name of the logger. Required for Dashboard integration.">
 		<cfreturn variables.instance.loggerTypeName />
