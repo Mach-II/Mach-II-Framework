@@ -60,15 +60,20 @@ Notes:
 		<cfset var continue = false />
 		<cfset var filter = getFilter() />
 		<cfset var log = getFilter().getLog() />
+		<cfset var paramArgs = getParamArgs() />
 		
 		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with runtime paramArgs.", getParamArgs()) />
+			<cfif StructCount(paramArgs)>
+				<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with runtime paramArgs.", paramArgs) />
+			<cfelse>
+				<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with no runtime paramArgs.") />
+			</cfif>
 		</cfif>
 		
 		<cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
 			<cfinvokeargument name="event" value="#arguments.event#" />
 			<cfinvokeargument name="eventContext" value="#arguments.eventContext#" />
-			<cfinvokeargument name="paramArgs" value="#getParamArgs()#" />
+			<cfinvokeargument name="paramArgs" value="#paramArgs#" />
 		</cfinvoke>
 
 		<cfif NOT continue AND log.isInfoEnabled()>
