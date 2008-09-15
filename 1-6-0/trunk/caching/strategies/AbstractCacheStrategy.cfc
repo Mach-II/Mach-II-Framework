@@ -113,7 +113,7 @@ in the Mach-II dashboard.
 	</cffunction>
 	
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
-		hint="Gets the configuration data for this caching strategy.">
+		hint="Gets pretty configuration data for this caching strategy. Override to provide nicer looking information for Dashboard integration.">
 		<cfreturn variables.instance />
 	</cffunction>
 	

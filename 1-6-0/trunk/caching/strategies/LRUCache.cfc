@@ -226,6 +226,20 @@ in the application scope.
 			
 		</cfif>
 	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets pretty configuration data for this caching strategy.">
+		
+		<cfset var data = StructNew() />
+		
+		<cfset data["Scope"] = getScope() />
+		<cfset data["Size"] = getSize() />
+		
+		<cfreturn data />
+	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS
