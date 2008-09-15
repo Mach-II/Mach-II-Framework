@@ -237,6 +237,7 @@ in the application scope.
 		
 		<cfset data["Scope"] = getScope() />
 		<cfset data["Size"] = getSize() />
+		<cfset data["Cache Enabled"] = YesNoFormat(isCacheEnabled()) />
 		
 		<cfreturn data />
 	</cffunction>
