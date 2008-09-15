@@ -112,6 +112,8 @@ Pattern matches are not case sensitive.
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(criteria)#" index="i">
+			<cfset temp = "" />
+			
 			<cfif criteria[i].restrict>
 				<cfset temp = temp & "!" />
 			</cfif>
