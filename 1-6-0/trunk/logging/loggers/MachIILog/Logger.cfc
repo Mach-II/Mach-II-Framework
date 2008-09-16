@@ -200,7 +200,6 @@ See that file header for configuration of filter criteria.
 		
 		<cfset data["Debug Mode Only"] = getDebugModeOnly() />
 		<cfset data["Supress Debug Arg"] = getSuppressDebugArg() />
-		<cfset data["Logging Enabled"] = getLogAdapter().getLoggingEnabled() />
 		<cfset data["Display Output Template"] = getDisplayOutputTemplateFile() />
 		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
 		
