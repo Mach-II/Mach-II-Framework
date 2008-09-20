@@ -226,7 +226,8 @@ Notes:
 			<cfelse>
 				<cfloop list="#arguments.alias#" index="currentAlias">
 					<cfif log.isDebugEnabled()>
-						<cfset log.debug("clearCache: currentAlias = #currentAlias#, aliasKeyLists = #variables.aliasKeyLists#") />
+						<cfset log.debug("clearCache: currentAlias = #currentAlias#, 
+							aliasKeyLists = #structKeyList(variables.aliasKeyLists)#") />
 					</cfif>
 					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
 						<cfset getCacheStrategy().remove(currentKey) />
