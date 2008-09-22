@@ -141,6 +141,7 @@ Notes:
 		<cfset var cacheCondition = "" />
 		<cfset var name = "" />
 		<cfset var criteria = "" />
+		<cfset var id = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes")>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
@@ -155,10 +156,13 @@ Notes:
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "id")>
+				<cfset id = arguments.commandNode.xmlAttributes["id"] />	
+			</cfif>	
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
-			name, cacheAlias, cacheCondition, criteria) />
+			name, cacheAlias, cacheCondition, criteria, id) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />

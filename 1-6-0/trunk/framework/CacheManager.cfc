@@ -180,14 +180,6 @@ Notes:
 
 		<!--- Add the handler --->
 		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
-		
-		<!--- TODO: see if this is needed: Register the handler by handler type  --->
-		<!--- <cfif handlerType EQ "event">
-			<cfset variables.handlersByEventName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
-		<cfelseif handlerType EQ "subroutine">
-			<cfset variables.handlersBySubroutineName[handlerId][getKeyHash(arguments.cacheHandler.getParentHandlerName())] = true />
-		</cfif>  --->
-		
 		<cfset variables.handlersByName[getKeyHash(cacheName)] = handlerId />
 		
 		<!--- Register the alias if defined --->
@@ -314,6 +306,26 @@ Notes:
 		<cfelseif isObject(getParent())>
 			<cfset getParent().clearCacheByName(arguments.cacheName, arguments.event) />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="clearCacheById" access="public" returntype="void" output="false"
+		hint="Clears caches by cache id (handler id).">
+		<cfargument name="id" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
+					"exists: #StructKeyExists(variables.handlers, arguments.id)#, " &
+					"handler keys: #StructKeyList(variables.handlers)#.") />
+		</cfif>
+		
+		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
+		<cfif StructKeyExists(variables.handlers, arguments.id)>
+			<cfset getCacheHandler(arguments.id).clearCache(arguments.event) />
+		<cfelseif isObject(getParent())>
+			<cfset getParent().clearCacheById(arguments.id, arguments.event) />
+		</cfif>
+		
 	</cffunction>
 	
 	<cffunction name="isAliasDefined" access="public" returntype="boolean" output="false"
