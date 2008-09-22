@@ -286,11 +286,12 @@ via reap() which is run every 3 minutes.
 		hint="Gets pretty configuration data for this caching strategy.">
 		
 		<cfset var data = StructNew() />
+		<cfset var cleanupInterval = getCleanupInterval() />
 		
 		<cfset data["Scope"] = getScope() />
 		<cfset data["Cache Enabled"] = YesNoFormat(isCacheEnabled()) />
 		<cfset data["Timespan"] = getTimespanString() />
-		<cfset data["Cleanup Interval"] = (getCleanupInterval() / 1000 / 60) & " minutes" />
+		<cfset data["Cleanup Interval"] = cleanupInterval.divide(createBigInteger(60000)).toString() & " minutes" />
 		
 		<cfreturn data />
 	</cffunction>
