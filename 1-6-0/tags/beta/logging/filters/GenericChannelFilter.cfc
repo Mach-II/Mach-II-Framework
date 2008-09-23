@@ -50,6 +50,7 @@ Pattern matches are not case sensitive.
 	PROPERTIES
 	--->
 	<cfset variables.filterChannels = ArrayNew(1) />
+	<cfset variables.instance.filterTypeName = "Channel" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -94,6 +95,36 @@ Pattern matches are not case sensitive.
 					<cfset result = true />
 				</cfif>
 			</cfif>
+		</cfloop>
+		
+		<cfreturn result />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getFilterCriteria" access="public" returntype="array" output="false"
+		hint="Gets a struct of filter criteria.">
+		
+		<cfset var criteria = getFilterChannels() />
+		<cfset var result = ArrayNew(1) />
+		<cfset var temp = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(criteria)#" index="i">
+			<cfset temp = "" />
+			
+			<cfif criteria[i].restrict>
+				<cfset temp = temp & "!" />
+			</cfif>
+			
+			<cfset temp = temp & criteria[i].channel />
+			
+			<cfif criteria[i].wildcard>
+				<cfset temp = temp & "*" />
+			</cfif>
+			
+			<cfset ArrayAppend(result, temp) />
 		</cfloop>
 		
 		<cfreturn result />

@@ -68,6 +68,7 @@ in the application scope.
 	PROPERTIES
 	--->
 	<cfset variables.instance.size = 100 />
+	<cfset variables.instance.strategyTypeName = "LRU" />
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
 	
@@ -167,6 +168,7 @@ in the application scope.
 		<cfset var dataStorage = getStorage() />
 
 		<cfset StructClear(dataStorage) />
+		<cfset getCacheStats().reset() />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
@@ -223,6 +225,21 @@ in the application scope.
 			</cflock>
 			
 		</cfif>
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets pretty configuration data for this caching strategy.">
+		
+		<cfset var data = StructNew() />
+		
+		<cfset data["Scope"] = getScope() />
+		<cfset data["Size"] = getSize() />
+		<cfset data["Cache Enabled"] = YesNoFormat(isCacheEnabled()) />
+		
+		<cfreturn data />
 	</cffunction>
 	
 	<!---

@@ -83,7 +83,9 @@ via reap() which is run every 3 minutes.
 	<cfset variables.HOUR = createBigInteger("3600000") />
 	<cfset variables.DAY = createBigInteger("86400000") />
 	
+	<cfset variables.instance.strategyTypeName = "Time Span" />
 	<cfset variables.instance.timespan = variables.HOUR /><!--- Default to 1 hour --->
+	<cfset variables.instance.timespanString =  "0,1,0,0" /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
 	<cfset variables.instance.cleanupInterval = createBigInteger("180000") /><!--- Default to 3 minutes --->
@@ -106,7 +108,7 @@ via reap() which is run every 3 minutes.
 					message="Invalid timespan of '#getParameter("timespan")#'."
 					detail="Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds)." />
 			<cfelse>
-				<cfset setTimespan(getParameter("timespan")) />
+				<cfset setTimespanString(getParameter("timespan")) />
 			</cfif>
 		</cfif>
 		<cfif isParameterDefined("scope")>
@@ -166,6 +168,10 @@ via reap() which is run every 3 minutes.
 		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
+		<cfelse>
+			<cfif dataStorage[hashedKey].isStale>
+				<cfset getCacheStats().incrementActiveElements(1) />
+			</cfif>
 		</cfif>
 		
 		<!--- Build the cache element --->
@@ -206,7 +212,8 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var dataStorage = getStorage() />
 		
-		<cfset StructClear(dataStorage) />		
+		<cfset StructClear(dataStorage) />	
+		<cfset getCacheStats().reset() />	
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="any" output="false"
@@ -271,6 +278,23 @@ via reap() which is run every 3 minutes.
 			</cfloop>
 		</cflock>
 	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets pretty configuration data for this caching strategy.">
+		
+		<cfset var data = StructNew() />
+		<cfset var cleanupInterval = getCleanupInterval() />
+		
+		<cfset data["Scope"] = getScope() />
+		<cfset data["Cache Enabled"] = YesNoFormat(isCacheEnabled()) />
+		<cfset data["Timespan"] = getTimespanString() />
+		<cfset data["Cleanup Interval"] = cleanupInterval.divide(createBigInteger(60000)).toString() & " minutes" />
+		
+		<cfreturn data />
+	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
@@ -290,7 +314,6 @@ via reap() which is run every 3 minutes.
 				<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
 				<cfset getCacheStats().incrementEvictions(1) />
 				<cfset getCacheStats().decrementTotalElements(1) />
-				<cfset getCacheStats().decrementActiveElements(1) />
 			<cfelse>
 				<cfset cacheElement.isStale = true />
 				<cfset getCacheStats().decrementActiveElements(1) />
@@ -426,6 +449,17 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 	<cffunction name="getTimespan" access="public" returntype="any" output="false">
 		<cfreturn variables.instance.timespan />
+	</cffunction>
+
+	<cffunction name="setTimespanString" access="private" returntype="void" output="false"
+		hint="Sets a timespan string.">
+		<cfargument name="timespanString" type="string" required="true"
+			hint="Must be in format of 0,0,0,0 (days,hours,minutes,seconds) or 'forever'." />
+		<cfset variables.instance.timespanString = arguments.timeSpanString />
+		<cfset setTimespan(arguments.timespanString) />
+	</cffunction>
+	<cffunction name="getTimespanString" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.timespanString />
 	</cffunction>
 
 	<cffunction name="getCurrentTickCount" access="public" returntype="any" output="false"

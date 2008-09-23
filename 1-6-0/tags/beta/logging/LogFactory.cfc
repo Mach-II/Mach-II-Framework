@@ -92,7 +92,7 @@ first [Hash(UCase(arguments.channell))]
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfset variables.logAdapters[key].disableLogging() />
+			<cfset variables.logAdapters[key].setLoggingEnabled(false) />
 		</cfloop>
 	</cffunction>
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
@@ -101,7 +101,7 @@ first [Hash(UCase(arguments.channell))]
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfset variables.logAdapters[key].enableLogging() />
+			<cfset variables.logAdapters[key].setLoggingEnabled(true) />
 		</cfloop>
 	</cffunction>
 	

@@ -47,6 +47,7 @@ tracked by Mach-II are as follows:
 	<cfset variables.activeElements = 0 />
 	<cfset variables.totalElements = 0 />
 	<cfset variables.evictions = 0 />
+	<cfset variables.statsActiveSince = Now() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -55,24 +56,42 @@ tracked by Mach-II are as follows:
 		hint="Initializes the stats.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
-	ACCESSORS
-	--->
-	<cffunction name="getExtraStats" access="public" returntype="struct" output="false">
-		<cfreturn variables.extraStats />
+	PUBLIC FUNCTIONS
+	--->	
+	<cffunction name="reset" access="public" returntype="void" output="false"
+		hint="Resets all the standard caching stats.">
+		<cfset setCacheHits(0) />
+		<cfset setCacheMisses(0) />
+		<cfset setEvictions(0) />
+		<cfset setTotalElements(0) />
+		<cfset setActiveElements(0) />
+		<cfset setStatsActiveSince(Now()) />
 	</cffunction>
+
 	<cffunction name="setExtraStat" access="public" returntype="void" output="false"
 		hint="Sets an extra stats value by stat name.">
 		<cfargument name="statName" type="string" required="true" />
 		<cfargument name="statValue" type="any" required="true" />
 		<cfset variables.extraStats[statName] = statValue />
 	</cffunction>
+	<cffunction name="getExtraStats" access="public" returntype="struct" output="false"
+		hint="Gets the extra stats which must be a key of this struct.">
+		<cfreturn variables.extraStats />
+	</cffunction>
 	
+	<!---
+	ACCESSORS
+	--->
 	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false"
 		hint="Increments the number of hits by the default of 1 or by the amount passed.">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.cacheHits = variables.cacheHits + arguments.amount />
+	</cffunction>
+	<cffunction name="setCacheHits" access="public" returntype="void" output="false">
+		<cfargument name="cacheHits" type="numeric" required="true" />
+		<cfset variables.cacheHits = arguments.cacheHits />
 	</cffunction>
 	<cffunction name="getCacheHits" access="public" returntype="numeric" output="false">
 		<cfreturn variables.cacheHits />
@@ -82,13 +101,21 @@ tracked by Mach-II are as follows:
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.cacheMisses = variables.cacheMisses + arguments.amount />
 	</cffunction>
-	<cffunction name="getcacheMisses" access="public" returntype="numeric" output="false">
+	<cffunction name="setCacheMisses" access="public" returntype="void" output="false">
+		<cfargument name="cacheMisses" type="numeric" required="true" />
+		<cfset variables.cacheMisses = arguments.cacheMisses />
+	</cffunction>
+	<cffunction name="getCacheMisses" access="public" returntype="numeric" output="false">
 		<cfreturn variables.cacheMisses />
 	</cffunction>
 	
 	<cffunction name="incrementEvictions" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.evictions = variables.evictions + arguments.amount />
+	</cffunction>
+	<cffunction name="setEvictions" access="public" returntype="void" output="false">
+		<cfargument name="evictions" type="numeric" required="true" />
+		<cfset variables.evictions = arguments.evictions />
 	</cffunction>
 	<cffunction name="getEvictions" access="public" returntype="numeric" output="false">
 		<cfreturn variables.evictions />
@@ -102,7 +129,7 @@ tracked by Mach-II are as follows:
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.totalElements = variables.totalElements - arguments.amount />
 	</cffunction>
-	<cffunction name="setTotalElements" access="public" returntype="numeric" output="false">
+	<cffunction name="setTotalElements" access="public" returntype="void" output="false">
 		<cfargument name="totalElements" type="numeric" required="true" />
 		<cfset variables.totalElements = arguments.totalElements />
 	</cffunction>
@@ -118,12 +145,20 @@ tracked by Mach-II are as follows:
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.activeElements = variables.activeElements - arguments.amount />
 	</cffunction>
-	<cffunction name="setActiveElements" access="public" returntype="numeric" output="false">
+	<cffunction name="setActiveElements" access="public" returntype="void" output="false">
 		<cfargument name="activeElements" type="numeric" required="true" />
 		<cfset variables.activeElements = arguments.activeElements />
 	</cffunction>
 	<cffunction name="getActiveElements" access="public" returntype="numeric" output="false">
 		<cfreturn variables.activeElements />
+	</cffunction>
+	
+	<cffunction name="setStatsActiveSince" access="public" returntype="void" output="false">
+		<cfargument name="statsActiveSince" type="date" required="true" />
+		<cfset variables.statsActiveSince = arguments.statsActiveSince />
+	</cffunction>
+	<cffunction name="getStatsActiveSince" access="public" returntype="date" output="false">
+		<cfreturn variables.statsActiveSince />
 	</cffunction>
 
 </cfcomponent>

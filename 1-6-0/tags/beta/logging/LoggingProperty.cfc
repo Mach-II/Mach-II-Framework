@@ -204,6 +204,16 @@ will bind to root parameter values.
 			<cfset variables.loggers[arguments.loggerName] = arguments.logger />
 		</cfif>
 	</cffunction>
+	<cffunction name="getLoggerByName" access="public" returntype="MachII.logging.loggers.AbstractLogger" output="false"
+		hint="Gets a logger by name.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfreturn variables.loggers[arguments.loggerName] />
+	</cffunction>
+	<cffunction name="isLoggerDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if a logger is defined by name.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfreturn StructKeyExists(variables.loggers, arguments.loggerName) />
+	</cffunction>
 	<cffunction name="getLoggers" access="public" returntype="struct" output="false"
 		hint="Gets all the registered loggers.">
 		<cfreturn variables.loggers />

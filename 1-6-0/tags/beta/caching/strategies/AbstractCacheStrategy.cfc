@@ -43,6 +43,7 @@ in the Mach-II dashboard.
 	PROPERTIES
 	--->
 	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.strategyTypeName = "undefined" />
 	<cfset variables.instance.isCacheEnabled = true />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
@@ -112,7 +113,7 @@ in the Mach-II dashboard.
 	</cffunction>
 	
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
-		hint="Gets the configuration data for this caching strategy.">
+		hint="Gets pretty configuration data for this caching strategy. Override to provide nicer looking information for Dashboard integration.">
 		<cfreturn variables.instance />
 	</cffunction>
 	
@@ -150,6 +151,15 @@ in the Mach-II dashboard.
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="getStrategyTypeName" access="public" returntype="string" output="false"
+		hint="Returns the type name of the strategy. Required for Dashboard integration.">
+		<cfreturn variables.instance.strategyTypeName />
+	</cffunction>
+	<cffunction name="getStrategyType" access="public" returntype="string" output="false"
+		hint="Returns the dot path type of the strategy. Required for Dashboard integration.">
+		<cfreturn GetMetadata(this).name />
+	</cffunction>
+	
 	<cffunction name="setCacheEnabled" access="public" returntype="void" output="false"
 		hint="Sets the boolean suggestion that isCacheEnabled() returns.">
 		<cfargument name="isCacheEnabled" type="boolean" required="true" />

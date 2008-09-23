@@ -197,6 +197,7 @@ Notes:
 		<cfset var key = "" />
 		<cfset var currentAlias = "" />
 		<cfset var currentKey = "" />
+		<cfset var criteriaFromKey = "" />
 		
 		<cfif arguments.criteria neq "">
 			<cfset key = getKeyFromCriteria(arguments.event, arguments.criteria) />
@@ -207,13 +208,28 @@ Notes:
 		<!--- If we don't get any criteria passed we want to clear the whole cache --->
 		<cfif arguments.criteria neq "" or arguments.alias neq "">
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', alias '#arguments.alias#'.") />
+				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', alias '#arguments.alias#', criteria '#arguments.criteria#'.") />
 			</cfif>
 			<cfif arguments.criteria neq "">
-				<cfset getCacheStrategy().remove(key) />
+				<!--- Loop through the list of alias' keys and determine if criteria matches and then if 
+					so the key should be removed. --->
+				<cfloop list="#arguments.alias#" index="currentAlias">
+					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
+						<!--- The first element of the currentKey is the handlerId which needs to be removed to 
+							check the criteria --->
+						<cfset criteriaFromKey = listDeleteAt(currentKey, 1, "&") />
+						<cfif criteriaFromKey eq listDeleteAt(getKeyFromCriteria(arguments.event, arguments.criteria), 1, "&")>
+							<cfset getCacheStrategy().remove(currentKey) />
+						</cfif>
+					</cfloop>
+				</cfloop>
 			<cfelse>
 				<cfloop list="#arguments.alias#" index="currentAlias">
-					<cfloop list="#variables.aliasKeyLists[currentAlias]#" index="currentKey">
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("clearCache: currentAlias = #currentAlias#, 
+							aliasKeyLists = #structKeyList(variables.aliasKeyLists)#") />
+					</cfif>
+					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
 						<cfset getCacheStrategy().remove(currentKey) />
 					</cfloop>
 				</cfloop>

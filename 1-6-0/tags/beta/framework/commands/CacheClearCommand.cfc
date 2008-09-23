@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.commandType = "cache-clear" />
 	<cfset variables.alias = "" />
+	<cfset variables.id = "" />
 	<cfset variables.condition = "" />
 	<cfset variables.criteria = "" />
 	<cfset variables.cacheName = "" />
@@ -46,11 +47,13 @@ Notes:
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="condition" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
+		<cfargument name="id" type="string" required="false" default="" />
 
 		<cfset setAlias(arguments.alias) />
 		<cfset setCondition(arguments.condition) />
 		<cfset setCacheName(arguments.cacheName) />
 		<cfset setCriteria(arguments.criteria) />
+		<cfset setId(arguments.id) />
 
 		<cfreturn this />
 	</cffunction>
@@ -130,6 +133,18 @@ Notes:
 	<cffunction name="isAliasDefined" access="private" returntype="boolean" output="false"
 		hint="Checks if an alias is defined.">
 		<cfreturn Len(variables.alias) />
+	</cffunction>
+	
+	<cffunction name="setId" access="private" returntype="void" output="false">
+		<cfargument name="id" type="string" required="true" />
+		<cfset variables.id = arguments.id />
+	</cffunction>
+	<cffunction name="getId" access="private" returntype="string" output="false">
+		<cfreturn variables.id />
+	</cffunction>
+	<cffunction name="isIdDefined" access="private" returntype="boolean" output="false"
+		hint="Checks if an cache id is defined.">
+		<cfreturn Len(variables.id) />
 	</cffunction>
 	
 	<cffunction name="setCondition" access="private" returntype="void" output="false">

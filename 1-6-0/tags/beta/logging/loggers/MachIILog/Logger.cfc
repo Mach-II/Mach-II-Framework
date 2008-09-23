@@ -68,13 +68,10 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.loggerType = "Mach-II Log" />
+	<cfset variables.instance.loggerTypeName = "Mach-II" />
 	<cfset variables.instance.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
-	
-	<cfset variables.loggingScope = "" />
-	<cfset variables.loggingPath = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -89,7 +86,7 @@ See that file header for configuration of filter criteria.
 		<cfset adapter.setFilter(filter) />
 		
 		<!--- Configure and set the adapter --->
-		<cfset adapter.configure()>
+		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
 		
 		<!--- Add the adapter to the log factory --->
@@ -102,7 +99,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfif isParameterDefined("debugModeOnly")>
 			<cfif NOT IsBoolean(getParameter("debugModeOnly"))>
-				<cfthrow type="MachII.logging.strategies.MachIILog.Logger"
+				<cfthrow type="MachII.logging.loggers.MachIILog.Logger"
 					message="The value of 'debugModeOnly' must be boolean."
 					detail="Current value '#getParameter('debugModeOnly')#'" />
 			<cfelse>
@@ -113,9 +110,6 @@ See that file header for configuration of filter criteria.
 		<cfif isParameterDefined("suppressDebugArg")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
-		
-		<cfset setLoggingScope(adapter.getLoggingScope()) />
-		<cfset setLoggingPath(adapter.getLoggingPath()) />
 	</cffunction>
 	
 	<!---
@@ -128,7 +122,6 @@ See that file header for configuration of filter criteria.
 			surrounded by cfoutput tags --->
 		
 		<cfset var data = ArrayNew(1) />
-		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var local = StructNew() />
 		<cfset var out = getPageContext().getOut() />
 		<cfset var buffer = "" />
@@ -137,11 +130,11 @@ See that file header for configuration of filter criteria.
 		
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()
-			AND StructKeyExists(scope, getLoggingPath())
+			AND getLogAdapter().isLoggingDataDefined()
 			AND ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly())
 			AND NOT arguments.event.isArgDefined(getSuppressDebugArg())>
 
-			<cfset data = scope[getLoggingPath()].data />
+			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<cfsavecontent variable="output">
 				<cfinclude template="#getDisplayOutputTemplateFile()#" />
@@ -164,7 +157,7 @@ See that file header for configuration of filter criteria.
 				<cfset out.clearBuffer() />
 			</cfif>
 			
-			<cfoutput>#output#</cfoutput>			
+			<cfoutput>#output#</cfoutput>
 		</cfif>
 	</cffunction>
 	
@@ -172,11 +165,9 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-
-		<cfset var scope = StructGet(getLoggingScope()) />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset arguments.data[getLoggerId()] = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
 	</cffunction>
 
@@ -185,17 +176,34 @@ See that file header for configuration of filter criteria.
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
 
-		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var loggingData = StructNew() />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cftry>
-				<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+				<cfset loggingData = getLogAdapter().getLoggingData() />
+				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
 					<!--- Do nothing as the configuration may have changed between start of
 					the redirect and now --->
 				</cfcatch>
 			</cftry>
 		</cfif>
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets the configuration data for this logger including adapter and filter.">
+		
+		<cfset var data = StructNew() />
+		
+		<cfset data["Debug Mode Only"] = getDebugModeOnly() />
+		<cfset data["Supress Debug Arg"] = getSuppressDebugArg() />
+		<cfset data["Display Output Template"] = getDisplayOutputTemplateFile() />
+		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
+		
+		<cfreturn data />
 	</cffunction>
 	
 	<!---
@@ -209,7 +217,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfswitch expression="#ListLast(arguments.version, ".")#">
 			<cfcase value="0">
-				<cfset release = "Bleeding Edge Release - Unknown build" />
+				<cfset release = "BER - Unknown build" />
 			</cfcase>
 			<cfcase value="1">
 				<cfset release = "Alpha" />
@@ -233,13 +241,13 @@ See that file header for configuration of filter criteria.
 				<cfset release = "RC5" />
 			</cfcase>
 			<cfcase value="8">
-				<cfset release = "Development and Production Stable (non-duck typed core)" />
+				<cfset release = "Production Stable" />
 			</cfcase>
 			<cfcase value="9">
-				<cfset release = "Production-Only Stable (duck-typed core for performance)" />
+				<cfset release = "Production-Only Stable (duck-typed)" />
 			</cfcase>
 			<cfdefaultcase>
-				<cfset release = "Bleeding Edge Release - Build " & ListLast(arguments.version, ".") />
+				<cfset release = "BER - Build " & ListLast(arguments.version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
 		
@@ -292,26 +300,6 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getSuppressDebugArg" access="public" returntype="string" output="false"
 		hint="Gets the event-arg the suppresses debug output if it is present.">
 		<cfreturn variables.instance.suppressDebugArg />
-	</cffunction>
-
-	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
-		hint="Sets the logging scope.">
-		<cfargument name="loggingScope" type="string" required="true" />
-		<cfset variables.loggingScope = arguments.loggingScope />
-	</cffunction>
-	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
-		hint="Gets the logging scope.">
-		<cfreturn variables.loggingScope />
-	</cffunction>
-
-	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
-		hint="Sets the logging path.">
-		<cfargument name="loggingPath" type="string" required="true" />
-		<cfset variables.loggingPath = arguments.loggingPath />
-	</cffunction>
-	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
-		hint="Gets the logging path.">
-		<cfreturn variables.loggingPath />
 	</cffunction>
 	
 </cfcomponent>

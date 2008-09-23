@@ -71,15 +71,12 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.instance.loggerType = "Email Logger" />
+	<cfset variables.instance.loggerTypeName = "Email" />
 	<cfset variables.instance.emailTemplateFile = "defaultEmailTemplate.cfm" />
 	<cfset variables.instance.to = "" />
 	<cfset variables.instance.from = "" />
 	<cfset variables.instance.subject = "" />
 	<cfset variables.instance.servers = "" />
-	
-	<cfset variables.loggingScope = "" />
-	<cfset variables.loggingPath = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -94,12 +91,8 @@ See that file header for configuration of filter criteria.
 		<cfset adapter.setFilter(filter) />
 		
 		<!--- Configure and set the adapter --->
-		<cfset adapter.configure()>
+		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
-		
-		<!--- Apply configuration from adapter that is needed by the logger --->
-		<cfset setLoggingScope(adapter.getLoggingScope()) />
-		<cfset setLoggingPath(adapter.getLoggingPath()) />
 		
 		<!--- Add the adapter to the log factory --->
 		<cfset getLogFactory().addLogAdapter(adapter) />
@@ -134,14 +127,13 @@ See that file header for configuration of filter criteria.
 		hint="Sends an email for this logger.">
 		
 		<cfset var body = "" />
-		<cfset var scope = StructGet(getLoggingScope()) />
 		<cfset var data = ArrayNew(1) />
 		<cfset var local = StructNew() />
 		
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			
-			<cfset data = scope[getLoggingPath()].data />
+			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<cfif ArrayLen(data)>
 				<!--- Save the body of the email --->
@@ -163,11 +155,9 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-
-		<cfset var scope = StructGet(getLoggingScope()) />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
-			<cfset arguments.data[getLoggerId()] = scope[getLoggingPath()] />
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
 	</cffunction>
 
@@ -176,17 +166,36 @@ See that file header for configuration of filter criteria.
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
 
-		<cfset var scope = StructGet(getLoggingScope()) />
+		<cfset var loggingData = StructNew() />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND StructKeyExists(scope, getLoggingPath())>
+		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cftry>
-				<cfset scope[getLoggingPath()].data = arrayConcat(arguments.data[getLoggerId()].data, scope[getLoggingPath()].data) />
+				<cfset loggingData = getLogAdapter().getLoggingData() />
+				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
 					<!--- Do nothing as the configuration may have changed between start of
 					the redirect and now --->
 				</cfcatch>
 			</cftry>
 		</cfif>
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets the configuration data for this logger including adapter and filter.">
+		
+		<cfset var data = StructNew() />
+		
+		<cfset data["To Email"] = getTo() />
+		<cfset data["From Email"] = getFrom() />
+		<cfset data["Subject"] = getSubject() />
+		<cfset data["SMTP Servers"] = getServers() />
+		<cfset data["Email Template"] = getEmailTemplateFile() />
+		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
+		
+		<cfreturn data />
 	</cffunction>
 
 	<!---
@@ -218,26 +227,6 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getEmailTemplateFile" access="public" returntype="string" output="false"
 		hint="Gets the email template location.">
 		<cfreturn variables.instance.emailTemplateFile />
-	</cffunction>
-	
-	<cffunction name="setLoggingScope" access="private" returntype="void" output="false"
-		hint="Sets the logging scope.">
-		<cfargument name="loggingScope" type="string" required="true" />
-		<cfset variables.loggingScope = arguments.loggingScope />
-	</cffunction>
-	<cffunction name="getLoggingScope" access="public" returntype="string" output="false"
-		hint="Gets the logging scope.">
-		<cfreturn variables.loggingScope />
-	</cffunction>
-
-	<cffunction name="setLoggingPath" access="private" returntype="void" output="false"
-		hint="Sets the logging path.">
-		<cfargument name="loggingPath" type="string" required="true" />
-		<cfset variables.loggingPath = arguments.loggingPath />
-	</cffunction>
-	<cffunction name="getLoggingPath" access="public" returntype="string" output="false"
-		hint="Gets the logging path.">
-		<cfreturn variables.loggingPath />
 	</cffunction>
 	
 	<cffunction name="setTo" access="private" returntype="void" output="false">

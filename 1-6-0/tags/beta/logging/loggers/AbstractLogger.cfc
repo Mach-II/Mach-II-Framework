@@ -32,7 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.instance = StructNew() />
-	<cfset variables.instance.loggerType = "undefined" />
+	<cfset variables.instance.loggerTypeName = "undefined" />
 	<cfset variables.instance.loggerId = "" />
 	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
@@ -84,18 +84,8 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS - UTILS
-	--->
-	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
-		hint="Gets the configuration data for this logger including adapter and filter.">
-		
-		<cfset var data = variables.instance />
-		
-		<cfset data.adapter = getLogAdapter().getConfigurationData() />
-		
-		<cfreturn data />
-	</cffunction>
-	
+	PUBLIC FUNCTIONS
+	--->	
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
 		<cfreturn isMethodDefined("onRequestEnd") />
@@ -119,13 +109,17 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="disableLogging" access="public" returntype="void" output="false"
-		hint="Disables logging. Convenience method for dashboard.">
-		<cfset getLogAdapter().setLoggingEnabled(false) />
-	</cffunction>
-	<cffunction name="enableLogging" access="public" returntype="void" output="false"
-		hint="Enables logging. Convenience method for dashboard.">
-		<cfset getLogAdapter().setLoggingEnabled(true) />
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
+		hint="Gets pretty configuration data for this logger. Override for better Dashboard integration data.">
+		
+		<cfset var data = variables.instance />
+		
+		<cfset data.adapter = getLogAdapter().getConfigurationData() />
+		
+		<cfreturn data />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
@@ -153,6 +147,10 @@ Notes:
 		<cfargument name="name" type="string" required="true"
 			hint="The parameter name." />
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
+	</cffunction>
+	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
+		hint="Returns a comma delimited list of parameter names.">
+		<cfreturn StructKeyList(variables.parameters) />
 	</cffunction>
 	
 	<!---
@@ -186,9 +184,34 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setLoggingLevel" access="public" returntype="string" output="false"
+		hint="Sets the logging level by name.">
+		<cfargument name="loggingLevelName" type="string" required="true"
+			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
+		<cfset getLogAdapter().setLoggingLevel(arguments.loggingLevelName) />
+	</cffunction>
+	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
+		hint="Returns the logging level by name.">
+		<cfreturn getLogAdapter().getLoggingLevel() />
+	</cffunction>
+	
+	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
+		hint="Sets logging. Convenience method for dashboard.">
+		<cfargument name="loggingEnabled" type="boolean" required="true" />
+		<cfset getLogAdapter().setLoggingEnabled(arguments.loggingEnabled) />
+	</cffunction>
+	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
+		hint="Checkes if logging is currently enabled.">
+		<cfreturn getLogAdapter().getLoggingEnabled() />
+	</cffunction>
+
+	<cffunction name="getLoggerTypeName" access="public" returntype="string" output="false"
+		hint="Returns the type name of the logger. Required for Dashboard integration.">
+		<cfreturn variables.instance.loggerTypeName />
+	</cffunction>
 	<cffunction name="getLoggerType" access="public" returntype="string" output="false"
-		hint="Returns the type of the logger. Required for Dashboard integration.">
-		<cfreturn variables.instance.loggerType />
+		hint="Returns the dot path type of the logger. Required for Dashboard integration.">
+		<cfreturn GetMetadata(this).name />
 	</cffunction>
 
 	<cffunction name="setLoggerId" access="private" returntype="void" output="false"
@@ -216,7 +239,7 @@ Notes:
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
 		<cfset variables.logAdapter = arguments.logAdapter />
 	</cffunction>
-	<cffunction name="getLogAdapter" access="private" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
+	<cffunction name="getLogAdapter" access="public" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
 		hint="Gets the log adapter for this logger.">
 		<cfreturn variables.logAdapter />
 	</cffunction>
