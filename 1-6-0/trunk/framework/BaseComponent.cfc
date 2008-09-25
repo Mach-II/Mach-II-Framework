@@ -18,16 +18,11 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.10
-Updated version: 1.5.0
+Updated version: 1.6.0
 
 Notes:
 The BaseComponent extended by Listener, EventFilter and Plugin components and gives
 quick access to things such as announcing a new event or getting/setting properties.
-
-- Implemented accessors to access the PropertyManager instead of direct name space
-calling. (pfarrell)
-- Deprecated hasParameter(). Duplicate method isParameterDefined is more inline with
-the rest of the framework. (pfarrell)
 --->
 <cfcomponent
 	displayname="Mach-II Base Component"
@@ -99,7 +94,7 @@ the rest of the framework. (pfarrell)
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url with module name.">
+		hint="Builds a framework specific url without specifying a module name.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
@@ -176,6 +171,14 @@ the rest of the framework. (pfarrell)
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
 
+	<cffunction name="setProperty" access="public" returntype="void" output="false"
+		hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to set."/>
+		<cfargument name="propertyValue" type="any" required="true" 
+			hint="The value to store in the property." />
+		<cfset getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
+	</cffunction>
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Gets the specified property - this is just a shortcut for getPropertyManager().getProperty()">
 		<cfargument name="propertyName" type="string" required="true"
@@ -183,14 +186,6 @@ the rest of the framework. (pfarrell)
 		<cfargument name="defaultValue" type="any" required="false" default=""
 			hint="The default value to use if the requested property is not defined." />
 		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
-	</cffunction>
-	<cffunction name="setProperty" access="public" returntype="any" output="false"
-		hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
-		<cfargument name="propertyName" type="string" required="true"
-			hint="The name of the property to set."/>
-		<cfargument name="propertyValue" type="any" required="true" 
-			hint="The value to store in the property." />
-		<cfreturn getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
 	</cffunction>
 	
 	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"

@@ -197,12 +197,12 @@ Notes:
 	ACCESSORS
 	--->
 	<cffunction name="setAppManager" access="private" returntype="void" output="false"
-		hint="Returns the AppManager instance this ViewContext belongs to.">
+		hint="Sets the AppManager instance this ViewContext belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Sets the AppManager instance this ViewContext belongs to.">
+		hint="Gets the AppManager instance this ViewContext belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
 
@@ -217,13 +217,13 @@ Notes:
 		<cfreturn variables.propertyManager />
 	</cffunction>	
 
-	<cffunction name="setProperty" access="public" returntype="any" output="false"
+	<cffunction name="setProperty" access="public" returntype="void" output="false"
 		hint="Sets the specified property - this is just a shortcut for getAppManager().getPropertyManager().setProperty()">
 		<cfargument name="propertyName" type="string" required="yes"
 			hint="The name of the property to set." />
 		<cfargument name="propertyValue" type="any" required="yes" 
 			hint="The value to store in the property." />
-		<cfreturn getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
+		<cfset getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
 	</cffunction>	
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Gets the specified property - this is just a shortcut for getAppManager().getPropertyManager().getProperty()">
