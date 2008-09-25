@@ -22,6 +22,8 @@ Created version: 1.0.0
 Created version: 1.5.0
 
 Notes:
+Listener invokers must be stateless because they are singletons
+and are used for multiple listeners.
 --->
 <cfcomponent 
 	displayname="ListenerInvoker"
