@@ -37,15 +37,65 @@ Configuring multiple logging adapters:
 		<parameter name="CFLog">
 			<struct>
 				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
-				<key name="loggingEnabled" value="false" />
-				<key name="loggingLevel" value="warn" />
+				<key name="loggingEnabled" value="true|false" />
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<!-- Optional -->
+				<key name="logFile" value="nameOfCFLogFile" />
+				<key name="debugModeOnly" value="false" />
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
+			</struct>
+		</parameter>
+		<parameter name="EmailLog">
+			<struct>
+				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
+				<key name="loggingEnabled" value="true|false" />
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<key name="emailTemplateFile" value="/path/to/customEmailTemplate.cfm" />
+				<key name="to" value="list,of,email,addresses" />
+				<key name="from" value="logs@example.com" />
+				<!-- Optional -->
+				<key name="subject" value="Application Log" />
+				<key name="servers" value="mail.example.com" />
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
 			</struct>
 		</parameter>
 		<parameter name="MachIILog">
 			<struct>
 				<key name="type" value="MachII.logging.loggers.MachIILog.Logger" />
-				<key name="loggingEnabled" value="true" />
-				<key name="loggingLevel" value="debug" />
+				<key name="loggingEnabled" value="true|false" />
+				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
+				<!-- Optional -->
+				<key name="displayOutputTemplateFile" value="/path/to/customOutputTemplate.cfm" />
+				<key name="debugModeOnly" value="true|false" />
+				<key name="suppressDebugArg" value="suppressDebug" />
+				<key name="filter" value="list,of,filter,criteria" />
+				- OR -
+				<key name="filter">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="filter" />
+						<element value="criteria" />
+					</array>
+				</key>
 			</struct>
 		</parameter>
 	</parameters>
