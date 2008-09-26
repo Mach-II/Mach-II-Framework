@@ -40,8 +40,8 @@ Example configuration of multiple caching strategires:
                   <struct>
                         <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
                         <key name="scope" value="application" />
-                        <key name="cacheFor" value="1" />
-                        <key name="cacheForUnit" value="hours" />
+                        <key name="timespan" value="0,1,0,0"/><!-- Cache for 1 hour -->
+						<key name="cleanupIntervalInMinutes" value="3" />
                   </struct>
             </parameter>
             <parameter name="bar">
