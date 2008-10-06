@@ -334,16 +334,16 @@ Notes:
 	
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
-		<cfargument name="name" type="string" required="false" />
+		<cfargument name="name" type="string" required="false" default="" />
 		<cfargument name="value" type="string" required="false" default="" />
-		<cfargument name="statusCode" type="numeric" required="false" />
+		<cfargument name="statusCode" type="numeric" required="false" default="0" />
 		<cfargument name="statusText" type="string" required="false" default="" />
-		<cfargument name="charset" type="string" required="false" />
+		<cfargument name="charset" type="string" required="false" default="" />
 		
 		<cfset var i = 0 />
 		
-		<cfif StructKeyExists(arguments, "name")>
-			<cfif StructKeyExists(arguments, "charset")>
+		<cfif Len(arguments.name)>
+			<cfif Len(arguments.charset)>
 				<cfheader name="#arguments.name#" 
 					value="#arguments.value#" 
 					charset="#arguments.charset#" />			
@@ -351,7 +351,7 @@ Notes:
 				<cfheader name="#arguments.name#" 
 					value="#arguments.value#" />
 			</cfif>
-		<cfelseif StructKeyExists(arguments, "statusCode")>
+		<cfelseif arguments.statusCode NEQ 0>
 			<cfheader statuscode="#arguments.statusCode#" 
 				statustext="#arguments.statusText#" />
 		<cfelse>
