@@ -62,7 +62,7 @@ Notes:
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<!--- Setup defaults --->
-		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />	s
+		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
