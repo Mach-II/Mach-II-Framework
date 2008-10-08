@@ -21,11 +21,6 @@ web applications.  The framework focuses on easing software development and
 maintenance.  Mach-II was the first object-oriented framework for CFML 
 and continues to mature as a strong and viable framework choice for developers.
 
-The framework core is not a stand-alone application.  Do not expect to run the
-mach-ii.cfm and expect a "welcome" message. Download the Mach-II Skeleton
-available at mach-ii.com to start a new application or download a sample
-application.
-
 ------------------------------------------------
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
@@ -77,11 +72,17 @@ _|_| |_>  |_(_|||(_| |_ |(_)| |
 
 3.	If you use sandbox security on your CFML server, you may have to add the 
 	framework's directory to your sandbox otherwise your CFML server may throw an 
-	java  security exception.
+	java security exception.
 
 Just three simple steps and you are done.  The Mach-II framework is just a CFML 
 application, so it will operate and behave just like any other CFML application.
 Please read the Upgrading Note below if you are upgrading your installation of Mach-II.
+
+Please Note Well:
+The framework core is not a stand-alone application.  Do not expect to run the
+mach-ii.cfm and expect a "welcome" message. Download the Mach-II Skeleton
+available at mach-ii.com to start a new application or download a sample
+application.
 
 If your webroot is "wwwroot", your directory structure should look like this:
 |-+ wwwroot
@@ -131,8 +132,10 @@ on our Trac installation at http://trac.mach-ii.com.  Please search the tickets 
 duplicate / similar defect reports or enhancement requests before submitting a new
 ticket.
 
+* All documentation and FAQs are located in our wiki at: http://trac.mach-ii.com
+
 * The best place to get quick help from other developers is to join our public 
-email list / forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
+email list / forums at: http://groups.google.com/group/mach-ii-for-coldfusion
 
 * Check out http://www.mach-ii.com for Quick Starts, FAQs and additional sample 
 applications and documentation.
