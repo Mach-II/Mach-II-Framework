@@ -130,5 +130,14 @@ Notes:
 		<!--- This should fail because it's not the same object instance --->
 		<cfset assertFalse(variables.utils.assertSame(obj1, obj2)) />
 	</cffunction>
+	
+	<cffunction name="testTrimList" access="public" returntype="void" output="false"
+		hint="Test trimList().">
+		
+		<cfset var comparisonList = "apples,oranges,pears" />
+		<cfset var returnedList = variables.utils.trimList(" apples, oranges ,pears ") />
+		
+		<cfset assertTrue(returnedList EQ comparisonList) />
+	</cffunction>
 
 </cfcomponent>

@@ -32,6 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.beanUtil = "" />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -39,6 +40,7 @@ Notes:
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initialization function called by the framework.">
 		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
+		<cfset variables.utils = getAppManager().getUtils() />
 	</cffunction>
 		
 	<!---
@@ -119,10 +121,10 @@ Notes:
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />
+				<cfset cacheAlias = variables.utils.trimList(arguments.commandNode.xmlAttributes["alias"]) />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
-				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
+				<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
 			</cfif>
 		</cfif>
 		
@@ -145,13 +147,13 @@ Notes:
 		
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes")>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-				<cfset cacheAlias = arguments.commandNode.xmlAttributes["alias"] />	
+				<cfset cacheAlias = variables.utils.trimList(arguments.commandNode.xmlAttributes["alias"]) />	
 			</cfif>		
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
 				<cfset cacheCondition = arguments.commandNode.xmlAttributes["condition"] />	
 			</cfif>	
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
-				<cfset criteria = arguments.commandNode.xmlAttributes["criteria"] />
+				<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
@@ -323,7 +325,7 @@ Notes:
 		<cfset var reinit = true />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "fields")>
-			<cfset beanFields = arguments.commandNode.xmlAttributes["fields"] />
+			<cfset beanFields = variables.utils.trimList(arguments.commandNode.xmlAttributes["fields"]) />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "reinit")>
 			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
@@ -358,13 +360,13 @@ Notes:
 			<cfset redirectUrl = arguments.commandNode.xmlAttributes["url"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
-			<cfset args = arguments.commandNode.xmlAttributes["args"] />
+			<cfset args = variables.utils.trimList(arguments.commandNode.xmlAttributes["args"]) />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persist")>
 			<cfset persist = arguments.commandNode.xmlAttributes["persist"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
-			<cfset persistArgs = arguments.commandNode.xmlAttributes["persistArgs"] />
+			<cfset persistArgs = variables.utils.trimList(arguments.commandNode.xmlAttributes["persistArgs"]) />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />

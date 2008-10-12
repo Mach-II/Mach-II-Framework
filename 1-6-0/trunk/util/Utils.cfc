@@ -170,5 +170,20 @@ Notes:
 			<cfreturn false />
 		</cfif>
 	</cffunction>
+	
+	<cffunction name="trimList" access="public" returntype="string" output="false"
+		hint="Trims each list item.">
+		<cfargument name="list" type="string" required="true" />
+		<cfargument name="delimiter" type="string" required="false" default="," />
+		
+		<cfset var trimmedList = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ListLen(arguments.list)#" index="i">
+			<cfset trimmedList = ListAppend(trimmedList, Trim(ListGetAt(arguments.list, i, arguments.delimiter)), arguments.delimiter) />
+		</cfloop>
+		
+		<cfreturn trimmedList />
+	</cffunction>
 
 </cfcomponent>
