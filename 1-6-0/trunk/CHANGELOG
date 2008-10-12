@@ -93,6 +93,13 @@ as override XML.
 See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/50
 (2008-06-20 pfarrell)
 
+* <event-bean> fields attribute did not trim each list item
+Event-bean did not Trim() list values in the field attribute which caused event-bean 
+to fail when you use spaces in the list (e.g. "firstName, lastName , emailAddress"). 
+
+See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/149
+(2008-10-11 pfarrell)
+
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
