@@ -117,10 +117,10 @@ Notes:
 			<cfelse>
 				<cfset listenerType = listenerNodes[i].xmlAttributes["type"] />
 			
-				<!--- Get the Listener's parameters. --->
+				<!--- Get the Listener's parameters --->
 				<cfset listenerParams = StructNew() />
 				
-				<!--- For each plugin, parse all the parameters --->
+				<!--- Parse all the parameters --->
 				<cfif StructKeyExists(listenerNodes[i], "parameters")>
 					<cfset paramNodes = listenerNodes[i].parameters.xmlChildren />
 					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
@@ -191,7 +191,7 @@ Notes:
 	
 				<!--- Continue setup on the Listener --->
 				<cfset listener.setInvoker(invoker) />
-				<!--- Add the Listener to the Manager. --->
+				<!--- Add the Listener to the manager --->
 				<cfset addListener(listenerName, listener, arguments.override) />
 			</cfif>
 		</cfloop>
