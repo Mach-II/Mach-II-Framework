@@ -331,6 +331,8 @@ Notes:
 				<cfset item = listGetAt(item, 1, "=") />
 				<cfif expressionEvaluator.isExpression(element)>
 					<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset arg = element />
 				</cfif>
 			<cfelse>
 				<cfset arg = arguments.event.getArg(item, "") />
