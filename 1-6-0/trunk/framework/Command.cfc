@@ -33,6 +33,8 @@ Notes:
 	--->
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
+	<cfset variables.expressionEvaluator = "" />
+	<cfset variables.propertyManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -94,6 +96,22 @@ Notes:
 	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
 		<cfreturn variables.log />
+	</cffunction>
+	
+	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false">
+		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
+		<cfset variables.expressionEvaluator = arguments.expressionEvaluator />
+	</cffunction>
+	<cffunction name="getExpressionEvaluator" access="public" returntype="MachII.util.ExpressionEvaluator" output="false">
+		<cfreturn variables.expressionEvaluator />
+	</cffunction>
+
+	<cffunction name="setPropertyManager" access="public" returntype="void" output="false">
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
+		<cfset variables.propertyManager = arguments.propertyManager />
+	</cffunction>	
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false">
+		<cfreturn variables.propertyManager />
 	</cffunction>
 
 </cfcomponent>

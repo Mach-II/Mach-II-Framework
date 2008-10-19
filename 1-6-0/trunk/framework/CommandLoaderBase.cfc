@@ -33,6 +33,8 @@ Notes:
 	--->
 	<cfset variables.beanUtil = "" />
 	<cfset variables.utils = "" />
+	<cfset variables.expressionEvaluator = "" />
+	<cfset variables.propertyManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -41,6 +43,8 @@ Notes:
 		hint="Initialization function called by the framework.">
 		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 		<cfset variables.utils = getAppManager().getUtils() />
+		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset variables.propertyManager = getAppManager().getPropertyManager() />
 	</cffunction>
 		
 	<!---
@@ -166,6 +170,8 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
 			name, cacheAlias, cacheCondition, criteria, id) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setPropertyManager(variables.propertyManager) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -419,6 +425,8 @@ Notes:
 		
 		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setPropertyManager(variables.propertyManager) />
 		
 		<cfreturn command />
 	</cffunction>

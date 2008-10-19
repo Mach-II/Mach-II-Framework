@@ -79,6 +79,28 @@ Notes:
 		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
 	</cffunction>
 	
+	
+	<cffunction name="testBooleanExpresion" access="public" returntype="void" output="false">
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+
+		<cfset propertyManager.setProperty("foo", "bar") />
+		<cfset event.setArg("foo", "bar") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq properties.foo}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertTrue(result, "Result of event.foo eq properties.foo was not true") />
+				
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 'bar'}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertTrue(result, "Result of event.foo eq 'foo' was not true") />
+			
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${'bar' eq event.foo}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertTrue(result, "Result of 'foo' eq event.foo was not true") />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNTIONS - UTIL
 	--->

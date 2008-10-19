@@ -84,7 +84,8 @@ Notes:
 				</cfif>
 			</cfif>
 			<cfset clearCache = true />
-		<cfelseif Evaluate(getCondition())>
+		<cfelseif variables.expressionEvaluator.evaluateExpressionBody(getCondition(), arguments.event, getPropertyManager())>
+			<!--- Evaluate(getCondition()) --->
 			<cfif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
