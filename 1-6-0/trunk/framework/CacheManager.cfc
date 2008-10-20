@@ -309,8 +309,8 @@ Notes:
 		
 		<cfif log.isDebugEnabled()>
 			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
-					"exists: #StructKeyExists(variables.handlers, arguments.id)#, " &
-					"handler keys: #StructKeyList(variables.handlers)#.") />
+					"exists: #StructKeyExists(variables.handlers, arguments.id)#, handler keys:",
+					StructKeyArray(variables.handlers)) />
 		</cfif>
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
