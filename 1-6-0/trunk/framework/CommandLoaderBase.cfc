@@ -120,7 +120,7 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes") >
 			<!--- We cannot get the default cache strategy name because it has not been set
 				by the CachingProperty yet. We deal with getting the default cache strategy
-				in the configu() method of the CachingManager. --->
+				in the configure() method of the CachingManager. --->
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
@@ -163,7 +163,7 @@ Notes:
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "id")>
-				<cfset id = arguments.commandNode.xmlAttributes["id"] />	
+				<cfset id = variables.utils.trimList(arguments.commandNode.xmlAttributes["id"]) />	
 			</cfif>	
 		</cfif>
 

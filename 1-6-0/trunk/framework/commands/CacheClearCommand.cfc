@@ -70,11 +70,15 @@ Notes:
 		<cfset var clearCache = false />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
 		<cfset var log = getLog() />
-		<cfset var currentAlias = "" />
+		<cfset var listElement = "" />
 				
 		<!--- Make decision on whether or not to clear a cache by alias --->
 		<cfif NOT isConditionDefined()>
-			<cfif isAliasDefined()>
+			<cfif isIdDefined()>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by id '#getId()#' (no condition to evaluated).") />
+				</cfif>
+			<cfelseif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Clearing cache by alias '#getAlias()#' (no condition to evaluate).") />
 				</cfif>
@@ -84,9 +88,13 @@ Notes:
 				</cfif>
 			</cfif>
 			<cfset clearCache = true />
+		<!--- Evaluate(getCondition()) --->
 		<cfelseif variables.expressionEvaluator.evaluateExpressionBody(getCondition(), arguments.event, getPropertyManager())>
-			<!--- Evaluate(getCondition()) --->
-			<cfif isAliasDefined()>
+			<cfif isIdDefined()>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Clearing cache by id '#getId()#' (condition '#getCondition()#' evaluated true).") />
+				</cfif>
+			<cfelseif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Clearing cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated true).") />
 				</cfif>
@@ -97,7 +105,11 @@ Notes:
 			</cfif>
 			<cfset clearCache = true />
 		<cfelse>
-			<cfif isAliasDefined()>
+			<cfif isIdDefined()>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Cannot clear cache by id '#getId()#' (condition '#getCondition()#' evaluated false).") />
+				</cfif>
+			<cfelseif isAliasDefined()>
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Cannot clear cache by alias '#getAlias()#' (condition '#getCondition()#' evaluated false).") />
 				</cfif>
@@ -109,9 +121,13 @@ Notes:
 		</cfif>
 		
 		<cfif clearCache>
-			<cfif isAliasDefined()>
-				<cfloop list="#getAlias()#" index="currentAlias">
-					<cfset cacheManager.clearCachesByAlias(currentAlias, arguments.event, getCriteria()) />
+			<cfif isIdDefined()>
+				<cfloop list="#getId()#" index="listElement">
+					<cfset cacheManager.clearCacheById(listElement, arguments.event) />
+				</cfif>
+			<cfelseif isAliasDefined()>
+				<cfloop list="#getAlias()#" index="listElement">
+					<cfset cacheManager.clearCachesByAlias(listElement, arguments.event, getCriteria()) />
 				</cfloop>
 			<cfelse>
 				<cfset cacheManager.clearCacheByName(getCacheName(), arguments.event, getCriteria()) />				
