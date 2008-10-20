@@ -378,7 +378,7 @@ Notes:
 			
 			<!--- Add if new arg in post --->
 			<cfif NOT StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
-				<cfset dataToCache[keyName] = arguments.postCommandDataSnapshot [keyName] />
+				<cfset dataToCache[keyName] = arguments.postCommandDataSnapshot[keyName] />
 			<!--- Check equality --->
 			<cfelseif StructKeyExists(arguments.preCommandDataSnapshot, keyName) AND StructKeyExists(arguments.postCommandDataSnapshot , keyName)>
 				<cfset pre = arguments.preCommandDataSnapshot[keyName] />
