@@ -124,7 +124,7 @@ Notes:
 			<cfif isIdDefined()>
 				<cfloop list="#getId()#" index="listElement">
 					<cfset cacheManager.clearCacheById(listElement, arguments.event) />
-				</cfif>
+				</cfloop>
 			<cfelseif isAliasDefined()>
 				<cfloop list="#getAlias()#" index="listElement">
 					<cfset cacheManager.clearCachesByAlias(listElement, arguments.event, getCriteria()) />
