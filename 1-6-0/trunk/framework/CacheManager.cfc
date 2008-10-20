@@ -290,21 +290,13 @@ Notes:
 		<cfargument name="cacheName" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var handlerId = "" />
-		<cfset var keyHashed = getKeyHash(arguments.cacheName) />
+		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName) />
+		<cfset var log = getLog() />
 		
+		<cfset cacheStrategy.flush() />
+
 		<cfif log.isDebugEnabled()>
-			<cfset log.debug("CacheManager clear cache for '#arguments.cacheName#' (#keyHashed#), " &
-					"exists: #StructKeyExists(variables.handlersByName, keyHashed)#, " &
-					"handler keys: #StructKeyList(variables.handlersByName)#.") />
-		</cfif>
-		
-		<!--- Only try to clear if there are cache handlers that are registered with this cacheName --->
-		<cfif StructKeyExists(variables.handlersByName, keyHashed)>
-			<cfset handlerId = variables.handlersByName[keyHashed] />
-			<cfset getCacheHandler(handlerId).clearCache(arguments.event) />
-		<cfelseif isObject(getParent())>
-			<cfset getParent().clearCacheByName(arguments.cacheName, arguments.event) />
+			<cfset log.debug("Cleared cache strategy named '#arguments.cacheName#'.") />
 		</cfif>
 	</cffunction>
 	
@@ -312,6 +304,8 @@ Notes:
 		hint="Clears caches by cache id (handler id).">
 		<cfargument name="id" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfset var log = getLog() />
 		
 		<cfif log.isDebugEnabled()>
 			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
