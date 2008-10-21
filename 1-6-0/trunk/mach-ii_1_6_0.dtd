@@ -415,30 +415,30 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	A "cache" element stores the result of a block of commands which put data in the event object or output data.
 		[name] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
 		[id] - an unique id for this cache block
-		[alias] - the alias or list of aliases that reference this cache block
+		[aliases] - the alias or list of aliases that reference this cache block
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 -->
 <!ELEMENT cache (filter | notify | event-arg | view-page | event-bean | execute | publish | cache-clear)*>
 <!ATTLIST cache 
 	id CDATA #IMPLIED
 	name CDATA #IMPLIED
-	alias CDATA #IMPLIED
+	aliases CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 >
 
 <!--
 	A "cache-clear" element causes a cache to be completely cleared or clears a specific cache key through the use of the criteria attribute.
-		[name] - the name of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
-		[id] - the id or list of ids of the cache block(s) to clear
-		[alias] - the alias or list of aliases of the cache block(s) to clear
+		[names] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
+		[ids] - the id or list of ids of the cache block(s) to clear
+		[aliases] - the alias or list of aliases of the cache block(s) to clear
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 		[condition] - a boolean expression that determines if the cache should be cleared
 -->
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear
-	name CDATA #IMPLIED
-	id CDATA #IMPLIED
-	alias CDATA #IMPLIED
+	names CDATA #IMPLIED
+	ids CDATA #IMPLIED
+	aliases CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 	condition CDATA #IMPLIED
 >

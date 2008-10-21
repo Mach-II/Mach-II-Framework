@@ -110,7 +110,7 @@ Notes:
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
-		<cfset var cacheAlias = "" />
+		<cfset var aliases = "" />
 		<cfset var handlerId = "" />
 		<cfset var criteria = "" />
 		<cfset var name = "" />
@@ -124,15 +124,15 @@ Notes:
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
 				<cfset name = arguments.commandNode.xmlAttributes["name"] />
 			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-				<cfset cacheAlias = variables.utils.trimList(arguments.commandNode.xmlAttributes["alias"]) />
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
+				<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
 			</cfif>
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, cacheAlias, criteria) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, aliases, criteria) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn command />
@@ -143,32 +143,32 @@ Notes:
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var cacheAlias = "" />
-		<cfset var cacheCondition = "" />
-		<cfset var name = "" />
+		<cfset var ids = "" />
+		<cfset var aliases = "" />
+		<cfset var strategyNames = "" />
 		<cfset var criteria = "" />
-		<cfset var id = "" />
+		<cfset var condition = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes")>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "alias")>
-				<cfset cacheAlias = variables.utils.trimList(arguments.commandNode.xmlAttributes["alias"]) />	
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ids")>
+				<cfset ids = variables.utils.trimList(arguments.commandNode.xmlAttributes["ids"]) />	
+			</cfif>
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
+				<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />	
 			</cfif>		
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
-				<cfset cacheCondition = arguments.commandNode.xmlAttributes["condition"] />	
-			</cfif>	
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "names")>
+				<cfset strategyNames = arguments.commandNode.xmlAttributes["names"] />
+			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 				<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
 			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
-				<cfset name = arguments.commandNode.xmlAttributes["name"] />
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
+				<cfset condition = arguments.commandNode.xmlAttributes["condition"] />	
 			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "id")>
-				<cfset id = variables.utils.trimList(arguments.commandNode.xmlAttributes["id"]) />	
-			</cfif>	
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
-			name, cacheAlias, cacheCondition, criteria, id) />
+			ids, aliases, strategyNames, criteria, condition) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setPropertyManager(variables.propertyManager) />
