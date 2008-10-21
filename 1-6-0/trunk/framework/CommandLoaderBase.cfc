@@ -121,8 +121,8 @@ Notes:
 			<!--- We cannot get the default cache strategy name because it has not been set
 				by the CachingProperty yet. We deal with getting the default cache strategy
 				in the configure() method of the CachingManager. --->
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "name")>
-				<cfset name = arguments.commandNode.xmlAttributes["name"] />
+			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "strategyName")>
+				<cfset name = arguments.commandNode.xmlAttributes["strategyName"] />
 			</cfif>
 			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
 				<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />
@@ -155,8 +155,8 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
 			<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />	
 		</cfif>		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "names")>
-			<cfset strategyNames = arguments.commandNode.xmlAttributes["names"] />
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "strategyNames")>
+			<cfset strategyNames = arguments.commandNode.xmlAttributes["strategyNames"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 			<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />

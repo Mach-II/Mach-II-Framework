@@ -91,8 +91,8 @@ Notes:
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "aliases")>
 			<cfset aliases = arguments.configXML.xmlAttributes["aliases"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "name")>
-			<cfset strategyName = arguments.configXML.xmlAttributes["name"] />
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "strategyName")>
+			<cfset strategyName = arguments.configXML.xmlAttributes["strategyName"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "criteria")>
 			<cfset criteria = arguments.configXML.xmlAttributes["criteria"] />
@@ -121,7 +121,7 @@ Notes:
 		
 		<cfset var handlerId = "" />
 		<cfset var cacheStrategy = "" />
-		<cfset var cacheName = "" />
+		<cfset var strategyName = "" />
 		<cfset var cacheStrategyManager = getCacheStrategyManager() />
 		
 		<!--- Configure all loaded cache strategies --->
@@ -137,15 +137,15 @@ Notes:
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
 		<cfloop collection="#variables.handlers#" item="handlerId">
-			<cfset cacheName = variables.handlers[handlerId].getCacheName() />
+			<cfset strategyName = variables.handlers[handlerId].getStrategyName() />
 			
-			<!--- Check if we need to use the default cache name --->
-			<cfif NOT Len(cacheName)>
-				<cfset cacheName = getDefaultCacheName() />
+			<!--- Check if we need to use the default cache strategy name --->
+			<cfif NOT Len(strategyName)>
+				<cfset strategyName = getDefaultCacheName() />
 			</cfif>
 			
 			<!--- Load the strategy into the handler --->
-			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(cacheName) />
+			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName) />
 			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
 	</cffunction>
@@ -160,13 +160,18 @@ Notes:
 
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
 		<cfset var aliases = arguments.cacheHandler.getAliases() />
-		<cfset var cacheName = arguments.cacheHandler.getCacheName() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 
 		<!--- Add the handler --->
 		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
-		<cfset variables.handlersByName[getKeyHash(cacheName)] = handlerId />
-		
+
+		<!--- Unregiester the handler by handler type --->
+		<cfif handlerType EQ "event">
+			<cfset StructInsert(variables.handlersByEventName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
+		<cfelseif handlerType EQ "subroutine">
+			<cfset StructInsert(variables.handlersBySubroutineName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
+		</cfif>
+
 		<!--- Register the aliases if defined --->
 		<cfif Len(aliases)>
 			<!--- TODO: Aliases can be a list and thus this will break if it contains more than alias --->
@@ -212,9 +217,6 @@ Notes:
 		<cfelseif handlerType EQ "subroutine">
 			<cfset StructDelete(variables.handlersBySubroutineName[handlerId], getKeyHash(arguments.cacheHandler.getParentHandlerName()), true) />
 		</cfif>
-		
-		<!--- Remove from cache name list --->
-		<cfset StructDelete(variables.handlersByName, getKeyHash(cacheName)) />
 		
 		<!--- Unregister the aliases if defined --->
 		<cfif Len(aliases)>
@@ -293,7 +295,7 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="clearCacheByName" access="public" returntype="void" output="false"
+	<cffunction name="clearCacheByStrategyName" access="public" returntype="void" output="false"
 		hint="Clears caches by cacheName.">
 		<cfargument name="cacheName" type="string" required="true" />
 		

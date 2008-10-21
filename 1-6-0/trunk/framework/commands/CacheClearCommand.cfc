@@ -194,14 +194,14 @@ Notes:
 		<cfset var currentStrategyName = "" />
 		
 		<cfloop list="#getStrategyNames()#" index="currentStrategyName">
-			<cfset arguments.cacheManager.clearCacheByName(currentStrategyName) />
+			<cfset arguments.cacheManager.clearCacheByStrategyName(currentStrategyName) />
 		</cfloop>
 	</cffunction>
 	
 	<cffunction name="clearCacheByDefaultStrategy" access="private" returntype="void" output="false"
 		hint="Helper method to clear default cache strategy.">
 		<cfargument name="cacheManager" type="MachII.framework.CacheManager" required="true" />
-		<cfset arguments.cacheManager.clearCacheByName(cacheManager.getDefaultCacheName()) />
+		<cfset arguments.cacheManager.clearCacheByStrategyName(cacheManager.getDefaultCacheName()) />
 	</cffunction>
 	
 	<cffunction name="checkIfClearDefaultStrategy" access="private" returntype="void" output="false"

@@ -34,7 +34,7 @@ Notes:
 	<cfset variables.commandType = "cache" />
 	<cfset variables.handlerId = "" />
 	<cfset variables.alias = "" />
-	<cfset variables.cacheName = "" />
+	<cfset variables.strategyName = "" />
 	<cfset variables.criteria = "" />
 	
 	<!---
@@ -43,13 +43,13 @@ Notes:
 	<cffunction name="init" access="public" returntype="CacheCommand" output="false"
 		hint="Initializes the command.">
 		<cfargument name="handlerId" type="string" required="false" default="" />
-		<cfargument name="cacheName" type="string" required="false" default="" />
+		<cfargument name="strategyName" type="string" required="false" default="" />
 		<cfargument name="alias" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
 
 		<cfset setHandlerId(arguments.handlerId) />
 		<cfset setAlias(arguments.alias) />
-		<cfset setCacheName(arguments.cacheName) />
+		<cfset setStrategyName(arguments.strategyName) />
 		<cfset setCriteria(arguments.criteria) />
 		
 		<cfreturn this />
@@ -105,12 +105,12 @@ Notes:
 		<cfreturn variables.alias />
 	</cffunction>
 	
-	<cffunction name="setCacheName" access="private" returntype="void" output="false">
-		<cfargument name="cacheName" type="string" required="true" />
-		<cfset variables.cacheName = arguments.cacheName />
+	<cffunction name="setStrategyName" access="private" returntype="void" output="false">
+		<cfargument name="strategyName" type="string" required="true" />
+		<cfset variables.strategyName = arguments.strategyName />
 	</cffunction>
-	<cffunction name="getCacheName" access="private" returntype="string" output="false">
-		<cfreturn variables.cacheName />
+	<cffunction name="getStrategyName" access="private" returntype="string" output="false">
+		<cfreturn variables.strategyName />
 	</cffunction>
 	
 	<cffunction name="setCriteria" access="private" returntype="void" output="false">

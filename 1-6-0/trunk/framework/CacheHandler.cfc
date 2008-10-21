@@ -34,7 +34,7 @@ Notes:
 	<cfset variables.commands = ArrayNew(1) />
 	<cfset variables.handlerId = "" />
 	<cfset variables.aliases = ""/>
-	<cfset variables.cacheName = "" />
+	<cfset variables.strategyName = "" />
 	<cfset variables.criteria = "" />
 	<cfset variables.parentHandlerName = "" />
 	<cfset variables.parentHandlerType = "" />
@@ -52,7 +52,7 @@ Notes:
 		hint="Initializes the handler.">
 		<cfargument name="id" type="string" required="false" default="" />
 		<cfargument name="aliases" type="string" required="false" default="" />
-		<cfargument name="cacheName" type="string" required="false" default="" />
+		<cfargument name="strategyName" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
@@ -60,12 +60,12 @@ Notes:
 		<cfset var currentAlias = "" />
 	
 		<!--- Run setters --->
+		<cfset setHandlerId(arguments.id) />
 		<cfset setAliases(arguments.aliases) />
-		<cfset setCacheName(arguments.cacheName) />
+		<cfset setStrategyName(arguments.strategyName) />
 		<cfset setCriteria(arguments.criteria) />
 		<cfset setParentHandlerName(arguments.parentHandlerName) />
 		<cfset setParentHandlerType(arguments.parentHandlerType) />
-		<cfset setHandlerId(arguments.id) />
 		
 		<!--- TODO: currentAlias should be Ucase() before hashing to normalize the alias --->
 		<cfloop list="#arguments.aliases#" index="currentAlias">
@@ -296,7 +296,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getKey" access="private" returntype="string" output="false">
-		<cfreturn "handlerId=" & getHandlerId() />
+		<cfreturn "HANDLERID=" & getHandlerId() />
 	</cffunction>
 	
 	<cffunction name="getKeyFromCriteria" access="private" returntype="string" output="false"
@@ -510,12 +510,12 @@ Notes:
 		<cfreturn variables.aliases />
 	</cffunction>
 
-	<cffunction name="setCacheName" access="private" returntype="void" output="false">
-		<cfargument name="cacheName" type="string" required="true" />
-		<cfset variables.cacheName = arguments.cacheName />
+	<cffunction name="setStrategyName" access="private" returntype="void" output="false">
+		<cfargument name="strategyName" type="string" required="true" />
+		<cfset variables.strategyName = arguments.strategyName />
 	</cffunction>
-	<cffunction name="getCacheName" access="public" returntype="string" output="false">
-		<cfreturn variables.cacheName />
+	<cffunction name="getStrategyName" access="public" returntype="string" output="false">
+		<cfreturn variables.strategyName />
 	</cffunction>
 
 	<cffunction name="setCriteria" access="private" returntype="void" output="false"
