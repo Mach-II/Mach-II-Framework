@@ -65,14 +65,11 @@ Notes:
 		<cfset setCriteria(arguments.criteria) />
 		<cfset setParentHandlerName(arguments.parentHandlerName) />
 		<cfset setParentHandlerType(arguments.parentHandlerType) />
-		<cfif len(arguments.id)>
-			<cfset setHandlerId(arguments.id) />
-		<cfelse>
-			<cfset setHandlerId(createHandlerId()) />
-		</cfif>
+		<cfset setHandlerId(arguments.id) />
 		
-		<cfloop list="#arguments.alias#" index="currentAlias">
-			<cfset variables.aliasKeyLists[hash(currentAlias)] = "" />
+		<!--- TODO: currentAlias should be Ucase() before hashing to normalize the alias --->
+		<cfloop list="#arguments.aliases#" index="currentAlias">
+			<cfset variables.aliasKeyLists[Hash(currentAlias)] = "" />
 		</cfloop>
 		
 		<cfreturn this />
@@ -138,7 +135,7 @@ Notes:
 	
 					<!--- Cache the data and output --->
 					<cfset getCacheStrategy().put(key, dataToCache) />
-					<cfset addKeyTo(key) />
+					<cfset addKeyToAlias(key) />
 					
 					<!--- Log messages --->
 					<cfif log.isDebugEnabled()>
@@ -226,7 +223,7 @@ Notes:
 			<cfelse>
 				<cfloop list="#arguments.aliases#" index="currentAlias">
 					<cfif log.isDebugEnabled()>
-						<cfset log.debug("clearCache: currentAlias '#currentAlias', aliasKeyLists '#StructKeyList(variables.aliasKeyLists)#'") />
+						<cfset log.debug("clearCache: currentAlias '#currentAlias#', aliasKeyLists '#StructKeyList(variables.aliasKeyLists)#'") />
 					</cfif>
 					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
 						<cfset getCacheStrategy().remove(currentKey) />
@@ -483,9 +480,14 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setHandlerId" access="private" returntype="void" output="false">
+	<cffunction name="setHandlerId" access="private" returntype="void" output="false"
+		hint="Sets the hanlder id and creates an unique id if handler id is NOT len.">
 		<cfargument name="handlerId" type="string" required="true" />
-		<cfset variables.handlerId = arguments.handlerId />
+		<cfif Len(arguments.handlerId)>
+			<cfset variables.handlerId = arguments.handlerId />
+		<cfelse>
+			<cfset variables.handlerId = createHandlerId() />
+		</cfif>
 	</cffunction>
 	<cffunction name="getHandlerId" access="public" returntype="string" output="false"
 		hint="Returns the handler id.">

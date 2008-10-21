@@ -250,6 +250,27 @@ Notes:
 		
 		<cfreturn cacheHandlers />
 	</cffunction>
+
+	<cffunction name="clearCacheById" access="public" returntype="void" output="false"
+		hint="Clears caches by cache id (handler id).">
+		<cfargument name="id" type="string" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfset var log = getLog() />
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
+					"exists: #StructKeyExists(variables.handlers, arguments.id)#, handler keys:",
+					StructKeyArray(variables.handlers)) />
+		</cfif>
+		
+		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
+		<cfif StructKeyExists(variables.handlers, arguments.id)>
+			<cfset getCacheHandler(arguments.id).clearCache(arguments.event) />
+		<cfelseif isObject(getParent())>
+			<cfset getParent().clearCacheById(arguments.id, arguments.event) />
+		</cfif>
+	</cffunction>
 	
 	<cffunction name="clearCachesByAlias" access="public" returntype="void" output="false"
 		hint="Clears caches by alias.">
@@ -275,38 +296,10 @@ Notes:
 	<cffunction name="clearCacheByName" access="public" returntype="void" output="false"
 		hint="Clears caches by cacheName.">
 		<cfargument name="cacheName" type="string" required="true" />
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName) />
-		<cfset var log = getLog() />
 		
 		<cfset cacheStrategy.flush() />
-
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Cleared cache strategy named '#arguments.cacheName#'.") />
-		</cfif>
-	</cffunction>
-	
-	<cffunction name="clearCacheById" access="public" returntype="void" output="false"
-		hint="Clears caches by cache id (handler id).">
-		<cfargument name="id" type="string" required="true" />
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
-		<cfset var log = getLog() />
-		
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
-					"exists: #StructKeyExists(variables.handlers, arguments.id)#, handler keys:",
-					StructKeyArray(variables.handlers)) />
-		</cfif>
-		
-		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
-		<cfif StructKeyExists(variables.handlers, arguments.id)>
-			<cfset getCacheHandler(arguments.id).clearCache(arguments.event) />
-		<cfelseif isObject(getParent())>
-			<cfset getParent().clearCacheById(arguments.id, arguments.event) />
-		</cfif>
-		
 	</cffunction>
 	
 	<cffunction name="isAliasDefined" access="public" returntype="boolean" output="false"

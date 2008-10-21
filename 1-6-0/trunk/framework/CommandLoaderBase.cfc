@@ -149,9 +149,6 @@ Notes:
 		<cfset var criteria = "" />
 		<cfset var condition = "" />
 		
-		<cfdump var="#arguments.commandNode#">
-		<cfabort>
-		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ids")>
 			<cfset ids = variables.utils.trimList(arguments.commandNode.xmlAttributes["ids"]) />	
 		</cfif>
