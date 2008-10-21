@@ -271,7 +271,7 @@ Notes:
 		</cfif>
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
-		<cfif StructKeyExists(variables.handlers, arguments.id)>
+		<cfif isCacheHandlerDefined(arguments.id)>
 			<cfset getCacheHandler(arguments.id).clearCache(arguments.event) />
 		<cfelseif isObject(getParent())>
 			<cfset getParent().clearCacheById(arguments.id, arguments.event) />
