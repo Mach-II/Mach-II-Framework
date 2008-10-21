@@ -42,7 +42,7 @@ Notes:
 	<cfset variables.cacheOutputBuffer = "" />
 	<cfset variables.log = 0 />
 	<cfset variables.cachingEnabled = true />
-	<cfset variables.aliasKeyLists = structNew() />
+	<cfset variables.aliasKeyLists = StructNew() />
 	<cfset variables.expressionEvaluator = 0 />
 	
 	<!---
@@ -135,7 +135,7 @@ Notes:
 	
 					<!--- Cache the data and output --->
 					<cfset getCacheStrategy().put(key, dataToCache) />
-					<cfset addKeyToAlias(key) />
+					<cfset addKeyToAliases(key) />
 					
 					<!--- Log messages --->
 					<cfif log.isDebugEnabled()>
@@ -203,11 +203,11 @@ Notes:
 		</cfif>
 		
 		<!--- If we don't get any criteria passed we want to clear the whole cache --->
-		<cfif arguments.criteria neq "" or arguments.aliases neq "">
+		<cfif Len(arguments.criteria) OR Len(arguments.aliases)>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', aliases '#arguments.aliases#', criteria '#arguments.criteria#'.") />
 			</cfif>
-			<cfif arguments.criteria neq "">
+			<cfif Len(arguments.criteria)>
 				<!--- Loop through the list of aliases and determine if criteria matches and then if 
 					so the key should be removed. --->
 				<cfloop list="#arguments.aliases#" index="currentAlias">
@@ -225,7 +225,7 @@ Notes:
 					<cfif log.isDebugEnabled()>
 						<cfset log.debug("clearCache: currentAlias '#currentAlias#', aliasKeyLists '#StructKeyList(variables.aliasKeyLists)#'") />
 					</cfif>
-					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
+					<cfloop list="#variables.aliasKeyLists[getKeyHash(currentAlias)]#" index="currentKey" delimiters="|">
 						<cfset getCacheStrategy().remove(currentKey) />
 					</cfloop>
 				</cfloop>
@@ -270,7 +270,7 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="executeCommands" access="public" returntype="struct" output="false" 
+	<cffunction name="executeCommands" access="private" returntype="struct" output="false" 
 		hints="Executes a block of commands and returns any output and continue status.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -345,18 +345,24 @@ Notes:
 		<cfreturn key />
 	</cffunction>
 	
-	<cffunction name="addKeyToAlias" access="private" returntype="void" output="false"
+	<cffunction name="addKeyToAliases" access="private" returntype="void" output="false"
 		hint="Addes a key to the the alias key list.">
 		<cfargument name="key" type="string" required="true">
 		
+		<cfset var aliases = getAliases() />
 		<cfset var hashedAlias = "" />
+		<cfset var currentAlias = "" />
 		
-		<cfif Len(getAliases())>
-			<cfset hashedAlias = Hash(getAliases()) />
-			
-			<cfif NOT ListFindNoCase(variables.aliasKeyLists[hashedAlias], key)>
-				<cfset variables.aliasKeyLists[hashedAlias] = ListAppend(variables.aliasKeyLists[hashedAlias], key, "|") />
-			</cfif>
+		<cfif Len(aliases)>
+			<cfloop list="#aliases#" index="currentAlias">
+				<cfset hashedAlias = getKeyHash(currentAlias) />
+				
+				<cfif NOT StructKeyExists(variables.aliasKeyLists, key)>
+					<cfset variables.aliasKeyLists[hashedAlias] = key />
+				<cfelseif NOT ListFindNoCase(variables.aliasKeyLists[hashedAlias], key)>
+					<cfset variables.aliasKeyLists[hashedAlias] = ListAppend(variables.aliasKeyLists[hashedAlias], key, "|") />
+				</cfif>
+			</cfloop>
 		</cfif>
 	</cffunction>
 	
@@ -475,6 +481,12 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(arguments.HTTPHeaders)#" index="i">
 			<cfset arguments.eventContext.addHTTPHeader(argumentcollection=arguments.HTTPHeaders[i]) />
 		</cfloop>
+	</cffunction>
+	
+	<cffunction name="getKeyHash" access="private" returntype="string" output="false"
+		hint="Gets a key name hash (uppercase and hash the key name)">
+		<cfargument name="keyName" type="string" required="true" />
+		<cfreturn Hash(UCase(arguments.keyName)) />
 	</cffunction>
 	
 	<!---

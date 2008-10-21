@@ -161,6 +161,7 @@ Notes:
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
 		<cfset var aliases = arguments.cacheHandler.getAliases() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
+		<cfset var currentAlias = "" />
 
 		<!--- Add the handler --->
 		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
@@ -174,8 +175,9 @@ Notes:
 
 		<!--- Register the aliases if defined --->
 		<cfif Len(aliases)>
-			<!--- TODO: Aliases can be a list and thus this will break if it contains more than alias --->
-			<cfset variables.handlersByAliases[getKeyHash(aliases)][handlerId] = true />
+			<cfloop list="#aliases#" index="currentAlias">
+				<cfset variables.handlersByAliases[getKeyHash(currentAlias)][handlerId] = true />
+			</cfloop>
 		</cfif>
 	</cffunction>
 	
@@ -207,6 +209,7 @@ Notes:
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
 		<cfset var aliases = arguments.cacheHandler.getAliases() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
+		<cfset var currentAlias = "" />
 
 		<!--- Remove the handler --->
 		<cfset StructDelete(variables.handlers, handlerId, false) />
@@ -220,8 +223,9 @@ Notes:
 		
 		<!--- Unregister the aliases if defined --->
 		<cfif Len(aliases)>
-			<!--- TODO: Aliases can be a list and thus this will break if it contains more than alias --->
-			<cfset StructDelete(variables.handlersByAliases[getKeyHash(aliases)], handlerId, false) />
+			<cfloop list="#aliases#" index="currentAlias">
+				<cfset StructDelete(variables.handlersByAliases[getKeyHash(currentAlias)], handlerId, false) />
+			</cfloop>
 		</cfif>
 	</cffunction>
 		
