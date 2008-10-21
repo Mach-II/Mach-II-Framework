@@ -261,6 +261,7 @@ Notes:
 		hint="Clears caches by cache id (handler id).">
 		<cfargument name="id" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="criteria" type="string" required="false" default="" />
 		
 		<cfset var log = getLog() />
 		
@@ -272,9 +273,9 @@ Notes:
 		
 		<!--- Only try to clear if there are cache handlers that are registered with this handler id --->
 		<cfif isCacheHandlerDefined(arguments.id)>
-			<cfset getCacheHandler(arguments.id).clearCache(arguments.event) />
+			<cfset getCacheHandler(arguments.id).clearCache(arguments.event, arguments.criteria) />
 		<cfelseif isObject(getParent())>
-			<cfset getParent().clearCacheById(arguments.id, arguments.event) />
+			<cfset getParent().clearCacheById(arguments.id, arguments.event, arguments.criteria) />
 		</cfif>
 	</cffunction>
 	
@@ -292,7 +293,7 @@ Notes:
 			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />
 			
 			<cfloop collection="#cacheHandlers#" item="key">
-				<cfset getCacheHandler(key).clearCache(arguments.event, arguments.criteria, arguments.alias) />
+				<cfset getCacheHandler(key).clearCache(arguments.event, arguments.criteria) />
 			</cfloop>
 		<cfelseif isObject(getParent())>
 			<cfset getParent().clearCachesByAlias(arguments.alias, arguments.event, arguments.criteria) />

@@ -171,7 +171,7 @@ Notes:
 		<cfset var currentId = "" />
 		
 		<cfloop list="#getIds()#" index="currentId">
-			<cfset arguments.cacheManager.clearCacheById(currentId, arguments.event) />
+			<cfset arguments.cacheManager.clearCacheById(currentId, arguments.event, getCriteria()) />
 		</cfloop>
 	</cffunction>
 	
