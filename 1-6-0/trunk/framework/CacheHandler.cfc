@@ -33,7 +33,7 @@ Notes:
 	--->
 	<cfset variables.commands = ArrayNew(1) />
 	<cfset variables.handlerId = "" />
-	<cfset variables.alias = ""/>
+	<cfset variables.aliases = ""/>
 	<cfset variables.cacheName = "" />
 	<cfset variables.criteria = "" />
 	<cfset variables.parentHandlerName = "" />
@@ -51,7 +51,7 @@ Notes:
 	<cffunction name="init" access="public" returntype="CacheHandler" output="false"
 		hint="Initializes the handler.">
 		<cfargument name="id" type="string" required="false" default="" />
-		<cfargument name="alias" type="string" required="false" default="" />
+		<cfargument name="aliases" type="string" required="false" default="" />
 		<cfargument name="cacheName" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
@@ -60,7 +60,7 @@ Notes:
 		<cfset var currentAlias = "" />
 	
 		<!--- Run setters --->
-		<cfset setAlias(arguments.alias) />
+		<cfset setAliases(arguments.aliases) />
 		<cfset setCacheName(arguments.cacheName) />
 		<cfset setCriteria(arguments.criteria) />
 		<cfset setParentHandlerName(arguments.parentHandlerName) />
@@ -138,7 +138,7 @@ Notes:
 	
 					<!--- Cache the data and output --->
 					<cfset getCacheStrategy().put(key, dataToCache) />
-					<cfset addKeyToAlias(key) />
+					<cfset addKeyTo(key) />
 					
 					<!--- Log messages --->
 					<cfif log.isDebugEnabled()>
@@ -192,7 +192,7 @@ Notes:
 		hint="Clears the cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default="" />
-		<cfargument name="alias" type="string" required="false" default="" />
+		<cfargument name="aliases" type="string" required="false" default="" />
 
 		<cfset var key = "" />
 		<cfset var currentAlias = "" />
@@ -206,14 +206,14 @@ Notes:
 		</cfif>
 		
 		<!--- If we don't get any criteria passed we want to clear the whole cache --->
-		<cfif arguments.criteria neq "" or arguments.alias neq "">
+		<cfif arguments.criteria neq "" or arguments.aliases neq "">
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', alias '#arguments.alias#', criteria '#arguments.criteria#'.") />
+				<cfset log.debug("Cache-handler clearing data from cache using key '#key#', aliases '#arguments.aliases#', criteria '#arguments.criteria#'.") />
 			</cfif>
 			<cfif arguments.criteria neq "">
-				<!--- Loop through the list of alias' keys and determine if criteria matches and then if 
+				<!--- Loop through the list of aliases and determine if criteria matches and then if 
 					so the key should be removed. --->
-				<cfloop list="#arguments.alias#" index="currentAlias">
+				<cfloop list="#arguments.aliases#" index="currentAlias">
 					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
 						<!--- The first element of the currentKey is the handlerId which needs to be removed to 
 							check the criteria --->
@@ -224,10 +224,9 @@ Notes:
 					</cfloop>
 				</cfloop>
 			<cfelse>
-				<cfloop list="#arguments.alias#" index="currentAlias">
+				<cfloop list="#arguments.aliases#" index="currentAlias">
 					<cfif log.isDebugEnabled()>
-						<cfset log.debug("clearCache: currentAlias = #currentAlias#, 
-							aliasKeyLists = #structKeyList(variables.aliasKeyLists)#") />
+						<cfset log.debug("clearCache: currentAlias '#currentAlias', aliasKeyLists '#StructKeyList(variables.aliasKeyLists)#'") />
 					</cfif>
 					<cfloop list="#variables.aliasKeyLists[hash(currentAlias)]#" index="currentKey" delimiters="|">
 						<cfset getCacheStrategy().remove(currentKey) />
@@ -307,7 +306,7 @@ Notes:
 		hint="Build a key from the cache handler criteria with data from the event object.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default=""
-			hint="If criteria is not passed in the criteria from the cache command will be used." />
+			hint="If criteria is not passed in, the criteria from the cache command will be used." />
 		
 		<cfset var criteriaToUse =  ""/>
 		<cfset var item = "" />
@@ -317,7 +316,7 @@ Notes:
 		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
 		
 		<!--- The criteria from the cache command will be used if criteria passed in is empty string. --->
-		<cfif arguments.criteria eq "">
+		<cfif NOT Len(arguments.criteria)>
 			<cfset criteriaToUse = getCriteria() />
 		<cfelse>
 			<cfset criteriaToUse = arguments.criteria />
@@ -326,9 +325,9 @@ Notes:
 		<!--- Criteria can have notation like 'id=${event.product_id},type=print' where product_id is the event arg and type is a string 
 			that needs to be part of the key as the id. --->		
 		<cfloop list="#criteriaToUse#" index="item">
-			<cfif listLen(item, "=") eq 2>
-				<cfset element = listGetAt(item, 2, "=") />
-				<cfset item = listGetAt(item, 1, "=") />
+			<cfif ListLen(item, "=") eq 2>
+				<cfset item = ListGetAt(item, 1, "=") />
+				<cfset element = ListGetAt(item, 2, "=") />
 				<cfif expressionEvaluator.isExpression(element)>
 					<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, getAppManager().getPropertyManager()) />
 				<cfelse>
@@ -349,13 +348,17 @@ Notes:
 		<cfreturn key />
 	</cffunction>
 	
-	<cffunction name="addKeyToAlias" access="private" returntype="void" output="false">
+	<cffunction name="addKeyToAlias" access="private" returntype="void" output="false"
+		hint="Addes a key to the the alias key list.">
 		<cfargument name="key" type="string" required="true">
-		<cfset var hashedAlias = "">
-		<cfif len(getAlias())>
-			<cfset hashedAlias = hash(getAlias())>
-			<cfif NOT listFindNoCase(variables.aliasKeyLists[hashedAlias], key)>
-				<cfset variables.aliasKeyLists[hashedAlias] = listAppend(variables.aliasKeyLists[hashedAlias], key, "|")>
+		
+		<cfset var hashedAlias = "" />
+		
+		<cfif Len(getAliases())>
+			<cfset hashedAlias = Hash(getAliases()) />
+			
+			<cfif NOT ListFindNoCase(variables.aliasKeyLists[hashedAlias], key)>
+				<cfset variables.aliasKeyLists[hashedAlias] = ListAppend(variables.aliasKeyLists[hashedAlias], key, "|") />
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -497,12 +500,12 @@ Notes:
 		<cfreturn variables.cacheStrategy />
 	</cffunction>
 	
-	<cffunction name="setAlias" access="private" returntype="void" output="false">
-		<cfargument name="alias" type="string" required="true" />
-		<cfset variables.alias = arguments.alias />
+	<cffunction name="setAliases" access="private" returntype="void" output="false">
+		<cfargument name="aliases" type="string" required="true" />
+		<cfset variables.aliases = arguments.aliases />
 	</cffunction>
-	<cffunction name="getAlias" access="public" returntype="string" output="false">
-		<cfreturn variables.alias />
+	<cffunction name="getAliases" access="public" returntype="string" output="false">
+		<cfreturn variables.aliases />
 	</cffunction>
 
 	<cffunction name="setCacheName" access="private" returntype="void" output="false">

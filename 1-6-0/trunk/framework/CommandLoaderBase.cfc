@@ -149,22 +149,23 @@ Notes:
 		<cfset var criteria = "" />
 		<cfset var condition = "" />
 		
-		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes")>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ids")>
-				<cfset ids = variables.utils.trimList(arguments.commandNode.xmlAttributes["ids"]) />	
-			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
-				<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />	
-			</cfif>		
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "names")>
-				<cfset strategyNames = arguments.commandNode.xmlAttributes["names"] />
-			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
-				<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
-			</cfif>
-			<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
-				<cfset condition = arguments.commandNode.xmlAttributes["condition"] />	
-			</cfif>
+		<cfdump var="#arguments.commandNode#">
+		<cfabort>
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ids")>
+			<cfset ids = variables.utils.trimList(arguments.commandNode.xmlAttributes["ids"]) />	
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "aliases")>
+			<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />	
+		</cfif>		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "names")>
+			<cfset strategyNames = arguments.commandNode.xmlAttributes["names"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
+			<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
+			<cfset condition = arguments.commandNode.xmlAttributes["condition"] />	
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(

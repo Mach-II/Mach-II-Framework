@@ -79,30 +79,32 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var cacheHandler = "" />		
 
-		<cfset var alias = "" />
-		<cfset var criteria = "" />
-		<cfset var cacheName = "" />
 		<cfset var id = "" />
+		<cfset var aliases = "" />
+		<cfset var strategyName = "" />
+		<cfset var criteria = "" />
 		<cfset var i = 0 />
-		
-		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "alias")>
-			<cfset alias = arguments.configXML.xmlAttributes["alias"] />
+
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "id")>
+			<cfset id = arguments.configXML.xmlAttributes["id"] />
+		</cfif>		
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "aliases")>
+			<cfset aliases = arguments.configXML.xmlAttributes["aliases"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "name")>
+			<cfset strategyName = arguments.configXML.xmlAttributes["name"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "criteria")>
 			<cfset criteria = arguments.configXML.xmlAttributes["criteria"] />
 		</cfif>
-		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "name")>
-			<cfset cacheName = arguments.configXML.xmlAttributes["name"] />
-		</cfif>
-		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "id")>
-			<cfset id = arguments.configXML.xmlAttributes["id"] />
-		</cfif>
 		
-		<!--- Build the cache handler --->
+		<!--- Build cache handler --->
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
-			id, alias, cacheName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
+			id, aliases, strategyName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
 		<cfset cacheHandler.setAppManager(getAppManager()) />
+		
+		<!--- Add commands to the cache handler --->
 		<cfloop from="1" to="#ArrayLen(nestedCommandNodes)#" index="i">
 			<cfset command = createCommand(nestedCommandNodes[i], arguments.parentHandlerName, arguments.parentHandlerType) />
 			<cfset cacheHandler.addCommand(command) />
@@ -113,24 +115,7 @@ Notes:
 		
 		<cfreturn cacheHandler.getHandlerId() />
 	</cffunction>
-	
-	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false">
-		<cfargument name="commandNode" type="any" required="true" />
-		<cfargument name="parentHandlerName" type="string" required="false" default="" />
-		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
-		<!--- If we see a event-mapping, announce, or redirect commands an error should be thrown 
-			since those are not replayed when the event is cached. --->
-		<cfif arguments.commandNode.xmlName EQ "announce" OR arguments.commandNode.xmlName EQ "event-mapping"
-			OR arguments.commandNode.xmlName EQ "redirect">
-			<cfthrow type="MachII.framework.InvalidNestedCommand"
-					message="The #arguments.commandNode.xmlName# command in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' is not valid inside a cache command."
-					detail="The commands announce, event-mapping and redirect are now allowed inside a cache command since they cannot be replayed." />
-		</cfif>
-		
-		<cfreturn super.createCommand(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
-	</cffunction>
-	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the cache handlers.">
 		
@@ -174,7 +159,7 @@ Notes:
 			hint="The cache handler you want to add." />
 
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
-		<cfset var alias = arguments.cacheHandler.getAlias() />
+		<cfset var aliases = arguments.cacheHandler.getAliases() />
 		<cfset var cacheName = arguments.cacheHandler.getCacheName() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 
@@ -182,9 +167,10 @@ Notes:
 		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 		<cfset variables.handlersByName[getKeyHash(cacheName)] = handlerId />
 		
-		<!--- Register the alias if defined --->
-		<cfif Len(alias)>
-			<cfset variables.handlersByAliases[getKeyHash(alias)][handlerId] = true />
+		<!--- Register the aliases if defined --->
+		<cfif Len(aliases)>
+			<!--- TODO: Aliases can be a list and thus this will break if it contains more than alias --->
+			<cfset variables.handlersByAliases[getKeyHash(aliases)][handlerId] = true />
 		</cfif>
 	</cffunction>
 	
@@ -214,7 +200,7 @@ Notes:
 			hint="The cache handler you want to remove." />
 
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
-		<cfset var alias = arguments.cacheHandler.getAlias() />
+		<cfset var aliases = arguments.cacheHandler.getAliases() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 
 		<!--- Remove the handler --->
@@ -230,9 +216,10 @@ Notes:
 		<!--- Remove from cache name list --->
 		<cfset StructDelete(variables.handlersByName, getKeyHash(cacheName)) />
 		
-		<!--- Unregister the alias if defined --->
-		<cfif Len(alias)>
-			<cfset StructDelete(variables.handlersByAliases[getKeyHash(alias)], handlerId, false) />
+		<!--- Unregister the aliases if defined --->
+		<cfif Len(aliases)>
+			<!--- TODO: Aliases can be a list and thus this will break if it contains more than alias --->
+			<cfset StructDelete(variables.handlersByAliases[getKeyHash(aliases)], handlerId, false) />
 		</cfif>
 	</cffunction>
 		
@@ -404,6 +391,23 @@ Notes:
 		<cfreturn Hash(UCase(arguments.keyName)) />
 	</cffunction>
 	
+	<cffunction name="createCommand" access="private" returntype="MachII.framework.Command" output="false"
+		hint="Creates a command and excludes 'announce', 'event-mapping' and 'redirect' commands as they cannot be used in a cache handler.">
+		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		
+		<!--- If we see a event-mapping, announce, or redirect commands an error should be thrown 
+			since those are not replayed when the event is cached. --->
+		<cfif ListFindNoCase("announce,event-mapping,redirect", arguments.commandNode.xmlName)>
+			<cfthrow type="MachII.framework.InvalidNestedCommand"
+					message="The #arguments.commandNode.xmlName# command in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' is not valid inside a cache command."
+					detail="The commands announce, event-mapping and redirect are now allowed inside a cache command since they cannot be replayed." />
+		</cfif>
+		
+		<cfreturn super.createCommand(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
@@ -440,8 +444,8 @@ Notes:
 		<cfif getCacheStrategyManager().isCacheStrategyDefined(arguments.defaultCacheName, true)>
 			<cfset variables.defaultCacheName = arguments.defaultCacheName />
 		<cfelse>
-			<cfthrow type="MachII.framework.DefaultCacheNameNotAvailable"
-				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy that is not available. Please set the default to a strategy that is configured."
+			<cfthrow type="MachII.framework.DefaultStrategyNameNotAvailable"
+				message="The 'defaultCacheName' was set to '#arguments.defaultCacheName#'. This strategy is not available. Please set the default to a strategy that is configured."
 				detail="Available strategies:#ArrayToList(getCacheStrategyManager().getCacheStrategyNames())#" />
 		</cfif>
 	</cffunction>	
