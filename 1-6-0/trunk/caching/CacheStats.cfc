@@ -81,6 +81,15 @@ tracked by Mach-II are as follows:
 		<cfreturn variables.extraStats />
 	</cffunction>
 	
+	<cffunction name="getCacheHitRatio" access="public" returntype="numeric" output="false"
+		hint="Gets the hit ratio (decimal) which is (hits / total accesses) where total accesses is hits + misses.">
+		
+		<cfset var hits = getCacheHits() />
+		<cfset var totalAccesses = hits + getCacheMisses() />
+		
+		<cfreturn hits / totalAccesses />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
