@@ -42,7 +42,7 @@ Notes:
 	<cfset variables.cacheOutputBuffer = "" />
 	<cfset variables.log = 0 />
 	<cfset variables.cachingEnabled = true />
-	<cfset variables.keyLists = StructNew() />
+	<cfset variables.keySet = CreateObject("java", "java.util.HashSet").init() />
 	<cfset variables.expressionEvaluator = 0 />
 	
 	<!---
@@ -130,7 +130,7 @@ Notes:
 	
 					<!--- Cache the data and output --->
 					<cfset getCacheStrategy().put(key, dataToCache) />
-					<cfset addToKeyList(key) />
+					<cfset variables.keySet.add(key) />
 					
 					<!--- Log messages --->
 					<cfif log.isDebugEnabled()>
@@ -186,24 +186,30 @@ Notes:
 		<cfargument name="criteria" type="string" required="false" default="" />
 
 		<cfset var key = getKeyWithCriteria(arguments.event, arguments.criteria) />
-		<cfset var currentKey = "" />
+		<cfset var keyIds = "" />
+		<cfset var i = 0 />
 		
 		<!--- Clear by key with criteria --->
 		<cfif Len(arguments.criteria)>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler clearing data from cache using key '#key#' with criteria '#arguments.criteria#'") />
 			</cfif>
+			
 			<cfset getCacheStrategy().remove(key) />
-			<!--- Remove the key frome the key list --->
-			<cfset StructDelete(variables.keyLists, key, false) />
+			<cfset variables.keySet.remove(key) />
 		<!---Clear by keys associated with this handler (clear by id without criteria or by alias) --->
 		<cfelse>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Cache-handler clearing all data from cache that start with id '#getHandlerId()#'") />
 			</cfif>
-			<cfloop collection="#variables.keyLists#" item="currentKey">
-				<cfset getCacheStrategy().remove(currentKey) />
-				<cfset StructDelete(variables.keyLists, key, false) />
+			
+			<!--- Get a copy of the key ids and then clear --->
+			<cfset keyIds = variables.keySet.toArray() />
+			<cfset variables.keySet.clear() />
+			
+			<!--- Clear the cache block from the array of key ids --->
+			<cfloop from="1" to="#ArrayLen(keyIds)#" index="i">
+				<cfset getCacheStrategy().remove(keyIds[i]) />
 			</cfloop>
 		</cfif>
 	</cffunction>
@@ -302,12 +308,6 @@ Notes:
 		</cfloop>
 		
 		<cfreturn key />
-	</cffunction>
-	
-	<cffunction name="addToKeyList" access="private" returntype="void" output="false"
-		hint="Addes a cache block key to the the key list so it is possible to clear cache blocks by aliases or id.">
-		<cfargument name="key" type="string" required="true">
-		<cfset StructInsert(variables.keyLists, arguments.key, true, true) />
 	</cffunction>
 	
 	<cffunction name="computeDataToCache" access="private" returntype="struct" output="false"
@@ -425,12 +425,6 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(arguments.HTTPHeaders)#" index="i">
 			<cfset arguments.eventContext.addHTTPHeader(argumentcollection=arguments.HTTPHeaders[i]) />
 		</cfloop>
-	</cffunction>
-	
-	<cffunction name="getKeyHash" access="private" returntype="string" output="false"
-		hint="Gets a key name hash (uppercase and hash the key name)">
-		<cfargument name="keyName" type="string" required="true" />
-		<cfreturn Hash(UCase(arguments.keyName)) />
 	</cffunction>
 	
 	<!---
