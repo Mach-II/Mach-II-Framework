@@ -61,12 +61,15 @@ Notes:
 		hint="Used by the framework for initialization. Do not override.">		
 		<cfreturn this />
 	</cffunction>
-	
-	<!---
-	PUBLIC FUNCTIONS
-	--->
+
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Calls configure() on each of the manager instances.">
+		
+		<!--- Perform callback cleanup if this is a module  --->
+		<cfif IsObject(getParent())>
+			<cfset getRequestManager().cleanupCallbacks(getModuleName()) />
+		</cfif>
+		
 		<!--- In order in which the managers are called is important
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
 		<cfset getPropertyManager().configure() />
@@ -88,7 +91,10 @@ Notes:
 		<!--- Flip loading to false --->
 		<cfset setLoading(false) />
 	</cffunction>
-	
+
+	<!---
+	PUBLIC FUNCTIONS
+	--->	
 	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
 		hint="Returns a new or cached instance of a RequestHandler.">
 		<cfargument name="createNew" type="boolean" required="false" default="false"

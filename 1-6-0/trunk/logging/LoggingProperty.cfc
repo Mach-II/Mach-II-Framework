@@ -183,7 +183,8 @@ will bind to root parameter values.
 		<cfset var type = "" />
 		<cfset var logger = "" />
 		<cfset var loggerId = createLoggerId(arguments.loggerName) />
-		<cfset var key = "" />
+		<cfset var moduleName = getModuleName() />
+		<cfset var key = "" />		
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
@@ -213,13 +214,13 @@ will bind to root parameter values.
 		
 		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 		<cfif logger.isOnRequestEndAvailable()>
-			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
+			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd", moduleName) />
 		</cfif>
 		
 		<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
 		<cfif logger.isPrePostRedirectAvailable()>
-			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
-			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
+			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect", moduleName) />
+			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect", moduleName) />
 		</cfif>
 		
 		<!--- Add the logger --->
@@ -229,14 +230,19 @@ will bind to root parameter values.
 	<cffunction name="createLoggerId" access="private" returntype="string" output="false"
 		hint="Creates a logger id.">
 		<cfargument name="loggerName" type="string" required="true" />
-		
+		<cfreturn Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
+	</cffunction>
+	
+	<cffunction name="getModuleName" access="private" returntype="string" output="false"
+		hint="Gets the module name.">
+
 		<cfset var moduleName = getAppManager().getModuleName() />
 		
 		<cfif NOT Len(moduleName)>
 			<cfset moduleName = "_base_" />
 		</cfif>
-		
-		<cfreturn Hash(arguments.loggerName & moduleName & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
+
+		<cfreturn moduleName />
 	</cffunction>
 	
 	<!---
