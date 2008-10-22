@@ -78,9 +78,10 @@ first [Hash(UCase(arguments.channell))]
 	</cffunction>
 	
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
-		hint="Adds a log adapter">
+		hint="Adds a log adapter.">
+		<cfargument name="logAdapterName" type="string" required="true" />
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset variables.logAdapters[Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000))] = arguments.logAdapter />
+		<cfset variables.logAdapters[arguments.logAdapterName] = arguments.logAdapter />
 	</cffunction>
 	
 	<!---
@@ -148,7 +149,7 @@ first [Hash(UCase(arguments.channell))]
 		<cfargument name="logAdapters" type="struct" required="true" />
 		<cfset variables.logAdapters = arguments.logAdapters />
 	</cffunction>
-	<cffunction name="getLogAdapters" access="private" returntype="struct" output="false"
+	<cffunction name="getLogAdapters" access="public" returntype="struct" output="false"
 		hint="Returns the log adapters.">
 		<cfreturn variables.logAdapters />
 	</cffunction>

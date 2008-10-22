@@ -129,7 +129,13 @@ will bind to root parameter values.
 		<cfset var params = getParameters() />
 		<cfset var defaultLoggerParameters = StructNew() />
 		<cfset var loggers = StructNew() />
+		<cfset var logFactoryLogAdapters = StructNew() />
+		<cfset var currentLogAdapters = ArrayNew(1) />
+		<cfset var moduleName = getModuleName() />
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var temp = "" />
 		<cfset var key = "" />
+		<cfset var i = 0 />
 		
 		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
@@ -147,9 +153,26 @@ will bind to root parameter values.
 		<!--- Configure the loggers --->
 		<cfset loggers = getLoggers() />
 		
+		<!--- Configure the loggers and register their adapters in the LogFactory --->
 		<cfloop collection="#loggers#" item="key">
 			<cfset loggers[key].configure() />
+			<cfset getAppManager().getLogFactory().addLogAdapter(moduleName & "-" & loggers[key].getLoggerId(), loggers[key].getLogAdapter()) />
+			<cfset ArrayAppend(currentLogAdapters, loggers[key].getLogAdapter()) />
 		</cfloop>
+		
+		<!--- Cleanup bad loggers from old instances of this module --->
+		<cfif IsObject(getAppManager().getParent())>
+			<cfset logFactoryLogAdapters = getAppManager().getLogFactory().getLogAdapters() />
+			<cfloop from="1" to="#ArrayLen(currentLogAdapters)#" index="i">
+				<cfloop collection="#logFactoryLogAdapters#" item="key">
+					<cfif ListFirst(key, "-") EQ moduleName 
+						AND NOT utils.assertSame(logFactoryLogAdapters[key], currentLogAdapters[i])>
+						<cfset StructDelete(logFactoryLogAdapters, key, false) />
+						<cfbreak />
+					</cfif>
+				</cfloop>
+			</cfloop>
+		</cfif>
 		
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT getParameter("loggingEnabled", true)>
@@ -199,7 +222,7 @@ will bind to root parameter values.
 		
 		<!--- Create, init and configure the logger --->
 		<cftry>
-			<cfset logger = CreateObject("component", arguments.parameters.type).init(loggerId, getAppManager().getLogFactory(), arguments.parameters) />
+			<cfset logger = CreateObject("component", arguments.parameters.type).init(loggerId, arguments.parameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName")>

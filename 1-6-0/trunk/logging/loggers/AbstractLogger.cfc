@@ -34,7 +34,6 @@ Notes:
 	<cfset variables.instance = StructNew() />
 	<cfset variables.instance.loggerTypeName = "undefined" />
 	<cfset variables.instance.loggerId = "" />
-	<cfset variables.logFactory = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
 	
@@ -44,11 +43,9 @@ Notes:
 	<cffunction name="init" access="public" returntype="AbstractLogger" output="false"
 		hint="Initializes the logger. Do not override.">
 		<cfargument name="loggerId" type="string" required="true" />
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
 		<cfargument name="parameters" type="struct" required="true" />
 		
 		<cfset setLoggerId(arguments.loggerId) />
-		<cfset setLogFactory(arguments.logFactory) />
 		<cfset setParameters(arguments.parameters) />
 		
 		<cfreturn this />
@@ -222,16 +219,6 @@ Notes:
 	<cffunction name="getLoggerId" access="public" returntype="string" output="false"
 		hint="Returns the id of the logger. Used for preRedirect/postRedirect id.">
 		<cfreturn variables.instance.loggerId />
-	</cffunction>
-	
-	<cffunction name="setLogFactory" access="private" returntype="void" output="false"
-		hint="Sets the log factory for this logger.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.logFactory = arguments.logFactory />
-	</cffunction>
-	<cffunction name="getLogFactory" access="private" returntype="MachII.logging.LogFactory" output="false"
-		hint="Gets the log factory for this logger.">
-		<cfreturn variables.logFactory />
 	</cffunction>
 	
 	<cffunction name="setLogAdapter" access="private" returntype="void" output="false"

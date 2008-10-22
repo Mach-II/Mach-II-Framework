@@ -81,9 +81,6 @@ See that file header for configuration of filter criteria.
 		<!--- Configure and set the adapter --->
 		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
-		
-		<!--- Add the adapter to the log factory --->
-		<cfset getLogFactory().addLogAdapter(adapter) />
 	</cffunction>
 	
 	<!---
