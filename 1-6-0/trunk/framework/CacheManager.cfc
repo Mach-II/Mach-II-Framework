@@ -134,6 +134,16 @@ Notes:
 			<cfset setDefaultCacheName(getParent().getDefaultCacheName()) />
 		</cfif>
 		
+		<!--- Check to make sure we have cache strategies to use otherwise throw an error --->
+		<cfif StructCount(variables.handlers)
+			AND (NOT cacheStrategyManager.containsCacheStrategies()
+			OR (NOT cacheStrategyManager.containsCacheStrategies() AND IsObject(cacheStrategyManager.getParent()) 
+				AND NOT cacheStrategyManager.getParent().containsCacheStrategies()))>
+			<cfthrow type="MachII.caching.NoCacheStrategiesDefined" 
+				message="A <cache> command was encountered and there are no cache strategies defined."
+				detail="Please add the MachII.caching.CachingProperty to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
+		</cfif>
+		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
 		<cfloop collection="#variables.handlers#" item="handlerId">
@@ -145,7 +155,7 @@ Notes:
 			</cfif>
 			
 			<!--- Load the strategy into the handler --->
-			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName) />
+			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName, true) />
 			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
 	</cffunction>
@@ -304,7 +314,7 @@ Notes:
 		hint="Clears caches by cacheName.">
 		<cfargument name="cacheName" type="string" required="true" />
 		
-		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName) />
+		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName, true) />
 		
 		<cfset cacheStrategy.flush() />
 	</cffunction>

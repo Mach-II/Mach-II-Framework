@@ -66,21 +66,17 @@ Notes:
 	<cffunction name="getCacheStrategyByName" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false"
 		hint="Gets a cache strategy with the specified name.">
 		<cfargument name="cacheStrategyName" type="string" required="true" />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent strategy manager." />
 		
 		<cfif isCacheStrategyDefined(arguments.cacheStrategyName)>
 			<cfreturn variables.cacheStrategies[arguments.cacheStrategyName] />
-		<cfelseif IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.cacheStrategyName)>
-			<cfreturn getParent().getCacheStrategyByName(arguments.cacheStrategyName) />
+		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.cacheStrategyName)>
+			<cfreturn getParent().getCacheStrategyByName(arguments.cacheStrategyName, arguments.checkParent) />
 		<cfelse>
-			<cfif NOT StructCount(getCacheStrategies())>
-				<cfthrow type="MachII.caching.NoCacheStrategiesDefined" 
-					message="There are no cache strategies defined."
-					detail="Please add the MachII.caching.CachingProperty to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
-			<cfelse>
-				<cfthrow type="MachII.caching.CacheStrategyNotDefined" 
-					message="Cache strategy with name '#arguments.cacheStrategyName#' is not defined."
-					detail="Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
-			</cfif>
+			<cfthrow type="MachII.caching.CacheStrategyNotDefined" 
+				message="Cache strategy with name '#arguments.cacheStrategyName#' is not defined."
+				detail="Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
 		</cfif>
 	</cffunction>
 
@@ -103,7 +99,7 @@ Notes:
 		<cfargument name="cacheStrategyName" type="string" required="true"
 			hint="Name of cache strategy to check if defined." />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
-			hint="Flag to check parent strategy." />
+			hint="Flag to check parent strategy manager." />
 		
 		<cfif StructKeyExists(variables.cacheStrategies, arguments.cacheStrategyName)>
 			<cfreturn true />
@@ -147,13 +143,18 @@ Notes:
 	</cffunction>
 
 	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
-		hint="Gets all registered cache strategies.">
+		hint="Gets all registered cache strategies for this manager. Does NOT get strategies from a parent manager.">
 		<cfreturn variables.cacheStrategies />
 	</cffunction>
 
 	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false"
-		hint="Returns an array of cache strategy names.">
+		hint="Returns an array of cache strategy names for this manager. Does NOT get strategy names from a parent manager.">
 		<cfreturn StructKeyArray(variables.cacheStrategies) />
+	</cffunction>
+	
+	<cffunction name="containsCacheStrategies" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean of on whether or not there are any registered cache strategies.">
+		<cfreturn StructCount(variables.cacheStrategies) />
 	</cffunction>
 
 	<!---

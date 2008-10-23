@@ -104,7 +104,9 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		hint="Gets a cache strategy with the specified name.">
 		<cfargument name="name" type="string" required="true"
 			hint="Name of the cache strategy to get." />
-		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.name) />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent strategy manager." />
+		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.name, arguments.checkParent) />
 	</cffunction>
 	
 	<!---
