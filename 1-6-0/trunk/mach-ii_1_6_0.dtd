@@ -413,7 +413,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	A "cache" element stores the result of a block of commands which put data in the event object or output data.
-		[name] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
+		[strategyName] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
 		[id] - an unique id for this cache block
 		[aliases] - the alias or list of aliases that reference this cache block
 		[criteria] - a comma delimited list of event arguments that form the cache key.
@@ -421,14 +421,14 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT cache (filter | notify | event-arg | view-page | event-bean | execute | publish | cache-clear)*>
 <!ATTLIST cache 
 	id CDATA #IMPLIED
-	name CDATA #IMPLIED
+	strategyName CDATA #IMPLIED
 	aliases CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 >
 
 <!--
 	A "cache-clear" element causes a cache to be completely cleared or clears a specific cache key through the use of the criteria attribute.
-		[names] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
+		[strategyNames] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
 		[ids] - the id or list of ids of the cache block(s) to clear
 		[aliases] - the alias or list of aliases of the cache block(s) to clear
 		[criteria] - a comma delimited list of event arguments that form the cache key.
@@ -436,7 +436,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear
-	names CDATA #IMPLIED
+	strategyNames CDATA #IMPLIED
 	ids CDATA #IMPLIED
 	aliases CDATA #IMPLIED
 	criteria CDATA #IMPLIED
