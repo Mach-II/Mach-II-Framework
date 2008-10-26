@@ -373,12 +373,13 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	A "redirect" element will send a redirect.
-		event - the event the redirect will relocate to
-		module - the module the redirect will relocate to
-		url - the url to redirect to
-		args - a comma-delimited list of event args to attach to the redirect url
+		[event] - the event the redirect will relocate to
+		[module] - the module the redirect will relocate to
+		[url] - the url to redirect to
+		[args] - a comma-delimited list of event args to attach to the redirect url
 		[persist] - a boolean that allows you to persist complex event arguments across a redirect
 		[persistArgs] - a list of event args to persist across a redirect (if empty quotes or not defined - entire event is persisted)
+		[persistArgsIgnore] - a list of event args to ignore to persist across a redirect
 		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
 		
 -->
@@ -390,6 +391,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	args CDATA #IMPLIED
 	persist (true|false) "false"
 	persistArgs CDATA #IMPLIED
+	persistArgsIgnore CDATA #IMPLIED
 	statusType (permanent|temporary|prg) "temporary"
 >
 
@@ -413,8 +415,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	A "cache" element stores the result of a block of commands which put data in the event object or output data.
-		[strategyName] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
 		[id] - an unique id for this cache block
+		[strategyName] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
 		[aliases] - the alias or list of aliases that reference this cache block
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 -->
@@ -428,17 +430,17 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	A "cache-clear" element causes a cache to be completely cleared or clears a specific cache key through the use of the criteria attribute.
-		[strategyNames] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
 		[ids] - the id or list of ids of the cache block(s) to clear
 		[aliases] - the alias or list of aliases of the cache block(s) to clear
+		[strategyNames] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 		[condition] - a boolean expression that determines if the cache should be cleared
 -->
 <!ELEMENT cache-clear EMPTY>
 <!ATTLIST cache-clear
-	strategyNames CDATA #IMPLIED
 	ids CDATA #IMPLIED
 	aliases CDATA #IMPLIED
+	strategyNames CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 	condition CDATA #IMPLIED
 >

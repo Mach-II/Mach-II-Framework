@@ -40,6 +40,7 @@ Notes:
 	<cfset variables.args = "" />
 	<cfset variables.persist = "" />
 	<cfset variables.persistArgs = "" />
+	<cfset variables.persistArgsIgnore = "" />
 	<cfset variables.statusType = "" />
 	
 	<!---
@@ -56,6 +57,7 @@ Notes:
 		<cfargument name="persist" type="boolean" required="false" default="false" />
 		<cfargument name="persistArgs" type="string" required="false" default="" />
 		<cfargument name="statusType" type="string" required="false" default="temporary" />
+		<cfargument name="persistArgsIgnore" type="string" required="false" default="" />
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setEventParameter(arguments.eventParameter) />
@@ -66,6 +68,7 @@ Notes:
 		<cfset setPersist(arguments.persist) />
 		<cfset setPersistArgs(arguments.persistArgs) />
 		<cfset setStatusType(arguments.statusType) />
+		<cfset setPersistArgsIgnore(arguments.persistArgsIgnore) />
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist()>
@@ -158,16 +161,17 @@ Notes:
 		
 		<cfset var args = StructNew() />
 		<cfset var persistArgs = getPersistArgs() />
+		<cfset var persistArgsIgnore = getPersistArgsIgnore() />
 		<cfset var persistId = "" />
 		<cfset var i = "" />
 		
 		<!--- Build params --->
 		<cfif NOT ListLen(persistArgs)>
 			<cfset args = arguments.event.getArgs() />
-			<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
-			<cfif StructKeyExists(args, getEventParameter())>
-				<cfset StructDelete(args, getEventParameter(), FALSE) />
-			</cfif>
+			<!--- Remove the persist args to ignore --->
+			<cfloop list="#persistArgsIgnore#" index="i" delimiters=",">
+				<cfset StructDelete(args, i, FALSE) />
+			</cfloop>
 		<cfelse>
 			<cfloop list="#persistArgs#" index="i" delimiters=",">
 				<cfif arguments.event.isArgDefined(i)>
@@ -175,6 +179,9 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfif>
+
+		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
+		<cfset StructDelete(args, getEventParameter(), FALSE) />
 		
 		<!--- Save the data --->
 		<cfset persistId = arguments.eventContext.getAppManager().getRequestManager().savePersistEventData(args) />
@@ -246,6 +253,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getPersistArgs" access="private" returntype="string" output="false">
 		<cfreturn variables.persistArgs />
+	</cffunction>
+	
+	<cffunction name="setPersistArgsIgnore" access="private" returntype="void" output="false">
+		<cfargument name="persistArgsIgnore" type="string" required="true" />
+		<cfset variables.persistArgsIgnore = arguments.persistArgsIgnore />
+	</cffunction>
+	<cffunction name="getPersistArgsIgnore" access="private" returntype="string" output="false">
+		<cfreturn variables.persistArgsIgnore />
 	</cffunction>
 	
 	<cffunction name="setStatusType" access="private" returntype="void" output="false">

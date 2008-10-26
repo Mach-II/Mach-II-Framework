@@ -353,6 +353,7 @@ Notes:
 		<cfset var args = "" />
 		<cfset var persist = false />
 		<cfset var persistArgs = "" />
+		<cfset var persistArgsIgnore = "" />
 		<cfset var statusType = "temporary" />
 		<cfset var eventParameter = getAppManager().getPropertyManager().getProperty("eventParameter", "event") />
 		<cfset var redirectPersistParameter = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") /> />
@@ -372,6 +373,9 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgs")>
 			<cfset persistArgs = variables.utils.trimList(arguments.commandNode.xmlAttributes["persistArgs"]) />
 		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "persistArgsIgnore")>
+			<cfset persistArgsIgnore = variables.utils.trimList(arguments.commandNode.xmlAttributes["persistArgsIgnore"]) />
+		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "module")>
 			<cfset moduleName = arguments.commandNode.xmlAttributes["module"] />
 		<cfelse>
@@ -381,7 +385,7 @@ Notes:
 			<cfset statusType = arguments.commandNode.xmlAttributes["statusType"] />
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore) />
 		
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		
