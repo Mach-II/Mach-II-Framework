@@ -135,13 +135,14 @@ Notes:
 		</cfif>
 		
 		<!--- Check to make sure we have cache strategies to use otherwise throw an error --->
-		<cfif StructCount(variables.handlers)
-			AND (NOT cacheStrategyManager.containsCacheStrategies()
-			OR (NOT cacheStrategyManager.containsCacheStrategies() AND IsObject(cacheStrategyManager.getParent()) 
-				AND NOT cacheStrategyManager.getParent().containsCacheStrategies()))>
-			<cfthrow type="MachII.caching.NoCacheStrategiesDefined" 
-				message="A <cache> command was encountered and there are no cache strategies defined."
-				detail="Please add the MachII.caching.CachingProperty to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
+		<cfif StructCount(variables.handlers)>
+			<cfif (NOT IsObject(getParent()) AND NOT cacheStrategyManager.containsCacheStrategies())
+				OR (IsObject(getParent()) AND NOT cacheStrategyManager.containsCacheStrategies() 
+					AND NOT cacheStrategyManager.getParent().containsCacheStrategies())>
+				<cfthrow type="MachII.caching.NoCacheStrategiesDefined" 
+					message="A &lt;cache&gt; command was encountered and there are no cache strategies defined."
+					detail="Please add the 'MachII.caching.CachingProperty' to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
+			</cfif>
 		</cfif>
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
