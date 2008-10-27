@@ -106,52 +106,71 @@ Notes:
 					<cfset clearCacheByStrategyNames(cacheManager) />
 				</cfif>
 			</cfif>
-		<!--- Evaluate(getCondition()) --->
-		<cfelseif variables.expressionEvaluator.evaluateExpressionBody(getCondition(), arguments.event, getPropertyManager())>
-			<!--- Clear default strategy --->
-			<cfif getClearDefaultStrategy()>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Clearing default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' evaluated true).") />
-				</cfif>
-				<cfset clearCacheByDefaultStrategy(cacheManager) />
-			<!--- Clear by ids, aliases and/or strategy names --->
-			<cfelse>
-				<!--- Clear by id with condition --->
-				<cfif isIdsDefined()>
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Clearing cache by ids '#getIds()#' (condition '#getCondition()#' evaluated true).") />
-					</cfif>
-					<cfset clearCacheByIds(cacheManager, arguments.event) />
-				</cfif>
-				<!--- Clear by alias with condition --->
-				<cfif isAliasesDefined()>
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Clearing cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated true).") />
-					</cfif>
-					<cfset clearCacheByAliases(cacheManager, arguments.event) />
-				</cfif>
-				<!--- Clear by cache name with condition --->
-				<cfif isStrategyNamesDefined()>
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Clearing cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' evaluated true).") />
-					</cfif>
-					<cfset clearCacheByStrategyNames(cacheManager) />
-				</cfif>
-			</cfif>
 		<cfelse>
-			<cfif log.isDebugEnabled()>
+			<cfset expressionResult = variables.expressionEvaluator.evaluateExpressionBody(getCondition(), arguments.event, getPropertyManager())>
+			<cfif isBoolean(expressionResult) AND expressionResult>
 				<!--- Clear default strategy --->
 				<cfif getClearDefaultStrategy()>
-					<cfset log.debug("Cannot clear default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' evaluated false).") />
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("Clearing default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' evaluated true).") />
+					</cfif>
+					<cfset clearCacheByDefaultStrategy(cacheManager) />
+				<!--- Clear by ids, aliases and/or strategy names --->
 				<cfelse>
-					<cfif isIdDefined()>
-						<cfset log.debug("Cannot clear cache by ids '#getIds()#' (condition '#getCondition()#' evaluated false).") />
+					<!--- Clear by id with condition --->
+					<cfif isIdsDefined()>
+						<cfif log.isDebugEnabled()>
+							<cfset log.debug("Clearing cache by ids '#getIds()#' (condition '#getCondition()#' evaluated true).") />
+						</cfif>
+						<cfset clearCacheByIds(cacheManager, arguments.event) />
 					</cfif>
-					<cfif isAliasDefined()>
-						<cfset log.debug("Cannot clear cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated false).") />
+					<!--- Clear by alias with condition --->
+					<cfif isAliasesDefined()>
+						<cfif log.isDebugEnabled()>
+							<cfset log.debug("Clearing cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated true).") />
+						</cfif>
+						<cfset clearCacheByAliases(cacheManager, arguments.event) />
 					</cfif>
-					<cfif isCacheNameDefined()>
-						<cfset log.debug("Cannot clear cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' evaluated false).") />
+					<!--- Clear by cache name with condition --->
+					<cfif isStrategyNamesDefined()>
+						<cfif log.isDebugEnabled()>
+							<cfset log.debug("Clearing cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' evaluated true).") />
+						</cfif>
+						<cfset clearCacheByStrategyNames(cacheManager) />
+					</cfif>
+				</cfif>
+			<cfelseif isBoolean(expressionResult) AND NOT expressionResult>
+				<cfif log.isDebugEnabled()>
+					<!--- Clear default strategy --->
+					<cfif getClearDefaultStrategy()>
+						<cfset log.debug("Cannot clear default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' evaluated false).") />
+					<cfelse>
+						<cfif isIdDefined()>
+							<cfset log.debug("Cannot clear cache by ids '#getIds()#' (condition '#getCondition()#' evaluated false).") />
+						</cfif>
+						<cfif isAliasDefined()>
+							<cfset log.debug("Cannot clear cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated false).") />
+						</cfif>
+						<cfif isCacheNameDefined()>
+							<cfset log.debug("Cannot clear cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' evaluated false).") />
+						</cfif>
+					</cfif>
+				</cfif>
+			<cfelse>
+				<!--- Expression result was not a boolean --->
+				<cfif log.isErrorEnabled()>
+					<cfif getClearDefaultStrategy()>
+						<cfset log.error("Cannot clear default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' which evaulated to '#expressionResult#' did not evaluate to a boolean).") />
+					<cfelse>
+						<cfif isIdsDefined()>
+							<cfset log.error("Cannot clear cache by ids '#getIds()#' (condition '#getCondition()#' which evaulated to '#expressionResult#' did not evaluate to a boolean).") />
+						</cfif>
+						<cfif isAliasesDefined()>
+							<cfset log.error("Cannot clear cache by aliases '#getAliases()#' (condition '#getCondition()#' which evaulated to '#expressionResult#' did not evaluate to a boolean).") />
+						</cfif>
+						<cfif isStrategyNamesDefined()>
+							<cfset log.error("Cannot clear cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' which evaulated to '#expressionResult#' did not evaluate to a boolean).") />
+						</cfif>
 					</cfif>
 				</cfif>
 			</cfif>
