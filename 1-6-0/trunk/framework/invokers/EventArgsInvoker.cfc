@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
-Update version: 1.5.0
+Update version: 1.6.0
 
 Notes:
 --->
@@ -98,7 +98,7 @@ Notes:
 					<cfrethrow />
 				</cfif>
 			</cfcatch>			
-			<cfcatch type="Any">
+			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
 					<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has caused an exception.",  cfcatch) />
 				</cfif>

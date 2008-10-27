@@ -269,7 +269,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="clearCacheById" access="public" returntype="void" output="false"
-		hint="Clears caches by cache id (handler id).">
+		hint="Clears caches by cache id (handler id) and tries to clear parent by id if not found in child.">
 		<cfargument name="id" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default="" />
@@ -291,7 +291,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="clearCachesByAlias" access="public" returntype="void" output="false"
-		hint="Clears caches by alias.">
+		hint="Clears caches by alias and tries to clear parent by alias if not found in child.">
 		<cfargument name="alias" type="string" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="criteria" type="string" required="false" default="" />
@@ -312,9 +312,10 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="clearCacheByStrategyName" access="public" returntype="void" output="false"
-		hint="Clears caches by cacheName.">
+		hint="Clears caches by cacheName and tries to clear parent strategy by name if not found in child.">
 		<cfargument name="cacheName" type="string" required="true" />
 		
+		<!--- Also checks parent --->
 		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName, true) />
 		
 		<cfset cacheStrategy.flush() />
