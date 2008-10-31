@@ -145,7 +145,10 @@ See that file header for configuration of filter criteria.
 				</cfcatch>
 			</cftry>
 
-			<cfhtmlhead text="#local.style#" />
+			<!--- Put head element items if defined --->
+			<cfif StructKeyExists(local, "headElement")>
+				<cfhtmlhead text="#local.headElement#" />
+			</cfif>
 				
 			<!--- Inserting output before the body tag only works on Adobe CF --->
 			<cfset count = FindNoCase("</body>", buffer) />
@@ -266,6 +269,57 @@ See that file header for configuration of filter criteria.
 		<cfreturn result />
 	</cffunction>
 	
+	<cffunction name="processCfdump" access="private" returntype="struct" output="false"
+		hint="Processes a cfdump and returns a struct with data and head elements. 
+		Also, cleans up invalid HTML syntax so debugging output will not mess up HTML validators.">
+		<cfargument name="dataToDump" type="any" required="true" />
+		
+		<cfset var data = CreateObject("java", "java.lang.StringBuffer") />
+		<cfset var results = StructNew() />
+		<cfset var reFindResults = "" />
+		<cfset var temp = "" />
+		
+		<!--- Get the dump data into a variable --->
+		<cfsavecontent variable="temp"><cfdump var="#arguments.dataToDump#" expand="false" /></cfsavecontent>
+		<cfset data.init(temp) />
+		
+		<!--- Build results struct --->
+		<cfset results.data = "" />
+		<cfset results.headElement = "" />
+		
+		<!--- Find the style element --->
+		<cfset reFindResults = REFindNoCase("(<style.*</style>)", data.toString(), 1, true) />
+		
+		<cfif reFindResults.pos[1] NEQ 0>
+			<!--- Java substrings start with 0 not 1 like in CFML --->
+			<cfset temp = data.substring(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+
+			<!--- Fix Adobe CF's bad syntax that does not validate --->
+			<cfset temp = REReplace(temp, "<style.*?>", '<style type="text/css">', "one") />
+			
+			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<cfset results.headElement = results.headElement & temp />
+		</cfif>
+		
+		<!--- Find the script element --->
+		<cfset reFindResults = REFindNoCase("(<script.*</script>)", data.toString(), 1, true) />
+		
+		<cfif reFindResults.pos[1] NEQ 0>
+			<cfset temp = data.substring(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			
+			<!--- Fix Adobe CF's bad syntax that does not validate --->
+			<cfset temp = REReplace(temp, "<script.*?>", '<script type="text/javascript">', "one") />
+			
+			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<cfset results.headElement = results.headElement & temp />
+		</cfif>
+		
+		<!--- Remainder is the data --->
+		<cfset results.data = data.toString() />
+
+		<cfreturn results />
+	</cffunction>
+		
 	<!---
 	ACCESSORS
 	--->

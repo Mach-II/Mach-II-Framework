@@ -33,12 +33,15 @@ to multiple threading.
 *** WARNING ***
 
 If you are creating a custom output template and using custom CSS, create a
-reference to your CSS in the local.style variable and the MachIILogger will
+reference to your CSS in the local.headElement variable and the MachIILogger will
 automatically put your CSS in the head section via <cfhtmlhead />
 --->
+<cfset local.headElement = "" />
+<cfset local.cfdumpData = "" />
+<cfset local.hasAppendedHeadElementFromCfdump = false />
 </cfsilent>
 <cfoutput>
-<cfsavecontent variable="local.style">
+<cfsavecontent variable="local.headElement">
 <style type="text/css"><!--
 	##MachIIRequestLogDisplay {
 		color: ##000;
@@ -131,7 +134,13 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			</tr>
 			<cfif NOT IsSimpleValue(data[local.i].additionalInformation) OR (IsSimpleValue(data[local.i].additionalInformation) AND Len(data[local.i].additionalInformation))>
 			<tr>
-				<td colspan="4"><cfdump var="#data[local.i].additionalInformation#" expand="false" /></td>
+				<td colspan="4">
+					<cfset local.cfdumpData = processCfdump(data[local.i].additionalInformation) />
+					#local.cfdumpData.data#
+					<cfif NOT local.hasAppendedHeadElementFromCfdump>
+						<cfset local.headElement = local.headElement & local.cfdumpData.headElement />
+						<cfset local.hasAppendedHeadElementFromCfdump = true />
+					</cfif>
 			</tr>
 			</cfif>
 		</cfloop>
