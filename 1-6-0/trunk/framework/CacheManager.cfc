@@ -72,6 +72,7 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="true" />
 		<cfargument name="parentHandlerType" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var nestedCommandNodes = arguments.configXML.xmlChildren />
 		<cfset var command = "" />
@@ -111,7 +112,7 @@ Notes:
 		</cfloop>
 		
 		<!--- Set the cache handler to the manager --->
-		<cfset addCacheHandler(cacheHandler) />
+		<cfset addCacheHandler(cacheHandler, arguments.override) />
 		
 		<cfreturn cacheHandler.getHandlerId() />
 	</cffunction>
@@ -168,20 +169,30 @@ Notes:
 		hint="Adds a cache handler.">
 		<cfargument name="cacheHandler" type="MachII.framework.CacheHandler" required="true"
 			hint="The cache handler you want to add." />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
 
 		<cfset var handlerId = arguments.cacheHandler.getHandlerId() />
 		<cfset var aliases = arguments.cacheHandler.getAliases() />
 		<cfset var handlerType = arguments.cacheHandler.getParentHandlerType() />
 		<cfset var currentAlias = "" />
-
-		<!--- Add the handler --->
-		<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
-
-		<!--- Unregiester the handler by handler type --->
-		<cfif handlerType EQ "event">
-			<cfset StructInsert(variables.handlersByEventName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
-		<cfelseif handlerType EQ "subroutine">
-			<cfset StructInsert(variables.handlersBySubroutineName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
+		
+		<cfif NOT arguments.overrideCheck>
+			<cftry>
+				<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.CacheHandlerAlreadyDefined"
+						message="An CacheHandler with the id '#arguments.handlerId#' is already registered." />
+				</cfcatch>
+			</cftry>
+			
+			<!--- Unregiester the handler by handler type --->
+			<cfif handlerType EQ "event">
+				<cfset StructInsert(variables.handlersByEventName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
+			<cfelseif handlerType EQ "subroutine">
+				<cfset StructInsert(variables.handlersBySubroutineName, handlerId, getKeyHash(arguments.cacheHandler.getParentHandlerName()), false) />
+			</cfif>
+		<cfelse>
+			<cfset variables.handlers[handlerId] = arguments.cacheHandler />
 		</cfif>
 
 		<!--- Register the aliases if defined --->

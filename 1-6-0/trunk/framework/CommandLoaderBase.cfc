@@ -55,6 +55,7 @@ Notes:
 		<cfargument name="commandNode" type="any" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var command = "" />
 
@@ -91,7 +92,7 @@ Notes:
 			<cfset command = setupEventArg(arguments.commandNode) />
 		<!--- cache --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache">
-			<cfset command = setupCache(arguments.commandNode, parentHandlerName, parentHandlerType) />
+			<cfset command = setupCache(arguments.commandNode, arguments..parentHandlerName, arguments.parentHandlerType, arguments.override) />
 		<!--- cacheclear --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
 			<cfset command = setupCacheClear(arguments.commandNode) />
@@ -108,6 +109,7 @@ Notes:
 		<cfargument name="commandNode" type="any" required="true" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
 		
 		<cfset var command = "" />
 		<cfset var aliases = "" />
@@ -115,7 +117,7 @@ Notes:
 		<cfset var criteria = "" />
 		<cfset var name = "" />
 		
-		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(commandNode, parentHandlerName, parentHandlerType) />
+		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
 		
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes") >
 			<!--- We cannot get the default cache strategy name because it has not been set

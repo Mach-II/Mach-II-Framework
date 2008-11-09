@@ -81,7 +81,7 @@ Notes:
 			<cfset eventNodes = XMLSearch(arguments.configXML, ".//event-handlers/event-handler") />
 		</cfif>
 		
-		<!--- Setup each even handler --->
+		<!--- Setup each event handler --->
 		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
 			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
 			
@@ -117,7 +117,7 @@ Notes:
 		  
 				<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = eventNodes[i].XMLChildren[j] />
-					<cfset command = createCommand(commandNode, eventName, "event") />
+					<cfset command = createCommand(commandNode, eventName, "event", arguments.override) />
 					<cfset eventHandler.addCommand(command) />
 				</cfloop>
 				
