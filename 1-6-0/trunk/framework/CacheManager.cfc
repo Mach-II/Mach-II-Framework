@@ -287,8 +287,8 @@ Notes:
 		
 		<cfset var log = getLog() />
 		
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("CacheManager clear cache for id '#arguments.id#', " &
+		<cfif log.isTraceEnabled()>
+			<cfset log.trace("CacheManager clear cache for id '#arguments.id#', " &
 					"exists: #StructKeyExists(variables.handlers, arguments.id)#, handler keys:",
 					StructKeyArray(variables.handlers)) />
 		</cfif>
@@ -309,7 +309,13 @@ Notes:
 		
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var key = "" />
-
+		
+		<cfif log.isTraceEnabled()>
+			<cfset log.trace("CacheManager clear cache for alias '#arguments.alias#', " &
+					"exists: #StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))#, " &
+					"criteria: #arguments.criteria#") />
+		</cfif>
+		
 		<!--- Only try to clear if there are cache handlers that are registered with this alias --->
 		<cfif StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))>
 			<cfset cacheHandlers = variables.handlersByAliases[getKeyHash(arguments.alias)] />
@@ -328,6 +334,10 @@ Notes:
 		
 		<!--- Also checks parent --->
 		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName, true) />
+		
+		<cfif log.isTraceEnabled()>
+			<cfset log.trace("CacheManager clear cache by strategy name '#arguments.cacheName#'") />
+		</cfif>
 		
 		<cfset cacheStrategy.flush() />
 	</cffunction>
