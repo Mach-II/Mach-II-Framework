@@ -104,7 +104,7 @@ Notes:
 				<exclude name="tests/output/"/>
 				<exclude name="uml/"/>
 				<exclude name=".project"/>
-				<exclude name=".settings"/>
+				<exclude name=".settings/"/>
 			</fileset>
 			<filterset begintoken="@" endtoken="@">
 				<filter token="minorVersion" value="${buildVersion}"/>
