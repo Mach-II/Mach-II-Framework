@@ -87,7 +87,12 @@ tracked by Mach-II are as follows:
 		<cfset var hits = getCacheHits() />
 		<cfset var totalAccesses = hits + getCacheMisses() />
 		
-		<cfreturn hits / totalAccesses />
+		<!--- Ensure that we are not dividing anything with a 0 --->
+		<cfif hits AND totalAccesses>
+			<cfreturn hits / totalAccesses />
+		<cfelse>
+			<cfreturn 0 />
+		</cfif>
 	</cffunction>
 	
 	<!---
