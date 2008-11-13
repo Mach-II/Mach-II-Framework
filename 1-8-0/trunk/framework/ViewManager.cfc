@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -33,7 +33,9 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.viewPaths = StructNew() />
+	<cfset variables.viewLoaders = ArrayNew(1) />
 	<cfset variables.parentViewManager = "" />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -45,6 +47,7 @@ Notes:
 			hint="Optional argument for a parent view manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
+		<cfset variables.utils = getAppManager().getUtils() />
 		
 		<cfif IsObject(arguments.parentViewManager)>
 			<cfset setParent(arguments.parentViewManager) />
@@ -59,9 +62,17 @@ Notes:
 		<cfargument name="override" type="boolean" required="false" default="false" />
 				
 		<cfset var viewNodes = ArrayNew(1) />
-
 		<cfset var name = "" />
 		<cfset var page = "" />
+
+		<cfset var viewLoaderNodes = ArrayNew(1) />		
+		<cfset var viewLoaderParams = StructNew() />
+		<cfset var viewLoaderType = "" />
+		<cfset var viewLoader = "" />
+		
+		<cfset var paramNodes = ArrayNew(1) />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
 
 		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var hasParent = IsObject(getParent()) />
@@ -75,7 +86,7 @@ Notes:
 			<cfset viewNodes = XMLSearch(arguments.configXML, ".//page-views/page-view") />
 		</cfif>
 		
-		<!--- Setup up each Page-View --->
+		<!--- Setup each Page-View --->
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
 			
@@ -110,11 +121,79 @@ Notes:
 				<cfset variables.viewPaths[name] = page />
 			</cfif>
 		</cfloop>
+		
+		<!--- Search for View-Loaders --->
+		<cfif NOT arguments.override>
+			<cfset viewLoaderNodes = XMLSearch(arguments.configXML, "mach-ii/page-views/view-loader") />
+		<cfelse>
+			<cfset viewLoaderNodes = XMLSearch(arguments.configXML, ".//page-views/view-loader") />
+		</cfif>
+		
+		<!--- Setup each View-Loader --->
+		<cfloop from="1" to="#ArrayLen(viewLoaderNodes)#" index="i">
+			<cfset viewLoaderType = viewLoaderNodes[i].xmlAttributes["type"] />
+			
+			<!--- Get the View-Loader's parameters --->
+			<cfset viewLoaderParams = StructNew() />
+			
+			<!--- Parse all the parameters --->
+			<cfif StructKeyExists(viewLoaderNodes[i], "parameters")>
+				<cfset paramNodes = viewLoaderNodes[i].parameters.xmlChildren />
+				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+					<cfset paramName = paramNodes[j].xmlAttributes["name"] />						
+					<cftry>
+						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfcatch type="any">
+							<cfthrow type="MachII.framework.InvalidParameterXml"
+								message="Xml parsing error for the parameter named '#paramName#' for view-loader in module '#getAppManager().getModuleName()#'." />
+						</cfcatch>
+					</cftry>
+					<cfset viewLoaderParams[paramName] = paramValue />
+				</cfloop>
+			</cfif>
+		
+			<!--- Setup the View-Loader --->
+			<cftry>
+				<!--- Do not method chain the init() on the instantiation
+					or objects that have their init() overridden will
+					cause the variable the object is assigned to will 
+					be deleted if init() returns void --->
+				<cfset viewLoader = CreateObject("component", viewLoaderType) />
+				<cfset viewLoader.init(getAppManager(), viewLoaderParams) />
+				
+				<cfcatch type="expression">
+					<cfthrow type="MachII.framework.ViewLoaderSyntaxException"
+						message="Mach-II could not register a view-loader with type of '#viewLoaderType#' for a view-loader in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+						detail="#cfcatch.detail#" />
+				</cfcatch>
+				<cfcatch type="any">
+					<cfif StructKeyExists(cfcatch, "missingFileName")>
+						<cfthrow type="MachII.framework.CannotFindViewLoader"
+							message="Cannot find a view-loader CFC with type of '#viewLoaderType#' for a view-loader in module named '#getAppManager().getModuleName()#'."
+							detail="Please check that this view-loader exists and that there is not a misconfiguration in the XML configuration file." />
+					<cfelse>
+						<cfrethrow />
+					</cfif>						
+				</cfcatch>
+			</cftry>
+			
+			<!--- Add the View-Loader to the manager --->
+			<cfset ArrayAppend(variables.viewLoaders, viewLoader) />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Prepares the manager for use.">
-		<!--- DO NOTHING --->
+		
+		<cfset var viewLoaders = variables.viewLoaders />
+		<cfset var views = StructNew() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(viewLoaders)#" index="i">
+			<cfset viewLoaders[i].configure() />
+			<cfset views = viewLoaders[i].discoverViews() />
+			<cfset StructAppend(variables.viewPaths, views, false) />
+		</cfloop>
 	</cffunction>
 	
 	<!---
