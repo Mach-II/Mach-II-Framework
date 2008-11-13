@@ -304,7 +304,7 @@ Notes:
 			userid="${ftp.user}"
 			password="${ftp.password}"
 			action="put"
-			remotedir="${ftp.webroot}/nightly/older/"
+			remotedir="${ftp.webroot}/nightly/older/${majorVersion}/"
 			verbose="${debug}">
 			<fileset dir="${zip}/older/">
 				<include name="*.zip"/>
