@@ -40,7 +40,7 @@ Notes:
 	-->
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
-	<property name="majorVersion" value="1-6-0"/>
+	<property name="majorVersion" value="1-8-0"/>
 	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	
