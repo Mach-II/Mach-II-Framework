@@ -66,7 +66,7 @@ Notes:
 		
 		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.AbstractLogAdapter").init(StructNew()) />
 		
-		<cfset variables.logFactory.addLogAdapter(adapter) />
+		<cfset variables.logFactory.addLogAdapter("test", adapter) />
 	</cffunction>
 	
 	<cffunction name="testDisableLogging" access="public" returntype="void" output="false"
