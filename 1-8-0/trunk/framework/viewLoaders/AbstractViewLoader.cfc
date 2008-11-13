@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id: AntPathMatcher.cfc 816 2008-06-14 21:57:40Z peterfarrell $
+$Id$
 
 Created version: 1.8.0
 Updated version: 1.8.0
