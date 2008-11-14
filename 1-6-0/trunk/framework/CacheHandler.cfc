@@ -112,6 +112,10 @@ Notes:
 							<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 							<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
 							<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
+
+							<!--- Should not be counted as a miss if the cache block unencounters an exception --->
+							<cfset getCacheStrategy().getCacheStats().decrementCacheMisses() />
+
 							<cfrethrow />
 						</cfcatch>
 					</cftry>

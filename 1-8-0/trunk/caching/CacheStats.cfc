@@ -115,6 +115,10 @@ tracked by Mach-II are as follows:
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfset variables.cacheMisses = variables.cacheMisses + arguments.amount />
 	</cffunction>
+	<cffunction name="decrementCacheMisses" access="public" returntype="void" output="false">
+		<cfargument name="amount" type="numeric" required="false" default="1" />
+		<cfset variables.cacheMisses = variables.cacheMisses - arguments.amount />
+	</cffunction>
 	<cffunction name="setCacheMisses" access="public" returntype="void" output="false">
 		<cfargument name="cacheMisses" type="numeric" required="true" />
 		<cfset variables.cacheMisses = arguments.cacheMisses />
