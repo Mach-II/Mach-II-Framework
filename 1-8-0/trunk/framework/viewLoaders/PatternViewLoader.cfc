@@ -22,6 +22,42 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+
+Wildcards for patterns:
+*	= Matches zero or more characters.
+?	= Matches exactly one character.
+**	= Matches zero or more directories.
+
+<page-views>
+    <view-loader type="MachII.framework.viewLoaders.PatternViewLoader">
+        <parameters>
+			<!-- An ANT-style patterns using wildcards to find views to load -->
+            <parameter name="pattern" value="/views/**/*.cfm" />
+            <!-- A string to prefix the <page-view> name with (matches only 
+				starts after first pattern character is detected). 
+				Optional, showing default value if attribute is omitted -->
+            <parameter name="prefix" value="" />
+            <!-- Character to use when building the <page-view> names.
+				Optional, showing default value if attribute is omitted -->
+            <parameter name="nameDelimiter" value="." />
+            <!-- A list or array of ANT-style patterns or static paths to 
+				exclude from the pattern search routine.
+				Optional, takes a list or an array -->
+            <parameter name="exclude" value="/views/includes/**,/views/otherDir/**" />
+            - or -
+            <parameter name="exclude">
+                <array>
+                    <element value="/views/includes/**"/>
+                    <element value="/views/otherDir/**"/>
+                </array>
+            </parameter>
+        </parameters>
+    </view-loader>
+
+    <!-- Normal static page-view nodes are allowed or additional view-loaders -->
+    <page-view name="someView" page="/views/someView.cfm"/>
+</page-views>
+
 --->
 <cfcomponent
 	displayname="PatternViewLoader"
