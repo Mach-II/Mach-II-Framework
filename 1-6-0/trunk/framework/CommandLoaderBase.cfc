@@ -92,7 +92,7 @@ Notes:
 			<cfset command = setupEventArg(arguments.commandNode) />
 		<!--- cache --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache">
-			<cfset command = setupCache(arguments.commandNode, arguments..parentHandlerName, arguments.parentHandlerType, arguments.override) />
+			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
 		<!--- cacheclear --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
 			<cfset command = setupCacheClear(arguments.commandNode) />
