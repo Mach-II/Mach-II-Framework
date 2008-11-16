@@ -24,7 +24,7 @@ Updated version: 1.8.0
 
 Notes:
 --->
-<cfimport prefix="form" taglib="/lightpost/cftags/form/" />
+<cfimport prefix="form" taglib="/MachII/customtags/form/" />
 
 <!--- This tag requires an end tag --->
 <cfif NOT thisTag.hasEndTag>
