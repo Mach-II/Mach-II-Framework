@@ -244,6 +244,14 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	mapping CDATA #IMPLIED
 	useParentAppRoot (true|false) #IMPLIED
 >
+<!--
+	"view-loader"
+		type - the type of the view-loader (fully qualified path)
+-->
+<!ELEMENT view-loader (parameters?)>
+<!ATTLIST view-loader
+	type CDATE #REQUIRED
+>
 
 <!--
 	The "plugins" element defines all of the plugins to be registered with the framework.

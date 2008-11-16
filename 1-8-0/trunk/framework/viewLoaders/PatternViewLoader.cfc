@@ -51,6 +51,9 @@ Wildcards for patterns:
                     <element value="/views/otherDir/**"/>
                 </array>
             </parameter>
+			<!-- Boolean indicator to throw an exception if no matches are found
+				Optional, takes a boolean and defaults to "true" -->
+			 <parameter name="throwIfNoMatches" value="true"/>
         </parameters>
     </view-loader>
 
@@ -73,6 +76,7 @@ Wildcards for patterns:
 	<cfset variables.prefix = "" />
 	<cfset variables.nameDelimiter = "" />
 	<cfset variables.exclude = ArrayNew(1) />
+	<cfset variables.throwIfNoMatches = "" />
 	<cfset variables.pathMatcher = CreateObject("component", "MachII.util.AntPathMatcher").init() />
 
 	<!---
@@ -85,6 +89,7 @@ Wildcards for patterns:
 		<cfset setPrefix(getParameter("prefix" ,"")) />
 		<cfset setNameDelimiter(getParameter("nameDelimiter", ".")) />
 		<cfset setExclude(getParameter("exclude", ArrayNew(1))) />
+		<cfset setThrowIfNoMatches(getParameter("throwIfNoMatches", true)) />
 	</cffunction>
 	
 	<!---
@@ -114,7 +119,7 @@ Wildcards for patterns:
 		--->
 		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
 			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
+				<cfset ArrayAppend(pageViewPaths, "/" & cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
 			</cfif>
 		</cfloop>
 		
@@ -139,6 +144,13 @@ Wildcards for patterns:
 				<cfset results[buildPageViewName(pattern, pageViewPaths[i])] = getApplicationRoot() & pageViewPaths[i] />
 			</cfif>
 		</cfloop>
+		
+		<!--- Throw an exception if there are not matches --->
+		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
+			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
+				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
+				detail="appRoot '#appRootPath#'" />
+		</cfif>
 		
 		<cfreturn results />
 	</cffunction>
@@ -276,6 +288,14 @@ Wildcards for patterns:
 	</cffunction>
 	<cffunction name="getExclude" access="public" returntype="array" output="false">
 		<cfreturn variables.exclude />
+	</cffunction>
+	
+	<cffunction name="setThrowIfNoMatches" access="private" returntype="void" output="false">
+		<cfargument name="throwIfNoMatches" type="boolean" required="true" />
+		<cfset variables.throwIfNoMatches = arguments.throwIfNoMatches />
+	</cffunction>
+	<cffunction name="getThrowIfNoMatches" access="public" returntype="boolean" output="false">
+		<cfreturn variables.throwIfNoMatches />
 	</cffunction>
 
 </cfcomponent>
