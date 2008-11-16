@@ -93,9 +93,12 @@ Notes:
 		<!--- cache --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache">
 			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
-		<!--- cacheclear --->
+		<!--- cache-clear --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
 			<cfset command = setupCacheClear(arguments.commandNode) />
+		<!--- call-method --->
+		<cfelseif arguments.commandNode.xmlName EQ "call-method">
+			<cfset command = setupCallMethod(arguments.commandNode) />
 		<!--- default/unrecognized command --->
 		<cfelse>
 			<cfset command = setupDefault(arguments.commandNode) />
@@ -169,6 +172,37 @@ Notes:
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
 			ids, aliases, strategyNames, criteria, condition) />
+		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setPropertyManager(variables.propertyManager) />
+		
+		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="setupCallMethod" access="private" returntype="MachII.framework.commands.CallMethodCommand" output="false"
+		hint="Sets up a CallMethodCommand command.">
+		<cfargument name="commandNode" type="any" required="true" />
+		
+		<cfset var command = "" />
+		<cfset var bean = "" />
+		<cfset var resultArg = "" />
+		<cfset var method = "" />
+		<cfset var args = "" />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "bean")>
+			<cfset bean = arguments.commandNode.xmlAttributes["bean"] />	
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
+			<cfset resultArg = arguments.commandNode.xmlAttributes["resultArg"] />	
+		</cfif>	
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "method")>
+			<cfset method = arguments.commandNode.xmlAttributes["method"] />	
+		</cfif>	
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "arguments")>
+			<cfset args = arguments.commandNode.xmlAttributes["arguments"] />	
+		</cfif>		
+
+		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setPropertyManager(variables.propertyManager) />
