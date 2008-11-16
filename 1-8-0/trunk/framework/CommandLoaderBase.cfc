@@ -204,8 +204,8 @@ Notes:
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
-		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(variables.propertyManager) />
+		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
