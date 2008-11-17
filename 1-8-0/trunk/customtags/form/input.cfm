@@ -23,66 +23,55 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	name		= AUTOMATIC|[string]
+	value		= AUTOMATIC|[string]
+	type		= text
+- OPTIONAL ATTRIBUTES
+	disabled	= disabled|[null]
+	readonly	= readonly|[null]
+	maxlength	= [numeric] 
+	size		= [numeric]
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
+<cfif thisTag.executionMode IS "start">
 
-<cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-		<!--- Check for required attributes --->
-		<cfif NOT StructKeyExists(variables.attributes, "path") AND NOT StructKeyExists(attributes, "name")>
-			<cfthrow type="MachII.FormLib.input.noPath"
-				message="This tag must have an attribute named 'path' if you do not specify a 'name'." />
-		</cfif>
+	<!--- Setup the tag --->
+	<cfinclude template="helper.cfm" />		
+	<cfset setupTag("input", true) />
+	
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
+	
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.value" type="string" 
+			default="#variables.bindResolver.resolvePath(attributes.path)#" />
+		<cfparam name="attributes.name" type="string" 
+			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+	</cfif>
+	
+	<!--- Set defaults --->
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
+	<cfparam name="attributes.value" type="string" 
+		default="" />
+	
+	<!--- Set required attributes--->
+	<cfset setAttribute("type", "text") />
+	<cfset setAttribute("name") />
+	<cfset setAttribute("value") />
 
-		<!--- Set defaults --->
-		<cfparam name="attributes.value" type="string" default="" />
-		
-		<!--- Resolve path --->
-		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "cfcs.BindResolver").init() />
-			<cfset attributes.value = variables.bindResolver.resolvePath(attributes.path) />
-			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
-		</cfif>
-		
-		<!--- Additional items based on type --->
-		
-		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("input", true) />
-		<cfset variables.tagWriter.setAttribute("type", "text") />
-		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
-		<cfset variables.tagWriter.setAttribute("value", attributes.value) />
-
-		<cfif StructKeyExists(attributes, "id")>
-			<cfif Len(attributes.id)>
-				<cfset variables.tagWriter.setAttribute("id", attributes.id) />
-			</cfif>
-		<cfelse>
-			<cfset variables.tagWriter.setAttribute("id", attributes.name) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "size")>
-			<cfset variables.tagWriter.setAttribute("size", attributes.size) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "maxLength")>
-			<cfset variables.tagWriter.setAttribute("maxLength", attributes.maxLength) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "tabIndex")>
-			<cfset variables.tagWriter.setAttribute("tabIndex", attributes.tabIndex) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onChange")>
-			<cfset variables.tagWriter.setAttribute("onChange", attributes.onChange) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onKeyUp")>
-			<cfset variables.tagWriter.setAttribute("onKeyUp", attributes.onKeyUp) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "readOnly")>
-			<cfset variables.tagWriter.setAttribute("readOnly","readOnly") />
-		</cfif>
-		<cfif StructKeyExists(attributes, "style")>
-			<cfset variables.tagWriter.setAttribute("style", attributes.style) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "class")>
-			<cfset variables.tagWriter.setAttribute("class", attributes.class) />
-		</cfif>
-	</cfsilent>
+	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("size") />
+	<cfset setAttributeIfDefined("maxLength") />
+	<cfset setAttributeIfDefined("readOnly", "readOnly") />
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setEventAttributes() />
+	
 	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
