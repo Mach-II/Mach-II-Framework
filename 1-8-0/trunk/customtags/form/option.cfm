@@ -51,7 +51,7 @@ Notes:
 		
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
 			<!--- Create a tag writer and set atrributes--->
-			<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("option", false) />
+			<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("option", false) />
 			<cfif StructKeyExists(attributes, "onClick")>
 				<cfset variables.tagWriter.setAttribute("onclick", attributes.onClick) />
 			</cfif>
@@ -76,7 +76,7 @@ Notes:
 	<cfelseif IsArray(attributes.items)>
 		<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 			<!--- Create a tag writer and set atrributes--->
-			<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("option", false) />
+			<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("option", false) />
 			<cfif StructKeyExists(attributes, "onClick")>
 				<cfset variables.tagWriter.setAttribute("onclick", attributes.onClick) />
 			</cfif>

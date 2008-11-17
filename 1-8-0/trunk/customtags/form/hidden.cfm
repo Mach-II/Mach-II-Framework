@@ -23,32 +23,50 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	name		= AUTOMATIC|[string]
+	value		= AUTOMATIC|[string]
+	type		= hidden
+- OPTIONAL ATTRIBUTES 
+	none
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
-<cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-		<!--- Check for required attributes --->
-		<cfif NOT (NOT StructKeyExists(attributes, "name") AND NOT StructKeyExists(attributes, "value")) XOR NOT StructKeyExists(variables.attributes, "path")>
-			<cfthrow type="MachII.FormLib.input.invalidAttributes"
-				message="This tag must have an attribute named 'path' or the 'name and 'value' pair." />
-		</cfif>
+<cfif thisTag.executionMode IS "start">
 
-		<!--- Set defaults --->
-		<cfparam name="attributes.name" type="string" default="" />
-		<cfparam name="attributes.value" type="string" default="" />
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfset setupTag("hidden", true) />
 	
-		<!--- Resolve path --->
-		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "cfcs.BindResolver").init() />
-			<cfset attributes.value = variables.bindResolver.resolvePath(attributes.path) />
-			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
-		</cfif>
-		
-		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("input", true) />
-		<cfset variables.tagWriter.setAttribute("type", "hidden") />
-		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
-		<cfset variables.tagWriter.setAttribute("value", attributes.value) />
-	</cfsilent>
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
+	
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.value" type="string" 
+			default="#variables.bindResolver.resolvePath(attributes.path)#" />
+		<cfparam name="attributes.name" type="string" 
+			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+	</cfif>
+	
+	<!--- Set defaults --->
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
+	<cfparam name="attributes.value" type="string" 
+		default="" />
+	
+	<!--- Set required attributes--->
+	<cfset setAttribute("type", "hidden") />
+	<cfset setAttribute("name") />
+	<cfset setAttribute("value") />
+
+	<!--- Set optional attributes --->
+	<!--- none --->
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setEventAttributes() />
+	
 	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

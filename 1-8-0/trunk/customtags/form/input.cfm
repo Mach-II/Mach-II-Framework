@@ -38,7 +38,7 @@ Notes:
 <cfif thisTag.executionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="helper.cfm" />		
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
 	<cfset setupTag("input", true) />
 	
 	<!--- Ensure certain attributes are defined --->
@@ -67,6 +67,7 @@ Notes:
 	<cfset setAttributeIfDefined("size") />
 	<cfset setAttributeIfDefined("maxLength") />
 	<cfset setAttributeIfDefined("readOnly", "readOnly") />
+	<cfset setAttributeIfDefined("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />

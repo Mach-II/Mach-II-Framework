@@ -47,7 +47,7 @@ Notes:
 		
 		<!--- Resolve path --->
 		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "cfcs.BindResolver").init() />
+			<cfset variables.bindResolver = CreateObject("component", "helper.BindResolver").init() />
 			<cfset attributes.checkValue = variables.bindResolver.resolvePath(attributes.path) />
 			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
 		</cfif>
@@ -62,7 +62,7 @@ Notes:
 		</cfif>
 		
 		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("select", false) />
+		<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("select", false) />
 		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
 
 		<cfif StructKeyExists(attributes, "id")>

@@ -23,56 +23,40 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	name		= AUTOMATIC|[string]
+- OPTIONAL ATTRIBUTES
+	rows		= [numeric] 
+	cols		= [numeric]
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
 <cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-		<!--- Check for required attributes --->
-		<cfif NOT StructKeyExists(variables.attributes, "path") AND NOT StructKeyExists(attributes, "name")>
-			<cfthrow type="MachII.FormLib.input.noPath"
-				message="This tag must have an attribute named 'path' if you do not specify a 'name'." />
-		</cfif>
-
-		<!--- Set defaults --->
-		<cfparam name="attributes.value" type="string" default="" />
+	
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfset setupTag("textarea", true) />
+	
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
 		
-		<!--- Resolve path --->
-		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "cfcs.BindResolver").init() />
-			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
-		</cfif>
-		
-		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "cfcs.TagWriter").init("textarea", false) />
-		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
+	<!--- Resolve path if defined --->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.name" type="string" 
+			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+	</cfif>
 
-		<cfif StructKeyExists(attributes, "id")>
-			<cfset variables.tagWriter.setAttribute("id", attributes.id) />
-		<cfelse>
-			<cfset variables.tagWriter.setAttribute("id", attributes.name) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "rows")>
-			<cfset variables.tagWriter.setAttribute("rows", attributes.rows) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "cols")>
-			<cfset variables.tagWriter.setAttribute("cols", attributes.cols) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onKeyUp")>
-			<cfset variables.tagWriter.setAttribute("onKeyUp", attributes.onKeyUp) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onKeyDown")>
-			<cfset variables.tagWriter.setAttribute("onKeyDown", attributes.onKeyDown) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "style")>
-			<cfset variables.tagWriter.setAttribute("style", attributes.style) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "class")>
-			<cfset variables.tagWriter.setAttribute("class", attributes.class) />
-		</cfif>s
-	</cfsilent>
+	<!--- Set required attributes--->
+	<cfset setAttribute("name") />
+	<cfset setAttribute("value") />
+
+	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("rows") />
+	<cfset setAttributeIfDefined("cols") />
+
 	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
 <cfelse>
-
-	<!--- Resolve path --->
+	<!--- Add content of text area if bindable --->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfset thisTag.GeneratedContent = variables.bindResolver.resolvePath(attributes.path) />
 	</cfif>

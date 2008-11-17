@@ -60,8 +60,8 @@ onKeyUp		= [string]
 	
 	<cfset request._MachIIFormLib.bind = request.event />
 	
-	<cfset variables.tagWriter = CreateObject("component", "MachII.customtags.form.cfcs.TagWriter").init(variables.tagData.tagName, variables.tagData.hasEndTag) />
-	<cfset attributes.bindResolver = CreateObject("component", "MachII.customtags.form.cfcs.BindResolver").init() />
+	<cfset variables.tagWriter = CreateObject("component", "MachII.customtags.form.helper.TagWriter").init(variables.tagData.tagName, variables.tagData.hasEndTag) />
+	<cfset attributes.bindResolver = CreateObject("component", "MachII.customtags.form.helper.BindResolver").init() />
 	
 	<!--- Check for required attributes --->
 	<cfif NOT StructKeyExists(attributes, "actionEvent")>
@@ -92,7 +92,7 @@ onKeyUp		= [string]
 	<cfset variables.tagData.tagName = arguments.tagName />
 	<cfset variables.tagData.hasEndTag = arguments.hasEndTag />
 	
-	<cfset variables.tagWriter = CreateObject("component", "MachII.customtags.form.cfcs.TagWriter").init(variables.tagData.tagName, variables.tagData.hasEndTag) />
+	<cfset variables.tagWriter = CreateObject("component", "MachII.customtags.form.helper.TagWriter").init(variables.tagData.tagName, variables.tagData.hasEndTag) />
 	<cfset variables.bindResolver = getBaseTagData("cf_form").attributes.bindResolver />
 	
 	<cfif arguments.hasEndTag AND NOT thisTag.hasEndTag>
