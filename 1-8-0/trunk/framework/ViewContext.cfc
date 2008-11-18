@@ -126,6 +126,21 @@ Notes:
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
+	<cffunction name="buildUnescapedUrl" access="public" returntype="string" output="false"
+		hint="Builds an unescaped framework specific url and does not escape entities.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
+	</cffunction>
+	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url with module name and automatically escapes entities for html display.">
 		<cfargument name="moduleName" type="string" required="true"
@@ -137,6 +152,19 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
+	</cffunction>
+
+	<cffunction name="buildUnescapedUrlToModule" access="public" returntype="string" output="false"
+		hint="Builds an escaped framework specific url with module name and does not escape entities.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with. Defaults to current module if empty string." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
