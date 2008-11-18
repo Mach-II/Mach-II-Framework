@@ -18,16 +18,16 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.10
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
-The BaseComponent extended by Listener, EventFilter and Plugin components and gives
+The BaseComponent extended by Listener, EventFilter, Plugin and Property components and gives
 quick access to things such as announcing a new event or getting/setting properties.
 --->
 <cfcomponent
-	displayname="Mach-II Base Component"
+	displayname="BaseComponent"
 	output="false"
-	hint="Base Mach-II component.">
+	hint="Base component for Listeners, EventFilters, Plugins and Properties.">
 	
 	<!---
 	PROPERTIES
@@ -94,7 +94,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url without specifying a module name.">
+		hint="Builds a framework specific url without specifying a module name. Does not escape entities.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
@@ -117,7 +117,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 	
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url.">
+		hint="Builds a framework specific url. Does not escape entities.">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with. Defaults to base module if empty string." />
 		<cfargument name="eventName" type="string" required="true"

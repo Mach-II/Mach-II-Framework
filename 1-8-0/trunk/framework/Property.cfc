@@ -52,5 +52,16 @@ All user-defined properties extend this base property component.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="announceEvent" access="public" returntype="void" output="false"
+		hint="Not available for use in Properties. Announces a new event to the framework.">
+		<cfthrow type="MachII.framework.Property.noAccess"
+			message="The 'announceEvent' method is not available for use in Properties." />
+	</cffunction>
+	
+	<cffunction name="announceEventInModule" access="public" returntype="void" output="false"
+		hint="Not available for use in Properties. Announces a new event to the framework.">
+		<cfthrow type="MachII.framework.Property.noAccess"
+			message="The 'announceEventInModule' method is not available for use in Properties." />
+	</cffunction>
 
 </cfcomponent>
