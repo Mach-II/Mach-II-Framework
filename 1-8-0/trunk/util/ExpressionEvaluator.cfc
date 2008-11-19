@@ -167,11 +167,15 @@ ${scope.key NEQ scope.key2}
 			
 			<cfswitch expression="#scope#">
 				<cfcase value="event">
-					<cfif arguments.event.isArgDefined(key)>
-						<cfset result = arguments.event.getArg(key) />
+					<cfif key eq "getArgs()">
+						<cfset result = arguments.event.getArgs() />
 					<cfelse>
-						<cfthrow type="MachII.util.InvalidExpression" 
-							message="The event argument '#key#' from the expression '#arguments.expression#' does not exist in the current event." />
+						<cfif arguments.event.isArgDefined(key)>
+							<cfset result = arguments.event.getArg(key) />
+						<cfelse>
+							<cfthrow type="MachII.util.InvalidExpression" 
+								message="The event argument '#key#' from the expression '#arguments.expression#' does not exist in the current event." />
+						</cfif>
 					</cfif>
 				</cfcase>
 				<cfcase value="properties">
