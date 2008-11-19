@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id: $
+$Id$
 
 Created version: 1.8.0
 Updated version: 1.8.0
@@ -24,11 +24,17 @@ Updated version: 1.8.0
 Notes:
 This command can be used to call a method from an object configured through the ColdSpringProperty.
 
-<call-method bean="fantasyteamService" method="getFantasyTeam" arguments="fantasyteam_id=${event.id}" resultArg="fantasyTeam" />
+<call-method bean="fantasyTeamService" method="getFantasyTeam" 
+	arguments="fantasyteam_id=${event.id}" resultArg="fantasyTeam" />
 or
-<call-method bean="fantasyteamService" method="getFantasyTeams" resultArg="fantasyteams" />
+<call-method bean="fantasyTeamService" method="getFantasyTeams" 
+	resultArg="fantasyTeams" />
 or
-<call-method bean="fantasyteamService" method="getFantasyTeams" arguments="${event.id:0}"" resultArg="fantasyteams" />
+<call-method bean="fantasyTeamService" method="getFantasyTeams" 
+	arguments="${event.id:0}" resultArg="fantasyTeams" />
+or
+<call-method bean="fantasyTeamService" method="searchFantasyTeams" 
+	arguments="argumentCollection=${event.getArgs()}" resultArg="fantasyTeams" />
 --->
 <cfcomponent 
 	displayname="CallMethodCommand" 
@@ -42,7 +48,7 @@ or
 	<cfset variables.beanId = "" />
 	<cfset variables.method = "" />
 	<cfset variables.resultArg = "" />
-	<cfset variables.args = arrayNew(1) />
+	<cfset variables.args = ArrayNew(1) />
 	<cfset variables.argumentList = "" />
 	<cfset variables.bean = "" />
 	
@@ -76,7 +82,7 @@ or
 		<cfset var beanFactory = "" />
 		<cfset var resultValue = "" />
 		<cfset var bean = "" />
-		<cfset var namedArgs = structNew() />
+		<cfset var namedArgs = StructNew() />
 		<cfset var args = getArguments() />
 		<cfset var argValues = ArrayNew(1) />
 		<cfset var unEvaluatedArgs = getArguments() />
@@ -84,15 +90,17 @@ or
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
 		
-		<cfif NOT isObject(variables.bean)>
+		<!--- TODO: Refactor how we autowire the bean into --->
+		<cfif NOT IsObject(variables.bean)>
 			<cfset pm = getPropertyManager() />
 			<cfset beanFactory = pm.getProperty(pm.getProperty("beanFactoryName")) />
 			<cfset setBean(beanFactory.getBean(getBeanId())) />
 		</cfif>
+		
 		<cfset bean = getBean() />
 		
-		<cfloop from="1" to="#arrayLen(args)#" index="i">
-			<cfif args[i].name neq "">
+		<cfloop from="1" to="#ArrayLen(args)#" index="i">
+			<cfif args[i].name NEQ "">
 				<cfif args[i].isExpression>
 					<cfset namedArgs[args[i].name] = variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, getPropertyManager()) />
 				<cfelse>
@@ -112,16 +120,18 @@ or
 				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'.") />
 			</cfif>
 		
-			<cfif ArrayLen(argValues) gt 0>
+			<cfif ArrayLen(argValues) GT 0>
 				<cfset evalStatement = evalStatement & 'bean.#getMethod()#(' />
+				
 				<cfloop from="1" to="#ArrayLen(argValues)#" index="i">
-					<cfif i gt 1>
+					<cfif i GT 1>
 						<cfset evalStatement = evalStatement & "," />
 					</cfif>
-					<cfset evalStatement = evalStatement & "#argValues[i]#" />
+					<cfset evalStatement = evalStatement & argValues[i] />
 				</cfloop>
+				
 				<cfset evalStatement = evalStatement & ')' />
-				<cfset resultValue = evaluate("#evalStatement#") />
+				<cfset resultValue = Evaluate(evalStatement) />
 			<cfelse>	
 				<cfinvoke 
 					component="#bean#" 
@@ -133,10 +143,10 @@ or
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has returned void but a ResultArg/Key has been defined.",  cfcatch) />
+						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has returned void but a ResultArg has been defined.",  cfcatch) />
 					</cfif>
 					<cfthrow type="MachII.framework.VoidReturnType"
-						message="A ResultArg/Key has been specified on a call-method command method that is returning void. This can also happen if your bean method returns a Java null."
+						message="A ResultArg has been specified on a call-method command method that is returning void. This can also happen if your bean method returns a Java null."
 						detail="Bean: '#getMetadata(getBean).name#' Method: '#getMethod()#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
@@ -145,10 +155,10 @@ or
 					<cfrethrow />
 				</cfif>
 			</cfcatch>
-			<cfcatch type="Any">
-					<cfif log.isErrorEnabled()>
-						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has caused an exception.",  cfcatch) />
-					</cfif>
+			<cfcatch type="any">
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has caused an exception.",  cfcatch) />
+				</cfif>
 				<cfrethrow />
 			</cfcatch>
 		</cftry>
@@ -161,23 +171,21 @@ or
 	</cffunction>
 	
 	<!---
-	ACCESSORS
+	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false">
-		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
-		
+	<cffunction name="transformArgumentList" access="private" returntype="void" output="false"
+		hint="Transforms the argument list into a more optimized data structure for evaluation.">
+
 		<cfset var argText = "" />
 		<cfset var arg = "" />
 		
-		<cfset super.setExpressionEvaluator(arguments.expressionEvaluator) />
-		
 		<cfloop list="#getArgumentList()#" index="argText">
-			<cfset arg = structNew() />
+			<cfset arg = StructNew() />
 			
-			<cfif listLen(argText, "=") gt 1>
-				<cfset arg.name = listGetAt(argText, 1, '=') />
+			<cfif ListLen(argText, "=") GT 1>
+				<cfset arg.name = ListGetAt(argText, 1, "=") />
 				<cfset arg.isExpression = arguments.expressionEvaluator.isExpression(listGetAt(argText, 2, '=')) />
-				<cfset arg.value = listGetAt(argText, 2, "=") /> 
+				<cfset arg.value = ListGetAt(argText, 2, "=") /> 
 			<cfelse>
 				<cfset arg.name = "" />
 				<cfset arg.isExpression = arguments.expressionEvaluator.isExpression(argText) />
@@ -186,6 +194,18 @@ or
 			
 			<cfset ArrayAppend(variables.args, arg) />
 		</cfloop>
+	</cffunction>
+	
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false"
+		hint="Overrides the inherited method and automatically calls transFormArgumentList().">
+		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
+		
+		<cfset super.setExpressionEvaluator(arguments.expressionEvaluator) />
+		
+		<cfset transformArgumentList() />
 	</cffunction>
 	
 	<cffunction name="setBeanId" access="private" returntype="void" output="false">
