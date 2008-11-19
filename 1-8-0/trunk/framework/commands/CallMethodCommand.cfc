@@ -22,6 +22,7 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+This command can be used to call a method from an object configured through the ColdSpringProperty.
 
 <call-method bean="fantasyteamService" method="getFantasyTeam" arguments="fantasyteam_id=${event.id}" resultArg="fantasyTeam" />
 or
@@ -77,9 +78,10 @@ or
 		<cfset var bean = "" />
 		<cfset var namedArgs = structNew() />
 		<cfset var args = getArguments() />
-		<cfset var argList = "" />
+		<cfset var argValues = ArrayNew(1) />
 		<cfset var unEvaluatedArgs = getArguments() />
 		<cfset var i = 0 />
+		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
 		
 		<cfif NOT isObject(variables.bean)>
@@ -98,9 +100,9 @@ or
 				</cfif>
 			<cfelse>
 				<cfif args[i].isExpression>
-					<cfset argList = ListAppend(argList, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, getPropertyManager())) />
+					<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, getPropertyManager())) />
 				<cfelse>
-					<cfset argList = ListAppend(argList, args[i].value) /> 
+					<cfset ArrayAppend(argValues, args[i].value) /> 
 				</cfif>
 			</cfif>
 		</cfloop>
@@ -110,8 +112,16 @@ or
 				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'.") />
 			</cfif>
 		
-			<cfif Len(argList) gt 0>
-				<cfset resultValue = evaluate("bean.#getMethod()#(#argList#)") />
+			<cfif ArrayLen(argValues) gt 0>
+				<cfset evalStatement = evalStatement & 'bean.#getMethod()#(' />
+				<cfloop from="1" to="#ArrayLen(argValues)#" index="i">
+					<cfif i gt 1>
+						<cfset evalStatement = evalStatement & "," />
+					</cfif>
+					<cfset evalStatement = evalStatement & "#argValues[i]#" />
+				</cfloop>
+				<cfset evalStatement = evalStatement & ')' />
+				<cfset resultValue = evaluate("#evalStatement#") />
 			<cfelse>	
 				<cfinvoke 
 					component="#bean#" 
