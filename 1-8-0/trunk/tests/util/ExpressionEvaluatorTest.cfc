@@ -49,6 +49,19 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
+	<cffunction name="testEventArgDefaultExpression" access="public" returntype="void" output="false">
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.argDoesntExist:0}", event, propertyManager) />	
+		<cfset assertTrue(result eq "0", "Event arg returned did not equal '0'") />
+
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.argDoesntExist:test}", event, propertyManager) />
+		<cfset assertTrue(result eq "test", "Event arg returned did not equal 'test'") />
+	</cffunction>
+
+	
 	<cffunction name="testEventArgExistsExpressionWithEvent" access="public" returntype="void" output="false">
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
@@ -78,7 +91,6 @@ Notes:
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${properties.dot.argExists}", event, propertyManager) />
 		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
 	</cffunction>
-	
 	
 	<cffunction name="testBooleanExpresion" access="public" returntype="void" output="false">
 		<cfset var result = "" />

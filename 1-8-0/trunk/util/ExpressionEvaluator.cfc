@@ -29,6 +29,7 @@ evaluate simple boolean operand.
 
 Examples:
 ${scope.key}
+${scope.key:default}
 ${scope.key EQ "foobar"}
 ${scope.key NEQ scope.key2}
 --->
@@ -158,12 +159,21 @@ ${scope.key NEQ scope.key2}
 		<cfset var key = "" />
 		<cfset var result = "" />
 		<cfset var body = arguments.expressionElement />
+		<cfset var defaultVal = "" />
+		<cfset var hasDefault = false />
 		
 		<cfif listLen(body, ".") gt 1>
 			<!--- Scope is always up to the first dot --->
-			<cfset scope = listGetAt(body, 1, ".") />
+			<cfset scope = ListGetAt(body, 1, ".") />
 			<!--- Keys can contain dots so just remove the scope --->
 			<cfset key = Right(body, Len(body) - Len(scope) - 1) />
+			
+			<!--- support scope.argname:0 for setting defaults --->
+			<cfif ListLen(key, ":") gt 1>
+				<cfset defaultValue = ListGetAt(key, 2, ":") />
+				<cfset key = ListGetAt(key, 1, ":") />
+				<cfset hasDefault = true />
+			</cfif>
 			
 			<cfswitch expression="#scope#">
 				<cfcase value="event">
@@ -172,6 +182,8 @@ ${scope.key NEQ scope.key2}
 					<cfelse>
 						<cfif arguments.event.isArgDefined(key)>
 							<cfset result = arguments.event.getArg(key) />
+						<cfelseif hasDefault>
+							<cfset result = defaultValue />
 						<cfelse>
 							<cfthrow type="MachII.util.InvalidExpression" 
 								message="The event argument '#key#' from the expression '#arguments.expression#' does not exist in the current event." />
@@ -183,6 +195,8 @@ ${scope.key NEQ scope.key2}
 						OR (IsObject(arguments.propertyManager.getParent()) 
 							AND arguments.propertyManager.getParent().isPropertyDefined(key))>
 						<cfset result = arguments.propertyManager.getProperty(key) />
+					<cfelseif hasDefault>
+						<cfset result = defaultValue />
 					<cfelse>
 						<cfthrow type="MachII.util.InvalidExpression" 
 							message="The property '#key#' from the expression '#arguments.expression#' was not found as a valid property name." />
