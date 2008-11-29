@@ -33,7 +33,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variable.log = "" />
+	<cfset variables.log = "" />
 	<cfset variables.parameters = StructNew() />
 	
 	<!---
