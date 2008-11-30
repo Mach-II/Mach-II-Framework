@@ -145,13 +145,13 @@ Notes:
 					<cfif getClearDefaultStrategy()>
 						<cfset log.debug("Cannot clear default cache strategy '#cacheManager.getDefaultCacheName()#' (condition '#getCondition()#' evaluated false).") />
 					<cfelse>
-						<cfif isIdDefined()>
+						<cfif isIdsDefined()>
 							<cfset log.debug("Cannot clear cache by ids '#getIds()#' (condition '#getCondition()#' evaluated false).") />
 						</cfif>
-						<cfif isAliasDefined()>
+						<cfif isAliasesDefined()>
 							<cfset log.debug("Cannot clear cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated false).") />
 						</cfif>
-						<cfif isCacheNameDefined()>
+						<cfif isStrategyNamesDefined()>
 							<cfset log.debug("Cannot clear cache by strategyNames '#getStrategyNames()#' (condition '#getCondition()#' evaluated false).") />
 						</cfif>
 					</cfif>
