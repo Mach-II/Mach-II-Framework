@@ -186,7 +186,7 @@ ${scope.key NEQ scope.key2}
 							<cfset result = defaultValue />
 						<cfelse>
 							<cfthrow type="MachII.util.InvalidExpression" 
-								message="The event argument '#key#' from the expression '#arguments.expression#' does not exist in the current event." />
+								message="The event argument '#key#' from the expression '#arguments.expressionElement#' does not exist in the current event." />
 						</cfif>
 					</cfif>
 				</cfcase>
@@ -199,13 +199,13 @@ ${scope.key NEQ scope.key2}
 						<cfset result = defaultValue />
 					<cfelse>
 						<cfthrow type="MachII.util.InvalidExpression" 
-							message="The property '#key#' from the expression '#arguments.expression#' was not found as a valid property name." />
+							message="The property '#key#' from the expression '#arguments.expressionElement#' was not found as a valid property name." />
 					</cfif>
 				</cfcase>
 			</cfswitch>
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
-				message="The following expression does not appear to be valid '#arguments.expressions#' Expressions must be in the form of '${scope.key}' Where scope can be either event or properties." />
+				message="The following expression does not appear to be valid '#arguments.expressionElement#'. Expressions must be in the form of '${scope.key}' Where scope can be either event or properties." />
 		</cfif>
 	
 		<cfreturn result />
