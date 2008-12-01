@@ -244,7 +244,7 @@ Notes:
 		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var notifyResultKey = "" />
 		<cfset var notifyResultArg = "" />
-		<cfset var listener = getAppManager().getListenerManager().getListener(notifyListener) />
+		<cfset var listenerProxy = getAppManager().getListenerManager().getListener(notifyListener).getProxy() />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
 			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
@@ -253,7 +253,7 @@ Notes:
 			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listener, notifyMethod, notifyResultKey, notifyResultArg) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listenerProxy, notifyMethod, notifyResultKey, notifyResultArg) />
 		
 		<cfreturn command />
 	</cffunction>

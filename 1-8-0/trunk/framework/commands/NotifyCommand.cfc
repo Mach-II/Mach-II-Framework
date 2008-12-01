@@ -32,7 +32,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.listener = "" />
+	<cfset variables.listenerProxy = "" />
 	<cfset variables.method = "" />
 	<cfset variables.resultKey = "" />
 	<cfset variables.resultArg = "" />
@@ -42,12 +42,12 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="NotifyCommand" output="false"
 		hint="Used by the framework for initialization.">
-		<cfargument name="listener" type="MachII.framework.Listener" required="true" />
+		<cfargument name="listenerProxy" type="MachII.framework.BaseProxy" required="true" />
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="resultKey" type="string" required="true" />
 		<cfargument name="resultArg" type="string" required="true" />
 		
-		<cfset setListener(arguments.listener) />
+		<cfset setListenerProxy(arguments.listenerProxy) />
 		<cfset setMethod(arguments.method) />
 		<cfset setResultKey(arguments.resultKey) />
 		<cfset setResultArg(arguments.resultArg) />
@@ -63,8 +63,9 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 			
-		<cfset var listener = getListener() />
+		<cfset var listener = getListenerProxy().getObject() />
 		<cfset var invoker = listener.getInvoker() />
+		
 		<cfset invoker.invokeListener(arguments.event, listener, getMethod(), getResultKey(), getResultArg()) />
 		
 		<cfreturn true />
@@ -73,12 +74,12 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setListener" access="private" returntype="void" output="false">
-		<cfargument name="listener" type="MachII.framework.Listener" required="true" />
-		<cfset variables.listener = arguments.listener />
+	<cffunction name="setListenerProxy" access="private" returntype="void" output="false">
+		<cfargument name="listenerProxy" type="MachII.framework.BaseProxy" required="true" />
+		<cfset variables.listenerProxy = arguments.listenerProxy />
 	</cffunction>
-	<cffunction name="getListener" access="private" returntype="MachII.framework.Listener" output="false">
-		<cfreturn variables.listener />
+	<cffunction name="getListenerProxy" access="private" returntype="MachII.framework.BaseProxy" output="false">
+		<cfreturn variables.listenerProxy />
 	</cffunction>
 	
 	<cffunction name="setMethod" access="private" returntype="void" output="false">

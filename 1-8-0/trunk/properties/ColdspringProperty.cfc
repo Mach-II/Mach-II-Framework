@@ -288,8 +288,8 @@ application.serviceFactory_account variable.
 
 		<cfset var localBeanFactoryKey = getParameter("beanFactoryPropertyName", bfUtils.DEFAULT_FACTORY_KEY) />
 		
-		<!--- Get the autowire attribute name --->
-		<cfset var autowireAttributeName = getParameter("autowireAttributeName", "depends") />
+		<!--- Set the autowire attribute name --->
+		<cfset setAutowireAttributeName(getParameter("autowireAttributeName", "depends")) />
 		
 		<!--- Setup CFC generation location --->
 		<cfif isParameterDefined("cfcGenerationLocation")>
@@ -369,7 +369,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Resolve Mach-II dependences if required --->
 		<cfif getParameter("resolveMachIIDependencies", false)>
-			<cfset resolveDependencies(autowireAttributeName) />
+			<cfset resolveDependencies() />
 		</cfif>
 		
 		<!--- Generate the remote proxies if required --->
@@ -430,6 +430,54 @@ application.serviceFactory_account variable.
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="resolveDependencies" access="public" returntype="void" output="false"
+		hint="Resolves Mach-II dependencies.">
+		
+		<cfset var targets = StructNew() />
+		<cfset var targetObj = 0 />
+		<cfset var targetMetadata = "" />
+		<cfset var key = "" />
+		
+		<!--- Get listener/filter/plugin/property targets --->
+		<cfset getListeners(targets) />
+		<cfset getFilters(targets) />
+		<cfset getPlugins(targets) />
+		<cfset getConfigurableProperties(targets) />
+		
+		<cfloop collection="#targets#" item="key">
+			<!--- Get this iteration target object for easy use --->
+			<cfset targetObj = targets[key] />
+			
+			<!--- Look for autowirable collaborators for any setters --->
+			<cfset targetMetadata = GetMetadata(targetObj) />
+			
+			<!--- Autowire by dynamic method generation --->
+			<cfset autowireByDynamicMethodGeneration(key, targetObj, targetMetadata, getAutowireAttributeName()) />
+
+			<!--- Autowire by defined setters --->
+			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
+		</cfloop>
+		
+	</cffunction>
+	
+	<cffunction name="resolveDependency" access="public" returntype="void" output="false"
+		hint="Resolves Mach-II dependency by passed object.">
+		<cfargument name="targetKey" type="string" required="true"
+			hint="Name of the target object." />
+		<cfargument name="targetObject" type="any" required="true"
+			hint="Target object to resolve dependency." />
+			
+		<!--- Look for autowirable collaborators for any setters --->
+		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
+		
+		<!--- Autowire by dynamic method generation --->
+		<cfset autowireByDynamicMethodGeneration(arguments.targetKey, arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+
+		<!--- Autowire by defined setters --->
+		<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+	</cffunction>
+	
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -466,37 +514,6 @@ application.serviceFactory_account variable.
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />
-	</cffunction>
-	
-	<cffunction name="resolveDependencies" access="private" returntype="void" output="false"
-		hint="Resolves Mach-II dependencies.">
-		<cfargument name="autowireAttributeName" type="string" required="true" />
-		
-		<cfset var targets = StructNew() />
-		<cfset var targetObj = 0 />
-		<cfset var targetMetadata = "" />
-		<cfset var key = "" />
-		
-		<!--- Get listener/filter/plugin/property targets --->
-		<cfset getListeners(targets) />
-		<cfset getFilters(targets) />
-		<cfset getPlugins(targets) />
-		<cfset getConfigurableProperties(targets) />
-		
-		<cfloop collection="#targets#" item="key">
-			<!--- Get this iteration target object for easy use --->
-			<cfset targetObj = targets[key] />
-			
-			<!--- Look for autowirable collaborators for any setters --->
-			<cfset targetMetadata = GetMetadata(targetObj) />
-			
-			<!--- Autowire by dynamic method generation --->
-			<cfset autowireByDynamicMethodGeneration(key, targetObj, targetMetadata, arguments.autowireAttributeName) />
-
-			<!--- Autowire by defined setters --->
-			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
-		</cfloop>
-		
 	</cffunction>
 
 	<cffunction name="autowireByDynamicMethodGeneration" access="private" returntype="void" output="false"
@@ -750,6 +767,14 @@ application.serviceFactory_account variable.
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setAutowireAttributeName" access="private" returntype="void" output="false">
+		<cfargument name="autowireAttributeName" type="string" required="true" />
+		<cfset variables.instance.autowireAttributeName = arguments.autowireAttributeName />
+	</cffunction>
+	<cffunction name="getAutowireAttributeName" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.autowireAttributeName />
+	</cffunction>
+	
 	<cffunction name="setLastReloadHash" access="private" returntype="void" output="false">
 		<cfargument name="lastReloadHash" type="string" required="true" />
 		<cfset variables.instance.lastReloadHash = arguments.lastReloadHash />

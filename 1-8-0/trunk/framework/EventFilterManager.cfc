@@ -69,6 +69,7 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
@@ -152,6 +153,9 @@ Notes:
 					</cfcatch>
 				</cftry>
 
+				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(filter, filterType, filterParams) />
+				<cfset filter.setProxy(baseProxy) />
+				
 				<cfset addFilter(filterName, filter, arguments.override) />
 			</cfif>
 		</cfloop>
@@ -219,6 +223,52 @@ Notes:
 	<cffunction name="getFilterNames" access="public" returntype="array" output="false"
 		hint="Returns an array of filter names.">
 		<cfreturn StructKeyArray(variables.filters) />
+	</cffunction>
+	
+	<cffunction name="reloadFilter" access="public" returntype="void" output="false"
+		hint="Reloads an event-filter.">
+		<cfargument name="filterName" type="string" required="true" />
+		
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var newFilter = "" />
+		<cfset var currentFilter = getFilter(arguments.filterName) />
+		<cfset var baseProxy = currentFilter.getProxy() />
+		
+		<!--- Setup the Filter --->
+		<cftry>
+			<!--- Do not method chain the init() on the instantiation
+				or objects that have their init() overridden will
+				cause the variable the object is assigned to will 
+				be deleted if init() returns void --->
+			<cfset newFilter = CreateObject("component", baseProxy.getType()) />
+			<cfset newFilter.init(getAppManager(), baseProxy.getOriginalParameters()) />
+
+			<cfcatch type="expression">
+				<cfthrow type="MachII.framework.EventFilterSyntaxException"
+					message="Mach-II could not register an event-filter with type of '#baseProxy.getType()#' for the event-filter named '#arguments.filterName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>	
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.framework.CannotFindEventFilter"
+						message="Cannot find a CFC with the type of '#baseProxy.getType()#' for the event-filter named '#arguments.filterName#' in module named '#getAppManager().getModuleName()#'."
+						detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file.">
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
+		
+		<!--- Continue setup on the Filter --->
+		<cfset baseProxy.setObject(newFilter) />
+		<cfset newFilter.setProxy(baseProxy) />
+		
+		<!--- Add the Filter to the manager --->
+		<cfset addFilter(arguments.filterName, newFilter, true) />
+		
+		<!--- Configure the Filter --->
+		<cfset newFilter.setLog(logFactory) />
+		<cfset newFilter.configure() />
 	</cffunction>
 	
 	<!---

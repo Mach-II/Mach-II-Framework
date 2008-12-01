@@ -33,8 +33,9 @@ quick access to things such as announcing a new event or getting/setting propert
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variable.log = "" />
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.log = "" />
+	<cfset variables.baseProxy = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -46,9 +47,28 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="The initial set of configuration parameters." />
 		
-		<!--- PropertyManager be in set after AppManager --->
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
+	</cffunction>
+	
+	<cffunction name="setProxy" access="public" returntype="void" output="false"
+		hint="Sets the base proxy.">
+		<cfargument name="proxy" type="MachII.framework.BaseProxy" required="true" />
+		<cfset variables.baseProxy = arguments.proxy>
+	</cffunction>
+	<cffunction name="getProxy" access="public" returntype="MachII.framework.BaseProxy" output="false"
+		hint="Gets the base proxy.">
+		<cfreturn variables.baseProxy />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -192,6 +212,14 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Gets the component name for logging.">
 		<cfreturn ListLast(getMetaData(this).name, ".") />
 	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
+		hint="Gets the components PropertyManager instance.">
+		<cfreturn getAppManager().getPropertyManager() />
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
@@ -224,6 +252,17 @@ quick access to things such as announcing a new event or getting/setting propert
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setAppManager" access="private" returntype="void" output="false"
+		hint="Sets the components AppManager instance.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager instance to set." />
+		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
+		hint="Gets the components AppManager instance.">
+		<cfreturn variables.appManager />
+	</cffunction>
+
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true"
@@ -247,32 +286,6 @@ quick access to things such as announcing a new event or getting/setting propert
 		</cfloop>
 		
 		<cfreturn resolvedParameters />
-	</cffunction>
-	
-	<cffunction name="setLog" access="public" returntype="void" output="false"
-		hint="Uses the log factory to create a log.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
-	</cffunction>
-	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
-		hint="Gets the log.">
-		<cfreturn variables.log />
-	</cffunction>
-
-	<cffunction name="setAppManager" access="private" returntype="void" output="false"
-		hint="Sets the components AppManager instance.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
-			hint="The AppManager instance to set." />
-		<cfset variables.appManager = arguments.appManager />
-	</cffunction>
-	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Gets the components AppManager instance.">
-		<cfreturn variables.appManager />
-	</cffunction>
-	
-	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
-		hint="Gets the components PropertyManager instance.">
-		<cfreturn getAppManager().getPropertyManager() />
 	</cffunction>
 
 </cfcomponent>

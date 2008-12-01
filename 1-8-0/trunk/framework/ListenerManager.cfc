@@ -77,6 +77,7 @@ Notes:
 		<cfset var invoker = "" />
 		<cfset var instantiatedInvokers = StructNew() />
 
+		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
@@ -191,6 +192,10 @@ Notes:
 	
 				<!--- Continue setup on the Listener --->
 				<cfset listener.setInvoker(invoker) />
+				
+				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(listener, listenerType, listenerParams) />
+				<cfset listener.setProxy(baseProxy) />
+				
 				<!--- Add the Listener to the manager --->
 				<cfset addListener(listenerName, listener, arguments.override) />
 			</cfif>
@@ -261,6 +266,53 @@ Notes:
 	<cffunction name="getListenerNames" access="public" returntype="array" output="false"
 		hint="Returns an array of listener names.">
 		<cfreturn StructKeyArray(variables.listeners) />
+	</cffunction>
+	
+	<cffunction name="reloadListener" access="public" returntype="void" output="false"
+		hint="Reloads a listener.">
+		<cfargument name="listenerName" type="string" required="true" />
+		
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var newListener = "" />
+		<cfset var currentListener = getListener(arguments.listenerName) />
+		<cfset var baseProxy = currentListener.getProxy() />
+		
+		<!--- Setup the Listener --->
+		<cftry>
+			<!--- Do not method chain the init() on the instantiation
+				or objects that have their init() overridden will
+				cause the variable the object is assigned to will 
+				be deleted if init() returns void --->
+			<cfset newListener = CreateObject("component", baseProxy.getType()) />
+			<cfset newListener.init(getAppManager(), baseProxy.getOriginalParameters()) />
+			
+			<cfcatch type="expression">
+				<cfthrow type="MachII.framework.ListenerSyntaxException"
+					message="Mach-II could not register a listener with type of '#baseProxy.getType()#' for the listener named '#arguments.listenerName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.framework.CannotFindListener"
+						message="Cannot find a listener CFC with type of '#baseProxy.getType()#' for the listener named '#arguments.listenerName#' in module named '#getAppManager().getModuleName()#'."
+						detail="Please check that this listener exists and that there is not a misconfiguration in the XML configuration file." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>						
+			</cfcatch>
+		</cftry>
+		
+		<!--- Continue setup on the Listener --->
+		<cfset newListener.setInvoker(currentListener.getInvoker()) />
+		<cfset baseProxy.setObject(newListener) />
+		<cfset newListener.setProxy(baseProxy) />
+		
+		<!--- Add the Listener to the manager --->
+		<cfset addListener(arguments.listenerName, newListener, true) />
+		
+		<!--- Configure the listener --->
+		<cfset newListener.setLog(logFactory) />
+		<cfset newListener.configure() />
 	</cffunction>
 
 	<!---

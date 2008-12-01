@@ -93,6 +93,7 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var baseProxy = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
@@ -157,6 +158,9 @@ Notes:
 					</cfif>
 				</cfcatch>
 			</cftry>
+			
+			<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(plugin, pluginType, pluginParams) />
+			<cfset plugin.setProxy(baseProxy) />
 
 			<cfset addPlugin(pluginName, plugin, arguments.override) />
 		</cfloop>
@@ -267,6 +271,52 @@ Notes:
 	<cffunction name="getPluginNames" access="public" returntype="array" output="false"
 		hint="Returns an array of plugin names.">
 		<cfreturn StructKeyArray(variables.plugins) />
+	</cffunction>
+	
+	<cffunction name="reloadPlugin" access="public" returntype="void" output="false"
+		hint="Reloads a plugin.">
+		<cfargument name="pluginName" type="string" required="true" />
+		
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var newPlugin = "" />
+		<cfset var currentPlugin = getPlugin(arguments.PluginName) />
+		<cfset var baseProxy = currentPlugin.getProxy() />
+		
+		<!--- Setup the Plugin --->
+		<cftry>
+			<!--- Do not method chain the init() on the instantiation
+				or objects that have their init() overridden will
+				cause the variable the object is assigned to will 
+				be deleted if init() returns void --->
+			<cfset newPlugin = CreateObject("component", baseProxy.getType()) />
+			<cfset newPlugin.init(getAppManager(), baseProxy.getOriginalParameters()) />
+
+			<cfcatch type="expression">
+				<cfthrow type="MachII.framework.PluginSyntaxException"
+					message="Mach-II could not register an plugin with type of '#baseProxy.getType()#' for the plugin named '#arguments.pluginName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>	
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.framework.CannotFindPlugin"
+						message="Cannot find a CFC with the type of '#baseProxy.getType()#' for the plugin named '#arguments.pluginName#' in module named '#getAppManager().getModuleName()#'."
+						detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file.">
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
+		
+		<!--- Continue setup on the Plugin --->
+		<cfset baseProxy.setObject(newPlugin) />
+		<cfset newPlugin.setProxy(baseProxy) />
+		
+		<!--- Add the Plugin to the manager --->
+		<cfset addPlugin(arguments.PluginName, newPlugin, true) />
+		
+		<!--- Configure the Plugin --->
+		<cfset newPlugin.setLog(logFactory) />
+		<cfset newPlugin.configure() />
 	</cffunction>
 
 	<!---
