@@ -80,6 +80,7 @@ the rest of the framework. (pfarrell)
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 		
+		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
@@ -165,6 +166,12 @@ the rest of the framework. (pfarrell)
 							</cfif>
 						</cfcatch>
 					</cftry>
+					
+					<!--- Continue setup on the property --->
+					<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(propertyValue, propertyType, propertyParams) />
+					<cfset propertyValue.setProxy(baseProxy) />
+					
+					<!--- Add the property to the array of configurable properties so they can be configured --->
 					<cfset ArrayAppend(variables.configurablePropertyNames, propertyName) />
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
@@ -242,6 +249,7 @@ the rest of the framework. (pfarrell)
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Prepares the configurable properties for use.">
 
+		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
@@ -249,6 +257,7 @@ the rest of the framework. (pfarrell)
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
+			<cfset aConfigurableProperty.setLog(logFactory) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
 	</cffunction>
@@ -346,6 +355,84 @@ the rest of the framework. (pfarrell)
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
 		hint="Returns an array of property names that we can call a configure() method on.">
 		<cfreturn variables.configurablePropertyNames />
+	</cffunction>
+	
+	<cffunction name="reloadProperty" access="public" returntype="void" output="false"
+		hint="Reloads a configurable property.">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="Name of configurable property to reload." />
+		
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var newProperty = "" />
+		<cfset var currentProperty = getProperty(arguments.propertyName) />
+		<cfset var baseProxy = "" />
+		
+		<!--- Throw error if the property is not configurable --->
+		<cfif NOT ensureConfigurableProperty(arguments.propertyName)>
+			<cfthrow type="MachII.framework.CannotReloadPropertyNotConfigurable"
+				message="The property '#arguments.propertyName#' cannot be reloaded because it is not configurable (i.e. Property.cfc)." />
+		</cfif>
+		
+		<!--- Since we now have a configurable property, get the base proxy --->
+		<cfset baseProxy = currentProperty.getProxy() />
+		
+		<!--- Setup the Property --->
+		<cftry>
+			<!--- Do not method chain the init() on the instantiation
+				or objects that have their init() overridden will
+				cause the variable the object is assigned to will 
+				be deleted if init() returns void --->
+			<cfset newProperty = CreateObject("component", baseProxy.getType()) />
+			<cfset newProperty.init(getAppManager(), baseProxy.getOriginalParameters()) />
+			
+			<cfcatch type="expression">
+				<cfthrow type="MachII.framework.PropertySyntaxException"
+					message="Mach-II could not register a property with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfthrow type="MachII.framework.CannotFindProperty"
+						message="Cannot find a listener CFC with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'."
+						detail="Please check that this property exists and that there is not a misconfiguration in the XML configuration file." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>						
+			</cfcatch>
+		</cftry>
+		
+		<!--- Continue setup on the Property --->
+		<cfset baseProxy.setObject(newProperty) />
+		<cfset newProperty.setProxy(baseProxy) />
+		
+		<!--- Add the Property to the manager --->
+		<cfset setProperty(arguments.propertyName, newProperty) />
+		
+		<!--- Configure the listener --->
+		<cfset newProperty.setLog(logFactory) />
+		<cfset newProperty.configure() />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS - UTILS
+	--->
+	<cffunction name="ensureConfigurableProperty" access="private" returntype="boolean" output="false"
+		hint="Ensures that the passed property name is configuable. Does NOT check parent.">
+		<cfargument name="propertyName" type="string" required="true" />
+		
+		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
+		<cfset var configurable = false />
+		<cfset var i = 0 />
+		
+		<!--- Ensure the property is configurable --->
+		<cfloop from="1" to="#ArrayLen(configurablePropertyNames)#" index="i">
+			<cfif CompareNoCase(arguments.propertyName, configurablePropertyNames[i]) EQ 0>
+				<cfset configurable = true />
+				<cfbreak />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn configurable />
 	</cffunction>
 	
 	<!---
