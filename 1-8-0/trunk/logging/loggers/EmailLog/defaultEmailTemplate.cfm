@@ -29,6 +29,7 @@ since this display template is rendered inside a *non-thread safe* CFC.
 Not using the 'local' prefix can cause errors due to threading.
 
 --->
+<cfset local.i = 1 />
 </cfsilent>
 <cfoutput>
 <h3>General Information</h3>

@@ -39,6 +39,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 <cfset local.headElement = "" />
 <cfset local.cfdumpData = "" />
 <cfset local.hasAppendedHeadElementFromCfdump = false />
+<cfset local.i = 1 />
 </cfsilent>
 <cfoutput>
 <cfsavecontent variable="local.headElement">
