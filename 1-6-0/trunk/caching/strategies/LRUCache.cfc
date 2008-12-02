@@ -290,8 +290,14 @@ in the application scope.
 			done in the application or server scopes will only run once --->
 		<cfif getScope() EQ "session">
 			<!--- Cannot directly access session scope because most CFML
-			engine will throw an error if session is disabled --->
-			<cfset name = name & "_" & StructGet("session").sessionId />
+				engine will throw an error if session is disabled --->
+			<!--- A StructClear(session) eliminates the sessionId needed
+				so only use it if it available, otherwise too bad for you
+				as all repeats will be single threaded because we have no 
+				unique identifier --->
+			<cfif StructKeyExists(StructGet("session"), "sessionId")>
+				<cfset name = name & "_" & StructGet("session").sessionId />
+			</cfif>
 		</cfif>
 
 		<cfreturn name />
