@@ -40,6 +40,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 <cfset local.cfdumpData = "" />
 <cfset local.hasAppendedHeadElementFromCfdump = false />
 <cfset local.i = 1 />
+<cfset local.cookieRow = 1 />
 </cfsilent>
 <cfoutput>
 <cfsavecontent variable="local.headElement">
@@ -160,7 +161,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 
 	<table>
 		<tr>
-			<th colspan="2"><h3>General Information</h3></th>
+			<th colspan="2"><h3>Request Information</h3></th>
 		</tr>
 		<tr>
 			<td><h4>Request Event Name</h4></td>
@@ -184,6 +185,30 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
 		</tr>
+		<tr>
+			<td><h4>Remote IP</h4></td>
+			<td><p>#cgi.remote_addr#</p></td>
+		</tr>
+		<tr class="shade">
+			<td><h4>Remote User Agent</h4></td>
+			<td><p>#cgi.http_user_agent#</p></td>
+		</tr>
+		<tr>
+			<td><h4>Locale</h4></td>
+			<td><p>#getLocale()#</p></td>
+		</tr>
 	</table>
+
+	<table>
+		<tr>
+			<th colspan="2"><h3>Cookies</h3></th>
+		</tr>
+	<cfloop collection="#cookie#" item="local.i">
+		<tr <cfif local.cookieRow MOD 2>class="shade"</cfif>>
+			<td><h4>#local.i#</h4></td>
+			<td><p>#cookie[local.i]#</p></td>
+		</tr>
+		<cfset local.cookieRow = local.cookieRow + 1 />
+	</cfloop>
 </div>
 </cfoutput>
