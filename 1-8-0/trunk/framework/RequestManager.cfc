@@ -257,8 +257,21 @@ Notes:
 		hint="Adds an on request end callback to be run at the end of processing an event.">
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
-		<cfargument name="moduleName" type="string" required="true" />
 		<cfset ArrayAppend(variables.onRequestEndCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeOnRequestEndCallback" access="public" returntype="void" output="false"
+		hint="Removes an onRequestEndCallback from the stack by passing in the callback object.">
+		<cfargument name="callback" type="any" required="true" />
+		
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.onRequestEndCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.onRequestEndCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.onRequestEndCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	<cffunction name="getOnRequestEndCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the on request end callbacks.">
@@ -269,8 +282,21 @@ Notes:
 		hint="Adds a pre-redirect callback to be run before a redirect occurs.">
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
-		<cfargument name="moduleName" type="string" required="true" />
 		<cfset ArrayAppend(variables.preRedirectCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removePreRedirectCallback" access="public" returntype="void" output="false"
+		hint="Removes an preRedirect from the stack by passing in the callback object.">
+		<cfargument name="callback" type="any" required="true" />
+		
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.preRedirectCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.preRedirectCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	<cffunction name="getPreRedirectCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the pre-redirect callbacks.">
@@ -281,28 +307,25 @@ Notes:
 		hint="Adds a post-redirect callback to be run after a redirect occurs.">
 		<cfargument name="callback" type="any" required="true" />
 		<cfargument name="method" type="string" required="true" />
-		<cfargument name="moduleName" type="string" required="true" />
 		<cfset ArrayAppend(variables.postRedirectCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removePostRedirectCallback" access="public" returntype="void" output="false"
+		hint="Removes an postRedirect from the stack by passing in the callback object.">
+		<cfargument name="callback" type="any" required="true" />
+		
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.postRedirectCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.postRedirectCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.postRedirectCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	<cffunction name="getPostRedirectCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the post-redirect callbacks.">
 		<cfreturn variables.postRedirectCallbacks />
-	</cffunction>
-	
-	<cffunction name="cleanupCallbacks" access="public" returntype="void" output="false"
-		hint="Cleans up callbacks by module name.">
-		<cfargument name="moduleName" type="string" required="true" />
-		
-		<cfset var i = "" />
-		<cfset var j = 0 />
-		
-		<cfloop list="#variables.callbackGroupNames#" index="i">
-			<cfloop from="1" to="#ArrayLen(variables[i])#" index="j">
-				<cfif variables[i][j].moduleName EQ arguments.moduleName>
-					<cfset ArrayDeleteAt(variables[i], j) />
-				</cfif>
-			</cfloop>
-		</cfloop>
 	</cffunction>
 
 	<!---

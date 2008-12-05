@@ -174,6 +174,18 @@ Notes:
 			<cfset aFilter.configure() />
 		</cfloop>
 	</cffunction>
+
+	<cffunction name="onReload" access="public" returntype="void"
+		hint="Performs onReload logic in each of the registered EventFilters.">
+		
+		<cfset var aFilter = 0 />
+		<cfset var i = 0 />
+		
+		<cfloop collection="#variables.filters#" item="i">
+			<cfset aFilter = variables.filters[i] />
+			<cfset aFilter.onReload() />
+		</cfloop>
+	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS
@@ -258,17 +270,23 @@ Notes:
 				</cfif>
 			</cfcatch>
 		</cftry>
+
+		<!--- Run onReload in the current Filter 
+			which must take place before configure is
+			run in the new Filter --->
+		<cfset currentFilter.onReload() />
 		
 		<!--- Continue setup on the Filter --->
 		<cfset baseProxy.setObject(newFilter) />
 		<cfset newFilter.setProxy(baseProxy) />
 		
-		<!--- Add the Filter to the manager --->
-		<cfset addFilter(arguments.filterName, newFilter, true) />
-		
 		<!--- Configure the Filter --->
 		<cfset newFilter.setLog(logFactory) />
+		<cfset getAppManager().onPostObjectReload(newFilter) />
 		<cfset newFilter.configure() />
+
+		<!--- Add the Filter to the manager --->
+		<cfset addFilter(arguments.filterName, newFilter, true) />
 	</cffunction>
 	
 	<!---

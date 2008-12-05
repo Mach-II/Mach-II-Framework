@@ -129,13 +129,8 @@ will bind to root parameter values.
 		<cfset var params = getParameters() />
 		<cfset var defaultLoggerParameters = StructNew() />
 		<cfset var loggers = StructNew() />
-		<cfset var logFactoryLogAdapters = StructNew() />
-		<cfset var currentLogAdapters = ArrayNew(1) />
-		<cfset var moduleName = getModuleName() />
-		<cfset var utils = getAppManager().getUtils() />
-		<cfset var temp = "" />
+		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var key = "" />
-		<cfset var i = 0 />
 		
 		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
@@ -157,27 +152,41 @@ will bind to root parameter values.
 		<cfloop collection="#loggers#" item="key">
 			<cfset loggers[key].configure() />
 			<cfset getAppManager().getLogFactory().addLogAdapter(moduleName & "-" & loggers[key].getLoggerId(), loggers[key].getLogAdapter()) />
-			<cfset ArrayAppend(currentLogAdapters, loggers[key].getLogAdapter()) />
 		</cfloop>
-		
-		<!--- Cleanup bad loggers from old instances of this module --->
-		<cfif IsObject(getAppManager().getParent())>
-			<cfset logFactoryLogAdapters = getAppManager().getLogFactory().getLogAdapters() />
-			<cfloop from="1" to="#ArrayLen(currentLogAdapters)#" index="i">
-				<cfloop collection="#logFactoryLogAdapters#" item="key">
-					<cfif ListFirst(key, "-") EQ moduleName 
-						AND NOT utils.assertSame(logFactoryLogAdapters[key], currentLogAdapters[i])>
-						<cfset StructDelete(logFactoryLogAdapters, key, false) />
-						<cfbreak />
-					</cfif>
-				</cfloop>
-			</cfloop>
-		</cfif>
 		
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT getParameter("loggingEnabled", true)>
 			<cfset getAppManager().getLogFactory().disableLogging() />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="onReload" access="public" returntype="void" output="false"
+		hint="Called before this property is reloaded. Unregisters some log adapters and call backs.">
+		
+		<cfset var requestManager = getAppManager().getRequestManager() />
+		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var logFactoryLogAdapters = logFactory.getLogAdapters() />
+		<cfset var thisPropertyLoggers = getLoggers() />
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var logFactoryLogAdapterKey = "" />
+		<cfset var thisPropertyLoggerKey = "" />
+		<cfset var moduleName = getAppManager().getModuleName() />
+		
+		<!--- Cleanup this property's' loggers --->
+		<cfloop collection="#thisPropertyLoggers#" item="thisPropertyLoggerKey">
+			<!--- Remove log adapter from log factory --->
+			<cfloop collection="#logFactoryLogAdapters#" item="logFactoryLogAdapterKey">
+				<cfif utils.assertSame(logFactoryLogAdapters[logFactoryLogAdapterKey], thisPropertyLoggers[thisPropertyLoggerKey].getLogAdapter())>
+					<cfset logFactory.removeLogAdapter(moduleName & "-" & thisPropertyLoggers[thisPropertyLoggerKey].getLoggerId()) />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+			
+			<!--- Remove preRedirect, postRedirect and onRequestEnd callbacks --->
+			<cfset requestManager.removeOnRequestEndCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
+			<cfset requestManager.removePreRedirectCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
+			<cfset requestManager.removePostRedirectCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
+		</cfloop>
 	</cffunction>
 	
 	<!---

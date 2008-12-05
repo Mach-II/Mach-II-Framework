@@ -216,6 +216,19 @@ Notes:
 			<cfset aListener.configure() />
 		</cfloop>
 	</cffunction>
+
+	<cffunction name="onReload" access="public" returntype="void"
+		hint="Performs onReload login in each of the registered listeners.">
+
+		<cfset var aListener = 0 />
+		<cfset var i = 0 />
+		
+		<!--- Loop through the listeners configure --->
+		<cfloop collection="#variables.listeners#" item="i">
+			<cfset aListener = variables.listeners[i] />
+			<cfset aListener.onReload() />
+		</cfloop>
+	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS
@@ -302,17 +315,23 @@ Notes:
 			</cfcatch>
 		</cftry>
 		
+		<!--- Run onReload in the current Listener 
+			which must take place before configure is
+			run in the new Listener --->
+		<cfset currentListener.onReload() />
+		
 		<!--- Continue setup on the Listener --->
 		<cfset newListener.setInvoker(currentListener.getInvoker()) />
 		<cfset baseProxy.setObject(newListener) />
 		<cfset newListener.setProxy(baseProxy) />
 		
-		<!--- Add the Listener to the manager --->
-		<cfset addListener(arguments.listenerName, newListener, true) />
-		
 		<!--- Configure the listener --->
 		<cfset newListener.setLog(logFactory) />
+		<cfset getAppManager().onPostObjectReload(newListener) />
 		<cfset newListener.configure() />
+
+		<!--- Add the Listener to the manager --->
+		<cfset addListener(arguments.listenerName, newListener, true) />
 	</cffunction>
 
 	<!---

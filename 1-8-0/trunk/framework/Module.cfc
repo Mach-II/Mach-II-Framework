@@ -82,6 +82,11 @@ Notes:
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
+		
+		<!--- Run onReload in current module --->
+		<cfset getModuleAppManager().onReload() />
+		
+		<!--- Create a new module --->
 		<cfset configure(getDtdPath(), arguments.validateXml) />
 	</cffunction>
 	

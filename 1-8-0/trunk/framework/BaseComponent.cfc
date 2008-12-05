@@ -75,6 +75,11 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Override to provide custom configuration logic. Called after init().">
 		<!--- Does nothing --->
 	</cffunction>
+	
+	<cffunction name="onReload" access="public" returntype="void" output="false"
+		hint="Override to provide custom logic when reload event occurs. Called when target object is reloaded.">
+		<!--- Does nothing --->
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS

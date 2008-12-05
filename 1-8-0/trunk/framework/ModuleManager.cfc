@@ -114,6 +114,16 @@ Notes:
 			<cfset variables.modules[key].configure(getDtdPath(), getValidateXML()) />
 		</cfloop>
 	</cffunction>
+
+	<cffunction name="onReload" access="public" returntype="void" output="false"
+		hint="Preforms logic onReload in each of the registered modules.">
+		
+		<cfset var key = "" />
+		
+		<cfloop collection="#variables.modules#" item="key">
+			<cfset variables.modules[key].getModuleAppManager().onReload() />
+		</cfloop>
+	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS

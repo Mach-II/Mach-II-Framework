@@ -45,6 +45,7 @@ Notes:
 	<cfset variables.subroutineManager = "" />
 	<cfset variables.viewManager = "" />
 
+	<cfset variables.onPostObjectReloadCallbacks = ArrayNew(1) />
 	<cfset variables.utils = "" />
 	<cfset variables.expressionEvaluator = "" />
 	<cfset variables.logFactory = "" />
@@ -52,7 +53,6 @@ Notes:
 	<cfset variables.appkey = "" />
 	<cfset variables.loading = TRUE />
 	<cfset variables.moduleName = "" />
-
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -64,11 +64,6 @@ Notes:
 
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Calls configure() on each of the manager instances.">
-		
-		<!--- Perform callback cleanup if this is a module  --->
-		<cfif IsObject(getParent())>
-			<cfset getRequestManager().cleanupCallbacks(getModuleName()) />
-		</cfif>
 		
 		<!--- In order in which the managers are called is important
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
@@ -91,6 +86,23 @@ Notes:
 		<!--- Flip loading to false --->
 		<cfset setLoading(false) />
 	</cffunction>
+	
+	<cffunction name="onReload" access="public" returntype="void"
+		hint="Performs logic onReload.">
+
+		<!--- In order in which the managers are called is important
+			DO NOT CHANGE ORDER OF METHOD CALLS --->
+		<cfset getPropertyManager().onReload() />
+		<cfset getPluginManager().onReload() />
+		<cfset getListenerManager().onReload() />
+		<cfset getFilterManager().onReload() />
+		
+		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
+		<cfif NOT IsObject(getParent())>
+			<cfset getModuleManager().onReload() />
+		</cfif>
+		
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
@@ -102,6 +114,34 @@ Notes:
 		<cfreturn getRequestManager().getRequestHandler(arguments.createNew) />
 	</cffunction>
 	
+	<cffunction name="addOnPostObjectReloadCallback" access="public" returntype="void" output="false"
+		hint="Registers on post object reload callback.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.onPostObjectReloadCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeOnPostObjectReloadCallback" access="public" returntype="void" output="false"
+		hint="Unregisters on post object reload callback.">
+		<cfargument name="callback" type="any" required="true" />
+		
+		<cfset var utils = getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.onPostObjectReloadCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.onPostObjectReloadCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.onPostObjectReloadCallbacks, i) />
+				<cfbreak />			
+			</cfif>
+		</cfloop>
+	</cffunction>
+	<cffunction name="getOnPostObjectReloadCallbacks" access="public" returntype="array" output="false"
+		hint="Gets all on post object reload callbacks.">
+		<cfreturn variables.onPostObjectReloadCallbacks />
+	</cffunction>
+	
+	<!---
+	MACH-II APPLICATION EVENTS
+	--->
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="Handles on session start application event.">
 		
@@ -142,6 +182,22 @@ Notes:
 				<cfset modules[key].getModuleAppManager().onSessionEnd(arguments.sessionScope) />
 			</cfloop>
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="onPostObjectReload" access="public" returntype="void" output="false"
+		hint="Handles on post object reload application events.">
+		<cfargument name="targetObject" type="any" required="true"
+			hint="The target object that is the subject of the reload event." />
+		
+		<cfset var onPostObjectReloadCallbacks = getOnPostObjectReloadCallbacks() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(onPostObjectReloadCallbacks)#" index="i">
+			<cfinvoke component="#onPostObjectReloadCallbacks[i].callback#"
+				method="#onPostObjectReloadCallbacks[i].method#">
+				<cfinvokeargument name="targetObject" value="#arguments.targetObject#" />
+			</cfinvoke>
+		</cfloop>
 	</cffunction>
 	
 	<!---

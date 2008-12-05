@@ -262,6 +262,20 @@ the rest of the framework. (pfarrell)
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="onReload" access="public" returntype="void"
+		hint="Preforms logic when a module is reloaded.">
+		
+		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
+		<cfset var aConfigurableProperty = "" />
+		<cfset var i = 0 />
+		
+		<!--- Run configure on all configurable properties --->
+		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
+			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
+			<cfset aConfigurableProperty.onReload() />
+		</cfloop>		
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -400,17 +414,23 @@ the rest of the framework. (pfarrell)
 				</cfif>						
 			</cfcatch>
 		</cftry>
-		
-		<!--- Continue setup on the Property --->
+
+		<!--- Run onReload in the current Property 
+			which must take place before configure is
+			run in the new Property --->
+		<cfset currentProperty.onReload() />
+
+		<!--- Replace the old Property with the new Property in the proxy--->
 		<cfset baseProxy.setObject(newProperty) />
+		<cfset getAppManager().onPostObjectReload(newProperty) />
 		<cfset newProperty.setProxy(baseProxy) />
+
+		<!--- Configure the Property --->
+		<cfset newProperty.setLog(logFactory) />
+		<cfset newProperty.configure() />
 		
 		<!--- Add the Property to the manager --->
 		<cfset setProperty(arguments.propertyName, newProperty) />
-		
-		<!--- Configure the listener --->
-		<cfset newProperty.setLog(logFactory) />
-		<cfset newProperty.configure() />
 	</cffunction>
 	
 	<!---

@@ -84,6 +84,12 @@ first [Hash(UCase(arguments.channell))]
 		<cfset variables.logAdapters[arguments.logAdapterName] = arguments.logAdapter />
 	</cffunction>
 	
+	<cffunction name="removeLogAdapter" access="public" returntype="void" output="false"
+		hints="Removes a log adapter by log adapter name.">
+		<cfargument name="logAdapterName" type="string" required="true" />
+		<cfset StructDelete(variables.logAdapters, arguments.logAdapterName, false) />	
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->

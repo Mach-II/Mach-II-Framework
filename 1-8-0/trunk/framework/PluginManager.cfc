@@ -180,6 +180,18 @@ Notes:
 		</cfloop>
 	</cffunction>
 
+	<cffunction name="onReload" access="public" returntype="void"
+		hint="Performs onReload logic in each of the registered Plugins.">
+
+		<cfset var aPlugin = 0 />
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#variables.nPlugins#" index="i">
+			<cfset aPlugin = variables.pluginArray[i] />
+			<cfset aPlugin.onReload() />
+		</cfloop>
+	</cffunction>
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -307,16 +319,22 @@ Notes:
 			</cfcatch>
 		</cftry>
 		
+		<!--- Run onReload in the current Plugin 
+			which must take place before configure is
+			run in the new Plugin --->
+		<cfset currentPlugin.onReload() />
+		
 		<!--- Continue setup on the Plugin --->
 		<cfset baseProxy.setObject(newPlugin) />
 		<cfset newPlugin.setProxy(baseProxy) />
 		
-		<!--- Add the Plugin to the manager --->
-		<cfset addPlugin(arguments.PluginName, newPlugin, true) />
-		
 		<!--- Configure the Plugin --->
 		<cfset newPlugin.setLog(logFactory) />
+		<cfset getAppManager().onPostObjectReload(newPlugin) />
 		<cfset newPlugin.configure() />
+
+		<!--- Add the Plugin to the manager --->
+		<cfset addPlugin(arguments.PluginName, newPlugin, true) />
 	</cffunction>
 
 	<!---

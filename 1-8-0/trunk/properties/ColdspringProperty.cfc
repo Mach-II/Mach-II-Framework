@@ -391,8 +391,21 @@ application.serviceFactory_account variable.
 		<cfset setConfigFilePaths(buildConfigFilePaths(serviceDefXmlLocation)) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 		<cfset setLastReloadDatetime(Now()) />
+		
+		<!--- Register as DIEngineInterface --->
+		<cfset getAppManager().addOnPostObjectReloadCallback(this, "resolveDependency") />
 	</cffunction>
 	
+	<cffunction name="onReload" access="public" returntype="void" output="false"
+		hint="Deregisters ColdSpring as an available DI engine interface.">
+		
+		<!--- Deregister as DIEngineInterface --->
+		<cfset getAppManager().deregisterDIEngineInterface(this) />
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS
+	--->
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Checks if the bean factory config file or any of its' imports have changed.">
 		
@@ -452,7 +465,7 @@ application.serviceFactory_account variable.
 			<cfset targetMetadata = GetMetadata(targetObj) />
 			
 			<!--- Autowire by dynamic method generation --->
-			<cfset autowireByDynamicMethodGeneration(key, targetObj, targetMetadata, getAutowireAttributeName()) />
+			<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, getAutowireAttributeName()) />
 
 			<!--- Autowire by defined setters --->
 			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
@@ -462,8 +475,6 @@ application.serviceFactory_account variable.
 	
 	<cffunction name="resolveDependency" access="public" returntype="void" output="false"
 		hint="Resolves Mach-II dependency by passed object.">
-		<cfargument name="targetKey" type="string" required="true"
-			hint="Name of the target object." />
 		<cfargument name="targetObject" type="any" required="true"
 			hint="Target object to resolve dependency." />
 			
@@ -471,7 +482,7 @@ application.serviceFactory_account variable.
 		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
 		
 		<!--- Autowire by dynamic method generation --->
-		<cfset autowireByDynamicMethodGeneration(arguments.targetKey, arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+		<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
 
 		<!--- Autowire by defined setters --->
 		<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
@@ -518,7 +529,6 @@ application.serviceFactory_account variable.
 
 	<cffunction name="autowireByDynamicMethodGeneration" access="private" returntype="void" output="false"
 		hint="Autowires by dynamic method generation.">
-		<cfargument name="targetKey" type="string" required="true" />
 		<cfargument name="targetObj" type="any" required="true" />
 		<cfargument name="targetObjMetadata" type="any" required="true" />
 		<cfargument name="autowireAttributeName" type="string" required="true" />
@@ -527,8 +537,6 @@ application.serviceFactory_account variable.
 		<cfset var autowireBeanNames = "" />
 		<cfset var beanName = "" />
 		<cfset var autowireCfc = "" />
-		<cfset var targetType = "" />
-		<cfset var targetName = "" />
 		<cfset var i = 0 />
 
 		<!--- Autowire by concrete setters (dynamically injected setters do not show up in the metadata) --->
@@ -565,10 +573,8 @@ application.serviceFactory_account variable.
 						<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
 					</cfinvoke>
 				<cfelse>
-					<cfset targetType = ListFirst(arguments.targetKey, "_") />
-					<cfset targetName = ListDeleteAt(arguments.targetKey, 1, "_") />
 					<cfthrow type="MachII.properties.ColdspringProperty"
-						message="Cannot find bean named '#beanName#' to autowire by method injection in a #targetType# named '#targetName#' in module '#getAppManager().getModuleName()#'."
+						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
 						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
 				</cfif>
 				
