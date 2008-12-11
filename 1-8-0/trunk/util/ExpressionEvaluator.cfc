@@ -138,7 +138,7 @@ ${scope.key NEQ scope.key2}
 		<cfset leftParam = right(arguments.body, len(arguments.body) - 1) />
 		<cfif left(arguments.body, 1) eq  "'">
 			<cfset leftParam = listGetAt(leftParam, 1, "'") />
-			<cfset body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, "'")) />
+			<cfset arguments.body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, "'")) />
 		<cfelse>
 			<cfset leftParam = listGetAt(leftParam, 1, '"') />
 			<cfset arguments.body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, '"')) />
