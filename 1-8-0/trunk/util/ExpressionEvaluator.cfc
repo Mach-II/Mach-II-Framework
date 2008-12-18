@@ -205,7 +205,7 @@ ${scope.key NEQ scope.key2}
 			</cfswitch>
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
-				message="The following expression does not appear to be valid '#arguments.expressionElement#'. Expressions must be in the form of '${scope.key}' Where scope can be either event or properties." />
+				message="The following expression does not appear to be valid '#arguments.expressionElement#'. Expressions must be in the form of '${scope.key}' where scope can be either 'event' or 'properties'." />
 		</cfif>
 	
 		<cfreturn result />
