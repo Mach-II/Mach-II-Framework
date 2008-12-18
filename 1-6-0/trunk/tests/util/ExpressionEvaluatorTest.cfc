@@ -87,10 +87,15 @@ Notes:
 
 		<cfset propertyManager.setProperty("foo", "bar") />
 		<cfset event.setArg("foo", "bar") />
+		<cfset event.setArg("boolean", 1) />
 		
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq properties.foo}", event, propertyManager) />	
 		<cfset debug(result)>
 		<cfset assertTrue(result, "Result of event.foo eq properties.foo was not true") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.boolean eq 1}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertTrue(result, "Result of 'boolean' eq 1 was not true") />
 				
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 'bar'}", event, propertyManager) />	
 		<cfset debug(result)>
