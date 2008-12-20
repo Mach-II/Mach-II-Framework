@@ -137,8 +137,12 @@ ${scope.key NEQ scope.key2}
 		
 		<cfset leftParam = right(arguments.body, len(arguments.body) - 1) />
 		<cfif left(arguments.body, 1) eq  "'">
-			<cfset leftParam = listGetAt(leftParam, 1, "'") />
-			<cfset arguments.body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, "'")) />
+			<cfif arguments.body eq "''">
+				<cfset arguments.body = "" />
+			<cfelse>
+				<cfset leftParam = listGetAt(leftParam, 1, "'") />
+				<cfset arguments.body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, "'")) />
+			</cfif>
 		<cfelse>
 			<cfset leftParam = listGetAt(leftParam, 1, '"') />
 			<cfset arguments.body = trim(ListDeleteAt(right(arguments.body, len(arguments.body) - 1), 1, '"')) />
@@ -203,6 +207,8 @@ ${scope.key NEQ scope.key2}
 					</cfif>
 				</cfcase>
 			</cfswitch>
+		<cfelseif isNumeric(body)>
+			<cfset result = body>
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
 				message="The following expression does not appear to be valid '#arguments.expressionElement#'. Expressions must be in the form of '${scope.key}' where scope can be either 'event' or 'properties'." />

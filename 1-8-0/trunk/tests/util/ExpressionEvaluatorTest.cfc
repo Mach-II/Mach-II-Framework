@@ -107,6 +107,19 @@ Notes:
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 'bar'}", event, propertyManager) />	
 		<cfset debug(result)>
 		<cfset assertTrue(result, "Result of event.foo eq 'foo' was not true") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq ''}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertFalse(result, "Result of event.foo eq '' was true") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 1}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertFalse(result, "Result of event.foo eq '' was true") />
+		
+		<cfset event.setArg("bar", 1) />
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.bar eq 1}", event, propertyManager) />	
+		<cfset debug(result)>
+		<cfset assertTrue(result, "Result of event.bar eq 1 was false") />
 			
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${'bar' eq event.foo}", event, propertyManager) />	
 		<cfset debug(result)>
