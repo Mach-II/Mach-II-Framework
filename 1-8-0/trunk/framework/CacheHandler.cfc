@@ -300,7 +300,11 @@ Notes:
 					<cfset arg = element />
 				</cfif>
 			<cfelse>
-				<cfset arg = arguments.event.getArg(item, "") />
+				<cfif expressionEvaluator.isExpression(item)>
+					<cfset arg = expressionEvaluator.evaluateExpression(item, arguments.event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset arg = arguments.event.getArg(item, "") />
+				</cfif>
 			</cfif>
 			
 			<!--- Accept only simple values and ignore complex values --->	
