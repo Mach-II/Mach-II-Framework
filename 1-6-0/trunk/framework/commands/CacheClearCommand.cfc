@@ -107,7 +107,13 @@ Notes:
 				</cfif>
 			</cfif>
 		<cfelse>
-			<cfset expressionResult = variables.expressionEvaluator.evaluateExpressionBody(getCondition(), arguments.event, getPropertyManager())>
+			<cfif variables.expressionEvaluator.isExpression(getCondition())>
+				<cfset expressionResult = variables.expressionEvaluator.evaluateExpression(getCondition(), 
+						arguments.event, getPropertyManager()) />
+			<cfelse>
+				<cfset expressionResult = variables.expressionEvaluator.evaluateExpressionBody(getCondition(), 
+						arguments.event, getPropertyManager()) />
+			</cfif>
 			<cfif isBoolean(expressionResult) AND expressionResult>
 				<!--- Clear default strategy --->
 				<cfif getClearDefaultStrategy()>
