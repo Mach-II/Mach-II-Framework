@@ -112,10 +112,10 @@ Notes:
 							<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 							<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
 							<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
-
+							
 							<!--- Should not be counted as a miss if the cache block unencounters an exception --->
 							<cfset getCacheStrategy().getCacheStats().decrementCacheMisses() />
-
+							
 							<cfrethrow />
 						</cfcatch>
 					</cftry>
@@ -300,7 +300,11 @@ Notes:
 					<cfset arg = element />
 				</cfif>
 			<cfelse>
-				<cfset arg = arguments.event.getArg(item, "") />
+				<cfif expressionEvaluator.isExpression(item)>
+					<cfset arg = expressionEvaluator.evaluateExpression(item, arguments.event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset arg = arguments.event.getArg(item, "") />
+				</cfif>
 			</cfif>
 			
 			<!--- Accept only simple values and ignore complex values --->	
