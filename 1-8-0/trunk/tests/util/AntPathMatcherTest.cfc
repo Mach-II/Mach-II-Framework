@@ -18,8 +18,8 @@ Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id: AntPathMatcherTest.cfc 814 2008-06-14 21:48:39Z peterfarrell $
 
-Created version: 2.0.0
-Updated version: 2.0.0
+Created version: 1.8.0
+Updated version: 1.8.0
 
 Notes:
 Parts of these tests has been kindly ported from the 
