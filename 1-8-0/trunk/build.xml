@@ -211,6 +211,7 @@ Notes:
 			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
 			<!-- util -->
 			<testcase name="MachII.tests.util.AntPathMatcherTest"/>
+			<testcase name="MachII.tests.util.AssertTest"/>
 			<testcase name="MachII.tests.util.BeanUtilTest"/>
 			<testcase name="MachII.tests.util.ExceptionTest"/>
 			<testcase name="MachII.tests.util.ExpressionEvaluatorTest"/>
