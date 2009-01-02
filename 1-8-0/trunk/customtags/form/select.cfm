@@ -23,81 +23,61 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	name		= AUTOMATIC|[string]
+	type		= select
+- OPTIONAL ATTRIBUTES
+	disabled	= disabled|[null]
+	size		= [numeric]
+	checkValue	= [string]|[null]
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
 <cfimport prefix="form" taglib="/MachII/customtags/form/" />
 
-<!--- This tag requires an end tag --->
-<cfif NOT thisTag.hasEndTag>
-	<cfthrow type="MachII.FormLib.select.noEndTag"
-		message="This tag must have an end tag." />
-</cfif>
-
 <cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-		<!--- Check for required attributes --->
-		<cfif NOT StructKeyExists(variables.attributes, "path") AND NOT StructKeyExists(attributes, "name")>
-			<cfthrow type="MachII.FormLib.input.noPath"
-				message="This tag must have an attribute named 'path' if you do not specify a 'name'." />
-		</cfif>
 
-		<!--- Set defaults --->
-		<cfparam name="attributes.checkValue" type="string" default="" />
-		<cfparam name="attributes.multiple" type="boolean" default="false" />
-		<cfset variables.options = "" />
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfset setupTag("select", false) />
+	
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
 		
-		<!--- Resolve path --->
-		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "helper.BindResolver").init() />
-			<cfset attributes.checkValue = variables.bindResolver.resolvePath(attributes.path) />
-			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
-		</cfif>
-		
-		<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.name" type="string" default="#getNameFromPath(attributes.path)#" />
+		<cfset attributes.checkValue = resolvePath(attributes.path) />
+	</cfif>
+	
+	<!--- Set defaults --->
+	<cfparam name="attributes.checkValue" type="string" default="" />
+	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
 				
-		<!--- Add options if items are available --->
-		<cfif StructKeyExists(attributes, "items")>
-			<cfsavecontent variable="variables.options">
-				<form:option items="#attributes.items#"/>
-			</cfsavecontent>
-		</cfif>
-		
-		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("select", false) />
-		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
+	<!--- Add options if items are available --->
+	<cfif StructKeyExists(attributes, "items")>
+		<cfsavecontent variable="variables.options">
+			<form:option items="#attributes.items#"/>
+		</cfsavecontent>
+	</cfif>
+	
+	<!--- Set required attributes--->
+	<cfset setAttribute("name") />
 
-		<cfif StructKeyExists(attributes, "id")>
-			<cfset variables.tagWriter.setAttribute("id", attributes.id) />
-		<cfelse>
-			<cfset variables.tagWriter.setAttribute("id", attributes.name) />
-		</cfif>
-		<cfif attributes.multiple>
-			<cfset variables.tagWriter.setAttribute("multiple", "multiple") />
-		</cfif>
-		<cfif StructKeyExists(attributes, "size")>
-			<cfset variables.tagWriter.setAttribute("size", attributes.size) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "maxLength")>
-			<cfset variables.tagWriter.setAttribute("maxLength", attributes.maxLength) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "tabIndex")>
-			<cfset variables.tagWriter.setAttribute("tabIndex", attributes.tabIndex) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onChange")>
-			<cfset variables.tagWriter.setAttribute("onChange", attributes.onChange) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onKeyUp")>
-			<cfset variables.tagWriter.setAttribute("onKeyUp", attributes.onKeyUp) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "style")>
-			<cfset variables.tagWriter.setAttribute("style", attributes.style) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "class")>
-			<cfset variables.tagWriter.setAttribute("class", attributes.class) />
-		</cfif>
-	</cfsilent>
-	<cfset variables.tagWriter.setContent(variables.options) />
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
+	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("size") />
+	<cfset setAttributeIfDefined("multiple", "multiple") />
+	<cfset setAttributeIfDefined("disabled", "disabled") />
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setEventAttributes() />
+	
+	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
-	<cfoutput>#variables.tagWriter.doEndTag()#</cfoutput>
+	<cfif StructKeyExists(attributes, "options")>
+		<cfset thisTag.GeneratedContent = attributes.options />
+	</cfif>
+	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

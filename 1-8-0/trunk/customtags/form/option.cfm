@@ -23,81 +23,52 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	value		= [string]
+- OPTIONAL ATTRIBUTES
+	disabled	= disabled|[null]
+	selected	= selected|[null]
+	label		= [string]
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
-<!--- This tag requires an end tag --->
-<cfif NOT thisTag.hasEndTag>
-	<cfthrow type="MachII.FormLib.option.noEndTag"
-		message="This tag must have an end tag or be self closing." />
-</cfif>
+<cfif thisTag.executionMode IS "start">
 
-<cfif thisTag.ExecutionMode IS "end">
-	<!--- Check for required attributes --->
-	<cfif NOT StructKeyExists(attributes, "value") AND NOT StructKeyExists(attributes, "items")>
-		<cfthrow type="MachII.FormLib.checkbox.invalidAttributes"
-			message="This tag must have an attribute named 'value' or 'items'." />
-	</cfif>
-
-	<!--- Set defaults --->
-	<cfif StructKeyExists(attributes, "value")>
-		<cfparam name="attributes.label" type="string" default="#attributes.value#" />
-		<cfset attributes.items[attributes.value] = attributes.label />
-	</cfif>
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfset setupTag("option", false) />	
 
 	<!--- Set data --->
-	<cfset variables.checkValue = request._MachIIFormLib.selectCheckValue />
+	<cfset attributes.checkValue = request._MachIIFormLib.selectCheckValue />
+	
+	<!--- TODO: need to figure out how to generate id --->
+	
+	<!--- Set required attributes--->
+	<cfset setAttribute("value") />
 
-	<cfif IsStruct(attributes.items)>
-		<cfset variables.itemOrder = StructSort(attributes.items, "text") />
-		
-		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
-			<!--- Create a tag writer and set atrributes--->
-			<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("option", false) />
-			<cfif StructKeyExists(attributes, "onClick")>
-				<cfset variables.tagWriter.setAttribute("onclick", attributes.onClick) />
-			</cfif>
-			<cfif StructKeyExists(attributes, "style")>
-				<cfset variables.tagWriter.setAttribute("style", attributes.style) />
-			</cfif>
-			<cfset variables.tagWriter.setAttribute("value", variables.itemOrder[i]) />
-	
-			<cfif variables.checkValue EQ variables.itemOrder[i]>
-				<cfset variables.tagWriter.setAttribute("selected", "selected") />
-			</cfif>
-	
-			<cfif NOT Len(thisTag.GeneratedContent)>
-				<cfset variables.tagWriter.setContent(attributes.items[variables.itemOrder[i]]) />
-			<cfelse>
-				<cfset variables.tagWriter.setContent(thisTag.GeneratedContent) />
-				<cfset thisTag.GeneratedContent = "" />
-			</cfif>
-			
-			<cfoutput>#variables.tagWriter.doStartTag()##variables.tagWriter.doEndTag()#</cfoutput>
-		</cfloop>
-	<cfelseif IsArray(attributes.items)>
-		<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-			<!--- Create a tag writer and set atrributes--->
-			<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("option", false) />
-			<cfif StructKeyExists(attributes, "onClick")>
-				<cfset variables.tagWriter.setAttribute("onclick", attributes.onClick) />
-			</cfif>
-			<cfif StructKeyExists(attributes, "style")>
-				<cfset variables.tagWriter.setAttribute("style", attributes.style) />
-			</cfif>
-			<cfset variables.tagWriter.setAttribute("value", i) />
-	
-			<cfif variables.checkValue EQ attributes.items[i]>
-				<cfset variables.tagWriter.setAttribute("selected", "selected") />
-			</cfif>
-	
-			<cfif NOT Len(thisTag.GeneratedContent)>
-				<cfset variables.tagWriter.setContent(attributes.items[i]) />
-			<cfelse>
-				<cfset variables.tagWriter.setContent(thisTag.GeneratedContent) />
-				<cfset thisTag.GeneratedContent = "" />
-			</cfif>
-			
-			<cfoutput>#variables.tagWriter.doStartTag()##variables.tagWriter.doEndTag()#</cfoutput>
-		</cfloop>		
+	<!--- Set optional attributes --->
+	<cfif ListFindNoCase(attributes.checkValue, attributes.value)>
+		<cfset setAttribute("selected", "selected") />
+	<cfelse>
+		<cfset setAttributeIfDefined("selected", "selected") />
 	</cfif>
+	<cfset setAttributeIfDefined("label") />
+	<cfset setAttributeIfDefined("disabled", "disabled") />
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setEventAttributes() />
+	
+	<cfoutput>#doStartTag()#</cfoutput>
+<cfelse>
+	<cfif NOT Len(thisTag.GeneratedContent)>
+		<!--- Put a non-breaking space if value is nothing so it does not break validation --->
+		<cfif NOT Len(attributes.value)>
+			<cfset thisTag.GeneratedContent = "&nbsp;" />
+		<cfelse>
+			<cfset setContent(attributes.value) />
+		</cfif>
+	</cfif>
+	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
