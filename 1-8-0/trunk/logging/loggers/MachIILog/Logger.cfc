@@ -90,21 +90,17 @@ See that file header for configuration of filter criteria.
 		<cfset setLogAdapter(adapter) />
 		
 		<!--- Configure the remaining parameters --->
-		<cfif isParameterDefined("displayOutputTemplateFile")>
-			<cfset setDisplayOutputTemplateFile(getParameter("displayOutputTemplateFile")) />
+		<cfif isParameterDefined("displayOutputTemplateFile")
+			AND getAssert().hasText(getParameter("displayOutputTemplateFile"), "The value of 'displayOutputTemplateFile' cannot be empty.")>
 		</cfif>
 		
-		<cfif isParameterDefined("debugModeOnly")>
-			<cfif NOT IsBoolean(getParameter("debugModeOnly"))>
-				<cfthrow type="MachII.logging.loggers.MachIILog.Logger"
-					message="The value of 'debugModeOnly' must be boolean."
-					detail="Current value '#getParameter('debugModeOnly')#'" />
-			<cfelse>
-				<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
-			</cfif>
+		<cfif isParameterDefined("debugModeOnly")
+			AND getAssert().isTrue(getParameter("debugModeOnly"), "The value of 'debugModeOnly' must be boolean.")>
+			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>
 		
-		<cfif isParameterDefined("suppressDebugArg")>
+		<cfif isParameterDefined("suppressDebugArg")
+			AND getAssert().hasText(getParameter("suppressDebugArg"), "The value of 'suppressDebugArg' cannot be empty.")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
 	</cffunction>
@@ -334,12 +330,12 @@ See that file header for configuration of filter criteria.
 	</cffunction>
 
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false"
-		hint="Sets if the output is shown only if CF's debug mode is enabled.">
+		hint="Sets if the output is shown only if the CFML engine's debug mode is enabled.">
 		<cfargument name="debugModeOnly" type="boolean" required="true" />
 		<cfset variables.instance.debugModeOnly = arguments.debugModeOnly />
 	</cffunction>
 	<cffunction name="getDebugModeOnly" access="public" returntype="boolean" output="false"
-		hint="Gets if the output is shown only if CF's debug mode is enabled.">
+		hint="Gets if the output is shown only if CFML engine's debug mode is enabled.">
 		<cfreturn variables.instance.debugModeOnly />
 	</cffunction>
 	

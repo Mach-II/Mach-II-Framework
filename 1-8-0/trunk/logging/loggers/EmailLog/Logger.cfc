@@ -95,22 +95,20 @@ See that file header for configuration of filter criteria.
 		<cfset setLogAdapter(adapter) />
 		
 		<!--- Configure the remaining parameters --->
-		<cfif isParameterDefined("emailTemplateFile")>
+		<cfif isParameterDefined("emailTemplateFile")
+			AND getAssert().hasText(getParameter("emailTemplateFile")
+			, "A parameter named 'emailTemplateFile' is required. A path to the email template is required.")>
 			<cfset setEmailTemplateFile(getParameter("emailTemplateFile")) />
 		</cfif>
 		
-		<cfif isParameterDefined("to")>
+		<cfif getAssert().hasText(getParameter("to")
+			, "A parameter named 'to' is required. A list of email address(es) to send a log report to.")>
 			<cfset setTo(getParameter("to")) />
-		<cfelse>
-			<cfthrow type="MachII.logging.loggers.EmailLog.Logger"
-				message="A parameter named 'to' is required. A list of email address(es) to send a log report to.">
 		</cfif>
 		
-		<cfif isParameterDefined("from")>
+		<cfif getAssert().hasText(getParameter("from")
+			, "A parameter named 'from' is required. This indicates the email address to send a log report from.")>
 			<cfset setFrom(getParameter("from")) />
-		<cfelse>
-			<cfthrow type="MachII.logging.loggers.EmailLog.Logger"
-				message="A parameter named 'from' is required. This indicates the email address to send a log report from.">
 		</cfif>
 		
 		<cfset setSubject(getParameter("subject", "Application Log")) />

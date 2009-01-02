@@ -36,6 +36,7 @@ Notes:
 	<cfset variables.instance.loggerId = "" />
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.assert = "" />
 	
 	<!---
 	INITIAlIZATION / CONFIGURATION
@@ -45,8 +46,10 @@ Notes:
 		<cfargument name="loggerId" type="string" required="true" />
 		<cfargument name="parameters" type="struct" required="true" />
 		
+		<!--- Run setters --->
 		<cfset setLoggerId(arguments.loggerId) />
 		<cfset setParameters(arguments.parameters) />
+		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -229,6 +232,16 @@ Notes:
 	<cffunction name="getLogAdapter" access="public" returntype="MachII.logging.adapters.AbstractLogAdapter" output="false"
 		hint="Gets the log adapter for this logger.">
 		<cfreturn variables.logAdapter />
+	</cffunction>
+	
+	<cffunction name="setAssert" access="private" returntype="void" output="false"
+		hint="Sets the assert utility.">
+		<cfargument name="assert" type="MachII.util.Assert" required="true" />
+		<cfset variables.assert = arguments.assert />
+	</cffunction>
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
+		hint="Gets the assert utility.">
+		<cfreturn variables.assert />
 	</cffunction>
 	
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
