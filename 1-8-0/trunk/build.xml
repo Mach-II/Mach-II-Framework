@@ -226,7 +226,7 @@ Notes:
 			<status path="${basedir}" lastChangedRevisionProperty="svnBuildVersion"/>
 		</svn>
 		<input addProperty="buildVersion"
-			message="Input a build number or minor version level (0-9) (defaults to SVN build number):"
+			message="Input a build number or minor version level (0=BER, 1=Alpha, 2=Beta, 3=RC1, 4=RC2, 5=RC3, 6=RC4, 7=RC5, 8=Stable, 9=StableDuck) (defaults to SVN build number):"
 			defaultvalue="${svnBuildVersion}"/>
 	</target>
 	
