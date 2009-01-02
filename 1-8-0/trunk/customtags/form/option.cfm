@@ -43,6 +43,9 @@ Notes:
 	
 	<!--- TODO: need to figure out how to generate id --->
 	
+	<!--- Set defaults --->
+	<cfparam name="attributes.label" default="#attributes.value#" />
+	
 	<!--- Set required attributes--->
 	<cfset setAttribute("value") />
 
@@ -52,7 +55,6 @@ Notes:
 	<cfelse>
 		<cfset setAttributeIfDefined("selected", "selected") />
 	</cfif>
-	<cfset setAttributeIfDefined("label") />
 	<cfset setAttributeIfDefined("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
@@ -63,10 +65,10 @@ Notes:
 <cfelse>
 	<cfif NOT Len(thisTag.GeneratedContent)>
 		<!--- Put a non-breaking space if value is nothing so it does not break validation --->
-		<cfif NOT Len(attributes.value)>
+		<cfif NOT Len(attributes.label)>
 			<cfset thisTag.GeneratedContent = "&nbsp;" />
 		<cfelse>
-			<cfset setContent(attributes.value) />
+			<cfset setContent(attributes.label) />
 		</cfif>
 	</cfif>
 	<cfoutput>#doEndTag()#</cfoutput>

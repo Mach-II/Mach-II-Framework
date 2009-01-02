@@ -53,13 +53,6 @@ Notes:
 	<!--- Set defaults --->
 	<cfparam name="attributes.checkValue" type="string" default="" />
 	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
-				
-	<!--- Add options if items are available --->
-	<cfif StructKeyExists(attributes, "items")>
-		<cfsavecontent variable="variables.options">
-			<form:option items="#attributes.items#"/>
-		</cfsavecontent>
-	</cfif>
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
@@ -74,10 +67,10 @@ Notes:
 	<cfset setEventAttributes() />
 	
 	<cfoutput>#doStartTag()#</cfoutput>
-<cfelse>
-	<cfif StructKeyExists(attributes, "options")>
-		<cfset thisTag.GeneratedContent = attributes.options />
+	<cfif StructKeyExists(attributes, "items")>
+		<cfoutput><form:options items="#attributes.items#"/></cfoutput>
 	</cfif>
+<cfelse>
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
