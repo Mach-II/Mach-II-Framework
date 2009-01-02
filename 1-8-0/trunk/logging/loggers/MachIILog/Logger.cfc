@@ -91,16 +91,19 @@ See that file header for configuration of filter criteria.
 		
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("displayOutputTemplateFile")
-			AND getAssert().hasText(getParameter("displayOutputTemplateFile"), "The value of 'displayOutputTemplateFile' cannot be empty.")>
+			AND getAssert().hasText(getParameter("displayOutputTemplateFile")
+				, "The value of 'displayOutputTemplateFile' cannot be empty.")>
 		</cfif>
 		
 		<cfif isParameterDefined("debugModeOnly")
-			AND getAssert().isTrue(getParameter("debugModeOnly"), "The value of 'debugModeOnly' must be boolean.")>
+			AND getAssert().isTrue(getParameter("debugModeOnly")
+				, "The value of 'debugModeOnly' must be boolean.")>
 			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>
 		
 		<cfif isParameterDefined("suppressDebugArg")
-			AND getAssert().hasText(getParameter("suppressDebugArg"), "The value of 'suppressDebugArg' cannot be empty.")>
+			AND getAssert().hasText(getParameter("suppressDebugArg")
+				, "The value of 'suppressDebugArg' cannot be empty.")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
 	</cffunction>

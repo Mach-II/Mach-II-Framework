@@ -102,46 +102,33 @@ via reap() which is run every 3 minutes.
 		hint="Configures the strategy.">
 
 		<!--- Validate and set parameters --->
-		<cfif isParameterDefined("timespan")>
-			<cfif getParameter("timespan") NEQ "forever" AND ListLen(getParameter("timespan")) NEQ 4>
-				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid timespan of '#getParameter("timespan")#'."
-					detail="Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds)." />
-			<cfelse>
-				<cfset setTimespanString(getParameter("timespan")) />
-			</cfif>
+		<cfif isParameterDefined("timespan")
+			AND getAssert().isTrue(getParameter("timespan") EQ "forever" OR ListLen(getParameter("timespan")) EQ 4
+				, "Invalid timespan of '#getParameter("timespan")#'."
+				, "Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds).")>
+			<cfset setTimespanString(getParameter("timespan")) />
 		</cfif>
-		<cfif isParameterDefined("scope")>
-			<cfif NOT ListFindNoCase("application,server,session", getParameter("scope"))>
-				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid Scope of '#getParameter("scope")#'."
-					detail="Use 'application', 'server' or 'session'." />
-			<cfelse>
-				<cfset setScope(getParameter("scope")) />
-			</cfif>
+		<cfif isParameterDefined("scope")
+			AND getAssert().isTrue(ListFindNoCase("application,server,session", getParameter("scope"))
+				, "Invalid Scope of '#getParameter("scope")#'."
+				, "Use 'application', 'server' or 'session'.")>
+			<cfset setScope(getParameter("scope")) />
 		</cfif>
-		<cfif isParameterDefined("scopeKey")>
-			<cfif NOT Len(getParameter("scopeKey"))>
-				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid ScopeKey of '#getParameter("ScopeKey")#'."
-					detail="ScopeKey must have a length greater than 0 and be a valid struct key." />
-			<cfelse>
-				<cfset setScopeKey(getParameter("scopeKey")) />
-			</cfif>
+		<cfif isParameterDefined("scopeKey")
+			AND getAssert().hasText(getParameter("scopeKey")
+				, "Invalid ScopeKey of '#getParameter("ScopeKey")#'."
+				, "ScopeKey must have a length greater than 0 and be a valid struct key.")>
+			<cfset setScopeKey(getParameter("scopeKey")) />
 		<cfelseif isParameterDefined("generatedScopeKey")>
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
 			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
-		<cfif isParameterDefined("cleanupIntervalInMinutes")>
-			<cfif NOT isNumeric(getParameter("cleanupIntervalInMinutes")) 
-				OR getParameter("cleanupIntervalInMinutes") LTE 0>
-				<cfthrow type="MachII.caching.strategies.TimeSpanCache"
-					message="Invalid CleanupIntervalInMinutes of '#getParameter("cleanupIntervalInMinutes")#'."
-					detail="CleanupIntervalInMinutes must be numeric and greater than 0." />
-			<cfelse>
-				<cfset setCleanupInterval(getParameter("cleanupIntervalInMinutes")) />
-			</cfif>
+		<cfif isParameterDefined("cleanupIntervalInMinutes")
+			AND getAssert().isTrue(IsNumeric(getParameter("cleanupIntervalInMinutes")) AND getParameter("cleanupIntervalInMinutes") GT 0
+				, "Invalid CleanupIntervalInMinutes of '#getParameter("cleanupIntervalInMinutes")#'."
+				, "CleanupIntervalInMinutes must be numeric and greater than 0.")>
+			<cfset setCleanupInterval(getParameter("cleanupIntervalInMinutes")) />
 		</cfif>
 
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />

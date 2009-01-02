@@ -97,17 +97,20 @@ See that file header for configuration of filter criteria.
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("emailTemplateFile")
 			AND getAssert().hasText(getParameter("emailTemplateFile")
-			, "A parameter named 'emailTemplateFile' is required. A path to the email template is required.")>
+			, "A parameter named 'emailTemplateFile' is required."
+			, "A path to the email template is required.")>
 			<cfset setEmailTemplateFile(getParameter("emailTemplateFile")) />
 		</cfif>
 		
 		<cfif getAssert().hasText(getParameter("to")
-			, "A parameter named 'to' is required. A list of email address(es) to send a log report to.")>
+			, "A parameter named 'to' is required."
+			, "A list of email address(es) to send a log report to.")>
 			<cfset setTo(getParameter("to")) />
 		</cfif>
 		
 		<cfif getAssert().hasText(getParameter("from")
-			, "A parameter named 'from' is required. This indicates the email address to send a log report from.")>
+			, "A parameter named 'from' is required."
+			, "This indicates the email address to send a log report from.")>
 			<cfset setFrom(getParameter("from")) />
 		</cfif>
 		

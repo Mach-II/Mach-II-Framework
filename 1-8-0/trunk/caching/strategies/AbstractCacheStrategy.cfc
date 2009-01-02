@@ -48,6 +48,7 @@ in the Mach-II dashboard.
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
 	<cfset variables.log = 0 />
+	<cfset variables.assert = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -57,6 +58,7 @@ in the Mach-II dashboard.
 		<cfargument name="parameters" type="struct" required="true" />
 		
 		<cfset setParameters(arguments.parameters) />
+		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -168,6 +170,16 @@ in the Mach-II dashboard.
 	<cffunction name="isCacheEnabled" access="public" returntype="boolean" output="false"
 		hint="Provides a boolean suggestion to the *calling code* if caching should be used. This does not explicitly turn caching on/off.">
 		<cfreturn variables.instance.isCacheEnabled />
+	</cffunction>
+	
+	<cffunction name="setAssert" access="private" returntype="void" output="false"
+		hint="Sets the assert utility.">
+		<cfargument name="assert" type="MachII.util.Assert" required="true" />
+		<cfset variables.assert = arguments.assert />
+	</cffunction>
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
+		hint="Gets the assert utility.">
+		<cfreturn variables.assert />
 	</cffunction>
 
 	<cffunction name="setParameters" access="public" returntype="void" output="false"

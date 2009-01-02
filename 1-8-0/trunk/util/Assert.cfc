@@ -25,7 +25,19 @@ Notes:
 Loosely based off the same class from the Spring Framework 
 (http://www.springframework.org)
 
+All assertions must return 'true' because returning is like returning
+null and can cause null pointer exceptions when assertions are used in
+complex conditionals.
 
+Example of null pointer if 'true' is not returned:
+<cfif isParameterDefined("timespan")
+	AND getAssert().isTrue(getParameter("timespan") EQ "forever" OR ListLen(getParameter("timespan")) EQ 4
+		, "Invalid timespan of '#getParameter("timespan")#'."
+		, "Timespan must be set to 'forever' or a list of 4 numbers (days, hours, minutes, seconds).")>
+	<cfset setTimespanString(getParameter("timespan")) />
+</cfif>
+
+The second conditional in the state returns as null and thus the exception.
 --->
 <cfcomponent 
 	displayname="Assert"
@@ -47,7 +59,7 @@ Loosely based off the same class from the Spring Framework
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="doesNotContain" access="public" returntype="void" output="false"
+	<cffunction name="doesNotContain" access="public" returntype="boolean" output="false"
 		hint="Assert that the given text does not contain the given substring (case-senstive).">
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check the substring against." />
@@ -62,9 +74,11 @@ Loosely based off the same class from the Spring Framework
 		<cfif FindNoCase(arguments.substring, arguments.text)>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 
-	<cffunction name="hasLength" access="public" returntype="void" output="false"
+	<cffunction name="hasLength" access="public" returntype="boolean" output="false"
 		hint="Assert that the given text is not empty.">
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check the length." />
@@ -77,9 +91,11 @@ Loosely based off the same class from the Spring Framework
 		<cfif NOT Len(arguments.text)>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="hasText" access="public" returntype="void" output="false"
+	<cffunction name="hasText" access="public" returntype="boolean" output="false"
 		hint="Assert that the given string has valid text content; it must not be a zero length string and must contain at least one non-whitespace character.">
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check the length." />
@@ -92,9 +108,11 @@ Loosely based off the same class from the Spring Framework
 		<cfif NOT checkValidTextContent(arguments.text)>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="isNumber" access="public" returntype="void" output="false"
+	<cffunction name="isNumber" access="public" returntype="boolean" output="false"
 		hint="Assert that the given text is a number.">
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check if number." />
@@ -107,9 +125,11 @@ Loosely based off the same class from the Spring Framework
 		<cfif NOT IsNumeric(arguments.text)>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="isTrue" access="public" returntype="void" output="false"
+	<cffunction name="isTrue" access="public" returntype="boolean" output="false"
 		hint="Assert that the given expression is true.">
 		<cfargument name="expression" type="boolean" required="true"
 			hint="The expression to check if not true." />
@@ -119,12 +139,16 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
 		
+		<cfset request.temp = arguments />
+		
 		<cfif NOT arguments.expression>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="notEmpty" access="public" returntype="void" output="false"
+	<cffunction name="notEmpty" access="public" returntype="boolean" output="false"
 		hint="Assert that the given expression is true.">
 		<cfargument name="object" type="any" required="true"
 			hint="The object (query, struct or array) to check if not empty." />
@@ -161,6 +185,8 @@ Loosely based off the same class from the Spring Framework
 			<cfthrow type="MachII.util.IllegalDatatype"
 				message="The passed argument is not of datatype 'struct', 'array' or 'query' and therefore an assertion cannot be performed." />
 		</cfif>
+		
+		<cfreturn true />
 	</cffunction>
 	
 	<!---
@@ -181,7 +207,7 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check the length." />
 		
-		<cfset var textCharArray = arguments.text.toCharArray() />
+		<cfset var textCharArray =  "" />
 		<cfset var char = CreateObject("java", "java.lang.Character") />
 		<cfset var i = 0 />
 		
@@ -189,6 +215,9 @@ Loosely based off the same class from the Spring Framework
 		<cfif NOT Len(arguments.text)>
 			<cfreturn false />
 		</cfif>
+		
+		<!--- Length of input text needs to be checked first or a null pointer will occur --->
+		<cfset textCharArray = arguments.text.toCharArray() />
 		
 		<!---
 		Check for at least one non-whitespace character 

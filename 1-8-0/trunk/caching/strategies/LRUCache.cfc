@@ -79,32 +79,23 @@ in the application scope.
 		hint="Configures the strategy.">
 
 		<!--- Validate and set parameters --->
-		<cfif isParameterDefined("size")>
-			<cfif NOT isNumeric(getParameter("size")) OR getParameter("size") LTE 0>
-				<cfthrow type="MachII.caching.strategies.LRUCache"
-					message="Invalid Size of '#getParameter("size")#'."
-					detail="Size must be numeric and greater than 0." />
-			<cfelse>			
-				<cfset setSize(getParameter("size")) />
-			</cfif>
+		<cfif isParameterDefined("size")
+			AND getAssert().isTrue(IsNumeric(getParameter("size")) AND getParameter("size") GT 0
+				, "Invalid Size of '#getParameter("size")#'."
+				, "Size must be numeric and greater than 0.">		
+			<cfset setSize(getParameter("size")) />
 		</cfif>
-		<cfif isParameterDefined("scope")>
-			<cfif NOT ListFindNoCase("application,server,session", getParameter("scope"))>
-				<cfthrow type="MachII.caching.strategies.LRUCache"
-					message="Invalid Scope of '#getParameter("scope")#'."
-					detail="Use 'application', 'server' or 'session'." />
-			<cfelse>
-				<cfset setScope(getParameter("scope")) />
-			</cfif>
+		<cfif isParameterDefined("scope")
+			AND getAssert().isTrue(ListFindNoCase("application,server,session", getParameter("scope"))
+				, "Invalid Scope of '#getParameter("scope")#'."
+				, "Use 'application', 'server' or 'session'.")>
+			<cfset setScope(getParameter("scope")) />
 		</cfif>
-		<cfif isParameterDefined("scopeKey")>
-			<cfif NOT Len(getParameter("scopeKey"))>
-				<cfthrow type="MachII.caching.strategies.LRUCache"
-					message="Invalid ScopeKey of '#getParameter("ScopeKey")#'."
-					detail="ScopeKey must have a length greater than 0 and be a valid struct key." />
-			<cfelse>
-				<cfset setScopeKey(getParameter("scopeKey")) />
-			</cfif>
+		<cfif isParameterDefined("scopeKey")
+			AND getAssert().hasText(getParameter("scopeKey")
+				, "Invalid ScopeKey of '#getParameter("ScopeKey")#'."
+				, "ScopeKey must have a length greater than 0 and be a valid struct key.")>
+			<cfset setScopeKey(getParameter("scopeKey")) />
 		<cfelseif isParameterDefined("generatedScopeKey")>
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
