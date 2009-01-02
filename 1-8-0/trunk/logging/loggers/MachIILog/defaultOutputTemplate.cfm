@@ -210,5 +210,6 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		</tr>
 		<cfset local.cookieRow = local.cookieRow + 1 />
 	</cfloop>
+	</table>
 </div>
 </cfoutput>
