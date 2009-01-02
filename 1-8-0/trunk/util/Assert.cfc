@@ -56,9 +56,11 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this text argument must not contain the substring '#arguments.substring#'."
 			hint="The message to throw if the assertion fails." />
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
 				
 		<cfif FindNoCase(arguments.substring, arguments.text)>
-			<cfset throw(arguments.message) />
+			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
 	</cffunction>
 
@@ -69,9 +71,11 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this text argument must have length; it cannot be empty."
 			hint="The message to throw if the assertion fails." />
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
 				
 		<cfif NOT Len(arguments.text)>
-			<cfset throw(arguments.message) />
+			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
 	</cffunction>
 	
@@ -82,9 +86,11 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this text argument must contain valid text content."
 			hint="The message to throw if the assertion fails." />
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
 		
 		<cfif NOT checkValidTextContent(arguments.text)>
-			<cfset throw(arguments.message) />
+			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
 	</cffunction>
 	
@@ -95,9 +101,11 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this text argument must be numeric."
 			hint="The message to throw if the assertion fails." />
-				
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
+		
 		<cfif NOT IsNumeric(arguments.text)>
-			<cfset throw(arguments.message) />
+			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
 	</cffunction>
 	
@@ -108,9 +116,11 @@ Loosely based off the same class from the Spring Framework
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this expression argument must be true."
 			hint="The message to throw if the assertion fails." />
-				
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
+		
 		<cfif NOT arguments.expression>
-			<cfset throw(arguments.message) />
+			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
 	</cffunction>
 	
@@ -120,6 +130,8 @@ Loosely based off the same class from the Spring Framework
 			hint="The object (query, struct or array) to check if not empty." />
 		<cfargument name="message" type="string" required="false"
 			hint="The message to throw if the assertion fails." />
+		<cfargument name="detail" type="string" required="false" default=""
+			hint="The detail to throw if the assertion fails." />
 				
 		<cfif IsArray(arguments.object)>
 			<cfif NOT ArrayLen(arguments.object)>
@@ -127,7 +139,7 @@ Loosely based off the same class from the Spring Framework
 					<cfset arguments.message = "[Assertion failed] - this array must not be empty; it must contain at least one element." />
 				</cfif>
 				
-				<cfset throw(arguments.message) />
+				<cfset throw(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsStruct(arguments.object)>
 			<cfif NOT StructCount(arguments.object)>
@@ -135,7 +147,7 @@ Loosely based off the same class from the Spring Framework
 					<cfset arguments.message = "[Assertion failed] - this struct must not be empty; it must contain at least one key." />
 				</cfif>
 				
-				<cfset throw(arguments.message) />
+				<cfset throw(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsQuery(arguments.object)>
 			<cfif NOT arguments.object.recordcount>
@@ -143,7 +155,7 @@ Loosely based off the same class from the Spring Framework
 					<cfset arguments.message = "[Assertion failed] - this query must not be empty; it must contain at least one row." />
 				</cfif>
 				
-				<cfset throw(arguments.message) />
+				<cfset throw(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.util.IllegalDatatype"
@@ -157,9 +169,11 @@ Loosely based off the same class from the Spring Framework
 	<cffunction name="throw" access="private" returntype="void" output="false"
 		hint="Throws an exception if an assertion fails.">
 		<cfargument name="message" type="string" required="true" />
+		<cfargument name="detail" type="string" required="true" />
 		
 		<cfthrow type="MachII.util.IllegalArgument"
-			message="#arguments.message#" />
+			message="#arguments.message#"
+			detail="#arguments.detail#" />
 	</cffunction>
 	
 	<cffunction name="checkValidTextContent" access="private" returntype="boolean" output="false"
