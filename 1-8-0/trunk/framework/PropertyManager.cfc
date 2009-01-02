@@ -249,7 +249,8 @@ the rest of the framework. (pfarrell)
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Prepares the configurable properties for use.">
 
-		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var appManager = getAppManager() />
+		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
@@ -258,6 +259,7 @@ the rest of the framework. (pfarrell)
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
 			<cfset aConfigurableProperty.setLog(logFactory) />
+			<cfset appManager.onPostObjectReload(aConfigurableProperty) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
 	</cffunction>

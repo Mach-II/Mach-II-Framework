@@ -205,7 +205,8 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered listeners and its' invoker.">
 
-		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var appManager = getAppManager() />
+		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aListener = 0 />
 		<cfset var i = 0 />
 		
@@ -213,6 +214,7 @@ Notes:
 		<cfloop collection="#variables.listeners#" item="i">
 			<cfset aListener = variables.listeners[i] />
 			<cfset aListener.setLog(logFactory) />
+			<cfset appManager.onPostObjectReload(aListener) />
 			<cfset aListener.configure() />
 		</cfloop>
 	</cffunction>

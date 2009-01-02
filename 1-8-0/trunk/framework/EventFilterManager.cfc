@@ -164,13 +164,15 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered EventFilters.">
 		
-		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var appManager = getAppManager() />
+		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aFilter = 0 />
 		<cfset var i = 0 />
 		
 		<cfloop collection="#variables.filters#" item="i">
 			<cfset aFilter = variables.filters[i] />
 			<cfset aFilter.setLog(logFactory) />
+			<cfset appManager.onPostObjectReload(aFilter) />
 			<cfset aFilter.configure() />
 		</cfloop>
 	</cffunction>

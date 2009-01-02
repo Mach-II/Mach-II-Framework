@@ -169,13 +169,15 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void"
 		hint="Configures each of the registered Plugins.">
 
-		<cfset var logFactory = getAppManager().getLogFactory() />
+		<cfset var appManager = getAppManager() />
+		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
 			<cfset aPlugin.setLog(logFactory) />
+			<cfset appManager.onPostObjectReload(aPlugin) />
 			<cfset aPlugin.configure() />
 		</cfloop>
 	</cffunction>
