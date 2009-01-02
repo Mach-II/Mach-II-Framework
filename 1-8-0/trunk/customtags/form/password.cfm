@@ -43,16 +43,16 @@ Notes:
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
 	
-	<!--- Resolve path if defined--->
+	<!--- Resolve path if defined --->
 	<cfif StructKeyExists(attributes, "path")>
 		<!--- Only populate with value if showPassowrd --->
 		<cfif StructKeyExists(attributes, "showPassword") 
 			AND attributes.showPassword>
 			<cfparam name="attributes.value" type="string" 
-				default="#variables.bindResolver.resolvePath(attributes.path)#" />
+				default="#resolvePath(attributes.path)#" />
 		</cfif>
 		<cfparam name="attributes.name" type="string" 
-			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+			default="#getNameFromPath(attributes.path)#" />
 	</cfif>
 	
 	<!--- Set defaults --->
@@ -76,6 +76,6 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setEventAttributes() />
 	
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
+	<cfoutput>#doStartTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

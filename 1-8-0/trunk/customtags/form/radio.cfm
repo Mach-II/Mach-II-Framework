@@ -23,60 +23,56 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
+- REQUIRED ATTRIBUTES
+	name		= AUTOMATIC|[string]
+	value		= AUTOMATIC|[string]
+	type		= text
+- OPTIONAL ATTRIBUTES
+	disabled	= disabled|[null]
+	checked		= checked|[null] 
+	size		= [numeric]
+- STANDARD FORM ATTRIBUTES
+- EVENT ATTRIBUTES
 --->
 <cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-		<!--- Check for required attributes --->
-		<cfif NOT StructKeyExists(variables.attributes, "path") AND NOT StructKeyExists(attributes, "name")>
-			<cfthrow type="MachII.FormLib.radio.noPath"
-				message="This tag must have an attribute named 'path' if you do not specify a 'name'." />
-		</cfif>
 
-		<!--- Set defaults --->
-		<cfparam name="attributes.value" type="string" default="1" />
-		
-		<!--- Resolve path --->
-		<cfif StructKeyExists(attributes, "path")>
-			<cfset variables.bindResolver = CreateObject("component", "helper.BindResolver").init() />
-			<cfset attributes.checkValue = variables.bindResolver.resolvePath(attributes.path) />
-			<cfparam name="attributes.name" type="string" default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
-		</cfif>
-		
-		<!--- Create a tag writer and set atrributes--->
-		<cfset variables.tagWriter = CreateObject("component", "helper.TagWriter").init("input", true) />
-		<cfset variables.tagWriter.setAttribute("type", "radio") />
-		<cfset variables.tagWriter.setAttribute("name", attributes.name) />
-		<cfset variables.tagWriter.setAttribute("value", attributes.value) />
-		
-		<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ attributes.value>
-			<cfset variables.tagWriter.setAttribute("checked", "checked") />
-		</cfif>
-		<cfif StructKeyExists(attributes, "id")>
-			<cfset variables.tagWriter.setAttribute("id", attributes.id) />
-		<cfelse>
-			<cfset variables.tagWriter.setAttribute("id", attributes.name & "_" & attributes.value) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "size")>
-			<cfset variables.tagWriter.setAttribute("size", attributes.size) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "maxLength")>
-			<cfset variables.tagWriter.setAttribute("maxLength", attributes.maxLength) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "tabIndex")>
-			<cfset variables.tagWriter.setAttribute("tabIndex", attributes.tabIndex) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onChange")>
-			<cfset variables.tagWriter.setAttribute("onChange", attributes.onChange) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "onKeyUp")>
-			<cfset variables.tagWriter.setAttribute("onKeyUp", attributes.onKeyUp) />
-		</cfif>
-		<cfif StructKeyExists(attributes, "disabled")>
-			<cfif attributes.disabled EQ "disabled" OR attributes.disabled EQ true>
-				<cfset variables.tagWriter.setAttribute("disabled", "disabled") />
-			</cfif>
-		</cfif>
-	</cfsilent>
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfset setupTag("input", true) />
+	
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
+	
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.value" type="string" 
+			default="#resolvePath(attributes.path)#" />
+		<cfparam name="attributes.name" type="string" 
+			default="#getNameFromPath(attributes.path)#" />
+	</cfif>
+
+	<!--- Set defaults --->
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
+	<cfparam name="attributes.value" type="string" 
+		default="1" />
+
+	<!--- Set required attributes--->
+	<cfset setAttribute("type", "radio") />
+	<cfset setAttribute("name") />
+	<cfset setAttribute("value") />
+	<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ attributes.value>
+		<cfset setAttribute("checked", "checked") />
+	</cfif>
+
+	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("size") />
+	<cfset setAttributeIfDefined("disabled", "disabled") />
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setEventAttributes() />
+	
+	<cfoutput>#doStartTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

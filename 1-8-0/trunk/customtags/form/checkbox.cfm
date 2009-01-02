@@ -45,9 +45,9 @@ Notes:
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.name" type="string" 
-			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+			default="#getNameFromPath(attributes.path)#" />
 		<cfparam name="attributes.checkValue" type="string" 
-			default="#variables.bindResolver.resolvePath(attributes.path)#" />
+			default="#resolvePath(attributes.path)#" />
 	</cfif>
 	
 	<!--- Set defaults --->
@@ -75,6 +75,6 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setEventAttributes() />
 	
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
+	<cfoutput>#doStartTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

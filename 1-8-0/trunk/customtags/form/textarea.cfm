@@ -43,7 +43,7 @@ Notes:
 	<!--- Resolve path if defined --->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.name" type="string" 
-			default="#variables.bindResolver.getNameFromPath(attributes.path)#" />
+			default="#getNameFromPath(attributes.path)#" />
 	</cfif>
 
 	<!--- Set required attributes--->
@@ -58,10 +58,10 @@ Notes:
 <cfelse>
 	<!--- Add content of text area if bindable --->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfset thisTag.GeneratedContent = variables.bindResolver.resolvePath(attributes.path) />
+		<cfset thisTag.GeneratedContent = resolvePath(attributes.path) />
 	</cfif>
 	
-	<cfset variables.tagWriter.setContent(thisTag.GeneratedContent) />
-	<cfoutput>#variables.tagWriter.doEndTag()#</cfoutput>
+	<cfset setContent(thisTag.GeneratedContent) />
+	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

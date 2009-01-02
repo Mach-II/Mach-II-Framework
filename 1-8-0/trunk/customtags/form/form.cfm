@@ -66,8 +66,8 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setEventAttributes() />
 		
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
+	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
-	<cfoutput>#variables.tagWriter.doEndTag()#</cfoutput>
+	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
