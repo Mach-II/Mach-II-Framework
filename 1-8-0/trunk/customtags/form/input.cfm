@@ -48,11 +48,13 @@ Notes:
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.value" type="string" 
 			default="#resolvePath(attributes.path)#" />
-		<cfparam name="attributes.name" type="string" 
-			default="#getNameFromPath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
 	</cfif>
 	
 	<!--- Set defaults --->
+	<cfparam name="attributes.name" type="string" 
+		default="#attributes.path#" />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
 	<cfparam name="attributes.value" type="string" 

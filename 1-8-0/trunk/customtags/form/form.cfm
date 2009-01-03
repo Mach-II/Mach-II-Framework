@@ -27,11 +27,11 @@ Notes:
 	actionEvent		= name of event to process this form
 
 - OPTIONAL ATTRIBUTES
-	actionModule	= name of module to use with the even to process this form
-	actionUrlParams	= name value pairs in pipe (|) list of url params or struct
-	encType			= specifies the encType of the form (defaults to "multipart/form-data")
-	method			= specifies the type of form post to make (defaults to "post")
-	bind			= specifies the name of the event arg to try to bind to (default to event object)
+actionModule	= name of module to use with the event to process this form
+actionUrlParams	= name value pairs in pipe (|) list of url params or struct
+encType			= specifies the encType of the form (defaults to "multipart/form-data")
+method			= specifies the type of form post to make (defaults to "post")
+bind			= specifies the name of the event arg to try to bind to (default to event object)
 --->
 <cfif thisTag.ExecutionMode IS "start">
 

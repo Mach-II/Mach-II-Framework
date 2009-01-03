@@ -46,12 +46,22 @@ Notes:
 		
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfparam name="attributes.name" type="string" default="#getNameFromPath(attributes.path)#" />
+		<cfparam name="attributes.name" type="string" 
+			default="#attributes.path#" />
 		<cfset attributes.checkValue = resolvePath(attributes.path) />
+	<cfelse>
+		<cfset attributes.path = "" />
 	</cfif>
 	
 	<!--- Set defaults --->
-	<cfparam name="attributes.checkValue" type="string" default="" />
+	<cfparam name="attributes.name" type="string" 
+		default="#attributes.path#" />
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
+	<cfparam name="attributes.checkValue" type="string" 
+		default="" />
+	
+	<!--- Syncronize check value for option tag --->
 	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
 	
 	<!--- Set required attributes--->
@@ -67,10 +77,10 @@ Notes:
 	<cfset setEventAttributes() />
 	
 	<cfoutput>#doStartTag()#</cfoutput>
+<cfelse>
 	<cfif StructKeyExists(attributes, "items")>
 		<cfoutput><form:options items="#attributes.items#"/></cfoutput>
 	</cfif>
-<cfelse>
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

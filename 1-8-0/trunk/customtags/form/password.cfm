@@ -51,15 +51,17 @@ Notes:
 			<cfparam name="attributes.value" type="string" 
 				default="#resolvePath(attributes.path)#" />
 		</cfif>
-		<cfparam name="attributes.name" type="string" 
-			default="#getNameFromPath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
 	</cfif>
 	
 	<!--- Set defaults --->
-	<cfparam name="attributes.id" type="string" 
-		default="#attributes.name#" />
+	<cfparam name="attributes.name" type="string" 
+		default="#attributes.path#" />
 	<cfparam name="attributes.value" type="string" 
 		default="" />
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "text") />

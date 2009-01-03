@@ -47,15 +47,18 @@ Notes:
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.checkValue" type="string" 
 			default="#resolvePath(attributes.path)#" />
-		<cfparam name="attributes.name" type="string" 
-			default="#getNameFromPath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
+		<cfset attributes.checkValue = "" />
 	</cfif>
 
 	<!--- Set defaults --->
+	<cfparam name="attributes.name" type="string" 
+		default="#attributes.path#" />
 	<cfparam name="attributes.value" type="string" 
 		default="1" />
 	<cfparam name="attributes.id" type="string" 
-		default="#attributes.name#_#attributes.value#" />
+		default="#attributes.name#_#replaceSpaces(attributes.value)#" />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "radio") />

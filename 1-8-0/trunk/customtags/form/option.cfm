@@ -41,10 +41,11 @@ Notes:
 	<!--- Set data --->
 	<cfset attributes.checkValue = request._MachIIFormLib.selectCheckValue />
 	
-	<!--- TODO: need to figure out how to generate id --->
-	
 	<!--- Set defaults --->
-	<cfparam name="attributes.label" default="#attributes.value#" />
+	<cfparam name="attributes.id" type="string"
+		default="#getParentTagAttribute("select", "id")#_#replaceSpaces(attributes.value)#" />
+	<cfparam name="attributes.label" type="string"  
+		default="#attributes.value#" />
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("value") />

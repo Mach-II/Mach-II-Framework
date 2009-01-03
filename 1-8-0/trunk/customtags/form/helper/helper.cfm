@@ -144,19 +144,17 @@ PUBLIC FUNCTIONS
 	<cfreturn value />
 </cffunction>
 
-<cffunction name="getNameFromPath" access="public" returntype="string" output="false"
-	hint="Gets a name from a binding path.">
-	<cfargument name="path" type="string" required="true" />
-	
-	<cfset var name = "" />
-	
-	<cfif FindNoCase(".", arguments.path)>
-		<cfset name = ListLast(arguments.path, ".") />
-	<cfelse>
-		<cfset name = arguments.path />
-	</cfif>
-	
-	<cfreturn name />
+<cffunction name="getParentTagAttribute" access="public" returntype="string" output="false"
+	hint="Gets the parents tag's attribute value (ex: used by option tag to get select tag id)">
+	<cfargument name="tagName" type="string" required="true" />
+	<cfargument name="attributeName" type="string" required="true" />	
+	<cfreturn GetBaseTagData("cf_" & arguments.tagName).attributes[arguments.attributeName] />
+</cffunction>
+
+<cffunction name="replaceSpaces" access="public" returntype="string" output="false"
+	hint="Replaces all spaces with underscores (_).">
+	<cfargument name="value" type="string" required="true" />
+	<cfreturn Replace(arguments.value, " ", "_", "all") />
 </cffunction>
 
 <cffunction name="doStartTag" access="public" returntype="string" output="false"
