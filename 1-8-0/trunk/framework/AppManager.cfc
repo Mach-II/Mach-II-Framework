@@ -47,6 +47,7 @@ Notes:
 
 	<cfset variables.onPostObjectReloadCallbacks = ArrayNew(1) />
 	<cfset variables.utils = "" />
+	<cfset variables.assert = "" />
 	<cfset variables.expressionEvaluator = "" />
 	<cfset variables.logFactory = "" />
 
@@ -329,6 +330,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
 		<cfreturn variables.utils />
+	</cffunction>
+	
+	<cffunction name="setAssert" access="public" returntype="void" output="false">
+		<cfargument name="assert" type="MachII.util.Assert" required="true" />
+		<cfset variables.assert = arguments.assert />
+	</cffunction>
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false">
+		<cfreturn variables.assert />
 	</cffunction>
 	
 	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false">

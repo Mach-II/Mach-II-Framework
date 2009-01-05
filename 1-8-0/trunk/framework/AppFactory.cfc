@@ -63,6 +63,7 @@ Notes:
 			
 		<cfset var appManager = "" />
 		<cfset var utils = "" />
+		<cfset var assert = "" />
 		<cfset var expressionEvaluator = "" />
 		<cfset var logFactory = "" />
 		<cfset var propertyManager = "" />
@@ -99,10 +100,12 @@ Notes:
 		<!--- Utils and LogFactory is a singleton --->
 		<cfif IsObject(arguments.parentAppManager)>
 			<cfset utils = arguments.parentAppManager.getUtils() />
+			<cfset assert = arguments.parentAppManager.getAssert() />
 			<cfset expressionEvaluator = arguments.parentAppManager.getExpressionEvaluator() />
 			<cfset logFactory = arguments.parentAppManager.getLogFactory() />
 		<cfelse>
 			<cfset utils = CreateObject("component", "MachII.util.Utils").init() />
+			<cfset assert = CreateObject("component", "MachII.util.Assert").init() />
 			<cfset expressionEvaluator = CreateObject("component", "MachII.util.ExpressionEvaluator").init() />
 			<cfset logFactory = CreateObject("component", "MachII.logging.LogFactory").init() />	
 		</cfif>
@@ -172,8 +175,11 @@ Notes:
 		subroutineManager, eventManager, viewManager, pluginManager and then moduleManager
 		--->
 		
-		<!--- Set the utils which is a singleton across the application --->
+		<!--- Set the Utils which is a singleton across the application --->
 		<cfset appManager.setUtils(utils) />
+		
+		<!--- Set the Assert which is a singleton across the application --->
+		<cfset appManager.setAssert(assert) />
 		
 		<!--- Set the ExpressionEvaluator which is a singleton across the application --->
 		<cfset appManager.setExpressionEvaluator(expressionEvaluator) />
