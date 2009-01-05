@@ -98,7 +98,7 @@ The second conditional in the state returns as null and thus the exception.
 	<cffunction name="hasText" access="public" returntype="boolean" output="false"
 		hint="Assert that the given string has valid text content; it must not be a zero length string and must contain at least one non-whitespace character.">
 		<cfargument name="text" type="string" required="true"
-			hint="The text to check the length." />
+			hint="The text to check if there at least one non-whitespace character." />
 		<cfargument name="message" type="string" required="false"
 			default="[Assertion failed] - this text argument must contain valid text content."
 			hint="The message to throw if the assertion fails." />
@@ -139,8 +139,6 @@ The second conditional in the state returns as null and thus the exception.
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
 		
-		<cfset request.temp = arguments />
-		
 		<cfif NOT arguments.expression>
 			<cfset throw(arguments.message, arguments.detail) />
 		</cfif>
@@ -149,10 +147,11 @@ The second conditional in the state returns as null and thus the exception.
 	</cffunction>
 	
 	<cffunction name="notEmpty" access="public" returntype="boolean" output="false"
-		hint="Assert that the given expression is true.">
+		hint="Assert that the passed query, struct or array is not empty.">
 		<cfargument name="object" type="any" required="true"
 			hint="The object (query, struct or array) to check if not empty." />
 		<cfargument name="message" type="string" required="false"
+			default="[Assertion failed] - this object argument cannot be an empty query, struct or array."
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
