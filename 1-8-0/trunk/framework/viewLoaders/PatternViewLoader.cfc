@@ -232,19 +232,14 @@ Wildcards for patterns:
 	<cffunction name="setPattern" access="private" returntype="void" output="false">
 		<cfargument name="pattern" type="string" required="true" />
 		
-		<cfset var cleanedPath = cleanPath(arguments.pattern) />
-		
 		<!--- Ensure the passed value is really a pattern --->
-		<cfif NOT variables.pathMatcher.isPattern(arguments.pattern)>
-			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.notPattern"
-				message="The value of the parameter 'pattern' is not a valid path pattern (ex. '/views/**/*.cfm')."
-				detail="pattern='#arguments.pattern#'" />
-		</cfif>
+		<cfset getAssert().isTrue(variables.pathMatcher.isPattern(arguments.pattern)
+				, "The value of the parameter 'pattern' is not a valid path pattern (ex. '/views/**/*.cfm')."
+				, "The passed pattern is '#arguments.pattern#'.") />
 		
-		<cfset variables.pattern = cleanedPath />
+		<cfset variables.pattern = cleanPath(arguments.pattern) />
 	</cffunction>
-	<cffunction name="getPattern" access="public" returntype="string" output="false"
-		hint="Gets the pattern array.">
+	<cffunction name="getPattern" access="public" returntype="string" output="false">
 		<cfreturn variables.pattern />
 	</cffunction>
 
@@ -273,11 +268,11 @@ Wildcards for patterns:
 		
 		<!--- Convert to array --->
 		<cfif IsSimpleValue(arguments.exclude)>
-			<cfset arguments.exclude = ListToArray(variables.utils.trimList(arguments.exclude)) />
-		<cfelseif NOT IsArray(arguments.exclude)>
-			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.invalidType"
-				message="The value of the parameter 'exclude' is not a list or an array." />
+			<cfset arguments.exclude = ListToArray(getUtils().trimList(arguments.exclude)) />
 		</cfif>
+		
+		<cfset getAssert().isTrue(IsArray(arguments.exclude)
+				, "The value of the parameter 'exclude' is must be a list or an array.") />
 		
 		<!--- Clean paths --->
 		<cfloop from="1" to="#ArrayLen(arguments.exclude)#" index="i">

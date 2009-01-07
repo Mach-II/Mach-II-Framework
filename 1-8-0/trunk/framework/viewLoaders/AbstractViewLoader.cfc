@@ -32,7 +32,6 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.utils = "" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 
@@ -48,8 +47,6 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
-		
-		<cfset variables.utils = getAppManager().getUtils() />
 		
 		<cfreturn this />	
 	</cffunction>
@@ -99,6 +96,16 @@ Notes:
 	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
 		hint="Returns a comma delimited list of parameter names.">
 		<cfreturn StructKeyList(variables.parameters) />
+	</cffunction>
+	
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false"
+		hint="Gets the Utils component.">
+		<cfreturn getAppManager().getUtils() />
+	</cffunction>
+	
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
+		hint="Gets the Assert component.">
+		<cfreturn getAppManager().getAssert() />
 	</cffunction>
 	
 	<!---

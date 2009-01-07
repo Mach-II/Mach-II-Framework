@@ -282,36 +282,24 @@ application.serviceFactory_account variable.
 		
 		<!--- Locating and storing bean factory (from properties/params) --->
 		<cfset var bfUtils = CreateObject("component", "coldspring.beans.util.BeanFactoryUtils").init() />
-
 		<cfset var parentBeanFactoryScope = getParameter("parentBeanFactoryScope", "application") />
 		<cfset var parentBeanFactoryKey = getParameter("parentBeanFactoryKey", "") />
-
 		<cfset var localBeanFactoryKey = getParameter("beanFactoryPropertyName", bfUtils.DEFAULT_FACTORY_KEY) />
 		
 		<!--- Set the autowire attribute name --->
 		<cfset setAutowireAttributeName(getParameter("autowireAttributeName", "depends")) />
 		
 		<!--- Setup CFC generation location --->
-		<cfif isParameterDefined("cfcGenerationLocation")>
-			<cfset setCfcGenerationLocation(ExpandPath(getParameter("cfcGenerationLocation"))) />
-		<cfelse>
-			<cfset setCfcGenerationLocation(GetDirectoryFromPath(GetCurrentTemplatePath())) />
-		</cfif>
+		<cfset setCfcGenerationLocation(ExpandPath(getParameter("cfcGenerationLocation"))
+				, GetDirectoryFromPath(GetCurrentTemplatePath())) />
 		
 		<!--- Setup the dot path to the CFC generation location --->
-		<cfif isParameterDefined("dotPathTocfcGenerationLocation")>
-			<cfset setDotPathToCfcGenerationLocation(getParameter("dotPathTocfcGenerationLocation") & ".") />
-		<cfelse>
-			<cfset setDotPathToCfcGenerationLocation("") />
-		</cfif>
+		<cfset setDotPathToCfcGenerationLocation(getParameter("dotPathTocfcGenerationLocation"), "") />
 		
 		<!--- Get the config file path --->
-		<cfif isParameterDefined("configFile")>
-			<cfset serviceDefXmlLocation = getParameter("configFile") />
-		<cfelse>
-			<cfthrow type="ColdspringProperty.configFileParameterNotDefined"
-				message="You must specify a parameter named 'configFile'." />
-		</cfif>
+		<cfset getAssert().hasLength(getParameter("configFile")
+				, "You must specify a parameter named 'configFile'.") />
+		<cfset serviceDefXmlLocation = getParameter("configFile") />
 		
 		<!--- Get the properties from the current property manager --->
 		<cfset StructAppend(defaultProperties, propertyManager.getProperties()) />
@@ -332,7 +320,7 @@ application.serviceFactory_account variable.
 		<cfset bf = CreateObject("component", "coldspring.beans.DefaultXmlBeanFactory").init(defaultAttributes, defaultProperties) />
 		
 		<!--- If necessary setup the parent bean factory using the new ApplicationContextUtils --->
-		<cfif len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
+		<cfif Len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
 			<cfset bf.setParent(bfUtils.getNamedFactory(parentBeanFactoryScope, parentBeanFactoryKey))/>
 		</cfif>
 		
@@ -379,12 +367,9 @@ application.serviceFactory_account variable.
 		
 		<!--- Place bean references into the Mach-II properties if required --->
 		<cfif isParameterDefined("beansToMachIIProperties")>
-			<cfif IsStruct(getParameter("beansToMachIIProperties"))>
-				<cfset referenceBeansToMachIIProperties(getParameter("beansToMachIIProperties")) />
-			<cfelse>
-				<cfthrow type="ColdspringProperty.beansToMachIIPropertiesInvalidType"
-					message="The value of a parameter named 'beansToMachIIProperties' must contain a struct." />
-			</cfif>
+			<cfset getAssert().isTrue(IsStruct(getParameter("beansToMachIIProperties"))
+					, "The value of a parameter named 'beansToMachIIProperties' must contain a struct.") />
+			<cfset referenceBeansToMachIIProperties(getParameter("beansToMachIIProperties")) />
 		</cfif>
 				
 		<!--- Build the config files and hash --->
@@ -807,6 +792,12 @@ application.serviceFactory_account variable.
 	
 	<cffunction name="setDotPathToCfcGenerationLocation" access="private" returntype="void" output="false">
 		<cfargument name="dotPathToCfcGenerationLocation" type="string" required="true" />
+		
+		<!--- Add a trailing dot of the path exists --->
+		<cfif Len(dotPathToCfcGenerationLocation)>
+			<cfset arguments.dotPathToCfcGenerationLocation = arguments.dotPathToCfcGenerationLocation & "." />
+		</cfif>
+		
 		<cfset variables.instance.dotPathToCfcGenerationLocation = arguments.dotPathToCfcGenerationLocation />
 	</cffunction>
 	<cffunction name="getDotPathToCfcGenerationLocation" access="public" returntype="string" output="false">

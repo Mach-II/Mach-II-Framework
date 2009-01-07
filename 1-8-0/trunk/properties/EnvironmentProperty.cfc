@@ -217,6 +217,9 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 	--->
 	<cffunction name="setDefaultEnvironment" access="private" returntype="void" output="false">
 		<cfargument name="defaultEnvironment" type="string" required="true" />
+		<cfset getAssert().isTrue(ListFindNoCase("development,staging,qualityAssurance,production", arguments.defaultEnvironment)
+			, "The 'defaultEnvironment' parameter must be a valid value."
+			, "Acceptable values are 'development', 'staging', 'qualityAssurance' and 'production'") />
 		<cfset variables.defaultEnvironment = arguments.defaultEnvironment />
 	</cffunction>
 	<cffunction name="getDefaultEnvironment" access="public" returntype="string" output="false">
