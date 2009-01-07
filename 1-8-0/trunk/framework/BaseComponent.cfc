@@ -212,6 +212,11 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfreturn getAppManager().getPropertyManager() />
 	</cffunction>
 	
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false"
+		hint="Gets the Utils component.">
+		<cfreturn getAppManager().getUtils() />
+	</cffunction>
+	
 	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
 		hint="Gets the Assert component.">
 		<cfreturn getAppManager().getAssert() />
