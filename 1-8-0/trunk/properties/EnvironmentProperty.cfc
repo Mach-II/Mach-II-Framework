@@ -193,7 +193,7 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 		
 		<!--- Transform list to an array of servers --->
 		<cfif NOT IsArray(arguments.servers)>
-			<cfset arguments.servers = ListToArray(arguments.servers) />
+			<cfset arguments.servers = ListToArray(getUtils().trimList(arguments.servers)) />
 		</cfif>
 		
 		<!--- Build server name hashes to lookup table --->
