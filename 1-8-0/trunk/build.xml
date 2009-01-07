@@ -215,6 +215,7 @@ Notes:
 			<testcase name="MachII.tests.util.BeanUtilTest"/>
 			<testcase name="MachII.tests.util.ExceptionTest"/>
 			<testcase name="MachII.tests.util.ExpressionEvaluatorTest"/>
+			<testcase name="MachII.tests.util.SimplePatternMatcherTest"/>
 			<testcase name="MachII.tests.util.QueueTest"/>
 			<testcase name="MachII.tests.util.UtilsTest"/>
 		</mxunit>
