@@ -50,6 +50,7 @@ Pattern matches are not case sensitive.
 	PROPERTIES
 	--->
 	<cfset variables.filterChannels = ArrayNew(1) />
+	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
 	<cfset variables.instance.filterTypeName = "Channel" />
 	
 	<!---
@@ -80,20 +81,9 @@ Pattern matches are not case sensitive.
 		<cfloop from="1" to="#ArrayLen(filterChannels)#" index="i">
 			<!--- Restrict --->
 			<cfif filterChannels[i].restrict>
-				<!--- Wildcard --->
-				<cfif filterChannels[i].wildcard AND FindNoCase(filterChannels[i].channel, channel) EQ 1>
-					<cfset result = false />
-				<cfelseif filterChannels[i].channel IS channel>
-					<cfset result = false />
-				</cfif>
+				<cfreturn NOT variables.matcher.match(filterChannels[i].channel, channel) />
 			<cfelse>
-			
-				<!--- Wildcard --->
-				<cfif filterChannels[i].wildcard AND FindNoCase(filterChannels[i].channel, channel) EQ 1>
-					<cfset result = true />
-				<cfelseif filterChannels[i].channel IS channel>
-					<cfset result = true />
-				</cfif>
+				<cfreturn variables.matcher.match(filterChannels[i].channel, channel) />
 			</cfif>
 		</cfloop>
 		
@@ -165,20 +155,6 @@ Pattern matches are not case sensitive.
 					</cfif>
 				<cfelse>
 					<cfset temp.restrict = false />
-				</cfif>
-				
-				<!--- Check for Wildcard (will always be the last character)--->
-				<cfif Right(channel, 1) EQ "*">
-					<cfset temp.wildcard = true />
-					
-					<!--- If there is no channel and only a directive of * --->
-					<cfif Len(channel) GT 1>
-						<cfset channel = Left(channel, Len(channel) -1) />
-					<cfelse>
-						<cfset channel = "" />
-					</cfif>
-				<cfelse>
-					<cfset temp.wildcard = false />
 				</cfif>
 				
 				<!--- Set channel string --->
