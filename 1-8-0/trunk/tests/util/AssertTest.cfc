@@ -56,19 +56,19 @@ Notes:
 		
 		<!--- These should all pass assertion without throwing any exceptions --->
 		<cftry>
-			<cfset variables.assert.doesNotContain(testText, "jumps") />
-			<cfset variables.assert.doesNotContain(testText, "dog") />
-			<cfset variables.assert.doesNotContain(testText, "fox jumps") />
-			<cfset variables.assert.doesNotContain(testText, " lazy dog") />
+			<cfset variables.assert.doesNotContain(testText, "jjump") />
+			<cfset variables.assert.doesNotContain(testText, "dogs") />
+			<cfset variables.assert.doesNotContain(testText, "foxes jump") />
+			<cfset variables.assert.doesNotContain(testText, "with the lazy dog") />
 			
 			<cfcatch type="any">
-				<cfset fail("Method doesNotContain() failed.") />	
+				<cfset fail("Assert method doesNotContain() failed.", cfcatch) />	
 			</cfcatch>
 		</cftry>
 		
 		<!--- These should all fail assertion by throwing an exception --->
 		<cftry>
-			<cfset variables.assert.doesNotContain(testText, "jumpss") />
+			<cfset variables.assert.doesNotContain(testText, "jump") />
 			
 			<!--- The catch should have occurred; otherwise fail --->
 			<cfset fail("Method doesNotContain() failed assert and catch should have caught.") />
@@ -79,7 +79,7 @@ Notes:
 		</cftry>
 		
 		<cftry>
-			<cfset variables.assert.doesNotContain(testText, " dog s") />
+			<cfset variables.assert.doesNotContain(testText, "lazy dog") />
 			
 			<!--- The catch should have occurred; otherwise fail --->
 			<cfset fail("Method doesNotContain() failed assert and catch should have caught.") />
@@ -90,7 +90,7 @@ Notes:
 		</cftry>
 		
 		<cftry>
-			<cfset variables.assert.doesNotContain(testText, "The s") />
+			<cfset variables.assert.doesNotContain(testText, "The q") />
 			
 			<!--- The catch should have occurred; otherwise fail --->
 			<cfset fail("Method doesNotContain() failed assert and catch should have caught.") />

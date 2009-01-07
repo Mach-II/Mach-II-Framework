@@ -82,7 +82,7 @@ in the application scope.
 		<cfif isParameterDefined("size")
 			AND getAssert().isTrue(IsNumeric(getParameter("size")) AND getParameter("size") GT 0
 				, "Invalid Size of '#getParameter("size")#'."
-				, "Size must be numeric and greater than 0.">		
+				, "Size must be numeric and greater than 0.")>		
 			<cfset setSize(getParameter("size")) />
 		</cfif>
 		<cfif isParameterDefined("scope")
