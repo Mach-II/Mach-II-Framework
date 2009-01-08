@@ -142,6 +142,14 @@ Notes:
 	</cffunction>
 	
 	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="inModule" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean on whether or not this AppManager is a module AppManager.">
+		<cfreturn IsObject(getParent()) />
+	</cffunction>
+	
+	<!---
 	MACH-II APPLICATION EVENTS
 	--->
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
