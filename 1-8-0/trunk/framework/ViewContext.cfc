@@ -87,9 +87,8 @@ Notes:
 			<cfif log.isWarnEnabled()>
 				<cfset log.warn("DEPRECATED: The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
 			</cfif>
-			<cfsavecontent variable="viewContent">
-				<cfinclude template="#viewPath#" />
-			</cfsavecontent>
+			<!--- Include must be on same line as save content or an extra tab will occur --->
+			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
 			<cfif arguments.append AND IsDefined(arguments.contentKey)>
 				<cfset viewContent = Evaluate(arguments.contentKey) & viewContent />
 			</cfif>
@@ -97,9 +96,8 @@ Notes:
 		</cfif>
 		
 		<cfif arguments.contentArg NEQ ''>
-			<cfsavecontent variable="viewContent">
-				<cfinclude template="#viewPath#" />
-			</cfsavecontent>
+			<!--- Include must be on same line as save content or an extra tab will occur --->
+			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
 			<cfif arguments.append>
 				<cfset viewContent = arguments.event.getArg(arguments.contentArg, "") & viewContent />
 			</cfif>
