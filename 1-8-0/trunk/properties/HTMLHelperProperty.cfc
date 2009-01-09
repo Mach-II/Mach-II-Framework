@@ -191,12 +191,15 @@ There are no configuration options at this time.
  			<cfset arguments.urls = ListToArray(getUtils().trimList(arguments.urls)) />
 		</cfif>
 		
+		<!--- Explode attributes to struct --->
+		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
+		
 		<!--- Build attributes code section --->
 		<cfloop collection="#arguments.attributes#" item="key">
 			<cfset attributesCode = attributesCode & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
 		</cfloop>
 		
-		<cfset attributesCode = attributeCode & ' />' />
+		<cfset attributesCode = attributesCode & ' />' />
 
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
 			<cfif arguments.inline OR
