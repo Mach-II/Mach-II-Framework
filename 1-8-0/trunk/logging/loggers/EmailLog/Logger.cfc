@@ -29,6 +29,13 @@ Notes:
 				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
 				<!-- Optional and defaults to true -->
 				<key name="loggingEnabled" value="true|false" />
+				- OR - 
+	            <key name="loggingEnabled">
+	            	<struct>
+	            		<key name="development" value="false"/>
+	            		<key name="production" value="true"/>
+	            	</struct>
+	            </key>
 				<!-- Optional and defaults to 'fatal' -->
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the default display template if not defined -->

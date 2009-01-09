@@ -191,8 +191,8 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		<tr>
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
-		</tr class="shade">
-		<tr>
+		</tr>
+		<tr class="shade">
 			<td><h4>Remote IP</h4></td>
 			<td><p>#cgi.remote_addr#</p></td>
 		</tr>

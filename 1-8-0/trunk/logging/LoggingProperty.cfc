@@ -38,6 +38,13 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
+				- OR - 
+	            <key name="loggingEnabled">
+	            	<struct>
+	            		<key name="development" value="false"/>
+	            		<key name="production" value="true"/>
+	            	</struct>
+	            </key>
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional -->
 				<key name="logFile" value="nameOfCFLogFile" />
@@ -58,6 +65,13 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
+				- OR - 
+	            <key name="loggingEnabled">
+	            	<struct>
+	            		<key name="development" value="false"/>
+	            		<key name="production" value="true"/>
+	            	</struct>
+	            </key>
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<key name="emailTemplateFile" value="/path/to/customEmailTemplate.cfm" />
 				<key name="to" value="list,of,email,addresses" />
@@ -81,6 +95,13 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.MachIILog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
+				- OR - 
+	            <key name="loggingEnabled">
+	            	<struct>
+	            		<key name="development" value="false"/>
+	            		<key name="production" value="true"/>
+	            	</struct>
+	            </key>
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional -->
 				<key name="displayOutputTemplateFile" value="/path/to/customOutputTemplate.cfm" />
@@ -132,9 +153,11 @@ will bind to root parameter values.
 		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var key = "" />
 		
+		<cfset setLoggingEnabled(getParameter("loggingEnabled", true)) />
+		
 		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
-			<cfif IsStruct(params[key])>
+			<cfif key NEQ "loggingEnabled" AND IsStruct(params[key])>
 				<cfset configureLogger(key, getParameter(key)) />
 			</cfif>
 		</cfloop>
@@ -155,7 +178,7 @@ will bind to root parameter values.
 		</cfloop>
 		
 		<!--- Set logging enabled/disabled --->
-		<cfif NOT getParameter("loggingEnabled", true)>
+		<cfif NOT isLoggingEnabled()>
 			<cfset getAppManager().getLogFactory().disableLogging() />
 		</cfif>
 	</cffunction>
@@ -229,6 +252,11 @@ will bind to root parameter values.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
+		<!--- Decide the logging enabled mode --->
+		<cfif StructKeyExists(arguments.parameters, "loggingEnabled")>
+			<cfset arguments.parameters["loggingEnabled"] = decidedLoggingEnabled(arguments.parameters["loggingEnabled"]) />
+		</cfif>
+		
 		<!--- Create, init and configure the logger --->
 		<cftry>
 			<cfset logger = CreateObject("component", arguments.parameters.type).init(loggerId, arguments.parameters) />
@@ -277,9 +305,39 @@ will bind to root parameter values.
 		<cfreturn moduleName />
 	</cffunction>
 	
+	<cffunction name="decidedLoggingEnabled" access="private" returntype="boolean" output="false"
+		hint="Decides if the logging is enabled.">
+		<cfargument name="loggingEnabled" type="any" required="true" />
+		
+		<cfset var environmentName = getAppManager().getEnvironmentName() />
+		<cfset var result = true />
+		
+		<cfset getAssert().isTrue(IsBoolean(arguments.loggingEnabled) OR IsStruct(arguments.loggingEnabled)
+				, "The 'loggingEnabled' parameter must be boolean or a struct of environments.") />
+		
+		<cfif IsBoolean(arguments.loggingEnabled)>
+			<cfset result = arguments.loggingEnabled />
+		<!--- Load logging enabled by environment name --->
+		<cfelseif StructKeyExists(arguments.loggingEnabled, environmentName)>
+			<cfset result = arguments.loggingEnabled[environmentName] />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
-	--->	
+	--->
+	<cffunction name="setLoggingEnabled" access="private" returntype="void" output="false"
+		hint="Sets the logging enabled status and decides by environment if struct.">
+		<cfargument name="loggingEnabled" type="any" required="true" />
+		<cfset variables.loggingEnabled = decidedLoggingEnabled(arguments.loggingEnabled) />
+	</cffunction>
+	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
+		hint="Checks if logging is enabled.">
+		<cfreturn variables.loggingEnabled />
+	</cffunction>
+	
 	<cffunction name="addLogger" access="private" returntype="void" output="false"
 		hint="Adds a logger to the struct of registered loggers.">
 		<cfargument name="loggerName" type="string" required="true" />

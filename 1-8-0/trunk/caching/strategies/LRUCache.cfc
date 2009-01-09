@@ -40,6 +40,11 @@ ScopeKey
 - Optional and by default the cache will be placed in scope._MachIICache.Hash(appKey & moduleName & cacheName)
 - Rarely will this need to be used
 
+CachingEnabled
+- Set whether caching enabled or disabled.
+- The default setting is "true".
+- Accepts a boolean or a struct of environments with corresponding booleans.
+
 Using all of the default settings will result in caching 100 elements of data
 in the application scope.
 
@@ -53,6 +58,14 @@ in the application scope.
                         <key name="type" value="MachII.caching.strategies.LRUCache" />
                         <key name="size" value="100" />
                         <key name="scope" value="application" />
+						<key name="cachingEnabled" value="true|false" />
+						- OR - 
+			            <key name="cachingEnabled">
+			            	<struct>
+			            		<key name="development" value="false"/>
+			            		<key name="production" value="true"/>
+			            	</struct>
+			            </key>
                   </struct>
             </parameter>
       </parameters>

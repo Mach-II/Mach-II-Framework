@@ -49,6 +49,11 @@ only that point will the data be "refreshed" and added back into the cache.
 - Valid numeric value only.
 - This attribute will rarely need to be changed.
 
+CachingEnabled
+- Set whether caching enabled or disabled.
+- The default setting is "true".
+- Accepts a boolean or a struct of environments with corresponding booleans.
+
 Using all of the default settings will result in caching each element of data 
 for 1 hour in the application scope. Expired cache elements will be cleaned up 
 via reap() which is run every 3 minutes.
@@ -64,6 +69,14 @@ via reap() which is run every 3 minutes.
                         <key name="scope" value="application" />
                         <key name="timespan" value="0,1,0,0"/><!-- Cache for 1 hour -->
 						<key name="cleanupIntervalInMinutes" value="3" />
+						<key name="cachingEnabled" value="true|false" />
+						- OR - 
+			            <key name="cachingEnabled">
+			            	<struct>
+			            		<key name="development" value="false"/>
+			            		<key name="production" value="true"/>
+			            	</struct>
+			            </key>
                   </struct>
             </parameter>
       </parameters>

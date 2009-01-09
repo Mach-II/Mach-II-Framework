@@ -35,6 +35,13 @@ Example configuration of multiple caching strategires:
             <!-- Naming a default cache name is not required, but required if you do not want 
                  to specify the 'name' attribute in the cache command -->
 			<parameter name="cachingEnabled" value="true" />
+			- OR -
+			<parameter name="cachingEnabled">
+				<struct>
+					<key name="development" value="false" />
+					<key name="production" value="true" />
+				</struct>
+			</parameter>
             <parameter name="defaultCacheName" value="foo" />
             <parameter name="foo">
                   <struct>
@@ -80,6 +87,8 @@ See individual caching strategies for more information on configuration.
 		<cfset var defaultCacheParameters = StructNew() />
 		<cfset var key = "" />
 
+		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
+
 		<!--- Set the default cache strategy if defined --->
 		<cfif isParameterDefined("defaultCacheName")>
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
@@ -87,7 +96,7 @@ See individual caching strategies for more information on configuration.
 		
 		<!--- Load defined cache strategies --->
 		<cfloop collection="#params#" item="key">
-			<cfif IsStruct(params[key])>
+			<cfif key NEQ "cachingEnabled" AND IsStruct(params[key])>
 				<cfset configureStrategy(key, getParameter(key)) />
 			</cfif>
 		</cfloop>
@@ -109,7 +118,7 @@ See individual caching strategies for more information on configuration.
 		<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
 		
 		<!--- Set caching enabled/disabled --->
-		<cfif NOT getParameter("cachingEnabled", true)>
+		<cfif NOT isCachingEnabled()>
 			<cfset getAppManager().getCacheManager().disableCaching() />
 		</cfif>
 	</cffunction>
@@ -152,6 +161,11 @@ See individual caching strategies for more information on configuration.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
+		<!--- Decide the logging enabled mode --->
+		<cfif StructKeyExists(arguments.parameters, "cachingEnabled")>
+			<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
+		</cfif>
+		
 		<!--- Load the strategy  --->
 		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.name, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
@@ -169,6 +183,26 @@ See individual caching strategies for more information on configuration.
 		<cfreturn getAppManager().getAppKey() & "._MachIICaching._" & Hash(moduleName & "_" & arguments.cacheName) />
 	</cffunction>
 	
+	<cffunction name="decidedCachingEnabled" access="private" returntype="boolean" output="false"
+		hint="Decides if the caching is enabled.">
+		<cfargument name="cachingEnabled" type="any" required="true" />
+		
+		<cfset var environmentName = getAppManager().getEnvironmentName() />
+		<cfset var result = true />
+		
+		<cfset getAssert().isTrue(IsBoolean(arguments.cachingEnabled) OR IsStruct(arguments.cachingEnabled)
+				, "The 'cachingEnabled' parameter must be boolean or a struct of environments.") />
+		
+		<cfif IsBoolean(arguments.cachingEnabled)>
+			<cfset result = arguments.cachingEnabled />
+		<!--- Load caching enabled by environment name --->
+		<cfelseif StructKeyExists(arguments.cachingEnabled, environmentName)>
+			<cfset result = arguments.cachingEnabled[environmentName] />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
@@ -182,10 +216,10 @@ See individual caching strategies for more information on configuration.
 	
 	<cffunction name="setCachingEnabled" access="public" returntype="void" output="false"
 		hint="Sets if caching is enabled.">
-		<cfargument name="cachingEnabled" type="boolean" required="true" />
-		<cfset variables.cachingEnabled = arguments.cachingEnabled />
+		<cfargument name="cachingEnabled" type="any" required="true" />
+		<cfset variables.cachingEnabled = decidedCachingEnabled(arguments.cachingEnabled) />
 	</cffunction>
-	<cffunction name="getCachingEnabled" access="public" returntype="boolean" output="false"
+	<cffunction name="isCachingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the value if caching is enabled.">
 		<cfreturn variables.cachingEnabled />
 	</cffunction>
