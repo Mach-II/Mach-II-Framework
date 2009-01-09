@@ -205,10 +205,12 @@ Notes:
 			<fileset dir="${mxunit.output}">
 			   <include name="*.xml"/>
 			</fileset>
-			<report format="frames" todir="${mxunit.output}/report" />
+			<report format="noframes" todir="${mxunit.output}/report" />
 		</junitreport>
 		<delete dir="${mxunit.output}/junit" />
-		<echo message="Report available at: file:///${mxunit.output}/report/index.html"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Report available at: file:///${mxunit.output}/report/junit-noframes.html"/>
+		<echo message="---------------------------------------------"/>
 	</target>
 	
 	<target name="zip-init">
