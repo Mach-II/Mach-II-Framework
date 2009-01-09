@@ -185,5 +185,34 @@ Notes:
 		
 		<cfreturn trimmedList />
 	</cffunction>
+	
+	<cffunction name="parseAttributesIntoStruct" access="public" returntype="struct" output="false"
+		hint="Parses the build url parameters into a useable form.">
+		<cfargument name="attributes" type="any" required="true"
+			hint="Takes string of name/value pairs or a struct.">
+		
+		<cfset var result = StructNew() />
+		<cfset var temp = "" />
+		<cfset var i = "" />
+		
+		<cfif IsSimpleValue(arguments.attributes)>
+			<cfloop list="#arguments.attributes#" index="i" delimiters="|">
+				<cfif ListLen(i, "=") EQ 2>
+					<cfset temp = ListLast(i, "=") />
+				<cfelse>
+					<cfset temp = "" />
+				</cfif>
+				<cfset result[ListFirst(i, "=")] = temp />
+			</cfloop>
+		<cfelseif IsStruct(arguments.attributes)>
+			<cfset result = arguments.attributes />
+		<cfelse>
+			<cfthrow
+				type="MachII.framework.InvalidAttributeType"
+				message="The parseAttributesIntoStruct takes a struct or a string."/>
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
 
 </cfcomponent>

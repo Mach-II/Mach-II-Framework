@@ -116,7 +116,7 @@ Notes:
 		
 		<cfset var builtUrl = "" />
 		<cfset var queryString = "" />
-		<cfset var params = parseBuildUrlParameters(arguments.urlParameters) />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var value = "" />
 		<cfset var i = "" />
 
@@ -326,38 +326,6 @@ Notes:
 	<cffunction name="getPostRedirectCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the post-redirect callbacks.">
 		<cfreturn variables.postRedirectCallbacks />
-	</cffunction>
-
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="parseBuildUrlParameters" access="private" returntype="struct" output="false"
-		hint="Parses the build url parameters into a useable form.">
-		<cfargument name="urlParameters" type="any" required="true"
-			hint="Takes string of name/value pairs or a struct.">
-		
-		<cfset var params = StructNew() />
-		<cfset var temp = "" />
-		<cfset var i = "" />
-		
-		<cfif IsSimpleValue(arguments.urlParameters)>
-			<cfloop list="#arguments.urlParameters#" index="i" delimiters="|">
-				<cfif ListLen(i, "=") EQ 2>
-					<cfset temp = ListLast(i, "=") />
-				<cfelse>
-					<cfset temp = "" />
-				</cfif>
-				<cfset params[ListFirst(i, "=")] = temp />
-			</cfloop>
-		<cfelseif IsStruct(arguments.urlParameters)>
-			<cfset params = arguments.urlParameters />
-		<cfelse>
-			<cfthrow
-				type="MachII.framework.urlParametersInvalidType"
-				message="BuildUrl()'s urlParameters attribute takes a list or struct."/>
-		</cfif>
-		
-		<cfreturn params />
 	</cffunction>
 	
 	<!---
