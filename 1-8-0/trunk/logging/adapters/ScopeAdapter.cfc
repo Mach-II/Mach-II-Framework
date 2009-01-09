@@ -99,8 +99,6 @@ Configuration Example:
 		<cfif isParameterDefined("debugModeOnly")>
 			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>
-		
-		<cfset setFilter(CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", ""))) />
 	</cffunction>
 	
 	<!---

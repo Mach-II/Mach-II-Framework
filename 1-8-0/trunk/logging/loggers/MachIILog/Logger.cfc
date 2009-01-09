@@ -82,8 +82,10 @@ See that file header for configuration of filter criteria.
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", "")) />
 		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.ScopeAdapter").init(getParameters()) />
 		
-		<!--- Set the filter to the adapter --->
-		<cfset adapter.setFilter(filter) />
+		<!--- Set the filter to the adapter only we have something to filter --->
+		<cfif ArrayLen(filter.getFilterChannels())>
+			<cfset adapter.setFilter(filter) />
+		</cfif>
 		
 		<!--- Configure and set the adapter --->
 		<cfset adapter.configure() />
@@ -96,7 +98,7 @@ See that file header for configuration of filter criteria.
 		</cfif>
 		
 		<cfif isParameterDefined("debugModeOnly")
-			AND getAssert().isTrue(getParameter("debugModeOnly")
+			AND getAssert().isTrue(IsBoolen(getParameter("debugModeOnly"))
 				, "The value of 'debugModeOnly' must be boolean.")>
 			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>

@@ -77,6 +77,9 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		border-top: 1px dotted ##D0D0D0;
 		border-bottom: 1px dotted ##D0D0D0;
 	}
+	##MachIIRequestLogDisplay table td h4{
+		padding: 0.5em;
+	}
 	##MachIIRequestLogDisplay table td.lineBottom {
 		border-bottom: 1px dotted ##666;
 	}
@@ -164,8 +167,8 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<th colspan="2"><h3>Request Information</h3></th>
 		</tr>
 		<tr>
-			<td><h4>Request Event Name</h4></td>
-			<td><p>#arguments.appManager.getRequestHandler().getRequestEventName()#</p></td>
+			<td style="width:20%;"><h4>Request Event Name</h4></td>
+			<td style="width:80%;"><p>#arguments.appManager.getRequestHandler().getRequestEventName()#</p></td>
 		</tr>
 		<tr class="shade">
 			<td><h4>Request Module Name</h4></td>
@@ -182,18 +185,22 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<td><p>#getMachIIVersion(arguments.appManager.getPropertyManager().getVersion())#</p></td>
 		</tr>
 		<tr class="shade">
+			<td><h4>Mach-II Environment Name</h4></td>
+			<td><p>#arguments.appManager.getEnvironmentName()#</p></td>
+		</tr>
+		<tr>
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
-		</tr>
+		</tr class="shade">
 		<tr>
 			<td><h4>Remote IP</h4></td>
 			<td><p>#cgi.remote_addr#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Remote User Agent</h4></td>
 			<td><p>#cgi.http_user_agent#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Locale</h4></td>
 			<td><p>#getLocale()#</p></td>
 		</tr>
@@ -205,8 +212,8 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		</tr>
 	<cfloop collection="#cookie#" item="local.i">
 		<tr <cfif local.cookieRow MOD 2>class="shade"</cfif>>
-			<td><h4>#local.i#</h4></td>
-			<td><p>#cookie[local.i]#</p></td>
+			<td style="width:20%;"><h4>#local.i#</h4></td>
+			<td style="width:80%;"><p>#cookie[local.i]#</p></td>
 		</tr>
 		<cfset local.cookieRow = local.cookieRow + 1 />
 	</cfloop>
