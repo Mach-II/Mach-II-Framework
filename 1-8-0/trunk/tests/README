@@ -19,4 +19,6 @@ Test Runners:
 * Use MXUnit's Eclipse based plugin
 * Use MXUnit's html test runner to run individual test cases
 * Use our ANT task 'test' in build.xml to run the test suite
-	You must have the MXUnit jars in your ANT class path  
+	You must have the MXUnit jars in your ANT class path.
+* Use our ANT task 'testRepor' build.xml to run the test suit
+	and get a JUnit report of test suite results

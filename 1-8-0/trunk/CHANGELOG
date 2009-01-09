@@ -39,6 +39,26 @@ Fixed Defects
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* View-Loaders
+View loaders allow a developers to load views based on convention such as 
+using an ANT-style path matching pattern.
+
+For more information see:
+http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationViewLoaders
+http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/175
+(2008-11-15 peterfarrell) 
+
+* Environment
+
+* Toolkit enhancements
+- AntPathMatcher.cfc 
+- Assert.cfc
+- SimplePatternMatcher.cfc
+
+For more information see:
+http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationToolkitEnhancements
+(various dates peterfarrell)
+
 * Added buildUnescapedUrl() and buildUnescapedUrlToModule() to ViewContext
 buildUrl() and buildUrlToModule() returned urls with escaped entities which
 made it impossible to use the returned urls in JS or other situations where

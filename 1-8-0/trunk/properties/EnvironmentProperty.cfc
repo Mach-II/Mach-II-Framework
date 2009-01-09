@@ -23,10 +23,10 @@ Updated version: 1.8.0
 
 Notes:
 Sets Mach-II properties based on the environment and uses the server name
-to detect and load the correct environment properties when the application
-is loaded.
+to detect and load the correct environment properties based on where the 
+application is loaded.
 
-The property provider a the ability to set properties for four deployment
+The property provides the ability to set properties for four deployment
 environments 'development', 'staging', 'qualityAssurance' and 'production'
 as supported by the core framework. Also, the proeprty plays nice when used 
 in a module by using the environment mode from the parent application when 

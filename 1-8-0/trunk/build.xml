@@ -223,7 +223,7 @@ Notes:
 			defaultvalue="${svnBuildVersion}"/>
 	</target>
 	
-	<target name="zip" depends="zip-init,build" description="Creates a build zip in the 'zip' directory.">
+	<target name="zip" depends="zip-init,build,test" description="Creates a build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the build"/>
 		<echo message="---------------------------------------------"/>
@@ -237,7 +237,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped" description="Creates a duck-typed build zip in the 'zip' directory">
+	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped,test" description="Creates a duck-typed build zip in the 'zip' directory">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the duck typed build"/>
 		<echo message="---------------------------------------------"/>
@@ -251,7 +251,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipNightly" depends="buildNightly" description="Creates a nightly build zip in the 'zip' directory.">
+	<target name="zipNightly" depends="buildNightly,test" description="Creates a nightly build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Building nightly zip"/>
 		<echo message="---------------------------------------------"/>

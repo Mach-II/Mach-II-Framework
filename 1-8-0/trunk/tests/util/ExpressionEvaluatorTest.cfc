@@ -49,7 +49,9 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testEventArgDefaultExpression" access="public" returntype="void" output="false">
+	<cffunction name="testEventArgDefaultExpression" access="public" returntype="void" output="false"
+		hint="Tests non-existent event-args with expression variable defaults.">
+		
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
 		<cfset var propertyManager = getPropertyManager() />
@@ -61,8 +63,9 @@ Notes:
 		<cfset assertTrue(result eq "test", "Event arg returned did not equal 'test'") />
 	</cffunction>
 
-	
-	<cffunction name="testEventArgExistsExpressionWithEvent" access="public" returntype="void" output="false">
+	<cffunction name="testEventArgExistsExpression" access="public" returntype="void" output="false"
+		hint="Tests existing event-args.">
+		
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
 		<cfset var propertyManager = getPropertyManager() />
@@ -77,7 +80,9 @@ Notes:
 		<cfset assertTrue(result eq "foobar", "Event arg returned did not equal 'foobar'") />
 	</cffunction>
 
-	<cffunction name="testEventArgExistsExpressionWithProperty" access="public" returntype="void" output="false">
+	<cffunction name="testPropertyExistsExpression" access="public" returntype="void" output="false"
+		hint="Tests existing properties.">
+		
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
 		<cfset var propertyManager = getPropertyManager() />
@@ -92,7 +97,9 @@ Notes:
 		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
 	</cffunction>
 	
-	<cffunction name="testBooleanExpresion" access="public" returntype="void" output="false">
+	<cffunction name="testBooleanExpresion" access="public" returntype="void" output="false"
+		hint="Test boolean evaluation to two variables.">
+		
 		<cfset var result = "" />
 		<cfset var event = getEvent() />
 		<cfset var propertyManager = getPropertyManager() />
@@ -101,28 +108,28 @@ Notes:
 		<cfset event.setArg("foo", "bar") />
 		
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq properties.foo}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertTrue(result, "Result of event.foo eq properties.foo was not true") />
 				
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 'bar'}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertTrue(result, "Result of event.foo eq 'foo' was not true") />
 		
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq ''}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertFalse(result, "Result of event.foo eq '' was true") />
 		
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.foo eq 1}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertFalse(result, "Result of event.foo eq '' was true") />
 		
 		<cfset event.setArg("bar", 1) />
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.bar eq 1}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertTrue(result, "Result of event.bar eq 1 was false") />
 			
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${'bar' eq event.foo}", event, propertyManager) />	
-		<cfset debug(result)>
+		<cfset debug(result) />
 		<cfset assertTrue(result, "Result of 'foo' eq event.foo was not true") />
 	</cffunction>
 	

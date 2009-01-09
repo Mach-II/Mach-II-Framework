@@ -46,7 +46,7 @@ Spring Framework (http://www.springframework.org)
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="match" access="public" returntype="boolean" output="false"
-		hint="Performs a simple pattern(s) match against the text.">
+		hint="Performs a match of simple a pattern or array of patterns against the text.">
 		<cfargument name="pattern" type="any" required="true"
 			hint="A pattern or array of patterns to perform the match with." />
 		<cfargument name="text" type="string" required="true"
