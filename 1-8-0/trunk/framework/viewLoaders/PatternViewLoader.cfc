@@ -133,7 +133,9 @@ Wildcards for patterns:
 				<cfif (variables.pathMatcher.isPattern(exclude[j]) 
 					AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))
 					OR exclude[j] EQ pageViewPaths[i]>
+					<!--- If a pattern is found, delete and break out of the inner loop (short-circuit) --->
 					<cfset ArrayDeleteAt(pageViewPaths, i) />
+					<cfbreak />
 				</cfif>
 			</cfloop>
 		</cfloop>
