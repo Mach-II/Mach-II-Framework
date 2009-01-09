@@ -52,48 +52,50 @@ Notes:
 		hint="Tests that matches no channels.">
 		
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init("!*") />
-		<cfset var logMessageElements  = StructNew() />
-		
-		<cfset logMessageElements.channel = "path.to.that" />
-		<cfset assertFalse(filter.decide(logMessageElements)) />
 
-		<cfset logMessageElements.channel = "path.to.this" />
-		<cfset assertFalse(filter.decide(logMessageElements)) />
+		<cfset doTest(filter, "path.to.that", false) />
+		<cfset doTest(filter, "path.to.this", false) />
 	</cffunction>
 	
 	<cffunction name="testMatchEverything" access="public" returntype="void" output="false"
 		hint="Tests that matches all channels.">
 		
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init("*") />
-		<cfset var logMessageElements  = StructNew() />
 		
-		<cfset logMessageElements.channel = "path.to.that" />
-		<cfset assertTrue(filter.decide(logMessageElements)) />
-
-		<cfset logMessageElements.channel = "path.to.this" />
-		<cfset assertTrue(filter.decide(logMessageElements)) />
+		<cfset doTest(filter, "path.to.that", true) />
+		<cfset doTest(filter, "path.to.this", true) />
 	</cffunction>
 
 	<cffunction name="testMatchSome" access="public" returntype="void" output="false"
 		hint="Tests that matches only some channels.">
 		
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init("!*,MachII.*,!MachII.filters.*") />
-		<cfset var logMessageElements  = StructNew() />
 		
-		<cfset logMessageElements.channel = "MachII.framework.RequestHandler" />
-		<cfset assertTrue(filter.decide(logMessageElements)) />
-
-		<cfset logMessageElements.channel = "MachII.framework.EventHandler" />
-		<cfset assertTrue(filter.decide(logMessageElements)) />
+		<cfset doTest(filter, "MachII.framework.RequestHandler", true) />
+		<cfset doTest(filter, "MachII.framework.EventHandler", true) />
+		<cfset doTest(filter, "MachII.filters.EventArgsFilter", false) />
+		<cfset doTest(filter, "path.to.that", false) />
+		<cfset doTest(filter, "path.to.this", false) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="doTest" access="private" returntype="void" output="false"
+		hint="Helper method to perform a test.">
+		<cfargument name="filter" type="any" required="true" />
+		<cfargument name="channel" type="string" required="true" />
+		<cfargument name="shouldMatch" type="boolean" required="true" />
 		
-		<cfset logMessageElements.channel = "MachII.filters.EventArgsFilter" />
-		<cfset assertFalse(filter.decide(logMessageElements)) />
-
-		<cfset logMessageElements.channel = "path.to.that" />
-		<cfset assertFalse(filter.decide(logMessageElements)) />
+		<cfset var logMessageElements = StructNew() />
 		
-		<cfset logMessageElements.channel = "path.to.this" />
-		<cfset assertFalse(filter.decide(logMessageElements)) />
+		<cfset logMessageElements.channel = arguments.channel />
+		
+		<cfif arguments.shouldMatch>
+			<cfset assertTrue(arguments.filter.decide(logMessageElements), "Failed on channel '#logMessageElements.channel#'.") />
+		<cfelse>
+			<cfset assertFalse(arguments.filter.decide(logMessageElements), "Failed on channel '#logMessageElements.channel#'.") />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>

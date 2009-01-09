@@ -90,9 +90,9 @@ Spring Framework (http://www.springframework.org)
 	
 	<cffunction name="testStartsEndsBetween" access="public" returntype="void" output="false"
 		hint="Tests matches based on patterns with a double *'s in the middle.">
+		<cfset doTest("12*45*78", "12345678", true) />
 		<cfset doTest("12*45*78", "123456789", false) />
 		<cfset doTest("12*45*78", "012345678", false) />
-		<cfset doTest("12*45*78", "12345678", true) />
 		<cfset doTest("12*45*78", "124578", true) />
 		<cfset doTest("12*45*78", "1245457878", true) />
 		<cfset doTest("3*3*3", "33", false) />

@@ -96,7 +96,7 @@ Spring Framework (http://www.springframework.org)
 		</cfif>
 		
 		<!--- If fist asterisk is in the first position (i.e. "*test") --->
-		<cfif firstAsteriskLoc GTE 0>
+		<cfif firstAsteriskLoc EQ 0>
 			<!--- If pattern is only "*" --->
 			<cfif Len(arguments.pattern)  EQ 1>
 				<cfreturn true />

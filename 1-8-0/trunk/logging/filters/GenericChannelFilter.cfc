@@ -69,25 +69,40 @@ Pattern matches are not case sensitive.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="decide" access="public" returntype="boolean" output="false"
+	<cffunction name="decide" access="public" returntype="boolean" output="true"
 		hint="Decides whether or not the passed channel should be logged.">
 		<cfargument name="logMessageElements" type="struct" required="true" />
 		
 		<cfset var channel = arguments.logMessageElements.channel />
-		<cfset var result = true />
+		<cfset var result = "" />
+		<cfset var noRestrictMatch = 0 />
+		<cfset var restrictMatch = 0 />
 		<cfset var filterChannels = getFilterChannels() />
+		<cfset var filterChannelLength = 0 />
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(filterChannels)#" index="i">
-			<!--- Restrict --->
-			<cfif filterChannels[i].restrict>
-				<cfreturn NOT variables.matcher.match(filterChannels[i].channel, channel) />
-			<cfelse>
-				<cfreturn variables.matcher.match(filterChannels[i].channel, channel) />
+			<cfset result = variables.matcher.match(filterChannels[i].channel, channel) />
+			
+			<cfset filterChannelLength = Len(filterChannels[i].channel) />
+			
+			<cfif NOT filterChannels[i].restrict AND result>
+				<cfif filterChannelLength GT noRestrictMatch>
+					<cfset noRestrictMatch = filterChannelLength />
+				</cfif>
+			<cfelseif filterChannels[i].restrict AND result>
+				<cfif filterChannelLength GT restrictMatch>
+					<cfset restrictMatch = filterChannelLength />
+				</cfif>
 			</cfif>
 		</cfloop>
 		
-		<cfreturn result />
+		<!--- More specific no restricted matches have a longer length if they match more exactly --->
+		<cfif noRestrictMatch GT restrictMatch>
+			<cfreturn true />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -176,7 +191,7 @@ Pattern matches are not case sensitive.
 		<cfargument name="filterChannels" type="array" required="true" />
 		<cfset variables.filterChannels = arguments.filterChannels />
 	</cffunction>
-	<cffunction name="getFilterChannels" access="private" returntype="array" output="false">
+	<cffunction name="getFilterChannels" access="public" returntype="array" output="false">
 		<cfreturn variables.filterChannels />
 	</cffunction>
 	
