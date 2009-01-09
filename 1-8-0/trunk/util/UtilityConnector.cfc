@@ -83,6 +83,11 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
+		hint="Gets the environment name.">
+		<cfreturn getAppManager().getEnvironmentName() />
+	</cffunction>
+	
 	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false"
 		hint="Gets the LogFactory.">
 		<cfreturn getAppManager().getLogFactory() />

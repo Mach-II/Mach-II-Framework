@@ -87,7 +87,9 @@ security, this parameter defaults to 'production'.
 The [development|staging|qualityAssurance|productionServers] parameter takes 
 a list or array of server names that are used to check if the development 
 environment is applicable and the corresponding the properties are to be 
-set the to the Mach-II property manager.
+set the to the Mach-II property manager.  Supports basic pattern matching 
+using the * wilcard which is useful if you deploy to a cluster 
+(i.e. web*.cluster.example.com would match web01.cluster.example.com)
 
 The [development|staging|qualityAssurance|productionProperies] parameter takes 
 a struct of data to be set as Mach-II properties if the environment is selected.  
@@ -102,8 +104,9 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 	PROPERTIES
 	--->
 	<cfset variables.defaultEnvironment = "production" />
-	<cfset variables.servers = StructNew() />
+	<cfset variables.servers = ArrayNew(1) />
 	<cfset variables.properties = StructNew() />
+	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -130,19 +133,23 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 		hint="Dectects the server and loads environment by server name.">
 		
 		<!--- We are knowningly breaking encapsulation by using the cgi scope --->
-		<cfset var deployedServerHash = createHashKey(cgi.SERVER_NAME) />
+		<cfset var thisServer = cgi.SERVER_NAME />
 		<cfset var environment = getDefaultEnvironment() />
 		<cfset var properties = StructNew() />
 		<cfset var key = "" />
+		<cfset var i = 0 />
 		
 		<!--- Check if this is a module since we differ to the environment of the parent application --->
 		<cfif IsObject(getAppManager().getParent())>
 			<cfset environment = getAppManager().getParent().getEnvironmentName() />
 		<cfelse>
-			<cfif StructKeyExists(variables.servers, deployedServerHash)>
-				<cfset environment = variables.servers[deployedServerHash] />
-				<cfset getAppManager().setEnvironmentName(environment) />
-			</cfif>
+			<cfloop from="1" to="#ArrayLen(variables.servers)#" index="i">
+				<cfif variables.matcher.match(variables.servers[i].server, thisServer)>
+					<cfset environment = variables.servers[i].environment />
+					<cfset getAppManager().setEnvironmentName(environment) />
+					<cfbreak />
+				</cfif>
+			</cfloop>
 		</cfif>
 		
 		<!---
@@ -182,13 +189,14 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 	
 	<cffunction name="loadServersAndPropertiesByEnvironment" access="private" returntype="void" output="false"
 		hint="Loads an environment servers and properties by environment name.">
-		<cfargument name="name" type="string" required="true"
+		<cfargument name="environment" type="string" required="true"
 			hint="The environment name.">
 		<cfargument name="servers" type="any" required="true"
 			hint="An list or array of servers.">
 		<cfargument name="properties" type="struct" required="true"
 			hint="A struct of properties.">
 		
+		<cfset var temp = StructNew() />
 		<cfset var i = 0 />
 		
 		<!--- Transform list to an array of servers --->
@@ -196,20 +204,16 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 			<cfset arguments.servers = ListToArray(getUtils().trimList(arguments.servers)) />
 		</cfif>
 		
-		<!--- Build server name hashes to lookup table --->
+		<!--- Build server name array --->
 		<cfloop from="1" to="#ArrayLen(arguments.servers)#" index="i">
-			<cfset variables.servers[createHashKey(arguments.servers[i])] = arguments.name />
+			<cfset temp = StructNew() />
+			<cfset temp.server = arguments.servers[i] />
+			<cfset temp.environment = arguments.environment />
+			<cfset ArrayAppend(variables.servers, temp)/>
 		</cfloop>
 		
 		<!--- Add the properties to the right environment --->
-		<cfset variables.properties[arguments.name] = arguments.properties />
-	</cffunction>
-
-	<cffunction name="createHashKey" access="public" returntype="string" output="false"
-		hint="Creates a hash key from the passed data by uppercasing the criteria and hashing.">
-		<cfargument name="criteria" type="string" required="true"
-			hint="A string of criteria to use." />
-		<cfreturn Hash(Ucase(arguments.criteria)) />
+		<cfset variables.properties[arguments.environment] = arguments.properties />
 	</cffunction>
 
 	<!---
