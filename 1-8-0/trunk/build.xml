@@ -48,7 +48,7 @@ Notes:
 	<property name="ftp.user" value="machii"/>
 	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
 	
-	<property name="mxunit.output" value="./tests/output"/>
+	<property name="mxunit.output" value="${basedir}/tests/output"/>
 
 	<!--
 	TASK DEFINITIONS
@@ -192,33 +192,23 @@ Notes:
 			outputdir="${mxunit.output}"
 			verbose="${debug}"
 			haltonerror="true">
-			<!--
-			This does not work yet because MXUnit appears not to recurse directories yet
-			<directory path="${basedir}/tests" recurse="true" componentpath="MachII" /> 
-			-->
-			<!-- framework -->
-			<testcase name="MachII.tests.framework.EventTest"/>
-			<testcase name="MachII.tests.framework.RequestRedirectPersistTest"/>
-			<!-- caching -->
-			<testcase name="MachII.tests.caching.CacheStrategyManagerTest"/>
-			<testcase name="MachII.tests.caching.CacheStatsTest"/>
-			<testcase name="MachII.tests.caching.strategies.TimeSpanCacheTest"/>
-			<testcase name="MachII.tests.caching.strategies.LRUCacheTest"/>
-			<!-- logging -->
-			<testcase name="MachII.tests.logging.LogTest"/>
-			<testcase name="MachII.tests.logging.LogFactoryTest"/>
-			<testcase name="MachII.tests.logging.adapters.CFLogAdapterTest"/>
-			<testcase name="MachII.tests.logging.filters.GenericChannelFilterTest"/>
-			<!-- util -->
-			<testcase name="MachII.tests.util.AntPathMatcherTest"/>
-			<testcase name="MachII.tests.util.AssertTest"/>
-			<testcase name="MachII.tests.util.BeanUtilTest"/>
-			<testcase name="MachII.tests.util.ExceptionTest"/>
-			<testcase name="MachII.tests.util.ExpressionEvaluatorTest"/>
-			<testcase name="MachII.tests.util.SimplePatternMatcherTest"/>
-			<testcase name="MachII.tests.util.QueueTest"/>
-			<testcase name="MachII.tests.util.UtilsTest"/>
+			<directory path="${basedir}/tests" recurse="true" componentpath="MachII.tests" /> 
 		</mxunit>
+	</target>
+
+	<target name="testReport" depends="test">
+		<echo message="---------------------------------------------"/>
+		<echo message="Building a test report"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${mxunit.output}/junit"/>
+		<junitreport todir="${mxunit.output}/junit">
+			<fileset dir="${mxunit.output}">
+			   <include name="*.xml"/>
+			</fileset>
+			<report format="frames" todir="${mxunit.output}/report" />
+		</junitreport>
+		<delete dir="${mxunit.output}/junit" />
+		<echo message="Report available at: file:///${mxunit.output}/report/index.html"/>
 	</target>
 	
 	<target name="zip-init">
