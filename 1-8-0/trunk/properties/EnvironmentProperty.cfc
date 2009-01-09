@@ -137,11 +137,11 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 		
 		<!--- Check if this is a module since we differ to the environment of the parent application --->
 		<cfif IsObject(getAppManager().getParent())>
-			<cfset environment = getAppManager().getParent().getEnvironment() />
+			<cfset environment = getAppManager().getParent().getEnvironmentName() />
 		<cfelse>
 			<cfif StructKeyExists(variables.servers, deployedServerHash)>
 				<cfset environment = variables.servers[deployedServerHash] />
-				<cfset getAppManager().setEnvironment(environment) />
+				<cfset getAppManager().setEnvironmentName(environment) />
 			</cfif>
 		</cfif>
 		

@@ -53,7 +53,7 @@ Notes:
 
 	<cfset variables.appkey = "" />
 	<cfset variables.loading = TRUE />
-	<cfset variables.environment = "production" />
+	<cfset variables.environmentName = "production" />
 	<cfset variables.moduleName = "" />
 	
 	<!---
@@ -213,22 +213,22 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setEnvironment" access="public" returntype="void" output="false"
-		hint="Sets the environment.">
-		<cfargument name="environment" type="string" required="true" />
+	<cffunction name="setEnvironmentName" access="public" returntype="void" output="false"
+		hint="Sets the environment name.">
+		<cfargument name="environmentName" type="string" required="true" />
 		<cfif NOT IsObject(getParent())>
-			<cfset variables.environment = arguments.environment />
+			<cfset variables.environmentName = arguments.environmentName />
 		<cfelse>
 			<cfthrow type="MachII.framework.CannotSetEnvironment"
 				message="Cannot set environment from module. Modules can only inherit environment from parent application." />
 		</cfif>
 	</cffunction>
-	<cffunction name="getEnvironment" access="public" returntype="string" output="false"
-		hint="Gets the environment. If module, gets value from parent since environment is a singleton.">
+	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
+		hint="Gets the environment name. If module, gets value from parent since environment is a singleton.">
 		<cfif IsObject(getParent())>
-			<cfreturn getParent().getEnvironment() />
+			<cfreturn getParent().getEnvironmentName() />
 		<cfelse>
-			<cfreturn variables.environment />
+			<cfreturn variables.environmentName />
 		</cfif>
 	</cffunction>
 	
