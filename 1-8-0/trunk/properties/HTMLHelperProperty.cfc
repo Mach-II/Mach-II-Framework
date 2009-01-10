@@ -26,10 +26,21 @@ Provides HTML helper functionality and enables you to easily make
 HTML related tags faster and less hassle to output. This includes
 output doctypes, css and javascript links and HTML metadata.
 
-Configuration Usage:
+Simple Configuration Usage:
 <property name="html" type="MachII.properties.HTMLHelperProperty" />
 
-There are no configuration options at this time.
+Customized Configuration Usage:
+<property name="html" type="MachII.properties.HTMLHelperProperty">
+	<parameters>
+		<parameter name="metaTitleSuffix" value=" - Mach-II" />
+	</parameters>
+</property>
+
+The [metaTitleSuffix] parameter optionally and automatically appends 
+the value of the parameter on the end value addMeta() method when setting 
+a title. For example, calling addMeta("title", "Home") with the above example 
+value of this parameter would result in '<title>Home - Mach-II</title>'. 
+Useful to append a company or application name on to the end of every HTML title. 
 --->
 <cfcomponent 
 	displayname="HTMLHelperProperty"
@@ -40,6 +51,7 @@ There are no configuration options at this time.
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.metaTitleSuffix = "" />
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	
@@ -48,6 +60,13 @@ There are no configuration options at this time.
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
+		
+		<!--- Assert and set parameters --->
+		<cfif isParameterDefined("metaTitleSuffix")>
+			<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
+		</cfif>
+		
+		<!--- Build data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
 	</cffunction>
@@ -165,7 +184,10 @@ There are no configuration options at this time.
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
 			<cfif arguments.inline OR
 				(NOT arguments.inline AND appendHTMLHeadElementPathToWatchList("js", arguments.urls[i]))>
-				<cfset code = code & '<script type="text/javascript" src="' & arguments.urls[i] & '"></script>' & Chr(13) />
+				<cfset code = code & '<script type="text/javascript" src="' & arguments.urls[i] & '"></script>' />
+				<cfif ArrayLen(arguments.urls) NEQ i>
+					<cfset code = code & Chr(13) />
+				</cfif>
 			</cfif>
 		</cfloop>
 		
@@ -204,7 +226,10 @@ There are no configuration options at this time.
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
 			<cfif arguments.inline OR
 				(NOT arguments.inline AND appendHTMLHeadElementPathToWatchList("css", arguments.urls[i]))>
-				<cfset code = code & '<link type="text/css" href="' & arguments.urls[i] & '" rel="stylesheet"' & attributesCode & Chr(13) />
+				<cfset code = code & '<link type="text/css" href="' & arguments.urls[i] & '" rel="stylesheet"' & attributesCode />
+				<cfif ArrayLen(arguments.urls) NEQ i>
+					<cfset code = code & Chr(13) />
+				</cfif>
 			</cfif>
 		</cfloop>
 		
@@ -253,7 +278,7 @@ There are no configuration options at this time.
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
 		
 		<cfif arguments.type EQ "title">
-			<cfset code = '<title>' & arguments.content & '</title>' & Chr(13) />
+			<cfset code = '<title>' & arguments.content & getMetaTitleSuffix() & '</title>' & Chr(13) />
 		<cfelse>
 			<cfif isHttpEquivMetaType(arguments.type)>
 				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & arguments.content & '"' />
@@ -337,6 +362,16 @@ There are no configuration options at this time.
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setMetaTitleSuffix" access="private" returntype="void" output="false">
+		<cfargument name="metaTitleSuffix" type="string" required="true" />
+		<cfset getAssert().hasText(getParameter("metaTitleSuffix")
+				, "The value of 'metaTitleSuffix' must contain some text.") />
+		<cfset variables.metaTitleSuffix = arguments.metaTitleSuffix />
+	</cffunction>
+	<cffunction name="getMetaTitleSuffix" access="public" returntype="string" output="false">
+		<cfreturn variables.metaTitleSuffix />
+	</cffunction>
+	
 	<cffunction name="setMimeShortcutMap" access="private" returntype="void" output="false">
 		<cfargument name="mimeShortcutMap" type="struct" required="true" />
 		<cfset variables.mimeShortcutMap = arguments.mimeShortcutMap />
