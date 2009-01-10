@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -116,7 +116,7 @@ Notes:
 		<cfargument name="value" type="any" required="true"
 			hint="The value of the arg to set." />
 		<cfargument name="argType" type="string" required="false"
-			hint="The type of the arg to set." />
+			hint="DEPRECATED: The type of the arg to set." />
 		
 		<cfset variables.args[arguments.name] = arguments.value />
 		<cfif StructKeyExists(arguments, 'argType')>
@@ -167,7 +167,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setArgType" access="public" returntype="void" output="false"
-		hint="Sets the arg type for the specified arg.">
+		hint="DEPRECATED: Sets the arg type for the specified arg.">
 		<cfargument name="argName" type="string" required="true"
 			hint="The name of the arg." />
 		<cfargument name="argType" type="string" required="true"
@@ -175,7 +175,7 @@ Notes:
 		<cfset variables.argTypes[arguments.argName] = arguments.argType />
 	</cffunction>
 	<cffunction name="getArgType" access="public" returntype="string" output="false"
-		hint="Returns the arg type of the arg name.">
+		hint="DEPRECATED: Returns the arg type of the arg name.">
 		<cfargument name="argName" type="string" required="true"
 			hint="The name of the arg to get the arg type." />
 		<cfif StructKeyExists(variables.argTypes, arguments.argName)>
