@@ -111,8 +111,7 @@ Spring Framework (http://www.springframework.org)
 			<cfset part = pattern.substring(1, nextAsteriskLoc) />
 			<cfset partIndex = arguments.text.indexOf(part) />
 			
-			<!--- Cannot use partIndex NEQ -1 as it makes the varscoper barf --->
-			<cfloop condition="NOT (partIndex EQ -1)">
+			<cfloop condition="#decidePartIndex(partIndex)#">
 				<cfif doMatch(arguments.pattern.substring(nextAsteriskLoc), arguments.text.substring(partIndex + part.length()))>
 					<cfreturn true />
 				</cfif>
@@ -126,6 +125,15 @@ Spring Framework (http://www.springframework.org)
 		<cfreturn arguments.text.length() GTE firstAsteriskLoc 
 			AND arguments.pattern.substring(0, firstAsteriskLoc) EQ arguments.text.substring(0, firstAsteriskLoc)
 			AND doMatch(arguments.pattern.substring(firstAsteriskLoc), arguments.text.substring(firstAsteriskLoc)) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->	
+	<cffunction name="decidePartIndex" access="private" returntype="boolean" output="false"
+		hint="Decides the partIndex condition -- only used because partIndex NEQ -1 expression makes the VarsSoper barf.">
+		<cfargument name="partIndex" type="numeric" required="true">
+		<cfreturn arguments.partIndex NEQ -1 />
 	</cffunction>
 	
 </cfcomponent>
