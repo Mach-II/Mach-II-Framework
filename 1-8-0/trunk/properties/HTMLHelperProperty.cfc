@@ -266,33 +266,23 @@ Useful to append a company or application name on to the end of every HTML title
 	<cffunction name="addMeta" access="public" returntype="string" output="false"
 		hint="Return meta tag code for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
-			hint="The type of the meta tag." />
+			hint="The type of the meta tag (this method auto-selects if value is a meta type of 'http-equiv' or 'name')." />
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
-		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
-			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="inline" type="boolean" required="false" default="true"
 			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">			
 		
 		<cfset var code = "" />
 		<cfset var key = "" />
 		
-		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
-		
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & arguments.content & getMetaTitleSuffix() & '</title>' & Chr(13) />
 		<cfelse>
 			<cfif isHttpEquivMetaType(arguments.type)>
-				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & arguments.content & '"' />
+				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & arguments.content & '" />' & Chr(13) />
 			<cfelse>
-				<cfset code = '<meta name="' & arguments.type & '" content="' & arguments.content & '"' />
+				<cfset code = '<meta name="' & arguments.type & '" content="' & arguments.content & '" />' & Chr(13) />
 			</cfif>
-
-			<cfloop collection="#arguments.attributes#" item="key">
-				<cfset code = code & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
-			</cfloop>
-
-			<cfset code = code  & ' />' & Chr(13) />
 		</cfif>
 		
 		<cfreturn renderOrAppendToHead(code, arguments.inline) />
