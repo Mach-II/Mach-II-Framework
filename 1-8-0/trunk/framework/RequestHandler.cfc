@@ -99,9 +99,6 @@ Notes:
 
 		<cfset eventArgs = getRequestEventArgs() />
 		<cfset result = parseEventParameter(eventArgs) />
-		
-		<cfset setRequestEventName(result.eventName) />
-		<cfset setRequestModuleName(result.moduleName) />
 		<cfset setupEventContext(appManager) />
 		
 		<cftry>
@@ -119,6 +116,9 @@ Notes:
 			<cfif NOT Len(result.eventName)>
 				<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
 			</cfif>
+			
+			<cfset setRequestEventName(result.eventName) />
+			<cfset setRequestModuleName(result.moduleName) />
 			
 			<!--- Check if the event exists and is publically accessible --->
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
@@ -139,7 +139,7 @@ Notes:
 				<cfif log.isWarnEnabled()>
 					<cfset log.warn("#cfcatch.message#", cfcatch) />
 				</cfif>
--
+				
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
 				<cfset setupEventContext(appManager) />
 				<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
