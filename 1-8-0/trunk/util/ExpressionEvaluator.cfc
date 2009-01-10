@@ -163,7 +163,7 @@ ${scope.key NEQ scope.key2}
 		<cfset var key = "" />
 		<cfset var result = "" />
 		<cfset var body = arguments.expressionElement />
-		<cfset var defaultVal = "" />
+		<cfset var defaultValue = "" />
 		<cfset var hasDefault = false />
 		
 		<cfif listLen(body, ".") gt 1>

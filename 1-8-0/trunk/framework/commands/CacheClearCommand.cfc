@@ -71,6 +71,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
+		<cfset var expressionResult = "" />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
 		<cfset var log = getLog() />
 				

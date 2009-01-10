@@ -78,6 +78,7 @@ Notes:
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
 		
 		<!--- Search for Page-Views --->
 		<cfif NOT arguments.override>

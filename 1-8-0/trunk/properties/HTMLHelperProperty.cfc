@@ -206,6 +206,7 @@ Useful to append a company or application name on to the end of every HTML title
 		<cfset var code = "" />
 		<cfset var attributesCode = "" />
 		<cfset var i = 0 />
+		<cfset var key = "" />
 		<cfset var log = getLog() />
 		
 		<!--- Explode the list to an array --->
@@ -274,6 +275,7 @@ Useful to append a company or application name on to the end of every HTML title
 			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">			
 		
 		<cfset var code = "" />
+		<cfset var key = "" />
 		
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
 		
