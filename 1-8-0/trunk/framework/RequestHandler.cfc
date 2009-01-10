@@ -109,10 +109,15 @@ Notes:
 			<cfif Len(result.moduleName)>
 				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined"  	
-						message="The module '#result.moduleName#' for event '#result.eventName#' is not defined." />
+						message="Cound not announce event '#result.eventName#' because module '#result.moduleName#' is not defined." />
 				<cfelse>
 					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
 				</cfif>
+			</cfif>
+			
+			<!--- Get default event	if no event listed --->
+			<cfif NOT Len(result.eventName)>
+				<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
 			</cfif>
 			
 			<!--- Check if the event exists and is publically accessible --->
@@ -134,7 +139,7 @@ Notes:
 				<cfif log.isWarnEnabled()>
 					<cfset log.warn("#cfcatch.message#", cfcatch) />
 				</cfif>
-
+-
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
 				<cfset setupEventContext(appManager) />
 				<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
@@ -361,28 +366,25 @@ Notes:
 		<cfset var moduleDelimiter = getModuleDelimiter() />
 		<cfset var result = StructNew() />
 		
+		<cfset result.moduleName = "" />
+		<cfset result.eventName = "" />
+		
 		<!--- Get the event and module names --->
 		<cfif StructKeyExists(arguments.eventArgs, eventParameter) AND Len(arguments.eventArgs[eventParameter])>
 		
 			<cfset rawEvent = arguments.eventArgs[eventParameter] />
-		
+			
 			<!--- Has a module --->
-			<cfif listLen(rawEvent, moduleDelimiter) eq 2>
+			<cfif FindNoCase(moduleDelimiter, rawEvent)>
 				<cfset result.moduleName = listGetAt(rawEvent, 1, moduleDelimiter) />
-				<cfset result.eventName = listGetAt(rawEvent, 2, moduleDelimiter) />
-			<!--- Has a module, but no event is defined so announce the default event for that module (i.e sample:) --->
-			<cfelseif listLen(rawEvent, moduleDelimiter) eq 1 AND Right(rawEvent, 1) eq moduleDelimiter>
-				<cfset result.moduleName = listGetAt(rawEvent, 1, moduleDelimiter) />
-				<cfset result.eventName = getAppManager().getModuleManager().getModule(result.moduleName).getModuleAppManager().getPropertyManager().getProperty("defaultEvent") />			
+				<cfif ListLen(rawEvent, moduleDelimiter) EQ 2>
+					<cfset result.eventName = listGetAt(rawEvent, 2, moduleDelimiter) />
+				</cfif>			
 			<!--- Has no module --->
 			<cfelse>
 				<cfset result.moduleName = "" />
 				<cfset result.eventName = rawEvent />
 			</cfif>
-		<!--- No event so announce the default event --->
-		<cfelse>
-			<cfset result.moduleName = "" />
-			<cfset result.eventName = getAppManager().getPropertyManager().getProperty("defaultEvent") />
 		</cfif>
 		
 		<cfreturn result />
