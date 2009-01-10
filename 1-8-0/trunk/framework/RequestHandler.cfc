@@ -99,6 +99,10 @@ Notes:
 
 		<cfset eventArgs = getRequestEventArgs() />
 		<cfset result = parseEventParameter(eventArgs) />
+		
+		<!--- Set the module and name for now (in case module not found we need the original event name) --->
+		<cfset setRequestEventName(result.eventName) />
+		<cfset setRequestModuleName(result.moduleName) />
 		<cfset setupEventContext(appManager) />
 		
 		<cftry>
@@ -115,10 +119,9 @@ Notes:
 			<!--- Get default event	if no event listed --->
 			<cfif NOT Len(result.eventName)>
 				<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
+				<!--- Syncronize with new name --->
+				<cfset setRequestEventName(result.eventName) />
 			</cfif>
-			
-			<cfset setRequestEventName(result.eventName) />
-			<cfset setRequestModuleName(result.moduleName) />
 			
 			<!--- Check if the event exists and is publically accessible --->
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
