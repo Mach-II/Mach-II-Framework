@@ -306,7 +306,7 @@ See that file header for configuration of filter criteria.
 			<cfset temp = REReplace(temp, "<style.*?>", '<style type="text/css">', "one") />
 			
 			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
-			<cfset results.headElement = results.headElement & temp />
+			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
 		
 		<!--- Find the script element --->
@@ -319,7 +319,7 @@ See that file header for configuration of filter criteria.
 			<cfset temp = REReplace(temp, "<script.*?>", '<script type="text/javascript">', "one") />
 			
 			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
-			<cfset results.headElement = results.headElement & temp />
+			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
 		
 		<!--- Remainder is the data --->
