@@ -31,7 +31,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.filters = StructNew() />
+	<cfset variables.filterProxies = StructNew() />
 	<cfset variables.parentFilterManager = "">
 	<cfset variables.utils = "" />
 	
@@ -169,8 +169,8 @@ Notes:
 		<cfset var aFilter = 0 />
 		<cfset var i = 0 />
 		
-		<cfloop collection="#variables.filters#" item="i">
-			<cfset aFilter = variables.filters[i] />
+		<cfloop collection="#variables.filterProxies#" item="i">
+			<cfset aFilter = variables.filterProxies[i].getObject() />
 			<cfset aFilter.setLog(logFactory) />
 			<cfset appManager.onPostObjectReload(aFilter) />
 			<cfset aFilter.configure() />
@@ -183,8 +183,8 @@ Notes:
 		<cfset var aFilter = 0 />
 		<cfset var i = 0 />
 		
-		<cfloop collection="#variables.filters#" item="i">
-			<cfset aFilter = variables.filters[i] />
+		<cfloop collection="#variables.filterProxies#" item="i">
+			<cfset aFilter = variables.filterProxies[i].getObject() />
 			<cfset aFilter.onReload() />
 		</cfloop>
 	</cffunction>
@@ -202,7 +202,7 @@ Notes:
 			<cfthrow type="MachII.framework.FilterAlreadyDefined"
 				message="An EventFilter with name '#arguments.filterName#' is already registered." />
 		<cfelse>
-			<cfset variables.filters[arguments.filterName] = arguments.filter />
+			<cfset variables.filterProxies[arguments.filterName] = arguments.filter.getProxy() />
 		</cfif>
 	</cffunction>
 	
@@ -210,7 +210,7 @@ Notes:
 		<cfargument name="filterName" type="string" required="true" />
 		
 		<cfif isFilterDefined(arguments.filterName)>
-			<cfreturn variables.filters[arguments.filterName] />
+			<cfreturn variables.filterProxies[arguments.filterName].getObject() />
 		<cfelseif IsObject(getParent()) AND getParent().isFilterDefined(arguments.filterName)>
 			<cfreturn getParent().getFilter(arguments.filterName) />
 		<cfelse>
@@ -222,13 +222,13 @@ Notes:
 	<cffunction name="removeFilter" access="public" returntype="void" output="false"
 		hint="Removes a filter. Does NOT remove from a parent.">
 		<cfargument name="filterName" type="string" required="true" />
-		<cfset StructDelete(variables.filters, arguments.filterName, false) />
+		<cfset StructDelete(variables.filterProxies, arguments.filterName, false) />
 	</cffunction>
 	
 	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if a filter is defined in this event filter manager. Does NOT check the parent.">
 		<cfargument name="filterName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.filters, arguments.filterName) />
+		<cfreturn StructKeyExists(variables.filterProxies, arguments.filterName) />
 	</cffunction>
 	
 	<!---
@@ -236,7 +236,7 @@ Notes:
 	--->
 	<cffunction name="getFilterNames" access="public" returntype="array" output="false"
 		hint="Returns an array of filter names.">
-		<cfreturn StructKeyArray(variables.filters) />
+		<cfreturn StructKeyArray(variables.filterProxies) />
 	</cffunction>
 	
 	<cffunction name="reloadFilter" access="public" returntype="void" output="false"

@@ -32,7 +32,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.plugins = StructNew() />
+	<cfset variables.pluginProxies = StructNew() />
 	<cfset variables.pluginArray = ArrayNew(1) />
 	<cfset variables.pluginArrayPosition = StructNew() />
 	<cfset variables.preProcessPlugins = ArrayNew(1) />
@@ -202,7 +202,7 @@ Notes:
 		<cfargument name="pluginName" type="string" required="true" />
 
 		<cfif isPluginDefined(arguments.pluginName)>
-			<cfreturn variables.plugins[arguments.pluginName] />
+			<cfreturn variables.pluginProxies[arguments.pluginName].getObject() />
 		<cfelseif IsObject(getParent()) AND getParent().isPluginDefined(arguments.pluginName)>
 			<cfreturn getParent().getPlugin(arguments.pluginName) />
 		<cfelse>
@@ -226,7 +226,7 @@ Notes:
 			<cfthrow type="MachII.framework.PluginAlreadyDefined"
 				message="A Plugin with name '#arguments.pluginName#' is already registered." />
 		<cfelseif arguments.override AND isPluginDefined(arguments.pluginName)>
-			<cfset variables.plugins[arguments.pluginName] = arguments.plugin />
+			<cfset variables.pluginProxies[arguments.pluginName] = arguments.plugin.getProxy() />
 			<cfset variables.pluginArray[variables.pluginArrayPosition[arguments.pluginName]] = arguments.plugin />
 
 			<!--- re-add references to this plugin for each registered point --->
@@ -256,7 +256,7 @@ Notes:
 				</cfif>
 			</cfloop>
 		<cfelse>
-			<cfset variables.plugins[arguments.pluginName] = arguments.plugin />
+			<cfset variables.pluginProxies[arguments.pluginName] = arguments.plugin.getProxy() />
 
 			<cfset variables.nPlugins = variables.nPlugins + 1 />
 			<cfset variables.pluginArray[variables.nPlugins] = arguments.plugin />
@@ -276,7 +276,7 @@ Notes:
 	<cffunction name="isPluginDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a Plugin is registered with the specified name. Does NOT check parent.">
 		<cfargument name="pluginName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.plugins, arguments.pluginName) />
+		<cfreturn StructKeyExists(variables.pluginProxies, arguments.pluginName) />
 	</cffunction>
 
 	<!---
@@ -284,7 +284,7 @@ Notes:
 	--->
 	<cffunction name="getPluginNames" access="public" returntype="array" output="false"
 		hint="Returns an array of plugin names.">
-		<cfreturn StructKeyArray(variables.plugins) />
+		<cfreturn StructKeyArray(variables.pluginProxies) />
 	</cffunction>
 	
 	<cffunction name="reloadPlugin" access="public" returntype="void" output="false"

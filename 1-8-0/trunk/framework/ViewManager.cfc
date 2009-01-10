@@ -134,6 +134,8 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(viewLoaderNodes)#" index="i">
 			<cfset viewLoaderType = viewLoaderNodes[i].xmlAttributes["type"] />
 			
+			<!--- View-Loaders do not support overrideAction --->
+			
 			<!--- Get the View-Loader's parameters --->
 			<cfset viewLoaderParams = StructNew() />
 			

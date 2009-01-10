@@ -288,8 +288,16 @@ the rest of the framework. (pfarrell)
 		<cfargument name="defaultValue" type="any" required="false" default=""
 			hint="The default value to use if the requested property is not defined." />
 		
+		<cfset var propertyValue = "" />
+		
 		<cfif isPropertyDefined(arguments.propertyName)>
-			<cfreturn variables.properties[arguments.propertyName] />
+			<cfset propertyValue = variables.properties[arguments.propertyName] />
+			
+			<!--- If configurable property, then return object --->
+			<cfif IsObject(propertyValue) AND StructKeyExists(propertyValue, "getObject")>
+				<cfset propertyValue = propertyValue.getObject() />
+			</cfif>
+			<cfreturn propertyValue />
 		<cfelseif IsObject(getParent()) AND getParent().isPropertyDefined(arguments.propertyName)>
 			<cfreturn getParent().getProperty(arguments.propertyName)>
 		<cfelseif StructKeyExists(arguments, "defaultValue")>
@@ -317,6 +325,10 @@ the rest of the framework. (pfarrell)
 			<cfthrow type="MachII.framework.propertyNotAllowed"
 				message="The '#arguments.propertyName#' property cannot be set inside of a module." />
 		<cfelse>
+			<!--- Save the proxy if this is a configurable property --->
+			<cfif IsObject(arguments.propertyValue) AND StructKeyExists(arguments.propertyValue, "getProxy")>
+				<cfset arguments.propertyValue = arguments.propertyValue.getProxy() />
+			</cfif>
 			<cfset variables.properties[arguments.propertyName] = arguments.propertyValue />
 		</cfif>
 	</cffunction>

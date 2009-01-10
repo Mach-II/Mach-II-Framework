@@ -30,7 +30,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.listeners = StructNew() />
+	<cfset variables.listenerProxies = StructNew() />
 	<cfset variables.defaultInvoker = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.parentListenerManager = "" />
@@ -211,8 +211,8 @@ Notes:
 		<cfset var i = 0 />
 		
 		<!--- Loop through the listeners configure --->
-		<cfloop collection="#variables.listeners#" item="i">
-			<cfset aListener = variables.listeners[i] />
+		<cfloop collection="#variables.listenerProxies#" item="i">
+			<cfset aListener = variables.listenerProxies[i].getObject() />
 			<cfset aListener.setLog(logFactory) />
 			<cfset appManager.onPostObjectReload(aListener) />
 			<cfset aListener.configure() />
@@ -226,8 +226,8 @@ Notes:
 		<cfset var i = 0 />
 		
 		<!--- Loop through the listeners configure --->
-		<cfloop collection="#variables.listeners#" item="i">
-			<cfset aListener = variables.listeners[i] />
+		<cfloop collection="#variables.listenerProxies#" item="i">
+			<cfset aListener = variables.listenerProxies[i].getObject() />
 			<cfset aListener.onReload() />
 		</cfloop>
 	</cffunction>
@@ -240,7 +240,7 @@ Notes:
 		<cfargument name="listenerName" type="string" required="true" />
 		
 		<cfif isListenerDefined(arguments.listenerName)>
-			<cfreturn variables.listeners[arguments.listenerName] />
+			<cfreturn variables.listenerProxies[arguments.listenerName].getObject() />
 		<cfelseif IsObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
 			<cfreturn getParent().getListener(arguments.listenerName) />
 		<cfelse>
@@ -259,20 +259,20 @@ Notes:
 			<cfthrow type="MachII.framework.ListenerAlreadyDefined"
 				message="A Listener with name '#arguments.listenerName#' is already registered." />
 		<cfelse>
-			<cfset variables.listeners[arguments.listenerName] = arguments.listener />
+			<cfset variables.listenerProxies[arguments.listenerName] = arguments.listener.getProxy() />
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="removeListener" access="public" returntype="void" output="false"
 		hint="Removes a listener. Does NOT remove from a parent.">
 		<cfargument name="listenerName" type="string" required="true" />
-		<cfset StructDelete(variables.listeners, arguments.listenerName, false) />
+		<cfset StructDelete(variables.listenerProxies, arguments.listenerName, false) />
 	</cffunction>
 	
 	<cffunction name="isListenerDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a listener is registered with the specified name. Does NOT check parent.">
 		<cfargument name="listenerName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.listeners, arguments.listenerName) />
+		<cfreturn StructKeyExists(variables.listenerProxies, arguments.listenerName) />
 	</cffunction>
 	
 	<!---
@@ -280,7 +280,7 @@ Notes:
 	--->
 	<cffunction name="getListenerNames" access="public" returntype="array" output="false"
 		hint="Returns an array of listener names.">
-		<cfreturn StructKeyArray(variables.listeners) />
+		<cfreturn StructKeyArray(variables.listenerProxies) />
 	</cffunction>
 	
 	<cffunction name="reloadListener" access="public" returntype="void" output="false"
