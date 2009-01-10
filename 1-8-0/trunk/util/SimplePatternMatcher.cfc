@@ -84,6 +84,7 @@ Spring Framework (http://www.springframework.org)
 		<cfset var nextAsteriskLoc = "" />
 		<cfset var part = "" />
 		<cfset var partIndex = "" />
+		<cfset var partIndexResult = true />
 		
 		<!--- Zero length strings for pattern and text does not constitute a match --->
 		<cfif NOT Len(arguments.pattern) AND NOT Len(arguments.text)>
@@ -108,15 +109,20 @@ Spring Framework (http://www.springframework.org)
 				<cfreturn arguments.text.endsWith(arguments.pattern.substring(1)) />
 			</cfif>
 			
-			<cfset part = pattern.substring(1, nextAsteriskLoc) />
+			<cfset part = arguments.pattern.substring(1, nextAsteriskLoc) />
 			<cfset partIndex = arguments.text.indexOf(part) />
 			
-			<cfloop condition="partIndex NEQ -1">
+			<cfloop condition="#partIndexResult#">
 				<cfif doMatch(arguments.pattern.substring(nextAsteriskLoc), arguments.text.substring(partIndex + part.length()))>
 					<cfreturn true />
 				</cfif>
 				
 				<cfset partIndex = arguments.text.indexOf(part, partIndex + 1) />
+				
+				<!--- We are using partIndexResult instead of partIndex NEQ -1 in the cfloop condition because it fails the varscoper --->
+				<cfif partIndex EQ -1>
+					<cfset partIndexResult = false />
+				</cfif>
 			</cfloop>
 			
 			<cfreturn false />	
