@@ -56,6 +56,8 @@ Notes:
 	<cfset variables.environmentName = "production" />
 	<cfset variables.moduleName = "" />
 	
+	<cfset variables.routes = StructNew() />
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -394,6 +396,40 @@ Notes:
 	</cffunction>
 	<cffunction name="isLoading" access="public" type="boolean" output="false">
 		<cfreturn variables.loading />
+	</cffunction>
+	
+	<cffunction name="getRoutes" access="public" returntype="struct" output="false">
+		<cfreturn variables.routes />
+	</cffunction>
+	<cffunction name="setRoutes" access="public" returntype="void" output="false">
+		<cfargument name="routes" type="struct" required="true" />
+		<cfset variables.routes = arguments.routes />
+	</cffunction>
+	
+	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
+		<cfreturn StructKeyList(variables.routes) />
+	</cffunction>
+	
+	<cffunction name="getRoute" access="public" returntype="struct" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		
+		<cfset var routes = getRoutes() />
+		
+		<!--- TODO: handle getting routes from the parent app if there is one --->
+		
+		<cfif NOT StructKeyExists(routes, arguments.routeName)>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route named '#arguments.routeName# could be found.'" />
+		</cfif>
+		
+		<cfreturn variables.routes[arguments.routeName] />
+	</cffunction>
+
+	<cffunction name="addRoute" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="route" type="struct" required="true" />
+		
+		<cfset variables.routes[arguments.routeName] = arguments.route />
 	</cffunction>
 	
 </cfcomponent>

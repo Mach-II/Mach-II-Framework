@@ -154,6 +154,55 @@ Notes:
 		<cfreturn builtUrl />
 	</cffunction>
 	
+	<cffunction name="buildRoute" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with." />
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		
+		<cfset var builtUrl = "" />
+		<cfset var queryString = "" />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var value = "" />
+		<cfset var i = "" />
+		
+		<cfset queryString = queryString & arguments.routeName />
+		
+		<!--- TODO: handle module routes --->
+		<!--- TODO: handle ordering the url params --->
+		
+		<!--- Attach each additional arguments if it exists and is a simple value --->
+		<cfloop collection="#params#" item="i">
+			<cfif IsSimpleValue(params[i])>
+				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
+				<cfif getParseSes()>
+					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
+				</cfif>
+				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
+					<cfset params[i] = "_-_NULL_-_" />
+				</cfif>
+				<cfset queryString = queryString & getSeriesDelimiter() & URLEncodedFormat(params[i]) />
+			</cfif>
+		</cfloop>
+		
+		<!--- Prepend the urlBase and add trailing series delimiter --->
+		<cfif Len(queryString)>
+			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
+			<cfif getSeriesDelimiter() NEQ "&">
+				<cfset builtUrl = builtUrl & getSeriesDelimiter() />
+			</cfif>
+		<cfelse>
+			<cfset builtUrl = arguments.urlBase />
+		</cfif>
+		
+		<cfreturn builtUrl />
+	</cffunction>
+	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
 		hint="Parse SES parameters.">
 		<cfargument name="pathInfo" type="string" required="true" />
@@ -162,6 +211,7 @@ Notes:
 		<cfset var value = "" />
 		<cfset var params = StructNew() />
 		<cfset var i = "" />
+		<cfset var routeName = "" />
 
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
@@ -176,32 +226,75 @@ Notes:
 			<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
 			<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
 			
-			<cfif getSeriesDelimiter() EQ getPairDelimiter()>
-			
-				<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
-				
-				<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
-					<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
-						<cfset value = names[i+1] />
-					<cfelse>
-						<cfset value = "" />
-					</cfif>
-					<cfset params[names[i]] = value />
-				</cfloop>
+			<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
+
+			<!--- Check to see if we are dealing with processing routes --->
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) gt 0>
+				<!--- The SES url has the event parameter in it so routes are disabled --->
+				<cfset params = parseNonRoute(names) />
 			<cfelse>
-				
-				<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
-				
-				<cfloop from="1" to="#ArrayLen(names)#" index="i">
-					<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
-						<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
-					<cfelse>
-						<cfset value = "" />
-					</cfif>
-					<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
-				</cfloop>
+				<!--- No event parameter was found so check to see if a route name is present --->
+				<cfif ListFindNoCase(getAppManager().getRouteNames(), names[1])>
+					<cfset params = parseRoute(names[1], names) />
+				<cfelse>
+					<!--- No route found for this url --->
+					<cfset params = parseNonRoute(names) />
+				</cfif>
 			</cfif>
+			
 		</cfif>
+		
+		<cfreturn params />
+	</cffunction>
+	
+	<cffunction name="parseNonRoute" access="private" returntype="struct" output="false">
+		<cfargument name="urlElements" type="array" required="true" />
+		
+		<cfset var value = "" />
+		<cfset var i = 0 />
+		<cfset var names = arguments.urlElements />
+	
+		<cfif getSeriesDelimiter() EQ getPairDelimiter()>
+			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
+				<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
+					<cfset value = names[i+1] />
+				<cfelse>
+					<cfset value = "" />
+				</cfif>
+				<cfset params[names[i]] = value />
+			</cfloop>
+		<cfelse>
+			<cfloop from="1" to="#ArrayLen(names)#" index="i">
+				<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
+					<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
+				<cfelse>
+					<cfset value = "" />
+				</cfif>
+				<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
+			</cfloop>
+		</cfif>
+		
+		<cfreturn params />
+	</cffunction>
+	
+	<cffunction name="parseRoute" access="private" returntype="struct" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="urlElements" type="array" required="true" />
+		
+		<cfset var route = getAppManager().getRoute(arguments.routeName) />
+		<cfset var params = structNew() />
+		<cfset var i = 1 />
+		
+		<cfset params[getEventParameter()] = route.event />
+		
+		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
+		
+		<!--- Start at position 2 since position 1 was the route name --->
+		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
+			<cfif ListLen(route.eventargs) lte i + 1>
+				<cfset params[ListGetAt(route.eventargs, i - 1)] = arguments.urlElements[i] />
+			</cfif>
+		</cfloop>
 		
 		<cfreturn params />
 	</cffunction>
@@ -426,7 +519,7 @@ Notes:
 	<cffunction name="getRequestRedirectPersist" access="public" returntype="any" output="false">
 		<cfreturn variables.requestRedirectPersist />
 	</cffunction>
-
+	
 	<cffunction name="setLog" access="private" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
