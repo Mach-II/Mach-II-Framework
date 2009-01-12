@@ -80,6 +80,9 @@ Notes:
 			</cfif>
 			<!--- resultArg --->
 			<cfif arguments.resultArg NEQ ''>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' returned data in event-arg '#arguments.resultArg#.'", resultValue) />
+				</cfif>
 				<cfset arguments.event.setArg(arguments.resultArg, resultValue) />
 			</cfif>
 
