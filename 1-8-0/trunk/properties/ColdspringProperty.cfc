@@ -377,15 +377,15 @@ application.serviceFactory_account variable.
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 		<cfset setLastReloadDatetime(Now()) />
 		
-		<!--- Register as DIEngineInterface --->
+		<!--- Register as onPostObjectReload callback --->
 		<cfset getAppManager().addOnPostObjectReloadCallback(this, "resolveDependency") />
 	</cffunction>
 	
 	<cffunction name="onReload" access="public" returntype="void" output="false"
 		hint="Deregisters ColdSpring as an available DI engine interface.">
 		
-		<!--- Deregister as DIEngineInterface --->
-		<cfset getAppManager().deregisterDIEngineInterface(this) />
+		<!--- Deregister as onPostObjectReload callback --->
+		<cfset getAppManager().removeOnPostObjectReloadCallback(this) />
 	</cffunction>
 	
 	<!---
