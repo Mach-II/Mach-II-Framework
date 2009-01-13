@@ -50,7 +50,6 @@ or
 	<cfset variables.resultArg = "" />
 	<cfset variables.args = ArrayNew(1) />
 	<cfset variables.argumentList = "" />
-	<cfset variables.bean = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -62,10 +61,14 @@ or
 		<cfargument name="args" type="string" required="true" />
 		<cfargument name="resultArg" type="string" required="true" />
 		
+		<!--- Run setters --->
 		<cfset setBeanId(arguments.beanId) />
 		<cfset setMethod(arguments.method) />
 		<cfset setArgumentList(arguments.args) />
 		<cfset setResultArg(arguments.resultArg) />
+		
+		<!--- Setup --->
+		<cfset addDependsMetadata() />
 		
 		<cfreturn this />
 	</cffunction>
@@ -81,7 +84,7 @@ or
 		<cfset var pm = "" />
 		<cfset var beanFactory = "" />
 		<cfset var resultValue = "" />
-		<cfset var bean = "" />
+		<cfset var bean = getBean() />
 		<cfset var namedArgs = StructNew() />
 		<cfset var args = getArguments() />
 		<cfset var argValues = ArrayNew(1) />
@@ -89,15 +92,6 @@ or
 		<cfset var i = 0 />
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
-		
-		<!--- TODO: Refactor how we autowire the bean into --->
-		<cfif NOT IsObject(variables.bean)>
-			<cfset pm = getPropertyManager() />
-			<cfset beanFactory = pm.getProperty(pm.getProperty("beanFactoryName")) />
-			<cfset setBean(beanFactory.getBean(getBeanId())) />
-		</cfif>
-		
-		<cfset bean = getBean() />
 		
 		<cfloop from="1" to="#ArrayLen(args)#" index="i">
 			<cfif args[i].name NEQ "">
@@ -178,22 +172,43 @@ or
 
 		<cfset var argText = "" />
 		<cfset var arg = "" />
+		<cfset var expressionEvaluator = getExpressionEvaluator() />
 		
 		<cfloop list="#getArgumentList()#" index="argText">
 			<cfset arg = StructNew() />
 			
 			<cfif ListLen(argText, "=") GT 1>
 				<cfset arg.name = ListGetAt(argText, 1, "=") />
-				<cfset arg.isExpression = arguments.expressionEvaluator.isExpression(listGetAt(argText, 2, '=')) />
+				<cfset arg.isExpression = expressionEvaluator.isExpression(listGetAt(argText, 2, '=')) />
 				<cfset arg.value = ListGetAt(argText, 2, "=") /> 
 			<cfelse>
 				<cfset arg.name = "" />
-				<cfset arg.isExpression = arguments.expressionEvaluator.isExpression(argText) />
+				<cfset arg.isExpression = expressionEvaluator.isExpression(argText) />
 				<cfset arg.value = argText /> 
 			</cfif>
 			
 			<cfset ArrayAppend(variables.args, arg) />
 		</cfloop>
+	</cffunction>
+	
+	<cffunction name="addDependsMetadata" access="private" returntype="void" output="false"
+		hint="Adds the depends attribute metadata with bean.">
+		
+		<cfset var md = GetMetadata(this) />
+		
+		<cfset md.depends = getBeanId() />
+	</cffunction>
+	
+	<cffunction name="getBean" access="private" returntype="any" output="false"
+		hint="Gets the bean.">
+		
+		<cfset var bean = "" />
+		
+		<cfinvoke  
+			method="get#getBeanId()#" 
+			returnvariable="bean" />
+		
+		<cfreturn bean />
 	</cffunction>
 	
 	<!---
@@ -214,14 +229,6 @@ or
 	</cffunction>
 	<cffunction name="getBeanId" access="private" returntype="string" output="false">
 		<cfreturn variables.beanId />
-	</cffunction>
-	
-	<cffunction name="setBean" access="private" returntype="void" output="false">
-		<cfargument name="bean" type="any" required="true" />
-		<cfset variables.bean = arguments.bean />
-	</cffunction>
-	<cffunction name="getBean" access="private" returntype="any" output="false">
-		<cfreturn variables.bean />
 	</cffunction>
 	
 	<cffunction name="setMethod" access="private" returntype="void" output="false">

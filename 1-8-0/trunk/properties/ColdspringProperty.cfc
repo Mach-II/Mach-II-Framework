@@ -431,20 +431,23 @@ application.serviceFactory_account variable.
 	<cffunction name="resolveDependencies" access="public" returntype="void" output="false"
 		hint="Resolves Mach-II dependencies.">
 		
-		<cfset var targets = StructNew() />
+		<cfset var targetBase = StructNew() />
 		<cfset var targetObj = 0 />
 		<cfset var targetMetadata = "" />
-		<cfset var key = "" />
+		<cfset var i = 0 />
+		
+		<cfset targetBase.targets = ArrayNew(1) />
 		
 		<!--- Get listener/filter/plugin/property targets --->
-		<cfset getListeners(targets) />
-		<cfset getFilters(targets) />
-		<cfset getPlugins(targets) />
-		<cfset getConfigurableProperties(targets) />
+		<cfset getListeners(targetBase) />
+		<cfset getFilters(targetBase) />
+		<cfset getPlugins(targetBase) />
+		<cfset getConfigurableProperties(targetBase) />
+		<cfset getConfigurableCommands(targetBase) />
 		
-		<cfloop collection="#targets#" item="key">
+		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
 			<!--- Get this iteration target object for easy use --->
-			<cfset targetObj = targets[key] />
+			<cfset targetObj =  targetBase.targets[i] />
 			
 			<!--- Look for autowirable collaborators for any setters --->
 			<cfset targetMetadata = GetMetadata(targetObj) />
@@ -622,7 +625,7 @@ application.serviceFactory_account variable.
 		
 	<cffunction name="getListeners" access="private" returntype="void" output="false"
 		hint="Gets the listener targets.">
-		<cfargument name="targets" type="struct" required="true" />
+		<cfargument name="targetBase" type="struct" required="true" />
 		
 		<cfset var listenerManager = getAppManager().getListenerManager() />
 		<cfset var listenerNames = listenerManager.getListenerNames() />
@@ -630,13 +633,13 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved listener and its' invoker to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(listenerNames)#" index="i">
-			<cfset targets["listener_" & listenerNames[i]] = listenerManager.getListener(listenerNames[i]) />
+			<cfset ArrayAppend(arguments.targetBase.targets, listenerManager.getListener(listenerNames[i])) />
 		</cfloop>
 	</cffunction>
 		
 	<cffunction name="getFilters" access="private" returntype="void" output="false"
 		hint="Get the filter targets.">
-		<cfargument name="targets" type="struct" required="true" />
+		<cfargument name="targetBase" type="struct" required="true" />
 		
 		<cfset var filterManager = getAppManager().getFilterManager() />
 		<cfset var filterNames = filterManager.getFilterNames() />
@@ -644,13 +647,13 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved filter to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(filterNames)#" index="i">
-			<cfset targets["filter_" & filterNames[i]] = filterManager.getFilter(filterNames[i]) />
+			<cfset ArrayAppend(arguments.targetBase.targets, filterManager.getFilter(filterNames[i])) />
 		</cfloop>
 	</cffunction>
 		
 	<cffunction name="getPlugins" access="private" returntype="void" output="false"
 		hint="Get the plugin targets.">
-		<cfargument name="targets" type="struct" required="true" />
+		<cfargument name="targetBase" type="struct" required="true" />
 		
 		<cfset var pluginManager = getAppManager().getPluginManager() />
 		<cfset var pluginNames = pluginManager.getPluginNames() />
@@ -658,21 +661,40 @@ application.serviceFactory_account variable.
 		
 		<!--- Append each retrieved plugin to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(pluginNames)#" index="i">
-			<cfset targets["plugin_" & pluginNames[i]] = pluginManager.getPlugin(pluginNames[i]) />
+			<cfset ArrayAppend(arguments.targetBase.targets, pluginManager.getPlugin(pluginNames[i])) />
 		</cfloop>
 	</cffunction>
 	
 	<cffunction name="getConfigurableProperties" access="private" returntype="void" output="false"
 		hint="Get the configurable property targets.">
-		<cfargument name="targets" type="struct" required="true" />
+		<cfargument name="targetBase" type="struct" required="true" />
 		
 		<cfset var propertyManager = getAppManager().getPropertyManager() />
 		<cfset var configurablePropertyNames = propertyManager.getConfigurablePropertyNames() />
 		<cfset var i = 0 />
 		
-		<!--- Append each retrieved plugin to the targets array (in struct) --->
+		<!--- Append each retrieved configurable properties to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(configurablePropertyNames)#" index="i">
-			<cfset targets["property_" & configurablePropertyNames[i]] = propertyManager.getProperty(configurablePropertyNames[i]) />
+			<cfset ArrayAppend(arguments.targetBase.targets, propertyManager.getProperty(configurablePropertyNames[i])) />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="getConfigurableCommands" access="private" returntype="void" output="false"
+		hint="Get the configurable command targets.">
+		<cfargument name="targetBase" type="struct" required="true" />
+		
+		<cfset var configurableEventCommands = getAppManager().getEventManager().getConfigurableCommandTargets() />
+		<cfset var configurableSubroutineCommands = getAppManager().getSubroutineManager().getConfigurableCommandTargets() />
+		<cfset var i = 0 />
+		
+		<!--- Append each retrieved configurable event commands to the targets array (in struct) --->
+		<cfloop from="1" to="#ArrayLen(configurableEventCommands)#" index="i">
+			<cfset ArrayAppend(arguments.targetBase.targets, configurableEventCommands[i]) />
+		</cfloop>
+		
+		<!--- Append each retrieved configurable subroutine commands to the targets array (in struct) --->
+		<cfloop from="1" to="#ArrayLen(configurableSubroutineCommands)#" index="i">
+			<cfset ArrayAppend(arguments.targetBase.targets, configurableSubroutineCommands[i]) />
 		</cfloop>
 	</cffunction>
 	

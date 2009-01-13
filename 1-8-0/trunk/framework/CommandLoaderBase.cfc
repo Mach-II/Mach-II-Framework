@@ -35,6 +35,7 @@ Notes:
 	<cfset variables.utils = "" />
 	<cfset variables.expressionEvaluator = "" />
 	<cfset variables.propertyManager = "" />
+	<cfset variables.configurableCommandTargets = ArrayNew(1) />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -206,6 +207,8 @@ Notes:
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
 		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
+		
+		<cfset addConfigurableCommandTarget(command) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -467,6 +470,19 @@ Notes:
 		<cfset command.setPropertyManager(variables.propertyManager) />
 		
 		<cfreturn command />
+	</cffunction>
+	
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="addConfigurableCommandTarget" access="private" returntype="void" output="false"
+		hint="Adds an command to the on reload targets.">
+		<cfargument name="command" type="MachII.framework.Command" required="true" />
+		<cfset ArrayAppend(variables.configurableCommandTargets, arguments.command) />
+	</cffunction>
+	<cffunction name="getConfigurableCommandTargets" access="public" returntype="array" output="false"
+		hint="Gets the on reload command targets.">
+		<cfreturn variables.configurableCommandTargets />
 	</cffunction>
 	
 </cfcomponent>
