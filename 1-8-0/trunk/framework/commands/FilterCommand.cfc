@@ -32,7 +32,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.filter = "" />
+	<cfset variables.filterProxy = "" />
 	<cfset variables.paramArgs = "" />
 	
 	<!---
@@ -40,10 +40,10 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="FilterCommand" output="false"
 		hint="Used by the framework for initialization.">
-		<cfargument name="filter" type="MachII.framework.EventFilter" required="true" />
+		<cfargument name="filterProxy" type="MachII.framework.BaseProxy" required="true" />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />
 		
-		<cfset setFilter(arguments.filter) />
+		<cfset setFilterProxy(arguments.filterProxy) />
 		<cfset setParamArgs(arguments.paramArgs) />
 		
 		<cfreturn this />
@@ -58,8 +58,8 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var continue = false />
-		<cfset var filter = getFilter() />
-		<cfset var log = getFilter().getLog() />
+		<cfset var filter = getFilterProxy().getObject() />
+		<cfset var log = filter.getLog() />
 		<cfset var paramArgs = getParamArgs() />
 		
 		<cfif log.isDebugEnabled()>
@@ -86,12 +86,12 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setFilter" access="private" returntype="void" output="false">
-		<cfargument name="filter" type="MachII.framework.EventFilter" required="true" />
-		<cfset variables.filter = arguments.filter />
+	<cffunction name="setFilterProxy" access="private" returntype="void" output="false">
+		<cfargument name="filterProxy" type="MachII.framework.BaseProxy" required="true" />
+		<cfset variables.filterProxy = arguments.filterProxy />
 	</cffunction>
-	<cffunction name="getFilter" access="private" returntype="MachII.framework.EventFilter" output="false">
-		<cfreturn variables.filter />
+	<cffunction name="getFilterProxy" access="private" returntype="MachII.framework.BaseProxy" output="false">
+		<cfreturn variables.filterProxy />
 	</cffunction>
 	
 	<cffunction name="setParamArgs" access="private" returntype="void" output="false">

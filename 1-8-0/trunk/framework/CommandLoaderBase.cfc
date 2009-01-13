@@ -336,7 +336,7 @@ Notes:
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filter = getAppManager().getFilterManager().getFilter(filterName) />
+		<cfset var filterProxy = getAppManager().getFilterManager().getFilter(filterName).getProxy() />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
@@ -349,7 +349,7 @@ Notes:
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filter, filterParams) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filterProxy, filterParams) />
 		
 		<cfreturn command />
 	</cffunction>
