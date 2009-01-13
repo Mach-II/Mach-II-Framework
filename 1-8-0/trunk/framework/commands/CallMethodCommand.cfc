@@ -159,6 +159,9 @@ or
 				
 		<cfif getResultArg() NEQ ''>
 			<cfset arguments.event.setArg(getResultArg(), resultValue) />
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
+			</cfif>
 		</cfif>	
 		
 		<cfreturn true />

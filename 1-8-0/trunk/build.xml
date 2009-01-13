@@ -29,7 +29,7 @@ Notes:
 
 -->
 <project
-	name="Mach-II Framework"
+	name="Mach-II Framework 1.8.0"
 	default="usage"
 	basedir=".">
 	
