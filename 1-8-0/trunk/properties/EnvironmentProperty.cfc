@@ -76,7 +76,10 @@ Usage:
 			<struct>
 				<key name="" value="" />
 			</struct>
-		</parameter>		
+		</parameter>
+		
+		<!-- Optional: Name of property to place in name of the resolved server -->
+		<parameter name="serverPropertyName" value="serverName" />
 	</parameters>
 </property>
 
@@ -92,7 +95,11 @@ using the * wilcard which is useful if you deploy to a cluster
 (i.e. web*.cluster.example.com would match web01.cluster.example.com)
 
 The [development|staging|qualityAssurance|productionProperies] parameter takes 
-a struct of data to be set as Mach-II properties if the environment is selected.  
+a struct of data to be set as Mach-II properties if the environment is selected.
+
+The [serverPropertyName] parameter optionally sets the name of the property used
+to populate the name of the server found when resolving environments. Defaults to
+'serverName'.
 --->
 <cfcomponent 
 	displayname="EnvironmentProperty"
@@ -104,6 +111,7 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 	PROPERTIES
 	--->
 	<cfset variables.defaultEnvironment = "production" />
+	<cfset variables.serverPropertyName = "serverName" />
 	<cfset variables.servers = ArrayNew(1) />
 	<cfset variables.properties = StructNew() />
 	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
@@ -116,6 +124,7 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 		
 		<!--- Load in parameters --->
 		<cfset setDefaultEnvironment(getParameter("defaultEnvironment", "production")) />
+		<cfset setServerPropertyName(getParameter("serverPropertyName", "serverName")) />
 		<cfset loadEnvironments() />
 		
 		<!--- Load correct environment --->
@@ -147,6 +156,7 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 				<cfif variables.matcher.match(variables.servers[i].server, thisServer)>
 					<cfset environment = variables.servers[i].environment />
 					<cfset getAppManager().setEnvironmentName(environment) />
+					<cfset getProperty(getServerPropertyName(), thisServer) />
 					<cfbreak />
 				</cfif>
 			</cfloop>
@@ -228,6 +238,16 @@ a struct of data to be set as Mach-II properties if the environment is selected.
 	</cffunction>
 	<cffunction name="getDefaultEnvironment" access="public" returntype="string" output="false">
 		<cfreturn variables.defaultEnvironment />
+	</cffunction>
+	
+	<cffunction name="setServerPropertyName" access="private" returntype="void" output="false">
+		<cfargument name="serverPropertyName" type="string" required="true" />
+		<cfset getAssert().hasText(arguments.serverPropertyName
+			, "The 'serverPropertyName' parameter must contain a value.") />
+		<cfset variables.serverPropertyName = arguments.serverPropertyName />
+	</cffunction>
+	<cffunction name="getServerPropertyName" access="public" returntype="string" output="false">
+		<cfreturn variables.serverPropertyName />
 	</cffunction>
 	
 </cfcomponent>
