@@ -92,13 +92,13 @@ Notes:
 		<cfset var exception = "" />
 		<cfset var missingEvent = "" />
 		<cfset var log = getLog() />
-		
-		<cfif log.isInfoEnabled()>
-			<cfset log.info("Begin processing request.") />
-		</cfif>
 
 		<cfset eventArgs = getRequestEventArgs() />
 		<cfset result = parseEventParameter(eventArgs) />
+		
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Begin processing request. Incoming event arguments:", eventArgs) />
+		</cfif>
 		
 		<!--- Set the module and name for now (in case module not found we need the original event name) --->
 		<cfset setRequestEventName(result.eventName) />
