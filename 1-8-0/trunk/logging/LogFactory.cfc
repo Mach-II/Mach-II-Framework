@@ -44,12 +44,16 @@ first [Hash(UCase(arguments.channell))]
 	--->
 	<cfset variables.logAdapters = StructNew() />
 	<cfset variables.logCache = StructNew() />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="LogFactory" output="false"
 		hint="Initializes the factory.">
+		
+		<cfset setUtils(CreateObject("component", "MachII.util.Utils").init()) />	
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -79,15 +83,23 @@ first [Hash(UCase(arguments.channell))]
 	
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
 		hint="Adds a log adapter.">
-		<cfargument name="logAdapterName" type="string" required="true" />
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
-		<cfset variables.logAdapters[arguments.logAdapterName] = arguments.logAdapter />
+		<cfset variables.logAdapters[createRandomKey()] = arguments.logAdapter />
 	</cffunction>
 	
 	<cffunction name="removeLogAdapter" access="public" returntype="void" output="false"
 		hints="Removes a log adapter by log adapter name.">
-		<cfargument name="logAdapterName" type="string" required="true" />
-		<cfset StructDelete(variables.logAdapters, arguments.logAdapterName, false) />	
+		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
+		
+		<cfset var utils = getUtils() />
+		<cfset var key = "" />
+		
+		<cfloop collection="#variables.logAdapters#" item="key">
+			<cfif utils.assertSame(variables.logAdapters[key], arguments.logAdapter)>
+				<cfset StructDelete(variables.logAdapters, key, false) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	
 	<!---
@@ -147,6 +159,11 @@ first [Hash(UCase(arguments.channell))]
 		<cfreturn Hash(UCase(arguments.channel)) />
 	</cffunction>
 	
+	<cffunction name="createRandomKey" access="private" returntype="string" output="false"
+		hint="Creates a random key.">
+		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
@@ -158,6 +175,14 @@ first [Hash(UCase(arguments.channell))]
 	<cffunction name="getLogAdapters" access="public" returntype="struct" output="false"
 		hint="Returns the log adapters.">
 		<cfreturn variables.logAdapters />
+	</cffunction>
+	
+	<cffunction name="setUtils" access="private" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
+	</cffunction>
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
+		<cfreturn variables.utils />
 	</cffunction>
 	
 </cfcomponent>

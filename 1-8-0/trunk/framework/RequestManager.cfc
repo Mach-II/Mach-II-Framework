@@ -360,7 +360,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.onRequestEndCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.onRequestEndCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.onRequestEndCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.onRequestEndCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -385,7 +385,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.preRedirectCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.preRedirectCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.preRedirectCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -410,7 +410,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.postRedirectCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.postRedirectCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.postRedirectCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.postRedirectCallbacks, i) />
 				<cfbreak />
 			</cfif>

@@ -174,7 +174,7 @@ will bind to root parameter values.
 		<!--- Configure the loggers and register their adapters in the LogFactory --->
 		<cfloop collection="#loggers#" item="key">
 			<cfset loggers[key].configure() />
-			<cfset getAppManager().getLogFactory().addLogAdapter(moduleName & "-" & loggers[key].getLoggerId(), loggers[key].getLogAdapter()) />
+			<cfset getAppManager().getLogFactory().addLogAdapter(loggers[key].getLogAdapter()) />
 		</cfloop>
 		
 		<!--- Set logging enabled/disabled --->
@@ -188,27 +188,21 @@ will bind to root parameter values.
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var logFactory = getAppManager().getLogFactory() />
-		<cfset var logFactoryLogAdapters = logFactory.getLogAdapters() />
-		<cfset var thisPropertyLoggers = getLoggers() />
-		<cfset var utils = getAppManager().getUtils() />
-		<cfset var logFactoryLogAdapterKey = "" />
-		<cfset var thisPropertyLoggerKey = "" />
-		<cfset var moduleName = getAppManager().getModuleName() />
+		<cfset var thisInstanceLoggers = getLoggers() />
+		<cfset var key = "" />
+		<cfset var currentLogger = "" />
 		
 		<!--- Cleanup this property's' loggers --->
-		<cfloop collection="#thisPropertyLoggers#" item="thisPropertyLoggerKey">
-			<!--- Remove log adapter from log factory --->
-			<cfloop collection="#logFactoryLogAdapters#" item="logFactoryLogAdapterKey">
-				<cfif utils.assertSame(logFactoryLogAdapters[logFactoryLogAdapterKey], thisPropertyLoggers[thisPropertyLoggerKey].getLogAdapter())>
-					<cfset logFactory.removeLogAdapter(moduleName & "-" & thisPropertyLoggers[thisPropertyLoggerKey].getLoggerId()) />
-					<cfbreak />
-				</cfif>
-			</cfloop>
-			
+		<cfloop collection="#thisInstanceLoggers#" item="key">
+			<cfset currentLogger = thisInstanceLoggers[key] />
+
 			<!--- Remove preRedirect, postRedirect and onRequestEnd callbacks --->
-			<cfset requestManager.removeOnRequestEndCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
-			<cfset requestManager.removePreRedirectCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
-			<cfset requestManager.removePostRedirectCallback(thisPropertyLoggers[thisPropertyLoggerKey]) />
+			<cfset requestManager.removeOnRequestEndCallback(currentLogger) />
+			<cfset requestManager.removePreRedirectCallback(currentLogger) />
+			<cfset requestManager.removePostRedirectCallback(currentLogger) />
+			
+			<!--- Remove log adapter from log factory --->
+			<cfset logFactory.removeLogAdapter(currentLogger.getLogAdapter()) />
 		</cfloop>
 	</cffunction>
 	
@@ -274,13 +268,13 @@ will bind to root parameter values.
 		
 		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 		<cfif logger.isOnRequestEndAvailable()>
-			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd", moduleName) />
+			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
 		</cfif>
 		
 		<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
 		<cfif logger.isPrePostRedirectAvailable()>
-			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect", moduleName) />
-			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect", moduleName) />
+			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
+			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
 		</cfif>
 		
 		<!--- Add the logger --->
