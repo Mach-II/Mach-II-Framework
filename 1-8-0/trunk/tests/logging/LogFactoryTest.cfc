@@ -62,11 +62,23 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="testAddLogAdapter" access="public" returntype="void" output="false"
-		hint="Tests adding a log adapter">
+		hint="Tests adds a log adapter">
 		
 		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.AbstractLogAdapter").init(StructNew()) />
 		
-		<cfset variables.logFactory.addLogAdapter("test", adapter) />
+		<cfset variables.logFactory.addLogAdapter(adapter) />
+	</cffunction>
+	
+	<cffunction name="testAddRemoveLogAdapter" access="public" returntype="void" output="false"
+		hint="Tests adding and removing a log adapter">
+		
+		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.AbstractLogAdapter").init(StructNew()) />
+		
+		<cfset variables.logFactory.addLogAdapter(adapter) />
+		
+		<cfset variables.logFactory.removeLogAdapter(adapter) />
+		
+		<cfset assertTrue(NOT StructCount(variables.logFactory.getLogAdapters()), "A log adapter was added and removed, but that did not work correctly.") />
 	</cffunction>
 	
 	<cffunction name="testDisableLogging" access="public" returntype="void" output="false"
