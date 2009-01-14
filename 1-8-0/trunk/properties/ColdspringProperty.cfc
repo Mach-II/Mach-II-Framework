@@ -443,13 +443,12 @@ application.serviceFactory_account variable.
 		<cfset getFilters(targetBase) />
 		<cfset getPlugins(targetBase) />
 		<cfset getConfigurableProperties(targetBase) />
-		<cfset getConfigurableCommands(targetBase) />
 		
 		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
 			<!--- Get this iteration target object for easy use --->
 			<cfset targetObj =  targetBase.targets[i] />
 			
-			<!--- Look for autowirable collaborators for any setters --->
+			<!--- Get metadata --->
 			<cfset targetMetadata = GetMetadata(targetObj) />
 			
 			<!--- Autowire by dynamic method generation --->
@@ -459,6 +458,22 @@ application.serviceFactory_account variable.
 			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
 		</cfloop>
 		
+		<!--- Autowire configurale commands --->
+		<cfset targetBase.targets = ArrayNew(1) />
+		
+		<cfset getConfigurableCommands(targetBase) />
+		
+		<!--- Autowire all commands --->
+		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
+			<!--- Get this iteration target object for easy use --->
+			<cfset targetObj =  targetBase.targets[i] />
+			
+			<!--- Get metadata --->
+			<cfset targetMetadata = GetMetadata(targetObj) />
+			
+			<!--- Autowire by value from bean id method --->
+			<cfset autowireByBeanIdValue(targetObj, targetMetadata) />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="resolveDependency" access="public" returntype="void" output="false"
@@ -469,11 +484,18 @@ application.serviceFactory_account variable.
 		<!--- Look for autowirable collaborators for any setters --->
 		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
 		
-		<!--- Autowire by dynamic method generation --->
-		<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
-
-		<!--- Autowire by defined setters --->
-		<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+		<!--- If target object is a command --->
+		<cfif StructKeyExists(targetMetadata, "extends") 
+			AND targetMetadata.extends.name EQ "MachII.framework.command">
+			<!--- Autowire by value from bean id method --->
+			<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
+		<cfelse>
+			<!--- Autowire by dynamic method generation --->
+			<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+	
+			<!--- Autowire by defined setters --->
+			<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+		</cfif>
 	</cffunction>
 	
 	
@@ -513,6 +535,23 @@ application.serviceFactory_account variable.
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />
+	</cffunction>
+	
+	<cffunction name="autowireByBeanIdValue" access="private" returntype="void" output="false"
+		hint="Autowires by the value from the bean id method.">
+		<cfargument name="targetObj" type="any" required="true" />
+		<cfargument name="targetObjMetadata" type="any" required="true" />
+		
+		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
+		<cfset var beanName = arguments.targetObj.getBeanId() />
+		
+		<cfif getAssert().isTrue(beanFactory.containsBean(beanName)
+				, "Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+				, "Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.")>
+			<cfinvoke component="#arguments.targetObj#" method="setBean">
+				<cfinvokeargument name="bean" value="#beanFactory.getBean(beanName)#" />
+			</cfinvoke>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="autowireByDynamicMethodGeneration" access="private" returntype="void" output="false"
@@ -554,16 +593,14 @@ application.serviceFactory_account variable.
 				<cfif NOT StructKeyExists(arguments.targetObj, "set" & beanName)>
 					<cfset arguments.targetObj._methodInject("set" & beanName, autowireCfc["set" & beanName]) />
 				</cfif>
-					
+									
 				<!--- Inject appropriate bean if the factory has a bean by that name --->
-				<cfif beanFactory.containsBean(beanName)>
+				<cfif getAssert().isTrue(beanFactory.containsBean(beanName)
+						, "Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+						, "Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.")>
 					<cfinvoke component="#arguments.targetObj#" method="set#beanName#">
 						<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
 					</cfinvoke>
-				<cfelse>
-					<cfthrow type="MachII.properties.ColdspringProperty"
-						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
-						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
 				</cfif>
 				
 				<!--- Delete the _methodInject() from the target --->

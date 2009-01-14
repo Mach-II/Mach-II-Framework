@@ -46,6 +46,7 @@ or
 	PROPERTIES
 	--->
 	<cfset variables.beanId = "" />
+	<cfset variables.bean = "" />
 	<cfset variables.method = "" />
 	<cfset variables.resultArg = "" />
 	<cfset variables.args = ArrayNew(1) />
@@ -66,9 +67,6 @@ or
 		<cfset setMethod(arguments.method) />
 		<cfset setArgumentList(arguments.args) />
 		<cfset setResultArg(arguments.resultArg) />
-		
-		<!--- Setup --->
-		<cfset addDependsMetadata() />
 		
 		<cfreturn this />
 	</cffunction>
@@ -194,26 +192,6 @@ or
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="addDependsMetadata" access="private" returntype="void" output="false"
-		hint="Adds the depends attribute metadata with bean.">
-		
-		<cfset var md = GetMetadata(this) />
-		
-		<cfset md.depends = getBeanId() />
-	</cffunction>
-	
-	<cffunction name="getBean" access="private" returntype="any" output="false"
-		hint="Gets the bean.">
-		
-		<cfset var bean = "" />
-		
-		<cfinvoke  
-			method="get#getBeanId()#" 
-			returnvariable="bean" />
-		
-		<cfreturn bean />
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
@@ -230,8 +208,16 @@ or
 		<cfargument name="beanId" type="string" required="true" />
 		<cfset variables.beanId = arguments.beanId />
 	</cffunction>
-	<cffunction name="getBeanId" access="private" returntype="string" output="false">
+	<cffunction name="getBeanId" access="public" returntype="string" output="false">
 		<cfreturn variables.beanId />
+	</cffunction>
+	
+	<cffunction name="setBean" access="public" returntype="void" output="false">
+		<cfargument name="bean" type="any" required="true" />
+		<cfset variables.bean = arguments.bean />
+	</cffunction>
+	<cffunction name="getBean" access="public" returntype="any" output="false">
+		<cfreturn variables.bean />
 	</cffunction>
 	
 	<cffunction name="setMethod" access="private" returntype="void" output="false">
