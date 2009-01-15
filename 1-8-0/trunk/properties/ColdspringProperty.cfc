@@ -333,7 +333,14 @@ application.serviceFactory_account variable.
 		<cfset request._MachIIAppManager = getAppManager() />
 		
 		<!--- Load the bean defs --->
-		<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
+		<cftry>
+			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
+			<cfcatch type="any">
+				<cfthrow type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException"
+					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'. Orginal exception: #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Put a bean factory reference into Mach-II property manager --->
 		<cfset setProperty("beanFactoryName", localBeanFactoryKey) />
