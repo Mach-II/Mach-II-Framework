@@ -108,9 +108,6 @@ or
 		</cfloop>
 
 		<cftry>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'.") />
-			</cfif>
 		
 			<cfif ArrayLen(argValues) GT 0>
 				<cfset evalStatement = evalStatement & 'bean.#getMethod()#(' />
@@ -125,8 +122,16 @@ or
 				</cfloop>
 				
 				<cfset evalStatement = evalStatement & ')' />
+
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolved positional arguments:", argValues) />
+				</cfif>	
+
 				<cfset resultValue = Evaluate(evalStatement) />
-			<cfelse>	
+			<cfelse>
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolve named arguments:", namedArgs) />
+				</cfif>	
 				<cfinvoke 
 					component="#bean#" 
 					method="#getMethod()#" 
