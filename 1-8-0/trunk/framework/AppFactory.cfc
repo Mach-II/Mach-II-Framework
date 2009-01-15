@@ -130,8 +130,15 @@ Notes:
 		<cfset appendConfigFilePath(arguments.configXmlPath) />
 
 		<!--- Parse the XML contents --->
-		<cfset temp.configXml = XmlParse(configXmlFile) />
-		<cfset temp.override = false />
+		<cftry>
+			<cfset temp.configXml = XmlParse(configXmlFile) />
+			<cfset temp.override = false />
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.AppFactory.BaseConfigFileParseException"
+					message="Exception ocurred parsing base config file '#arguments.configXmlPath#' for module '#arguments.moduleName#'. Original exception: #cfcatch.message#"
+					detail="#cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 		
 		<!--- Validate the XML contents --->
 		<cfset validateConfigXml(arguments.validateXml, temp.configXml, arguments.configXmlPath, arguments.configDtdPath) />
@@ -140,7 +147,7 @@ Notes:
 		<cfset ArrayAppend(configXmls, temp) />
 
 		<!--- Load the includes --->
-		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(arguments.configXmlPath)) />
+		<cfset configXmls = loadIncludes(configXmls, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(arguments.configXmlPath), arguments.moduleName) />
 
 		<!--- Search for includes in the overrideXml if defined --->
 		<cfif Len(arguments.overrideXml)>
@@ -304,6 +311,7 @@ Notes:
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
 		<cfargument name="parentConfigFilePathDirectory" type="string" required="true" />
+		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
@@ -313,7 +321,7 @@ Notes:
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
 		
-		<cfset includeNodes =  XmlSearch(arguments.configXML, ".//includes/include") />
+		<cfset includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 
 			<cfset temp = StructNew() />
@@ -347,13 +355,20 @@ Notes:
 					variable="includeXMLFile" />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CannotFindIncludeConfigFile"
-						message="Unable to find the include config file. This could be due to an incorrect relative path."
+						message="Unable to find the include config file in module '#arguments.moduleName#'. This could be due to an incorrect relative path."
 						detail="includePath=#includeFilePath#" />
 				</cfcatch>
 			</cftry>
 			
 			<!--- Parse the XML contents --->
-			<cfset temp.configXml = XmlParse(includeXmlFile) />
+			<cftry>
+				<cfset temp.configXml = XmlParse(includeXmlFile) />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.AppFactory.IncldueConfigFileParseException"
+						message="Exception ocurred parsing include config file '#includeFilePath#' in module '#arguments.moduleName#'. Original exception: #cfcatch.message#"
+						detail="#cfcatch.detail#" />
+				</cfcatch>
+			</cftry>
 
 			<!--- Validate the XML contents --->
 			<cfset validateConfigXml(arguments.validateXml, temp.configXml, includeFilePath, arguments.configDtdPath) />
@@ -365,7 +380,7 @@ Notes:
 			<cfset ArrayAppend(arguments.configFiles, temp) />
 			
 			<!--- Recursively check the currently processing include for more includes --->
-			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(includeFilePath), arguments.overrideIncludeType, arguments.alreadyLoaded) />
+			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(includeFilePath), arguments.moduleName, arguments.overrideIncludeType, arguments.alreadyLoaded) />
 		</cfloop>
 		
 		<cfreturn arguments.configFiles />
