@@ -161,6 +161,7 @@ ${scope.key NEQ scope.key2}
 	
 		<cfset var scope = "" />
 		<cfset var key = "" />
+		<cfset var keyBody = "" />
 		<cfset var result = "" />
 		<cfset var body = arguments.expressionElement />
 		<cfset var defaultValue = "" />
@@ -169,15 +170,20 @@ ${scope.key NEQ scope.key2}
 		<cfif listLen(body, ".") gt 1>
 			<!--- Scope is always up to the first dot --->
 			<cfset scope = ListGetAt(body, 1, ".") />
-			<!--- Keys can contain dots so just remove the scope --->
-			<cfset key = Right(body, Len(body) - Len(scope) - 1) />
+			<!--- Remove the scope --->
+			<cfset keyBody = Right(body, Len(body) - Len(scope) - 1) />
 			
 			<!--- support scope.argname:0 for setting defaults --->
-			<cfif ListLen(key, ":") gt 1>
-				<cfset defaultValue = ListGetAt(key, 2, ":") />
-				<cfset key = ListGetAt(key, 1, ":") />
+			<cfif ListLen(keyBody, ":") gt 1>
+				<cfset defaultValue = ListGetAt(keyBody, 2, ":") />
+				<cfset keyBody = ListGetAt(keyBody, 1, ":") />
 				<cfset hasDefault = true />
 			</cfif>
+			
+			<!--- Keys may have nested path --->
+			<!--- Support for event.['arg.with.dot'].dsn needs to be supported --->
+			<cfset key = ListFirst(keyBody, ".") />
+			<cfset keyBody = ListDeleteAt(keyBody, 1, ".") />
 			
 			<cfswitch expression="#scope#">
 				<cfcase value="event">
@@ -186,6 +192,9 @@ ${scope.key NEQ scope.key2}
 					<cfelse>
 						<cfif arguments.event.isArgDefined(key)>
 							<cfset result = arguments.event.getArg(key) />
+							<cfif Len(keyBody)>
+								<cfset result = evaluateDeepNestedPath(result, keyBody) />
+							</cfif>
 						<cfelseif hasDefault>
 							<cfset result = defaultValue />
 						<cfelse>
@@ -199,6 +208,9 @@ ${scope.key NEQ scope.key2}
 						OR (IsObject(arguments.propertyManager.getParent()) 
 							AND arguments.propertyManager.getParent().isPropertyDefined(key))>
 						<cfset result = arguments.propertyManager.getProperty(key) />
+						<cfif Len(keyBody)>
+							<cfset result = evaluateDeepNestedPath(result, keyBody) />
+						</cfif>
 					<cfelseif hasDefault>
 						<cfset result = defaultValue />
 					<cfelse>
@@ -221,6 +233,41 @@ ${scope.key NEQ scope.key2}
 		hint="Checks if passed argument is a valid expression.">
 		<cfargument name="expression" type="string" required="true" />
 		<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="evaluateDeepNestedPath" access="private" returntype="any" output="false"
+		hint="Evaluates a deeply nested path.">
+		<cfargument name="target" type="any" required="true" />
+		<cfargument name="expressionElement" type="string" required="true" />
+		
+		<cfset var key = ListFirst(arguments.expressionElement, ".") />
+		<cfset var keyBody = ListDeleteAt(arguments.expressionElement, 1, ".") />
+		<cfset var result = "" />
+		
+		<cfif IsObject(arguments.target)>
+			<!--- Check if method call --->
+			<cfif REFindNoCase("\(\)$", key)>
+				<cfinvoke component="#arguments.target#"
+					method="#Left(key, REFindNoCase("\(\)$", key) - 1)#" 
+					returnvariable="result" />			
+			<!--- Call getter --->
+			<cfelse>
+				<cfinvoke component="#arguments.target#"
+					method="get#key#" 
+					returnvariable="result" />
+			</cfif>
+			<cfif Len(keyBody)>
+				<cfset result = evaluateDeepNestedPath(result, keyBody) />
+			</cfif>
+		<cfelse>
+			<cfthrow type="MachII.util.InvalidExpression" 
+				message="We do not support getting at accessing deeply nested array or struct element." />
+		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	
 </cfcomponent>

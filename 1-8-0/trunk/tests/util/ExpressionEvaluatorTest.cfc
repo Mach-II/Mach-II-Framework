@@ -76,8 +76,10 @@ Notes:
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.argExists}", event, propertyManager) />	
 		<cfset assertTrue(result eq "foobar", "Event arg returned did not equal 'foobar'") />
 
+		<!--- NOT currently support expression should be ${event.['dot.argExists']}
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.dot.argExists}", event, propertyManager) />
 		<cfset assertTrue(result eq "foobar", "Event arg returned did not equal 'foobar'") />
+		--->
 	</cffunction>
 
 	<cffunction name="testPropertyExistsExpression" access="public" returntype="void" output="false"
@@ -93,8 +95,10 @@ Notes:
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${properties.argExists}", event, propertyManager) />	
 		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
 
+		<!--- NOT currently support expression should be ${properties.['dot.argExists']} 
 		<cfset result = variables.expressionEvaluator.evaluateExpression("${properties.dot.argExists}", event, propertyManager) />
 		<cfset assertTrue(result eq "foobar", "Property returned did not equal 'foobar'") />
+		 --->
 	</cffunction>
 	
 	<cffunction name="testBooleanExpresion" access="public" returntype="void" output="false"
