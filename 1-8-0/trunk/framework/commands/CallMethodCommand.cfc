@@ -119,7 +119,9 @@ or
 					<cfif i GT 1>
 						<cfset evalStatement = evalStatement & "," />
 					</cfif>
-					<cfset evalStatement = evalStatement & argValues[i] />
+					<!--- Just give areference to the argValues array instead of 
+						outputing the value which fails if the value is a complex arg --->
+					<cfset evalStatement = evalStatement & "argValues[" & i & "]" />
 				</cfloop>
 				
 				<cfset evalStatement = evalStatement & ')' />
