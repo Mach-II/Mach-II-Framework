@@ -151,7 +151,7 @@ Notes:
 
 		<!--- Search for includes in the overrideXml if defined --->
 		<cfif Len(arguments.overrideXml)>
-			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true) />
+			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true, arguments.moduleName) />
 		</cfif>
 		
 		<!--- Create the AppManager --->
