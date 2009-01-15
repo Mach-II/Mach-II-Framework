@@ -18,8 +18,8 @@ Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell(peter@mach-ii.com)
 $Id: $
 
-Created version: 1.6.0
-Updated version: 1.6.0
+Created version: 1.8.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -49,7 +49,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testCacheHits" access="public" returntype="void"
+	<cffunction name="testCacheHits" access="public" returntype="void" output="false"
 		hint="Tests cache hits of the cache stats.">
 
 		<!--- Increment by the default of '1' hit
@@ -63,7 +63,7 @@ Notes:
 			"Cache hits should be '5' but returned '#variables.cacheStats.getCacheHits()#'") />
 	</cffunction>
 
-	<cffunction name="testCacheMisses" access="public" returntype="void"
+	<cffunction name="testCacheMisses" access="public" returntype="void" output="false"
 		hint="Tests cache misses of the cache stats.">
 
 		<!--- Increment by the default of '1' miss
@@ -77,7 +77,7 @@ Notes:
 			"Cache misses should be '5' but returned '#variables.cacheStats.getCacheMisses()#'") />
 	</cffunction>
 
-	<cffunction name="testEvictions" access="public" returntype="void"
+	<cffunction name="testEvictions" access="public" returntype="void" output="false"
 		hint="Tests evictions of the cache stats.">
 
 		<!--- Increment by the default of '1' eviction
@@ -91,7 +91,7 @@ Notes:
 			"Evictions should be '5' but returned '#variables.cacheStats.getEvictions()#'") />
 	</cffunction>
 	
-	<cffunction name="testTotalElements" access="public" returntype="void"
+	<cffunction name="testTotalElements" access="public" returntype="void" output="false"
 		hint="Tests total elements of the cache stats.">
 
 		<!--- Increment by the default of '1' total elements
@@ -112,7 +112,7 @@ Notes:
 			"Total elements should be '0' but returned '#variables.cacheStats.getTotalElements()#'") />
 	</cffunction>
 
-	<cffunction name="testActiveElements" access="public" returntype="void"
+	<cffunction name="testActiveElements" access="public" returntype="void" output="false"
 		hint="Tests active elements of the cache stats.">
 
 		<!--- Increment by the default of '1' active elements
@@ -133,7 +133,7 @@ Notes:
 			"Active elements should be '0' but returned '#variables.cacheStats.getActiveElements()#'") />
 	</cffunction>
 	
-	<cffunction name="testExtraStats" access="public" returntype="void"
+	<cffunction name="testExtraStats" access="public" returntype="void" output="false"
 		hint="Test the extra stats functionality.">
 		
 		<cfset var extraStats = "" />
@@ -149,6 +149,33 @@ Notes:
 		<cfset assertEquals(extraStats.a, "a", "Value of key 'a' in extra stats should be 'a' but returned '#extraStats.a#'.") />
 		<cfset assertTrue(StructKeyExists(extraStats, "b"), "Key 'b' not in extra stats.") />
 		<cfset assertEquals(extraStats.b, "b", "Value of key 'b' in extra stats should be 'b' but returned '#extraStats.b#'.") />
+	</cffunction>
+	
+	<cffunction name="testCacheHitRatio" access="public" returntype="void" output="false"
+		hint="Tests to see if the cache hit ratio is being computed correctly.">
+		
+		<cfset variables.cacheStats.incrementCacheHits(100) />
+		<cfset variables.cacheStats.incrementCacheMisses(100) />
+		
+		<cfset assertTrue(variables.cacheStats.getCacheHitRatio() EQ .5, "The cache hit ratio should be .5, but returned a different number.") />
+	</cffunction>
+	
+	<cffunction name="testReset" access="public" returntype="void" output="false"
+		hint="Tests reset functionality of the stats.">
+		
+		<cfset variables.cacheStats.incrementCacheHits(100) />
+		<cfset variables.cacheStats.incrementCacheMisses(100) />
+		<cfset variables.cacheStats.incrementActiveElements(100) />
+		<cfset variables.cacheStats.incrementTotalElements(100) />
+		<cfset variables.cacheStats.incrementEvictions(100) />
+		
+		<cfset variables.cacheStats.reset() />
+		
+		<cfset assertTrue(variables.cacheStats.getCacheHits() EQ 0) />
+		<cfset assertTrue(variables.cacheStats.getCacheMisses() EQ 0) />
+		<cfset assertTrue(variables.cacheStats.getActiveElements() EQ 0) />
+		<cfset assertTrue(variables.cacheStats.getTotalElements() EQ 0) />
+		<cfset assertTrue(variables.cacheStats.getEvictions() EQ 0) />
 	</cffunction>
 	
 </cfcomponent>
