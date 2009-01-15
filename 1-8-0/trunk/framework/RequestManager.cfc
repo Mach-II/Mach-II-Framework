@@ -253,6 +253,7 @@ Notes:
 		<cfset var value = "" />
 		<cfset var i = 0 />
 		<cfset var names = arguments.urlElements />
+		<cfset var params = StructNew() />
 	
 		<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
