@@ -105,19 +105,19 @@ Useful to append a company or application name on to the end of every HTML title
 		
 		<cfset var httpEquivReferenceMap = StructNew() />
 		
-		<cfset httpEquivReferenceMap["allow"] = "" />
-		<cfset httpEquivReferenceMap["content-encoding"] = "" />
-		<cfset httpEquivReferenceMap["content-length"] = "" />
-		<cfset httpEquivReferenceMap["content-type"] = "" />
-		<cfset httpEquivReferenceMap["date"] = "" />
-		<cfset httpEquivReferenceMap["expires"] = "" />
-		<cfset httpEquivReferenceMap["last-modified"] = "" />
-		<cfset httpEquivReferenceMap["location"] = "" />
-		<cfset httpEquivReferenceMap["refresh"] = "" />
-		<cfset httpEquivReferenceMap["set-cookie"] = "" />
-		<cfset httpEquivReferenceMap["www-authenticate"] = "" />
+			<cfset httpEquivReferenceMap["allow"] = "" />
+			<cfset httpEquivReferenceMap["content-encoding"] = "" />
+			<cfset httpEquivReferenceMap["content-length"] = "" />
+			<cfset httpEquivReferenceMap["content-type"] = "" />
+			<cfset httpEquivReferenceMap["date"] = "" />
+			<cfset httpEquivReferenceMap["expires"] = "" />
+			<cfset httpEquivReferenceMap["last-modified"] = "" />
+			<cfset httpEquivReferenceMap["location"] = "" />
+			<cfset httpEquivReferenceMap["refresh"] = "" />
+			<cfset httpEquivReferenceMap["set-cookie"] = "" />
+			<cfset httpEquivReferenceMap["www-authenticate"] = "" />
 
-		<cfset setHttpEquivReferenceMap(mimeShortcutMap) />
+		<cfset setHttpEquivReferenceMap(httpEquivReferenceMap) />
 	</cffunction>
 	
 	<!---
@@ -146,7 +146,7 @@ Useful to append a company or application name on to the end of every HTML title
 				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">' />
 			</cfcase>
 			<cfcase value="xhtml-1.1">
-				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"' />
+				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' />
 			</cfcase>
 			<cfcase value="html-4.0-strict">
 				<cfreturn '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">' />
@@ -160,7 +160,7 @@ Useful to append a company or application name on to the end of every HTML title
 			<cfdefaultcase>
 				<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
 					message="The renderDocType method does not accept the type of '#arguments.type#'."
-					detail="Allowed values for 'type' are xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame." />
+						detail="Allowed values for 'type' are xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame." />
 			</cfdefaultcase>
 		</cfswitch>
 	</cffunction>
@@ -240,7 +240,7 @@ Useful to append a company or application name on to the end of every HTML title
 	<cffunction name="addLink" access="public" returntype="string" output="false"
 		hint="Returns code for a link tag for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
-			hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
+				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
 		<cfargument name="url" type="any" required="true"
 			hint="A the path to a web accessible location of the link file." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
@@ -345,7 +345,7 @@ Useful to append a company or application name on to the end of every HTML title
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="isHttpEquivMetaType" access="private" returntype="boolean" output="false"
+	<cffunction name="isHttpEquivMetaType" access="public" returntype="boolean" output="false"
 		hint="Checks if the passed type of the meta tag is an http-equiv.">
 		<cfargument name="type" type="string" required="true" />
 		<cfreturn StructKeyExists(getHttpEquivReferenceMap(), arguments.type) />
