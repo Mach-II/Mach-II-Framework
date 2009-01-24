@@ -729,7 +729,7 @@ application.serviceFactory_account variable.
 		
 		<cfset var configurableEventCommands = getAppManager().getEventManager().getConfigurableCommandTargets() />
 		<cfset var configurableSubroutineCommands = getAppManager().getSubroutineManager().getConfigurableCommandTargets() />
-		<cfset var configurableCacheCommands = getAppManager.getCacheManager().getConfigurableCommandTargets()/>
+		<cfset var configurableCacheCommands = getAppManager().getCacheManager().getConfigurableCommandTargets() />
 		<cfset var i = 0 />
 		
 		<!--- Append each retrieved configurable event commands to the targets array (in struct) --->
