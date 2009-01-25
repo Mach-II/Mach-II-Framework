@@ -56,8 +56,6 @@ Notes:
 		<cfargument name="criteria" type="string" required="false" default="" />
 		<cfargument name="parentHandlerName" type="string" required="false" default="" />
 		<cfargument name="parentHandlerType" type="string" required="false" default="" />
-		
-		<cfset var currentAlias = "" />
 	
 		<!--- Run setters --->
 		<cfset setHandlerId(arguments.id) />
@@ -511,9 +509,9 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
-		hint="Uses the log factory to create a log.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+		hint="Sets the log.">
+		<cfargument name="log" type="MachII.logging.Log" required="true" />
+		<cfset variables.log = arguments.log />
 	</cffunction>
 	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">

@@ -51,8 +51,10 @@ Notes:
 		<cfset variables.utils = getAppManager().getUtils() />
 		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
 
+		<!--- Grab local references to increase performance because constantly getting a the 
+			same log when computing the channel name via getMetadata is expensive --->
 		<cfset variables.cacheClearCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheClearCommand") />
-		<cfset variables.cacheCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheCCommand") />
+		<cfset variables.cacheCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheCommand") />
 		<cfset variables.callMethodCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CallMethodCommand") />
 		<cfset variables.eventArgCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand") />
 		<cfset variables.eventBeanCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand") />

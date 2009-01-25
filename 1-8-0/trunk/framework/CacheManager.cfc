@@ -41,6 +41,7 @@ Notes:
 	<cfset variables.handlersByEventName = StructNew() />
 	<cfset variables.handlersBySubroutineName = StructNew() />
 	<cfset variables.cacheEnabled = true />
+	<cfset variables.cacheHandlerlog = "" />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -61,6 +62,9 @@ Notes:
 		
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory()) />
+		
+		<!--- Quick reference for performance reasons --->
+		<cfset variables.cacheHandlerlog = getAppManager().getLogFactory().getLog("MachII.framework.CacheHandler") />
 		
 		<cfset super.init() />
 		
@@ -84,6 +88,7 @@ Notes:
 		<cfset var aliases = "" />
 		<cfset var strategyName = "" />
 		<cfset var criteria = "" />
+		
 		<cfset var i = 0 />
 
 		<cfif StructKeyExists(arguments.configXML.xmlAttributes, "id")>
@@ -102,7 +107,7 @@ Notes:
 		<!--- Build cache handler --->
 		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
 			id, aliases, strategyName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
-		<cfset cacheHandler.setLog(getAppManager().getLogFactory()) />
+		<cfset cacheHandler.setLog(variables.cacheHandlerlog) />
 		<cfset cacheHandler.setAppManager(getAppManager()) />
 		
 		<!--- Add commands to the cache handler --->
