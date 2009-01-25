@@ -34,8 +34,13 @@ Notes:
 	<cfset variables.beanUtil = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.expressionEvaluator = "" />
-	<cfset variables.propertyManager = "" />
 	<cfset variables.configurableCommandTargets = ArrayNew(1) />
+	<cfset variables.cacheClearCommandLog = "" />
+	<cfset variables.cacheCommandLog = "" />
+	<cfset variables.callMethodCommandLog = "" />
+	<cfset variables.eventArgCommandLog = "" />
+	<cfset variables.eventBeanCommandLog = "" />
+	<cfset variables.redirectCommandlog = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -45,7 +50,13 @@ Notes:
 		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 		<cfset variables.utils = getAppManager().getUtils() />
 		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
-		<cfset variables.propertyManager = getAppManager().getPropertyManager() />
+
+		<cfset variables.cacheClearCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheClearCommand") />
+		<cfset variables.cacheCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheCCommand") />
+		<cfset variables.callMethodCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CallMethodCommand") />
+		<cfset variables.eventArgCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand") />
+		<cfset variables.eventBeanCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand") />
+		<cfset variables.redirectCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.RedirectCommand") />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -153,7 +164,7 @@ Notes:
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, aliases, criteria) />
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.cacheCommandLog) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -187,9 +198,9 @@ Notes:
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
 			ids, aliases, strategyNames, criteria, condition) />
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.cacheClearCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(variables.propertyManager) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -218,7 +229,7 @@ Notes:
 		</cfif>		
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.callMethodCommandLog) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
 		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
@@ -390,7 +401,7 @@ Notes:
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit, variables.beanUtil) />
 		
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.eventBeanCommandLog) />
 
 		<cfreturn command />
 	</cffunction>
@@ -440,7 +451,7 @@ Notes:
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore) />
 		
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.redirectCommandLog) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -467,7 +478,7 @@ Notes:
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite) />
 		
-		<cfset command.setLog(getAppManager().getLogFactory()) />
+		<cfset command.setLog(variables.eventArgCommandLog) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -479,9 +490,6 @@ Notes:
 		<cfset var command = CreateObject("component", "MachII.framework.Command").init() />
 		
 		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
-		<cfset command.setLog(getAppManager().getLogFactory()) />
-		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(variables.propertyManager) />
 		
 		<cfreturn command />
 	</cffunction>

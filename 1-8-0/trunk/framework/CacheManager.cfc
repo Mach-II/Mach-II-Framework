@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id: CacheManager.cfc 595 2007-12-17 02:39:01Z kurtwiersma $
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -61,6 +61,8 @@ Notes:
 		
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory()) />
+		
+		<cfset super.init() />
 		
 		<cfreturn this />
 	</cffunction>

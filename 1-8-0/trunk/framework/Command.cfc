@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -89,9 +89,9 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
-		hint="Uses the log factory to create a log.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+		hint="Set the log.">
+		<cfargument name="log" type="MachII.logging.Log" required="true" />
+		<cfset variables.log = arguments.log />
 	</cffunction>
 	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
