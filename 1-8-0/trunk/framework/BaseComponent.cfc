@@ -90,7 +90,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
-		<cfset getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
 	</cffunction>
 	
 	<cffunction name="announceEventInModule" access="public" returntype="void" output="false"
@@ -101,7 +101,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of arguments to set as the event's args." />
-		<cfset getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
@@ -112,16 +112,14 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-			
-		<cfset var appKey = getAppManager().getAppKey() />
-			
+					
 		<!--- If we are loading, then fall back to current module, because this means
 			BuildUrl is being called during configure() and there is no current request --->
 		<cfif getAppManager().isLoading()>
 			<cfset arguments.moduleName = getAppManager().getModuleName() />
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfelse>
-			<cfset arguments.moduleName = getRequestHandler().getEventContext().getAppManager().getModuleName() />
+			<cfset arguments.moduleName = getAppManager().getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName() />
 		</cfif>
 		
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
@@ -220,19 +218,6 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
 		hint="Gets the Assert component.">
 		<cfreturn getAppManager().getAssert() />
-	</cffunction>
-	
-	<cffunction name="getRequestHandler" access="public" returntype="MachII.framework.RequestHandler" output="false"
-		hint="Gets the current requets handler.">
-
-		<cfset var appKey = getAppManager().getAppKey() />
-		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
-			<cfreturn request["_MachIIRequestHandler_" & appKey] />
-		<cfelse>
-			<cfthrow message="The required RequestHandler cannot be located."
-				detail="Do not clear the request scope." />
-		</cfif>
 	</cffunction>
 
 	<!---

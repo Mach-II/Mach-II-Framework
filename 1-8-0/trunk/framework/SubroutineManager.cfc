@@ -119,7 +119,7 @@ Notes:
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered SubroutineHandlers.">
-		<!--- DO NOTHING --->
+		<cfset super.configure() />
 	</cffunction>
 	
 	<!---

@@ -161,6 +161,8 @@ Notes:
 				</cfif>
 			</cfif>
 		</cfif>
+		
+		<cfset super.configure() />
 	</cffunction>
 	
 	<!---

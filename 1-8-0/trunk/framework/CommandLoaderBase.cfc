@@ -47,6 +47,20 @@ Notes:
 		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
 		<cfset variables.propertyManager = getAppManager().getPropertyManager() />
 	</cffunction>
+	
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Call on object reload for all configurable commands.">
+		
+		<cfset var appManager = getAppManager() />
+		<cfset var aCommand = 0 />
+		<cfset var i = 0 />
+		
+		<!--- Loop through the configurable commands --->
+		<cfloop from="1" to="#ArrayLen(variables.configurableCommandTargets)#" index="i">
+			<cfset aCommand = variables.configurableCommandTargets[i] />
+			<cfset appManager.onObjectReload(aCommand) />
+		</cfloop>
+	</cffunction>
 		
 	<!---
 	PROTECTED FUNCTIONS

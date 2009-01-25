@@ -232,7 +232,7 @@ Notes:
 		<cfset appManager.setPluginManager(pluginManager) />
 		
 		<!--- ModuleManager is a singleton across the application --->
-		<cfif NOT appManager.inModule()>s
+		<cfif NOT appManager.inModule()>
 			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, GetDirectoryFromPath(arguments.configXmlPath), arguments.configDtdPath, arguments.validateXML) />
 			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
 				<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />

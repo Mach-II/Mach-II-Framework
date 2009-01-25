@@ -256,7 +256,7 @@ the rest of the framework. (pfarrell)
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
 			<cfset aConfigurableProperty.setLog(logFactory) />
-			<cfset appManager.onPostObjectReload(aConfigurableProperty) />
+			<cfset appManager.onObjectReload(aConfigurableProperty) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
 	</cffunction>

@@ -158,6 +158,8 @@ Notes:
 			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName, true) />
 			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
 		</cfloop>
+		
+		<cfset super.configure() />
 	</cffunction>
 	
 	<!---

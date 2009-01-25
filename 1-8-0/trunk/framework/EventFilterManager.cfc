@@ -169,7 +169,7 @@ Notes:
 		<cfloop collection="#variables.filterProxies#" item="i">
 			<cfset aFilter = variables.filterProxies[i].getObject() />
 			<cfset aFilter.setLog(logFactory) />
-			<cfset appManager.onPostObjectReload(aFilter) />
+			<cfset appManager.onObjectReload(aFilter) />
 			<cfset aFilter.configure() />
 		</cfloop>
 	</cffunction>

@@ -211,7 +211,7 @@ Notes:
 		<cfloop collection="#variables.listenerProxies#" item="i">
 			<cfset aListener = variables.listenerProxies[i].getObject() />
 			<cfset aListener.setLog(logFactory) />
-			<cfset appManager.onPostObjectReload(aListener) />
+			<cfset appManager.onObjectReload(aListener) />
 			<cfset aListener.configure() />
 		</cfloop>
 	</cffunction>

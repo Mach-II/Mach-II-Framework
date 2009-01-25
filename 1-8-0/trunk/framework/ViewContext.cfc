@@ -183,14 +183,7 @@ Notes:
 	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
 		hint="Adds a HTML head element.">
 		<cfargument name="text" type="string" required="true" />
-
-		<cfset var appKey = getAppManager().getAppKey() />
-
-		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
-			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().addHTMLHeadElement(arguments.text) />
-		<cfelse>
-			<cfthrow message="The required RequestHandler is necessary to add HTML head elements is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
-		</cfif>
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.text) />
 	</cffunction>
 	
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
@@ -200,14 +193,7 @@ Notes:
 		<cfargument name="statusCode" type="numeric" required="false" />
 		<cfargument name="statusText" type="string" required="false" />
 		<cfargument name="charset" type="string" required="false" />
-		
-		<cfset var appKey = getAppManager().getAppKey() />
-		
-		<cfif StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
-			<cfset request["_MachIIRequestHandler_" & appKey].getEventContext().addHTTPHeader(argumentcollection=arguments) />
-		<cfelse>
-			<cfthrow message="The required RequestHandler is necessary to add HTTP headers is not set in 'request['_MachIIRequestHandler_#appKey#']'." />
-		</cfif>
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"

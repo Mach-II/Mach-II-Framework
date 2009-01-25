@@ -174,7 +174,7 @@ Notes:
 		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
 			<cfset aPlugin.setLog(logFactory) />
-			<cfset appManager.onPostObjectReload(aPlugin) />
+			<cfset appManager.onObjectReload(aPlugin) />
 			<cfset aPlugin.configure() />
 		</cfloop>
 	</cffunction>

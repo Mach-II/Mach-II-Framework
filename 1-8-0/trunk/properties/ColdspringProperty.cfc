@@ -362,8 +362,11 @@ application.serviceFactory_account variable.
 			<cfset bfUtils.setNamedFactory("server", factoryKey, bf) />
 		</cfif>
 		
-		<!--- Resolve Mach-II dependences if required --->
-		<cfif getParameter("resolveMachIIDependencies", false)>
+		<!--- Resolve Mach-II dependences if required and application is not 
+			loading (because during load Mach-II will call onObjectReload and
+			this is needed when the CS property is being reloaded) --->
+		<cfif getParameter("resolveMachIIDependencies", false)
+			AND NOT getAppManager().isLoading()>
 			<cfset resolveDependencies() />
 		</cfif>
 		
@@ -385,14 +388,14 @@ application.serviceFactory_account variable.
 		<cfset setLastReloadDatetime(Now()) />
 		
 		<!--- Register as onPostObjectReload callback --->
-		<cfset getAppManager().addOnPostObjectReloadCallback(this, "resolveDependency") />
+		<cfset getAppManager().addOnObjectReloadCallback(this, "resolveDependency") />
 	</cffunction>
 	
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deregisters ColdSpring as an available DI engine interface.">
 		
 		<!--- Deregister as onPostObjectReload callback --->
-		<cfset getAppManager().removeOnPostObjectReloadCallback(this) />
+		<cfset getAppManager().removeOnObjectReloadCallback(this) />
 	</cffunction>
 	
 	<!---
@@ -504,7 +507,6 @@ application.serviceFactory_account variable.
 			<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
 		</cfif>
 	</cffunction>
-	
 	
 	<!---
 	PROTECTED FUNCTIONS

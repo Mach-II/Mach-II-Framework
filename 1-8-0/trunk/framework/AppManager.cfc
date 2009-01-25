@@ -45,7 +45,7 @@ Notes:
 	<cfset variables.subroutineManager = "" />
 	<cfset variables.viewManager = "" />
 
-	<cfset variables.onPostObjectReloadCallbacks = ArrayNew(1) />
+	<cfset variables.onObjectReloadCallbacks = ArrayNew(1) />
 	<cfset variables.utils = "" />
 	<cfset variables.assert = "" />
 	<cfset variables.expressionEvaluator = "" />
@@ -134,30 +134,49 @@ Notes:
 			hint="Pass true to return a new instance of a RequestHandler." />
 		<cfreturn getRequestManager().getRequestHandler(arguments.createNew) />
 	</cffunction>
+
+	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
+		<cfreturn StructKeyList(variables.routes) />
+	</cffunction>
 	
-	<cffunction name="addOnPostObjectReloadCallback" access="public" returntype="void" output="false"
-		hint="Registers on post object reload callback.">
-		<cfargument name="callback" type="any" required="true" />
-		<cfargument name="method" type="string" required="true" />
-		<cfset ArrayAppend(variables.onPostObjectReloadCallbacks, arguments) />
-	</cffunction>
-	<cffunction name="removeOnPostObjectReloadCallback" access="public" returntype="void" output="false"
-		hint="Unregisters on post object reload callback.">
-		<cfargument name="callback" type="any" required="true" />
+	<cffunction name="getRoute" access="public" returntype="struct" output="false">
+		<cfargument name="routeName" type="string" required="true" />
 		
-		<cfset var utils = getUtils() />
-		<cfset var i = 0 />
+		<cfset var routes = getRoutes() />
 		
-		<cfloop from="1" to="#ArrayLen(variables.onPostObjectReloadCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.onPostObjectReloadCallbacks[i], arguments.callback)>
-				<cfset ArrayDeleteAt(variables.onPostObjectReloadCallbacks, i) />
-				<cfbreak />			
-			</cfif>
-		</cfloop>
+		<!--- TODO: handle getting routes from the parent app if there is one --->
+		
+		<cfif NOT StructKeyExists(routes, arguments.routeName)>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route named '#arguments.routeName#' could be found.'" />
+		</cfif>
+		
+		<cfreturn variables.routes[arguments.routeName] />
 	</cffunction>
-	<cffunction name="getOnPostObjectReloadCallbacks" access="public" returntype="array" output="false"
-		hint="Gets all on post object reload callbacks.">
-		<cfreturn variables.onPostObjectReloadCallbacks />
+	
+	<cffunction name="getRouteByAlias" access="public" returntype="struct" output="false">
+		<cfargument name="routeAlias" type="string" required="true" />
+		
+		<cfset var routeAliases = variables.routeAliases />
+		
+		<!--- TODO: handle getting routes by alias from the parent app if there is one --->
+		
+		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route with alias '#arguments.routeAlias#' could be found.'" />
+		</cfif>
+		
+		<cfreturn getRoute(routeAliases[arguments.routeAlias]) />
+	</cffunction>
+
+	<cffunction name="addRoute" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		
+		<cfset variables.routes[arguments.routeName] = arguments.route />
+		<cfif arguments.route.getUrlAlias() neq "">
+			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
+		</cfif>
 	</cffunction>
 	
 	<!---
@@ -166,6 +185,31 @@ Notes:
 	<cffunction name="inModule" access="public" returntype="boolean" output="false"
 		hint="Returns a boolean on whether or not this AppManager is a module AppManager.">
 		<cfreturn IsObject(getParent()) />
+	</cffunction>
+
+	<cffunction name="addOnObjectReloadCallback" access="public" returntype="void" output="false"
+		hint="Registers on object reload callback.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.onObjectReloadCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeOnObjectReloadCallback" access="public" returntype="void" output="false"
+		hint="Unregisters on object reload callback.">
+		<cfargument name="callback" type="any" required="true" />
+		
+		<cfset var utils = getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.onObjectReloadCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.onObjectReloadCallbacks[i], arguments.callback)>
+				<cfset ArrayDeleteAt(variables.onObjectReloadCallbacks, i) />
+				<cfbreak />			
+			</cfif>
+		</cfloop>
+	</cffunction>
+	<cffunction name="getOnObjectReloadCallbacks" access="public" returntype="array" output="false"
+		hint="Gets all on object reload callbacks.">
+		<cfreturn variables.onObjectReloadCallbacks />
 	</cffunction>
 	
 	<!---
@@ -218,17 +262,17 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="onPostObjectReload" access="public" returntype="void" output="false"
+	<cffunction name="onObjectReload" access="public" returntype="void" output="false"
 		hint="Handles on post object reload application events.">
 		<cfargument name="targetObject" type="any" required="true"
-			hint="The target object that is the subject of the reload event." />
+			hint="The target object that is the subject of the application reload event." />
 		
-		<cfset var onPostObjectReloadCallbacks = getOnPostObjectReloadCallbacks() />
+		<cfset var onObjectReloadCallbacks = getOnObjectReloadCallbacks() />
 		<cfset var i = 0 />
 		
-		<cfloop from="1" to="#ArrayLen(onPostObjectReloadCallbacks)#" index="i">
-			<cfinvoke component="#onPostObjectReloadCallbacks[i].callback#"
-				method="#onPostObjectReloadCallbacks[i].method#">
+		<cfloop from="1" to="#ArrayLen(onObjectReloadCallbacks)#" index="i">
+			<cfinvoke component="#onObjectReloadCallbacks[i].callback#"
+				method="#onObjectReloadCallbacks[i].method#">
 				<cfinvokeargument name="targetObject" value="#arguments.targetObject#" />
 			</cfinvoke>
 		</cfloop>
@@ -426,50 +470,6 @@ Notes:
 	<cffunction name="setRoutes" access="public" returntype="void" output="false">
 		<cfargument name="routes" type="struct" required="true" />
 		<cfset variables.routes = arguments.routes />
-	</cffunction>
-	
-	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
-		<cfreturn StructKeyList(variables.routes) />
-	</cffunction>
-	
-	<cffunction name="getRoute" access="public" returntype="struct" output="false">
-		<cfargument name="routeName" type="string" required="true" />
-		
-		<cfset var routes = getRoutes() />
-		
-		<!--- TODO: handle getting routes from the parent app if there is one --->
-		
-		<cfif NOT StructKeyExists(routes, arguments.routeName)>
-			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route named '#arguments.routeName#' could be found.'" />
-		</cfif>
-		
-		<cfreturn variables.routes[arguments.routeName] />
-	</cffunction>
-	
-	<cffunction name="getRouteByAlias" access="public" returntype="struct" output="false">
-		<cfargument name="routeAlias" type="string" required="true" />
-		
-		<cfset var routeAliases = variables.routeAliases />
-		
-		<!--- TODO: handle getting routes by alias from the parent app if there is one --->
-		
-		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
-			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route with alias '#arguments.routeAlias#' could be found.'" />
-		</cfif>
-		
-		<cfreturn getRoute(routeAliases[arguments.routeAlias]) />
-	</cffunction>
-
-	<cffunction name="addRoute" access="public" returntype="void" output="false">
-		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
-		
-		<cfset variables.routes[arguments.routeName] = arguments.route />
-		<cfif arguments.route.getUrlAlias() neq "">
-			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
-		</cfif>
 	</cffunction>
 	
 </cfcomponent>
