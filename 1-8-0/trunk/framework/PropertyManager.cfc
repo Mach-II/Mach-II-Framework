@@ -247,7 +247,6 @@ the rest of the framework. (pfarrell)
 		hint="Prepares the configurable properties for use.">
 
 		<cfset var appManager = getAppManager() />
-		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
@@ -255,7 +254,6 @@ the rest of the framework. (pfarrell)
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
-			<cfset aConfigurableProperty.setLog(logFactory) />
 			<cfset appManager.onObjectReload(aConfigurableProperty) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
@@ -387,7 +385,6 @@ the rest of the framework. (pfarrell)
 		<cfargument name="propertyName" type="string" required="true"
 			hint="Name of configurable property to reload." />
 		
-		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var newProperty = "" />
 		<cfset var currentProperty = getProperty(arguments.propertyName) />
 		<cfset var baseProxy = "" />
@@ -433,11 +430,10 @@ the rest of the framework. (pfarrell)
 
 		<!--- Replace the old Property with the new Property in the proxy--->
 		<cfset baseProxy.setObject(newProperty) />
-		<cfset getAppManager().onPostObjectReload(newProperty) />
 		<cfset newProperty.setProxy(baseProxy) />
 
 		<!--- Configure the Property --->
-		<cfset newProperty.setLog(logFactory) />
+		<cfset getAppManager().onObjectReload(newProperty) />
 		<cfset newProperty.configure() />
 		
 		<!--- Add the Property to the manager --->

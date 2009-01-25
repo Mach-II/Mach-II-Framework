@@ -167,13 +167,11 @@ Notes:
 		hint="Configures each of the registered Plugins.">
 
 		<cfset var appManager = getAppManager() />
-		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
-			<cfset aPlugin.setLog(logFactory) />
 			<cfset appManager.onObjectReload(aPlugin) />
 			<cfset aPlugin.configure() />
 		</cfloop>
@@ -288,7 +286,6 @@ Notes:
 		hint="Reloads a plugin.">
 		<cfargument name="pluginName" type="string" required="true" />
 		
-		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var newPlugin = "" />
 		<cfset var currentPlugin = getPlugin(arguments.PluginName) />
 		<cfset var baseProxy = currentPlugin.getProxy() />
@@ -328,8 +325,7 @@ Notes:
 		<cfset newPlugin.setProxy(baseProxy) />
 		
 		<!--- Configure the Plugin --->
-		<cfset newPlugin.setLog(logFactory) />
-		<cfset getAppManager().onPostObjectReload(newPlugin) />
+		<cfset getAppManager().onObjectReload(newPlugin) />
 		<cfset newPlugin.configure() />
 
 		<!--- Add the Plugin to the manager --->

@@ -183,8 +183,8 @@ will bind to root parameter values.
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="onReload" access="public" returntype="void" output="false"
-		hint="Called before this property is reloaded. Unregisters some log adapters and call backs.">
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Unregisters some log adapters and callbacks.">
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var logFactory = getAppManager().getLogFactory() />

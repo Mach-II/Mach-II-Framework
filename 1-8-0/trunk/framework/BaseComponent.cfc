@@ -47,8 +47,11 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="The initial set of configuration parameters." />
 		
+		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
+		
+		<cfset setLog(getAppManager().getLogFactory()) />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
@@ -66,7 +69,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="proxy" type="MachII.framework.BaseProxy" required="true" />
 		<cfset variables.baseProxy = arguments.proxy>
 	</cffunction>
-	<cffunction name="getProxy" access="public" returntype="MachII.framework.BaseProxy" output="false"
+	<cffunction name="getProxy" access="public" returntype="any" output="false"
 		hint="Gets the base proxy.">
 		<cfreturn variables.baseProxy />
 	</cffunction>

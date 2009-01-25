@@ -184,7 +184,7 @@ Notes:
 					
 				<!--- Use defaultInvoker --->
 				<cfelse>
-					<cfset invoker = defaultInvoker />
+					<cfset invoker = getDefaultInvoker() />
 				</cfif>
 	
 				<!--- Continue setup on the Listener --->
@@ -203,14 +203,12 @@ Notes:
 		hint="Configures each of the registered listeners and its' invoker.">
 
 		<cfset var appManager = getAppManager() />
-		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aListener = 0 />
 		<cfset var i = 0 />
 		
 		<!--- Loop through the listeners configure --->
 		<cfloop collection="#variables.listenerProxies#" item="i">
 			<cfset aListener = variables.listenerProxies[i].getObject() />
-			<cfset aListener.setLog(logFactory) />
 			<cfset appManager.onObjectReload(aListener) />
 			<cfset aListener.configure() />
 		</cfloop>
@@ -284,7 +282,6 @@ Notes:
 		hint="Reloads a listener.">
 		<cfargument name="listenerName" type="string" required="true" />
 		
-		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var newListener = "" />
 		<cfset var currentListener = getListener(arguments.listenerName) />
 		<cfset var baseProxy = currentListener.getProxy() />
@@ -325,8 +322,7 @@ Notes:
 		<cfset newListener.setProxy(baseProxy) />
 		
 		<!--- Configure the listener --->
-		<cfset newListener.setLog(logFactory) />
-		<cfset getAppManager().onPostObjectReload(newListener) />
+		<cfset getAppManager().onObjectReload(newListener) />
 		<cfset newListener.configure() />
 
 		<!--- Add the Listener to the manager --->

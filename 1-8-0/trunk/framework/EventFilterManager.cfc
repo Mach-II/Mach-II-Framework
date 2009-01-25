@@ -162,13 +162,11 @@ Notes:
 		hint="Configures each of the registered EventFilters.">
 		
 		<cfset var appManager = getAppManager() />
-		<cfset var logFactory = appManager.getLogFactory() />
 		<cfset var aFilter = 0 />
 		<cfset var i = 0 />
 		
 		<cfloop collection="#variables.filterProxies#" item="i">
 			<cfset aFilter = variables.filterProxies[i].getObject() />
-			<cfset aFilter.setLog(logFactory) />
 			<cfset appManager.onObjectReload(aFilter) />
 			<cfset aFilter.configure() />
 		</cfloop>
@@ -240,7 +238,6 @@ Notes:
 		hint="Reloads an event-filter.">
 		<cfargument name="filterName" type="string" required="true" />
 		
-		<cfset var logFactory = getAppManager().getLogFactory() />
 		<cfset var newFilter = "" />
 		<cfset var currentFilter = getFilter(arguments.filterName) />
 		<cfset var baseProxy = currentFilter.getProxy() />
@@ -280,8 +277,7 @@ Notes:
 		<cfset newFilter.setProxy(baseProxy) />
 		
 		<!--- Configure the Filter --->
-		<cfset newFilter.setLog(logFactory) />
-		<cfset getAppManager().onPostObjectReload(newFilter) />
+		<cfset getAppManager().onObjectReload(newFilter) />
 		<cfset newFilter.configure() />
 
 		<!--- Add the Filter to the manager --->
