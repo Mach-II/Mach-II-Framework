@@ -66,15 +66,24 @@ index.cfm/product/A12345/fancy/
 		<cfset var parameterName = "" />
 		<cfset var parameter = 0 />
 		<cfset var i = 0 />
-		<cfset var route = structNew() />
+		<cfset var route = createObject("component", "MachII.framework.UrlRoute").init() />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
 			<cfset parameter = getParameter(parameterName) />
 			<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
 				"You must provide a struct key for 'event' for route '#parameterName#'") />	
-			<cfset route.event = parameter.event />
-			<cfif StructKeyExists(parameter, "argumentOrder")>
-				<cfset route.eventargs = parameter.argumentOrder />
+			<cfset route.setEventName(parameter.event) />
+			<cfif StructKeyExists(parameter, "module")>
+				<cfset route.setModuleName(parameter.module) />
+			</cfif>
+			<cfif StructKeyExists(parameter, "urlAlias")>
+				<cfset route.setUrlAlias(parameter.urlAlias) />
+			</cfif>
+			<cfif StructKeyExists(parameter, "requiredArguments")>
+				<cfset route.setRequiredArguments(parameter.requiredArguments) />
+			</cfif>
+			<cfif StructKeyExists(parameter, "optionalArguments")>
+				<cfset route.setOptionalArguments(parameter.optionalArguments) />
 			</cfif>	
 			<cfset addRoute(parameterName, route) />
 		</cfloop>
@@ -86,7 +95,7 @@ index.cfm/product/A12345/fancy/
 	--->
 	<cffunction name="addRoute" access="public" returntype="void" output="false">
 		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="struct" required="true" />
+		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
 		<cfset getAppManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>

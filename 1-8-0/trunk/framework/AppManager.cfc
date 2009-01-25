@@ -419,17 +419,35 @@ Notes:
 		
 		<cfif NOT StructKeyExists(routes, arguments.routeName)>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route named '#arguments.routeName# could be found.'" />
+				message="No route named '#arguments.routeName#' could be found.'" />
 		</cfif>
 		
 		<cfreturn variables.routes[arguments.routeName] />
 	</cffunction>
+	
+	<cffunction name="getRouteByAlias" access="public" returntype="struct" output="false">
+		<cfargument name="routeAlias" type="string" required="true" />
+		
+		<cfset var routeAliases = variables.routeAliases />
+		
+		<!--- TODO: handle getting routes by alias from the parent app if there is one --->
+		
+		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route with alias '#arguments.routeAlias#' could be found.'" />
+		</cfif>
+		
+		<cfreturn getRoute(routeAliases[arguments.routeAlias]) />
+	</cffunction>
 
 	<cffunction name="addRoute" access="public" returntype="void" output="false">
 		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="struct" required="true" />
+		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
+		<cfif arguments.route.getUrlAlias() neq "">
+			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
+		</cfif>
 	</cffunction>
 	
 </cfcomponent>

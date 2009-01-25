@@ -170,11 +170,34 @@ Notes:
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var value = "" />
 		<cfset var i = "" />
+		<cfset var route = getAppManager().getRoute(arguments.routeName) />	
+		<cfset var defaultValue = "" />	
+		<cfset var element = "" />
+
+		<cfif route.getUrlAlias() neq "">
+			<cfset queryString = queryString & route.getUrlAlias() />		
+		<cfelse>
+			<cfset queryString = queryString & arguments.routeName />
+		</cfif>		
 		
-		<cfset queryString = queryString & arguments.routeName />
-		
-		<!--- TODO: handle module routes --->
 		<!--- TODO: handle ordering the url params --->
+		
+		<!--- Check to see if all required arguments were passed in --->
+		<cfloop list="#route.getRequiredArguments()#" index="i">
+			<cfset defaultValue = "" />
+			<cfif ListLen(i, ":") gt 1>
+				<cfset defaultValue = ListGetAt(i, 2, ":") />
+				<cfset element = ListGetAt(i, 1, ":") />
+			<cfelse>
+				<cfset element = i />
+			</cfif>
+			<cfif NOT structKeyExists(params, element) AND defaultValue eq "">
+				<cfthrow type="MachII.RequestManager.RouteArgumentMissing"
+					message="When attempting to build a url for the route '#arguments.routeName#' required argument '#element#' was not specified.">
+			<cfelseif NOT structKeyExists(params, element)>
+				<cfset params[element] = defaultValue />
+			</cfif>
+		</cfloop>
 		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop collection="#params#" item="i">
@@ -286,14 +309,19 @@ Notes:
 		<cfset var params = structNew() />
 		<cfset var i = 1 />
 		
-		<cfset params[getEventParameter()] = route.event />
+		<cfif route.getModuleName() eq "">
+			<cfset params[getEventParameter()] = route.getEventName() />
+		<cfelse>
+			<cfset params[getEventParameter()] = route.getModuleName() & getModuleDelimiter() & route.getEventName() />
+		</cfif>
 		
 		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
 		
 		<!--- Start at position 2 since position 1 was the route name --->
 		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
-			<cfif ListLen(route.eventargs) lte i + 1>
-				<cfset params[ListGetAt(route.eventargs, i - 1)] = arguments.urlElements[i] />
+			<!--- TODO: handle optionalArguments --->
+			<cfif ListLen(route.getRequiredArguments()) lte i + 1>
+				<cfset params[ListGetAt(route.getRequiredArguments(), i - 1)] = arguments.urlElements[i] />
 			</cfif>
 		</cfloop>
 		
