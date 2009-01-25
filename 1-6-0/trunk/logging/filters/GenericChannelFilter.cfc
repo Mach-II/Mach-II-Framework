@@ -200,7 +200,7 @@ Pattern matches are not case sensitive.
 		<cfargument name="filterChannels" type="array" required="true" />
 		<cfset variables.filterChannels = arguments.filterChannels />
 	</cffunction>
-	<cffunction name="getFilterChannels" access="private" returntype="array" output="false">
+	<cffunction name="getFilterChannels" access="public" returntype="array" output="false">
 		<cfreturn variables.filterChannels />
 	</cffunction>
 	

@@ -64,6 +64,8 @@ Notes:
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory()) />
 		
+		<cfset super.init() />
+		
 		<cfreturn this />
 	</cffunction>
 	

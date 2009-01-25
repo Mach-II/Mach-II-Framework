@@ -34,7 +34,6 @@ Notes:
 	<cfset variables.beanUtil = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.expressionEvaluator = "" />
-	<cfset variables.propertyManager = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -44,7 +43,6 @@ Notes:
 		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 		<cfset variables.utils = getAppManager().getUtils() />
 		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
-		<cfset variables.propertyManager = getAppManager().getPropertyManager() />
 	</cffunction>
 		
 	<!---
@@ -171,7 +169,7 @@ Notes:
 			ids, aliases, strategyNames, criteria, condition) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(variables.propertyManager) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -430,7 +428,7 @@ Notes:
 		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
 		<cfset command.setLog(getAppManager().getLogFactory()) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(variables.propertyManager) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
