@@ -33,22 +33,20 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.handlers = StructNew() />
 	<cfset variables.parentEventManager = "" />
+	<cfset variables.handlers = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="EventManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentEventManager" type="any" required="false" default=""
-			hint="Optional argument for a parent event manager. If there isn't one default to empty string." />	
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />	
 				
 		<cfset setAppManager(arguments.appManager) />
 		
-		<cfif IsObject(arguments.parentEventManager)>
-			<cfset setParent(arguments.parentEventManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getEventManager()) />
 		</cfif>
 		
 		<cfset super.init() />

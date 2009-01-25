@@ -49,15 +49,13 @@ Notes:
 	<cffunction name="init" access="public" returntype="CacheManager" output="false"
 		hint="Initializes the manager.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentCacheManager" type="any" required="false" default=""
-			hint="Optional argument for a parent cache manager. If not defined, default to zero-length string." />
 		
 		<cfset setAppManager(arguments.appManager) />
 		
 		<cfset setCacheStrategyManager(CreateObject("component", "MachII.caching.CacheStrategyManager").init()) />
 		
-		<cfif IsObject(arguments.parentCacheManager)>
-			<cfset setParent(arguments.parentCacheManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getCacheManager()) />
 			<cfset getCacheStrategyManager().setParent(getParent().getCacheStrategyManager()) />
 		</cfif>
 		

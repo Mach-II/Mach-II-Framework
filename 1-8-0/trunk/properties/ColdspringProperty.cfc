@@ -388,7 +388,7 @@ application.serviceFactory_account variable.
 		<cfset getAppManager().addOnPostObjectReloadCallback(this, "resolveDependency") />
 	</cffunction>
 	
-	<cffunction name="onReload" access="public" returntype="void" output="false"
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deregisters ColdSpring as an available DI engine interface.">
 		
 		<!--- Deregister as onPostObjectReload callback --->

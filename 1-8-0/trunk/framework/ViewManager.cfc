@@ -32,10 +32,9 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.parentViewManager = "" />
 	<cfset variables.viewPaths = StructNew() />
 	<cfset variables.viewLoaders = ArrayNew(1) />
-	<cfset variables.parentViewManager = "" />
-	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -43,14 +42,11 @@ Notes:
 	<cffunction name="init" access="public" returntype="ViewManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentViewManager" type="any" required="false" default=""
-			hint="Optional argument for a parent view manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif IsObject(arguments.parentViewManager)>
-			<cfset setParent(arguments.parentViewManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getViewManager()) />
 		</cfif>
 		
 		<cfreturn this />
@@ -74,6 +70,7 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
@@ -145,7 +142,7 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 					<cfset paramName = paramNodes[j].xmlAttributes["name"] />						
 					<cftry>
-						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
 						<cfcatch type="any">
 							<cfthrow type="MachII.framework.InvalidParameterXml"
 								message="Xml parsing error for the parameter named '#paramName#' for view-loader in module '#getAppManager().getModuleName()#'." />

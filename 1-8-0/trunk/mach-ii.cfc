@@ -59,11 +59,17 @@ the handleRequest() method in the onRequest() application event.
 	APPLICATION SPECIFIC EVENTS
 	--->
 	<cffunction name="onApplicationStart" access="public" returntype="boolean" output="false"
-		hint="Run on the application start event. Override to provide customize functionality.">
+		hint="Handles the application start event. Override to provide customized functionality.">
 		<!--- Load up the framework --->
 		<cfset LoadFramework() />
 		
 		<cfreturn TRUE />
+	</cffunction>
+	
+	<cffunction name="onApplicationEnd" access="public" returntype="void" output="false"
+		hint="Handles the application start event. Override to provide customized functionality.">
+		<cfargument name="applicationScope" type="struct" required="true">
+		<cfset getAppManager().onApplicationEnd() />
 	</cffunction>
 	
 	<cffunction name="onRequestStart" access="public" returntype="void" output="true"

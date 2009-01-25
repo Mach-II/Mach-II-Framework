@@ -55,7 +55,6 @@ Notes:
 	<cfset variables.handleExceptionPluginsPosition = "" />
 	<cfset variables.nPlugins = 0 />
 	<cfset variables.parentPluginManager = "" />
-	<cfset variables.utils = "" />
 	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,onSessionStart,onSessionEnd,handleException") />
 	<cfset variables.runParent = "" />
 
@@ -65,14 +64,11 @@ Notes:
 	<cffunction name="init" access="public" returntype="PluginManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentPluginManager" type="any" required="false" default=""
-			hint="Optional argument for a parent plugin manager. If there isn't one default to empty string." />
 
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
 
-		<cfif IsObject(arguments.parentPluginManager)>
-			<cfset setParent(arguments.parentPluginManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getPluginManager()) />
 		</cfif>
 
 		<cfreturn this />
@@ -93,6 +89,7 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var baseProxy = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -125,7 +122,7 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 					<cfset paramName = paramNodes[j].XmlAttributes["name"] />
 					<cftry>
-						<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+						<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
 						<cfcatch type="any">
 							<cfthrow type="MachII.framework.InvalidParameterXml"
 								message="Xml parsing error for the parameter named '#paramName#' for plugin '#pluginName#' in module '#getAppManager().getModuleName()#'." />
@@ -182,15 +179,15 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="onReload" access="public" returntype="void"
-		hint="Performs onReload logic in each of the registered Plugins.">
+	<cffunction name="deconfigure" access="public" returntype="void"
+		hint="Performs deconiguration logic.">
 
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#variables.nPlugins#" index="i">
 			<cfset aPlugin = variables.pluginArray[i] />
-			<cfset aPlugin.onReload() />
+			<cfset aPlugin.deconfigure() />
 		</cfloop>
 	</cffunction>
 
@@ -321,10 +318,10 @@ Notes:
 			</cfcatch>
 		</cftry>
 		
-		<!--- Run onReload in the current Plugin 
+		<!--- Run deconfigure in the current Plugin 
 			which must take place before configure is
 			run in the new Plugin --->
-		<cfset currentPlugin.onReload() />
+		<cfset currentPlugin.deconfigure() />
 		
 		<!--- Continue setup on the Plugin --->
 		<cfset baseProxy.setObject(newPlugin) />

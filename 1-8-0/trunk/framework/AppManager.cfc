@@ -62,7 +62,25 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="AppManager" output="false"
-		hint="Used by the framework for initialization. Do not override.">		
+		hint="Used by the framework for initialization. Do not override.">
+		<cfargument name="parentAppManager" type="any" required="false" default="" 
+			hint="Optional argument for parent application manager. Defaults to empty string" />
+		
+		<!--- The utils, assert, express evaluator and log factory CFCs are singletons --->
+		<cfif IsObject(arguments.parentAppManager)>
+			<cfset setParent(arguments.parentAppManager) />
+			
+			<cfset setUtils(getParent().getUtils()) />
+			<cfset setAssert(getParent().getAssert()) />
+			<cfset setExpressionEvaluator(getParent().getExpressionEvaluator()) />
+			<cfset setLogFactory(getParent().getLogFactory()) />
+		<cfelse>
+			<cfset setUtils(CreateObject("component", "MachII.util.Utils").init()) />
+			<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
+			<cfset setExpressionEvaluator(CreateObject("component", "MachII.util.ExpressionEvaluator").init()) />
+			<cfset setLogFactory(CreateObject("component", "MachII.logging.LogFactory").init()) />
+		</cfif>
+		
 		<cfreturn this />
 	</cffunction>
 
@@ -83,7 +101,7 @@ Notes:
 		<cfset getViewManager().configure() />
 		
 		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
-		<cfif NOT IsObject(getParent())>
+		<cfif NOT inModule()>
 			<cfset getModuleManager().configure() />
 		</cfif>
 		
@@ -91,21 +109,20 @@ Notes:
 		<cfset setLoading(false) />
 	</cffunction>
 	
-	<cffunction name="onReload" access="public" returntype="void"
-		hint="Performs logic onReload.">
+	<cffunction name="deconfigure" access="public" returntype="void"
+		hint="Calls deconfigure() on each of the manager instances.">
 
 		<!--- In order in which the managers are called is important
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
-		<cfset getPropertyManager().onReload() />
-		<cfset getPluginManager().onReload() />
-		<cfset getListenerManager().onReload() />
-		<cfset getFilterManager().onReload() />
+		<cfset getPropertyManager().deconfigure() />
+		<cfset getPluginManager().deconfigure() />
+		<cfset getListenerManager().deconfigure() />
+		<cfset getFilterManager().deconfigure() />
 		
 		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
-		<cfif NOT IsObject(getParent())>
-			<cfset getModuleManager().onReload() />
+		<cfif NOT inModule()>
+			<cfset getModuleManager().deconfigure() />
 		</cfif>
-		
 	</cffunction>
 
 	<!---
@@ -154,6 +171,11 @@ Notes:
 	<!---
 	MACH-II APPLICATION EVENTS
 	--->
+	<cffunction name="onApplicationEnd" access="public" returntype="void" output="false"
+		hint="Handles on application end application event.">
+		<cfset deconfigure() />
+	</cffunction>
+	
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="Handles on session start application event.">
 		

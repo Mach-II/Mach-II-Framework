@@ -33,8 +33,8 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.handlers = StructNew() />
 	<cfset variables.parentSubroutineManager = "" />
+	<cfset variables.handlers = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -42,13 +42,11 @@ Notes:
 	<cffunction name="init" access="public" returntype="SubroutineManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentSubroutineManager" type="any" required="false" default=""
-			hint="Optional argument for a parent subroutine manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
 		
-		<cfif IsObject(arguments.parentSubroutineManager)>
-			<cfset setParent(arguments.parentSubroutineManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getSubroutineManager()) />
 		</cfif>
 		
 		<cfset super.init() />

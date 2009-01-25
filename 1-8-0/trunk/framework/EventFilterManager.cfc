@@ -31,9 +31,8 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.parentFilterManager = "" />
 	<cfset variables.filterProxies = StructNew() />
-	<cfset variables.parentFilterManager = "">
-	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -41,14 +40,11 @@ Notes:
 	<cffunction name="init" access="public" returntype="EventFilterManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentFilterManager" type="any" required="false" default=""
-			hint="Optional argument for a parent filter manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif IsObject(arguments.parentFilterManager)>
-			<cfset setParent(arguments.parentFilterManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getFilterManager()) />
 		</cfif>
 		
 		<cfreturn this />
@@ -69,6 +65,7 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
@@ -119,7 +116,7 @@ Notes:
 					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 						<cfset paramName = paramNodes[j].xmlAttributes["name"] />
 						<cftry>
-							<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+							<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
 							<cfcatch type="any">
 								<cfthrow type="MachII.framework.InvalidParameterXml"
 									message="Xml parsing error for the parameter named '#paramName#' for event-filter '#filterName#' in module '#getAppManager().getModuleName()#'." />
@@ -177,15 +174,15 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="onReload" access="public" returntype="void"
-		hint="Performs onReload logic in each of the registered EventFilters.">
+	<cffunction name="deconfigure" access="public" returntype="void"
+		hint="Performs deconfiguration logic.">
 		
 		<cfset var aFilter = 0 />
 		<cfset var i = 0 />
 		
 		<cfloop collection="#variables.filterProxies#" item="i">
 			<cfset aFilter = variables.filterProxies[i].getObject() />
-			<cfset aFilter.onReload() />
+			<cfset aFilter.deconfigure() />
 		</cfloop>
 	</cffunction>
 	
@@ -273,10 +270,10 @@ Notes:
 			</cfcatch>
 		</cftry>
 
-		<!--- Run onReload in the current Filter 
+		<!--- Run deconfigure in the current Filter 
 			which must take place before configure is
 			run in the new Filter --->
-		<cfset currentFilter.onReload() />
+		<cfset currentFilter.deconfigure() />
 		
 		<!--- Continue setup on the Filter --->
 		<cfset baseProxy.setObject(newFilter) />

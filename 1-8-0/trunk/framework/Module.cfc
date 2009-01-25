@@ -83,11 +83,13 @@ Notes:
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 		
-		<!--- Run onReload in current module --->
-		<cfset getModuleAppManager().onReload() />
+		<cfset var oldModuleAppManager = getModuleAppManager() />
 		
 		<!--- Create a new module --->
 		<cfset configure(getDtdPath(), arguments.validateXml) />
+		
+		<!--- Only run deconfigure in old module once the new module has successfully been configured --->
+		<cfset oldModuleAppManager.deconfigure() />
 	</cffunction>
 	
 	<!---

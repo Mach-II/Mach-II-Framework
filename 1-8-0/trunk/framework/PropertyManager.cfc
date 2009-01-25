@@ -39,7 +39,6 @@ the rest of the framework. (pfarrell)
 	<cfset variables.parentPropertyManager = "">
 	<cfset variables.majorVersion = "1.8.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
-	<cfset variables.utils = "" />
 	<cfset variables.propsNotAllowInModule =
 		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
 	
@@ -49,14 +48,11 @@ the rest of the framework. (pfarrell)
 	<cffunction name="init" access="public" returntype="PropertyManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentPropertyManager" type="any" required="false" default=""
-			hint="Optional argument for a parent property manager. If there isn't one default to empty string." />
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif IsObject(arguments.parentPropertyManager)>
-			<cfset setParent(arguments.parentPropertyManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getPropertyManager()) />
 		</cfif>
 		
 		<!--- Setup the log --->
@@ -82,6 +78,7 @@ the rest of the framework. (pfarrell)
 		
 		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -132,7 +129,7 @@ the rest of the framework. (pfarrell)
 						<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
 							<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
 							<cftry>
-								<cfset paramValue = variables.utils.recurseComplexValues(paramsNodes[j]) />
+								<cfset paramValue = utils.recurseComplexValues(paramsNodes[j]) />
 								<cfcatch type="any">
 									<cfthrow type="MachII.framework.InvalidPropertyXml"
 										message="Xml parsing error for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'." />
@@ -176,7 +173,7 @@ the rest of the framework. (pfarrell)
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
 					<cftry>
-						<cfset propertyValue = variables.utils.recurseComplexValues(propertyNodes[i]) />
+						<cfset propertyValue = utils.recurseComplexValues(propertyNodes[i]) />
 						<cfcatch type="any">
 							<cfthrow type="MachII.framework.InvalidPropertyXml"
 								message="Xml parsing error for the property named '#propertyName#' in module '#getAppManager().getModuleName()#'." />
@@ -264,8 +261,8 @@ the rest of the framework. (pfarrell)
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="onReload" access="public" returntype="void"
-		hint="Preforms logic when a module is reloaded.">
+	<cffunction name="deconfigure" access="public" returntype="void"
+		hint="Preforms deconfiguration logic.">
 		
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
@@ -274,7 +271,7 @@ the rest of the framework. (pfarrell)
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
-			<cfset aConfigurableProperty.onReload() />
+			<cfset aConfigurableProperty.deconfigure() />
 		</cfloop>		
 	</cffunction>
 	
@@ -429,10 +426,10 @@ the rest of the framework. (pfarrell)
 			</cfcatch>
 		</cftry>
 
-		<!--- Run onReload in the current Property 
+		<!--- Run deconfigure in the current Property 
 			which must take place before configure is
 			run in the new Property --->
-		<cfset currentProperty.onReload() />
+		<cfset currentProperty.deconfigure() />
 
 		<!--- Replace the old Property with the new Property in the proxy--->
 		<cfset baseProxy.setObject(newProperty) />

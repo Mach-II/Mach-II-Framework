@@ -115,13 +115,13 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="onReload" access="public" returntype="void" output="false"
-		hint="Preforms logic onReload in each of the registered modules.">
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Preforms deconfiguration logic in each of the registered modules.">
 		
 		<cfset var key = "" />
 		
 		<cfloop collection="#variables.modules#" item="key">
-			<cfset variables.modules[key].getModuleAppManager().onReload() />
+			<cfset variables.modules[key].getModuleAppManager().deconfigure() />
 		</cfloop>
 	</cffunction>
 	

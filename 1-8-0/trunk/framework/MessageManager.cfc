@@ -41,15 +41,15 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="MessageManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentMessageManager" type="any" required="false" default=""
-			hint="Optional argument for a parent message manager. If there isn't one, defaults to empty string." />	
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />	
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 		
-		<cfif IsObject(arguments.parentMessageManager)>
-			<cfset setParent(arguments.parentMessageManager) />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getMessageManager()) />
+			<cfset setThreadingAdapter(getParent().getThreadingAdapter()) />
+		<cfelse>
+			<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 		</cfif>
 		
 		<cfreturn this />
@@ -251,7 +251,7 @@ Notes:
 		<cfreturn variables.parentMessageManager />
 	</cffunction>
 	
-	<cffunction name="setThreadingAdapter" access="private" returntype="void" output="false"
+	<cffunction name="setThreadingAdapter" access="public" returntype="void" output="false"
 		hint="Sets a threading adapter.">
 		<cfargument name="threadingAdapter" type="MachII.util.threading.ThreadingAdapter" required="true" />
 		<cfset variables.threadingAdapter = arguments.threadingAdapter />

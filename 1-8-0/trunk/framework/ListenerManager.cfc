@@ -30,30 +30,26 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.listenerProxies = StructNew() />
-	<cfset variables.defaultInvoker = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.parentListenerManager = "" />
-	<cfset variables.utils = "" />
+	<cfset variables.defaultInvoker = "" />
+	<cfset variables.listenerProxies = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ListenerManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parentListenerManager" type="any" required="false" default=""
-			hint="Optional argument for a parent listener manager. If there isn't one default to empty string." />	
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />	
 		
 		<cfset setAppManager(arguments.appManager) />
-		<cfset variables.utils = getAppManager().getUtils() />
 		
-		<cfif IsObject(arguments.parentListenerManager)>
-			<cfset setParent(arguments.parentListenerManager) />
-		</cfif>
-		
-		<!--- Instantiate the default invoker (invokers are stateless) --->
-		<cfset variables.defaultInvoker = CreateObject("component", "MachII.framework.invokers.EventInvoker").init() />
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getListenerManager()) />
+			<cfset setDefaultInvoker(getParent().getDefaultInvoker()) />
+		<cfelse>
+			<cfset setDefaultInvoker(CreateObject("component", "MachII.framework.invokers.EventInvoker").init()) />
+		</cfif>		
 		
 		<cfreturn this />
 	</cffunction>
@@ -77,6 +73,7 @@ Notes:
 		<cfset var invoker = "" />
 		<cfset var instantiatedInvokers = StructNew() />
 
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var baseProxy = "" />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
@@ -127,7 +124,7 @@ Notes:
 					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
 						<cfset paramName = paramNodes[j].xmlAttributes["name"] />						
 						<cftry>
-							<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[j]) />
+							<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
 							<cfcatch type="any">
 								<cfthrow type="MachII.framework.InvalidParameterXml"
 									message="Xml parsing error for the parameter named '#paramName#' for listener '#listenerName#' in module '#getAppManager().getModuleName()#'." />
@@ -219,8 +216,8 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="onReload" access="public" returntype="void"
-		hint="Performs onReload login in each of the registered listeners.">
+	<cffunction name="deconfigure" access="public" returntype="void"
+		hint="Performs deconfigure logic.">
 
 		<cfset var aListener = 0 />
 		<cfset var i = 0 />
@@ -228,7 +225,7 @@ Notes:
 		<!--- Loop through the listeners configure --->
 		<cfloop collection="#variables.listenerProxies#" item="i">
 			<cfset aListener = variables.listenerProxies[i].getObject() />
-			<cfset aListener.onReload() />
+			<cfset aListener.deconfigure() />
 		</cfloop>
 	</cffunction>
 	
@@ -317,10 +314,10 @@ Notes:
 			</cfcatch>
 		</cftry>
 		
-		<!--- Run onReload in the current Listener 
+		<!--- Run deconfigure in the current Listener 
 			which must take place before configure is
 			run in the new Listener --->
-		<cfset currentListener.onReload() />
+		<cfset currentListener.deconfigure() />
 		
 		<!--- Continue setup on the Listener --->
 		<cfset newListener.setInvoker(currentListener.getInvoker()) />
@@ -357,6 +354,16 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false"
 		hint="Sets the parent ListenerManager instance this ListenerManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentListenerManager />
+	</cffunction>
+	
+	<cffunction name="setDefaultInvoker" access="public" returntype="void" output="false"
+		hint="Sets the default invoker.">
+		<cfargument name="defaultInvoker" type="MachII.framework.ListenerInvoker" required="true" />
+		<cfset variables.defaultInvoker = arguments.defaultInvoker />
+	</cffunction>
+	<cffunction name="getDefaultInvoker" access="public" returntype="MachII.framework.ListenerInvoker" output="false"
+		hint="Get the default invoker.">
+		<cfreturn variables.defaultInvoker />
 	</cffunction>
 	
 </cfcomponent>
