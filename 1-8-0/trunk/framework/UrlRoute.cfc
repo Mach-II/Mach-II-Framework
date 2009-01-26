@@ -59,6 +59,104 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS	
 	--->
+	<cffunction name="parseRoute" access="public" returntype="struct" output="false">
+		<cfargument name="urlElements" type="array" required="true" />
+		<cfargument name="moduleDelimiter" type="string" required="true" />
+		<cfargument name="eventParameter" type="string" required="true" />
+		
+		<cfset var params = structNew() />
+		<cfset var i = 1 />
+		
+		<cfif getModuleName() eq "">
+			<cfset params[arguments.eventParameter] = getEventName() />
+		<cfelse>
+			<cfset params[arguments.eventParameter] = getModuleName() & arguments.moduleDelimiter & getEventName() />
+		</cfif>
+		
+		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
+		
+		<!--- Start at position 2 since position 1 was the route name --->
+		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
+			<!--- TODO: handle optionalArguments --->
+			<cfif ListLen(getRequiredArguments()) lte i + 1>
+				<cfset params[ListGetAt(getRequiredArguments(), i - 1)] = arguments.urlElements[i] />
+			</cfif>
+		</cfloop>
+		
+		<!--- <cfdump var="#params#" /><cfabort /> --->
+		
+		<cfreturn params />
+	</cffunction>
+	
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="true" 
+			hint="Base of the url." />
+		<cfargument name="seriesDelimiter" type="string" required="true" />
+		<cfargument name="queryStringDelimiter" type="string" required="true" />
+	
+		<cfset var builtUrl = "" />
+		<cfset var queryString = "" />
+		<cfset var params = arguments.urlParameters />
+		<cfset var value = "" />
+		<cfset var i = "" />
+		<cfset var defaultValue = "" />	
+		<cfset var element = "" />
+		
+		<cfif getUrlAlias() neq "">
+			<cfset queryString = queryString & getUrlAlias() />		
+		<cfelse>
+			<cfset queryString = queryString & getName() />
+		</cfif>		
+		
+		<!--- TODO: handle ordering the url params --->
+		
+		<!--- Check to see if all required arguments were passed in --->
+		<cfloop list="#getRequiredArguments()#" index="i">
+			<cfset defaultValue = "" />
+			<cfif ListLen(i, ":") gt 1>
+				<cfset defaultValue = ListGetAt(i, 2, ":") />
+				<cfset element = ListGetAt(i, 1, ":") />
+			<cfelse>
+				<cfset element = i />
+			</cfif>
+			<cfif NOT structKeyExists(params, element) AND defaultValue eq "">
+				<cfthrow type="MachII.framework.UrlRoute.RouteArgumentMissing"
+					message="When attempting to build a url for the route '#getName()#' required argument '#element#' was not specified.">
+			<cfelseif NOT structKeyExists(params, element)>
+				<cfset params[element] = defaultValue />
+			</cfif>
+		</cfloop>
+		
+		<!--- Attach each additional arguments if it exists and is a simple value --->
+		<cfloop collection="#params#" item="i">
+			<cfif IsSimpleValue(params[i])>
+				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
+				<!--- <cfif getParseSes()>
+					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
+				</cfif>
+				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
+					<cfset params[i] = "_-_NULL_-_" />
+				</cfif> --->
+				<cfset queryString = queryString & arguments.seriesDelimiter & URLEncodedFormat(params[i]) />
+			</cfif>
+		</cfloop>
+		
+		<!--- Prepend the urlBase and add trailing series delimiter --->
+		<cfif Len(queryString)>
+			<cfset builtUrl = arguments.urlBase & arguments.queryStringDelimiter & queryString />
+			<cfif arguments.seriesDelimiter NEQ "&">
+				<cfset builtUrl = builtUrl & arguments.seriesDelimiter />
+			</cfif>
+		<cfelse>
+			<cfset builtUrl = arguments.urlBase />
+		</cfif>
+		
+		<cfreturn builtUrl />
+	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS

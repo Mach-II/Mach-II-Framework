@@ -25,12 +25,13 @@ Notes:
 
 
 Usage:
-<property name="routes" type="MachII.properties.FriendlyRoutesProperty">
+<property name="routes" type="MachII.properties.UrlRoutesProperty">
   <parameters>
     <parameter name="product">
       <struct>
          <key name="event" value="showProduct" />
-         <key name="argumentOrder" value="productId,displayType" />
+         <key name="requiredArguments" value="productId,displayType:fancy" />
+		 <key name="optionalArguments" value="key" />
      </struct>
     </parameter>
   </parameters>
@@ -39,14 +40,14 @@ Usage:
 Then in your view you can call the new buildRoute() method which, like buildURL(), handling creating the actual URL string 
 for you based the route configuration.
 
-#BuildRoute("product", "productId=#event.getArg('productId')#|displayType=fancy")#
+#BuildRouteUrl("product", "productId=#event.getArg('productId')#|displayType=fancy")#
 
 BuildRoute then produces the following URL:
 
 index.cfm/product/A12345/fancy/
 --->
 <cfcomponent 
-	displayname="FriendlyRoutesProperty"
+	displayname="UrlRoutesProperty"
 	extends="MachII.framework.Property"
 	output="false"
 	hint="Sets up one or more route which are configurable search engine friendly url schemes.">
@@ -55,6 +56,8 @@ index.cfm/product/A12345/fancy/
 	PROPERTIES
 	--->
 	<cfset variables.routes = StructNew() />
+	<cfset variables.routeNames = "" />
+	<cfset variables.routeAliases = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -90,6 +93,23 @@ index.cfm/product/A12345/fancy/
 		
 	</cffunction>
 	
+	<cffunction name="deconfigure" access="public" returntype="void" output="false">
+		<cfset var requestManager = getAppManager().getRequestManager() />
+		<cfset var name = "" />
+		
+		<!--- Cleanup this property's routes --->
+		<cfloop list="#variables.routeNames#" index="name">
+			<!--- Remove route --->
+			<cfset requestManager.removeRoute(name) />
+		</cfloop>
+		
+		<cfloop list="#variables.routeAliases#" index="name">
+			<!--- Remove route alias --->
+			<cfset requestManager.removeRouteAlias(name) />
+		</cfloop>
+		
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS	
 	--->
@@ -97,7 +117,12 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
-		<cfset getAppManager().addRoute(arguments.routeName, arguments.route) />
+		<cfset variables.routeNames = ListAppend(variables.routeNames, arguments.routeName) />
+		<cfif arguments.route.getUrlAlias() neq "">
+			<cfset variables.routeAliases = ListAppend(variables.routeAliases, arguments.route.getUrlAlias()) />
+		</cfif>
+		
+		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>
 	
 	<!---

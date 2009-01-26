@@ -124,7 +124,7 @@ Notes:
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
-	<cffunction name="buildRoute" access="public" returntype="string" output="false"
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="routeName" type="string" required="true"
 			hint="Name of the route to build the url with." />
@@ -136,8 +136,24 @@ Notes:
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 		
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildRoute(argumentcollection=arguments)) />
+		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
+
+	<cffunction name="buildUnescapedRouteUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name of the route to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		
+		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
+	</cffunction>
+
 	
 	<cffunction name="buildUnescapedUrl" access="public" returntype="string" output="false"
 		hint="Builds an unescaped framework specific url and does not escape entities.">

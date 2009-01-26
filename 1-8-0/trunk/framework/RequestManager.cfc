@@ -48,6 +48,8 @@ Notes:
 	<cfset variables.callbackGroupNames = "onRequestEndCallbacks,preRedirectCallbacks,postRedirectCallbacks" />
 	<cfset variables.requestRedirectPersist = "" />
 	<cfset variables.log = "" />
+	<cfset variables.routes = StructNew() />
+	<cfset variables.routeAliases = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -154,7 +156,7 @@ Notes:
 		<cfreturn builtUrl />
 	</cffunction>
 	
-	<cffunction name="buildRoute" access="public" returntype="string" output="false"
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with." />
@@ -165,65 +167,10 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
-		<cfset var builtUrl = "" />
-		<cfset var queryString = "" />
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
-		<cfset var value = "" />
-		<cfset var i = "" />
-		<cfset var route = getAppManager().getRoute(arguments.routeName) />	
-		<cfset var defaultValue = "" />	
-		<cfset var element = "" />
-
-		<cfif route.getUrlAlias() neq "">
-			<cfset queryString = queryString & route.getUrlAlias() />		
-		<cfelse>
-			<cfset queryString = queryString & arguments.routeName />
-		</cfif>		
+		<cfset var route = getRoute(arguments.routeName) />	
 		
-		<!--- TODO: handle ordering the url params --->
-		
-		<!--- Check to see if all required arguments were passed in --->
-		<cfloop list="#route.getRequiredArguments()#" index="i">
-			<cfset defaultValue = "" />
-			<cfif ListLen(i, ":") gt 1>
-				<cfset defaultValue = ListGetAt(i, 2, ":") />
-				<cfset element = ListGetAt(i, 1, ":") />
-			<cfelse>
-				<cfset element = i />
-			</cfif>
-			<cfif NOT structKeyExists(params, element) AND defaultValue eq "">
-				<cfthrow type="MachII.RequestManager.RouteArgumentMissing"
-					message="When attempting to build a url for the route '#arguments.routeName#' required argument '#element#' was not specified.">
-			<cfelseif NOT structKeyExists(params, element)>
-				<cfset params[element] = defaultValue />
-			</cfif>
-		</cfloop>
-		
-		<!--- Attach each additional arguments if it exists and is a simple value --->
-		<cfloop collection="#params#" item="i">
-			<cfif IsSimpleValue(params[i])>
-				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
-				<cfif getParseSes()>
-					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
-				</cfif>
-				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
-					<cfset params[i] = "_-_NULL_-_" />
-				</cfif>
-				<cfset queryString = queryString & getSeriesDelimiter() & URLEncodedFormat(params[i]) />
-			</cfif>
-		</cfloop>
-		
-		<!--- Prepend the urlBase and add trailing series delimiter --->
-		<cfif Len(queryString)>
-			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
-			<cfif getSeriesDelimiter() NEQ "&">
-				<cfset builtUrl = builtUrl & getSeriesDelimiter() />
-			</cfif>
-		<cfelse>
-			<cfset builtUrl = arguments.urlBase />
-		</cfif>
-		
-		<cfreturn builtUrl />
+		<cfreturn route.buildRouteUrl(arguments.moduleName, params, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter())>
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
@@ -257,7 +204,7 @@ Notes:
 				<cfset params = parseNonRoute(names) />
 			<cfelse>
 				<!--- No event parameter was found so check to see if a route name is present --->
-				<cfif ListFindNoCase(getAppManager().getRouteNames(), names[1])>
+				<cfif ListFindNoCase(getRouteNames(), names[1])>
 					<cfset params = parseRoute(names[1], names) />
 				<cfelse>
 					<!--- No route found for this url --->
@@ -305,27 +252,9 @@ Notes:
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="urlElements" type="array" required="true" />
 		
-		<cfset var route = getAppManager().getRoute(arguments.routeName) />
-		<cfset var params = structNew() />
-		<cfset var i = 1 />
+		<cfset var route = getRoute(arguments.routeName) />
 		
-		<cfif route.getModuleName() eq "">
-			<cfset params[getEventParameter()] = route.getEventName() />
-		<cfelse>
-			<cfset params[getEventParameter()] = route.getModuleName() & getModuleDelimiter() & route.getEventName() />
-		</cfif>
-		
-		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
-		
-		<!--- Start at position 2 since position 1 was the route name --->
-		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
-			<!--- TODO: handle optionalArguments --->
-			<cfif ListLen(route.getRequiredArguments()) lte i + 1>
-				<cfset params[ListGetAt(route.getRequiredArguments(), i - 1)] = arguments.urlElements[i] />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn params />
+		<cfreturn route.parseRoute(urlElements, getModuleDelimiter(), getEventParameter()) />
 	</cffunction>
 
 	<cffunction name="readPersistEventData" access="public" returntype="struct" output="false"
@@ -448,6 +377,69 @@ Notes:
 	<cffunction name="getPostRedirectCallbacks" access="public" returntype="array" output="false"
 		hints="Gets the post-redirect callbacks.">
 		<cfreturn variables.postRedirectCallbacks />
+	</cffunction>
+	
+	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
+		<cfreturn StructKeyList(variables.routes) />
+	</cffunction>
+	
+	<cffunction name="getRoutes" access="public" returntype="struct" output="false">
+		<cfreturn variables.routes />
+	</cffunction>
+	<cffunction name="setRoutes" access="public" returntype="void" output="false">
+		<cfargument name="routes" type="struct" required="true" />
+		<cfset variables.routes = arguments.routes />
+	</cffunction>
+	
+	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		
+		<cfset var routes = getRoutes() />
+		
+		<!--- TODO: handle getting routes from the parent app if there is one --->
+		
+		<cfif StructKeyExists(routes, arguments.routeName)>
+			<cfreturn variables.routes[arguments.routeName] />
+		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeName)>
+			<cfreturn variables.routes[variables.routeAliases[arguments.routeName]] />
+		<cfelse>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route named '#arguments.routeName#' could be found.'" />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="getRouteByAlias" access="public" returntype="struct" output="false">
+		<cfargument name="routeAlias" type="string" required="true" />
+		
+		<cfset var routeAliases = variables.routeAliases />
+		
+		<!--- TODO: handle getting routes by alias from the parent module if there is one --->
+		
+		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No route with alias '#arguments.routeAlias#' could be found.'" />
+		</cfif>
+		
+		<cfreturn getRoute(routeAliases[arguments.routeAlias]) />
+	</cffunction>
+
+	<cffunction name="addRoute" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		
+		<cfset variables.routes[arguments.routeName] = arguments.route />
+		<cfif arguments.route.getUrlAlias() neq "">
+			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="removeRoute" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfset StructDelete(variables.routes, arguments.routeName) />
+	</cffunction>
+	<cffunction name="removeRouteAlias" access="public" returntype="void" output="false">
+		<cfargument name="routeAlias" type="string" required="true" />
+		<cfset StructDelete(variables.routesAliases, arguments.routeAlias) />
 	</cffunction>
 	
 	<!---
