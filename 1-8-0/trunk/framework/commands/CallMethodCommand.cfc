@@ -139,6 +139,13 @@ or
 					returnvariable="resultValue" />
 			</cfif>
 			
+			<cfif Len(getResultArg())>
+				<cfset arguments.event.setArg(getResultArg(), resultValue) />
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
+				</cfif>
+			</cfif>
+			
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfif log.isErrorEnabled()>
@@ -160,14 +167,7 @@ or
 				</cfif>
 				<cfrethrow />
 			</cfcatch>
-		</cftry>
-				
-		<cfif getResultArg() NEQ ''>
-			<cfset arguments.event.setArg(getResultArg(), resultValue) />
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
-			</cfif>
-		</cfif>	
+		</cftry>	
 		
 		<cfreturn true />
 	</cffunction>
