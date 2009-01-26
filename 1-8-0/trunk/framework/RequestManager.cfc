@@ -261,9 +261,20 @@ Notes:
 		hint="Gets a persisted event by id if found in event args.">
 		<cfargument name="eventArgs" type="struct" required="true" />
 		
-		<cfset var data = getRequestRedirectPersist().read(arguments.eventArgs) />
+		<cfset var data = "" />
 		<cfset var postRedirectCallbacks = getPostRedirectCallbacks() />
 		<cfset var i = "" />
+		<cfset var parameterId = getPropertyManager().getProperty("redirectPersistParameter") />
+		
+		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
+			<cfif StructKeyExists(cookie, parameterId)>
+				<cfset eventArgs[parameterId] = cookie[parameterId] />
+				<cfcookie name="#parameterId#" expires="now" />
+			</cfif>
+		</cfif>
+		
+		<cfset data = getRequestRedirectPersist().read(arguments.eventArgs) />
+
 		
 		<!--- If there is data, run post-redirect callbacks --->
 		<cfif StructCount(data)>
@@ -300,6 +311,10 @@ Notes:
 		<cfset data.eventArgs = arguments.eventArgs />
 		
 		<cfset persistId = getRequestRedirectPersist().save(data) />
+		
+		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
+			<cfcookie name="#getPropertyManager().getProperty("redirectPersistParameter")#" value="#persistId#" />
+		</cfif>
 		
 		<cfreturn persistId />
 	</cffunction>

@@ -40,7 +40,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.majorVersion = "1.8.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
+		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -221,6 +221,12 @@ the rest of the framework. (pfarrell)
 			</cfif>
 			<cfif NOT isPropertyDefined("redirectPersistScope")>
 				<cfset setProperty("redirectPersistScope", "session") />
+			</cfif>
+			<cfif NOT isPropertyDefined("redirectPersistParameterLocation")>
+				<cfset setProperty("redirectPersistParameterLocation", "url") />
+			<cfelseif NOT ListFindNoCase("cookie,url", getProperty("redirectPersistParameterLocation"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'redirectPersistParameterLocation' property must be an 'url' or 'cookie'." />
 			</cfif>
 			<cfif NOT isPropertyDefined("urlBase")>
 				<cfset setProperty("urlBase", "index.cfm") />

@@ -70,11 +70,6 @@ Notes:
 		<cfset setStatusType(arguments.statusType) />
 		<cfset setPersistArgsIgnore(arguments.persistArgsIgnore) />
 		
-		<!--- Add the persistId parameter to the url args if persist is required --->
-		<cfif getPersist()>
-			<cfset setArgs(ListAppend(getArgs(), getRedirectPersistParameter())) />
-		</cfif>
-		
 		<cfreturn this />
 	</cffunction>
 	
@@ -141,6 +136,11 @@ Notes:
 		<cfset var params = StructNew() />
 		<cfset var args = getArgs() />
 		<cfset var i = "" />
+		
+		<!--- Add the persistId parameter to the url args if persist is required --->
+		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+			<cfset args = ListAppend(getArgs(), getRedirectPersistParameter()) />
+		</cfif>
 		
 		<!--- Build params --->
 		<cfloop list="#args#" index="i" delimiters=",">
