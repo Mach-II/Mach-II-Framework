@@ -226,6 +226,39 @@ Notes:
 		<cfargument name="statustext" type="string" required="false" />
 		<cfset addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
+	
+	<cffunction name="copyToScope" access="public" returntype="void" output="false"
+		hint="Copies an evaluation string to a scope.">
+		<cfargument name="evaluationString" type="string" required="true" />
+		<cfargument name="scopeReference" type="struct" required="false" default="#variables#" />
+		
+		<cfset var event = getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset var item = "" />
+		<cfset var element = "" />
+		
+		<cfloop list="#arguments.evaluationString#" index="item">
+			<!--- Remove any spaces or carriage returns or this will fail --->
+			<cfset item = Trim(item) />
+			
+			<cfif ListLen(item, "=") eq 2>
+				<cfset element = ListGetAt(item, 2, "=") />
+				<cfset item = ListGetAt(item, 1, "=") />
+				<cfif expressionEvaluator.isExpression(element)>
+					<cfset arguments.scopeReference[item] = expressionEvaluator.evaluateExpression(element, event, propertyManager) />
+				<cfelse>
+					<cfset arguments.scopeReference[item] = element />
+				</cfif>
+			<cfelse>
+				<cfif expressionEvaluator.isExpression(item)>
+					<cfset arguments.scopeReference[Replace(ListGetAt(item, 2, "."), "}", "")] = expressionEvaluator.evaluateExpression(item, event, propertyManager) />
+				<cfelse>
+					<cfset arguments.scopeReference[item] = item />
+				</cfif>
+			</cfif>
+		</cfloop>
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
