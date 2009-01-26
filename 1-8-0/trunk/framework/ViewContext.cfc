@@ -252,7 +252,7 @@ Notes:
 				</cfif>
 			<cfelse>
 				<cfif expressionEvaluator.isExpression(item)>
-					<cfset arguments.scopeReference[Replace(ListGetAt(item, 2, "."), "}", "")] = expressionEvaluator.evaluateExpression(item, event, propertyManager) />
+					<cfset arguments.scopeReference[Replace(ListLast(item, "."), "}", "")] = expressionEvaluator.evaluateExpression(item, event, propertyManager) />
 				<cfelse>
 					<cfset arguments.scopeReference[item] = item />
 				</cfif>
