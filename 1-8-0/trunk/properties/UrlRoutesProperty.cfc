@@ -69,9 +69,10 @@ index.cfm/product/A12345/fancy/
 		<cfset var parameterName = "" />
 		<cfset var parameter = 0 />
 		<cfset var i = 0 />
-		<cfset var route = createObject("component", "MachII.framework.UrlRoute").init() />
+		<cfset var route = 0 />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
+			<cfset route = createObject("component", "MachII.framework.UrlRoute").init() />
 			<cfset parameter = getParameter(parameterName) />
 			<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
 				"You must provide a struct key for 'event' for route '#parameterName#'") />	

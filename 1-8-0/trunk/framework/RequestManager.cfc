@@ -395,7 +395,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
-		<cfreturn StructKeyList(variables.routes) />
+		<cfreturn StructKeyList(variables.routes) & "," & StructKeyList(variables.routeAliases) />
 	</cffunction>
 	
 	<cffunction name="getRoutes" access="public" returntype="struct" output="false">

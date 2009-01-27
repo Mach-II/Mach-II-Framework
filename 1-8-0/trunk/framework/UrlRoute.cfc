@@ -66,6 +66,9 @@ Notes:
 		
 		<cfset var params = structNew() />
 		<cfset var i = 1 />
+		<cfset var element = "" />
+		<cfset var totalArgCount = ListLen(getRequiredArguments()) + ListLen(getOptionalArguments()) />
+		<cfset var totalArgsProcessed = 0 />
 		
 		<cfif getModuleName() eq "">
 			<cfset params[arguments.eventParameter] = getEventName() />
@@ -77,13 +80,23 @@ Notes:
 		
 		<!--- Start at position 2 since position 1 was the route name --->
 		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
-			<!--- TODO: handle optionalArguments --->
 			<cfif ListLen(getRequiredArguments()) lte i + 1>
-				<cfset params[ListGetAt(getRequiredArguments(), i - 1)] = arguments.urlElements[i] />
+				<cfset params[ListGetAt(ListGetAt(getRequiredArguments(), i - 1), 1, ":")] = arguments.urlElements[i] />
 			</cfif>
 		</cfloop>
+		<cfset totalArgsProcessed = i - 2 /><!--- Hold total number of url args processed not counting the route name --->
+
+		<!--- handle optionalArguments --->	
+		<cfif totalArgsProcessed lt totalArgCount>
+			<cfloop from="#totalArgsProcessed#" to="#totalArgCount - 1#" index="i">
+				<cfset element = ListGetAt(getOptionalArguments(), totalArgCount - i) />
+				<cfif ListLen(element, ":") gt 1>
+					<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
+				</cfif>
+			</cfloop>
+		</cfif>
 		
-		<!--- <cfdump var="#params#" /><cfabort /> --->
+		  <!--- <cfdump var="#params#" /><cfabort />  ---> 
 		
 		<cfreturn params />
 	</cffunction>
@@ -91,8 +104,8 @@ Notes:
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with." />
-		<cfargument name="urlParameters" type="any" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlParameters" type="struct" required="true"
+			hint="Name/value pairs to build the url with a struct of data." />
 		<cfargument name="urlBase" type="string" required="true" 
 			hint="Base of the url." />
 		<cfargument name="seriesDelimiter" type="string" required="true" />
@@ -105,14 +118,14 @@ Notes:
 		<cfset var i = "" />
 		<cfset var defaultValue = "" />	
 		<cfset var element = "" />
+		<cfset var param = 0 />
+		<cfset var orderedParams = arrayNew(1) />
 		
 		<cfif getUrlAlias() neq "">
 			<cfset queryString = queryString & getUrlAlias() />		
 		<cfelse>
 			<cfset queryString = queryString & getName() />
 		</cfif>		
-		
-		<!--- TODO: handle ordering the url params --->
 		
 		<!--- Check to see if all required arguments were passed in --->
 		<cfloop list="#getRequiredArguments()#" index="i">
@@ -128,20 +141,38 @@ Notes:
 					message="When attempting to build a url for the route '#getName()#' required argument '#element#' was not specified.">
 			<cfelseif NOT structKeyExists(params, element)>
 				<cfset params[element] = defaultValue />
+				<cfset param = StructNew() />
+				<cfset param.name = element />
+				<cfset param.value = defaultValue />
+				<cfset ArrayAppend(orderedParams, param)>
+			<cfelse>
+				<!--- Parameter is in params with a value already set so we just need to put in the ordered array --->
+				<cfset param = StructNew() />
+				<cfset param.name = element />
+				<cfset param.value = params[element] />
+				<cfset ArrayAppend(orderedParams, param)>
 			</cfif>
 		</cfloop>
 		
-		<!--- Attach each additional arguments if it exists and is a simple value --->
-		<cfloop collection="#params#" item="i">
-			<cfif IsSimpleValue(params[i])>
-				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
-				<!--- <cfif getParseSes()>
-					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
-				</cfif>
-				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
-					<cfset params[i] = "_-_NULL_-_" />
-				</cfif> --->
-				<cfset queryString = queryString & arguments.seriesDelimiter & URLEncodedFormat(params[i]) />
+		<cfloop list="#getOptionalArguments()#" index="i">
+			<cfset defaultValue = "" />
+			<cfif ListLen(i, ":") gt 1>
+				<cfset defaultValue = ListGetAt(i, 2, ":") />
+				<cfset element = ListGetAt(i, 1, ":") />
+			<cfelse>
+				<cfset element = i />
+			</cfif>
+			<cfif structKeyExists(params, element)>
+				<cfset param = StructNew() />
+				<cfset param.name = element />
+				<cfset param.value = params[element] />
+				<cfset ArrayAppend(orderedParams, param)>
+			</cfif>
+		</cfloop>
+		
+		<cfloop from="1" to="#ArrayLen(orderedParams)#" index="i">
+			<cfif IsSimpleValue(orderedParams[i].value)>
+				<cfset queryString = queryString & arguments.seriesDelimiter & URLEncodedFormat(orderedParams[i].value) />
 			</cfif>
 		</cfloop>
 		
