@@ -428,7 +428,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[aliases] - the alias or list of aliases that reference this cache block
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 -->
-<!ELEMENT cache (filter | notify | event-arg | view-page | event-bean | execute | publish | cache-clear)*>
+<!ELEMENT cache (filter | notify | event-arg | view-page | event-bean | execute | publish | cache-clear | call-method)*>
 <!ATTLIST cache 
 	id CDATA #IMPLIED
 	strategyName CDATA #IMPLIED
