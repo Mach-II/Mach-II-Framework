@@ -233,7 +233,7 @@ Notes:
 
 		<!--- support adding arguments tags inside call-method --->
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
-			<cfif arguments.commandNode.xmlChildren[i].xmlName eq "argument">
+			<cfif arguments.commandNode.xmlChildren[i].xmlName EQ "arg">
 				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")>
 					<cfset args = ListAppend(args, 
 						"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
