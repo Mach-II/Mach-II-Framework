@@ -227,7 +227,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	The "page-views" element defines all of the views to be registered with the framework.
 	Views are referenced by name.
 -->
-<!ELEMENT page-views (page-view*)>
+<!ELEMENT page-views (page-view | view-loader)*>
 <!--
 	"page-view"
 		name - the name of the view
