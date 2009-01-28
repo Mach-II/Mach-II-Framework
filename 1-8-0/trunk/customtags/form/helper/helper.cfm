@@ -121,18 +121,22 @@ PUBLIC FUNCTIONS
 	<cfargument name="bind" type="any" required="false" default="#request._MachIIFormLib.bind#" />
 	
 	<cfset var value = "" />
-	<cfset var method = ListFirst(arguments.path, ".") />
+	<cfset var key = ListFirst(arguments.path, ".") />
 	
-	<cfif getMetaData(arguments.bind).name NEQ "MachII.framework.Event">
-		<cfinvoke component="#arguments.bind#"
-			method="get#method#"
-			returnvariable="value" />
-	<cfelse>
-		<cfinvoke component="#arguments.bind#"
-			method="getArg"
-			returnvariable="value">
-			<cfinvokeargument name="name" value="#method#" />
-		</cfinvoke>
+	<cfif IsObject(arguments.bind)>
+		<cfif getMetaData(arguments.bind).name NEQ "MachII.framework.Event">
+			<cfinvoke component="#arguments.bind#"
+				method="get#key#"
+				returnvariable="value" />
+		<cfelse>
+			<cfinvoke component="#arguments.bind#"
+				method="getArg"
+				returnvariable="value">
+				<cfinvokeargument name="name" value="#key#" />
+			</cfinvoke>
+		</cfif>
+	<cfelseif IsStruct(arguments.bind)>
+		<cfset value = arguments.bind[key] />
 	</cfif>
 	
 	<cfset arguments.path = ListDeleteAt(arguments.path, 1, ".") />
