@@ -460,7 +460,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[arguments] - A comma delimited list of arguments to pass in. The arguments can contain expressions like a=${event.foobar}
 		[resultArgs] - event argument to store the result of the method call
 -->
-<!ELEMENT call-method (arg)>
+<!ELEMENT call-method (arg*)>
 <!ATTLIST call-method
 	bean CDATA #REQUIRED
 	method CDATA #REQUIRED
