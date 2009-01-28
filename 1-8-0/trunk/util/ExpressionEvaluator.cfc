@@ -259,12 +259,15 @@ ${scope.key NEQ scope.key2}
 					method="get#key#" 
 					returnvariable="result" />
 			</cfif>
-			<cfif Len(keyBody)>
-				<cfset result = evaluateDeepNestedPath(result, keyBody) />
-			</cfif>
+		<cfelseif IsStruct(arguments.target)>
+			<cfset result = arguments.target[key] />
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
-				message="We do not support getting at accessing deeply nested array or struct element." />
+				message="We do not support getting at accessing deeply nested array element yet." />
+		</cfif>
+		
+		<cfif Len(keyBody)>
+			<cfset result = evaluateDeepNestedPath(result, keyBody) />
 		</cfif>
 		
 		<cfreturn result />
