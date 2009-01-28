@@ -477,7 +477,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		value - the value of the argument		
 -->
 <!ELEMENT arg (value?, struct?, array?)>
-<!ATTLIST parameter
+<!ATTLIST arg
 	name CDATA #IMPLIED
 	value CDATA #IMPLIED
 >
