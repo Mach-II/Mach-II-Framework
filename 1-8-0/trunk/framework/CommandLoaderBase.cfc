@@ -216,6 +216,7 @@ Notes:
 		<cfset var resultArg = "" />
 		<cfset var method = "" />
 		<cfset var args = "" />
+		<cfset var i = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "bean")>
 			<cfset bean = arguments.commandNode.xmlAttributes["bean"] />	
@@ -226,9 +227,21 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "method")>
 			<cfset method = arguments.commandNode.xmlAttributes["method"] />	
 		</cfif>	
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "arguments")>
-			<cfset args = arguments.commandNode.xmlAttributes["arguments"] />	
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
+			<cfset args = arguments.commandNode.xmlAttributes["args"] />	
 		</cfif>		
+
+		<!--- support adding arguments tags inside call-method --->
+		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
+			<cfif arguments.commandNode.xmlChildren[i].xmlName eq "argument">
+				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")>
+					<cfset args = ListAppend(args, 
+						"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
+				<cfelse>
+					<cfset args = ListAppend(args, #arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#) />
+				</cfif>
+			</cfif>
+		</cfloop>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
