@@ -217,6 +217,7 @@ Notes:
 		<cfset var method = "" />
 		<cfset var args = "" />
 		<cfset var i = "" />
+		<cfset var namedArgCount = 0 />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "bean")>
 			<cfset bean = arguments.commandNode.xmlAttributes["bean"] />	
@@ -235,10 +236,21 @@ Notes:
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
 			<cfif arguments.commandNode.xmlChildren[i].xmlName EQ "arg">
 				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")>
-					<cfset args = ListAppend(args, 
-						"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
+					<cfif namedArgCount eq 0 AND i gt 1>
+						<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
+							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
+					<cfelse>
+						<cfset args = ListAppend(args, 
+							"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
+						<cfset namedArgCount = namedArgCount + 1 />
+					</cfif>
 				<cfelse>
-					<cfset args = ListAppend(args, #arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#) />
+					<cfif namedArgCount gt 0 AND i gt 1>
+						<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
+							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
+					<cfelse>
+						<cfset args = ListAppend(args, #arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#) />
+					</cfif>
 				</cfif>
 			</cfif>
 		</cfloop>
