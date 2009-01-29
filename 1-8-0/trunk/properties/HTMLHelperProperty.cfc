@@ -300,7 +300,7 @@ Useful to append a company or application name on to the end of every HTML title
 		<cfif arguments.inline>
 			<cfreturn arguments.code />
 		<cfelse>
-			<cfset getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code) />
+			<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code) />
 			<cfreturn "" />
 		</cfif>
 	</cffunction>
