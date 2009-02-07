@@ -33,6 +33,24 @@ Customized Configuration Usage:
 <property name="html" type="MachII.properties.HTMLHelperProperty">
 	<parameters>
 		<parameter name="metaTitleSuffix" value=" - Mach-II" />
+		<parameter name="packages">
+			<struct>
+				<key name="lightwindow">
+					<array>
+						<element value="/js/prototype.js,/js/effects.js,/js/lightwindow.js" />
+						<element value="/css/lightwindow.css">
+						- OR -
+						<element>
+							<struct>
+								<key name="path" value="/css/lightwindow.cfm" />
+								<key name="type" value="css" />
+								<key name="attributes" value="media=screen,projection" />
+							</struct>
+						</element>
+					</array>
+				</key>
+			</struct>
+		</parameter>
 	</parameters>
 </property>
 
@@ -41,6 +59,11 @@ the value of the parameter on the end value addMeta() method when setting
 a title. For example, calling addMeta("title", "Home") with the above example 
 value of this parameter would result in '<title>Home - Mach-II</title>'. 
 Useful to append a company or application name on to the end of every HTML title. 
+
+The [packages] parameter holds a struct of packages.  Packages are a group of
+javascript and CSS files that can be included as a group.  Each package has an 
+array of assets 
+
 --->
 <cfcomponent 
 	displayname="HTMLHelperProperty"
@@ -54,6 +77,7 @@ Useful to append a company or application name on to the end of every HTML title
 	<cfset variables.metaTitleSuffix = "" />
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
+	<cfset variables.packagesPropertyName = "_HTMLHelper.packages" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -62,13 +86,67 @@ Useful to append a company or application name on to the end of every HTML title
 		hint="Configures the property.">
 		
 		<!--- Assert and set parameters --->
-		<cfif isParameterDefined("metaTitleSuffix")>
-			<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
-		</cfif>
+		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix", "")) />
+		<cfset setPackages(configurePackages(getParameter("packages", StructNew()))) />
 		
 		<!--- Build data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
+	</cffunction>
+	
+	<cffunction name="configurePackages" access="private" returntype="struct" output="false"
+		hint="Configures packages from the 'package' parameter.">
+		<cfargument name="rawPackages" type="struct" required="true" />
+		
+		<cfset var packages = StructNew() />
+		<cfset var packageElements = ArrayNew(1) />
+		<cfset var temp = "" />
+		<cfset var element = "" />
+		<cfset var key = "" />
+		<cfset var i = 0 />
+		
+		<cfloop collection="#arguments.rawPackages#" item="key">
+			<cfset packageData = ArrayNew(1) />
+			
+			<cfloop from="1" to="#ArrayLen(arguments.rawPackages[key])#" index="i">
+				<cfset temp = arguments.rawPackages[key][i] />
+				<cfset element = StructNew() />
+				
+				<cfif IsSimpleValue(temp)>
+					<cfset element.path = Trim(temp) />
+					<cfset element.type = ListLast(element.path, ".") />
+					<cfset element.attributes = "" />
+				<cfelseif IsStruct(temp)>
+					<!--- Setup path --->
+					<cfset getAssert().isTrue(StructKeyExist(temp, "path")
+								, "A key named 'name' must exist for an elements in a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
+					<cfset element.path = temp.path />
+					
+					<cfif NOT StructKeyExists(temp,  "type")>
+						<cfset element.type = ListLast(element.name, ".") />
+					<cfelse>
+						<cfset element.type = temp.type />
+					</cfif>
+					
+					<cfif NOT StructKeyExists(temp, "attributes")>
+						<cfset element.attributes = "" />
+					<cfelse>
+						<cfset element.attributes = temp.attributes />
+					</cfif>
+				</cfif>
+				
+				<!--- Assert that type is supported --->
+				<cfset getAssert().isTrue(ListFindNoCase("js,css,meta", element.type)
+						, "The type for path '#element.path#' in package '#key#' in module '#getAppManager().getModuleName()#' is not supported."
+						, "Valid types are 'js' or 'css'. It could be that it was not possible to auto-resolve the type by the file extension.") />
+				
+				<cfset ArrayAppend(packageElements, element) />
+			</cfloop>
+			
+			<cfset packages[key] = packageElements />
+		</cfloop>
+		
+		<cfreturn packages />
 	</cffunction>
 	
 	<cffunction name="buildMimeShortcutMap" access="private" returntype="void" output="false"
@@ -165,8 +243,33 @@ Useful to append a company or application name on to the end of every HTML title
 		</cfswitch>
 	</cffunction>
 	
+	<cffunction name="addPackage" access="public" returntype="string" output="false"
+		hint="Adds files that are defined as a package.">
+		<cfargument name="packageName" type="string" required="true"
+			hint="The name of the package to add." />
+		<cfargument name="inline" type="boolean" required="false" default="true"
+			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
+		
+		<cfset var package = getPackageByName(arguments.packageName) />
+		<cfset var code = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(package)#" index="i">
+			<cfif package[i].type EQ "js">
+				<cfset code = code & addJavascript(package[i].path, arguments.inline) />
+			<cfelseif package[i].type EQ "css">
+				<cfset code = code & addCss(package[i].path, arguments.inline) />
+			</cfif>
+			<cfif i NEQ ArrayLen(package)>
+				<cfset code = code & Chr(13) />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn code />
+	</cffunction>
+	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
-		hint="Return javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
+		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
 		<cfargument name="urls" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .js files.">
 		<cfargument name="inline" type="boolean" required="false" default="true"
@@ -195,7 +298,7 @@ Useful to append a company or application name on to the end of every HTML title
 	</cffunction>
 	
 	<cffunction name="addCss" access="public" returntype="string" output="false"
-		hint="Return css script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
+		hint="Adds css script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
 		<cfargument name="urls" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .css files.">
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
@@ -238,7 +341,7 @@ Useful to append a company or application name on to the end of every HTML title
 	</cffunction>
 	
 	<cffunction name="addLink" access="public" returntype="string" output="false"
-		hint="Returns code for a link tag for inline use or in the HTML head.">
+		hint="Adds code for a link tag for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
 				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
 		<cfargument name="url" type="any" required="true"
@@ -264,7 +367,7 @@ Useful to append a company or application name on to the end of every HTML title
 	</cffunction>
 	
 	<cffunction name="addMeta" access="public" returntype="string" output="false"
-		hint="Return meta tag code for inline use or in the HTML head.">
+		hint="Adds meta tag code for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
 			hint="The type of the meta tag (this method auto-selects if value is a meta type of 'http-equiv' or 'name')." />
 		<cfargument name="content" type="string" required="true"
@@ -345,10 +448,28 @@ Useful to append a company or application name on to the end of every HTML title
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="isHttpEquivMetaType" access="public" returntype="boolean" output="false"
+	<cffunction name="isHttpEquivMetaType" access="private" returntype="boolean" output="false"
 		hint="Checks if the passed type of the meta tag is an http-equiv.">
 		<cfargument name="type" type="string" required="true" />
 		<cfreturn StructKeyExists(getHttpEquivReferenceMap(), arguments.type) />
+	</cffunction>
+	
+	<cffunction name="getPackageByName" access="private" returntype="array" output="false"
+		hint="Gets a package by name. Checks parent if defined.">
+		<cfargument name="packageName" type="string" required="true" />
+		
+		<cfset var packages = getPackages() />
+		<cfset var parentPackages = getParentPackages() />
+		
+		<cfif StructKeyExists(packages, arguments.packageName)>
+			<cfreturn packages[arguments.packageName] />
+		<cfelseif StructKeyExists(parentPackages, arguments.packageName)>
+			<cfreturn parentPackages[arguments.packageName] />
+		<cfelse>
+			<cfthrow type="MachII.properties.HTMLHelperProperty.packageDoesNotExist"
+				message="A package named '#arguments.packageName#' cannot be found."
+				detail="Packages: #StructKeyList(packages)# Parent Packages: #StructKeyList(parentPackages)#" />
+		</cfif>
 	</cffunction>
 	
 	<!---
@@ -356,8 +477,6 @@ Useful to append a company or application name on to the end of every HTML title
 	--->
 	<cffunction name="setMetaTitleSuffix" access="private" returntype="void" output="false">
 		<cfargument name="metaTitleSuffix" type="string" required="true" />
-		<cfset getAssert().hasText(getParameter("metaTitleSuffix")
-				, "The value of 'metaTitleSuffix' must contain some text.") />
 		<cfset variables.metaTitleSuffix = arguments.metaTitleSuffix />
 	</cffunction>
 	<cffunction name="getMetaTitleSuffix" access="public" returntype="string" output="false">
@@ -378,6 +497,24 @@ Useful to append a company or application name on to the end of every HTML title
 	</cffunction>
 	<cffunction name="getHttpEquivReferenceMap" access="public" returntype="struct" output="false">
 		<cfreturn variables.httpEquivReferenceMap />
+	</cffunction>
+	
+	<cffunction name="setPackages" access="private" returntype="void" output="false"
+		hint="Sets the packages into the property manager.">
+		<cfargument name="packages" type="struct" required="true" />
+		<cfset setProperty(variables.packagesPropertyName, arguments.packages) />
+	</cffunction>
+	<cffunction name="getPackages" access="public" returntype="struct" output="false"
+		hint="Gets the pacakages from the property manager.">
+		<cfreturn getProperty(variables.packagesPropertyName) />
+	</cffunction>
+	<cffunction name="getParentPackages" access="public" returntype="struct" output="false"
+		hint="Gets the pacakages from the parent property manager.">
+		<cfif getAppManager().inModule()>
+			<cfreturn getPropertyManager().getParent().getProperty(variables.packagesPropertyName, StructNew()) />
+		<cfelse>
+			<cfreturn StructNew() />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>
