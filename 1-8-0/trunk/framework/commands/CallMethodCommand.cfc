@@ -86,7 +86,6 @@ or
 		<cfset var namedArgs = StructNew() />
 		<cfset var args = getArguments() />
 		<cfset var argValues = ArrayNew(1) />
-		<cfset var unEvaluatedArgs = getArguments() />
 		<cfset var i = 0 />
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
@@ -187,15 +186,13 @@ or
 			
 			<cfif ListLen(argText, "=") GT 1>
 				<cfset arg.name = ListGetAt(argText, 1, "=") />
-				<cfset arg.isExpression = expressionEvaluator.isExpression(listGetAt(argText, 2, '=')) />
 				<cfset arg.value = ListGetAt(argText, 2, "=") /> 
 			<cfelse>
 				<cfset arg.name = "" />
-				<cfset arg.isExpression = expressionEvaluator.isExpression(argText) />
 				<cfset arg.value = argText /> 
 			</cfif>
 			
-			<cfset ArrayAppend(variables.args, arg) />
+			<cfset addArgument(arg.name, arg.value) />
 		</cfloop>
 	</cffunction>
 	
@@ -241,6 +238,20 @@ or
 	</cffunction>
 	<cffunction name="getArgumentList" access="private" returntype="string" output="false">
 		<cfreturn variables.argumentList />
+	</cffunction>
+	
+	<cffunction name="addArgument" access="public" returntype="void" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="any" required="true" />
+		<cfset var arg = StructNew() />
+		<cfset arg.name = arguments.name />
+		<cfif isSimpleValue(value)>
+			<cfset arg.isExpression = expressionEvaluator.isExpression(value) />
+		<cfelse>
+			<cfset arg.isExpression = false />
+		</cfif>
+		<cfset arg.value = value /> 
+		<cfset ArrayAppend(variables.args, arg) />
 	</cffunction>
 	
 	<cffunction name="setArguments" access="private" returntype="void" output="false">

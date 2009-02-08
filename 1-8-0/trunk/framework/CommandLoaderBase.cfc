@@ -218,6 +218,7 @@ Notes:
 		<cfset var args = "" />
 		<cfset var i = "" />
 		<cfset var namedArgCount = 0 />
+		<cfset var argValue = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "bean")>
 			<cfset bean = arguments.commandNode.xmlAttributes["bean"] />	
@@ -232,6 +233,11 @@ Notes:
 			<cfset args = arguments.commandNode.xmlAttributes["args"] />	
 		</cfif>		
 
+		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
+		<cfset command.setLog(variables.callMethodCommandLog) />
+		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
+
 		<!--- support adding arguments tags inside call-method --->
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
 			<cfif arguments.commandNode.xmlChildren[i].xmlName EQ "arg">
@@ -240,8 +246,21 @@ Notes:
 						<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
 							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
 					<cfelse>
-						<cfset args = ListAppend(args, 
-							"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
+						<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "value")>
+							<cfset args = ListAppend(args, 
+								"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
+							<cfset command.addArgument(arguments.commandNode.xmlChildren[i].xmlAttributes["name"],
+								arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
+						<cfelse>
+							<cfif ArrayLen(arguments.commandNode.xmlChildren[i].xmlChildren) eq 0>
+								<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
+									message="You must provide a value for the argument named '#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#' in the call-method command for '#bean#.#method#'" />
+							<cfelse>
+								<!--- Handle structs or arrays that are passed in as arguments --->
+								<cfset argValue = getAppManager().getUtils().recurseComplexValues(arguments.commandNode.xmlChildren[i]) />
+								<cfset command.addArgument(arguments.commandNode.xmlChildren[i].xmlAttributes["name"], argValue) />
+							</cfif>
+						</cfif>
 						<cfset namedArgCount = namedArgCount + 1 />
 					</cfif>
 				<cfelse>
@@ -249,16 +268,11 @@ Notes:
 						<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
 							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
 					<cfelse>
-						<cfset args = ListAppend(args, #arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#) />
+						<cfset command.addArgument("", arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
 					</cfif>
 				</cfif>
 			</cfif>
 		</cfloop>
-
-		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
-		<cfset command.setLog(variables.callMethodCommandLog) />
-		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
-		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfset addConfigurableCommandTarget(command) />
 		
