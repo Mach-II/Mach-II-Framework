@@ -29,11 +29,11 @@ Notes:
 
 -->
 <project
-	name="Mach-II Framework"
+	name="Mach-II Framework 1.6.0"
 	default="usage"
 	basedir=".">
 	
-	<description>Mach-II Framework</description>
+	<description>Mach-II Framework 1.6.0</description>
 	
 	<!--
 	PROPERTIES
