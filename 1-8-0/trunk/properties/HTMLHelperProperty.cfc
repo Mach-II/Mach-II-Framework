@@ -42,7 +42,7 @@ Customized Configuration Usage:
 						- OR -
 						<element>
 							<struct>
-								<key name="path" value="/css/lightwindow.cfm" />
+								<key name="paths" value="/css/lightwindow.cfm" />
 								<key name="type" value="css" />
 								<key name="attributes" value="media=screen,projection" />
 							</struct>
@@ -64,6 +64,10 @@ The [packages] parameter holds a struct of packages.  Packages are a group of
 javascript and CSS files that can be included as a group.  Each package has an 
 array of assets 
 
+Developer Notes:
+Because of the hierarchical nature of Mach-II applications that utilitze modules,
+we store packages in the property manager so HTML helpers in modules can inherit
+from the parent application.
 --->
 <cfcomponent 
 	displayname="HTMLHelperProperty"
@@ -113,17 +117,17 @@ array of assets
 				<cfset element = StructNew() />
 				
 				<cfif IsSimpleValue(temp)>
-					<cfset element.path = Trim(temp) />
-					<cfset element.type = ListLast(element.path, ".") />
+					<cfset element.paths = Trim(temp) />
+					<cfset element.type = ListLast(element.paths, ".") />
 					<cfset element.attributes = "" />
 				<cfelseif IsStruct(temp)>
-					<!--- Setup path --->
-					<cfset getAssert().isTrue(StructKeyExist(temp, "path")
-								, "A key named 'name' must exist for an elements in a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
-					<cfset element.path = temp.path />
+					<cfset getAssert().isTrue(StructKeyExists(temp, "paths")
+						, "A key named 'paths' must exist for an element in position '#i#' of a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
+				
+					<cfset element.paths = Trim(temp.paths) />
 					
 					<cfif NOT StructKeyExists(temp,  "type")>
-						<cfset element.type = ListLast(element.name, ".") />
+						<cfset element.type = ListLast(element.paths, ".") />
 					<cfelse>
 						<cfset element.type = temp.type />
 					</cfif>
@@ -136,8 +140,8 @@ array of assets
 				</cfif>
 				
 				<!--- Assert that type is supported --->
-				<cfset getAssert().isTrue(ListFindNoCase("js,css,meta", element.type)
-						, "The type for path '#element.path#' in package '#key#' in module '#getAppManager().getModuleName()#' is not supported."
+				<cfset getAssert().isTrue(ListFindNoCase("js,css", element.type)
+						, "The type for path '#element.paths#' in package '#key#' in module '#getAppManager().getModuleName()#' is not supported."
 						, "Valid types are 'js' or 'css'. It could be that it was not possible to auto-resolve the type by the file extension.") />
 				
 				<cfset ArrayAppend(packageElements, element) />
@@ -256,9 +260,9 @@ array of assets
 		
 		<cfloop from="1" to="#ArrayLen(package)#" index="i">
 			<cfif package[i].type EQ "js">
-				<cfset code = code & addJavascript(package[i].path, arguments.inline) />
+				<cfset code = code & addJavascript(package[i].paths, arguments.inline) />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addCss(package[i].path, arguments.inline) />
+				<cfset code = code & addCss(package[i].paths, arguments.inline) />
 			</cfif>
 			<cfif i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />

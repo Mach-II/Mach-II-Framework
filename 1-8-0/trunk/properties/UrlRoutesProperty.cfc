@@ -33,7 +33,7 @@ Usage:
          <key name="requiredArguments" value="productId,displayType:fancy" />
 		 <key name="optionalArguments" value="key" />
      </struct>
-    </parameter>
+    </parameter>	
   </parameters>
 </property>
 
@@ -63,7 +63,7 @@ index.cfm/product/A12345/fancy/
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the property.">
+		hint="Configures the property by building the routes.">
 		
 		<cfset var parameterNames = getParameterNames() />
 		<cfset var parameterName = "" />
@@ -72,31 +72,44 @@ index.cfm/product/A12345/fancy/
 		<cfset var route = 0 />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
-			<cfset route = createObject("component", "MachII.framework.UrlRoute").init() />
+			<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init() />
+			
 			<cfset parameter = getParameter(parameterName) />
+			
 			<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
 				"You must provide a struct key for 'event' for route '#parameterName#'") />	
 			<cfset route.setEventName(parameter.event) />
+			
 			<cfif StructKeyExists(parameter, "module")>
 				<cfset route.setModuleName(parameter.module) />
 			</cfif>
 			<cfif StructKeyExists(parameter, "urlAlias")>
 				<cfset route.setUrlAlias(parameter.urlAlias) />
 			</cfif>
+			<!---  --->
 			<cfif StructKeyExists(parameter, "requiredArguments")>
 				<cfset route.setRequiredArguments(parameter.requiredArguments) />
 			</cfif>
 			<cfif StructKeyExists(parameter, "optionalArguments")>
 				<cfset route.setOptionalArguments(parameter.optionalArguments) />
 			</cfif>	
+			
 			<cfset addRoute(parameterName, route) />
 		</cfloop>
 		
 	</cffunction>
 	
-	<cffunction name="deconfigure" access="public" returntype="void" output="false">
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures the property by un-registering routes and route aliases.">
+		
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var name = "" />
+		
+		<!---
+		TODO: Lists can be really slow if there are a lot of routes or aliases
+			We should use a CreateObject("java", "java.util.HashSet").init()
+			as it is consistent speed-wise as the dataset grows (see cacheClear in CacheHandler)
+		--->
 		
 		<!--- Cleanup this property's routes --->
 		<cfloop list="#variables.routeNames#" index="name">
@@ -133,6 +146,5 @@ index.cfm/product/A12345/fancy/
 	<!---
 	ACCESSORS
 	--->
-	
 	
 </cfcomponent>

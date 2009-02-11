@@ -33,7 +33,7 @@ Notes:
 	default="usage"
 	basedir=".">
 	
-	<description>Mach-II Framework</description>
+	<description>Mach-II Framework 1.8.0</description>
 	
 	<!--
 	PROPERTIES
