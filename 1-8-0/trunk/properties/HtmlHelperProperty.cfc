@@ -27,10 +27,10 @@ HTML related tags faster and less hassle to output. This includes
 output doctypes, css and javascript links and HTML metadata.
 
 Simple Configuration Usage:
-<property name="html" type="MachII.properties.HTMLHelperProperty" />
+<property name="html" type="MachII.properties.HtmlHelperProperty" />
 
 Customized Configuration Usage:
-<property name="html" type="MachII.properties.HTMLHelperProperty">
+<property name="html" type="MachII.properties.HtmlHelperProperty">
 	<parameters>
 		<parameter name="metaTitleSuffix" value=" - Mach-II" />
 		<parameter name="packages">
@@ -38,8 +38,9 @@ Customized Configuration Usage:
 				<key name="lightwindow">
 					<array>
 						<element value="/js/prototype.js,/js/effects.js,/js/lightwindow.js" />
+						<!-- SIMPLE -->
 						<element value="/css/lightwindow.css">
-						- OR -
+						<!-- VERBOSE-->
 						<element>
 							<struct>
 								<key name="paths" value="/css/lightwindow.cfm" />
@@ -62,7 +63,10 @@ Useful to append a company or application name on to the end of every HTML title
 
 The [packages] parameter holds a struct of packages.  Packages are a group of
 javascript and CSS files that can be included as a group.  Each package has an 
-array of assets 
+array of assets which can be defined in a simple manner in which the type of asset
+is auto-determined based on the file extension or can be defined in a verbose manner.
+Verbose is required when the asset type cannot be determined automatically or when
+additional tag attributes are needed (such as media type for CSS).
 
 Developer Notes:
 Because of the hierarchical nature of Mach-II applications that utilitze modules,

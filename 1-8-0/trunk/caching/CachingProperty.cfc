@@ -73,7 +73,7 @@ See individual caching strategies for more information on configuration.
 	PROPERTIES
 	--->
 	<!--- Default cache name default value is programmatically discovered --->
-	<cfset variables.defaultCacheName = "" />
+	<cfset variables.defaultCacheName = "Default" />
 	<cfset variables.defaultCacheType = "MachII.caching.strategies.TimeSpanCache" />
 	<cfset variables.cachingEnabled = true />
 	
@@ -108,11 +108,11 @@ See individual caching strategies for more information on configuration.
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
 		<cfelse>
 			<!--- Set the default cache name if there is only one strategy defined 
-				and there is not default cache name defined --->
+				and th/ere is not default cache name defined --->
 			<cfif NOT Len(getDefaultCacheName()) AND StructCount(cacheStrategyManager.getCacheStrategies()) EQ 1>
 				<cfset setDefaultCacheName(ListGetAt(StructKeyList(cacheStrategyManager.getCacheStrategies()), 1)) />
 			<cfelse>
-				<cfset setDefaultCacheName("default") />
+				<cfset setDefaultCacheName(variables.defaultCacheName) />
 			</cfif>
 		</cfif>
 		
