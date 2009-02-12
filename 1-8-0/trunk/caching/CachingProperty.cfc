@@ -103,17 +103,12 @@ See individual caching strategies for more information on configuration.
 			<cfset configureStrategy(variables.defaultCacheName, defaultCacheParameters) />
 		</cfif>
 
-		<!--- Set the default cache strategy if defined --->
+		<!--- Set the default cache strategy if defined in the parameters --->
 		<cfif isParameterDefined("defaultCacheName")>
 			<cfset setDefaultCacheName(getParameter("defaultCacheName")) />
-		<cfelse>
-			<!--- Set the default cache name if there is only one strategy defined 
-				and th/ere is not default cache name defined --->
-			<cfif NOT Len(getDefaultCacheName()) AND StructCount(cacheStrategyManager.getCacheStrategies()) EQ 1>
-				<cfset setDefaultCacheName(ListGetAt(StructKeyList(cacheStrategyManager.getCacheStrategies()), 1)) />
-			<cfelse>
-				<cfset setDefaultCacheName(variables.defaultCacheName) />
-			</cfif>
+		<!--- Set the default cache name if there is only one strategy defined --->
+		<cfelseif StructCount(cacheStrategyManager.getCacheStrategies()) EQ 1>
+			<cfset setDefaultCacheName(ListGetAt(StructKeyList(cacheStrategyManager.getCacheStrategies()), 1)) />
 		</cfif>
 		
 		<!--- Set the default cache strategy name (this must be done only after all strategies 
