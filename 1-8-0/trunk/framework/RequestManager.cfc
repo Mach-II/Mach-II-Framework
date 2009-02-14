@@ -105,6 +105,42 @@ Notes:
 		<cfreturn request["_MachIIRequestHandler_" & appKey]  />
 	</cffunction>
 	
+	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
+			
+		<cfset var eventParameterName = getEventParameter() />
+		<cfset var eventName = "" />
+		<cfset var parsedModuleName = "" />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var key = "" />
+		
+		<cfif isDefined("url.#eventParameterName#")>
+			<cfset eventName = url[eventParameterName] />
+		<cfelseif isDefined("form.#eventParameterName#")>
+			<cfset eventName = form[eventParameterName] />		
+		</cfif>
+		
+		<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
+			<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
+			<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+		<cfelse>
+			<cfset parsedModuleName = arguments.moduleName />
+		</cfif>
+		
+		<cfloop collection="#url#" item="key">
+			<cftrace text="StructKeyExists(params, #key#) = #StructKeyExists(params, key)#">
+			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+				<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
+	</cffunction>
+	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
 		<cfargument name="moduleName" type="string" required="true"

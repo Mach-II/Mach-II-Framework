@@ -124,6 +124,17 @@ Notes:
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
+	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
+		
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+
+		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
+	</cffunction>
+	
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="routeName" type="string" required="true"
