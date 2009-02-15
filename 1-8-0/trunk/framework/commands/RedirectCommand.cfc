@@ -136,16 +136,34 @@ Notes:
 		<cfset var params = StructNew() />
 		<cfset var args = getArgs() />
 		<cfset var i = "" />
+		<cfset var element = "" />
+		<cfset var arg = "" />
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
 			<cfset args = ListAppend(getArgs(), getRedirectPersistParameter()) />
 		</cfif>
 		
-		<!--- Build params --->
+		<!--- Build params which can have notation like args="id=${event.product_id},type=print"  --->
 		<cfloop list="#args#" index="i" delimiters=",">
-			<cfif arguments.event.isArgDefined(i) AND IsSimpleValue(arguments.event.getArg(i))>
-				<cfset params[i] = arguments.event.getArg(i) />
+			<cfif ListLen(i, "=") eq 2>
+				<cfset element = ListGetAt(i, 2, "=") />
+				<cfset i = ListGetAt(i, 1, "=") />
+				<cfif expressionEvaluator.isExpression(element)>
+					<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset arg = element />
+				</cfif>
+			<cfelse>
+				<cfif expressionEvaluator.isExpression(i)>
+					<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset arg = arguments.event.getArg(i, "") />
+				</cfif>
+			</cfif>
+			
+			<cfif IsSimpleValue(arg)>
+				<cfset params[i] = arg />
 			</cfif>
 		</cfloop>
 		
@@ -164,6 +182,8 @@ Notes:
 		<cfset var persistArgsIgnore = getPersistArgsIgnore() />
 		<cfset var persistId = "" />
 		<cfset var i = "" />
+		<cfset var element = "" />
+		<cfset var arg = "" />
 		
 		<!--- Build params --->
 		<cfif NOT ListLen(persistArgs)>
@@ -174,8 +194,22 @@ Notes:
 			</cfloop>
 		<cfelse>
 			<cfloop list="#persistArgs#" index="i" delimiters=",">
-				<cfif arguments.event.isArgDefined(i)>
-					<cfset args[i] = arguments.event.getArg(i) />
+				<cfif ListLen(i, "=") eq 2>
+					<cfset element = ListGetAt(i, 2, "=") />
+					<cfset i = ListGetAt(i, 1, "=") />
+					<cfif expressionEvaluator.isExpression(element)>
+						<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+					<cfelse>
+						<cfset arg = element />
+					</cfif>
+					<cfset args[i] = arg />
+				<cfelse>
+					<cfif expressionEvaluator.isExpression(i)>
+						<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+					<cfelseif arguments.event.isArgDefined(i)>
+						<cfset arg = arguments.event.getArg(i, "") />
+					</cfif>
+					<cfset args[i] = arg />
 				</cfif>
 			</cfloop>
 		</cfif>

@@ -493,6 +493,7 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore) />
 		
 		<cfset command.setLog(variables.redirectCommandLog) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		
 		<cfreturn command />
 	</cffunction>
