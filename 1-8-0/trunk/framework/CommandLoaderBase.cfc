@@ -521,6 +521,7 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite) />
 		
 		<cfset command.setLog(variables.eventArgCommandLog) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		
 		<cfreturn command />
 	</cffunction>

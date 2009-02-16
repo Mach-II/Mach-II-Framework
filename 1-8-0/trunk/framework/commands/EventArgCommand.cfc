@@ -70,7 +70,11 @@ Notes:
 		<cfif isArgVariableDefined()>
 			<cfset value = getArgVariableValue() />
 		<cfelseif isArgValueDefined()>
-			<cfset value = getArgValue() />
+			<cfif getExpressionEvaluator().isExpression(getArgValue())>
+				<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, getPropertyManager())>
+			<cfelse>
+				<cfset value = getArgValue() />
+			</cfif>
 		</cfif>
 		
 		<!--- Set event-arg if overwrite is true or if event-arg is not defined
