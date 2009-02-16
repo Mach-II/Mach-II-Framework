@@ -138,6 +138,9 @@ Notes:
 		<cfset var i = "" />
 		<cfset var element = "" />
 		<cfset var arg = "" />
+		<cfset var evaluatedUrl = getUrl() />
+		<cfset var evaluatedEventName = getEventName() />
+		<cfset var evaluatedModuleName  getModuleName() />
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
@@ -149,14 +152,14 @@ Notes:
 			<cfif ListLen(i, "=") eq 2>
 				<cfset element = ListGetAt(i, 2, "=") />
 				<cfset i = ListGetAt(i, 1, "=") />
-				<cfif expressionEvaluator.isExpression(element)>
-					<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfif variables.expressionEvaluator.isExpression(element)>
+					<cfset arg = getExpressionEvaluator().evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
 				<cfelse>
 					<cfset arg = element />
 				</cfif>
 			<cfelse>
-				<cfif expressionEvaluator.isExpression(i)>
-					<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfif variables.expressionEvaluator.isExpression(i)>
+					<cfset arg = getExpressionEvaluator().evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
 				<cfelse>
 					<cfset arg = arguments.event.getArg(i, "") />
 				</cfif>
@@ -167,7 +170,17 @@ Notes:
 			</cfif>
 		</cfloop>
 		
-		<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(getModuleName(), getEventName(), params, getUrl()) />
+		<cfif evaluatedUrl neq "" AND expressionEvaluator.isExpression(evaluatedUrl)>
+			<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+		</cfif>
+		<cfif evaluatedEventName neq "" AND expressionEvaluator.isExpression(evaluatedEventName)>
+			<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+		</cfif>
+		<cfif evaluatedModuleName neq "" AND expressionEvaluator.isExpression(evaluatedModuleName)>
+			<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+		</cfif>
+		
+		<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(evaluatedModuleName, evaluatedEventName, params, evaluatedUrl) />
 		
 		<cfreturn redirectUrl />
 	</cffunction>
