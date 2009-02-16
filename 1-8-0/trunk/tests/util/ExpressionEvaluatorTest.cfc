@@ -82,6 +82,23 @@ Notes:
 		--->
 	</cffunction>
 
+	<cffunction name="testGetEventArgsExpression" access="public" returntype="void" output="false"
+		hint="Tests existing event-args.">
+		
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+
+		<cfset event.setArg("test1", "foo") />
+		<cfset event.setArg("test2", "bar") />
+		
+		<cfset result = variables.expressionEvaluator.evaluateExpression("${event.getArgs()}", event, propertyManager) />	
+		<cfset debug(result) />
+		<cfset assertTrue(IsStruct(result), "The result is not a struct") />
+		<cfset assertTrue(StructKeyExists(result, "test1"), "The result does not have 'test1' as a struct key") />
+		<cfset assertTrue(result["test1"] eq "foo", "result['test1'] does not eq 'foo'") />
+	</cffunction>
+
 	<cffunction name="testPropertyExistsExpression" access="public" returntype="void" output="false"
 		hint="Tests existing properties.">
 		
