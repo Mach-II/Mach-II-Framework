@@ -457,7 +457,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	A "call-method" element calls a method on a object defined in the ColdSpring config that is part of the ColdSpringProperty.
 		[bean] - the object from the ColdSpring config on which the method should be called
 		[method] - the name of the method to call
-		[arguments] - A comma delimited list of arguments to pass in. The arguments can contain expressions like a=${event.foobar}
+		[args] - A comma delimited list of arguments to pass in. The arguments can contain expressions like a=${event.foobar}
 		[resultArgs] - event argument to store the result of the method call
 -->
 <!ELEMENT call-method (arg*)>
