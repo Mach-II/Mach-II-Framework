@@ -140,7 +140,7 @@ Notes:
 		<cfset var arg = "" />
 		<cfset var evaluatedUrl = getUrl() />
 		<cfset var evaluatedEventName = getEventName() />
-		<cfset var evaluatedModuleName  getModuleName() />
+		<cfset var evaluatedModuleName =  getModuleName() />
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
