@@ -247,8 +247,6 @@ Notes:
 							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
 					<cfelse>
 						<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "value")>
-							<cfset args = ListAppend(args, 
-								"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#") />
 							<cfset command.addArgument(arguments.commandNode.xmlChildren[i].xmlAttributes["name"],
 								arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
 						<cfelse>
@@ -490,10 +488,22 @@ Notes:
 			<cfset statusType = arguments.commandNode.xmlAttributes["statusType"] />
 		</cfif>
 		
+		<!--- support adding arg and persist-arg tags inside redirect --->
+		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
+			<cfif arguments.commandNode.xmlChildren[i].xmlName EQ "arg">
+				<cfset args = ListAppend(args, 
+					"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#")>
+			<cfelseif arguments.commandNode.xmlChildren[i].xmlName EQ "persist-arg">
+				<cfset persistArgs = ListAppend(persistArgs, 
+					"#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#=#arguments.commandNode.xmlChildren[i].xmlAttributes["value"]#")>		
+			</cfif>
+		</cfloop>
+		
 		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore) />
 		
 		<cfset command.setLog(variables.redirectCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
