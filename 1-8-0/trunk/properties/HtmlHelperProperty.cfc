@@ -83,9 +83,15 @@ from the parent application.
 	PROPERTIES
 	--->
 	<cfset variables.metaTitleSuffix = "" />
+	<cfset variables.cacheAssetPaths = false />
+	<cfset variables.webrootBasePath = ExpandPath(".") />
+	<cfset variables.jsBasePath = "/js" />
+	<cfset variables.cssBasePath = "/css" />
+
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.packagesPropertyName = "_HTMLHelper.packages" />
+	<cfset variables.assetPathsCache = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -93,8 +99,33 @@ from the parent application.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
+		<cfset var cacheAssetPaths = StructNew() />
+		
 		<!--- Assert and set parameters --->
-		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix", "")) />
+		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
+		
+		<cfif IsStruct(getParameter("cacheAssetPaths"))>
+			<cfset cacheAssetPaths = getParameter("cacheAssetPaths") />
+			
+			<cfif StructKeyExists(cacheAssetPaths, getAppManager().getEnvironmentName())>
+				<cfset setCacheAssetPaths(cacheAssetPaths[getAppManager().getEnvironmentName()]) />
+			<cfelse>
+				<cfset setCacheAssetPaths("false") />
+			</cfif>
+		<cfelse>
+			<cfset setCacheAssetPaths(getParameter("cacheAssetPaths", "false")) />
+		</cfif>
+		
+		<cfif isParameterDefined("webrootBasePath")>
+			<cfset setWebrootBasePath(getParameter("webrootBasePath")) />
+		</cfif>
+		<cfif isParameterDefined("jsBasePath")>
+			<cfset setJsBasePath(getParameter("jsBasePath")) />
+		</cfif>
+		<cfif isParameterDefined("cssBasePath")>
+			<cfset setCssBasePath(getParameter("cssBasePath")) />
+		</cfif>
+		
 		<cfset setPackages(configurePackages(getParameter("packages", StructNew()))) />
 		
 		<!--- Build data --->
@@ -286,6 +317,7 @@ from the parent application.
 		<cfset var code = "" />
 		<cfset var i = 0 />
 		<cfset var log = getLog() />
+		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
 		<cfif NOT IsArray(arguments.urls)>
@@ -293,9 +325,10 @@ from the parent application.
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
+			<cfset assetPath = computeAssetPath("js", arguments.urls[i]) />
 			<cfif arguments.inline OR
-				(NOT arguments.inline AND appendHTMLHeadElementPathToWatchList("js", arguments.urls[i]))>
-				<cfset code = code & '<script type="text/javascript" src="' & arguments.urls[i] & '"></script>' />
+				(NOT arguments.inline AND NOT isAssetPathInWatchList(assetPath))>
+				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' />
 				<cfif ArrayLen(arguments.urls) NEQ i>
 					<cfset code = code & Chr(13) />
 				</cfif>
@@ -318,7 +351,7 @@ from the parent application.
 		<cfset var attributesCode = "" />
 		<cfset var i = 0 />
 		<cfset var key = "" />
-		<cfset var log = getLog() />
+		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
 		<cfif NOT IsArray(arguments.urls)>
@@ -336,9 +369,10 @@ from the parent application.
 		<cfset attributesCode = attributesCode & ' />' />
 
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
+			<cfset assetPath = computeAssetPath("css", arguments.urls[i]) />
 			<cfif arguments.inline OR
-				(NOT arguments.inline AND appendHTMLHeadElementPathToWatchList("css", arguments.urls[i]))>
-				<cfset code = code & '<link type="text/css" href="' & arguments.urls[i] & '" rel="stylesheet"' & attributesCode />
+				(NOT arguments.inline AND NOT isAssetPathInWatchList(assetPath))>
+				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode />
 				<cfif ArrayLen(arguments.urls) NEQ i>
 					<cfset code = code & Chr(13) />
 				</cfif>
@@ -398,9 +432,9 @@ from the parent application.
 		
 		<cfreturn renderOrAppendToHead(code, arguments.inline) />
 	</cffunction>
-
+	
 	<!---
-	PRIVATE FUNCTIONS
+	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="renderOrAppendToHead" access="private" returntype="string" output="false"
 		hint="Renders the code or append to head.">
@@ -416,26 +450,21 @@ from the parent application.
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="appendHTMLHeadElementPathToWatchList" access="private" returntype="boolean" output="false"
-		hint="Appends a HTML head element to the watch list. Returns true if already on watch list and false if not currently on list">
-		<cfargument name="type" type="string" required="true"
-			hint="Type of HTML head element path (css or js)." />
-		<cfargument name="path" type="string" required="true"
--			hint="Path to element." />
+	<cffunction name="isAssetPathInWatchList" access="private" returntype="boolean" output="false"
+		hint="Checks if an asset path is in the watch list. Returns true if the asset is already on watch list and false if it is not on list.">
+		<cfargument name="assetPath" type="string" required="true"
+			hint="Path to element." />
 		
-		<cfset var elementPathHash = Hash(UCase(arguments.type & "_" & arguments.path)) />
-		<cfset var htmlHeadElementPaths = "" />
+		<cfset var assetPathHash = Hash(UCase(arguments.assetPath)) />
 		
-		<cfif NOT IsDefined("request._MachIIHTMLHelper_HTMLHeadElementPaths")>
-			<cfset request["_MachIICacheHandler_MachIIHTMLHelper_HTMLHeadElementPaths"] = StructNew() />
+		<cfif NOT StructKeyExists(request, "_MachIIHTMLHelper_HTMLHeadElementPaths")>
+			<cfset request["_MachIIHTMLHelper_HTMLHeadElementPaths"] = StructNew() />
 		</cfif>
 		
-		<cfset htmlHeadElementPaths = request["_MachIICacheHandler_MachIIHTMLHelper_HTMLHeadElementPaths"] />
-		
-		<cfif StructKeyExists(htmlHeadElementPaths, "elementPathHash")>
+		<cfif StructKeyExists(request._MachIIHTMLHelper_HTMLHeadElementPaths, assetPathHash)>
 			<cfreturn true />
 		<cfelse>
-			<cfset htmlHeadElementPaths[elementPathHash] = arguments />
+			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = "" />
 			<cfreturn false />
 		</cfif>
 	</cffunction>
@@ -480,6 +509,78 @@ from the parent application.
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="computeAssetPath" access="private" returntype="string" output="false"
+		hint="Checks if the raw asset path and type is already in the asset path cache.">
+		<cfargument name="assetType" type="string" required="true" />
+		<cfargument name="assetPath" type="string" required="true" />
+		
+		<cfset var assetPathHash = "" />
+		<cfset var path = "" />
+		
+		<!--- Check if we are caching asset paths --->
+		<cfif getCacheAssetPaths()>
+			<cfset assetPathHash = Hash(UCase(arguments.assetType & "_" & arguments.assetPath)) />
+			<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
+				<cfset path = variables.assetPathsCache[assetPathHash] />
+			<cfelse>
+				<cfset path = buildAssetPath(arguments.assetType, arguments.assetPath) />
+				<cfset variables.assetPathsCache[assetPathHash] = path />
+			</cfif>
+		<cfelse>
+			<cfset path = buildAssetPath(arguments.assetType, arguments.assetPath) />
+		</cfif>
+		
+		<cfreturn path />
+	</cffunction>
+	
+	<cffunction name="buildAssetPath" access="private" returntype="string" output="false"
+		hint="Builds the asset path for a raw path and type.">
+		<cfargument name="assetType" type="string" required="true" />
+		<cfargument name="assetPath" type="string" required="true" />
+		
+		<cfset var path = arguments.assetPath />
+		
+		<!--- Get path if the asset path is not a full path from webroot --->
+		<cfif NOT path.startsWith("/")>
+			<cfif arguments.assetType EQ "js">
+				<cfset path = getJsBasePath() & "/" & path />
+			<cfelseif arguments.assetType EQ "css">
+				<cfset path = getCssBasePath() & "/" & path />
+			</cfif>
+		</cfif>
+		
+		<!--- Append the file extension if not defined --->
+		<cfif arguments.assetType EQ "js" AND NOT path.endsWith(".js")>
+			<cfset path = path & ".js" />
+		<cfelseif arguments.assetType EQ "css" AND NOT path.endsWith(".css")>
+			<cfset path = path & ".css" />
+		</cfif>
+		
+		<!--- Append the timestamp --->
+		<cfset path = path & "?" & fetchAssetTimestamp(path) />
+		
+		<cfreturn path />
+	</cffunction>
+		
+	<cffunction name="fetchAssetTimestamp" access="private" returntype="numeric" output="false"
+		hint="Fetches the asset timestamp (seconds from epoch) from the passed target asset path.">
+		<cfargument name="assetPath" type="string" required="true"
+			hint="This is the full asset path from the webroot." />
+		
+		<cfset var path = getWebrootBasePath() & "/" & arguments.assetPath />
+		<cfset var directoryResults = "" />
+		
+		<cfdirectory action="LIST" directory="#GetDirectoryFromPath(path)#" 
+			name="directoryResults" filter="#GetFileFromPath(path)#" />
+
+		<!--- Assert the file was found --->
+		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
+				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset paths."
+				, "Asset path: '#path#'") />
+		
+		<cfreturn DateDiff("s", CreateDate(1970, 1, 1), directoryResults.dateLastModified) />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
@@ -489,6 +590,38 @@ from the parent application.
 	</cffunction>
 	<cffunction name="getMetaTitleSuffix" access="public" returntype="string" output="false">
 		<cfreturn variables.metaTitleSuffix />
+	</cffunction>
+	
+	<cffunction name="setCacheAssetPaths" access="private" returntype="void" output="false">
+		<cfargument name="cacheAssetPaths" type="boolean" required="true" />
+		<cfset variables.cacheAssetPaths = arguments.cacheAssetPaths />
+	</cffunction>
+	<cffunction name="getCacheAssetPaths" access="public" returntype="boolean" output="false">
+		<cfreturn variables.cacheAssetPaths />
+	</cffunction>
+
+	<cffunction name="setWebrootBasePath" access="private" returntype="void" output="false">
+		<cfargument name="webrootBasePath" type="string" required="true" />
+		<cfset variables.webrootBasePath = arguments.webrootBasePath />
+	</cffunction>
+	<cffunction name="getWebrootBasePath" access="public" returntype="string" output="false">
+		<cfreturn variables.webrootBasePath />
+	</cffunction>
+
+	<cffunction name="setJsBasePath" access="private" returntype="void" output="false">
+		<cfargument name="jsBasePath" type="string" required="true" />
+		<cfset variables.jsBasePath = arguments.jsBasePath />
+	</cffunction>
+	<cffunction name="getJsBasePath" access="public" returntype="string" output="false">
+		<cfreturn variables.jsBasePath />
+	</cffunction>
+
+	<cffunction name="setCssBasePath" access="private" returntype="void" output="false">
+		<cfargument name="cssBasePath" type="string" required="true" />
+		<cfset variables.cssBasePath = arguments.cssBasePath />
+	</cffunction>
+	<cffunction name="getCssBasePath" access="public" returntype="string" output="false">
+		<cfreturn variables.cssBasePath />
 	</cffunction>
 	
 	<cffunction name="setMimeShortcutMap" access="private" returntype="void" output="false">
