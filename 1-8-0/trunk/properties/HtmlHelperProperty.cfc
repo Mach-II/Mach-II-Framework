@@ -23,17 +23,33 @@ Updated version: 1.8.0
 
 Notes:
 Provides HTML helper functionality and enables you to easily make
-HTML related tags faster and less hassle to output. This includes
-output doctypes, css and javascript links and HTML metadata.
+HTML related tags faster and less hassle to output such as 
+outputting doctypes, css and javascript links and HTML metadata.
 
-Simple Configuration Usage:
-<property name="html" type="MachII.properties.HtmlHelperProperty" />
+All javascript and css files get a timestamp appended for easy
+webserver caching.
 
-Customized Configuration Usage:
+Configuration Usage:
 <property name="html" type="MachII.properties.HtmlHelperProperty">
 	<parameters>
 		<parameter name="metaTitleSuffix" value=" - Mach-II" />
-		<parameter name="packages">
+		<parameter name="cacheAssetPaths" value="false" />
+		<!-- OR using environments -->
+		<parameter name="cacheAssetPaths">
+			<struct>
+				<key name="development" value="false" />
+				<key name="staging" value="false" />
+				<key name="qualityAssurance" value="false" />
+				<key name="production" value="true" />
+			</struct>
+		</parameter>
+		<!-- Defaults to ExpandPath(".") -->
+		<parameter name="webrootBasePath" value="/path/to/webroot" />
+		<!-- Defaults to webroot base path + "/js" -->
+		<parameter name="jsBasePath" value="/path/to/webroot" />
+		<!-- Defaults to webroot base path + "/css" -->
+		<parameter name="cssBasePath" value="/path/to/webroot" />
+		<parameter name="assetPackages">
 			<struct>
 				<key name="lightwindow">
 					<array>
@@ -54,19 +70,6 @@ Customized Configuration Usage:
 		</parameter>
 	</parameters>
 </property>
-
-The [metaTitleSuffix] parameter optionally and automatically appends 
-the value of the parameter on the end value addMeta() method when setting 
-a title. For example, calling addMeta("title", "Home") with the above example 
-value of this parameter would result in '<title>Home - Mach-II</title>'. 
-Useful to append a company or application name on to the end of every HTML title. 
-
-The [packages] parameter holds a struct of packages.  Packages are a group of
-javascript and CSS files that can be included as a group.  Each package has an 
-array of assets which can be defined in a simple manner in which the type of asset
-is auto-determined based on the file extension or can be defined in a verbose manner.
-Verbose is required when the asset type cannot be determined automatically or when
-additional tag attributes are needed (such as media type for CSS).
 
 Developer Notes:
 Because of the hierarchical nature of Mach-II applications that utilitze modules,
@@ -90,7 +93,7 @@ from the parent application.
 
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
-	<cfset variables.packagesPropertyName = "_HTMLHelper.packages" />
+	<cfset variables.assetPackagesPropertyName = "_HTMLHelper.assetPackages" />
 	<cfset variables.assetPathsCache = StructNew() />
 	
 	<!---
@@ -117,7 +120,7 @@ from the parent application.
 		</cfif>
 		
 		<cfif isParameterDefined("webrootBasePath")>
-			<cfset setWebrootBasePath(getParameter("webrootBasePath")) />
+			<cfset setWebrootBasePath(ExpandPath(getParameter("webrootBasePath"))) />
 		</cfif>
 		<cfif isParameterDefined("jsBasePath")>
 			<cfset setJsBasePath(getParameter("jsBasePath")) />
@@ -126,15 +129,15 @@ from the parent application.
 			<cfset setCssBasePath(getParameter("cssBasePath")) />
 		</cfif>
 		
-		<cfset setPackages(configurePackages(getParameter("packages", StructNew()))) />
+		<cfset setAssetPackages(configureAssetPackages(getParameter("assetPackages", StructNew()))) />
 		
 		<!--- Build data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
 	</cffunction>
 	
-	<cffunction name="configurePackages" access="private" returntype="struct" output="false"
-		hint="Configures packages from the 'package' parameter.">
+	<cffunction name="configureAssetPackages" access="private" returntype="struct" output="false"
+		hint="Configures asset packages from the 'package' parameter.">
 		<cfargument name="rawPackages" type="struct" required="true" />
 		
 		<cfset var packages = StructNew() />
@@ -282,14 +285,14 @@ from the parent application.
 		</cfswitch>
 	</cffunction>
 	
-	<cffunction name="addPackage" access="public" returntype="string" output="false"
-		hint="Adds files that are defined as a package.">
-		<cfargument name="packageName" type="string" required="true"
-			hint="The name of the package to add." />
+	<cffunction name="addAssetPackage" access="public" returntype="string" output="false"
+		hint="Adds files that are defined as an asset package.">
+		<cfargument name="assetPackageName" type="string" required="true"
+			hint="The name of the asset package to add." />
 		<cfargument name="inline" type="boolean" required="false" default="true"
 			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
 		
-		<cfset var package = getPackageByName(arguments.packageName) />
+		<cfset var package = getAssetPackageByName(arguments.assetPackageName) />
 		<cfset var code = "" />
 		<cfset var i = 0 />
 		
@@ -304,7 +307,7 @@ from the parent application.
 			</cfif>
 		</cfloop>
 		
-		<cfreturn code />
+		<cfreturn renderOrAppendToHead(code, arguments.inline) />
 	</cffunction>
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
@@ -491,21 +494,21 @@ from the parent application.
 		<cfreturn StructKeyExists(getHttpEquivReferenceMap(), arguments.type) />
 	</cffunction>
 	
-	<cffunction name="getPackageByName" access="private" returntype="array" output="false"
-		hint="Gets a package by name. Checks parent if defined.">
-		<cfargument name="packageName" type="string" required="true" />
+	<cffunction name="getAssetPackageByName" access="private" returntype="array" output="false"
+		hint="Gets a asset package by name. Checks parent if defined.">
+		<cfargument name="assetPackageName" type="string" required="true" />
 		
-		<cfset var packages = getPackages() />
-		<cfset var parentPackages = getParentPackages() />
+		<cfset var packages = getAssetPackages() />
+		<cfset var parentPackages = getAssetParentPackages() />
 		
 		<cfif StructKeyExists(packages, arguments.packageName)>
 			<cfreturn packages[arguments.packageName] />
 		<cfelseif StructKeyExists(parentPackages, arguments.packageName)>
 			<cfreturn parentPackages[arguments.packageName] />
 		<cfelse>
-			<cfthrow type="MachII.properties.HTMLHelperProperty.packageDoesNotExist"
-				message="A package named '#arguments.packageName#' cannot be found."
-				detail="Packages: #StructKeyList(packages)# Parent Packages: #StructKeyList(parentPackages)#" />
+			<cfthrow type="MachII.properties.HTMLHelperProperty.assetPackageDoesNotExist"
+				message="A asset package named '#arguments.packageName#' cannot be found."
+				detail="Asset Packages: #StructKeyList(packages)# Parent Asset Packages: #StructKeyList(parentPackages)#" />
 		</cfif>
 	</cffunction>
 	
@@ -640,19 +643,19 @@ from the parent application.
 		<cfreturn variables.httpEquivReferenceMap />
 	</cffunction>
 	
-	<cffunction name="setPackages" access="private" returntype="void" output="false"
-		hint="Sets the packages into the property manager.">
-		<cfargument name="packages" type="struct" required="true" />
-		<cfset setProperty(variables.packagesPropertyName, arguments.packages) />
+	<cffunction name="setAssetPackages" access="private" returntype="void" output="false"
+		hint="Sets the asset packages into the property manager.">
+		<cfargument name="assetPackages" type="struct" required="true" />
+		<cfset setProperty(variables.assetPackagesPropertyName, arguments.assetPackages) />
 	</cffunction>
-	<cffunction name="getPackages" access="public" returntype="struct" output="false"
-		hint="Gets the pacakages from the property manager.">
-		<cfreturn getProperty(variables.packagesPropertyName) />
+	<cffunction name="getAssetPackages" access="public" returntype="struct" output="false"
+		hint="Gets the asset pacakages from the property manager.">
+		<cfreturn getProperty(variables.assetPackagesPropertyName) />
 	</cffunction>
-	<cffunction name="getParentPackages" access="public" returntype="struct" output="false"
-		hint="Gets the pacakages from the parent property manager.">
+	<cffunction name="getAssetParentPackages" access="public" returntype="struct" output="false"
+		hint="Gets the asset pacakages from the parent property manager.">
 		<cfif getAppManager().inModule()>
-			<cfreturn getPropertyManager().getParent().getProperty(variables.packagesPropertyName, StructNew()) />
+			<cfreturn getPropertyManager().getParent().getProperty(variables.assetPackagesPropertyName, StructNew()) />
 		<cfelse>
 			<cfreturn StructNew() />
 		</cfif>
