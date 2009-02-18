@@ -26,7 +26,9 @@ Notes:
 - OPTIONAL ATTRIBUTES
 	appendToHead	= [boolean] defaults to true
 --->
-<cfparam name="attritbutes.appendToHead" default="true" />
+<cfparam name="attritbutes.appendToHead" type="boolean" 
+	default="true" />
+
 <cfif thisTag.ExecutionMode IS "end">
 	<cfset variables.js = '<script type="text/javascript">' & Chr(13) & '<!--//--><![CDATA[//><!--' & thisTag.GeneratedContent & '//--><!]]>' & Chr(13) &  '</script>' & Chr(13) />
 	<cfif attritbutes.appendToHead>

@@ -28,6 +28,21 @@ Notes:
 	items	= [string] a list of items to use when evaluating the value
 --->
 <cfif thisTag.ExecutionMode IS "start">
+
+	<!--- Assert required attributes are present --->
+	<cfif NOT StructKeyExists(attributes, "value") OR NOT IsNumeric(attributes.value)>
+		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
+			message="An attribute named 'value' required and must be numeric." />
+	</cfif>
+	<cfif NOT StructKeyExists(attributes, "items") OR NOT IsSimpleValue(attributes.items) OR NOT IsArray(attributes.items)>
+		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
+			message="An attribute named 'items' required and must be a list or an array." />
+	</cfif>
+	
+	<!--- Convert items array to list --->
+	<cfif IsArray(attributes.items)>
+		<cfset attibutes.items = ArrayToList(attributes.items) />
+	</cfif>
 	
 	<cfset variables.modResult = attributes.value MOD ListLen(attributes.items) />
 	<cfset variables.output = "" />
