@@ -34,23 +34,28 @@ Notes:
 		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
 			message="An attribute named 'value' required and must be numeric." />
 	</cfif>
-	<cfif NOT StructKeyExists(attributes, "items") OR NOT IsSimpleValue(attributes.items) OR NOT IsArray(attributes.items)>
+	<cfif NOT StructKeyExists(attributes, "items")>
 		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
 			message="An attribute named 'items' required and must be a list or an array." />
 	</cfif>
 	
 	<!--- Convert items array to list --->
-	<cfif IsArray(attributes.items)>
-		<cfset attibutes.items = ArrayToList(attributes.items) />
+	<cfif IsSimpleValue(attributes.items)>
+		<cfset attributes.items = ListToArray(attributes.items) />
 	</cfif>
 	
-	<cfset variables.modResult = attributes.value MOD ListLen(attributes.items) />
+	<!--- We can't zebra strip if there is only one item so assume nothing for the second item --->
+	<cfif ArrayLen(attributes.items) EQ 1>
+		<cfset ArrayAppend(attributes.items, "") />
+	</cfif>
+	
+	<cfset variables.modResult = attributes.value MOD ArrayLen(attributes.items) />
 	<cfset variables.output = "" />
 	
 	<cfif variables.modResult EQ 0>
-		<cfset variables.output = ListGetAt(attributes.items, ListLen(attributes.items)) />
+		<cfset variables.output = attributes.items[ArrayLen(attributes.items)] />
 	<cfelse>
-		<cfset variables.output = ListGetAt(attributes.items, variables.modResult) />
+		<cfset variables.output = attributes.items[variables.modResult] />
 	</cfif>
 	<cfoutput>#Trim(variables.output)#</cfoutput>
 </cfif>
