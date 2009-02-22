@@ -289,8 +289,8 @@ from the parent application.
 		hint="Adds files that are defined as an asset package.">
 		<cfargument name="assetPackageName" type="string" required="true"
 			hint="The name of the asset package to add." />
-		<cfargument name="inline" type="boolean" required="false" default="true"
-			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates to output type for the generated HTML code (head, inline).">
 		
 		<cfset var package = getAssetPackageByName(arguments.assetPackageName) />
 		<cfset var code = "" />
@@ -298,24 +298,24 @@ from the parent application.
 		
 		<cfloop from="1" to="#ArrayLen(package)#" index="i">
 			<cfif package[i].type EQ "js">
-				<cfset code = code & addJavascript(package[i].paths, arguments.inline) />
+				<cfset code = code & addJavascript(package[i].paths, "inline") />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addCss(package[i].paths, arguments.inline) />
+				<cfset code = code & addCss(package[i].paths, "inline") />
 			</cfif>
 			<cfif i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.inline) />
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
 		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
 		<cfargument name="urls" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .js files.">
-		<cfargument name="inline" type="boolean" required="false" default="true"
-			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates to output type for the generated HTML code (head, inline).">
 		
 		<cfset var code = "" />
 		<cfset var i = 0 />
@@ -329,8 +329,8 @@ from the parent application.
 
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
 			<cfset assetPath = computeAssetPath("js", arguments.urls[i]) />
-			<cfif arguments.inline OR
-				(NOT arguments.inline AND NOT isAssetPathInWatchList(assetPath))>
+			<cfif arguments.outputType EQ "inline" OR
+				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' />
 				<cfif ArrayLen(arguments.urls) NEQ i>
 					<cfset code = code & Chr(13) />
@@ -338,7 +338,7 @@ from the parent application.
 			</cfif>
 		</cfloop>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.inline) />
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<cffunction name="addCss" access="public" returntype="string" output="false"
@@ -347,8 +347,8 @@ from the parent application.
 			hint="A single string, comma-delimited list or array of web accessible paths to .css files.">
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
-		<cfargument name="inline" type="boolean" required="false" default="true"
-			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates to output type for the generated HTML code (head, inline).">
 		
 		<cfset var code = "" />
 		<cfset var attributesCode = "" />
@@ -373,8 +373,8 @@ from the parent application.
 
 		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
 			<cfset assetPath = computeAssetPath("css", arguments.urls[i]) />
-			<cfif arguments.inline OR
-				(NOT arguments.inline AND NOT isAssetPathInWatchList(assetPath))>
+			<cfif arguments.outputType EQ "inline" OR
+				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode />
 				<cfif ArrayLen(arguments.urls) NEQ i>
 					<cfset code = code & Chr(13) />
@@ -382,7 +382,7 @@ from the parent application.
 			</cfif>
 		</cfloop>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.inline) />
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<cffunction name="addLink" access="public" returntype="string" output="false"
@@ -393,8 +393,8 @@ from the parent application.
 			hint="A the path to a web accessible location of the link file." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
-		<cfargument name="inline" type="boolean" required="false" default="true"
-			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates to output type for the generated HTML code (head, inline).">
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
 		<cfset var code = '<link href="' & arguments.url & '"' />
@@ -403,12 +403,12 @@ from the parent application.
 		<cfset StructAppend(getUtils().parseAttributesIntoStruct(arguments.attributes), resolveMimeTypeAndGetData(arguments.type)) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
-			<cfset code = code & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
+			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
 		</cfloop>
 		
 		<cfset code = code & ' />' & Chr(13) />
 		
-		<cfreturn renderOrAppendToHead(code, arguments.inline) />
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<cffunction name="addMeta" access="public" returntype="string" output="false"
@@ -417,23 +417,23 @@ from the parent application.
 			hint="The type of the meta tag (this method auto-selects if value is a meta type of 'http-equiv' or 'name')." />
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
-		<cfargument name="inline" type="boolean" required="false" default="true"
-			hint="Indicates to output the HTML code inline (true) or place in HTML head (false).">			
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates to output type for the generated HTML code (head, inline).">			
 		
 		<cfset var code = "" />
 		<cfset var key = "" />
 		
 		<cfif arguments.type EQ "title">
-			<cfset code = '<title>' & arguments.content & getMetaTitleSuffix() & '</title>' & Chr(13) />
+			<cfset code = '<title>' & HTMLEditFormat(arguments.content & getMetaTitleSuffix()) & '</title>' & Chr(13) />
 		<cfelse>
 			<cfif isHttpEquivMetaType(arguments.type)>
-				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & arguments.content & '" />' & Chr(13) />
+				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & HTMLEditFormat(arguments.content) & '" />' & Chr(13) />
 			<cfelse>
-				<cfset code = '<meta name="' & arguments.type & '" content="' & arguments.content & '" />' & Chr(13) />
+				<cfset code = '<meta name="' & arguments.type & '" content="' & HTMLEditFormat(arguments.content) & '" />' & Chr(13) />
 			</cfif>
 		</cfif>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.inline) />
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<!---
@@ -442,10 +442,10 @@ from the parent application.
 	<cffunction name="renderOrAppendToHead" access="private" returntype="string" output="false"
 		hint="Renders the code or append to head.">
 		<cfargument name="code" type="string" required="true" />
-		<cfargument name="inline" type="boolean" required="true" />
+		<cfargument name="outputType" type="string" required="true" />
 
 		<!--- Output the code inline or append to HTML head --->
-		<cfif arguments.inline>
+		<cfif arguments.outputType EQ "inline">
 			<cfreturn arguments.code />
 		<cfelse>
 			<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code) />
@@ -501,13 +501,13 @@ from the parent application.
 		<cfset var packages = getAssetPackages() />
 		<cfset var parentPackages = getAssetParentPackages() />
 		
-		<cfif StructKeyExists(packages, arguments.packageName)>
-			<cfreturn packages[arguments.packageName] />
-		<cfelseif StructKeyExists(parentPackages, arguments.packageName)>
-			<cfreturn parentPackages[arguments.packageName] />
+		<cfif StructKeyExists(packages, arguments.assetPackageName)>
+			<cfreturn packages[arguments.assetPackageName] />
+		<cfelseif StructKeyExists(parentPackages, arguments.assetPackageName)>
+			<cfreturn parentPackages[arguments.assetPackageName] />
 		<cfelse>
 			<cfthrow type="MachII.properties.HTMLHelperProperty.assetPackageDoesNotExist"
-				message="A asset package named '#arguments.packageName#' cannot be found."
+				message="A asset package named '#arguments.assetPackageName#' cannot be found."
 				detail="Asset Packages: #StructKeyList(packages)# Parent Asset Packages: #StructKeyList(parentPackages)#" />
 		</cfif>
 	</cffunction>
