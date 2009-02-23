@@ -389,7 +389,7 @@ from the parent application.
 		hint="Adds code for a link tag for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
 				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
-		<cfargument name="url" type="any" required="true"
+		<cfargument name="url" type="string" required="true"
 			hint="A the path to a web accessible location of the link file." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
@@ -581,7 +581,8 @@ from the parent application.
 				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset paths."
 				, "Asset path: '#path#'") />
 		
-		<cfreturn DateDiff("s", CreateDate(1970, 1, 1), directoryResults.dateLastModified) />
+		<!--- Conver current time to UTC because epoch is essentially UTC --->
+		<cfreturn DateDiff("s", CreateDate(1970, 1, 1), DateConvert("local2Utc", directoryResults.dateLastModified)) />
 	</cffunction>
 	
 	<!---
