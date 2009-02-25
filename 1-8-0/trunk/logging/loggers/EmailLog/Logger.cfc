@@ -50,6 +50,8 @@ Notes:
 				<!-- Optional - list of mail server names or IPs
 					defaults to mail server specified in the coldfusion admin -->
 				<key name="servers" value="mail.example.com" />
+				<!-- Optional - mail type for the cfmail (default: text/html) -->
+				<key name="mailType" value="text/html" />
 				<!-- Optional -->
 				<key name="filter" value="list,of,filter,criteria" />
 				- OR -
@@ -84,6 +86,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.from = "" />
 	<cfset variables.instance.subject = "" />
 	<cfset variables.instance.servers = "" />
+	<cfset variables.instance.mailType = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -125,6 +128,7 @@ See that file header for configuration of filter criteria.
 		
 		<cfset setSubject(getParameter("subject", "Application Log")) />
 		<cfset setServers(getParameter("servers", "")) />
+		<cfset setMailType(getParameter("mailType", "text/html")) />
 	</cffunction>
 	
 	<!---
@@ -150,9 +154,16 @@ See that file header for configuration of filter criteria.
 				
 				<!--- Send the email --->
 				<cfif NOT Len(getServers())>
-					<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
+					<cfmail from="#getFrom()#" 
+						to="#getTo()#"
+						type="#getMailType()#"  
+						subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
 				<cfelse>
-					<cfmail from="#getFrom()#" to="#getTo()#" subject="#getSubject()#" server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
+					<cfmail from="#getFrom()#" 
+						to="#getTo()#" 
+						subject="#getSubject()#"
+						type="#getMailType()#" 
+						server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
 				</cfif>
 			</cfif>
 		</cfif>
@@ -266,6 +277,14 @@ See that file header for configuration of filter criteria.
 	</cffunction>
 	<cffunction name="getServers" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.servers />
+	</cffunction>
+	
+	<cffunction name="setMailType" access="private" returntype="void" output="false">
+		<cfargument name="mailType" type="string" required="true" />
+		<cfset variables.instance.mailType = arguments.mailType />
+	</cffunction>
+	<cffunction name="getMailType" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.mailType />
 	</cffunction>
 	
 </cfcomponent>
