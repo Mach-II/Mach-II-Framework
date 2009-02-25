@@ -80,7 +80,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
 	
-	<!---
+	<!---	
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -299,13 +299,16 @@ See that file header for configuration of filter criteria.
 		<cfset reFindResults = REFindNoCase("(<style.*</style>)", data.toString(), 1, true) />
 		
 		<cfif reFindResults.pos[1] NEQ 0>
-			<!--- Java substrings start with 0 not 1 like in CFML --->
-			<cfset temp = data.substring(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<!---
+			Java substrings start with 0 not 1 like in CFML
+			Must use Javacast for CF7 compatibility
+			--->
+			<cfset temp = data.substring(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
 			<cfset temp = REReplace(temp, "<style.*?>", '<style type="text/css">', "one") />
 			
-			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
 		
@@ -313,12 +316,16 @@ See that file header for configuration of filter criteria.
 		<cfset reFindResults = REFindNoCase("(<script.*</script>)", data.toString(), 1, true) />
 		
 		<cfif reFindResults.pos[1] NEQ 0>
-			<cfset temp = data.substring(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<!---
+			Java substrings start with 0 not 1 like in CFML
+			Must use Javacast for CF7 compatibility
+			--->
+			<cfset temp = data.substring(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
 			<cfset temp = REReplace(temp, "<script.*?>", '<script type="text/javascript">', "one") />
 			
-			<cfset data.delete(reFindResults.pos[1] - 1, reFindResults.len[1] + reFindResults.pos[1] - 1) />
+			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
 		
