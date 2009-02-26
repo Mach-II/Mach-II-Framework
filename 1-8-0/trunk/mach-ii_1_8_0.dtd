@@ -513,7 +513,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ELEMENT array (element*)>
 <!ELEMENT element (value?, struct?, array?)>
 <!ATTLIST element 
-	value CDATA #REQUIRED
+	value CDATA #IMPLIED
 >
 
 <!ELEMENT value (#PCDATA)>
