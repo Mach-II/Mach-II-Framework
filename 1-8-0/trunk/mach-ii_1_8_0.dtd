@@ -389,9 +389,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[persistArgs] - a list of event args to persist across a redirect (if empty quotes or not defined - entire event is persisted)
 		[persistArgsIgnore] - a list of event args to ignore to persist across a redirect
 		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
-		
+		[route] - the url route to redirect to
 -->
-<!ELEMENT redirect EMPTY>
+<!ELEMENT redirect (arg | persistArg)*>
 <!ATTLIST redirect
 	event CDATA #IMPLIED
 	module CDATA #IMPLIED
@@ -401,6 +401,18 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	persistArgs CDATA #IMPLIED
 	persistArgsIgnore CDATA #IMPLIED
 	statusType (permanent|temporary|prg) "temporary"
+	route CDATA #IMPLIED
+>
+
+<!--
+	"persistArg"
+		name - the name of the argument
+		value - the value of the argument		
+-->
+<!ELEMENT persistArg (value?, struct?, array?)>
+<!ATTLIST persistArg
+	name CDATA #IMPLIED
+	value CDATA #IMPLIED
 >
 
 <!--
