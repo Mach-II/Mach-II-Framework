@@ -298,16 +298,16 @@ from the parent application.
 		
 		<cfloop from="1" to="#ArrayLen(package)#" index="i">
 			<cfif package[i].type EQ "js">
-				<cfset code = code & addJavascript(package[i].paths, "inline") />
+				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addCss(package[i].paths, "inline") />
+				<cfset code = code & addCss(package[i].paths, arguments.outputType) />
 			</cfif>
-			<cfif i NEQ ArrayLen(package)>
+			<cfif arguments.outputType EQ "inline" AND i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfreturn code />
 	</cffunction>
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
@@ -461,13 +461,13 @@ from the parent application.
 		<cfset var assetPathHash = Hash(UCase(arguments.assetPath)) />
 		
 		<cfif NOT StructKeyExists(request, "_MachIIHTMLHelper_HTMLHeadElementPaths")>
-			<cfset request["_MachIIHTMLHelper_HTMLHeadElementPaths"] = StructNew() />
+			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths = StructNew() />
 		</cfif>
 		
 		<cfif StructKeyExists(request._MachIIHTMLHelper_HTMLHeadElementPaths, assetPathHash)>
 			<cfreturn true />
 		<cfelse>
-			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = "" />
+			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = arguments.assetPath />
 			<cfreturn false />
 		</cfif>
 	</cffunction>
