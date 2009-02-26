@@ -44,6 +44,8 @@ Notes:
 	<cfset variables.isProcessing = false />
 	<cfset variables.isException = false />
 	<cfset variables.log = "" />
+	<cfset variables.currentRouteParams = StructNew() />
+	<cfset variables.currentRouteName = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -426,6 +428,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setCurrentRouteParams" access="public" returntype="void" output="false">
+		<cfargument name="routeParams" type="struct" required="true" />
+		<cfset variables.currentRouteParams = arguments.routeParams />
+	</cffunction>
+	<cffunction name="getCurrentRouteParams" access="public" returntype="struct" output="false">
+		<cfreturn variables.currentRouteParams />
+	</cffunction>
+	
+	<cffunction name="setCurrentRouteName" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfset variables.currentRouteName = arguments.routeName />
+	</cffunction>
+	<cffunction name="getCurrentRouteName" access="public" returntype="string" output="false">
+		<cfreturn variables.currentRouteName />
 	</cffunction>
 	
 	<cffunction name="setParameterPrecedence" access="private" returntype="void" output="false">

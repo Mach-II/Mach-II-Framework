@@ -64,7 +64,7 @@ Notes:
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		<cfargument name="eventParameter" type="string" required="true" />
 		
-		<cfset var params = structNew() />
+		<cfset var params = StructNew() />
 		<cfset var i = 1 />
 		<cfset var element = "" />
 		<cfset var totalArgCount = ListLen(getRequiredArguments()) + ListLen(getOptionalArguments()) />
@@ -97,6 +97,25 @@ Notes:
 		</cfif>
 		
 		  <!--- <cfdump var="#params#" /><cfabort />  ---> 
+		
+		<cfreturn params />
+	</cffunction>
+	
+	<!--- Used in the RequestManager to form the current route url for buildCurrentUrl() --->
+	<cffunction name="parseRouteRequiredParams" access="public" returntype="struct" output="false">
+		<cfargument name="urlElements" type="array" required="true" />
+		
+		<cfset var params = StructNew() />
+		<cfset var i = 0 />
+		
+		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
+		
+		<!--- Start at position 2 since position 1 was the route name --->
+		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
+			<cfif ListLen(getRequiredArguments()) lte i + 1>
+				<cfset params[ListGetAt(ListGetAt(getRequiredArguments(), i - 1), 1, ":")] = arguments.urlElements[i] />
+			</cfif>
+		</cfloop>
 		
 		<cfreturn params />
 	</cffunction>

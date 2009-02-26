@@ -117,28 +117,33 @@ Notes:
 		<cfset var parsedModuleName = "" />
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var key = "" />
+		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
 		
-		<cfif isDefined("url.#eventParameterName#")>
-			<cfset eventName = url[eventParameterName] />
-		<cfelseif isDefined("form.#eventParameterName#")>
-			<cfset eventName = form[eventParameterName] />		
-		</cfif>
-		
-		<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
-			<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
-			<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+		<cfif Len(routeName)>
+			<cfreturn buildRouteUrl(getAppManager().getModuleName(), routeName, getRequestHandler().getCurrentRouteParams()) />
 		<cfelse>
-			<cfset parsedModuleName = arguments.moduleName />
+			<cfif isDefined("url.#eventParameterName#")>
+				<cfset eventName = url[eventParameterName] />
+			<cfelseif isDefined("form.#eventParameterName#")>
+				<cfset eventName = form[eventParameterName] />		
+			</cfif>
+			
+			<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
+				<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
+				<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+			<cfelse>
+				<cfset parsedModuleName = arguments.moduleName />
+			</cfif>
+			
+			<cfloop collection="#url#" item="key">
+				<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+					<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
+				</cfif>
+			</cfloop>
+			
+			<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
 		</cfif>
 		
-		<cfloop collection="#url#" item="key">
-			<cftrace text="StructKeyExists(params, #key#) = #StructKeyExists(params, key)#">
-			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
-				<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
 	</cffunction>
 	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
@@ -289,8 +294,14 @@ Notes:
 		<cfargument name="urlElements" type="array" required="true" />
 		
 		<cfset var route = getRoute(arguments.routeName) />
+		<cfset var routeParams = 0 />
 		
-		<cfreturn route.parseRoute(urlElements, getModuleDelimiter(), getEventParameter()) />
+		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
+		<cfset routeParams = route.parseRoute(urlElements, getModuleDelimiter(), getEventParameter()) />
+		<cfset getRequestHandler().setCurrentRouteName(arguments.routeName) />
+		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteRequiredParams(urlElements)) />
+		
+		<cfreturn routeParams />
 	</cffunction>
 
 	<cffunction name="readPersistEventData" access="public" returntype="struct" output="false"

@@ -42,6 +42,7 @@ Notes:
 	<cfset variables.persistArgs = "" />
 	<cfset variables.persistArgsIgnore = "" />
 	<cfset variables.statusType = "" />
+	<cfset variables.routeName = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -58,6 +59,7 @@ Notes:
 		<cfargument name="persistArgs" type="string" required="false" default="" />
 		<cfargument name="statusType" type="string" required="false" default="temporary" />
 		<cfargument name="persistArgsIgnore" type="string" required="false" default="" />
+		<cfargument name="routeName" type="string" required="false" default="" />
 		
 		<cfset setEventName(arguments.eventName) />
 		<cfset setEventParameter(arguments.eventParameter) />
@@ -69,6 +71,7 @@ Notes:
 		<cfset setPersistArgs(arguments.persistArgs) />
 		<cfset setStatusType(arguments.statusType) />
 		<cfset setPersistArgsIgnore(arguments.persistArgsIgnore) />
+		<cfset setRouteName(arguments.routeName) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -141,6 +144,12 @@ Notes:
 		<cfset var evaluatedUrl = getUrl() />
 		<cfset var evaluatedEventName = getEventName() />
 		<cfset var evaluatedModuleName =  getModuleName() />
+		<cfset var evaluatedRouteName = getRouteName() />
+		
+		<cfif Len(evaluatedRouteName) AND variables.expressionEvaluator.isExpression(evaluatedRouteName)>
+			<cfset evaluatedRouteName = getExpressionEvaluator().evaluateExpression(evaluatedRouteName, 
+				arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+		</cfif>
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
@@ -170,17 +179,27 @@ Notes:
 			</cfif>
 		</cfloop>
 		
-		<cfif evaluatedUrl neq "" AND expressionEvaluator.isExpression(evaluatedUrl)>
-			<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+		<!--- Support redirect urls using a url route --->
+		<cfif Len(evaluatedRouteName)>
+			<!--- Grab the module name from the context of the currently executing request--->
+			<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildRouteUrl(
+				arguments.eventContext.getAppManager().getModuleName(),
+				evaluatedRouteName,
+				params) />
+		<cfelse>
+			<!--- If it isn't a route then look at the url and event name properties to build the redirect url --->
+			<cfif Len(evaluatedUrl) AND expressionEvaluator.isExpression(evaluatedUrl)>
+				<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+			</cfif>
+			<cfif Len(evaluatedEventName) AND expressionEvaluator.isExpression(evaluatedEventName)>
+				<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+			</cfif>
+			<cfif Len(evaluatedModuleName) AND expressionEvaluator.isExpression(evaluatedModuleName)>
+				<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+			</cfif>
+			
+			<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(evaluatedModuleName, evaluatedEventName, params, evaluatedUrl) />
 		</cfif>
-		<cfif evaluatedEventName neq "" AND expressionEvaluator.isExpression(evaluatedEventName)>
-			<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
-		</cfif>
-		<cfif evaluatedModuleName neq "" AND expressionEvaluator.isExpression(evaluatedModuleName)>
-			<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
-		</cfif>
-		
-		<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(evaluatedModuleName, evaluatedEventName, params, evaluatedUrl) />
 		
 		<cfreturn redirectUrl />
 	</cffunction>
@@ -252,6 +271,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setRouteName" access="private" returntype="void" output="false">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfset variables.routeName = arguments.routeName />
+	</cffunction>
+	<cffunction name="getRouteName" access="private" returntype="string" output="false">
+		<cfreturn variables.routeName />
 	</cffunction>
 	
 	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">

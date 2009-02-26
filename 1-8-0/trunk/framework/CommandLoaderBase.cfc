@@ -453,6 +453,7 @@ Notes:
 		<cfset var eventName = "" />
 		<cfset var redirectUrl = getAppManager().getPropertyManager().getProperty("urlBase", "index.cfm") />
 		<cfset var moduleName = "" />
+		<cfset var routeName = "" />
 		<cfset var args = "" />
 		<cfset var persist = false />
 		<cfset var persistArgs = "" />
@@ -463,6 +464,9 @@ Notes:
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "event")>
 			<cfset eventName = arguments.commandNode.xmlAttributes["event"] />
+		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "route")>
+			<cfset routeName = arguments.commandNode.xmlAttributes["route"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "url")>
 			<cfset redirectUrl = arguments.commandNode.xmlAttributes["url"] />
@@ -499,7 +503,7 @@ Notes:
 			</cfif>
 		</cfloop>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, eventParameter, redirectPersistParameter, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore, routeName) />
 		
 		<cfset command.setLog(variables.redirectCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
