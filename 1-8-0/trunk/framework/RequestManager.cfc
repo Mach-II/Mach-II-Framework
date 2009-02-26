@@ -118,9 +118,26 @@ Notes:
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var key = "" />
 		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
+		<cfset var currentSESParams = getRequestHandler().getCurrentSESParams() />
 		
 		<cfif Len(routeName)>
 			<cfreturn buildRouteUrl(getAppManager().getModuleName(), routeName, getRequestHandler().getCurrentRouteParams()) />
+		<cfelseif StructCount(currentSESParams)>
+			<cfloop collection="#currentSESParams#" item="key">
+				<cfif key eq getEventParameter()>
+					<cfset eventName = currentSESParams[key] />
+					<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
+						<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
+						<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+					<cfelse>
+						<cfset parsedModuleName = arguments.moduleName />
+					</cfif>
+				<cfelseif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+					<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#currentSESParams[key]#", "|") />
+				</cfif>
+			</cfloop>
+			
+			<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
 		<cfelse>
 			<cfif isDefined("url.#eventParameterName#")>
 				<cfset eventName = url[eventParameterName] />
@@ -162,6 +179,7 @@ Notes:
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var value = "" />
 		<cfset var i = "" />
+		<cfset var keyList = StructKeyList(params) />
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
@@ -170,8 +188,11 @@ Notes:
 			<cfset queryString = queryString & getEventParameter() & getPairDelimiter()& arguments.eventName />
 		</cfif>
 		
+		<!--- Sort the list of url args to keep them in a consistent order --->
+		<cfset keyList = ListSort(keyList, "textnocase") />
+		
 		<!--- Attach each additional arguments if it exists and is a simple value --->
-		<cfloop collection="#params#" item="i">
+		<cfloop list="#keyList#" index="i">
 			<cfif IsSimpleValue(params[i])>
 				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
 				<cfif getParseSes()>
@@ -243,6 +264,7 @@ Notes:
 			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) gt 0>
 				<!--- The SES url has the event parameter in it so routes are disabled --->
 				<cfset params = parseNonRoute(names) />
+				<cfset getRequestHandler().setCurrentSESParams(params) />
 			<cfelse>
 				<!--- No event parameter was found so check to see if a route name is present --->
 				<cfif ListFindNoCase(getRouteNames(), names[1])>
@@ -250,6 +272,7 @@ Notes:
 				<cfelse>
 					<!--- No route found for this url --->
 					<cfset params = parseNonRoute(names) />
+					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
 			</cfif>
 			

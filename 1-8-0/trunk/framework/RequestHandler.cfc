@@ -45,6 +45,7 @@ Notes:
 	<cfset variables.isException = false />
 	<cfset variables.log = "" />
 	<cfset variables.currentRouteParams = StructNew() />
+	<cfset variables.currentSESParams = StructNew() />
 	<cfset variables.currentRouteName = "" />
 	
 	<!---
@@ -428,6 +429,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />
+	</cffunction>
+	
+	<cffunction name="setCurrentSESParams" access="public" returntype="void" output="false">
+		<cfargument name="sesParams" type="struct" required="true" />
+		<cfset variables.currentSESParams = arguments.sesParams />
+	</cffunction>
+	<cffunction name="getCurrentSESParams" access="public" returntype="struct" output="false">
+		<cfreturn variables.currentSESParams />
 	</cffunction>
 	
 	<cffunction name="setCurrentRouteParams" access="public" returntype="void" output="false">
