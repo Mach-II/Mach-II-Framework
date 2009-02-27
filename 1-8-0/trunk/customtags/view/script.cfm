@@ -30,7 +30,7 @@ Notes:
 	default="true" />
 
 <cfif thisTag.ExecutionMode IS "end">
-	<cfset variables.js = '<script type="text/javascript">' & Chr(13) & '<!--//--><![CDATA[//><!--' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//--><!]]>' & Chr(13) &  '</script>' & Chr(13) />
+	<cfset variables.js = Chr(13) & '<script type="text/javascript">' & Chr(13) & '<!--//--><![CDATA[//><!--' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//--><!]]>' & Chr(13) &  '</script>' & Chr(13) />
 	<cfif attributes.appendToHead>
 		<cfset caller.this.addHTMLHeadElement(variables.js) />
 		<cfset thisTag.GeneratedContent = "" />
