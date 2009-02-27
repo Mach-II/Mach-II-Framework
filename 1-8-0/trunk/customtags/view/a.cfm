@@ -40,8 +40,16 @@ Notes:
 	<!--- Build url parameters --->
 	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
 	
+	<cfif StructKeyExists(attributes, "p")>
+		<cfset StructAppend(variables.urlParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.p), false) />
+	</cfif>
+	
 	<!--- Build non-standard attributes --->
 	<cfset variables.nonStandardAttributes = normalizeStructByNamespace("x") />
+
+	<cfif StructKeyExists(attributes, "x")>
+		<cfset StructAppend(variables.nonStandardAttributes, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.x), false) />
+	</cfif>
 	
 	<!--- Build a route or an URL --->
 	<cfif StructKeyExists(attributes, "event")>
@@ -53,7 +61,11 @@ Notes:
 	<cfelseif StructKeyExists(attributes, "route")>
 		<!--- Build query string parameters --->
 		<cfset variables.queryStringParameters = normalizeStructByNamespace("q") />
-		
+
+		<cfif StructKeyExists(attributes, "q")>
+			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
+		</cfif>
+
 		<cfset variables.href = caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters) />
 	<cfelse>
 		<cfthrow type="MachII.customtags.view.a.noEventOrRoute"
