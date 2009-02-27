@@ -25,11 +25,18 @@ Updated version: 1.8.0
 Notes:
 - REQUIRED ATTRIBUTES
 	event	= [string] the event name to build the URL with
+	- OR -
+	route	= [string] the route name to build the URL with
 - OPTIONAL ATTRIBUTES
-	module	= [string] the module name to build the URL with
+	module	= [string] the module name to build the URL with (not valid with route attribute)
 	label	= [string] the value between the start and closing <a> tags
+	p		= [string|struct] name / value pair list or struct of URL parameters to build the URL with
+	q		= [string|struct] name / value pair list or struct of query string parameters to append to the end of a route (only valid with route attribute)
+	x		= [string|struct] name / value pair list or struct of additional non-standard attribute to insert into the rendered tag output
 - STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
+- NAMESPACES
+	p:key	= Indicates that the attribute "key" name should be used as
 --->
 <cfif thisTag.ExecutionMode IS "start">
 	
