@@ -31,7 +31,7 @@ Notes:
 <cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("options", true) />
 
 	<cfif IsStruct(attributes.items)>

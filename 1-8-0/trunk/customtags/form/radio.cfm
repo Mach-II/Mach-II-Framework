@@ -31,13 +31,13 @@ Notes:
 	disabled	= disabled|[null]
 	checked		= checked|[null] 
 	size		= [numeric]
-- STANDARD FORM ATTRIBUTES
+- STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
 --->
 <cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("input", true) />
 	
 	<!--- Ensure certain attributes are defined --->

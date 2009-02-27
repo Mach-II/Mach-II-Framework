@@ -29,13 +29,13 @@ Notes:
 	disabled	= disabled|[null]
 	selected	= selected|[null]
 	label		= [string]
-- STANDARD FORM ATTRIBUTES
+- STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
 --->
 <cfif thisTag.executionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("option", false) />	
 
 	<!--- Set data --->

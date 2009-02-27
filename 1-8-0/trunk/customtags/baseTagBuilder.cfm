@@ -17,7 +17,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id: checkbox.cfm 1159 2008-11-16 01:53:16Z peterfarrell $
+$Id$
 
 Created version: 1.8.0
 Updated version: 1.8.0
@@ -63,35 +63,6 @@ PROPERTIES
 <!---
 PUBLIC FUNCTIONS
 --->
-<cffunction name="setupFormTag" access="public" returntype="void" output="false"
-	hint="Sets up the form tag for use.">
-	
-	<cfset setTagType("form") />
-	<cfset setSelfClosingTag(false) />
-		
-	<cfset request._MachIIFormLib.bind = request.event />
-	
-	<!--- Check for required attributes --->
-	<cfif NOT StructKeyExists(attributes, "actionEvent")>
-		<cfthrow type="MachII.customtags.form.form.noActionEvent"
-			message="The form tag must have an attribute named 'actionEvent'." />
-	</cfif>
-	
-	<cfif StructKeyExists(attributes, "bind") AND IsSimpleValue(attributes.bind)>
-		<cfif request.event.isArgDefined(ListFirst(attributes.bind, "."))>
-			<cfset request._MachIIFormLib.bind = resolvePath(attributes.bind) />
-		<cfelse>
-			<cfthrow type="MachII.customtags.form.form.noBindInEvent"
-				message="A bind named '#attributes.bind#' is not available the current event object." />
-		</cfif>
-	</cfif>
-	
-	<cfif NOT thisTag.hasEndTag>
-		<cfthrow type="MachII.customtags.form.#getTagType()#"
-			message="The #getTagType()# must have an end tag." />
-	</cfif>
-</cffunction>
-
 <cffunction name="setupTag" access="public" returntype="void" output="false"
 	hint="Sets up a form element tag for use.">
 	<cfargument name="tagType" type="string" required="true" />
@@ -101,51 +72,9 @@ PUBLIC FUNCTIONS
 	<cfset setSelfClosingTag(arguments.hasEndTag) />
 	
 	<cfif isSelfClosingTag() AND NOT thisTag.hasEndTag>
-		<cfthrow type="MachII.customtags.form.#getTagType()#.endTag"
+		<cfthrow type="MachII.customtags.#variables.tabLib#.#getTagType()#.endTag"
 			message="The #getTagType()# must have an end tag." />
 	</cfif>
-</cffunction>
-
-<cffunction name="ensurePathOrName" acces="public" returntype="void" output="false"
-	hint="Ensures a path or name is available in the attributes.">
-	<cfif NOT StructKeyExists(attributes, "path") 
-		AND NOT StructKeyExists(attributes, "name")>
-		<cfthrow type="MachII.customtags.form.#variables.tagData.tagName#.noPath"
-			message="This tag must have an attribute named 'path' or 'name' or both." />
-	</cfif>
-</cffunction>
-
-<cffunction name="resolvePath" access="public" returntype="any" output="false"
-	hint="Resolves a path and returns a value.">
-	<cfargument name="path" type="string" required="true" />
-	<cfargument name="bind" type="any" required="false" default="#request._MachIIFormLib.bind#" />
-	
-	<cfset var value = "" />
-	<cfset var key = ListFirst(arguments.path, ".") />
-	
-	<cfif IsObject(arguments.bind)>
-		<cfif getMetaData(arguments.bind).name NEQ "MachII.framework.Event">
-			<cfinvoke component="#arguments.bind#"
-				method="get#key#"
-				returnvariable="value" />
-		<cfelse>
-			<cfinvoke component="#arguments.bind#"
-				method="getArg"
-				returnvariable="value">
-				<cfinvokeargument name="name" value="#key#" />
-			</cfinvoke>
-		</cfif>
-	<cfelseif IsStruct(arguments.bind)>
-		<cfset value = arguments.bind[key] />
-	</cfif>
-	
-	<cfset arguments.path = ListDeleteAt(arguments.path, 1, ".") />
-
-	<cfif ListLen(arguments.path, ".") GT 0>
-		<cfset value = resolvePath(arguments.path, value) />
-	</cfif>
-	
-	<cfreturn value />
 </cffunction>
 
 <cffunction name="getParentTagAttribute" access="public" returntype="string" output="false"
@@ -211,6 +140,12 @@ PUBLIC FUNCTIONS
 	</cfif>
 
 	<cfset variables.attributeCollection[arguments.attributeName] = arguments.value />
+</cffunction>
+
+<cffunction name="setAttributes" access="public" returntype="void" output="false"
+	hint="Adds attributes.">
+	<cfargument name="attributes" type="struct" required="true" />
+	<cfset StructAppend(variables.attributeCollection, arguments.attributes, true) />
 </cffunction>
 
 <cffunction name="setAttributeIfDefined" access="public" returntype="void" output="false"
@@ -306,6 +241,23 @@ PUBLIC FUNCTIONS - UTIL
 <cffunction name="getAttributeCollection" access="public" returntype="struct" output="false"
 	hint="Gets the attribute collection.">
 	<cfreturn variables.attributeCollection />
+</cffunction>
+
+<cffunction name="normalizeStructByNamespace" access="public" returntype="struct" output="false">
+	<cfargument name="namespace" type="string" required="true" />
+	<cfargument name="target" type="struct" required="true" default="#attributes#" />
+	
+	<cfset var tagAttributes = StructNew() />
+	<cfset var key = "" />
+	<cfset var namespaceStem = arguments.namespace & ":" />
+		
+	<cfloop collection="#arguments.target#" item="key">
+		<cfif key.toLowercase().startsWith(namespaceStem)>
+			<cfset tagAttributes[ReplaceNoCase(key, namespaceStem, "", "one").toLowercase()] = arguments.target[key] />
+		</cfif>
+	</cfloop>
+	
+	<cfreturn tagAttributes />
 </cffunction>
 
 <!---

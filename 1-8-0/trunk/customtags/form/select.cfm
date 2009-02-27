@@ -30,7 +30,7 @@ Notes:
 	disabled	= disabled|[null]
 	size		= [numeric]
 	checkValue	= [string]|[null]
-- STANDARD FORM ATTRIBUTES
+- STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
 --->
 <cfimport prefix="form" taglib="/MachII/customtags/form/" />
@@ -38,7 +38,7 @@ Notes:
 <cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/helper.cfm" />		
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("select", false) />
 	
 	<!--- Ensure certain attributes are defined --->
