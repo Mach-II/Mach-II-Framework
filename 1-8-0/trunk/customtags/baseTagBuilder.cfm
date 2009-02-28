@@ -182,6 +182,18 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
+<cffunction name="setNonStandardAttributes" access="public" returntype="void" output="false"
+	hint="Adds non-standard attributes (namespaced with 'x:' and in the 'x' attribute) to the tag writer if defined.">
+	
+	<cfset var nonStandardAttributes = normalizeStructByNamespace("x") />	
+	
+	<cfif StructKeyExists(attributes, "x")>
+		<cfset StructAppend(nonStandardAttributes, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.x), false) />
+	</cfif>
+	
+	<cfset setAttributes(nonStandardAttributes) />
+</cffunction>
+
 <cffunction name="setEventAttributes" access="public" returntype="void" output="false"
 	hint="Adds event attributes to the tag writer if defined.">
 

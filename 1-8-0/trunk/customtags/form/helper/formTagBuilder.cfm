@@ -45,12 +45,6 @@ PUBLIC FUNCTIONS
 		
 	<cfset request._MachIIFormLib.bind = request.event />
 	
-	<!--- Check for required attributes --->
-	<cfif NOT StructKeyExists(attributes, "actionEvent")>
-		<cfthrow type="MachII.customtags.form.form.noActionEvent"
-			message="The form tag must have an attribute named 'actionEvent'." />
-	</cfif>
-	
 	<cfif StructKeyExists(attributes, "bind") AND IsSimpleValue(attributes.bind)>
 		<cfif request.event.isArgDefined(ListFirst(attributes.bind, "."))>
 			<cfset request._MachIIFormLib.bind = resolvePath(attributes.bind) />

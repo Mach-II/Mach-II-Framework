@@ -40,18 +40,37 @@ Notes:
 	<cfset setupFormTag() />
 
 	<!--- Set defaults --->
-	<cfparam name="attributes.actionUrlParams" type="any" 
-		default="#StructNew()#" />
 	<cfparam name="attributes.encType" type="string" 
 		default="multipart/form-data" />
 	<cfparam name="attributes.method" type="string" 
 		default="post" />
+		
+	<!--- Build url parameters --->
+	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
+	
+	<cfif StructKeyExists(attributes, "actionUrlParams")>
+		<cfset StructAppend(variables.urlParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.actionUrlParams), false) />
+	</cfif>
 	
 	<!--- Set required attributes--->
-	<cfif NOT StructKeyExists(attributes, "actionModule")>
-		<cfset setAttribute("action", caller.this.buildUrl(attributes.actionEvent, attributes.actionUrlParams)) />
+	<cfif StructKeyExists(attributes, "actionEvent")>
+		<cfif NOT StructKeyExists(attributes, "actionModule")>
+			<cfset setAttribute("action", caller.this.buildUrl(attributes.actionEvent, variables.urlParameters)) />
+		<cfelse>
+			<cfset setAttribute("action", caller.this.buildUrlToModule(attributes.actionModule, attributes.actionEvent, variables.urlParameters)) />
+		</cfif>
+	<cfelseif StructKeyExists(attributes, "actionRoute")>
+		<!--- Build query string parameters --->
+		<cfset variables.queryStringParameters = normalizeStructByNamespace("q") />
+
+		<cfif StructKeyExists(attributes, "q")>
+			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
+		</cfif>
+
+		<cfset setAttribute("action", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />
 	<cfelse>
-		<cfset setAttribute("action", caller.this.buildUrlToModule(attributes.actionModule, attributes.actionEvent, attributes.actionUrlParams)) />
+		<cfthrow type="MachII.customtags.form.form.noEventOrRoute"
+			message="The 'form' tag must have an attribute named 'event' or 'route'." />
 	</cfif>
 	<cfset setAttribute("method") />
 	<cfset setAttribute("encType") />
@@ -64,6 +83,7 @@ Notes:
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />
+	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 		
 	<cfoutput>#doStartTag()#</cfoutput>

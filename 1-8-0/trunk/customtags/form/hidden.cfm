@@ -67,6 +67,7 @@ Notes:
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />
+	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
 	<cfoutput>#doStartTag()#</cfoutput>

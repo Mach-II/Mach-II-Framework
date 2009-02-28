@@ -51,19 +51,12 @@ Notes:
 		<cfset StructAppend(variables.urlParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.p), false) />
 	</cfif>
 	
-	<!--- Build non-standard attributes --->
-	<cfset variables.nonStandardAttributes = normalizeStructByNamespace("x") />
-
-	<cfif StructKeyExists(attributes, "x")>
-		<cfset StructAppend(variables.nonStandardAttributes, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.x), false) />
-	</cfif>
-	
-	<!--- Build a route or an URL --->
+	<!--- Set required attributes--->
 	<cfif StructKeyExists(attributes, "event")>
 		<cfif StructKeyExists(attributes, "module")>
-			<cfset variables.href = caller.this.buildUrlToModule(attributes.module, attributes.event, variables.urlParameters) />
+			<cfset setAttribute("href", variables.href = caller.this.buildUrlToModule(attributes.module, attributes.event, variables.urlParameters)) />
 		<cfelse>
-			<cfset variables.href = caller.this.buildUrl(attributes.event, variables.urlParameters) />
+			<cfset setAttribute("href", caller.this.buildUrl(attributes.event, variables.urlParameters)) />
 		</cfif>
 	<cfelseif StructKeyExists(attributes, "route")>
 		<!--- Build query string parameters --->
@@ -73,14 +66,11 @@ Notes:
 			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
 		</cfif>
 
-		<cfset variables.href = caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters) />
+		<cfset setAttribute("href", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />
 	<cfelse>
 		<cfthrow type="MachII.customtags.view.a.noEventOrRoute"
 			message="The 'a' tag must have an attribute named 'event' or 'route'." />
 	</cfif>
-	
-	<!--- Set required attributes--->
-	<cfset setAttribute("href", variables.href) />
 	
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("charset") />
@@ -93,12 +83,10 @@ Notes:
 	<cfset setAttributeIfDefined("target") />
 	<cfset setAttributeIfDefined("type") />
 	
-	<!--- Set standard and event attributes --->
+	<!--- Set standard, non-standard and event attributes --->
 	<cfset setStandardAttributes() />
+	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-	
-	<!--- Set non-standard attributes --->
-	<cfset setAttributes(variables.nonStandardAttributes) />
 	
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>

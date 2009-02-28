@@ -53,6 +53,11 @@ Notes:
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("rows") />
 	<cfset setAttributeIfDefined("cols") />
+	
+	<!--- Set standard and event attributes --->
+	<cfset setStandardAttributes() />
+	<cfset setNonStandardAttributes() />
+	<cfset setEventAttributes() />
 
 	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
 <cfelse>
