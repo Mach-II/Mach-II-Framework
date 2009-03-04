@@ -76,6 +76,6 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
-	<cfoutput>#doStartTag()#<input name="_#attributes.name#" type="hidden" value="" /></cfoutput>
+	<cfoutput>#doStartTag()#<input name="__#attributes.name#" type="hidden" value="" /></cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
