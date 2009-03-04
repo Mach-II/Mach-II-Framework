@@ -288,8 +288,7 @@ Notes:
 					<cfset params = parseNonRoute(names) />
 					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
-			</cfif>
-			
+			</cfif>	
 		</cfif>
 		
 		<cfreturn params />
@@ -365,7 +364,6 @@ Notes:
 		
 		<cfset data = getRequestRedirectPersist().read(arguments.eventArgs) />
 
-		
 		<!--- If there is data, run post-redirect callbacks --->
 		<cfif StructCount(data)>
 			
@@ -501,8 +499,6 @@ Notes:
 		
 		<cfset var routes = getRoutes() />
 		
-		<!--- TODO: handle getting routes from the parent app if there is one --->
-		
 		<cfif StructKeyExists(routes, arguments.routeName)>
 			<cfreturn variables.routes[arguments.routeName] />
 		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeName)>
@@ -518,8 +514,6 @@ Notes:
 		
 		<cfset var routeAliases = variables.routeAliases />
 		
-		<!--- TODO: handle getting routes by alias from the parent module if there is one --->
-		
 		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
 				message="No route with alias '#arguments.routeAlias#' could be found.'" />
@@ -533,6 +527,7 @@ Notes:
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
+		
 		<cfif arguments.route.getUrlAlias() neq "">
 			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
 		</cfif>
