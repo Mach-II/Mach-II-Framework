@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.eventParameter = "" />
 	<cfset variables.parameterPrecedence = "" />
 	<cfset variables.parseSes = "" />
+	<cfset variables.urlExcludeEventParameter = false />
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
@@ -70,6 +71,7 @@ Notes:
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
+		<cfset setUrlExcludeEventParameter(getPropertyManager().getProperty("urlExcludeEventParameter")) />
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		
@@ -183,9 +185,17 @@ Notes:
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+			<cfif NOT getUrlExcludeEventParameter()>
+				<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+			<cfelse>
+				<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+			</cfif>
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfset queryString = queryString & getEventParameter() & getPairDelimiter()& arguments.eventName />
+			<cfif NOT getUrlExcludeEventParameter()>
+				<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.eventName />
+			<cfelse>
+				<cfset queryString = queryString & arguments.eventName />
+			</cfif>
 		</cfif>
 		
 		<!--- Sort the list of url args to keep them in a consistent order --->
@@ -288,6 +298,12 @@ Notes:
 		<cfset var i = 0 />
 		<cfset var names = arguments.urlElements />
 		<cfset var params = StructNew() />
+		
+		<!--- If the event name was excluded from the URL, then pop off the first element --->
+		<cfif getUrlExcludeEventParameter() AND ArrayLen(arguments.urlElements)>
+			<cfset params[getEventParameter()] = arguments.urlElements[1] />
+			<cfset ArrayDeleteAt(arguments.urlElements, 1) />
+		</cfif>
 	
 		<cfif getSeriesDelimiter() EQ getPairDelimiter()>
 			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
@@ -568,6 +584,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getParseSes" access="private" returntype="string" output="false">
 		<cfreturn variables.parseSes />
+	</cffunction>
+	
+	<cffunction name="setUrlExcludeEventParameter" access="private" returntype="void" output="false">
+		<cfargument name="urlExcludeEventParameter" type="boolean" required="true" />
+		<cfset variables.urlExcludeEventParameter = arguments.urlExcludeEventParameter />
+	</cffunction>
+	<cffunction name="getUrlExcludeEventParameter" access="private" returntype="boolean" output="false">
+		<cfreturn variables.urlExcludeEventParameter />
 	</cffunction>
 	
 	<cffunction name="setDefaultUrlBase" access="private" returntype="void" output="false">

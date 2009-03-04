@@ -40,7 +40,7 @@ the rest of the framework. (pfarrell)
 	<cfset variables.majorVersion = "1.8.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES" />
+		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES,urlExcludeEventParameter" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -245,6 +245,12 @@ the rest of the framework. (pfarrell)
 			</cfif>
 			<cfif NOT isPropertyDefined("moduleDelimiter")>
 				<cfset setProperty("moduleDelimiter", ":") />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlExcludeEventParameter")>
+				<cfset setProperty("urlExcludeEventParameter", false) />
+			<cfelseif NOT IsBoolean(getProperty("urlExcludeEventParameter"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlExcludeEventParameter' property must be a boolean." />
 			</cfif>
 		</cfif>
 	</cffunction>
