@@ -54,7 +54,7 @@ Notes:
 	<!--- Set required attributes--->
 	<cfif StructKeyExists(attributes, "event")>
 		<cfif StructKeyExists(attributes, "module")>
-			<cfset setAttribute("href", variables.href = caller.this.buildUrlToModule(attributes.module, attributes.event, variables.urlParameters)) />
+			<cfset setAttribute("href", caller.this.buildUrlToModule(attributes.module, attributes.event, variables.urlParameters)) />
 		<cfelse>
 			<cfset setAttribute("href", caller.this.buildUrl(attributes.event, variables.urlParameters)) />
 		</cfif>
@@ -66,10 +66,12 @@ Notes:
 			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
 		</cfif>
 
-		<cfset setAttribute("href", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />
+		<cfset setAttribute("href", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters))/>
+	<cfelseif StructKeyExists(attributes, "useCurrentUrl")>
+		<cfset setAttribute("href", caller.this.buildCurrentUrl(variables.urlParameters)) />
 	<cfelse>
-		<cfthrow type="MachII.customtags.view.a.noEventOrRoute"
-			message="The 'a' tag must have an attribute named 'event' or 'route'." />
+		<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrl"
+			message="The 'a' tag must have an attribute named 'event', 'route' or 'useCurrentUrl'." />
 	</cfif>
 	
 	<!--- Set optional attributes --->
