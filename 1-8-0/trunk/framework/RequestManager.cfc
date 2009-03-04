@@ -38,6 +38,7 @@ Notes:
 	<cfset variables.parameterPrecedence = "" />
 	<cfset variables.parseSes = "" />
 	<cfset variables.urlExcludeEventParameter = false />
+	<cfset variables.queryStringUrls = false />
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
@@ -79,6 +80,12 @@ Notes:
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
+		
+		<cfif getQueryStringDelimiter() EQ "?"
+			AND getSeriesDelimiter() EQ "&"
+			AND getPairDelimiter() EQ "=">
+			<cfset setQueryStringUrls(true) />
+		</cfif>
 		
 		<!--- Setup the RequestRedirectPersist --->
 		<cfset setRequestRedirectPersist(CreateObject("component", "MachII.framework.RequestRedirectPersist").init(arguments.appManager)) />
@@ -183,19 +190,16 @@ Notes:
 		<cfset var i = "" />
 		<cfset var keyList = StructKeyList(params) />
 
+		<!--- Attach event parameter only if it not supposed to be excluded --->
+		<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
+			<cfset queryString = getEventParameter() & getPairDelimiter() />
+		</cfif>
+
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfif NOT getUrlExcludeEventParameter()>
-				<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
-			<cfelse>
-				<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
-			</cfif>
+			<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
-			<cfif NOT getUrlExcludeEventParameter()>
-				<cfset queryString = queryString & getEventParameter() & getPairDelimiter() & arguments.eventName />
-			<cfelse>
-				<cfset queryString = queryString & arguments.eventName />
-			</cfif>
+			<cfset queryString = queryString & arguments.eventName />
 		</cfif>
 		
 		<!--- Sort the list of url args to keep them in a consistent order --->
@@ -592,6 +596,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getUrlExcludeEventParameter" access="private" returntype="boolean" output="false">
 		<cfreturn variables.urlExcludeEventParameter />
+	</cffunction>
+	
+	<cffunction name="setQueryStringUrls" access="private" returntype="void" output="false">
+		<cfargument name="queryStringUrls" type="boolean" required="true" />
+		<cfset variables.queryStringUrls = arguments.queryStringUrls />
+	</cffunction>
+	<cffunction name="isQueryStringUrls" access="private" returntype="boolean" output="false">
+		<cfreturn variables.queryStringUrls />
 	</cffunction>
 	
 	<cffunction name="setDefaultUrlBase" access="private" returntype="void" output="false">
