@@ -300,7 +300,7 @@ from the parent application.
 			<cfif package[i].type EQ "js">
 				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addCss(package[i].paths, arguments.outputType) />
+				<cfset code = code & addStylesheet(package[i].paths, arguments.outputType) />
 			</cfif>
 			<cfif arguments.outputType EQ "inline" AND i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />
@@ -341,8 +341,8 @@ from the parent application.
 		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
-	<cffunction name="addCss" access="public" returntype="string" output="false"
-		hint="Adds css script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
+	<cffunction name="addStylesheet" access="public" returntype="string" output="false"
+		hint="Adds css stylesheet code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
 		<cfargument name="urls" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .css files.">
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
