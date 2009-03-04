@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version: 1.6.0.@minorVersion@
+Version: 1.6.1.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -25,7 +25,7 @@ and continues to mature as a strong and viable framework choice for developers.
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
 ------------------------------------------------
-Mach-II 1.6.0 is released under the Apache 2.0 license.  You can use Mach-II 
+Mach-II 1.6.1 is released under the Apache 2.0 license.  You can use Mach-II 
 on any commercial application as long as you abide by the license. For more 
 details, please see the NOTICE and LICENSE files that are shipped with the 
 framework.

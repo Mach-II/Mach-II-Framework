@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version: 1.6.0.@minorVersion@
+Version: 1.6.1.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -35,157 +35,15 @@ limitations under the License.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
-* Fixed Inconsistent Cleanup of Abandoned Redirect Persist Data
-Re-built cleanup routine to ensure total cleanup of abandoned redirect persist data.
-(2007-10-20 pfarrell)
+* EmailLogger sends HTML messages as plain text
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/231
+(2009-03-03 peterfarrell)
 
-* Fixed SES / Friendly URLs with zero length param value breaks parseSES()
-CF8 strips out the double "//" from the path info. This causes url params to become mismatched.
-(2007-11-13 pfarrell)
+* CF7 incorrectly tries to cast values to java methods causing ambiguous 
+method call exception
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/232
+(2009-03-03 peterfarrell)
 
-* Fixed event arguments not available in handleException plugin point or exception event
-The missing event is placed in an event arg named 'missingEvent' in the exception event. Replumbed 
-when the exception event is placed in the queue, so getNextEvent() is now available in the 
-handleException plugin point.
-
-In the handleException plugin point, you can get the missing event by doing this:
-arguments.eventContext.getNextEvent().getArg("missingEvent")
-
-You use getNextEvent() because the handleException() plugin point is called before the 
-next event begins processing.
-
-In your exception event handler:
-event.getArg("missingEvent")
-
-If you clear the event queue in the handleException() plugin point and do not announce a
-a new event.  You will clear the exception event and no exception event handler will be
-run.  You must announce a new event if you clear the event queue in the handleException()
-plugin point.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/14
-(2007-11-21 pfarrell)
-
-* Fixed EventContext.cfc failed to handle exception when an event-mapping exists
-If an exception occurs in an event which has an event-mapping defined, the handleException
-method of EventContext.cfc itself throws a new exception.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/24
-(2008-01-14 pfarrell)
-
-* AppKey with invalid characters for struct keys caused redirect persists to fail
-The boostrappers now "clean" AppKeys so StructGet() built-in function does not
-fail.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/39
-(2008-06-15 pfarrell)
-
-* Redirect caused exception when statusType is set 'permanent' or 'prg'
-The redirect would occur, but an exception would occur causing the handleException()
-plugin point to be run.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/43
-(2008-06-20 pfarrell)
-
-* Plugins in modules failed to run before parent plugins if runParent="before"
-The PluginManager only set the runParent attribute when the XML was being parsed
-as override XML.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/50
-(2008-06-20 pfarrell)
-
-* <event-bean> fields attribute did not trim each list item
-Event-bean did not Trim() list values in the field attribute which caused event-bean 
-to fail when you use spaces in the list (e.g. "firstName, lastName , emailAddress"). 
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/149
-(2008-10-11 pfarrell)
-
-------------------------------------------------
-Improvements / Enhancements
-------------------------------------------------
-* Application.cfc Bootstrapper Enhancements and OnSessionStart / OnSessionEnd Integration
-Add onSessionStart / onSessionEnd integration as new plugin point.  This enhancement helps 
-developers to integrate third-party modules into a base application with ease and/or to 
-encapsulate session application events into Mach-II rather than maintaining application 
-event code in their Application.cfc file.
-
-The bootstrapper (mach-ii.cfc) was added onApplicationStart and onRequestStart methods to
-allow for easier setup of Mach-II applications. These methods can be overrided for custom
-functionality.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/5
-(2007-11-10 pfarrell)
-
-* Message Subscriber Listeners Enhancement (AKA Broadcast Style Listeners Invocation)
-This enhancement allows developers another way to invoke listeners by publishing messages.
-This lets developers easily swap different listener methods or add addition listeners that 
-respond to a message by changing the subscribes directive instead of changing the a bunch 
-of notify commands throughout an XML file since listeners are decoupled from the event-handlers.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/4
-(2007-11-11 pfarrell)
-
-* Caching Enhancement
-Added a generic interface that allows developers to implement their own caching strategy 
-for caching at the controller level. Developers may specify which caching strategy they 
-want to use through a special Mach-II caching property (MachII.caching.CachingProperty).
-Additional configuration parameters may also be passed in to the caching strategy through 
-the caching property. The default Mach-II caching strategy will leverage storing cached 
-items in the application scope using the TimeSpanCache (MachII.caching.strategies.TimeSpanCache).
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/2
-(2008-03-15 kwiersma)
-
-* Utility Connector for ColdSpring
-Added connector for easy use of Mach-II managed LogFactory and CacheStrategyManager components
-inside of the ColdSpring.  Allows you to use logging and caching functionality in your model 
-layer.
-
-See file header comments on how to setup and configure the MachII.util.UtilityConector.
-(2008-04-24 pfarrell)
-
-* <event-arg> Overwrite Enhancement
-Added the "overwrite" attribute (defaults to true) that allows you optionally set an
-event-arg by setting the "overwrite" attribute to false. Use to set a default if an
-event-arg is not currently in the Event. Works similarly to <cfparam>.
-
-(2008-05-10 pfarrell)
-
-------------------------------------------------
-Internal Framework Improvements / Enhancements / Other Changes
-------------------------------------------------
-* Removed superfluous Application.cfm and index.cfm files
-These files are no longer required for backwards compatibility and cause confusion to new
-users that thinking they can run index.cfm instead of using the skeleton.
-
-See for more information: http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/16
-(2007-12-7 pfarrell)
-
-* ColdspringProperty Part of Mach-II Core
-Moved development of the ColdspringProperty into the Mach-II core. Use 
-MachII.properties.ColdspringProperty instead of any of the CS loaders available
-in the ColdSpring core files.
-(2008-03-15 pfarrell)
-
-* ColdspringProperty Improved Performance
-Improved performance of the ColdspringProperty:
-- Used java.lang.StringBuffer for string concatenation
-- Used hash instead of UUID for name of CFC in dynamic method generation (15-18% faster than UUID)
-
-* Deprecated mach-ii.cfm
-All supported CF engines now support Application.cfc.  The mach-ii.cfm bootstrapper for
-Application.cfm has been deprecated as Application.cfc offers application events and Abobe
-has stopped selling support for ColdFusion MX 6.1 thus the decision to deprecate this
-bootstrapper.
-(2008-04-17 pfarrell)
-
-* Add MXUnit Test Cases
-Mach-II officially uses MXUnit for unit testing framework components. Not all components
-currently have test cases, but all new features introduced in this release do.
-(2008-04-24 pfarrell)
-
-* Made MachII.util.BeanUtil a singleton per CommandLoaderBase
-In previous versions, a new instance of BeanUtil was created for each event-bean command.
-This improves performance a drastically fewer number of BeanUtils are created during
-the loading of the framework.
-(2008-05-09 pfarrell)
+* DTD incorrectly indentifies <element> of having to require a value attribute
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/235
+(2009-03-03 peterfarrell)

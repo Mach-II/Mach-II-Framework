@@ -29,18 +29,18 @@ Notes:
 
 -->
 <project
-	name="Mach-II Framework 1.6.0"
+	name="Mach-II Framework 1.6.1"
 	default="usage"
 	basedir=".">
 	
-	<description>Mach-II Framework 1.6.0</description>
+	<description>Mach-II Framework 1.6.1</description>
 	
 	<!--
 	PROPERTIES
 	-->
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
-	<property name="majorVersion" value="1-6-0"/>
+	<property name="majorVersion" value="1-6-1"/>
 	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	

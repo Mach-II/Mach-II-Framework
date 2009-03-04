@@ -33,7 +33,7 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 <cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 <!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_1_1.dtd. --->
-<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_6_0.dtd')#" />
+<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_6_1.dtd')#" />
 <!--- Set the request timeout for loading of the framework. Defaults to 120 --->
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
 
