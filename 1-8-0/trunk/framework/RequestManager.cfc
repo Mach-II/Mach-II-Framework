@@ -302,10 +302,13 @@ Notes:
 		<cfset var names = arguments.urlElements />
 		<cfset var params = StructNew() />
 		
-		<!--- If the event name was excluded from the URL, then pop off the first element --->
-		<cfif getUrlExcludeEventParameter() AND ArrayLen(arguments.urlElements)>
+		<!---
+		If the event name was excluded from the URL and there are an odd number of
+		URL elements then pop off the first element
+		--->
+		<cfif getUrlExcludeEventParameter() AND ArrayLen(arguments.urlElements) MOD 2>
 			<cfset params[getEventParameter()] = arguments.urlElements[1] />
-			<cfset ArrayDeleteAt(arguments.urlElements, 1) />
+			<cfset ArrayDeleteAt(names, 1) />
 		</cfif>
 	
 		<cfif getSeriesDelimiter() EQ getPairDelimiter()>
