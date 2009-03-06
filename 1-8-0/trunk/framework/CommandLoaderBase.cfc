@@ -212,22 +212,16 @@ Notes:
 		<cfargument name="commandNode" type="any" required="true" />
 		
 		<cfset var command = "" />
-		<cfset var bean = "" />
+		<cfset var bean = arguments.commandNode.xmlAttributes["bean"] />
+		<cfset var method = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var resultArg = "" />
-		<cfset var method = "" />
 		<cfset var args = "" />
 		<cfset var i = "" />
 		<cfset var namedArgCount = 0 />
 		<cfset var argValue = "" />
 		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "bean")>
-			<cfset bean = arguments.commandNode.xmlAttributes["bean"] />	
-		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
 			<cfset resultArg = arguments.commandNode.xmlAttributes["resultArg"] />	
-		</cfif>	
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "method")>
-			<cfset method = arguments.commandNode.xmlAttributes["method"] />	
 		</cfif>	
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
 			<cfset args = arguments.commandNode.xmlAttributes["args"] />	

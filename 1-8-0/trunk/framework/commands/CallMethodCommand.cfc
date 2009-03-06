@@ -90,6 +90,12 @@ or
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
 		
+		<cfif NOT IsObject(bean)>
+			<cfthrow type="MachII.framework.commands.NoBean"
+				message="A call-method commands was encountered that did not have a bean named '#getBeanId#' autowired into it."
+				detail="Ensure your IoC property such as ColdSpring is of a version that supports the call-method command." />
+		</cfif>
+		
 		<cfloop from="1" to="#ArrayLen(args)#" index="i">
 			<cfif args[i].name NEQ "">
 				<cfif args[i].isExpression>
@@ -171,15 +177,33 @@ or
 		<cfreturn true />
 	</cffunction>
 	
+	<cffunction name="addArgument" access="public" returntype="void" output="false">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="any" required="true" />
+		
+		<cfset var arg = StructNew() />
+		
+		<cfset arg.name = arguments.name />
+		
+		<cfif isSimpleValue(value)>
+			<cfset arg.isExpression = expressionEvaluator.isExpression(value) />
+		<cfelse>
+			<cfset arg.isExpression = false />
+		</cfif>
+		
+		<cfset arg.value = value /> 
+		
+		<cfset ArrayAppend(variables.args, arg) />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="transformArgumentList" access="private" returntype="void" output="false"
 		hint="Transforms the argument list into a more optimized data structure for evaluation.">
 
-		<cfset var argText = "" />
 		<cfset var arg = "" />
-		<cfset var expressionEvaluator = getExpressionEvaluator() />
+		<cfset var argText = "" />
 		
 		<cfloop list="#getArgumentList()#" index="argText">
 			<cfset arg = StructNew() />
@@ -238,20 +262,6 @@ or
 	</cffunction>
 	<cffunction name="getArgumentList" access="private" returntype="string" output="false">
 		<cfreturn variables.argumentList />
-	</cffunction>
-	
-	<cffunction name="addArgument" access="public" returntype="void" output="false">
-		<cfargument name="name" type="string" required="true" />
-		<cfargument name="value" type="any" required="true" />
-		<cfset var arg = StructNew() />
-		<cfset arg.name = arguments.name />
-		<cfif isSimpleValue(value)>
-			<cfset arg.isExpression = expressionEvaluator.isExpression(value) />
-		<cfelse>
-			<cfset arg.isExpression = false />
-		</cfif>
-		<cfset arg.value = value /> 
-		<cfset ArrayAppend(variables.args, arg) />
 	</cffunction>
 	
 	<cffunction name="setArguments" access="private" returntype="void" output="false">
