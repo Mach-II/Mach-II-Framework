@@ -300,7 +300,7 @@ from the parent application.
 			<cfif package[i].type EQ "js">
 				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addStylesheet(package[i].paths, arguments.outputType) />
+				<cfset code = code & addStylesheet(package[i].paths, pacakge[i].attributes, arguments.outputType) />
 			</cfif>
 			<cfif arguments.outputType EQ "inline" AND i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />
@@ -349,6 +349,8 @@ from the parent application.
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates to output type for the generated HTML code (head, inline).">
+		<cfargument name="forIEVersion" type="string" required="false"
+			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
 		<cfset var code = "" />
 		<cfset var attributesCode = "" />
@@ -382,6 +384,11 @@ from the parent application.
 			</cfif>
 		</cfloop>
 		
+		<!--- Enclose in an IE conditional comment if available --->
+		<cfif StructKeyExists(arguments, "forIEVersion")>
+			<cfset code = wrapIEConditionalComment(arguments.forIEVersion, code) />
+		</cfif>
+		
 		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
@@ -400,7 +407,8 @@ from the parent application.
 		<cfset var code = '<link href="' & arguments.url & '"' />
 		<cfset var key = "" />
 		
-		<cfset StructAppend(getUtils().parseAttributesIntoStruct(arguments.attributes), resolveMimeTypeAndGetData(arguments.type)) />
+		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
+		<cfset StructAppend(arguments.attributes, resolveMimeTypeAndGetData(arguments.type)) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
 			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
@@ -451,6 +459,31 @@ from the parent application.
 			<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code) />
 			<cfreturn "" />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="wrapIEConditionalComment" access="private" returntype="string" output="false"
+		hint="Wraps an IE conditional comment around the incoming code.">
+		<cfargument name="forIEVersion" type="string" required="true" />
+		<cfargument name="code" type="string" required="true" />
+		
+		<cfset var conditional = Trim(arguments.forIEVersion) />
+		<cfset var comment = Chr(13) />
+		
+		<!--- Nothing in the version means all versions of IE --->
+		<cfif NOT Len(conditional)>
+			<cfset comment = comment & "<!--[if IE]>" & Chr(13) />
+		<!--- No operator (just version number) means EQ for version --->
+		<cfelseif IsNumeric(conditional)>
+			<cfset comment = comment & "<!--[if IE " & conditional &  "]>" & Chr(13)  />
+		<!--- Use operator and version --->
+		<cfelse>
+			<cfset comment = comment & "<!--[if " & ListFirst(conditional, " ") & " IE " & ListLast(conditional, " ") &  "]>" & Chr(13)  />
+		</cfif>
+		
+		<!--- Append the code --->
+		<cfset comment = comment & arguments.code & Chr(13) & "<![endif]-->" & Chr(13) />
+
+		<cfreturn comment />
 	</cffunction>
 	
 	<cffunction name="isAssetPathInWatchList" access="private" returntype="boolean" output="false"
