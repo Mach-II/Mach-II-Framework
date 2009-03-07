@@ -55,6 +55,7 @@ onKeyUp		= [string]
 <!---
 PROPERTIES
 --->
+<cfset variables.tagLib = "" />
 <cfset variables.tagType = "" />
 <cfset variables.selfClosingTag = false />
 <cfset variables.attributeCollection = StructNew() />
@@ -72,7 +73,7 @@ PUBLIC FUNCTIONS
 	<cfset setSelfClosingTag(arguments.hasEndTag) />
 	
 	<cfif isSelfClosingTag() AND NOT thisTag.hasEndTag>
-		<cfthrow type="MachII.customtags.#variables.tabLib#.#getTagType()#.endTag"
+		<cfthrow type="MachII.customtags.#variables.tagLib#.#getTagType()#.endTag"
 			message="The #getTagType()# must have an end tag." />
 	</cfif>
 </cffunction>
@@ -275,6 +276,14 @@ PUBLIC FUNCTIONS - UTIL
 <!---
 ACCESSORS
 --->
+<cffunction name="setTagLib" access="public" returntype="void" output="false">
+	<cfargument name="tagLib" type="string" required="true" />
+	<cfset variables.tagLib = arguments.tagLib />
+</cffunction>
+<cffunction name="getTagLib" access="public" returntype="string" output="false">
+	<cfreturn variables.tagLib />
+</cffunction>
+
 <cffunction name="setTagType" access="public" returntype="void" output="false">
 	<cfargument name="tagType" type="string" required="true" />
 	<cfset variables.tagType = arguments.tagType />

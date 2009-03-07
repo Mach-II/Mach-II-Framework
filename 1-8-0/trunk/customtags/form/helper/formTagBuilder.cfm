@@ -32,7 +32,7 @@ Concrete tag builder for the Mach-II form tag library inherits from base builder
 <!---
 PROPERTIES
 --->
-<cfset variables.tagLib = "form" />
+<cfset setTagLib("form") />
 
 <!---
 PUBLIC FUNCTIONS

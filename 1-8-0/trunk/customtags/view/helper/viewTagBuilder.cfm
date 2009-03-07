@@ -32,7 +32,7 @@ Concrete tag builder for the Mach-II view tag library inherits from base builder
 <!---
 PROPERTIES
 --->
-<cfset variables.tagLib = "view" />
+<cfset setTagLib("view") />
 
 <!---
 PUBLIC FUNCTIONS

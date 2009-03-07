@@ -42,7 +42,12 @@ Notes:
 	
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
-	<cfset setupTag("a", false) />
+	<cfif StructKeyExists(attributes, "label")>
+		<cfset setupTag("a", true) />
+	<cfelse>
+		<cfset setupTag("a", false) />
+	</cfif>
+	
 	
 	<!--- Build url parameters --->
 	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
@@ -66,7 +71,7 @@ Notes:
 			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
 		</cfif>
 
-		<cfset setAttribute("href", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters))/>
+		<cfset setAttribute("href", caller.this.buildRouteUrl(attributes.route, variables.urlParameters, variables.queryStringParameters))/>
 	<cfelseif StructKeyExists(attributes, "useCurrentUrl")>
 		<cfset setAttribute("href", caller.this.buildCurrentUrl(variables.urlParameters)) />
 	<cfelse>
@@ -90,12 +95,12 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
-	<cfoutput>#doStartTag()#</cfoutput>
-<cfelse>
-	<cfif StructKeyExists(attributes, "label")>
-		<cfset thisTag.GeneratedContent = HTMLEditFormat(attributes.label) />
+	<cfif isSelfClosingTag()>
+		<cfset setContent(HTMLEditFormat(attributes.label)) />
 	</cfif>
 	
+	<cfoutput>#doStartTag()#</cfoutput>
+<cfelse>	
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
