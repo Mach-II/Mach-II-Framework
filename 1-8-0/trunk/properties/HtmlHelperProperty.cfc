@@ -300,7 +300,7 @@ from the parent application.
 			<cfif package[i].type EQ "js">
 				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
 			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addStylesheet(package[i].paths, pacakge[i].attributes, arguments.outputType) />
+					<cfset code = code & addStylesheet(package[i].paths, package[i].attributes, arguments.outputType) />
 			</cfif>
 			<cfif arguments.outputType EQ "inline" AND i NEQ ArrayLen(package)>
 				<cfset code = code & Chr(13) />
