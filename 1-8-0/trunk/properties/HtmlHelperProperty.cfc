@@ -148,7 +148,7 @@ from the parent application.
 		<cfset var i = 0 />
 		
 		<cfloop collection="#arguments.rawPackages#" item="key">
-			<cfset packageData = ArrayNew(1) />
+			<cfset packageElements = ArrayNew(1) />
 			
 			<cfloop from="1" to="#ArrayLen(arguments.rawPackages[key])#" index="i">
 				<cfset temp = arguments.rawPackages[key][i] />
@@ -300,12 +300,11 @@ from the parent application.
 			<cfif package[i].type EQ "js">
 				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
 			<cfelseif package[i].type EQ "css">
-					<cfset code = code & addStylesheet(package[i].paths, package[i].attributes, arguments.outputType) />
-			</cfif>
-			<cfif arguments.outputType EQ "inline" AND i NEQ ArrayLen(package)>
-				<cfset code = code & Chr(13) />
+				<cfset code = code & addStylesheet(package[i].paths, package[i].attributes, arguments.outputType) />
 			</cfif>
 		</cfloop>
+		
+		<cfset code = code & Chr(13) />
 		
 		<cfreturn code />
 	</cffunction>
