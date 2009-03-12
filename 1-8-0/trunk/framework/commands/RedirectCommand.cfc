@@ -85,7 +85,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 
 		<cfset var redirectUrl = "" />
-		<cfset var statusType = getStatusType() />
 		<cfset var log = getLog() />
 
 		<!--- Persist if directed --->
@@ -103,22 +102,8 @@ Notes:
 		<cfif log.isInfoEnabled()>
 			<cfset log.info("Redirecting to url '#redirectUrl#' with '#statusType#' status code (persist='#getPersist()#').") />
 		</cfif>
-
-		<!--- Redirect based on the HTTP status type --->
-		<cfif statusType EQ "permanent">
-			<cfheader statuscode="301" statustext="Moved Permanently" />
-			<cfheader name="Location" value="#redirectUrl#" />
-			<!--- cflocation automatically calls abort so we have to do it manually --->
-			<cfabort />
-		<cfelseif statusType EQ "prg">
-			<cfheader statuscode="303" statustext="See Other" />
-			<cfheader name="Location" value="#redirectUrl#" />
-			<!--- cflocation automatically calls abort so we have to do it manually --->
-			<cfabort />
-		<cfelse>
-			<!--- Default condition for 302 (temporary) --->
-			<cflocation url="#redirectUrl#" addtoken="no" />
-		</cfif>
+		
+		<cfset arguments.eventContext.getAppManager().getRequestManager().redirectUrl(redirectUrl, getStatusType()) />
 		
 		<!--- Return false to stop the processeing of any remaning commands.
 			Since we have cleared the event queue, the request will stop 

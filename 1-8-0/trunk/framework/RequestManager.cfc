@@ -114,6 +114,77 @@ Notes:
 		<cfreturn request["_MachIIRequestHandler_" & appKey]  />
 	</cffunction>
 	
+	<cffunction name="redirectEvent" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to an event.">
+		<cfargument name="eventName" type="string" required="true" />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="moduleName" type="string" required="false" default="" />
+		<cfargument name="persist" type="boolean" required="false" default="false" />
+		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="statusType" type="string" required="false" default="" />
+
+		<cfset var redirectToUrl =  ""/>
+		<cfset var persistId =  "" />
+		<cfset var redirectPersistParam = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
+		
+		<cfif arguments.persist>
+			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+		</cfif>
+		
+		<!--- Add the persistId parameter to the url args if persist is required --->
+		<cfif arguments.persist AND getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+			<cfset arguments.eventArgs[redirectPersistParam] = persistId />
+		</cfif>
+		
+		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
+		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
+		
+		<cfset redirectToUrl = buildUrl(arguments.moduleName, arguments.eventName, arguments.eventArgs) />
+		
+		<cfset redirectUrl(redirectToUrl, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to a route.">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="routeArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="persist" type="boolean" required="false" default="false" />
+		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="statusType" type="string" required="false" default="" />
+
+		<cfset var redirectToUrl = "" />
+		<cfset var persistId = "" />
+		
+		<cfif arguments.persist>
+			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+		</cfif>
+		
+		<cfset redirectToUrl = buildRouteUrl("", arguments.routeName, arguments.routeArgs) />
+
+		<cfset redirectUrl(redirectToUrl, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectUrl" access="public" returntype="void" output="false">
+		<cfargument name="redirectUrl" type="string" required="true" />
+		<cfargument name="statusType" type="string" required="false" default="" />
+
+		<!--- Redirect based on the HTTP status type --->
+		<cfif arguments.statusType EQ "permanent">
+			<cfheader statuscode="301" statustext="Moved Permanently" />
+			<cfheader name="Location" value="#arguments.redirectUrl#" />
+			<!--- cflocation automatically calls abort so we have to do it manually --->
+			<cfabort />
+		<cfelseif arguments.statusType EQ "prg">
+			<cfheader statuscode="303" statustext="See Other" />
+			<cfheader name="Location" value="#arguments.redirectUrl#" />
+			<!--- cflocation automatically calls abort so we have to do it manually --->
+			<cfabort />
+		<cfelse>
+			<!--- Default condition for 302 (temporary) --->
+			<cflocation url="#arguments.redirectUrl#" addtoken="no" />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="moduleName" type="string" required="true"

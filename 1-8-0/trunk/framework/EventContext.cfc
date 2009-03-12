@@ -134,6 +134,65 @@ Notes:
 		</cftry>
 	</cffunction>
 	
+	<cffunction name="redirectUrl" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to a specific url.">
+		<cfargument name="redirectUrl" type="string" required="true"
+			hint="The url to redirect to. Should be in the form of 'http://www.google.com'." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		
+		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
+			handling to catch a cfabort --->
+		<cfset clearEventQueue() />
+		
+		<cfset getAppManager().getRequestManager().redirectUrl(arguments.redirectUrl, arguments.statusType) />	
+	</cffunction>
+	
+	<cffunction name="redirectEvent" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to an event.">
+		<cfargument name="eventName" type="string" required="true" />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#" />
+		<cfargument name="persist" type="boolean" required="false" default="false" />
+		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="statusType" type="string" required="false" default="" />
+		
+		<cfset var mapping = "" />
+		<cfset var nextEvent = "" />
+		<cfset var nextModuleName = arguments.moduleName />
+		<cfset var nextEventName = arguments.eventName />
+		
+		<!--- Check for an event-mapping. --->
+		<cfif isEventMappingDefined(arguments.eventName)>
+			<cfset mapping = getEventMapping(arguments.eventName) />
+			<cfset nextModuleName = mapping.moduleName />
+			<cfset nextEventName = mapping.eventName />			
+		</cfif>
+		
+		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
+			handling to catch a cfabort --->
+		<cfset clearEventQueue() />
+		
+		<cfset getAppManager().getRequestManager().redirectEvent(
+			nextEventName, arguments.eventArgs, nextModuleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to a route.">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="routeArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="persist" type="boolean" required="false" default="false" />
+		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="statusType" type="string" required="false" default="" />
+		
+		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
+			handling to catch a cfabort --->
+		<cfset clearEventQueue() />
+		
+		<cfset getAppManager().getRequestManager().redirectRoute(
+			nextRouteName, arguments.routeArgs, arguments.persist, arguments.persistArgs, arguments.statusType) />
+	</cffunction>
+	
 	<cffunction name="executeSubroutine" access="public" returntype="boolean" output="true"
 		hint="Executes a subroutine.">
 		<cfargument name="subroutineName" type="string" required="true" />

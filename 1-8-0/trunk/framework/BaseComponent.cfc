@@ -107,6 +107,66 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 	</cffunction>
 	
+	<cffunction name="redirectEvent" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to an event.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the event to redirect to." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="persist" type="boolean" required="false" default="false"
+			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
+		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
+			hint="A struct of args to persist." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
+				arguments.eventName, arguments.eventArgs, "", arguments.persist, arguments.persistArgs, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectEventInModule" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to an event.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="The name of the module in which event exists." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the event to redirect to." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="persist" type="boolean" required="false" default="false"
+			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
+		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
+			hint="A struct of args to persist." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
+			arguments.eventName, arguments.eventArgs, arguments.moduleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to a route.">
+		<cfargument name="routeName" type="string" required="true"
+			hint="The name of the route." />
+		<cfargument name="routeArgs" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of route arguments." />
+		<cfargument name="persist" type="boolean" required="false" default="false"
+			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
+		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
+			hint="A struct of args to persist." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
+			arguments.routeName, arguments.routeArgs, arguments.persist, arguments.persistArgs, arguments.statusType) />
+	</cffunction>
+	
+	<cffunction name="redirectUrl" access="public" returntype="void" output="false"
+		hint="Triggers a server side redirect to a specific url.">
+		<cfargument name="redirectUrl" type="string" required="true"
+			hint="The url to redirect to. Should be in the form of 'http://www.google.com'." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectUrl(
+			arguments.redirectUrl, arguments.statusType) />
+	</cffunction>
+	
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url without specifying a module name. Does not escape entities.">
 		<cfargument name="eventName" type="string" required="true"
