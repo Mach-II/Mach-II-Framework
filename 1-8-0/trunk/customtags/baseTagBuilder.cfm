@@ -55,8 +55,8 @@ onKeyUp		= [string]
 <!---
 PROPERTIES
 --->
-<cfset variables.tagLib = "" />
-<cfset variables.tagType = "" />
+<cfset variables.tagLib = "unknown" />
+<cfset variables.tagType = "unknown" />
 <cfset variables.selfClosingTag = false />
 <cfset variables.attributeCollection = StructNew() />
 <cfset variables.content = "" />
@@ -73,8 +73,8 @@ PUBLIC FUNCTIONS
 	<cfset setSelfClosingTag(arguments.hasEndTag) />
 	
 	<cfif isSelfClosingTag() AND NOT thisTag.hasEndTag>
-		<cfthrow type="MachII.customtags.#variables.tagLib#.#getTagType()#.endTag"
-			message="The #getTagType()# must have an end tag." />
+		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.endTag"
+			message="The '#getTagType()#' in the '#getTagLib()#' tag library must have an end tag." />
 	</cfif>
 </cffunction>
 
