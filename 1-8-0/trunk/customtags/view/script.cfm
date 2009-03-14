@@ -24,7 +24,7 @@ Updated version: 1.8.0
 
 Notes:
 - OPTIONAL ATTRIBUTES
-	appendToHead	= [boolean] defaults to true
+	outputType	= [string] outputs the code to "head" or "inline"
 --->
 <cfparam name="attributes.outputType" type="string" 
 	default="head" />
