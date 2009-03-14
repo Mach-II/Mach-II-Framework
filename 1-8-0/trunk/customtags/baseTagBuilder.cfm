@@ -67,12 +67,12 @@ PUBLIC FUNCTIONS
 <cffunction name="setupTag" access="public" returntype="void" output="false"
 	hint="Sets up a form element tag for use.">
 	<cfargument name="tagType" type="string" required="true" />
-	<cfargument name="hasEndTag" type="boolean" required="true" />
+	<cfargument name="selfClosingTag" type="boolean" required="true" />
 	
 	<cfset setTagType(arguments.tagType) />
-	<cfset setSelfClosingTag(arguments.hasEndTag) />
+	<cfset setSelfClosingTag(arguments.selfClosingTag) />
 	
-	<cfif isSelfClosingTag() AND NOT thisTag.hasEndTag>
+	<cfif NOT thisTag.hasEndTag>
 		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.endTag"
 			message="The '#getTagType()#' in the '#getTagLib()#' tag library must have an end tag." />
 	</cfif>

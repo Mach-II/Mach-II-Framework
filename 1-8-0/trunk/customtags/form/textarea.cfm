@@ -35,7 +35,7 @@ Notes:
 	
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
-	<cfset setupTag("textarea", true) />
+	<cfset setupTag("textarea", false) />
 	
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
@@ -48,7 +48,6 @@ Notes:
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
-	<cfset setAttribute("value") />
 
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("rows") />
@@ -58,15 +57,13 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-
-	<cfoutput>#variables.tagWriter.doStartTag()#</cfoutput>
 <cfelse>
 	<!--- Add content of text area if bindable --->
-	<cfif StructKeyExists(attributes, "path")>
-		<cfset thisTag.GeneratedContent = resolvePath(attributes.path) />
+	<cfif Len(attributes.path)>
+		<cfset setContent(resolvePath(attributes.path)) />
+	<cfelse>
+		<cfset setContent(thisTag.GeneratedContent) />
 	</cfif>
-	
-	<cfset setContent(thisTag.GeneratedContent) />
-	<cfoutput>#doEndTag()#</cfoutput>
+	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
 <cfsetting enablecfoutputonly="false" />
