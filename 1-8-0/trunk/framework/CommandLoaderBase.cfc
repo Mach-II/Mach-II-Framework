@@ -455,6 +455,7 @@ Notes:
 		<cfset var statusType = "temporary" />
 		<cfset var eventParameter = getAppManager().getPropertyManager().getProperty("eventParameter", "event") />
 		<cfset var redirectPersistParameter = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") /> />
+		<cfset var i = 0 />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "event")>
 			<cfset eventName = arguments.commandNode.xmlAttributes["event"] />

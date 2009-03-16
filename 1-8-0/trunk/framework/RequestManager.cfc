@@ -431,7 +431,7 @@ Notes:
 		
 		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
 			<cfif StructKeyExists(cookie, parameterId)>
-				<cfset eventArgs[parameterId] = cookie[parameterId] />
+				<cfset arguments.eventArgs[parameterId] = cookie[parameterId] />
 				<cfcookie name="#parameterId#" expires="now" />
 			</cfif>
 		</cfif>
