@@ -41,10 +41,16 @@ Notes:
 	<cfset ensurePathOrName() />
 	
 	<!--- Set defaults --->
-	<cfparam name="attributes.path" type="string" 
-		default="" />
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.value" type="string" 
+			default="#resolvePath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
+	</cfif>
 	<cfparam name="attributes.name" type="string" 
 		default="#attributes.path#" />
+	<cfparam name="attributes.value" type="string" 
+		default="" />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
@@ -58,12 +64,7 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 <cfelse>
-	<!--- Add content of text area if bindable --->
-	<cfif Len(attributes.path)>
-		<cfset setContent(resolvePath(attributes.path)) />
-	<cfelse>
-		<cfset setContent(thisTag.GeneratedContent) />
-	</cfif>
+	<cfset setContent(attributes.value) />
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
 <cfsetting enablecfoutputonly="false" />

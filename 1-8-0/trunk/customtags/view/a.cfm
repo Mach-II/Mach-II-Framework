@@ -42,12 +42,7 @@ Notes:
 	
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
-	<cfif StructKeyExists(attributes, "label")>
-		<cfset setupTag("a", true) />
-	<cfelse>
-		<cfset setupTag("a", false) />
-	</cfif>
-	
+	<cfset setupTag("a", false) />
 	
 	<!--- Build url parameters --->
 	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
@@ -94,13 +89,11 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-	
-	<cfif isSelfClosingTag()>
-		<cfset setContent(HTMLEditFormat(attributes.label)) />
-	</cfif>
-	
-	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>	
-	<cfoutput>#doEndTag()#</cfoutput>
+	<cfif StructKeyExists(attributes, "label")>
+		<cfset setContent(HTMLEditFormat(attributes.label)) />
+		<cfset thisTag.GeneratedContent = "" />
+	</cfif>
+	<cfoutput>#doStartTag()##doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
