@@ -64,7 +64,7 @@ Notes:
 		default="#attributes.name#" />
 	
 	<!--- Set required attributes--->
-	<cfset setAttribute("type", "text") />
+	<cfset setAttribute("type", "password") />
 	<cfset setAttribute("name") />
 	<cfset setAttribute("value") />
 
