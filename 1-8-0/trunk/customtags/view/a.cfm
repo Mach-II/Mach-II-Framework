@@ -89,11 +89,14 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
+	
+	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>	
 	<cfif StructKeyExists(attributes, "label")>
 		<cfset setContent(HTMLEditFormat(attributes.label)) />
 		<cfset thisTag.GeneratedContent = "" />
 	</cfif>
-	<cfoutput>#doStartTag()##doEndTag()#</cfoutput>
+	
+	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />
