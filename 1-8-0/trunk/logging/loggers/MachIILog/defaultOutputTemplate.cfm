@@ -134,7 +134,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<tr class="<cfif local.i MOD 2>shade </cfif>#data[local.i].logLevelName#">
 				<td><p>#data[local.i].channel#</p></td>
 				<td><p>#data[local.i].logLevelName#</p></td>
-				<td><p>#data[local.i].message#</p></td>
+				<td><p>#HtmlEditFormat(data[local.i].message)#</p></td>
 				<td><p class="right"><cfif local.i NEQ ArrayLen(data)>#data[local.i + 1].currentTick - data[local.i].currentTick#<cfelse>0</cfif></p></td>
 			</tr>
 			<cfif NOT IsSimpleValue(data[local.i].additionalInformation) OR (IsSimpleValue(data[local.i].additionalInformation) AND Len(data[local.i].additionalInformation))>
@@ -146,6 +146,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 						<cfset local.headElement = local.headElement & local.cfdumpData.headElement />
 						<cfset local.hasAppendedHeadElementFromCfdump = true />
 					</cfif>
+				</td>
 			</tr>
 			</cfif>
 		</cfloop>
@@ -213,7 +214,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 	<cfloop collection="#cookie#" item="local.i">
 		<tr <cfif local.cookieRow MOD 2>class="shade"</cfif>>
 			<td style="width:20%;"><h4>#local.i#</h4></td>
-			<td style="width:80%;"><p>#cookie[local.i]#</p></td>
+			<td style="width:80%;"><p>#HtmlEditFormat(cookie[local.i])#</p></td>
 		</tr>
 		<cfset local.cookieRow = local.cookieRow + 1 />
 	</cfloop>
