@@ -188,7 +188,7 @@ Notes:
 				<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CacheHandlerAlreadyDefined"
-						message="An CacheHandler with the id '#arguments.handlerId#' is already registered." />
+						message="An CacheHandler with the id '#handlerId#' is already registered." />
 				</cfcatch>
 			</cftry>
 			
