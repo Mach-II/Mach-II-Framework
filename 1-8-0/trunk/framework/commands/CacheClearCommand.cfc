@@ -48,6 +48,7 @@ Notes:
 		<cfargument name="aliases" type="string" required="false" default="" />
 		<cfargument name="strategyNames" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
+		<cfargument name="criteriaCollectionName" type="any" required="false" default="" />
 		<cfargument name="criteriaCollection" type="any" required="false" default="" />
 		<cfargument name="condition" type="string" required="false" default="" />
 		
@@ -55,6 +56,7 @@ Notes:
 		<cfset setAliases(arguments.aliases) />
 		<cfset setStrategyNames(arguments.strategyNames) />
 		<cfset setCriteria(arguments.criteria) />
+		<cfset setCriteriaCollectionName(arguments.criteriaCollectionName) />
 		<cfset setCriteriaCollection(arguments.criteriaCollection) />
 		<cfset setCondition(arguments.condition) />
 		
@@ -199,6 +201,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentId = "" />
+		<cfset var collectioName = getCriteriaCollectionName() />
 		<cfset var collection = "" />
 		<cfset var criteria = "" />
 		<cfset var i = 0 />
@@ -207,7 +210,7 @@ Notes:
 			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
 			
 			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
-				<cfset criteria = ListAppend(getCriteria(), collection[i]) />
+				<cfset criteria = ListAppend(getCriteria(), collectioName & "=" & collection[i]) />
 				
 				<cfloop list="#getAliases()#" index="currentAlias">
 					<cfset arguments.cacheManager.clearCacheById(currentAlias, arguments.event, criteria) />
@@ -227,6 +230,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentAlias = "" />
+		<cfset var collectioName = getCriteriaCollectionName() />
 		<cfset var collection = "" />
 		<cfset var criteria = "" />
 		<cfset var i = 0 />
@@ -235,7 +239,7 @@ Notes:
 			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
 			
 			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
-				<cfset criteria = ListAppend(getCriteria(), collection[i]) />
+				<cfset criteria = ListAppend(getCriteria(), collectioName & "=" & collection[i]) />
 				
 				<cfloop list="#getAliases()#" index="currentAlias">
 					<cfset arguments.cacheManager.clearCachesByAlias(currentAlias, arguments.event, criteria) />
@@ -347,6 +351,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getCriteria" access="public" returntype="string" output="false">
 		<cfreturn variables.criteria />
+	</cffunction>
+	
+	<cffunction name="setCriteriaCollectionName" access="private" returntype="void" output="false">
+		<cfargument name="criteriaCollectionName" type="string" required="true" />
+		<cfset variables.criteriaCollectionName = UCase(arguments.criteriaCollectionName) />
+	</cffunction>
+	<cffunction name="getCriteriaCollectionName" access="public" returntype="string" output="false">
+		<cfreturn variables.criteriaCollectionName />
 	</cffunction>
 	
 	<cffunction name="setCriteriaCollection" access="private" returntype="void" output="false">

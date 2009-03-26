@@ -182,6 +182,7 @@ Notes:
 		<cfset var aliases = "" />
 		<cfset var strategyNames = "" />
 		<cfset var criteria = "" />
+		<cfset var criteriaCollectionName = "" />
 		<cfset var criteriaCollection = "" />
 		<cfset var condition = "" />
 		
@@ -216,6 +217,7 @@ Notes:
 		<!--- Get nested criterion --->
 		<cfloop from="1" to="#ArrayLen(criterionNodes)#" index="i">
 			<cfset criterionName = criterionNodes[i].xmlAttributes["name"] />
+			
 			<cfif NOT StructKeyExists(criterionNodes[i].xmlAttributes, "value")>
 				<cfif Len(criteriaCollection)>
 					<cfthrow type="MachII.CommandLoaderBase.InvalidCacheClearCriteriaCollection"
@@ -228,6 +230,8 @@ Notes:
 				<cfelse>
 					<cfset criteriaCollection = variables.utils.recurseComplexValues(criterionNodes[i]) />
 				</cfif>
+				
+				<cfset criteriaCollectionName = criterionName />
 				
 				<!--- If we have a complex value, ensure it's an array --->
 				<cfif NOT IsSimpleValue(criteriaCollection) AND NOT IsArray(criteriaCollection)>
@@ -242,7 +246,8 @@ Notes:
 		</cfloop>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
-			ids, aliases, strategyNames, criteria, criteriaCollection, condition) />
+			ids, aliases, strategyNames, criteria
+			, criteriaCollectionName, criteriaCollection, condition) />
 		<cfset command.setLog(variables.cacheClearCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		
