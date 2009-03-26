@@ -48,12 +48,14 @@ Notes:
 		<cfargument name="aliases" type="string" required="false" default="" />
 		<cfargument name="strategyNames" type="string" required="false" default="" />
 		<cfargument name="criteria" type="string" required="false" default="" />
+		<cfargument name="criteriaCollection" type="any" required="false" default="" />
 		<cfargument name="condition" type="string" required="false" default="" />
 		
 		<cfset setIds(arguments.ids) />
 		<cfset setAliases(arguments.aliases) />
 		<cfset setStrategyNames(arguments.strategyNames) />
 		<cfset setCriteria(arguments.criteria) />
+		<cfset setCriteriaCollection(arguments.criteriaCollection) />
 		<cfset setCondition(arguments.condition) />
 		
 		<!--- Check if default cache strategy should be clear if no 
@@ -73,6 +75,7 @@ Notes:
 		
 		<cfset var expressionResult = "" />
 		<cfset var cacheManager = arguments.eventContext.getAppManager().getCacheManager() />
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		<cfset var log = getLog() />
 				
 		<!--- Make decision on whether or not to clear a cache by evaluating a condition --->
@@ -90,14 +93,14 @@ Notes:
 					<cfif log.isDebugEnabled()>
 						<cfset log.debug("Clearing cache by ids '#getIds()#' (no condition to evaluate).") />
 					</cfif>
-					<cfset clearCacheByIds(cacheManager, arguments.event) />
+					<cfset clearCacheByIds(cacheManager, propertyManager, arguments.event) />
 				</cfif>
 				<!--- Clear by aliases without condition --->
 				<cfif isAliasesDefined()>
 					<cfif log.isDebugEnabled()>
 						<cfset log.debug("Clearing cache by aliases '#getAliases()#' (no condition to evaluate).") />
 					</cfif>
-					<cfset clearCacheByAliases(cacheManager, arguments.event) />
+					<cfset clearCacheByAliases(cacheManager, propertyManager, arguments.event) />
 				</cfif>
 				<!--- Clear by strategy names without condition --->
 				<cfif isStrategyNamesDefined()>
@@ -108,12 +111,12 @@ Notes:
 				</cfif>
 			</cfif>
 		<cfelse>
-			<cfif variables.expressionEvaluator.isExpression(getCondition())>
-				<cfset expressionResult = variables.expressionEvaluator.evaluateExpression(getCondition(), 
-						arguments.event, getPropertyManager()) />
+			<cfif getExpressionEvaluator().isExpression(getCondition())>
+				<cfset expressionResult = getExpressionEvaluator().evaluateExpression(getCondition(), 
+						arguments.event, propertyManager) />
 			<cfelse>
-				<cfset expressionResult = variables.expressionEvaluator.evaluateExpressionBody(getCondition(), 
-						arguments.event, getPropertyManager()) />
+				<cfset expressionResult = getExpressionEvaluator().evaluateExpressionBody(getCondition(), 
+						arguments.event, propertyManager) />
 			</cfif>
 			<cfif isBoolean(expressionResult) AND expressionResult>
 				<!--- Clear default strategy --->
@@ -129,14 +132,14 @@ Notes:
 						<cfif log.isDebugEnabled()>
 							<cfset log.debug("Clearing cache by ids '#getIds()#' (condition '#getCondition()#' evaluated true).") />
 						</cfif>
-						<cfset clearCacheByIds(cacheManager, arguments.event) />
+						<cfset clearCacheByIds(cacheManager, propertyManager, arguments.event) />
 					</cfif>
 					<!--- Clear by alias with condition --->
 					<cfif isAliasesDefined()>
 						<cfif log.isDebugEnabled()>
 							<cfset log.debug("Clearing cache by aliases '#getAliases()#' (condition '#getCondition()#' evaluated true).") />
 						</cfif>
-						<cfset clearCacheByAliases(cacheManager, arguments.event) />
+						<cfset clearCacheByAliases(cacheManager, propertyManager, arguments.event) />
 					</cfif>
 					<!--- Clear by cache name with condition --->
 					<cfif isStrategyNamesDefined()>
@@ -192,25 +195,57 @@ Notes:
 	<cffunction name="clearCacheByIds" access="private" returntype="void" output="false"
 		hint="Helper method to clear cache elements by id/ids.">
 		<cfargument name="cacheManager" type="MachII.framework.CacheManager" required="true" />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentId = "" />
+		<cfset var collection = "" />
+		<cfset var criteria = "" />
+		<cfset var i = 0 />
 		
-		<cfloop list="#getIds()#" index="currentId">
-			<cfset arguments.cacheManager.clearCacheById(currentId, arguments.event, getCriteria()) />
-		</cfloop>
+		<cfif isCriteriaCollectionDefined()>
+			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
+			
+			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
+				<cfset criteria = ListAppend(getCriteria(), collection[i]) />
+				
+				<cfloop list="#getAliases()#" index="currentAlias">
+					<cfset arguments.cacheManager.clearCacheById(currentAlias, arguments.event, criteria) />
+				</cfloop>
+			</cfloop>
+		<cfelse>
+			<cfloop list="#getIds()#" index="currentId">
+				<cfset arguments.cacheManager.clearCacheById(currentId, arguments.event, getCriteria()) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="clearCacheByAliases" access="private" returntype="void" output="false"
 		hint="Helper method to clear cache elements by alias/aliases.">
 		<cfargument name="cacheManager" type="MachII.framework.CacheManager" required="true" />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentAlias = "" />
+		<cfset var collection = "" />
+		<cfset var criteria = "" />
+		<cfset var i = 0 />
 		
-		<cfloop list="#getAliases()#" index="currentAlias">
-			<cfset arguments.cacheManager.clearCachesByAlias(currentAlias, arguments.event, getCriteria()) />
-		</cfloop>
+		<cfif isCriteriaCollectionDefined()>
+			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
+			
+			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
+				<cfset criteria = ListAppend(getCriteria(), collection[i]) />
+				
+				<cfloop list="#getAliases()#" index="currentAlias">
+					<cfset arguments.cacheManager.clearCachesByAlias(currentAlias, arguments.event, criteria) />
+				</cfloop>
+			</cfloop>
+		<cfelse>
+			<cfloop list="#getAliases()#" index="currentAlias">
+				<cfset arguments.cacheManager.clearCachesByAlias(currentAlias, arguments.event, getCriteria()) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="clearCacheByStrategyNames" access="private" returntype="void" output="false"
@@ -236,6 +271,35 @@ Notes:
 		<cfif NOT isIdsDefined() AND NOT isAliasesDefined() AND NOT isStrategyNamesDefined()>
 			<cfset setClearDefaultStrategy(true) />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="resolveCriteriaCollection" access="private" returntype="array" output="false"
+		hint="Resolves a criteria collection for use.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
+
+		<cfset var collection = getCriteriaCollection() />
+
+		<cfif IsSimpleValue(collection) 
+			AND getExpressionEvaluator().isExpression(collection)>
+			<cfset collection = getExpressionEvaluator().evaluateExpression(
+					getCriteriaCollection()
+					, arguments.event
+					, arguments.propertyManager) />
+		</cfif>
+		
+		<!--- Convert collection to an array --->
+		<cfif IsSimpleValue(collection)>
+			<cfset collection = ListToArray(collection) />
+		</cfif>
+		
+		<!--- Throw exception if the collection is not an array (only lists and arrays are supported) --->
+		<cfif NOT IsArray(collection)>
+			<cfthrow type="MachII.CacheClearCommand.InvalidCriterionCollectionType"
+				message="The criterion collection must be a list or an array. Structs are not supported." />
+		</cfif>
+		
+		<cfreturn collection />
 	</cffunction>
 	
 	<!---
@@ -283,6 +347,22 @@ Notes:
 	</cffunction>
 	<cffunction name="getCriteria" access="public" returntype="string" output="false">
 		<cfreturn variables.criteria />
+	</cffunction>
+	
+	<cffunction name="setCriteriaCollection" access="private" returntype="void" output="false">
+		<cfargument name="criteriaCollection" type="any" required="true" />
+		<cfset variables.criteriaCollection = arguments.criteriaCollection />
+	</cffunction>
+	<cffunction name="getCriteriaCollection" access="public" returntype="any" output="false">
+		<cfreturn variables.criteriaCollection />
+	</cffunction>
+	<cffunction name="isCriteriaCollectionDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if a criteria collection is defined.">
+		<cfif IsSimpleValue(variables.criteriaCollection)>
+			<cfreturn Len(variables.criteriaCollection) />
+		<cfelseif IsArray(variables.criteriaCollection)>
+			<cfreturn ArrayLen(variables.criteriaCollection) />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="setCondition" access="private" returntype="void" output="false">

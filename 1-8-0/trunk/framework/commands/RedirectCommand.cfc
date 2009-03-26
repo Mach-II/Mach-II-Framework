@@ -130,14 +130,15 @@ Notes:
 		<cfset var evaluatedEventName = getEventName() />
 		<cfset var evaluatedModuleName =  getModuleName() />
 		<cfset var evaluatedRouteName = getRouteName() />
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		
 		<cfif Len(evaluatedRouteName) AND variables.expressionEvaluator.isExpression(evaluatedRouteName)>
 			<cfset evaluatedRouteName = getExpressionEvaluator().evaluateExpression(evaluatedRouteName, 
-				arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				arguments.event, propertyManager) />
 		</cfif>
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
-		<cfif getPersist() AND arguments.eventContext.getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+		<cfif getPersist() AND propertyManager.getProperty("redirectPersistParameterLocation") NEQ "cookie">
 			<cfset args = ListAppend(getArgs(), getRedirectPersistParameter()) />
 		</cfif>
 		
@@ -147,13 +148,13 @@ Notes:
 				<cfset element = ListGetAt(i, 2, "=") />
 				<cfset i = ListGetAt(i, 1, "=") />
 				<cfif variables.expressionEvaluator.isExpression(element)>
-					<cfset arg = getExpressionEvaluator().evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+					<cfset arg = getExpressionEvaluator().evaluateExpression(element, arguments.event, propertyManager) />
 				<cfelse>
 					<cfset arg = element />
 				</cfif>
 			<cfelse>
 				<cfif variables.expressionEvaluator.isExpression(i)>
-					<cfset arg = getExpressionEvaluator().evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+					<cfset arg = getExpressionEvaluator().evaluateExpression(i, arguments.event, propertyManager) />
 				<cfelse>
 					<cfset arg = arguments.event.getArg(i, "") />
 				</cfif>
@@ -174,13 +175,13 @@ Notes:
 		<cfelse>
 			<!--- If it isn't a route then look at the url and event name properties to build the redirect url --->
 			<cfif Len(evaluatedUrl) AND expressionEvaluator.isExpression(evaluatedUrl)>
-				<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, propertyManager) />
 			</cfif>
 			<cfif Len(evaluatedEventName) AND expressionEvaluator.isExpression(evaluatedEventName)>
-				<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, propertyManager) />
 			</cfif>
 			<cfif Len(evaluatedModuleName) AND expressionEvaluator.isExpression(evaluatedModuleName)>
-				<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+				<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, propertyManager) />
 			</cfif>
 			
 			<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(evaluatedModuleName, evaluatedEventName, params, evaluatedUrl) />
@@ -201,6 +202,7 @@ Notes:
 		<cfset var i = "" />
 		<cfset var element = "" />
 		<cfset var arg = "" />
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		
 		<!--- Build params --->
 		<cfif NOT ListLen(persistArgs)>
@@ -215,14 +217,14 @@ Notes:
 					<cfset element = ListGetAt(i, 2, "=") />
 					<cfset i = ListGetAt(i, 1, "=") />
 					<cfif expressionEvaluator.isExpression(element)>
-						<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+						<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, propertyManager) />
 					<cfelse>
 						<cfset arg = element />
 					</cfif>
 					<cfset args[i] = arg />
 				<cfelse>
 					<cfif expressionEvaluator.isExpression(i)>
-						<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />
+						<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, propertyManager) />
 					<cfelseif arguments.event.isArgDefined(i)>
 						<cfset arg = arguments.event.getArg(i, "") />
 					</cfif>

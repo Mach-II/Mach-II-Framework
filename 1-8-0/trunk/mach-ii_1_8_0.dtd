@@ -456,13 +456,19 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[criteria] - a comma delimited list of event arguments that form the cache key.
 		[condition] - a boolean expression that determines if the cache should be cleared
 -->
-<!ELEMENT cache-clear EMPTY>
+<!ELEMENT cache-clear (criterion*)>
 <!ATTLIST cache-clear
 	ids CDATA #IMPLIED
 	aliases CDATA #IMPLIED
 	strategyNames CDATA #IMPLIED
 	criteria CDATA #IMPLIED
 	condition CDATA #IMPLIED
+>
+<!ELEMENT criterion EMPTY>
+<!ATTLIST criterion
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	collection CDATA #IMPLIED
 >
 
 <!--

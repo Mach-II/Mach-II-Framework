@@ -123,10 +123,10 @@ Notes:
 			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
 		<!--- cache-clear --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache-clear">
-			<cfset command = setupCacheClear(arguments.commandNode) />
+			<cfset command = setupCacheClear(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<!--- call-method --->
 		<cfelseif arguments.commandNode.xmlName EQ "call-method">
-			<cfset command = setupCallMethod(arguments.commandNode) />
+			<cfset command = setupCallMethod(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<!--- default/unrecognized command --->
 		<cfelse>
 			<cfset command = setupDefault(arguments.commandNode) />
@@ -174,13 +174,21 @@ Notes:
 	<cffunction name="setupCacheClear" access="private" returntype="MachII.framework.commands.CacheClearCommand" output="false"
 		hint="Sets up a CacheClear command.">
 		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
 		<cfset var ids = "" />
 		<cfset var aliases = "" />
 		<cfset var strategyNames = "" />
 		<cfset var criteria = "" />
+		<cfset var criteriaCollection = "" />
 		<cfset var condition = "" />
+		
+		<cfset var criterionName = "" />
+		<cfset var criterionValue = "" />
+		<cfset var criterionNodes = arguments.commandNode.xmlChildren />
+		<cfset var i = 0 />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ids")>
 			<cfset ids = variables.utils.trimList(arguments.commandNode.xmlAttributes["ids"]) />	
@@ -189,20 +197,54 @@ Notes:
 			<cfset aliases = variables.utils.trimList(arguments.commandNode.xmlAttributes["aliases"]) />	
 		</cfif>		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "strategyNames")>
-			<cfset strategyNames = arguments.commandNode.xmlAttributes["strategyNames"] />
+			<cfset strategyNames = variables.utils.trimList(arguments.commandNode.xmlAttributes["strategyNames"]) />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "criteria")>
 			<cfset criteria = variables.utils.trimList(arguments.commandNode.xmlAttributes["criteria"]) />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "condition")>
-			<cfset condition = arguments.commandNode.xmlAttributes["condition"] />	
+			<cfset condition = Trim(arguments.commandNode.xmlAttributes["condition"]) />	
 		</cfif>
+		
+		<!--- Ensure there are not bother criteria (attribute) and criterion nodes --->
+		<cfif Len(criteria) AND ArrayLen(criterionNodes)>
+			<cfthrow type="MachII.CommandLoaderBase.InvalidCacheClearCriteria"
+				message="When using cache-clear you must use either all nested criterion elements or the 'criteria' attribute."
+				detail="This exception occurred in a cache-clear command in '#arguments.parentHandlerName#' #arguments.parentHandlerType#." />
+		</cfif>
+		
+		<!--- Get nested criterion --->
+		<cfloop from="1" to="#ArrayLen(criterionNodes)#" index="i">
+			<cfset criterionName = criterionNodes[i].xmlAttributes["name"] />
+			<cfif NOT StructKeyExists(criterionNodes[i].xmlAttributes, "value")>
+				<cfif Len(criteriaCollection)>
+					<cfthrow type="MachII.CommandLoaderBase.InvalidCacheClearCriteriaCollection"
+						message="There can be only one criterion collection to loop over when clearing a cache."
+						detail="This exception occurred in a cache-clear command in '#arguments.parentHandlerName#' #arguments.parentHandlerType#." />				
+				</cfif>
+				
+				<cfif StructKeyExists(criterionNodes[i].xmlAttributes, "collection")>
+					<cfset criteriaCollection = criterionNodes[i].xmlAttributes["collection"] />
+				<cfelse>
+					<cfset criteriaCollection = variables.utils.recurseComplexValues(criterionNodes[i]) />
+				</cfif>
+				
+				<!--- If we have a complex value, ensure it's an array --->
+				<cfif NOT IsSimpleValue(criteriaCollection) AND NOT IsArray(criteriaCollection)>
+					<cfthrow type="MachII.CommandLoaderBase.InvalidCacheClearCriteriaCollection"
+						message="The criterion collection can only be a list or array."
+						detail="This exception occurred in a cache-clear command in '#arguments.parentHandlerName#' #arguments.parentHandlerType#." />					
+				</cfif>
+			<cfelse>
+				<cfset criterionValue = criterionNodes[i].xmlAttributes["value"] />
+				<cfset criteria = ListAppend(criteria, criterionName & "=" & criterionValue) />
+			</cfif>	
+		</cfloop>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
-			ids, aliases, strategyNames, criteria, condition) />
+			ids, aliases, strategyNames, criteria, criteriaCollection, condition) />
 		<cfset command.setLog(variables.cacheClearCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -210,6 +252,8 @@ Notes:
 	<cffunction name="setupCallMethod" access="private" returntype="MachII.framework.commands.CallMethodCommand" output="false"
 		hint="Sets up a CallMethodCommand command.">
 		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
 		<cfset var bean = arguments.commandNode.xmlAttributes["bean"] />
@@ -230,7 +274,6 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
-		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 
 		<!--- support adding arguments tags inside call-method --->
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
@@ -246,10 +289,11 @@ Notes:
 						<cfelse>
 							<cfif ArrayLen(arguments.commandNode.xmlChildren[i].xmlChildren) eq 0>
 								<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
-									message="You must provide a value for the argument named '#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#' in the call-method command for '#bean#.#method#'" />
+									message="You must provide a value for the argument named '#arguments.commandNode.xmlChildren[i].xmlAttributes["name"]#'."
+									detail="This exception occurred in a call-method command in '#arguments.parentHandlerName#' #arguments.parentHandlerType#." />
 							<cfelse>
 								<!--- Handle structs or arrays that are passed in as arguments --->
-								<cfset argValue = getAppManager().getUtils().recurseComplexValues(arguments.commandNode.xmlChildren[i]) />
+								<cfset argValue = variables.utils.recurseComplexValues(arguments.commandNode.xmlChildren[i]) />
 								<cfset command.addArgument(arguments.commandNode.xmlChildren[i].xmlAttributes["name"], argValue) />
 							</cfif>
 						</cfif>
@@ -258,7 +302,8 @@ Notes:
 				<cfelse>
 					<cfif namedArgCount gt 0 AND i gt 1>
 						<cfthrow type="MachII.CommandLoaderBase.InvalidCallMethodArguments"
-							message="When using call-method calling bean '#bean#.#method#' you must use either all named arguments or all positional arguments.">
+							message="When using call-method you must use either all named arguments or all positional arguments."
+							detail="This exception occurred in a call-method command in '#arguments.parentHandlerName#' #arguments.parentHandlerType#." />
 					<cfelse>
 						<cfset command.addArgument("", arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
 					</cfif>
@@ -403,7 +448,7 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">
 			<cfset paramName = paramNodes[i].xmlAttributes["name"] />
 			<cfif NOT StructKeyExists(paramNodes[i].xmlAttributes, "value")>
-				<cfset paramValue = getAppManager().getUtils().recurseComplexValues(paramNodes[i]) />
+				<cfset paramValue = variables.utils.recurseComplexValues(paramNodes[i]) />
 			<cfelse>
 				<cfset paramValue = paramNodes[i].xmlAttributes["value"] />
 			</cfif>
@@ -502,7 +547,6 @@ Notes:
 		
 		<cfset command.setLog(variables.redirectCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
-		<cfset command.setPropertyManager(getAppManager().getPropertyManager()) />
 		
 		<cfreturn command />
 	</cffunction>

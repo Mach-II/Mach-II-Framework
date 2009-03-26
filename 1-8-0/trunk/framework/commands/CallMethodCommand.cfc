@@ -89,6 +89,7 @@ or
 		<cfset var i = 0 />
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		
 		<cfif NOT IsObject(bean)>
 			<cfthrow type="MachII.framework.commands.NoBean"
@@ -99,13 +100,13 @@ or
 		<cfloop from="1" to="#ArrayLen(args)#" index="i">
 			<cfif args[i].name NEQ "">
 				<cfif args[i].isExpression>
-					<cfset namedArgs[args[i].name] = variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, getPropertyManager()) />
+					<cfset namedArgs[args[i].name] = variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager) />
 				<cfelse>
 					<cfset namedArgs[args[i].name] = args[i].value />
 				</cfif>
 			<cfelse>
 				<cfif args[i].isExpression>
-					<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, getPropertyManager())) />
+					<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager)) />
 				<cfelse>
 					<cfset ArrayAppend(argValues, args[i].value) /> 
 				</cfif>
