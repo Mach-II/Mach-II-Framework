@@ -117,7 +117,14 @@ Notes:
 		</cfloop>
 		
 		<!--- Set the cache handler to the manager --->
-		<cfset addCacheHandler(cacheHandler, arguments.override) />
+		<cftry>
+			<cfset addCacheHandler(cacheHandler, arguments.override) />
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="#cfcatch.message#" 
+					detail="This exception occurred in #arguments.parentHandlerType# named '#arguments.parentHandlerName#'. #cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 		
 		<cfreturn cacheHandler.getHandlerId() />
 	</cffunction>
@@ -188,7 +195,8 @@ Notes:
 				<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CacheHandlerAlreadyDefined"
-						message="An CacheHandler with the id '#handlerId#' is already registered." />
+						message="A cache handler with the id '#handlerId#' is already registered."
+						detail="The cache handler id must be unique." />
 				</cfcatch>
 			</cftry>
 			
