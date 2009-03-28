@@ -49,7 +49,7 @@ Notes:
 			default="#resolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
-		<cfset attributes.checkValue = "" />
+		<cfparam name="attributes.checkValue" default="" />
 	</cfif>
 
 	<!--- Set defaults --->

@@ -44,10 +44,12 @@ Notes:
 	
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfset attributes.checkValue = resolvePath(attributes.path) />
+		<cfparam name="attributes.checkValue" type="string" 
+			default="#resolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
-		<cfparam name="attributes.checkValue" default="" />
+		<cfparam name="attributes.checkValue" type="string" 
+			default="" />
 	</cfif>
 	
 	<!--- Set defaults --->
