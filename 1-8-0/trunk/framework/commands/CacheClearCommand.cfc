@@ -201,7 +201,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentId = "" />
-		<cfset var collectioName = getCriteriaCollectionName() />
+		<cfset var collectionName = getCriteriaCollectionName() />
 		<cfset var collection = "" />
 		<cfset var criteria = "" />
 		<cfset var i = 0 />
@@ -210,10 +210,10 @@ Notes:
 			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
 			
 			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
-				<cfset criteria = ListAppend(getCriteria(), collectioName & "=" & collection[i]) />
+				<cfset criteria = ListAppend(getCriteria(), collectionName & "=" & collection[i]) />
 				
-				<cfloop list="#getAliases()#" index="currentAlias">
-					<cfset arguments.cacheManager.clearCacheById(currentAlias, arguments.event, criteria) />
+				<cfloop list="#getAliases()#" index="currentId">
+					<cfset arguments.cacheManager.clearCacheById(currentId, arguments.event, criteria) />
 				</cfloop>
 			</cfloop>
 		<cfelse>
@@ -230,7 +230,7 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfset var currentAlias = "" />
-		<cfset var collectioName = getCriteriaCollectionName() />
+		<cfset var collectionName = getCriteriaCollectionName() />
 		<cfset var collection = "" />
 		<cfset var criteria = "" />
 		<cfset var i = 0 />
@@ -239,7 +239,7 @@ Notes:
 			<cfset collection = resolveCriteriaCollection(arguments.event, arguments.propertyManager) />
 			
 			<cfloop from="1" to="#ArrayLen(collection)#" index="i">
-				<cfset criteria = ListAppend(getCriteria(), collectioName & "=" & collection[i]) />
+				<cfset criteria = ListAppend(getCriteria(), collectionName & "=" & collection[i]) />
 				
 				<cfloop list="#getAliases()#" index="currentAlias">
 					<cfset arguments.cacheManager.clearCachesByAlias(currentAlias, arguments.event, criteria) />
