@@ -53,7 +53,8 @@ Notes:
 
 	<cfset variables.appkey = "" />
 	<cfset variables.loading = TRUE />
-	<cfset variables.environmentName = "production" />
+	<cfset variables.environmentName = "default" />
+	<cfset variables.environmentGroup = "production" />
 	<cfset variables.moduleName = "" />
 	
 	<!---
@@ -241,16 +242,35 @@ Notes:
 		<cfif NOT IsObject(getParent())>
 			<cfset variables.environmentName = arguments.environmentName />
 		<cfelse>
-			<cfthrow type="MachII.framework.CannotSetEnvironment"
-				message="Cannot set environment from module. Modules can only inherit environment from parent application." />
+			<cfthrow type="MachII.framework.CannotSetEnvironmentName"
+				message="Cannot set environment name from module. Modules can only inherit environment name from parent application." />
 		</cfif>
 	</cffunction>
 	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
-		hint="Gets the environment name. If module, gets value from parent since environment is a singleton.">
+		hint="Gets the environment name. If module, gets value from parent since environment name is a singleton.">
 		<cfif IsObject(getParent())>
 			<cfreturn getParent().getEnvironmentName() />
 		<cfelse>
 			<cfreturn variables.environmentName />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="setEnvironmentGroup" access="public" returntype="void" output="false"
+		hint="Sets the environment group.">
+		<cfargument name="environmentGroup" type="string" required="true" />
+		<cfif NOT IsObject(getParent())>
+			<cfset variables.environmentGroup = arguments.environmentGroup />
+		<cfelse>
+			<cfthrow type="MachII.framework.CannotSetEnvironment"
+				message="Cannot set environment from module. Modules can only inherit environment from parent application." />
+		</cfif>
+	</cffunction>
+	<cffunction name="getEnvironmentGroup" access="public" returntype="string" output="false"
+		hint="Gets the environment group. If module, gets value from parent since environment group is a singleton.">
+		<cfif IsObject(getParent())>
+			<cfreturn getParent().getEnvironmentGroup() />
+		<cfelse>
+			<cfreturn variables.environmentGroup />
 		</cfif>
 	</cffunction>
 	
