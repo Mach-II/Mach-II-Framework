@@ -127,6 +127,10 @@ Notes:
 		<cfset var persistId =  "" />
 		<cfset var redirectPersistParam = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
 		
+		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
+		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
+		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
+		
 		<cfif arguments.persist>
 			<cfset persistId = savePersistEventData(arguments.persistArgs) />
 		</cfif>
@@ -135,9 +139,6 @@ Notes:
 		<cfif arguments.persist AND getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
 			<cfset arguments.eventArgs[redirectPersistParam] = persistId />
 		</cfif>
-		
-		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
-		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
 		
 		<cfset redirectToUrl = buildUrl(arguments.moduleName, arguments.eventName, arguments.eventArgs) />
 		
@@ -154,6 +155,10 @@ Notes:
 
 		<cfset var redirectToUrl = "" />
 		<cfset var persistId = "" />
+		
+		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
+		<cfset StructDelete(arguments.routeArgs, getEventParameter(), FALSE) />
+		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
 		
 		<cfif arguments.persist>
 			<cfset persistId = savePersistEventData(arguments.persistArgs) />

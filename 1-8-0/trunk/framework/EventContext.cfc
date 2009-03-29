@@ -150,17 +150,25 @@ Notes:
 	
 	<cffunction name="redirectEvent" access="public" returntype="void" output="false"
 		hint="Triggers a server side redirect to an event.">
-		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the event to redirect to." />
+		<cfargument name="args" type="any" required="false" default=""
+			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in url." />
 		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#" />
-		<cfargument name="persist" type="boolean" required="false" default="false" />
-		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="persist" type="boolean" required="false" default="false"
+			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
+		<cfargument name="persistArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default="" />
 		
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
 		<cfset var nextModuleName = arguments.moduleName />
 		<cfset var nextEventName = arguments.eventName />
+		<cfset var arg = "" />
+		<cfset var eventArgs = StructNew() />
+		<cfset var event = getCurrentEvent() />
+		<cfset var argsToPersist = StructNew() />
 		
 		<!--- Check for an event-mapping. --->
 		<cfif isEventMappingDefined(arguments.eventName)>
@@ -169,28 +177,73 @@ Notes:
 			<cfset nextEventName = mapping.eventName />			
 		</cfif>
 		
+		<cfif NOT IsStruct(arguments.args)>
+			<!--- Resolve args to place in the URL --->
+			<cfloop list="#arguments.args#" index="arg">
+				<cfset eventArgs[arg] = event.getArg(arg) />
+			</cfloop>
+		<cfelse>
+			<cfset eventArgs = arguments.args />
+		</cfif>
+		
+		<cfif NOT IsStruct(arguments.persistArgs)>
+			<!--- Resolve args to persist --->
+			<cfloop list="#arguments.persistArgs#" index="arg">
+				<cfset argsToPersist[arg] = event.getArg(arg) />
+			</cfloop>
+		<cfelse>
+			<cfset argsToPersist = arguments.persistArgs />
+		</cfif>
+		
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
 			handling to catch a cfabort --->
 		<cfset clearEventQueue() />
 		
 		<cfset getAppManager().getRequestManager().redirectEvent(
-			nextEventName, arguments.eventArgs, nextModuleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
+			nextEventName, eventArgs, nextModuleName, arguments.persist, argsToPersist, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
 		hint="Triggers a server side redirect to a route.">
 		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="routeArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="persist" type="boolean" required="false" default="false" />
-		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="statusType" type="string" required="false" default="" />
+		<cfargument name="routeArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
+		<cfargument name="persist" type="boolean" required="false" default="false"
+			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
+		<cfargument name="persistArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of items or a list of event args to persist." />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="String that represent which http status type to use in the redirect.">
+		
+		<cfset var arg = "" />
+		<cfset var eventArgs = StructNew() />
+		<cfset var event = getCurrentEvent() />
+		<cfset var argsToPersist = StructNew() />
+		
+		<cfif NOT IsStruct(arguments.routeArgs)>
+			<!--- Resolve args to place in the URL --->
+			<cfloop list="#arguments.routeArgs#" index="arg">
+				<cfset eventArgs[arg] = event.getArg(arg) />
+			</cfloop>
+		<cfelse>
+			<cfset eventArgs = arguments.routeArgs />
+		</cfif>
+		
+		<cfif NOT IsStruct(arguments.persistArgs)>
+			<!--- Resolve args to persist --->
+			<cfloop list="#arguments.persistArgs#" index="arg">
+				<cfset argsToPersist[arg] = event.getArg(arg) />
+			</cfloop>
+		<cfelse>
+			<cfset argsToPersist = arguments.persistArgs />
+		</cfif>
 		
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
 			handling to catch a cfabort --->
 		<cfset clearEventQueue() />
 		
 		<cfset getAppManager().getRequestManager().redirectRoute(
-			nextRouteName, arguments.routeArgs, arguments.persist, arguments.persistArgs, arguments.statusType) />
+			arguments.routeName, eventArgs, arguments.persist, argsToPersist, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="executeSubroutine" access="public" returntype="boolean" output="true"

@@ -111,16 +111,16 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Triggers a server side redirect to an event.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the event to redirect to." />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
-			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="args" type="any" required="false" default=""
+			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
-		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
-			hint="A struct of args to persist." />
+		<cfargument name="persistArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
-				arguments.eventName, arguments.eventArgs, "", arguments.persist, arguments.persistArgs, arguments.statusType) />
+				arguments.eventName, arguments.args, "", arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="redirectEventInModule" access="public" returntype="void" output="false"
@@ -129,28 +129,28 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the module in which event exists." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the event to redirect to." />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
-			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="args" type="any" required="false" default=""
+			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
-		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
-			hint="A struct of args to persist." />
+		<cfargument name="persistArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
-			arguments.eventName, arguments.eventArgs, arguments.moduleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
+			arguments.eventName, arguments.args, arguments.moduleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
 		hint="Triggers a server side redirect to a route.">
 		<cfargument name="routeName" type="string" required="true"
 			hint="The name of the route." />
-		<cfargument name="routeArgs" type="struct" required="false" default="#StructNew()#"
-			hint="A struct of route arguments." />
+		<cfargument name="routeArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
-		<cfargument name="persistArgs" type="struct" required="false" default="#structNew()#"
-			hint="A struct of args to persist." />
+		<cfargument name="persistArgs" type="any" required="false" default=""
+			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
