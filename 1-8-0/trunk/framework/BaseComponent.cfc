@@ -201,6 +201,70 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 	
+	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
+		hint="Resolves a value by deployed environment name or group (explicit environment names are searched first then groups then default).">
+		<cfargument name="environmentValues" type="struct" required="true"
+			hint="A struct of environment values. Key prefixed with 'group:' are treated as groups and keys can contain ',' to indicate multiple environments names or groups." />
+		<cfargument name="defaultValue" type="any" required="false"
+			hint="A default value to provide if no environment is found. An exception will be thrown if no 'defaultValue' is provide and no value can be resolved." />
+		
+		<cfset var currentEnvironmentName = getAppManager().getEnvironmentName() />
+		<cfset var currentEnvironmentGroup = getAppManager().getEnvironmentGroup() />
+		<cfset var valuesByEnvironmentName = StructNew() />
+		<cfset var valuesByEnvironmentGroup = StructNew() />
+		<cfset var key = "" />
+		<cfset var i = "" />
+		<cfset var scrubbedKey = "" />
+		
+		<!--- Build values by name and group --->
+		<cfloop collection="#arguments.environmentValues#" item="key">
+			<!--- An environment group if it is prefixed with 'group:' --->
+			<cfif key.toLowerCase().startsWith("group:")>
+				<!--- Removed 'group:'--->
+				<cfset scrubbedKey = Right(key, Len(key) - 6) />
+				
+				<cfloop list="#scrubbedKey#" index="i">
+					<cfset valuesByEnvironmentGroup[i] = arguments.environmentValues[key] />
+				</cfloop>
+			<!--- An explicit environment name if it does not have a prefix --->
+			<cfelse>
+				<cfloop list="#key#" index="i">
+					<cfset valuesByEnvironmentName[i] = arguments.environmentValues[key] />
+				</cfloop>
+			</cfif>
+		</cfloop>
+		
+		<!--- 
+			Typically, we prefer to only have one return, however in this case 
+			it is easier to just short-ciruit the process.
+			
+			Resolution order:
+			 * by explicit environment name
+			 * by environment group
+			 * by default value (if provided)
+			 * throw exception
+		--->
+		
+		<!--- Resolve value by explicit environment name --->
+		<cfif StructKeyExists(valuesByEnvironmentName, currentEnvironmentName)>
+			<cfreturn valuesByEnvironmentName[currentEnvironmentName] />
+		</cfif>
+		
+		<!--- Resolve value by explicit environment group --->
+		<cfif StructKeyExists(valuesByEnvironmentGroup, currentEnvironmentGroup)>
+			<cfreturn valuesByEnvironmentGroup[currentEnvironmentGroup] />
+		</cfif>
+		
+		<!--- No environment to resolve, return default value if provided --->
+		<cfif StructKeyExists(arguments, "defaultValue")>
+			<cfreturn arguments.defaultValue />
+		<cfelse>
+			<cfthrow type="MachII.framework.NoEnvironmentToResolveByValue"
+				message="Cannot resolve value by environment name or group and no default value was provided."
+				detail="Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'" />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"

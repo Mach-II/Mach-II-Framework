@@ -309,11 +309,12 @@ will bind to root parameter values.
 		<cfset getAssert().isTrue(IsBoolean(arguments.loggingEnabled) OR IsStruct(arguments.loggingEnabled)
 				, "The 'loggingEnabled' parameter must be boolean or a struct of environments.") />
 		
+		<!--- Load logging enabled by simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.loggingEnabled)>
 			<cfset result = arguments.loggingEnabled />
-		<!--- Load logging enabled by environment name --->
+		<!--- Load logging enabled by environment name / group --->
 		<cfelseif StructKeyExists(arguments.loggingEnabled, environmentName)>
-			<cfset result = arguments.loggingEnabled[environmentName] />
+			<cfset result = resolveValueByEnvironment(arguments.loggingEnabled) />
 		</cfif>
 		
 		<cfreturn result />

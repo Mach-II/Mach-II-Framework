@@ -189,13 +189,14 @@ See individual caching strategies for more information on configuration.
 		<cfset var result = true />
 		
 		<cfset getAssert().isTrue(IsBoolean(arguments.cachingEnabled) OR IsStruct(arguments.cachingEnabled)
-				, "The 'cachingEnabled' parameter must be boolean or a struct of environments.") />
+				, "The 'cachingEnabled' parameter must be boolean or a struct of environment names / groups.") />
 		
+		<!--- Load caching enabled since this is a simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.cachingEnabled)>
 			<cfset result = arguments.cachingEnabled />
-		<!--- Load caching enabled by environment name --->
-		<cfelseif StructKeyExists(arguments.cachingEnabled, environmentName)>
-			<cfset result = arguments.cachingEnabled[environmentName] />
+		<!--- Load caching enabled by environment name / group --->
+		<cfelse>
+			<cfset result = resolveValueByEnvironment(arguments.cachingEnabled) />
 		</cfif>
 		
 		<cfreturn result />
