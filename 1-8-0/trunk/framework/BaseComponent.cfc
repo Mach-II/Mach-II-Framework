@@ -120,7 +120,9 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
-				arguments.eventName, arguments.args, "", arguments.persist, arguments.persistArgs, arguments.statusType) />
+				arguments.eventName, arguments.args, 
+				getAppManager().getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName(), 
+				arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="redirectEventInModule" access="public" returntype="void" output="false"

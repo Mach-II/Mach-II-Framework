@@ -131,9 +131,10 @@ Notes:
 		<cfset var evaluatedModuleName =  getModuleName() />
 		<cfset var evaluatedRouteName = getRouteName() />
 		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
+		<cfset var expressionEvaluator = getExpressionEvaluator() />
 		
-		<cfif Len(evaluatedRouteName) AND variables.expressionEvaluator.isExpression(evaluatedRouteName)>
-			<cfset evaluatedRouteName = getExpressionEvaluator().evaluateExpression(evaluatedRouteName, 
+		<cfif Len(evaluatedRouteName) AND expressionEvaluator.isExpression(evaluatedRouteName)>
+			<cfset evaluatedRouteName = expressionEvaluator.evaluateExpression(evaluatedRouteName, 
 				arguments.event, propertyManager) />
 		</cfif>
 		
@@ -147,14 +148,14 @@ Notes:
 			<cfif ListLen(i, "=") eq 2>
 				<cfset element = ListGetAt(i, 2, "=") />
 				<cfset i = ListGetAt(i, 1, "=") />
-				<cfif variables.expressionEvaluator.isExpression(element)>
-					<cfset arg = getExpressionEvaluator().evaluateExpression(element, arguments.event, propertyManager) />
+				<cfif expressionEvaluator.isExpression(element)>
+					<cfset arg = expressionEvaluator.evaluateExpression(element, arguments.event, propertyManager) />
 				<cfelse>
 					<cfset arg = element />
 				</cfif>
 			<cfelse>
-				<cfif variables.expressionEvaluator.isExpression(i)>
-					<cfset arg = getExpressionEvaluator().evaluateExpression(i, arguments.event, propertyManager) />
+				<cfif expressionEvaluator.isExpression(i)>
+					<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, propertyManager) />
 				<cfelse>
 					<cfset arg = arguments.event.getArg(i, "") />
 				</cfif>
@@ -175,13 +176,13 @@ Notes:
 		<cfelse>
 			<!--- If it isn't a route then look at the url and event name properties to build the redirect url --->
 			<cfif Len(evaluatedUrl) AND expressionEvaluator.isExpression(evaluatedUrl)>
-				<cfset evaluatedUrl = getExpressionEvaluator().evaluateExpression(evaluatedUrl, arguments.event, propertyManager) />
+				<cfset evaluatedUrl = expressionEvaluator.evaluateExpression(evaluatedUrl, arguments.event, propertyManager) />
 			</cfif>
 			<cfif Len(evaluatedEventName) AND expressionEvaluator.isExpression(evaluatedEventName)>
-				<cfset evaluatedEventName = getExpressionEvaluator().evaluateExpression(evaluatedEventName, arguments.event, propertyManager) />
+				<cfset evaluatedEventName = expressionEvaluator.evaluateExpression(evaluatedEventName, arguments.event, propertyManager) />
 			</cfif>
 			<cfif Len(evaluatedModuleName) AND expressionEvaluator.isExpression(evaluatedModuleName)>
-				<cfset evaluatedModuleName = getExpressionEvaluator().evaluateExpression(evaluatedModuleName, arguments.event, propertyManager) />
+				<cfset evaluatedModuleName = expressionEvaluator.evaluateExpression(evaluatedModuleName, arguments.event, propertyManager) />
 			</cfif>
 			
 			<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildUrl(evaluatedModuleName, evaluatedEventName, params, evaluatedUrl) />
@@ -203,6 +204,7 @@ Notes:
 		<cfset var element = "" />
 		<cfset var arg = "" />
 		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
+		<cfset var expressionEvaluator = getExpressionEvaluator() />
 		
 		<!--- Build params --->
 		<cfif NOT ListLen(persistArgs)>
