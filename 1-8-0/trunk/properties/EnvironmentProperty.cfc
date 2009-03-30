@@ -135,7 +135,7 @@ properties struct can take complex datatypes like structs and arrays.
 	<cfset variables.environments = StructNew() />
 	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
 	
-	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironmentName,serverPropertyName" />
+	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironment,serverPropertyName" />
 	<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = "environmentGroup,servers,properties" />
 	<cfset variables.ENVIRONMENT_GROUP_NAMES = "production,qa,staging,development,local" />
 	
@@ -218,11 +218,9 @@ properties struct can take complex datatypes like structs and arrays.
 		<cfif StructKeyExists(variables.environments, environmentName)>
 			<cfset properties = variables.environments[environmentName].properties />
 		<cfelse>
-			<cfif getThrowIfEnvironmentUnresolved()>
-				<cfthrow type="MachII.properties.EnvironmentProperty.missingEnvironmentData"
-					message="No environment can be resolved for '#thisServer#' and no default environment has been defined."
-					detail="Please define a default environment or add this server to a defined environment." />
-			</cfif>
+			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved()
+						, "No environment can be resolved for '#thisServer#' and no default environment has been defined."
+						, "Please define a default environment or add this server to a defined environment.") />
 			<cfset properties = variables.environments[getDefaultEnvironment()].properties />
 		</cfif>
 
@@ -243,7 +241,10 @@ properties struct can take complex datatypes like structs and arrays.
 		
 		<!--- Discover environments --->
 		<cfloop collection="#parameters#" item="key">
-			<cfif NOT ListFindNoCase(variables.REQUIRED_ENVIRONMENT_KEY_NAMES, key)>
+			<cfif NOT ListFindNoCase(variables.RESERVED_PARAMETER_NAMES, key)>				
+				<cfset getAssert().isTrue(IsStruct(parameters[key])
+							, "The value for an environment named '#key#' is not a struct for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
+							, "Please check your configuration.") />
 				<cfset loadEnvironment(key, parameters[key]) />
 			</cfif>
 		</cfloop>
@@ -251,7 +252,7 @@ properties struct can take complex datatypes like structs and arrays.
 		<!--- Ensure default environment exists (if parameter is defined) --->
 		<cfif Len(getDefaultEnvironment())>
 			<cfset getAssert().isTrue(ListFindNoCase(StructKeyList(variables.environments), getDefaultEnvironment())
-						, "The 'defaultEnvironment' named '#getDefaultEnvironment()#' does not corespond to a defined environment."
+						, "The 'defaultEnvironment' named '#getDefaultEnvironment()#' does not corespond to a defined environment for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
 						, "Available environments: #StructKeyList(variables.environments)#") />
 		</cfif>
 	</cffunction>
@@ -268,21 +269,19 @@ properties struct can take complex datatypes like structs and arrays.
 		
 		<!--- Assert the environment has not already been defined --->
 		<cfset getAssert().isTrue(NOT isEnvironmentDefined(arguments.environmentName)
-					, "An environment named '#arguments.environmentName#' has already been defined in the EnvironmentProperty."
+					, "An environment named '#arguments.environmentName#' has already been defined for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
 					, "Current environment names (may not be complete depending on when this exception occurred in the loading sequence): #StructKeyList(variables.environments)#") />
 		
 		<!--- Assert that the required keys are available in the environment data --->
 		<cfloop list="#variables.REQUIRED_ENVIRONMENT_KEY_NAMES#" index="i">
-			<cfif NOT StructKeyExists(arguments.environmentData, i)>
-				<cfthrow type="MachII.properties.EnvironmentProperty.missingEnvironmentData"
-					message="An environment named '#arguments.environmentName#' is missing a required key '#i#'."
-					detail="All environments require these keys: #variables.REQUIRED_ENVIRONMENT_KEY_NAMES#" />
-			</cfif>
+			<cfset getAssert().isTrue(StructKeyExists(arguments.environmentData, i)
+						, "An environment named '#arguments.environmentName#' is missing a required key named '#i#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
+						, "All environments require these keys: #variables.REQUIRED_ENVIRONMENT_KEY_NAMES#") />
 		</cfloop>
 
 		<!--- Assert the environment group name --->
-		<cfset getAssert().isTrue(NOT ListFindNoCase("", arguments.environmentData.environmentGroup) 
-					, "The 'environmentGroup' value is no a valid group name for environment named '#arguments.environmentName#' in the EnvironmentProperty."
+		<cfset getAssert().isTrue(ListFindNoCase(variables.ENVIRONMENT_GROUP_NAMES, arguments.environmentData.environmentGroup) 
+					, "The 'environmentGroup' value is no a valid group name for environment named '#arguments.environmentName#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
 					, "Valid environment groups: #variables.ENVIRONMENT_GROUP_NAMES#") />
 		
 		<!--- Transform list to an array of servers --->
