@@ -188,9 +188,14 @@ Notes:
 		
 		<cfif NOT IsStruct(arguments.persistArgs)>
 			<!--- Resolve args to persist --->
-			<cfloop list="#arguments.persistArgs#" index="arg">
-				<cfset argsToPersist[arg] = event.getArg(arg) />
-			</cfloop>
+			<cfif ListLen(arguments.persistArgs) gt 0>
+				<cfloop list="#arguments.persistArgs#" index="arg">
+					<cfset argsToPersist[arg] = event.getArg(arg) />
+				</cfloop>
+			<cfelseif arguments.persist>
+				<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
+				<cfset argsToPersist = event.getArgs() />
+			</cfif>
 		<cfelse>
 			<cfset argsToPersist = arguments.persistArgs />
 		</cfif>
