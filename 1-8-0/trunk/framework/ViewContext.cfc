@@ -66,6 +66,7 @@ Notes:
 		
 		<cfset var viewPath = getFullPath(arguments.viewName) />
 		<cfset var viewContent = "" />
+		<cfset var resolvedContentData = "" />
 		<cfset var log = getLog() />
 		
 		<cfif log.isDebugEnabled()>
@@ -90,16 +91,24 @@ Notes:
 			<!--- Include must be on same line as save content or an extra tab will occur --->
 			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
 			<cfif arguments.append AND IsDefined(arguments.contentKey)>
-				<cfset viewContent = Evaluate(arguments.contentKey) & viewContent />
+				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
+				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
+							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							, "Ensure that the contentKey is of a simple data type.") />
+				<cfset viewContent = resolvedContentData & viewContent />
 			</cfif>
-			<cfset setVariable(arguments.contentKey, viewContent) />
+			<cfset SetVariable(arguments.contentKey, viewContent) />
 		</cfif>
 		
 		<cfif arguments.contentArg NEQ ''>
 			<!--- Include must be on same line as save content or an extra tab will occur --->
 			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
 			<cfif arguments.append>
-				<cfset viewContent = arguments.event.getArg(arguments.contentArg, "") & viewContent />
+				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
+				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
+							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'."
+							, "Ensure that the contentArg is of a simple data type.") />
+				<cfset viewContent = resolvedContentData & viewContent />
 			</cfif>
 			<cfset arguments.event.setArg(arguments.contentArg, viewContent) />
 		</cfif>
@@ -109,6 +118,9 @@ Notes:
 		</cfif>
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="eventName" type="string" required="true"
@@ -164,7 +176,6 @@ Notes:
 		
 		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
 	</cffunction>
-
 	
 	<cffunction name="buildUnescapedUrl" access="public" returntype="string" output="false"
 		hint="Builds an unescaped framework specific url and does not escape entities.">
@@ -275,6 +286,12 @@ Notes:
 			</cfif>
 		</cfloop>
 	</cffunction>
+	
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
+		hint="Gets the basic assertion utility.">
+		<cfreturn getAppManager().getAssert() />
+	</cffunction>
+
 
 	<!---
 	PROTECTED FUNCTIONS
