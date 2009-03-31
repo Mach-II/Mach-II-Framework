@@ -35,6 +35,17 @@ limitations under the License.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* View context throws an ambiguous exception appending view content on to a complex event-arg
+We now assert the target contentArg/Key is a simple value and throw a friendly 
+exception if it is not.
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/263
+(2009-03-30 peterfarrell)
+
+ * BuildUrl() and related methods orders args randomly
+Fixed so all args are ordered alphanumerically which provides consistent URLs for 
+search engines.
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
+(2009-02-26 kurtwiersma)
 
 ------------------------------------------------
 Improvements / Enhancements
@@ -48,7 +59,16 @@ http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationView
 http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/175
 (2008-11-15 peterfarrell) 
 
-* Environment
+* EnvironmentProperty
+Implemented a way to manage the deployment environment of Mach-II applications. This 
+feature allows developers to setup properties specific to a particular environment 
+and to drive other features (such as caching and logging) to change their behavior 
+based on the environment in which the application is deployed. 
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/wiki/EnvironmentSpecificProperities#SolutionforMach-II1.8
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/224
+(various dates peterfarrell)
 
 * Toolkit enhancements
 - AntPathMatcher.cfc 
