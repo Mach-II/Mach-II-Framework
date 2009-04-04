@@ -70,7 +70,7 @@ Notes:
 		<cfset setAttribute("action", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.form.noEventOrRoute"
-			message="The 'form' tag must have an attribute named 'event' or 'route'." />
+			message="The 'form' tag must have an attribute named 'actionEvent' or 'actionRoute'." />
 	</cfif>
 	<cfset setAttribute("method") />
 	<cfset setAttribute("encType") />
