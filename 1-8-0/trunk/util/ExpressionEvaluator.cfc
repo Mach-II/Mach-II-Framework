@@ -41,6 +41,7 @@ ${scope.key NEQ scope.key2}
 	PROPERTIES
 	--->
 	<cfset variables.operandList = "eq,neq,gt,gte,lt,lte" />
+	<cfset variables.parsedExpressions = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -231,8 +232,13 @@ ${scope.key NEQ scope.key2}
 	
 	<cffunction name="isExpression" access="public" returntype="boolean" output="false"
 		hint="Checks if passed argument is a valid expression.">
-		<cfargument name="expression" type="string" required="true" />
-		<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
+		<cfargument name="expression" type="any" required="true" 
+			hint="This argument should be a string otherwise it this method will return false." />
+		<cfif isSimpleValue(arguments.expression)>
+			<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
 	</cffunction>
 	
 	<!---
