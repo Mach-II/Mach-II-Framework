@@ -284,8 +284,7 @@ Notes:
 
 		<cfset var collection = getCriteriaCollection() />
 
-		<cfif IsSimpleValue(collection) 
-			AND getExpressionEvaluator().isExpression(collection)>
+		<cfif getExpressionEvaluator().isExpression(collection)>
 			<cfset collection = getExpressionEvaluator().evaluateExpression(
 					getCriteriaCollection()
 					, arguments.event
