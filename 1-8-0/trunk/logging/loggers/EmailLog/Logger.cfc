@@ -69,7 +69,7 @@ Notes:
 </property>
 
 Uses the generic channel filter (MachII.logging.filters.GenericChannelFilter)for filtering.
-See that file header for configuration of filter criteria.
+See that file header for configuration of filter criteria.  test.
 --->
 <cfcomponent
 	displayname="EmailLog.Logger"
