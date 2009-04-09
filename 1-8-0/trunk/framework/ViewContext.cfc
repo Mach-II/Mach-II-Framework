@@ -147,15 +147,28 @@ Notes:
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
+	<cffunction name="buildUnescapedCurrentUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url that does not escape entities for html display.">
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
+		
+		<!--- Grab the module name from the context of the currently executing request--->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+
+		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
+	</cffunction>
+	
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="routeName" type="string" required="true"
 			hint="Name of the route to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="string" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-
+		
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 		
@@ -168,6 +181,8 @@ Notes:
 			hint="Name of the route to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="string" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 

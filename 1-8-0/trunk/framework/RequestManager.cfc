@@ -205,8 +205,16 @@ Notes:
 		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
 		<cfset var currentSESParams = getRequestHandler().getCurrentSESParams() />
 		
+		<cfloop collection="#url#" item="key">
+			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+				<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
+			</cfif>
+		</cfloop>
+		
+		<!--- <cfdump var="#getRequestHandler().getCurrentRouteParams()#"><cfabort> --->
+		
 		<cfif Len(routeName)>
-			<cfreturn buildRouteUrl(getAppManager().getModuleName(), routeName, getRequestHandler().getCurrentRouteParams()) />
+			<cfreturn buildRouteUrl(getAppManager().getModuleName(), routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
 		<cfelseif StructCount(currentSESParams)>
 			<cfloop collection="#currentSESParams#" item="key">
 				<cfif key eq getEventParameter()>
@@ -236,12 +244,6 @@ Notes:
 			<cfelse>
 				<cfset parsedModuleName = arguments.moduleName />
 			</cfif>
-			
-			<cfloop collection="#url#" item="key">
-				<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
-					<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
-				</cfif>
-			</cfloop>
 			
 			<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
 		</cfif>
@@ -316,13 +318,16 @@ Notes:
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="string" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var queryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters)>
 		<cfset var route = getRoute(arguments.routeName) />	
 		
-		<cfreturn route.buildRouteUrl(arguments.moduleName, params, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter())>
+		<cfreturn route.buildRouteUrl(arguments.moduleName, params, queryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter())>
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
@@ -335,21 +340,20 @@ Notes:
 		<cfset var i = "" />
 		<cfset var routeName = "" />
 
+		<!--- Remove the query string delimiter --->
+		<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo)) />
+		
+		<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
+		<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
+
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
-			
-			<!--- Remove the query string delimiter --->
-			<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo)) />
 			<!--- Remove trailing series delimiter if defined --->
 			<cfif Right(arguments.pathInfo, 1) IS getSeriesDelimiter()>
 				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
 			</cfif>
-			
-			<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
-			<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
-			
+		
 			<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
-
 			<!--- Check to see if we are dealing with processing routes --->
 			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) gt 0>
 				<!--- The SES url has the event parameter in it so routes are disabled --->
@@ -365,6 +369,19 @@ Notes:
 					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
 			</cfif>	
+		<cfelseif NOT getParseSes()>
+			<!--- If SES is not enabled we just need to check to see if this is a request for a url route --->
+			<!--- Remove trailing series delimiter if defined --->
+			<cfif Right(arguments.pathInfo, 1) EQ "/">
+				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
+			</cfif>
+			<cfset names = ListToArray(arguments.pathInfo, "/") />
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) EQ 0
+				AND ArrayLen(names) GTE 1>
+				<cfif ListFindNoCase(getRouteNames(), names[1])>
+					<cfset params = parseRoute(names[1], names) />
+				</cfif>
+			</cfif>
 		</cfif>
 		
 		<cfreturn params />
@@ -418,9 +435,9 @@ Notes:
 		<cfset var routeParams = 0 />
 		
 		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
-		<cfset routeParams = route.parseRoute(urlElements, getModuleDelimiter(), getEventParameter()) />
+		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
 		<cfset getRequestHandler().setCurrentRouteName(arguments.routeName) />
-		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteRequiredParams(urlElements)) />
+		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
 		
 		<cfreturn routeParams />
 	</cffunction>

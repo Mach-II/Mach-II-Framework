@@ -30,8 +30,8 @@ Usage:
     <parameter name="product">
       <struct>
          <key name="event" value="showProduct" />
-         <key name="requiredArguments" value="productId,displayType:fancy" />
-		 <key name="optionalArguments" value="key" />
+         <key name="requiredParameters" value="productId,displayType:fancy" /><!-- You can also use a array here -->
+		 <key name="optionalParameters" value="key" /><!-- You can also use a array here -->
      </struct>
     </parameter>	
   </parameters>
@@ -56,8 +56,8 @@ index.cfm/product/A12345/fancy/
 	PROPERTIES
 	--->
 	<cfset variables.routes = StructNew() />
-	<cfset variables.routeNames = "" />
-	<cfset variables.routeAliases = "" />
+	<cfset variables.routeNames = CreateObject("java", "java.util.HashSet").init() />
+	<cfset variables.routeAliases = CreateObject("java", "java.util.HashSet").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -72,7 +72,7 @@ index.cfm/product/A12345/fancy/
 		<cfset var route = 0 />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
-			<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init() />
+			<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
 			
 			<cfset parameter = getParameter(parameterName) />
 			
@@ -86,12 +86,12 @@ index.cfm/product/A12345/fancy/
 			<cfif StructKeyExists(parameter, "urlAlias")>
 				<cfset route.setUrlAlias(parameter.urlAlias) />
 			</cfif>
-			<!---  --->
-			<cfif StructKeyExists(parameter, "requiredArguments")>
-				<cfset route.setRequiredArguments(parameter.requiredArguments) />
+
+			<cfif StructKeyExists(parameter, "requiredParameters")>
+				<cfset route.setRequiredParameters(evaluateParameters(parameter.requiredParameters)) />
 			</cfif>
-			<cfif StructKeyExists(parameter, "optionalArguments")>
-				<cfset route.setOptionalArguments(parameter.optionalArguments) />
+			<cfif StructKeyExists(parameter, "optionalParameters")>
+				<cfset route.setOptionalParameters(evaluateParameters(parameter.optionalParameters)) />
 			</cfif>	
 			
 			<cfset addRoute(parameterName, route) />
@@ -103,25 +103,63 @@ index.cfm/product/A12345/fancy/
 		hint="Deconfigures the property by un-registering routes and route aliases.">
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var name = "" />
-		
-		<!---
-		TODO: Lists can be really slow if there are a lot of routes or aliases
-			We should use a CreateObject("java", "java.util.HashSet").init()
-			as it is consistent speed-wise as the dataset grows (see cacheClear in CacheHandler)
-		--->
+		<cfset var names = "" />
+		<cfset var aliases = "" />
+		<cfset var i = 0 />
 		
 		<!--- Cleanup this property's routes --->
-		<cfloop list="#variables.routeNames#" index="name">
+		<cfset names = variables.routeNames.toArray() />
+		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<!--- Remove route --->
-			<cfset requestManager.removeRoute(name) />
+			<cfset requestManager.removeRoute(names[i]) />
 		</cfloop>
+		<cfset variables.routeNames.clear() />
 		
-		<cfloop list="#variables.routeAliases#" index="name">
+		<cfset aliases = variables.routeAliases.toArray() />
+		<cfloop from="1" to="#ArrayLen(aliases)#" index="i">
 			<!--- Remove route alias --->
-			<cfset requestManager.removeRouteAlias(name) />
+			<cfset requestManager.removeRouteAlias(aliases[i]) />
 		</cfloop>
+		<cfset variables.routeAliases.clear() />
 		
+	</cffunction>
+	
+	<cffunction name="evaluateParameters" access="private" returntype="string" output="false">
+		<cfargument name="parameters" type="any" required="true" />
+		
+		<cfset var param = "" />
+		<cfset var parsedParameters = "" />
+		<cfset var i = 0 />
+		
+		<cfif isSimpleValue(arguments.parameters)>
+			<cfloop list="#arguments.parameters#" index="param">
+				<cfset parsedParameters = ListAppend(parsedParameters, parseParameter(param)) />
+			</cfloop>
+		<cfelseif isArray(arguments.parameters)>
+			<!--- handle passing in an array of parameters --->
+			<cfloop from="1" to="#ArrayLen(arguments.parameters)#" index="i">
+				<cfset parsedParameters = ListAppend(parsedParameters, parseParameter(arguments.parameters[i])) />
+			</cfloop>
+		</cfif>
+		
+		<cfreturn parsedParameters />
+	</cffunction>
+	
+	<cffunction name="parseParameter" access="private" returntype="string" output="false">
+		<cfargument name="param" type="string" required="true" />
+		
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
+		<cfset var parsedParam = arguments.param />
+		
+		<cfif ListLen(parsedParam, ":") eq 2>
+			<cfif expressionEvaluator.isExpression(ListGetAt(parsedParam, 2, ":"))>
+				<cfset parsedParam = ListSetAt(parsedParam, 2, 
+					expressionEvaluator.evaluateExpression(ListGetAt(parsedParam, 2, ":"), event, getAppManager().getPropertyManager()), ":") />
+			</cfif>
+		</cfif>
+		
+		<cfreturn parsedParam />
 	</cffunction>
 	
 	<!---
@@ -131,9 +169,14 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
-		<cfset variables.routeNames = ListAppend(variables.routeNames, arguments.routeName) />
+		<!---
+			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and aliases
+			as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler)
+		--->
+		
+		<cfset variables.routeNames.add(arguments.routeName) />
 		<cfif arguments.route.getUrlAlias() neq "">
-			<cfset variables.routeAliases = ListAppend(variables.routeAliases, arguments.route.getUrlAlias()) />
+			<cfset variables.routeAliases.add(arguments.route.getUrlAlias()) />
 		</cfif>
 		
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
