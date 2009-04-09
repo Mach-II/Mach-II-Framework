@@ -46,9 +46,9 @@ Configuration Usage:
 		<!-- Defaults to ExpandPath(".") -->
 		<parameter name="webrootBasePath" value="/path/to/webroot" />
 		<!-- Defaults to webroot base path + "/js" -->
-		<parameter name="jsBasePath" value="/path/to/webroot" />
+		<parameter name="jsBasePath" value="/path/from/webroot" />
 		<!-- Defaults to webroot base path + "/css" -->
-		<parameter name="cssBasePath" value="/path/to/webroot" />
+		<parameter name="cssBasePath" value="/path/from/webroot" />
 		<parameter name="assetPackages">
 			<struct>
 				<key name="lightwindow">
@@ -585,16 +585,26 @@ from the parent application.
 		</cfif>
 		
 		<!--- Append the file extension if not defined --->
-		<cfif arguments.assetType EQ "js" AND NOT path.endsWith(".js")>
-			<cfset path = path & ".js" />
-		<cfelseif arguments.assetType EQ "css" AND NOT path.endsWith(".css")>
-			<cfset path = path & ".css" />
-		</cfif>
+		<cfset path = appendFileExtension(arguments.assetType, path) />
 		
 		<!--- Append the timestamp --->
 		<cfset path = path & "?" & fetchAssetTimestamp(path) />
 		
 		<cfreturn path />
+	</cffunction>
+	
+	<cffunction name="appendFileExtension" access="public" returntype="string" output="false"
+		hint="Appends the default file extension if no file extension is present.">
+		<cfargument name="assetType" type="string" required="true" />
+		<cfargument name="assetPath" type="string" required="true" />
+		
+		<cfset var file = ListLast(arguments.assetPath, "/") />
+		
+		<cfif NOT FindNoCase(".", file)>
+			<cfreturn arguments.assetPath & "." & arguments.assetType />
+		<cfelse>
+			<cfreturn arguments.assetPath />
+		</cfif>
 	</cffunction>
 		
 	<cffunction name="fetchAssetTimestamp" access="private" returntype="numeric" output="false"
