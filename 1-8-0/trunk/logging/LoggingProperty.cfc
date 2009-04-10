@@ -303,7 +303,6 @@ will bind to root parameter values.
 		hint="Decides if the logging is enabled.">
 		<cfargument name="loggingEnabled" type="any" required="true" />
 		
-		<cfset var environmentName = getAppManager().getEnvironmentName() />
 		<cfset var result = true />
 		
 		<cfset getAssert().isTrue(IsBoolean(arguments.loggingEnabled) OR IsStruct(arguments.loggingEnabled)
@@ -313,7 +312,7 @@ will bind to root parameter values.
 		<cfif IsBoolean(arguments.loggingEnabled)>
 			<cfset result = arguments.loggingEnabled />
 		<!--- Load logging enabled by environment name / group --->
-		<cfelseif StructKeyExists(arguments.loggingEnabled, environmentName)>
+		<cfelse>
 			<cfset result = resolveValueByEnvironment(arguments.loggingEnabled) />
 		</cfif>
 		
