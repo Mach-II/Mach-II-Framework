@@ -105,7 +105,7 @@ See that file header for configuration of filter criteria.
 		</cfif>
 		
 		<cfif isParameterDefined("debugModeOnly")
-			AND getAssert().isTrue(IsBoolen(getParameter("debugModeOnly"))
+			AND getAssert().isTrue(IsBoolean(getParameter("debugModeOnly"))
 				, "The value of 'debugModeOnly' must be boolean.")>
 			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>
