@@ -180,7 +180,8 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<!--- Perform trace for preProcess --->
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset setIsInitialTrace(TRUE) />
-			<cfset setTraceInfo(arrayNew(1)) />	
+			<cfset setTraceInfo(arrayNew(1)) />
+			<cfset appendTrace("TracePlugin is deprecated. Please use the new logging functionality.", "DEPRECATED", "preProcess", computeTraceTime()) />
 			<cfset trace("preProcess", arguments.eventContext) />
 		</cfif>
 	</cffunction>
