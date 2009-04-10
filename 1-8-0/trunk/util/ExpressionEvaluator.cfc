@@ -64,7 +64,7 @@ ${scope.key NEQ scope.key2}
 		
 		<cfif isExpression(arguments.expression)>
 			<cfset body = Mid(arguments.expression, 3, Len(arguments.expression) - 3) />
-			<cfset result = evaluateExpressionBody(body, arguments.event, arguments.propertyManager)>
+			<cfset result = evaluateExpressionBody(body, arguments.event, arguments.propertyManager) />
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
 				message="The following expression does not appear to be valid '#arguments.expressions#' Expressions must be in the form of '${scope.key}' Where scope can be either event or properties." />
@@ -221,7 +221,7 @@ ${scope.key NEQ scope.key2}
 				</cfcase>
 			</cfswitch>
 		<cfelseif isNumeric(body)>
-			<cfset result = body>
+			<cfset result = body />
 		<cfelse>
 			<cfthrow type="MachII.util.InvalidExpression" 
 				message="The following expression does not appear to be valid '#arguments.expressionElement#'. Expressions must be in the form of '${scope.key}' where scope can be either 'event' or 'properties'." />
