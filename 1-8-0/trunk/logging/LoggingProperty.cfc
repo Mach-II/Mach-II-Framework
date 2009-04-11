@@ -248,7 +248,17 @@ will bind to root parameter values.
 		
 		<!--- Decide the logging enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "loggingEnabled")>
-			<cfset arguments.parameters["loggingEnabled"] = decidedLoggingEnabled(arguments.parameters["loggingEnabled"]) />
+			<cftry>
+				<cfset arguments.parameters["loggingEnabled"] = decidedLoggingEnabled(arguments.parameters["loggingEnabled"]) />
+				<cfcatch type="MachII.util.IllegalArgument">
+					<cfthrow type="MachII.logging.InvalidEnvironmentConfiguration"
+						message="#cfcatch.message#"
+						detail="This misconfiguration error occurred in logger named '#arguments.loggerName#' in module named '#moduleName#'." />
+				</cfcatch>
+				<cfcatch type="any">
+					<cfrethrow />
+				</cfcatch>
+			</cftry>
 		</cfif>
 		
 		<!--- Create, init and configure the logger --->
@@ -325,7 +335,18 @@ will bind to root parameter values.
 	<cffunction name="setLoggingEnabled" access="private" returntype="void" output="false"
 		hint="Sets the logging enabled status and decides by environment if struct.">
 		<cfargument name="loggingEnabled" type="any" required="true" />
-		<cfset variables.loggingEnabled = decidedLoggingEnabled(arguments.loggingEnabled) />
+		
+		<cftry>
+			<cfset variables.loggingEnabled = decidedLoggingEnabled(arguments.loggingEnabled) />
+			<cfcatch type="MachII.util.IllegalArgument">
+				<cfthrow type="MachII.logging.InvalidEnvironmentConfiguration"
+					message="#cfcatch.message#"
+					detail="This misconfiguration error is defined in the property-wide 'loggingEnabled' parameter in the logging property in module named '#getModuleName()#'." />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfrethrow />
+			</cfcatch>			
+		</cftry>
 	</cffunction>
 	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if logging is enabled.">

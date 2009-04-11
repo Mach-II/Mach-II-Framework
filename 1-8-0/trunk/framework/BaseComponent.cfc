@@ -214,6 +214,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset var currentEnvironmentGroup = getAppManager().getEnvironmentGroup() />
 		<cfset var valuesByEnvironmentName = StructNew() />
 		<cfset var valuesByEnvironmentGroup = StructNew() />
+		<cfset var environmentGroupNames = getAppManager().getEnvironmentGroupNames() />
 		<cfset var key = "" />
 		<cfset var i = "" />
 		<cfset var scrubbedKey = "" />
@@ -226,6 +227,8 @@ quick access to things such as announcing a new event or getting/setting propert
 				<cfset scrubbedKey = Right(key, Len(key) - 6) />
 				
 				<cfloop list="#scrubbedKey#" index="i">
+					<cfset getAssert().isTrue(ListFindNoCase(environmentGroupNames, i)
+							, "An environment group named '#i#' is not a valid environment group name. Valid environment group names: '#environmentGroupNames#'.") />
 					<cfset valuesByEnvironmentGroup[i] = arguments.environmentValues[key] />
 				</cfloop>
 			<!--- An explicit environment name if it does not have a prefix --->
@@ -258,13 +261,9 @@ quick access to things such as announcing a new event or getting/setting propert
 		</cfif>
 		
 		<!--- No environment to resolve, return default value if provided --->
-		<cfif StructKeyExists(arguments, "defaultValue")>
-			<cfreturn arguments.defaultValue />
-		<cfelse>
-			<cfthrow type="MachII.framework.NoEnvironmentToResolveByValue"
-				message="Cannot resolve value by environment name or group and no default value was provided."
-				detail="Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'" />
-		</cfif>
+		<cfset getAssert().isTrue(StructKeyExists(arguments, "defaultValue")
+					, "Cannot resolve value by environment name or group and no default value was provided. Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'") />
+		<cfreturn arguments.defaultValue />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"

@@ -55,6 +55,7 @@ Notes:
 	<cfset variables.loading = TRUE />
 	<cfset variables.environmentName = "default" />
 	<cfset variables.environmentGroup = "production" />
+	<cfset variables.environmentGroupNames = "" />
 	<cfset variables.moduleName = "" />
 	
 	<!---
@@ -271,6 +272,25 @@ Notes:
 			<cfreturn getParent().getEnvironmentGroup() />
 		<cfelse>
 			<cfreturn variables.environmentGroup />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="setEnvironmentGroupNames" access="public" returntype="void" output="false"
+		hint="Sets a list of valid environment group names (used by custom environment loaders).">
+		<cfargument name="environmentGroupNames" type="string" required="true" />
+		<cfif NOT IsObject(getParent())>
+			<cfset variables.environmentGroupNames = arguments.environmentGroupNames />
+		<cfelse>
+			<cfthrow type="MachII.framework.CannotSetEnvironmentNames"
+				message="Cannot set environment names from module. Modules can only inherit environment names from parent application." />
+		</cfif>
+	</cffunction>
+	<cffunction name="getEnvironmentGroupNames" access="public" returntype="string" output="false"
+		hint="Gets a list of valid environment group names. If module, gets value from parent since the list of environment group names is a singleton.">
+		<cfif IsObject(getParent())>
+			<cfreturn getParent().getEnvironmentGroupNames() />
+		<cfelse>
+			<cfreturn variables.environmentGroupNames />
 		</cfif>
 	</cffunction>
 	

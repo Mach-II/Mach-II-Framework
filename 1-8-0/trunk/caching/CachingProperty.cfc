@@ -138,21 +138,22 @@ See individual caching strategies for more information on configuration.
 	--->
 	<cffunction name="configureStrategy" access="private" returntype="void" output="false"
 		hint="Configures a strategy.">
-		<cfargument name="name" type="string" required="true"
-			hint="Name of the strategy" />
+		<cfargument name="cacheName" type="string" required="true"
+			hint="Name of the cache strategy." />
 		<cfargument name="parameters" type="struct" required="true"
 			hint="Parameters for this strategy." />
 
+		<cfset var moduleName = getModuleName() />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
 			<cfthrow type="MachII.caching.MissingCacheStrategyType"
-				message="You must specify a parameter named 'type' for cache named '#arguments.name#' in module named '#getAppManager().getModuleName()#'." />
+				message="You must specify a parameter named 'type' for cache named '#arguments.cacheName#' in module named '#moduleName#'." />
 		</cfif>
 
 		<!--- Add in scopeKey as a parameter --->
-		<cfset arguments.parameters.generatedScopeKey = createCacheId(arguments.name) />
+		<cfset arguments.parameters.generatedScopeKey = createCacheId(arguments.cacheName) />
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
@@ -161,11 +162,21 @@ See individual caching strategies for more information on configuration.
 		
 		<!--- Decide the logging enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "cachingEnabled")>
-			<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
+			<cftry>
+				<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
+				<cfcatch type="MachII.util.IllegalArgument">
+					<cfthrow type="MachII.caching.InvalidEnvironmentConfiguration"
+						message="#cfcatch.message#"
+						detail="This misconfiguration error occurred in cache strategy named '#arguments.cacheName#' in module named '#moduleName#'." />
+				</cfcatch>
+				<cfcatch type="any">
+					<cfrethrow />
+				</cfcatch>
+			</cftry>
 		</cfif>
 		
 		<!--- Load the strategy  --->
-		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.name, arguments.parameters.type, arguments.parameters) />
+		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.cacheName, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
 	<cffunction name="createCacheId" access="private" returntype="string" output="false"
@@ -179,6 +190,18 @@ See individual caching strategies for more information on configuration.
 		</cfif>
 		
 		<cfreturn getAppManager().getAppKey() & "._MachIICaching._" & Hash(moduleName & "_" & arguments.cacheName) />
+	</cffunction>
+	
+	<cffunction name="getModuleName" access="private" returntype="string" output="false"
+		hint="Gets the module name.">
+
+		<cfset var moduleName = getAppManager().getModuleName() />
+		
+		<cfif NOT Len(moduleName)>
+			<cfset moduleName = "_base_" />
+		</cfif>
+
+		<cfreturn moduleName />
 	</cffunction>
 	
 	<cffunction name="decidedCachingEnabled" access="private" returntype="boolean" output="false"
@@ -216,7 +239,18 @@ See individual caching strategies for more information on configuration.
 	<cffunction name="setCachingEnabled" access="public" returntype="void" output="false"
 		hint="Sets if caching is enabled.">
 		<cfargument name="cachingEnabled" type="any" required="true" />
-		<cfset variables.cachingEnabled = decidedCachingEnabled(arguments.cachingEnabled) />
+		
+		<cftry>
+			<cfset variables.cachingEnabled = decidedCachingEnabled(arguments.cachingEnabled) />
+			<cfcatch type="MachII.util.IllegalArgument">
+				<cfthrow type="MachII.caching.InvalidEnvironmentConfiguration"
+					message="#cfcatch.message#"
+					detail="This misconfiguration error is defined in the property-wide 'cachingEnabled' parameter in the caching property in module named '#getModuleName()#'." />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfrethrow />
+			</cfcatch>			
+		</cftry>
 	</cffunction>
 	<cffunction name="isCachingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the value if caching is enabled.">
