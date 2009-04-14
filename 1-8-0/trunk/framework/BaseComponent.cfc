@@ -214,21 +214,21 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset var currentEnvironmentGroup = getAppManager().getEnvironmentGroup() />
 		<cfset var valuesByEnvironmentName = StructNew() />
 		<cfset var valuesByEnvironmentGroup = StructNew() />
-		<cfset var environmentGroupNames = getAppManager().getEnvironmentGroupNames() />
-		<cfset var key = "" />
+		<cfset var validEnvironmentGroupNames = getAppManager().getEnvironmentGroupNames() />
+		<cfset var scrubbedEnvironmentGroups = "" />
 		<cfset var i = "" />
-		<cfset var scrubbedKey = "" />
+		<cfset var utils = getUtils() />
 		
 		<!--- Build values by name and group --->
 		<cfloop collection="#arguments.environmentValues#" item="key">
 			<!--- An environment group if it is prefixed with 'group:' --->
 			<cfif key.toLowerCase().startsWith("group:")>
-				<!--- Removed 'group:'--->
-				<cfset scrubbedKey = Right(key, Len(key) - 6) />
+				<!--- Removed 'group:' and trim each list element --->
+				<cfset scrubbedEnvironmentGroups = utils.trimList(Right(key, Len(key) - 6)) />
 				
-				<cfloop list="#scrubbedKey#" index="i">
-					<cfset getAssert().isTrue(ListFindNoCase(environmentGroupNames, i)
-							, "An environment group named '#i#' is not a valid environment group name. Valid environment group names: '#environmentGroupNames#'.") />
+				<cfloop list="#scrubbedEnvironmentGroups#" index="i">
+					<cfset getAssert().isTrue(ListFindNoCase(validEnvironmentGroupNames, i)
+							, "An environment group named '#i#' is not a valid environment group name. Valid environment group names: '#validEnvironmentGroupNames#'.") />
 					<cfset valuesByEnvironmentGroup[i] = arguments.environmentValues[key] />
 				</cfloop>
 			<!--- An explicit environment name if it does not have a prefix --->
