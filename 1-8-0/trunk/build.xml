@@ -318,25 +318,6 @@ Notes:
 		</ftp>
 	</target>
 	
-	<target name="branch" depends="svnLogin" description="Creates a branch.">
-		<echo message="---------------------------------------------"/>
-		<echo message="Creating a branch" />
-		<echo message="---------------------------------------------"/>
-		<input addproperty="branchName"
-			message="Please define a name for this branch:"/>
-		<input addproperty="revision"
-			message="What revision would you like to branch from (a date with the following format : MM/DD/YYYY HH:MM AM_PM, a revision number, HEAD, BASE, COMMITED or PREV):"
-			defaultvalue="HEAD" />
-		<input addproperty="message"
-			message="Commit message:"/>
-		<svn username="${svn.usr}" password="${svn.pwd}">
-			<copy srcPath="${basedir}"
-				destUrl="${baseSvnUrl}/branches/${branchName}"
-				message="${message}"
-				revision="${revision}"/>
-		</svn>
-	</target>
-	
 	<target name="svnLogin">
 		<input addproperty="svn.usr"
 			message="SVN Username:"/>
