@@ -90,6 +90,7 @@ Notes:
 		<cfset var i = 0 />
 		<cfset var totalArgCount = ListLen(getRequiredParameters()) + ListLen(getOptionalParameters()) />
 		<cfset var totalArgsProcessed = 0 />
+		<cfset var element = "" />
 		
 		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
 		

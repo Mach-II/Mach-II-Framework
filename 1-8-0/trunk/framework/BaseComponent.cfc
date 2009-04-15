@@ -217,6 +217,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset var validEnvironmentGroupNames = getAppManager().getEnvironmentGroupNames() />
 		<cfset var scrubbedEnvironmentGroups = "" />
 		<cfset var i = "" />
+		<cfset var key = "" />
 		<cfset var utils = getUtils() />
 		
 		<!--- Build values by name and group --->
