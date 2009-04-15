@@ -135,7 +135,7 @@ properties struct can take complex datatypes like structs and arrays.
 	<cfset variables.environments = StructNew() />
 	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
 	
-	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironment,serverPropertyName" />
+	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironmentName,serverPropertyName" />
 	<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = "environmentGroup,servers,properties" />
 	<cfset variables.ENVIRONMENT_GROUP_NAMES = "production,qa,staging,development,local" />
 	
