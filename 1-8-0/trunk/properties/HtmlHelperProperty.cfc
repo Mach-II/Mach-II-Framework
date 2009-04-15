@@ -93,8 +93,9 @@ from the parent application.
 
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
-	<cfset variables.assetPackagesPropertyName = "_HTMLHelper.assetPackages" />
 	<cfset variables.assetPathsCache = StructNew() />
+	
+	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -689,16 +690,16 @@ from the parent application.
 	<cffunction name="setAssetPackages" access="private" returntype="void" output="false"
 		hint="Sets the asset packages into the property manager.">
 		<cfargument name="assetPackages" type="struct" required="true" />
-		<cfset setProperty(variables.assetPackagesPropertyName, arguments.assetPackages) />
+		<cfset setProperty(variables.ASSET_PACKAGES_PROPERTY_NAME, arguments.assetPackages) />
 	</cffunction>
 	<cffunction name="getAssetPackages" access="public" returntype="struct" output="false"
 		hint="Gets the asset pacakages from the property manager.">
-		<cfreturn getProperty(variables.assetPackagesPropertyName) />
+		<cfreturn getProperty(variables.ASSET_PACKAGES_PROPERTY_NAME) />
 	</cffunction>
 	<cffunction name="getAssetParentPackages" access="public" returntype="struct" output="false"
 		hint="Gets the asset pacakages from the parent property manager.">
 		<cfif getAppManager().inModule()>
-			<cfreturn getPropertyManager().getParent().getProperty(variables.assetPackagesPropertyName, StructNew()) />
+			<cfreturn getPropertyManager().getParent().getProperty(variables.ASSET_PACKAGES_PROPERTY_NAME, StructNew()) />
 		<cfelse>
 			<cfreturn StructNew() />
 		</cfif>
