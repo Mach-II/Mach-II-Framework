@@ -268,15 +268,22 @@ Notes:
 		<cfset var i = "" />
 		<cfset var keyList = StructKeyList(params) />
 
-		<!--- Attach event parameter only if it not supposed to be excluded --->
-		<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
-			<cfset queryString = getEventParameter() & getPairDelimiter() />
-		</cfif>
+		<!--- Nested the appending of the event parameter inside the next block
+			Moving it causes redirect commands with just urls to wrongly append
+			the event parameter on the end of the url --->
 
 		<!--- Attach the module/event name if defined --->
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<!--- Attach event parameter only if it not supposed to be excluded --->
+			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
+				<cfset queryString = getEventParameter() & getPairDelimiter() />
+			</cfif>
 			<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<!--- Attach event parameter only if it not supposed to be excluded --->
+			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
+				<cfset queryString = getEventParameter() & getPairDelimiter() />
+			</cfif>
 			<cfset queryString = queryString & arguments.eventName />
 		</cfif>
 		
