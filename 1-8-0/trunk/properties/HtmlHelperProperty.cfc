@@ -96,6 +96,8 @@ from the parent application.
 	<cfset variables.assetPathsCache = StructNew() />
 	
 	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
+	<!--- Tabs, line feeds and carriage returns --->
+	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -432,12 +434,12 @@ from the parent application.
 		<cfset var key = "" />
 		
 		<cfif arguments.type EQ "title">
-			<cfset code = '<title>' & HTMLEditFormat(arguments.content & getMetaTitleSuffix()) & '</title>' & Chr(13) />
+			<cfset code = '<title>' & HTMLEditFormat(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
 		<cfelse>
 			<cfif isHttpEquivMetaType(arguments.type)>
-				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & HTMLEditFormat(arguments.content) & '" />' & Chr(13) />
+				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 			<cfelse>
-				<cfset code = '<meta name="' & arguments.type & '" content="' & HTMLEditFormat(arguments.content) & '" />' & Chr(13) />
+				<cfset code = '<meta name="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 			</cfif>
 		</cfif>
 		
@@ -626,6 +628,12 @@ from the parent application.
 		
 		<!--- Conver current time to UTC because epoch is essentially UTC --->
 		<cfreturn DateDiff("s", CreateDate(1970, 1, 1), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+	</cffunction>
+	
+	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
+		hint="Cleans up content text by removing undesireable control characters.">
+		<cfargument name="content" type="string" required="true" />
+		<cfreturn REReplace(arguments.content, variables.CLEANUP_CONTROL_CHARACTERS_REGEX, "", "ALL") />
 	</cffunction>
 	
 	<!---
