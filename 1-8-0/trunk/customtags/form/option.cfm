@@ -70,7 +70,7 @@ Notes:
 		<cfif NOT Len(attributes.label)>
 			<cfset thisTag.GeneratedContent = "&nbsp;" />
 		<cfelse>
-			<cfset setContent(attributes.label) />
+			<cfset setContent(HTMLEditFormat(attributes.label)) />
 		</cfif>
 	</cfif>
 	<cfoutput>#doEndTag()#</cfoutput>

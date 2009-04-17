@@ -34,11 +34,18 @@ Notes:
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("options", true) />
 
-	<cfif IsStruct(attributes.items)>
+	<cfif IsSimpleValue(attributes.items)>
+		<cfparam name="attributes.delimiter" type="string"
+			default="," />
+		
+		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
+			<cfoutput><form:option value="#i#" /></cfoutput>
+		</cfloop>
+	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.itemOrder = StructSort(attributes.items, "text") />
 		
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
-			<cfoutput><form:option value="#variables.itemOrder[i]#" label="#attributes.items[variables.itemOrder[i]]#" /></cfoutput>
+			<cfoutput><form:option value="#LCase(variables.itemOrder[i])#" label="#attributes.items[variables.itemOrder[i]]#" /></cfoutput>
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
 		<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">

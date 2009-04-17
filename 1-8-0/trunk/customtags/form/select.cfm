@@ -59,6 +59,8 @@ Notes:
 		default="#attributes.path#" />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
+	<cfparam name="attributes.delimiter" type="string"
+		default="," />
 	
 	<!--- Syncronize check value for option tag --->
 	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
@@ -79,7 +81,7 @@ Notes:
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
 	<cfif StructKeyExists(attributes, "items")>
-		<cfoutput><form:options items="#attributes.items#"/></cfoutput>
+		<cfoutput><form:options items="#attributes.items#" delimiter="#attributes.delimiter#"/></cfoutput>
 	</cfif>
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
