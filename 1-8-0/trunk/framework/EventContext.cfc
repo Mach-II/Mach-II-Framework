@@ -154,12 +154,14 @@ Notes:
 			hint="The name of the event to redirect to." />
 		<cfargument name="args" type="any" required="false" default=""
 			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in url." />
-		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#" />
+		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#"
+			hint="The name of the module." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
 		<cfargument name="persistArgs" type="any" required="false" default=""
 			hint="You can pass in either a struct of items or a list of event args to persist." />
-		<cfargument name="statusType" type="string" required="false" default="" />
+		<cfargument name="statusType" type="string" required="false" default=""
+			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG)." />
 		
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
