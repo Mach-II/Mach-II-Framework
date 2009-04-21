@@ -60,11 +60,17 @@ Notes:
 		hint="Initializes the manager.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
 			hint="Sets the base AppManager." />
-
-		<cfset var urlDelimiters = "" />	
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
+
+		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Configures nothing.">
+
+		<cfset var urlDelimiters = "" />	
 
 		<!--- Setup defaults --->
 		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />
@@ -88,14 +94,7 @@ Notes:
 		</cfif>
 		
 		<!--- Setup the RequestRedirectPersist --->
-		<cfset setRequestRedirectPersist(CreateObject("component", "MachII.framework.RequestRedirectPersist").init(arguments.appManager)) />
-
-		<cfreturn this />
-	</cffunction>
-
-	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures nothing.">
-		<!--- Does nothing --->
+		<cfset setRequestRedirectPersist(CreateObject("component", "MachII.framework.RequestRedirectPersist").init(getAppManager())) />
 	</cffunction>
 
 	<!---

@@ -104,6 +104,7 @@ Wildcards for patterns:
 		<cfset var pageViewQuery = "" />
 		<cfset var pageViewPaths = ArrayNew(1) />
 		<cfset var results = StructNew() />
+		<cfset var viewData = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -143,7 +144,11 @@ Wildcards for patterns:
 		<!--- Build page-views that match patterns --->
 		<cfloop from="1" to="#ArrayLen(pageViewPaths)#" index="i">
 			<cfif variables.pathMatcher.match(pattern, pageViewPaths[i])>
-				<cfset results[buildPageViewName(pattern, pageViewPaths[i])] = getApplicationRoot() & pageViewPaths[i] />
+				<cfset viewData = StructNew() />
+				<cfset viewData.page = pageViewPaths[i] />
+				<cfset viewData.appRoot = getApplicationRoot() />
+				<cfset viewData.appRootType = "local" />
+				<cfset results[buildPageViewName(pattern, pageViewPaths[i])] = viewData />
 			</cfif>
 		</cfloop>
 		

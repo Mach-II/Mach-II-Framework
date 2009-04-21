@@ -33,7 +33,7 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentViewManager = "" />
-	<cfset variables.viewPaths = StructNew() />
+	<cfset variables.viewData = StructNew() />
 	<cfset variables.viewLoaders = ArrayNew(1) />
 	
 	<!---
@@ -59,7 +59,7 @@ Notes:
 				
 		<cfset var viewNodes = ArrayNew(1) />
 		<cfset var name = "" />
-		<cfset var page = "" />
+		<cfset var viewData = StructNew() />
 
 		<cfset var viewLoaderNodes = ArrayNew(1) />		
 		<cfset var viewLoaderParams = StructNew() />
@@ -71,7 +71,6 @@ Notes:
 		<cfset var paramValue = "" />
 
 		<cfset var utils = getAppManager().getUtils() />
-		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
@@ -88,10 +87,13 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(viewNodes)#" index="i">
 			<cfset name = viewNodes[i].xmlAttributes["name"] />
 			
+			<cfset viewData = StructNew() />
+			<cfset viewData.appRoot = "" />
+			
 			<!--- Override XML for Modules --->
 			<cfif hasParent AND arguments.override AND StructKeyExists(viewNodes[i].xmlAttributes, "overrideAction")>
 				<cfif viewNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
-					<cfset StructDelete(variables.viewPaths, name, false) />
+					<cfset StructDelete(variables.viewData, name, false) />
 				<cfelseif viewNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
 					<!--- Check for a mapping --->
 					<cfif StructKeyExists(viewNodes[i].xmlAttributes, "mapping")>
@@ -106,17 +108,19 @@ Notes:
 							message="An view named '#mapping#' cannot be found in the parent view manager for the override named '#name#' in module '#getAppManager().getModuleName()#'." />
 					</cfif>
 					
-					<cfset variables.viewPaths[name] = mapping />
+					<cfset variables.viewData[name] = getParent().getView(mapping) />
 				</cfif>
 			<cfelse>
+				<cfset viewData.page = viewNodes[i].xmlAttributes["page"] />
+				
 				<!--- Use a different appRoot if defined --->
 				<cfif StructKeyExists(viewNodes[i].xmlAttributes, "useParentAppRoot") AND viewNodes[i].xmlAttributes["useParentAppRoot"]>
-					<cfset page = getAppManager().getParent().getPropertyManager().getProperty("applicationRoot") & viewNodes[i].xmlAttributes["page"] />
+					<cfset viewData.appRootType = "parent" />
 				<cfelse>
-					<cfset page = appRoot & viewNodes[i].xmlAttributes["page"] />
+					<cfset viewData.appRootType = "local" />
 				</cfif>
 			
-				<cfset variables.viewPaths[name] = page />
+				<cfset variables.viewData[name] = viewData />
 			</cfif>
 		</cfloop>
 		
@@ -187,12 +191,45 @@ Notes:
 		
 		<cfset var viewLoaders = variables.viewLoaders />
 		<cfset var views = StructNew() />
+		<cfset var viewData = "" />
 		<cfset var i = 0 />
+		<cfset var key = "" />
+		<cfset var localAppRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
+		<cfset var parentAppRoot =  ""/>
 		
+		<!--- Get parent app root if in module  --->
+		<cfif getAppManager().inModule()>
+			<cfset parentAppRoot = getAppManager().getPropertyManager().getParent().getProperty("applicationRoot") />
+		</cfif>
+		
+		<!--- Resolve app roots for local views --->
+		<cfloop collection="#variables.viewData#" item="key">
+			<cfset viewData = variables.viewData[key] />
+			
+			<cfif viewData.appRootType EQ "local">
+				<cfset viewData.appRoot = localAppRoot />
+			<cfelse>
+				<cfset viewData.appRoot = parentAppRoot />
+			</cfif>
+		</cfloop>
+		
+		<!--- Configure and resolve view loaders --->
 		<cfloop from="1" to="#ArrayLen(viewLoaders)#" index="i">
 			<cfset viewLoaders[i].configure() />
 			<cfset views = viewLoaders[i].discoverViews() />
-			<cfset StructAppend(variables.viewPaths, views, false) />
+			<cfset StructAppend(variables.viewData, views, false) />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures the manager for use.">
+		
+		<cfset var viewLoaders = variables.viewLoaders />
+		<cfset var i = 0 />
+		
+		<!--- Deconfigureview loaders --->
+		<cfloop from="1" to="#ArrayLen(viewLoaders)#" index="i">
+			<cfset viewLoaders[i].deconfigure() />
 		</cfloop>
 	</cffunction>
 	
@@ -200,14 +237,24 @@ Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="getViewPath" access="public" returntype="string" output="false"
-		hint="Gets the view path by view name.">
+		hint="Gets a resolved view path by view name.">
+		<cfargument name="viewName" type="string" required="true"
+			hint="Name of the view path to get." />
+		
+		<cfset var viewData = getView(arguments.viewName) />
+		
+		<cfreturn viewData.appRoot & viewData.page />
+	</cffunction>
+	
+	<cffunction name="getView" access="public" returntype="struct" output="false"
+		hint="Gets view data information.">
 		<cfargument name="viewName" type="string" required="true"
 			hint="Name of the view path to get." />
 		
 		<cfif isViewDefined(arguments.viewName)>
-			<cfreturn variables.viewPaths[arguments.viewName] />
+			<cfreturn variables.viewData[arguments.viewName] />
 		<cfelseif IsObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
-			<cfreturn getParent().getViewPath(arguments.viewName) />
+			<cfreturn getParent().getView(arguments.viewName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ViewNotDefined" 
 				message="View with name '#arguments.viewName#' is not defined." />
@@ -218,7 +265,7 @@ Notes:
 		hint="Checks if the view is defined.">
 		<cfargument name="viewName" type="string" required="true"
 			hint="Name of the view to check. Does not check parent ViewManager." />
-		<cfreturn StructKeyExists(variables.viewPaths, arguments.viewName) />
+		<cfreturn StructKeyExists(variables.viewData, arguments.viewName) />
 	</cffunction>
 	
 	<!---

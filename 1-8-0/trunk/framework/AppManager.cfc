@@ -118,6 +118,7 @@ Notes:
 		<cfset getPluginManager().deconfigure() />
 		<cfset getListenerManager().deconfigure() />
 		<cfset getFilterManager().deconfigure() />
+		<cfset getViewManager().deconfigure() />
 		
 		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
