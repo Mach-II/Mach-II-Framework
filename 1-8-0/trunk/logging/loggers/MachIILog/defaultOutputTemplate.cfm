@@ -20,7 +20,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 You must use the 'local' prefix for all variables created in this template 
@@ -190,18 +190,22 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<td><p>#arguments.appManager.getEnvironmentName()#</p></td>
 		</tr>
 		<tr>
+			<td><h4>Mach-II Environment Group Name</h4></td>
+			<td><p>#arguments.appManager.getEnvironmentGroup()#</p></td>
+		</tr>
+		<tr class="shade">
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Remote IP</h4></td>
 			<td><p>#cgi.remote_addr#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Remote User Agent</h4></td>
 			<td><p>#cgi.http_user_agent#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Locale</h4></td>
 			<td><p>#getLocale()#</p></td>
 		</tr>
