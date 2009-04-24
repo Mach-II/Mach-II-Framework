@@ -18,12 +18,9 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
-- Deprecated hasProperty(). Duplicate method isPropertyDefined is more inline with
-the rest of the framework. (pfarrell)
-- Added method to get Mach-II framework version (pfarrell)
 --->
 <cfcomponent 
 	displayname="PropertyManager"

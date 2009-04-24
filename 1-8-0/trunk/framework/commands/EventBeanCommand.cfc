@@ -27,7 +27,7 @@ Notes:
 	displayname="EventBeanCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for creating and populating a bean in the current event.">
+	hint="A Command for creating and populating a bean in the current event.">
 	
 	<!---
 	PROPERTIES

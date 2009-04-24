@@ -27,7 +27,7 @@ Notes:
 	displayname="PublishCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command that publishing messages in which message subscribers listen for.">
+	hint="A Command that publishing messages in which message subscribers listen for.">
 	
 	<!---
 	PROPERTIES

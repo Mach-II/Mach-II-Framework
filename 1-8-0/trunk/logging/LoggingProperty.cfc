@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id: Log.cfc 584 2007-12-15 08:44:43Z peterfarrell $
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 

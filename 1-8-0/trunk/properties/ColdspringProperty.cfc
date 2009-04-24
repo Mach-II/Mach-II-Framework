@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Original license from the ColdSpring project (http://www.coldspringframework.org):
 ------------------------------------------------------------------------------------------
@@ -43,9 +43,6 @@ A Mach-II property that provides easy ColdSpring integration with Mach-II applic
 
 Special thanks to GreatBizTools, LLC and Peter J. Farrell for donating the improvements 
 to this integration component for Mach-II.
-
-N.B.
-Compatible with Mach-II 1.5.0 or higher.
 
 Usage:
 <property name="coldSpringProperty" type="MachII.properties.ColdspringProperty">

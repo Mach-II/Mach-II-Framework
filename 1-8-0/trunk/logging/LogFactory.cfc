@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as

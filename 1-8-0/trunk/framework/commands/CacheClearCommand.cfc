@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id: CacheClearCommand.cfc 422 2007-07-06 05:34:59Z pfarrell $
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->

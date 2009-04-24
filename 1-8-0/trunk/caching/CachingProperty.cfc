@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Simple configuration that uses the timespan strategy with its' default parameters

@@ -27,7 +27,7 @@ Notes:
 	displayname="EventMappingCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for setting up an event mapping for an event handler.">
+	hint="A Command for setting up an event mapping for an event handler.">
 	
 	<!---
 	PROPERTIES

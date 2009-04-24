@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -27,7 +27,7 @@ Notes:
 	displayname="NotifyCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for notifying a Listener.">
+	hint="A Command for notifying a Listener.">
 	
 	<!---
 	PROPERTIES

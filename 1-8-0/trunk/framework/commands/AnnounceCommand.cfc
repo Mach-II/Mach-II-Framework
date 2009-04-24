@@ -27,7 +27,7 @@ Notes:
 	displayname="AnnounceCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for announcing an event.">
+	hint="A Command for announcing an event.">
 	
 	<!---
 	PROPERTIES

@@ -27,7 +27,7 @@ Notes:
 	displayname="EventArgCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for putting an event arg into the current event.">
+	hint="A Command for putting an event arg into the current event.">
 	
 	<!---
 	PROPERTIES

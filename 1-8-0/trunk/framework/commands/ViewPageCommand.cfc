@@ -27,7 +27,7 @@ Notes:
 	displayname="ViewPageCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for processing a view.">
+	hint="A Command for processing a view.">
 	
 	<!---
 	PROPERTIES

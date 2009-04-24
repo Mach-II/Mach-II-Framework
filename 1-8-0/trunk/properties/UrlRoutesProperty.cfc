@@ -50,7 +50,7 @@ index.cfm/product/A12345/fancy/
 	displayname="UrlRoutesProperty"
 	extends="MachII.framework.Property"
 	output="false"
-	hint="Sets up one or more route which are configurable search engine friendly url schemes.">
+	hint="Sets up one or more routes which are configurable search engine friendly url schemes.">
 
 	<!---
 	PROPERTIES

@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 --->

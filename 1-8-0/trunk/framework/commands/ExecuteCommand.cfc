@@ -27,7 +27,7 @@ Notes:
 	displayname="ExecuteCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for executing a subroutine.">
+	hint="A Command for executing a subroutine.">
 	
 	<!---
 	PROPERTIES

@@ -40,7 +40,7 @@ or
 	displayname="CallMethodCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="An Command for calling a method on a bean configured from the ColdSpringProperty.">
+	hint="A Command for calling a method on a bean configured from the ColdSpringProperty.">
 	
 	<!---
 	PROPERTIES
