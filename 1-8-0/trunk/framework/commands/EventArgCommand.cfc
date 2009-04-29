@@ -64,14 +64,15 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var value = "" />
-		<cfset var log = getLog() />		
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
+		<cfset var log = getLog() />
 
 		<!--- Get value (variable attribute and then event-arg) --->
 		<cfif isArgVariableDefined()>
 			<cfset value = getArgVariableValue() />
 		<cfelseif isArgValueDefined()>
 			<cfif getExpressionEvaluator().isExpression(getArgValue())>
-				<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, getPropertyManager())>
+				<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, propertyManager) />
 			<cfelse>
 				<cfset value = getArgValue() />
 			</cfif>
