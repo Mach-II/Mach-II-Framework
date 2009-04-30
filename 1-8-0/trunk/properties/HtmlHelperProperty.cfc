@@ -289,22 +289,33 @@ from the parent application.
 	</cffunction>
 	
 	<cffunction name="addAssetPackage" access="public" returntype="string" output="false"
-		hint="Adds files that are defined as an asset package.">
-		<cfargument name="assetPackageName" type="string" required="true"
-			hint="The name of the asset package to add." />
+		hint="Adds files that are defined as an asset packages.">
+		<cfargument name="assetPackageNames" type="any" required="true"
+			hint="A list or array of the asset packages names to add." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline).">
+			hint="Indicates to output type for the generated HTML code (head, inline)." />
 		
-		<cfset var package = getAssetPackageByName(arguments.assetPackageName) />
+		<cfset var package = "" />
 		<cfset var code = "" />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
 		
-		<cfloop from="1" to="#ArrayLen(package)#" index="i">
-			<cfif package[i].type EQ "js">
-				<cfset code = code & addJavascript(package[i].paths, arguments.outputType) />
-			<cfelseif package[i].type EQ "css">
-				<cfset code = code & addStylesheet(package[i].paths, package[i].attributes, arguments.outputType) />
-			</cfif>
+		<!--- Explode the list to an array --->
+		<cfif NOT IsArray(arguments.assetPackageNames)>
+ 			<cfset arguments.assetPackageNames = ListToArray(getUtils().trimList(arguments.assetPackageNames)) />
+		</cfif>
+		
+		<cfloop from="1" to="#ArrayLen(arguments.assetPackageNames)#" index="i">
+			
+			<cfset package = getAssetPackageByName(arguments.assetPackageNames[i]) />	
+		
+			<cfloop from="1" to="#ArrayLen(package)#" index="j">
+				<cfif package[j].type EQ "js">
+					<cfset code = code & addJavascript(package[j].paths, arguments.outputType) />
+				<cfelseif package[j].type EQ "css">
+					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType) />
+				</cfif>
+			</cfloop>
 		</cfloop>
 		
 		<cfset code = code & Chr(13) />
