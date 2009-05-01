@@ -50,8 +50,6 @@ Notes:
 	<cffunction name="init" access="public" returntype="RedirectCommand" output="false"
 		hint="Used by the framework for initialization.">
 		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="eventParameter" type="string" required="true" />
-		<cfargument name="redirectPersistParameter" type="string" required="true" />
 		<cfargument name="moduleName" type="string" required="false" default="" />
 		<cfargument name="url" type="string" required="false" default="" />
 		<cfargument name="args" type="string" required="false" default="" />
@@ -62,8 +60,6 @@ Notes:
 		<cfargument name="routeName" type="string" required="false" default="" />
 		
 		<cfset setEventName(arguments.eventName) />
-		<cfset setEventParameter(arguments.eventParameter) />
-		<cfset setRedirectPersistParameter(arguments.redirectPersistParameter) />
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setUrl(arguments.url) />
 		<cfset setArgs(arguments.args) />
@@ -133,6 +129,11 @@ Notes:
 		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		<cfset var expressionEvaluator = getExpressionEvaluator() />
 		
+		<!--- Grab the UrlBase if no URL is specified --->
+		<cfif NOT Len(evaluatedUrl)>
+			<cfset evaluatedUrl = propertyManager.getProperty("urlBase") />	
+		</cfif>
+		
 		<cfif Len(evaluatedRouteName) AND expressionEvaluator.isExpression(evaluatedRouteName)>
 			<cfset evaluatedRouteName = expressionEvaluator.evaluateExpression(evaluatedRouteName, 
 				arguments.event, propertyManager) />
@@ -140,7 +141,7 @@ Notes:
 		
 		<!--- Add the persistId parameter to the url args if persist is required --->
 		<cfif getPersist() AND propertyManager.getProperty("redirectPersistParameterLocation") NEQ "cookie">
-			<cfset args = ListAppend(getArgs(), getRedirectPersistParameter()) />
+			<cfset args = ListAppend(getArgs(), propertyManager.getProperty("redirectPersistParameter")) />
 		</cfif>
 		
 		<!--- Build params which can have notation like args="id=${event.product_id},type=print"  --->
@@ -236,11 +237,11 @@ Notes:
 		</cfif>
 
 		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
-		<cfset StructDelete(args, getEventParameter(), FALSE) />
+		<cfset StructDelete(args, propertyManager.getProperty("eventParameter"), FALSE) />
 		
 		<!--- Save the data --->
 		<cfset persistId = arguments.eventContext.getAppManager().getRequestManager().savePersistEventData(args) />
-		<cfset arguments.event.setArg(getRedirectPersistParameter(), persistId) />
+		<cfset arguments.event.setArg(propertyManager.getProperty("redirectPersistParameter"), persistId) />
 	</cffunction>
 	
 	<!---
@@ -254,28 +255,12 @@ Notes:
 		<cfreturn variables.eventName />
 	</cffunction>
 	
-	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
-		<cfargument name="eventParameter" type="string" required="true" />
-		<cfset variables.eventParameter = arguments.eventParameter />
-	</cffunction>
-	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
-		<cfreturn variables.eventParameter />
-	</cffunction>
-	
 	<cffunction name="setRouteName" access="private" returntype="void" output="false">
 		<cfargument name="routeName" type="string" required="true" />
 		<cfset variables.routeName = arguments.routeName />
 	</cffunction>
 	<cffunction name="getRouteName" access="private" returntype="string" output="false">
 		<cfreturn variables.routeName />
-	</cffunction>
-	
-	<cffunction name="setRedirectPersistParameter" access="private" returntype="void" output="false">
-		<cfargument name="redirectPersistParameter" type="string" required="true" />
-		<cfset variables.redirectPersistParameter = arguments.redirectPersistParameter />
-	</cffunction>
-	<cffunction name="getRedirectPersistParameter" access="private" returntype="string" output="false">
-		<cfreturn variables.redirectPersistParameter />
 	</cffunction>
 
 	<cffunction name="setModuleName" access="private" returntype="void" output="false">
