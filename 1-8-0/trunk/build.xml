@@ -251,7 +251,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipNightly" depends="buildNightly,test" description="Creates a nightly build zip in the 'zip' directory.">
+	<target name="zipNightly" depends="lastCommitRevision,buildNightly,test" description="Creates a nightly build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Building nightly zip"/>
 		<echo message="---------------------------------------------"/>
@@ -278,6 +278,9 @@ Notes:
 		<input addProperty="ftp.password"
 			message="Please enter the password for FTP user named '${ftp.user}':"/>
 		<fail unless="ftp.password">You must set the ftp.password property for ftp as command line arg (e.g. -Dftp.password=YOURPWD) or input the password if you have manually run this target.</fail>
+		<input addProperty="autoUpdate.password"
+			message="Please enter the password for auto updater:"/>
+		<fail unless="autoUpdate.password">You must set the autoUpdate.password property as command line arg (e.g. -DautoUpdate.password=YOURPWD) or input the password if you have manually run this target.</fail>
 	</target>
 	
 	<target name="ftp-zipNightly" depends="ftp-init,zipNightly" description="Creates a nightly build zip and uploads it to nightly directory on mach-ii.com">
@@ -316,6 +319,8 @@ Notes:
 				<include name="*.dtd"/>
 			</fileset>
 		</ftp>
+		<tempfile property="tempFile" suffix=".tmp" destdir="${dest}"/>
+		<get dest="${tempFile}" src="http://www.mach-ii.com/index.cfm?go=admin.updatePackage&amp;package=framework&amp;versionNumber=1.8.0.${buildVersion}&amp;fileLocation=http://www.mach-ii.com/nightly/older/${majorVersion}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip&amp;password=${autoUpdate.password}"/>
 	</target>
 	
 	<target name="svnLogin">
