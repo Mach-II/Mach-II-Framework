@@ -138,9 +138,9 @@ Notes:
 					
 					<cfloop from="1" to="#ArrayLen(subscriberNodes)#" index="j">
 						<cfif StructKeyExists(subscriberNodes[j].xmlAttributes, "listener")>							
-							<cfset messageSubscriber = setupNotify(subscriberNodes[j].xmlAttributes) />
+							<cfset messageSubscriber = setupNotify(subscriberNodes[j]) />
 						<cfelseif StructKeyExists(subscriberNodes[j].xmlAttributes, "bean")>
-							<cfset messageSubscriber = setupCallMethod(subscriberNodes[j].xmlAttributes) />
+							<cfset messageSubscriber = setupCallMethod(subscriberNodes[j]) />
 						</cfif>
 						
 						<cfset messageHandler.addMessageSubscriber(messageSubscriber) />
