@@ -19,12 +19,13 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
 <cfcomponent 
 	displayname="MessageManager"
+	extends="MachII.framework.CommandLoaderBase"
 	output="false"
 	hint="Manages registered Message Subscribers for the framework instance.">
 	
@@ -67,11 +68,7 @@ Notes:
 		<cfset var messageWaitForThreads = "" />
 		<cfset var messageTimeout = "" />
 		
-		<cfset var subscriberNodes = ArrayNew(1) />
-		<cfset var subscriberListenerName = "" />
-		<cfset var subscriberListener = "" />
-		<cfset var subscriberMethod = "" />
-		<cfset var subscriberResultArg = "" />
+		<cfset var subscriberNodes = ArrayNew(1) />		
 		
 		<cfset var messageHandler = "" />
 		<cfset var messageSubscriber = "" />
@@ -140,18 +137,11 @@ Notes:
 					<cfset subscriberNodes = messageSubscribersNodes[i].xmlChildren />
 					
 					<cfloop from="1" to="#ArrayLen(subscriberNodes)#" index="j">
-						<cfset subscriberListenerName = subscriberNodes[j].xmlAttributes["listener"] />
-						<cfset subscriberMethod = subscriberNodes[j].xmlAttributes["method"] />
-
-						<cfif StructKeyExists(subscriberNodes[j].xmlAttributes, "resultArg")>
-							<cfset subscriberResultArg = subscriberNodes[j].xmlAttributes["resultArg"] />
-						<cfelse>
-							<cfset subscriberResultArg = "" />
+						<cfif StructKeyExists(subscriberNodes[j].xmlAttributes, "listener")>							
+							<cfset messageSubscriber = setupNotify(subscriberNodes[j].xmlAttributes) />
+						<cfelseif StructKeyExists(subscriberNodes[j].xmlAttributes, "bean")>
+							<cfset messageSubscriber = setupCallMethod(subscriberNodes[j].xmlAttributes) />
 						</cfif>
-						
-						<cfset subscriberListener = getAppManager().getListenerManager().getListener(subscriberListenerName) />
-						
-						<cfset messageSubscriber = CreateObject("component", "MachII.framework.MessageSubscriber").init(subscriberListenerName, subscriberListener, subscriberMethod, subscriberResultArg) />
 						
 						<cfset messageHandler.addMessageSubscriber(messageSubscriber) />
 					</cfloop>

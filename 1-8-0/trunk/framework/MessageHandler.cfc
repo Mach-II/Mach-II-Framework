@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -38,6 +38,7 @@ Notes:
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.messageSubscribers = StructNew() />
 	<cfset variables.log = "" />
+	<cfset variables.system = CreateObject("java", "java.lang.System") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -88,10 +89,11 @@ Notes:
 			
 			<!--- Setup parameters --->
 			<cfset parameters.event = arguments.event />
+			<cfset parameters.eventContext = arguments.eventContext />
 			
 			<!--- Run all the threads --->
 			<cfloop collection="#subscribers#" item="key">
-				<cfset threadIds[threadingAdapter.run(subscribers[key], "invokeListener", parameters)] = key />
+				<cfset threadIds[threadingAdapter.run(subscribers[key], "execute", parameters)] = key />
 			</cfloop>
 			
 			<!--- Wait and join --->
@@ -127,7 +129,7 @@ Notes:
 			</cfif>
 
 			<cfloop collection="#subscribers#" item="key">
-				<cfset subscribers[key].invokeListener(arguments.event) />
+				<cfset subscribers[key].execute(arguments.event, arguments.eventContent) />
 			</cfloop>
 		</cfif>
 		
@@ -135,10 +137,10 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="addMessageSubscriber" access="public" returntype="void" output="false"
-		hint="Registers a subscriber to this message.">
-		<cfargument name="messageSubscriber" type="MachII.framework.MessageSubscriber" />
+		hint="Registers a subscriber (notify / call-method command) to this message.">
+		<cfargument name="messageSubscriber" type="MachII.framework.Command" required="true" />
 		
-		<cfset var key = arguments.messageSubscriber.getListenerName() & "_" & arguments.messageSubscriber.getMethod() />
+		<cfset var key = variables.system.identityHashCode(arguments.messageSubscriber) />
 		
 		<cfset variables.messageSubscribers[key] = arguments.messageSubscriber />
 	</cffunction>
