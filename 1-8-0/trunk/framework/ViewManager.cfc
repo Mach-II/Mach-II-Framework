@@ -247,7 +247,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getView" access="public" returntype="struct" output="false"
-		hint="Gets view data information.">
+		hint="Gets view data information. Checks parent if child manager.">
 		<cfargument name="viewName" type="string" required="true"
 			hint="Name of the view path to get." />
 		
@@ -266,6 +266,11 @@ Notes:
 		<cfargument name="viewName" type="string" required="true"
 			hint="Name of the view to check. Does not check parent ViewManager." />
 		<cfreturn StructKeyExists(variables.viewData, arguments.viewName) />
+	</cffunction>
+	
+	<cffunction name="getViewLoaders" access="public" returntype="array" output="false"
+		hint="Gets all view loader for this context.">
+		<cfreturn variables.viewLoaders />
 	</cffunction>
 	
 	<!---
