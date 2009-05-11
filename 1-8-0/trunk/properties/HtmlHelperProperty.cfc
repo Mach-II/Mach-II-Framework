@@ -331,7 +331,7 @@ from the parent application.
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
 		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
-		<cfargument name="urls" type="any" required="true"
+		<cfargument name="paths" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .js files.">
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates to output type for the generated HTML code (head, inline).">
