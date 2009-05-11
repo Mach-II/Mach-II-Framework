@@ -415,10 +415,10 @@ from the parent application.
 		hint="Adds code for an img tag for inline use.">
 		<cfargument name="path" type="string" required="true"
 			hint="A path to a web accessible image file." />
-		<cfargument name="height" type="numeric" required="false"
-			hint="The height of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
 		<cfargument name="width" type="numeric" required="false" 
 			hint="The width of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
+		<cfargument name="height" type="numeric" required="false"
+			hint="The height of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
 		<cfargument name="alt" type="string" required="false"
 			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. A zero-length string will cause this attribute to be omitted." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
