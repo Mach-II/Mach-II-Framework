@@ -53,6 +53,8 @@ Notes:
 			<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 		</cfif>
 		
+		<cfset super.init() />
+		
 		<cfreturn this />
 	</cffunction>
 
@@ -164,6 +166,8 @@ Notes:
 			<cfset aMessageHandler = variables.messageHandlers[i] />
 			<cfset aMessageHandler.setLog(logFactory) />
 		</cfloop>
+		
+		<cfset super.configure() />
 	</cffunction>
 	
 	<!---

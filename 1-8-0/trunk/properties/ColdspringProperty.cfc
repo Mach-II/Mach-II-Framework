@@ -729,6 +729,7 @@ application.serviceFactory_account variable.
 		<cfset var configurableEventCommands = getAppManager().getEventManager().getConfigurableCommandTargets() />
 		<cfset var configurableSubroutineCommands = getAppManager().getSubroutineManager().getConfigurableCommandTargets() />
 		<cfset var configurableCacheCommands = getAppManager().getCacheManager().getConfigurableCommandTargets() />
+		<cfset var configurableMessageCommands = getAppManager().getMessageManager().getConfigurableCommandTargets() />
 		<cfset var i = 0 />
 		
 		<!--- Append each retrieved configurable event commands to the targets array (in struct) --->
@@ -744,6 +745,11 @@ application.serviceFactory_account variable.
 		<!--- Append each retrieved configurable cache commands to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(configurableCacheCommands)#" index="i">
 			<cfset ArrayAppend(arguments.targetBase.targets, configurableCacheCommands[i]) />
+		</cfloop>
+		
+		<!--- Append each retrieved configurable message commands to the targets array (in struct) --->
+		<cfloop from="1" to="#ArrayLen(configurableMessageCommands)#" index="i">
+			<cfset ArrayAppend(arguments.targetBase.targets, configurableMessageCommands[i]) />
 		</cfloop>
 	</cffunction>
 	
