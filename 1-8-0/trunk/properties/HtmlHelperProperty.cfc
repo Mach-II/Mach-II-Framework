@@ -49,6 +49,8 @@ Configuration Usage:
 		<parameter name="jsBasePath" value="/path/from/webroot" />
 		<!-- Defaults to webroot base path + "/css" -->
 		<parameter name="cssBasePath" value="/path/from/webroot" />
+		<!-- Defaults to webroot base path + "/img" -->
+		<parameter name="imgBasePath" value="/path/from/webroot" />
 		<parameter name="assetPackages">
 			<struct>
 				<key name="lightwindow">
@@ -90,6 +92,7 @@ from the parent application.
 	<cfset variables.webrootBasePath = ExpandPath(".") />
 	<cfset variables.jsBasePath = "/js" />
 	<cfset variables.cssBasePath = "/css" />
+	<cfset variables.imgBasePath = "/img" />
 
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
@@ -130,6 +133,9 @@ from the parent application.
 		</cfif>
 		<cfif isParameterDefined("cssBasePath")>
 			<cfset setCssBasePath(getParameter("cssBasePath")) />
+		</cfif>
+		<cfif isParameterDefined("imgBasePath")>
+			<cfset setImgBasePath(getParameter("imgBasePath")) />
 		</cfif>
 		
 		<cfset setAssetPackages(configureAssetPackages(getParameter("assetPackages", StructNew()))) />
@@ -336,16 +342,16 @@ from the parent application.
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.urls)>
- 			<cfset arguments.urls = ListToArray(getUtils().trimList(arguments.urls)) />
+		<cfif NOT IsArray(arguments.paths)>
+ 			<cfset arguments.paths = ListToArray(getUtils().trimList(arguments.paths)) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
-			<cfset assetPath = computeAssetPath("js", arguments.urls[i]) />
+		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
+			<cfset assetPath = computeAssetPath("js", arguments.paths[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' />
-				<cfif ArrayLen(arguments.urls) NEQ i>
+				<cfif ArrayLen(arguments.paths) NEQ i>
 					<cfset code = code & Chr(13) />
 				</cfif>
 			</cfif>
@@ -356,8 +362,8 @@ from the parent application.
 	
 	<cffunction name="addStylesheet" access="public" returntype="string" output="false"
 		hint="Adds css stylesheet code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
-		<cfargument name="urls" type="any" required="true"
-			hint="A single string, comma-delimited list or array of web accessible paths to .css files.">
+		<cfargument name="paths" type="any" required="true"
+			hint="A single string, comma-delimited list or array of web accessible paths to .css files." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
@@ -372,8 +378,8 @@ from the parent application.
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.urls)>
- 			<cfset arguments.urls = ListToArray(getUtils().trimList(arguments.urls)) />
+		<cfif NOT IsArray(arguments.paths)>
+ 			<cfset arguments.paths = ListToArray(getUtils().trimList(arguments.paths)) />
 		</cfif>
 		
 		<!--- Explode attributes to struct --->
@@ -386,12 +392,12 @@ from the parent application.
 		
 		<cfset attributesCode = attributesCode & ' />' />
 
-		<cfloop from="1" to="#ArrayLen(arguments.urls)#" index="i">
-			<cfset assetPath = computeAssetPath("css", arguments.urls[i]) />
+		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
+			<cfset assetPath = computeAssetPath("css", arguments.paths[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode />
-				<cfif ArrayLen(arguments.urls) NEQ i>
+				<cfif ArrayLen(arguments.paths) NEQ i>
 					<cfset code = code & Chr(13) />
 				</cfif>
 			</cfif>
@@ -403,6 +409,46 @@ from the parent application.
 		</cfif>
 		
 		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+	</cffunction>
+	
+	<cffunction name="addImage" access="public" returntype="string" output="false"
+		hint="Adds code for an img tag for inline use.">
+		<cfargument name="path" type="string" required="true"
+			hint="A path to a web accessible image file." />
+		<cfargument name="height" type="numeric" required="false"
+			hint="The height of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
+		<cfargument name="width" type="numeric" required="false" 
+			hint="The width of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
+		<cfargument name="alt" type="string" required="false"
+			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. A zero-length string will cause this attribute to be omitted." />
+		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
+			hint="A struct or string (param1=value1|param2=value2) of attributes." />
+		
+		<cfset var code = '<img src="' & computeAssetPath("img", arguments.path) & '"' />
+		<cfset var key = "" />
+		
+		<cfif StructKeyExists(arguments, "height") AND arguments.height LT 0>
+			<cfset code = code & ' height="' & arguments.height  & '"' />
+		</cfif>
+		
+		<cfif StructKeyExists(arguments, "width") AND arguments.width LT 0>
+			<cfset code = code & ' width="' & arguments.width  & '"' />
+		</cfif>
+		
+		<cfif StructKeyExists(arguments, "alt") AND Len(arguments.alt)>
+			<cfset code = code & ' alt="' & HTMLEditFormat(arguments.alt)  & '"' />
+		</cfif>
+		
+		<!--- Explode attributes to struct --->
+		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
+		
+		<cfloop collection="#arguments.attributes#" item="key">
+			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
+		</cfloop>
+		
+		<cfset code = code & ' />' />
+		
+		<cfreturn code />
 	</cffunction>
 	
 	<cffunction name="addLink" access="public" returntype="string" output="false"
@@ -421,7 +467,7 @@ from the parent application.
 		<cfset var key = "" />
 		
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
-		<cfset StructAppend(arguments.attributes, resolveMimeTypeAndGetData(arguments.type)) />
+		<cfset StructAppend(arguments.attributes, resolveMimeTypeAndGetData(arguments.type), false) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
 			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
@@ -584,7 +630,8 @@ from the parent application.
 	
 	<cffunction name="buildAssetPath" access="private" returntype="string" output="false"
 		hint="Builds the asset path for a raw path and type.">
-		<cfargument name="assetType" type="string" required="true" />
+		<cfargument name="assetType" type="string" required="true"
+			hint="The asset type for passed asset path. Takes 'img', 'css' or 'js'." />
 		<cfargument name="assetPath" type="string" required="true" />
 		
 		<cfset var path = arguments.assetPath />
@@ -595,11 +642,15 @@ from the parent application.
 				<cfset path = getJsBasePath() & "/" & path />
 			<cfelseif arguments.assetType EQ "css">
 				<cfset path = getCssBasePath() & "/" & path />
+			<cfelseif arguments.assetType EQ "img">
+				<cfset path = getImgBasePath() & "/" & path />
 			</cfif>
 		</cfif>
 		
 		<!--- Append the file extension if not defined --->
-		<cfset path = appendFileExtension(arguments.assetType, path) />
+		<cfif arguments.assetType NEQ "img">
+			<cfset path = appendFileExtension(arguments.assetType, path) />
+		</cfif>
 		
 		<!--- Append the timestamp --->
 		<cfset path = path & "?" & fetchAssetTimestamp(path) />
@@ -688,6 +739,14 @@ from the parent application.
 	</cffunction>
 	<cffunction name="getCssBasePath" access="public" returntype="string" output="false">
 		<cfreturn variables.cssBasePath />
+	</cffunction>
+	
+	<cffunction name="setImgBasePath" access="private" returntype="void" output="false">
+		<cfargument name="imgBasePath" type="string" required="true" />
+		<cfset variables.imgBasePath = arguments.imgBasePath />
+	</cffunction>
+	<cffunction name="getImgBasePath" access="public" returntype="string" output="false">
+		<cfreturn variables.imgBasePath />
 	</cffunction>
 	
 	<cffunction name="setMimeShortcutMap" access="private" returntype="void" output="false">
