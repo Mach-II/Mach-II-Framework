@@ -24,9 +24,9 @@ Updated version: 1.8.0
 Notes:
 --->
 <cfcomponent 
-	displayname="URLRoute"
+	displayname="UrlRoute"
 	output="false"
-	hint="The URLRoute object represent a possible route for use by the URLRoutesProperty.">
+	hint="The UrlRoute object represent a possible route for use by the UrlRoutesProperty.">
 	
 	<!---
 	PROPERTIES
