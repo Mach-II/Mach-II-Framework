@@ -214,5 +214,44 @@ Notes:
 		
 		<cfreturn result />
 	</cffunction>
+	
+	<cffunction name="copyToScope" access="public" returntype="void" output="false"
+		hint="Copies an evaluation string to a scope.">
+		<cfargument name="evaluationString" type="string" required="true" />
+		<cfargument name="scopeReference" type="struct" required="true" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		
+		<cfset var event = arguments.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var propertyManager = arguments.appManager.getPropertyManager() />
+		<cfset var expressionEvaluator = arguments.appManager.getExpressionEvaluator() />
+		<cfset var stem = "" />
+		<cfset var key = "" />
+		<cfset var element = "" />
+		
+		<cfloop list="#arguments.evaluationString#" index="stem">
+			<!--- Remove any spaces or carriage returns or this will fail --->
+			<cfset stem = Trim(stem) />
+			
+			<cfif ListLen(stem, "=") EQ 2>
+				<cfset element = ListGetAt(stem, 2, "=") />
+				<cfset key = ListGetAt(stem, 1, "=") />
+				<cfif expressionEvaluator.isExpression(element)>
+					<cfset arguments.scopeReference[key] = expressionEvaluator.evaluateExpression(element, event, propertyManager) />
+				<cfelse>
+					<cfset arguments.scopeReference[key] = element />
+				</cfif>
+			<cfelse>
+				<cfset element = stem />
+				<cfset key = stem />
+				<cfif expressionEvaluator.isExpression(stem)>
+					<!--- It would be better to replace this with RegEx --->
+					<cfset key = ListLast(ListFirst(REReplaceNoCase(key, "^\${(.*)}$", "\1", "all"), ":"), ".") />
+					<cfset arguments.scopeReference[key] = expressionEvaluator.evaluateExpression(element, event, propertyManager) />
+				<cfelse>
+					<cfset arguments.scopeReference[key] = stem />
+				</cfif>
+			</cfif>
+		</cfloop>
+	</cffunction>
 
 </cfcomponent>
