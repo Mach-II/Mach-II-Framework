@@ -171,6 +171,7 @@ Notes:
 		<cfset var eventArgs = StructNew() />
 		<cfset var event = getCurrentEvent() />
 		<cfset var argsToPersist = StructNew() />
+		<cfset var expEvaluator = getAppManager().getExpressionEvaluator() />
 		
 		<!--- Check for an event-mapping. --->
 		<cfif isEventMappingDefined(arguments.eventName)>
@@ -182,7 +183,12 @@ Notes:
 		<cfif NOT IsStruct(arguments.args)>
 			<!--- Resolve args to place in the URL --->
 			<cfloop list="#arguments.args#" index="arg">
-				<cfset eventArgs[arg] = event.getArg(arg) />
+				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
+					<cfset eventArgs[ListGetAt(arg, 1, "=")] = 
+						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset eventArgs[arg] = event.getArg(arg) />
+				</cfif>
 			</cfloop>
 		<cfelse>
 			<cfset eventArgs = arguments.args />
@@ -192,7 +198,12 @@ Notes:
 			<!--- Resolve args to persist --->
 			<cfif ListLen(arguments.persistArgs) gt 0>
 				<cfloop list="#arguments.persistArgs#" index="arg">
-					<cfset argsToPersist[arg] = event.getArg(arg) />
+					<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
+						<cfset argsToPersist[ListGetAt(arg, 1, "=")] = 
+							expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
+					<cfelse>
+						<cfset argsToPersist[arg] = event.getArg(arg) />
+					</cfif>
 				</cfloop>
 			<cfelseif arguments.persist>
 				<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
@@ -226,11 +237,17 @@ Notes:
 		<cfset var eventArgs = StructNew() />
 		<cfset var event = getCurrentEvent() />
 		<cfset var argsToPersist = StructNew() />
+		<cfset var expEvaluator = getAppManager().getExpressionEvaluator() />
 		
 		<cfif NOT IsStruct(arguments.routeArgs)>
 			<!--- Resolve args to place in the URL --->
 			<cfloop list="#arguments.routeArgs#" index="arg">
-				<cfset eventArgs[arg] = event.getArg(arg) />
+				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
+					<cfset eventArgs[ListGetAt(arg, 1, "=")] = 
+						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset eventArgs[arg] = event.getArg(arg) />
+				</cfif>
 			</cfloop>
 		<cfelse>
 			<cfset eventArgs = arguments.routeArgs />
@@ -239,7 +256,12 @@ Notes:
 		<cfif NOT IsStruct(arguments.persistArgs)>
 			<!--- Resolve args to persist --->
 			<cfloop list="#arguments.persistArgs#" index="arg">
-				<cfset argsToPersist[arg] = event.getArg(arg) />
+				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
+					<cfset argsToPersist[ListGetAt(arg, 1, "=")] = 
+						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
+				<cfelse>
+					<cfset argsToPersist[arg] = event.getArg(arg) />
+				</cfif>
 			</cfloop>
 		<cfelse>
 			<cfset argsToPersist = arguments.persistArgs />
