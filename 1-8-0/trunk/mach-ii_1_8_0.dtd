@@ -157,10 +157,12 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
-<!ELEMENT subscribe EMPTY>
+<!ELEMENT subscribe (arg*)>
 <!ATTLIST subscribe
-	listener CDATA #REQUIRED
+	listener CDATA #IMPLIED
+	bean CDATA #IMPLIED
 	method CDATA #REQUIRED
+	args CDATA #IMPLIED
 	resultArg CDATA #IMPLIED
 >
 
