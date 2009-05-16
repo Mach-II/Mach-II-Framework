@@ -129,7 +129,7 @@ Notes:
 			</cfif>
 
 			<cfloop collection="#subscribers#" item="key">
-				<cfset subscribers[key].execute(arguments.event, arguments.eventContent) />
+				<cfset subscribers[key].execute(arguments.event, arguments.eventContext) />
 			</cfloop>
 		</cfif>
 		
