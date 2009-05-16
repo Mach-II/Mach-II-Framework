@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 
@@ -112,7 +112,8 @@ in the application scope.
 		<cfelseif isParameterDefined("generatedScopeKey")>
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
-			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+			<!--- BlueDragon does not like it when the cache starts with numbers --->
+			<cfset setScopeKey("_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		
 		<cfset flush() />

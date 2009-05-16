@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 
@@ -135,7 +135,8 @@ via reap() which is run every 3 minutes.
 		<cfelseif isParameterDefined("generatedScopeKey")>
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
-			<cfset setScopeKey(REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+			<!--- BlueDragon does not like it when the cache starts with numbers --->
+			<cfset setScopeKey("_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		<cfif isParameterDefined("cleanupIntervalInMinutes")
 			AND getAssert().isTrue(IsNumeric(getParameter("cleanupIntervalInMinutes")) AND getParameter("cleanupIntervalInMinutes") GT 0
