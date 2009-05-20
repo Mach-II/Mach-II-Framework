@@ -62,7 +62,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Call on object reload for all configurable commands.">
+		hint="Calls onObjectReload for all configurable commands.">
 		
 		<cfset var appManager = getAppManager() />
 		<cfset var aCommand = 0 />
@@ -564,7 +564,10 @@ Notes:
 		<cfset var overwrite = true />
 		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
 		
-		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
+		
+		<cfif NOT StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
+			<cfset argValue = variables.utils.recurseComplexValues(arguments.commandNode) />
+		<cfelse>
 			<cfset argValue = arguments.commandNode.xmlAttributes["value"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "variable")>

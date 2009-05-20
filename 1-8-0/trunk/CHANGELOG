@@ -38,13 +38,13 @@ Fixed Defects
 * View context throws an ambiguous exception appending view content on to a complex event-arg
 We now assert the target contentArg/Key is a simple value and throw a friendly 
 exception if it is not.
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/263
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/263
 (2009-03-30 peterfarrell)
 
  * BuildUrl() and related methods orders args randomly
-Fixed so all args are ordered alphanumerically which provides consistent URLs for 
+Fixed so all args are ordered alpha-numeric which provides consistent URLs for 
 search engines.
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
 (2009-02-26 kurtwiersma)
 
 ------------------------------------------------
@@ -55,8 +55,8 @@ View loaders allow a developers to load views based on convention such as
 using an ANT-style path matching pattern.
 
 For more information see:
-http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationViewLoaders
-http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/175
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationViewLoaders
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/175
 (2008-11-15 peterfarrell) 
 
 * EnvironmentProperty
@@ -66,8 +66,8 @@ and to drive other features (such as caching and logging) to change their behavi
 based on the environment in which the application is deployed. 
 
 For more information see:
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/wiki/EnvironmentSpecificProperities#SolutionforMach-II1.8
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/224
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/wiki/EnvironmentSpecificProperities#SolutionforMach-II1.8
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/224
 (various dates peterfarrell)
 
 * Toolkit enhancements
@@ -76,7 +76,7 @@ http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/224
 - SimplePatternMatcher.cfc
 
 For more information see:
-http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationToolkitEnhancements
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationToolkitEnhancements
 (various dates peterfarrell)
 
 * Added buildUnescapedUrl() and buildUnescapedUrlToModule() to ViewContext
@@ -85,13 +85,19 @@ made it impossible to use the returned urls in JS or other situations where
 unescaped urls are required.
 
 For more information see:
-http://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/178
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/178
 (2008-11-17 peterfarrell)
+
+* Event-arg command accepts complex XML values (struct / array)
+
+Form more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/293
+(2009-05-20 peterfarrell)
 
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
 
 Trace Plugin reports that is has been deprecated in the trace output
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
 (2009-04-10 peterfarrell)

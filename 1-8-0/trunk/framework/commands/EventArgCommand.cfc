@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -43,7 +43,7 @@ Notes:
 	<cffunction name="init" access="public" returntype="EventArgCommand" output="false"
 		hint="Used by the framework for initialization.">
 		<cfargument name="argName" type="string" required="true" />
-		<cfargument name="argValue" type="string" required="false" default="" />
+		<cfargument name="argValue" type="any" required="false" default="" />
 		<cfargument name="argVariable" type="string" required="false" default="" />
 		<cfargument name="overwrite" type="boolean" required="false" default="true" />
 		
@@ -83,9 +83,9 @@ Notes:
 		<cfif getOverwrite() OR NOT arguments.event.isArgDefined(getArgName())>
 			<cfif log.isDebugEnabled()>
 				<cfif IsSimpleValue(value)>
-					<cfset log.debug("Set event-arg named '#getArgName()#' with value '#value#'.") />
+					<cfset log.debug("Set event-arg named '#getArgName()#' with a value of '#value#'.") />
 				<cfelse>
-					<cfset log.debug("Set event-arg named '#getArgName()#'.", value) />
+					<cfset log.debug("Set event-arg named '#getArgName()#' with a value of:", value) />
 				</cfif>
 			</cfif>
 			
@@ -133,14 +133,14 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="setArgValue" access="private" returntype="void" output="false">
-		<cfargument name="argValue" type="string" required="true" />
+		<cfargument name="argValue" type="any" required="true" />
 		<cfset variables.argValue = arguments.argValue />
 	</cffunction>
-	<cffunction name="getArgValue" access="private" returntype="string" output="false">
+	<cffunction name="getArgValue" access="private" returntype="any" output="false">
 		<cfreturn variables.argValue />
 	</cffunction>
 	<cffunction name="isArgValueDefined" access="private" returntype="boolean" output="false">
-		<cfreturn Len(variables.argValue) />
+		<cfreturn (IsSimpleValue(variables.argValue) AND Len(variables.argValue)) OR NOT IsSimpleValue(variables.argValue) />
 	</cffunction>
 	
 	<cffunction name="setArgVariable" access="private" returntype="void" output="false">

@@ -96,7 +96,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
 		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
 -->
-<!ELEMENT property (parameters?, array?, struct?)>
+<!ELEMENT property (parameters?, array?, struct?, value?)>
 <!ATTLIST property 
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
@@ -281,7 +281,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 
 <!--
-	Event-Handler tags.
+	Event-Handler commands.
 -->
 <!--
 	A "filter" element will apply an event-filter to the current event being handled.
@@ -314,7 +314,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		value - the value of the arg to set in the event
 		[variable] - a variable to set as the value in the event
 -->
-<!ELEMENT event-arg EMPTY>
+<!ELEMENT event-arg (array?, struct?)>
 <!ATTLIST event-arg 
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
