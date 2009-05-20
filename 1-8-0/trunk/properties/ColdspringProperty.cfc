@@ -362,8 +362,7 @@ application.serviceFactory_account variable.
 		<!--- Resolve Mach-II dependences if required and application is not 
 			loading (because during load Mach-II will call onObjectReload and
 			this is needed when the CS property is being reloaded) --->
-		<cfif getParameter("resolveMachIIDependencies", false)
-			AND NOT getAppManager().isLoading()>
+		<cfif NOT getAppManager().isLoading()>
 			<cfset resolveDependencies() />
 		</cfif>
 		
@@ -443,65 +442,75 @@ application.serviceFactory_account variable.
 		<cfset var targetMetadata = "" />
 		<cfset var i = 0 />
 		
-		<cfset targetBase.targets = ArrayNew(1) />
-		
-		<!--- Get listener/filter/plugin/property targets --->
-		<cfset getListeners(targetBase) />
-		<cfset getFilters(targetBase) />
-		<cfset getPlugins(targetBase) />
-		<cfset getConfigurableProperties(targetBase) />
-		
-		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
-			<!--- Get this iteration target object for easy use --->
-			<cfset targetObj =  targetBase.targets[i] />
+		<!--- Only resolve if dependency resolution is on --->
+		<cfif getParameter("resolveMachIIDependencies", false)>	
+			<cfset targetBase.targets = ArrayNew(1) />
 			
-			<!--- Get metadata --->
-			<cfset targetMetadata = GetMetadata(targetObj) />
+			<!--- Get listener/filter/plugin/property targets --->
+			<cfset getListeners(targetBase) />
+			<cfset getFilters(targetBase) />
+			<cfset getPlugins(targetBase) />
+			<cfset getConfigurableProperties(targetBase) />
 			
-			<!--- Autowire by dynamic method generation --->
-			<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, getAutowireAttributeName()) />
-
-			<!--- Autowire by defined setters --->
-			<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
-		</cfloop>
-		
-		<!--- Autowire configurale commands --->
-		<cfset targetBase.targets = ArrayNew(1) />
-		
-		<cfset getConfigurableCommands(targetBase) />
-		
-		<!--- Autowire all commands --->
-		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
-			<!--- Get this iteration target object for easy use --->
-			<cfset targetObj =  targetBase.targets[i] />
+			<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
+				<!--- Get this iteration target object for easy use --->
+				<cfset targetObj =  targetBase.targets[i] />
+				
+				<!--- Get metadata --->
+				<cfset targetMetadata = GetMetadata(targetObj) />
+				
+				<!--- Autowire by dynamic method generation --->
+				<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, getAutowireAttributeName()) />
+	
+				<!--- Autowire by defined setters --->
+				<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
+			</cfloop>
 			
-			<!--- Get metadata --->
-			<cfset targetMetadata = GetMetadata(targetObj) />
+			<!--- Autowire configurale commands --->
+			<cfset targetBase.targets = ArrayNew(1) />
 			
-			<!--- Autowire by value from bean id method --->
-			<cfset autowireByBeanIdValue(targetObj, targetMetadata) />
-		</cfloop>
+			<cfset getConfigurableCommands(targetBase) />
+			
+			<!--- Autowire all commands --->
+			<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
+				<!--- Get this iteration target object for easy use --->
+				<cfset targetObj =  targetBase.targets[i] />
+				
+				<!--- Get metadata --->
+				<cfset targetMetadata = GetMetadata(targetObj) />
+				
+				<!--- Autowire by value from bean id method --->
+				<cfset autowireByBeanIdValue(targetObj, targetMetadata) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="resolveDependency" access="public" returntype="void" output="false"
 		hint="Resolves Mach-II dependency by passed object.">
 		<cfargument name="targetObject" type="any" required="true"
 			hint="Target object to resolve dependency." />
-			
-		<!--- Look for autowirable collaborators for any setters --->
-		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
 		
-		<!--- If target object is a command --->
-		<cfif StructKeyExists(targetMetadata, "extends") 
-			AND targetMetadata.extends.name EQ "MachII.framework.command">
-			<!--- Autowire by value from bean id method --->
-			<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
-		<cfelse>
-			<!--- Autowire by dynamic method generation --->
-			<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
-	
-			<!--- Autowire by defined setters --->
-			<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+		<cfset var targetMetadata = "" />
+		
+		<!--- Only resolve if dependency resolution is on --->
+		<cfif getParameter("resolveMachIIDependencies", false)>
+		
+			<!--- Look for autowirable collaborators for any setters --->
+			<cfset targetMetadata = GetMetadata(arguments.targetObject) />
+		
+			<!--- If target object is a command --->
+			<cfif StructKeyExists(targetMetadata, "extends") 
+				AND targetMetadata.extends.name EQ "MachII.framework.command">
+				<!--- Autowire by value from bean id method --->
+				<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
+			<cfelse>
+				<!--- Autowire by dynamic method generation --->
+				<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+		
+				<!--- Autowire by defined setters --->
+				<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+			</cfif>
+		
 		</cfif>
 	</cffunction>
 	
