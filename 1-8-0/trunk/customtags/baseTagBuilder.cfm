@@ -33,22 +33,22 @@ dir			= ltr|rtl (Sets the text direction)
 lang		= [string] (Sets the language code)
 
 EVENT ATTRIBUTES
-tabIndex	= [numeric]
-accessKey	= [string]
-onFocus		= [string]
-onBlur		= [string]
-onSelect	= [string]
-onChange	= [string]
-onClick		= [string]
-onDblClick	= [string]
-onMouseDown	= [string]
-onMouseUp	= [string]
-onMouseOver	= [string]
-onMouseMove	= [string]
-onMouseOut	= [string]
-onKeyPress	= [string]
-onKeyDown	= [string]
-onKeyUp		= [string]
+tabindex	= [numeric]
+accesskey	= [string]
+onfocus		= [string]
+onblur		= [string]
+onselect	= [string]
+onchange	= [string]
+onclick		= [string]
+ondblclick	= [string]
+onmousedown	= [string]
+onmouseup	= [string]
+onmouseover	= [string]
+onmousemove	= [string]
+onmouseout	= [string]
+onkeypress	= [string]
+onkeydown	= [string]
+onkeyup		= [string]
 --->
 </cfsilent>
 
@@ -198,53 +198,54 @@ PUBLIC FUNCTIONS
 <cffunction name="setEventAttributes" access="public" returntype="void" output="false"
 	hint="Adds event attributes to the tag writer if defined.">
 
-	<cfif StructKeyExists(attributes, "tabIndex")>
-		<cfset setAttribute("tabIndex", attributes.tabIndex) />
+	<!--- The attribute name passed to setAttribute() must be lowercase to be XHTML valid  --->
+	<cfif StructKeyExists(attributes, "tabindex")>
+		<cfset setAttribute("tabindex", attributes.tabIndex) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "accessKey")>
-		<cfset setAttribute("accessKey", attributes.accessKey) />
+	<cfif StructKeyExists(attributes, "accesskey")>
+		<cfset setAttribute("accesskey", attributes.accessKey) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onFocus")>
-		<cfset setAttribute("onFocus", attributes.onFocus) />
+	<cfif StructKeyExists(attributes, "onfocus")>
+		<cfset setAttribute("onfocus", attributes.onFocus) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onBlur")>
-		<cfset setAttribute("onBlur", attributes.onBlur) />
+	<cfif StructKeyExists(attributes, "onblur")>
+		<cfset setAttribute("onblur", attributes.onBlur) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onSelect")>
-		<cfset setAttribute("onSelect", attributes.onSelect) />
+	<cfif StructKeyExists(attributes, "onselect")>
+		<cfset setAttribute("onselect", attributes.onSelect) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onChange")>
-		<cfset setAttribute("onChange", attributes.onChange) />
+	<cfif StructKeyExists(attributes, "onchange")>
+		<cfset setAttribute("onchange", attributes.onChange) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onChange")>
-		<cfset setAttribute("onChange", attributes.onChange) />
+	<cfif StructKeyExists(attributes, "onclick")>
+		<cfset setAttribute("onclick", attributes.onChange) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onDblClick")>
-		<cfset setAttribute("onDblClick", attributes.onDblClick) />
+	<cfif StructKeyExists(attributes, "ondblcick")>
+		<cfset setAttribute("ondblclick", attributes.onDblClick) />m
 	</cfif>
-	<cfif StructKeyExists(attributes, "onMouseDown")>
-		<cfset setAttribute("onMouseDown", attributes.onMouseDown) />
+	<cfif StructKeyExists(attributes, "onmousedown")>
+		<cfset setAttribute("onmousedown", attributes.onMouseDown) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onMouseUp")>
-		<cfset setAttribute("onMouseUp", attributes.onMouseUp) />
+	<cfif StructKeyExists(attributes, "onmouseup")>
+		<cfset setAttribute("onmouseup", attributes.onMouseUp) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onMouseOver")>
-		<cfset setAttribute("onMouseOver", attributes.onMouseOver) />
+	<cfif StructKeyExists(attributes, "onmouseover")>
+		<cfset setAttribute("onmouseover", attributes.onMouseOver) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onMouseMove")>
-		<cfset setAttribute("onMouseMove", attributes.onMouseMove) />
+	<cfif StructKeyExists(attributes, "onmousemove")>
+		<cfset setAttribute("onmousemove", attributes.onMouseMove) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onMouseOut")>
-		<cfset setAttribute("onMouseOut", attributes.onMouseOut) />
+	<cfif StructKeyExists(attributes, "onmouseout")>
+		<cfset setAttribute("onmouseout", attributes.onMouseOut) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onKeyPress")>
-		<cfset setAttribute("onKeyPress", attributes.onKeyPress) />
+	<cfif StructKeyExists(attributes, "onkeypress")>
+		<cfset setAttribute("onkeypress", attributes.onKeyPress) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onKeyDown")>
-		<cfset setAttribute("onKeyDown", attributes.onKeyDown) />
+	<cfif StructKeyExists(attributes, "onkeydown")>
+		<cfset setAttribute("onkeydown", attributes.onKeyDown) />
 	</cfif>
-	<cfif StructKeyExists(attributes, "onKeyUp")>
-		<cfset setAttribute("onKeyUp", attributes.onKeyUp) />
+	<cfif StructKeyExists(attributes, "onkeyup")>
+		<cfset setAttribute("onkeyup", attributes.onKeyUp) />
 	</cfif>
 </cffunction>
 
