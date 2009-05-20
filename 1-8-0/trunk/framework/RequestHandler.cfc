@@ -15,11 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Ben Edwards (ben@ben-edwards.com)
+Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -281,6 +281,7 @@ Notes:
 
 		<cfset var exception = 0 />
 		<cfset var log = getLog() />
+		<cfset var message = "" />
 		
 		<cftry>
 			<cfset incrementEventCount() />
@@ -294,7 +295,26 @@ Notes:
 					<cfrethrow />
 				<cfelse>
 					<cfif log.isFatalEnabled()>
-						<cfset log.fatal("#cfcatch.message#", cfcatch) />
+						<cfset message = "message: " & cfcatch.message />
+						<cfset message = message & " || detail: " & cfcatch.detail />
+						
+						<cfif StructKeyExists(cfcatch, "template")>
+							<cfset message = message & " ||  template: " & cfcatch.template />
+							<cfif StructKeyExists(cfcatch, "line")>
+								<cfset message = message & " at line " & cfcatch.line />
+							</cfif>
+						</cfif>
+						
+						<cfif cfcatch.type EQ "database">
+							<cfif StructKeyExists(cfcatch, "datasource")>
+								<cfset message = message & " || datasource: " & cfcatch.datasource />
+							</cfif>
+							<cfif StructKeyExists(cfcatch, "sql")>
+								<cfset message = message & " || sql: " & cfcatch.sql />
+							</cfif>
+						</cfif>
+						
+						<cfset log.fatal(message, cfcatch) />
 					</cfif>
 					<cfset exception = wrapException(cfcatch) />
 					<cfset getEventContext().handleException(exception, true) />
