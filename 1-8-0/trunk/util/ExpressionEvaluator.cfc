@@ -177,6 +177,10 @@ ${scope.key NEQ scope.key2}
 			<!--- support scope.argname:0 for setting defaults --->
 			<cfif ListLen(keyBody, ":") gt 1>
 				<cfset defaultValue = ListGetAt(keyBody, 2, ":") />
+				<!--- Check of zero length string keyword of "" or '' --->
+				<cfif defaultValue EQ "''" OR defaultValue EQ '""'>
+					<cfset defaultValue = "" />
+				</cfif>
 				<cfset keyBody = ListGetAt(keyBody, 1, ":") />
 				<cfset hasDefault = true />
 			</cfif>
