@@ -69,7 +69,7 @@ Notes:
 </property>
 
 Uses the generic channel filter (MachII.logging.filters.GenericChannelFilter)for filtering.
-See that file header for configuration of filter criteria.  test.
+See that file header for configuration of filter criteria.
 --->
 <cfcomponent
 	displayname="EmailLog.Logger"
@@ -87,6 +87,13 @@ See that file header for configuration of filter criteria.  test.
 	<cfset variables.instance.subject = "" />
 	<cfset variables.instance.servers = "" />
 	<cfset variables.instance.mailType = "" />
+	<cfset variables.instance.username = "" />
+	<cfset variables.instance.password = "" />
+	<cfset variables.instance.charset = "" />
+	<cfset variables.instance.spoolenable = "" />
+	<cfset variables.instance.timeout = "" />
+
+
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -129,6 +136,12 @@ See that file header for configuration of filter criteria.  test.
 		<cfset setSubject(getParameter("subject", "Application Log")) />
 		<cfset setServers(getParameter("servers", "")) />
 		<cfset setMailType(getParameter("mailType", "text/html")) />
+		<cfset setUsername(getParameter("username", "")) />
+		<cfset setPassword(getParameter("password", "")) />
+		<cfset setCharset(getParameter("charset", "UTF-8")) />
+		<cfset setSpoolEnable(getParameter("spoolEnable", true)) />
+		<cfset setTimeout(getParameter("timeout", 60)) />
+
 	</cffunction>
 	
 	<!---
@@ -151,20 +164,56 @@ See that file header for configuration of filter criteria.  test.
 				<cfsavecontent variable="body">
 					<cfinclude template="#getEmailTemplateFile()#" />
 				</cfsavecontent>
-				
+
 				<!--- Send the email --->
-				<cfif NOT Len(getServers())>
-					<cfmail from="#getFrom()#" 
-						to="#getTo()#"
-						type="#getMailType()#"  
-						subject="#getSubject()#"><cfoutput>#body#</cfoutput></cfmail>
-				<cfelse>
-					<cfmail from="#getFrom()#" 
-						to="#getTo()#" 
-						subject="#getSubject()#"
-						type="#getMailType()#" 
-						server="#getServers()#"><cfoutput>#body#</cfoutput></cfmail>
+				<cfif Len(getServers())>
+					
+					<cfif hasSpecifiedAuthCredentials()>
+						<cfmail from="#getFrom()#" 
+							to="#getTo()#"
+							subject="#getSubject()#"
+							type="#getMailType()#" 
+							server="#getServers()#"
+							username="#getUsername()#"
+							password="#getPassword()#"
+							charset="#getCharset()#"
+							spoolenable="#getSpoolEnable()#"
+							timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
+					<cfelse>
+						<cfmail from="#getFrom()#" 
+							to="#getTo()#"
+							subject="#getSubject()#"
+							type="#getMailType()#" 
+							server="#getServers()#"
+							charset="#getCharset()#"
+							spoolenable="#getSpoolEnable()#"
+							timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
+					</cfif>
+
+				<cfelse><!--- User has not defined custom servers in the xml config --->
+
+					<cfif hasSpecifiedAuthCredentials()>
+						<cfmail from="#getFrom()#" 
+							to="#getTo()#"
+							subject="#getSubject()#"
+							type="#getMailType()#"
+							username="#getUsername()#"
+							password="#getPassword()#"
+							charset="#getCharset()#"
+							spoolenable="#getSpoolEnable()#"
+							timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
+					<cfelse>
+						<cfmail from="#getFrom()#" 
+							to="#getTo()#"
+							subject="#getSubject()#"
+							type="#getMailType()#"
+							charset="#getCharset()#"
+							spoolenable="#getSpoolEnable()#"
+							timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
+					</cfif>
+
 				</cfif>
+
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -211,6 +260,11 @@ See that file header for configuration of filter criteria.  test.
 		<cfset data["Subject"] = getSubject() />
 		<cfset data["SMTP Servers"] = getServers() />
 		<cfset data["Email Template"] = getEmailTemplateFile() />
+		<cfset data["username"] = getUsername() />
+		<cfset data["password"] = getPassword() />
+		<cfset data["charset"] = getCharset() />
+		<cfset data["spoolenable"] = getSpoolEnable() />
+		<cfset data["timeout"] = getTimeout() />
 		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
 		
 		<cfreturn data />
@@ -231,6 +285,20 @@ See that file header for configuration of filter criteria.  test.
 			<cfset ArrayAppend(result, arguments.array2[i]) />
 		</cfloop>
 		
+		<cfreturn result />
+	</cffunction>
+
+	<cffunction name="hasSpecifiedAuthCredentials" access="private" returntype="boolean" output="false"
+		hint="Determines if user correctly specified a username and password in the loggers xml configuration file">
+		<cfset var result = false />
+
+		<cfif len(getUsername()) and len(getPassword())>
+			<cfset result = true />
+		<cfelseif len(getUsername()) and not len(getPassword()) or len(getPassword()) and not len(getUsername())>
+			<cfthrow message="If you provide a value for the username or password parameter, you must specify both a username AND password"
+				detail="Passed value - username: #getUsername()#, password: #getPassword()#" />
+		</cfif>
+
 		<cfreturn result />
 	</cffunction>
 
@@ -277,6 +345,46 @@ See that file header for configuration of filter criteria.  test.
 	</cffunction>
 	<cffunction name="getServers" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.servers />
+	</cffunction>
+
+	<cffunction name="setUsername" access="private" returntype="void" output="false">
+		<cfargument name="username" type="string" required="true" />
+		<cfset variables.instance.username = arguments.username />
+	</cffunction>
+	<cffunction name="getUsername" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.username />
+	</cffunction>
+
+	<cffunction name="setPassword" access="private" returntype="void" output="false">
+		<cfargument name="password" type="string" required="true" />
+		<cfset variables.instance.password = arguments.password />
+	</cffunction>
+	<cffunction name="getPassword" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.password />
+	</cffunction>
+
+	<cffunction name="setCharset" access="private" returntype="void" output="false">
+		<cfargument name="charset" type="string" required="true" />
+		<cfset variables.instance.charset = arguments.charset />
+	</cffunction>
+	<cffunction name="getCharset" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.charset />
+	</cffunction>
+
+	<cffunction name="setSpoolenable" access="private" returntype="void" output="false">
+		<cfargument name="spoolEnable" type="string" required="true" />
+		<cfset variables.instance.spoolEnable = arguments.spoolEnable />
+	</cffunction>
+	<cffunction name="getSpoolEnable" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.spoolEnable />
+	</cffunction>
+
+	<cffunction name="setTimeout" access="private" returntype="void" output="false">
+		<cfargument name="timeout" type="string" required="true" />
+		<cfset variables.instance.timeout = arguments.timeout />
+	</cffunction>
+	<cffunction name="getTimeout" access="public" returntype="string" output="false">
+		<cfreturn variables.instance.timeout />
 	</cffunction>
 	
 	<cffunction name="setMailType" access="private" returntype="void" output="false">
