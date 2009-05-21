@@ -98,6 +98,10 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/293
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
 
-Trace Plugin reports that is has been deprecated in the trace output
+* Trace Plugin reports that is has been deprecated in the trace output
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
 (2009-04-10 peterfarrell)
+
+* Logging package now uses a LoggerManager
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/295
+(2009-05-21 peterfarrell)
