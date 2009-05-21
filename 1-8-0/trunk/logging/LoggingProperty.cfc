@@ -23,7 +23,7 @@ Updated version: 1.8.0
 
 Notes:
 
-Configuring for Mach-II logging only:
+Configuring for Mach-II logger only:
 <property name="Logging" type="MachII.logging.LoggingProperty" />
 
 This will turn on the MachIILog logger and display the log message 
@@ -138,8 +138,10 @@ will bind to root parameter values.
 	--->
 	<cfset variables.defaultLoggerName = "MachII" />
 	<cfset variables.defaultLoggerType = "MachII.logging.loggers.MachIILog.Logger" />
-	<cfset variables.loggers = StructNew() />
+	<cfset variables.loggerManager = "" />
 	<cfset variables.loggingEnabled = true />
+	
+	<cfset variables.LOGGER_MANAGER_PROPERTY_NAME = "_LoggingProperty.loggerManager" />
 	
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -147,12 +149,25 @@ will bind to root parameter values.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
+		<cfset var parentLoggerManager = "" />
 		<cfset var params = getParameters() />
 		<cfset var defaultLoggerParameters = StructNew() />
 		<cfset var loggers = StructNew() />
 		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var key = "" />
 		
+		<!--- Setup a manager for all of the loggers --->
+		<cfif getAppManager().inModule()>
+			<cfset parentLoggerManager = getPropertyManager().getParent().getProperty(variables.LOGGER_MANAGER_PROPERTY_NAME, "") />
+		</cfif>
+		
+		<cfif IsObject(parentLoggerManager)>
+			<cfset variables.loggerManager = CreateObject("component", "MachII.logging.LoggerManager").init(getAppManager().getLogFactory(), parentLoggerManager) />
+		<cfelse>
+			<cfset variables.loggerManager = CreateObject("component", "MachII.logging.LoggerManager").init(getAppManager().getLogFactory()) />
+		</cfif>
+		
+		<!--- Get basic parameters --->
 		<cfset setLoggingEnabled(getParameter("loggingEnabled", true)) />
 		
 		<!--- Load loggers --->
@@ -163,20 +178,28 @@ will bind to root parameter values.
 		</cfloop>
 		
 		<!--- Configure the default logger since no loggers are registered --->
-		<cfif NOT StructCount(getLoggers())>
+		<cfif NOT StructCount(getLoggerManager().getLoggers())>
 			<cfset defaultLoggerParameters.type = variables.defaultLoggerType />
 			<cfset configureLogger(variables.defaultLoggerName, defaultLoggerParameters) />
-		</cfif>
+		</cfif>	
 		
 		<!--- Configure the loggers --->
-		<cfset loggers = getLoggers() />
+		<cfset getLoggerManager().configure() />
+		<cfset loggers = getLoggerManager().getLoggers() />
 		
-		<!--- Configure the loggers and register their adapters in the LogFactory --->
 		<cfloop collection="#loggers#" item="key">
-			<cfset loggers[key].configure() />
-			<cfset getAppManager().getLogFactory().addLogAdapter(loggers[key].getLogAdapter()) />
+			<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
+			<cfif loggers[key].isOnRequestEndAvailable()>
+				<cfset getAppManager().getRequestManager().addOnRequestEndCallback(loggers[key], "onRequestEnd") />
+			</cfif>
+			
+			<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
+			<cfif loggers[key].isPrePostRedirectAvailable()>
+				<cfset getAppManager().getRequestManager().addPreRedirectCallback(loggers[key], "preRedirect") />
+				<cfset getAppManager().getRequestManager().addPostRedirectCallback(loggers[key], "postRedirect") />
+			</cfif>
 		</cfloop>
-		
+				
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT isLoggingEnabled()>
 			<cfset getAppManager().getLogFactory().disableLogging() />
@@ -188,7 +211,7 @@ will bind to root parameter values.
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var logFactory = getAppManager().getLogFactory() />
-		<cfset var thisInstanceLoggers = getLoggers() />
+		<cfset var thisInstanceLoggers = getLoggerManager().getLoggers() />
 		<cfset var key = "" />
 		<cfset var currentLogger = "" />
 		
@@ -261,40 +284,15 @@ will bind to root parameter values.
 			</cftry>
 		</cfif>
 		
-		<!--- Create, init and configure the logger --->
-		<cftry>
-			<cfset logger = CreateObject("component", arguments.parameters.type).init(loggerId, arguments.parameters) />
-
-			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
-					<cfthrow type="MachII.logging.CannotFindLogger"
-						message="The LoggingProperty in module named '#getAppManager().getModuleName()#' cannot find a logger located at '#arguments.parameters.type#'."
-						detail="Please check that this logger exists and that there is not a misconfiguration in the XML configuration file." />
-				<cfelse>
-					<cfrethrow />
-				</cfif>
-			</cfcatch>
-		</cftry>
-		
-		<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
-		<cfif logger.isOnRequestEndAvailable()>
-			<cfset getAppManager().getRequestManager().addOnRequestEndCallback(logger, "onRequestEnd") />
-		</cfif>
-		
-		<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
-		<cfif logger.isPrePostRedirectAvailable()>
-			<cfset getAppManager().getRequestManager().addPreRedirectCallback(logger, "preRedirect") />
-			<cfset getAppManager().getRequestManager().addPostRedirectCallback(logger, "postRedirect") />
-		</cfif>
-		
-		<!--- Add the logger --->
-		<cfset addLogger(arguments.loggerName, logger) />
+		<!--- Load the logger  --->
+		<cfset variables.loggerManager.loadLogger(arguments.loggerName, loggerId, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
 	<cffunction name="createLoggerId" access="private" returntype="string" output="false"
 		hint="Creates a logger id.">
 		<cfargument name="loggerName" type="string" required="true" />
-		<cfreturn Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
+		<!--- Some CFML engines don't like logger ids that start with a number --->
+		<cfreturn "_" & Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
 	</cffunction>
 	
 	<cffunction name="getModuleName" access="private" returntype="string" output="false"
@@ -353,31 +351,12 @@ will bind to root parameter values.
 		<cfreturn variables.loggingEnabled />
 	</cffunction>
 	
-	<cffunction name="addLogger" access="private" returntype="void" output="false"
-		hint="Adds a logger to the struct of registered loggers.">
-		<cfargument name="loggerName" type="string" required="true" />
-		<cfargument name="logger" type="MachII.logging.loggers.AbstractLogger" required="true" />
-		
-		<cfif StructKeyExists(variables.loggers, arguments.loggerName)>
-			<cfthrow type="MachII.properties.LoggingProperty"
-				message="A logger named '#arguments.loggerName#' already exists in module '#getAppManager().getModuleName()#'. Logger names must be unique." />
-		<cfelse>
-			<cfset variables.loggers[arguments.loggerName] = arguments.logger />
-		</cfif>
+	<cffunction name="setLoggerManager" access="private" returntype="void" output="false">
+		<cfargument name="loggerManager" type="MachII.logging.LoggerManager" required="true" />
+		<cfset variables.loggerManager =  arguments.loggerManager />
 	</cffunction>
-	<cffunction name="getLoggerByName" access="public" returntype="MachII.logging.loggers.AbstractLogger" output="false"
-		hint="Gets a logger by name.">
-		<cfargument name="loggerName" type="string" required="true" />
-		<cfreturn variables.loggers[arguments.loggerName] />
+	<cffunction name="getLoggerManager" access="public" returntype="MachII.logging.LoggerManager" output="false">
+		<cfreturn variables.loggerManager />
 	</cffunction>
-	<cffunction name="isLoggerDefined" access="public" returntype="boolean" output="false"
-		hint="Checks if a logger is defined by name.">
-		<cfargument name="loggerName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.loggers, arguments.loggerName) />
-	</cffunction>
-	<cffunction name="getLoggers" access="public" returntype="struct" output="false"
-		hint="Gets all the registered loggers.">
-		<cfreturn variables.loggers />
-	</cffunction>
-	
+
 </cfcomponent>
