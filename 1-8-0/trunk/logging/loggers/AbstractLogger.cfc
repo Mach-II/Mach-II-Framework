@@ -19,9 +19,12 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
+When implementing a logger, do not implement onRequestEnd, onRedirectStart
+and onRedirectEnd method if required. Mach-II introspecs your logger and
+only executes methods that have been implemented to increase performance. 
 --->
 <cfcomponent
 	displayname="AbstractLogger"
@@ -157,28 +160,36 @@ Notes:
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="isMethodDefined" access="private" returntype="boolean" output="false"
-		hint="Checks if an abstract function was overridden in the concrete class. Does not walk the inheritance tree.">
-		<cfargument name="methodName" type="string" required="true" />
+		hint="Checks if an abstract function was overridden in the concrete class. This method is recursive and will walk the inheritance tree.">
+		<cfargument name="methodName" type="string" required="true"
+			hint="Method name to look for in metadata" />
+		<cfargument name="metadata" type="any" required="false" default="#GetMetadata(this)#"
+			hint="Metadata to search for method name." />
 
-		<cfset var md = GetMetadata(this) />
 		<cfset var methods = ArrayNew(1) />
 		<cfset var i = 0 />
 		<cfset var result = false />
 		
 		<!--- "functions" key only exists when there at least one defined method --->
-		<cfif StructKeyExists(md, "functions")>
-			<cfset methods = md.functions />
+		<cfif StructKeyExists(arguments.metadata, "functions")>
+			<cfset methods = arguments.metadata.functions />
 			
 			<!--- Find if the method exists --->
 			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
 				<cfif methods[i].name EQ arguments.methodName>
-					<cfset result = true />
-					<cfbreak />
+					<!--- Typically, we don't shortcircuit returns but it is easier in recursive functions --->
+					<cfreturn true />
 				</cfif>
 			</cfloop>
 		</cfif>
 		
-		<cfreturn result />		
+		<!--- Method is not at this level so walk inheritance tree if possible --->
+		<cfif StructKeyExists(arguments.metadata, "extends") 
+			AND arguments.metadata.extends.name NEQ "MachII.logging.loggers.AbstractLogger">
+			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>	
 	</cffunction>
 	
 	<!---
