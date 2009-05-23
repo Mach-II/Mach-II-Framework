@@ -35,15 +35,24 @@ limitations under the License.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Method checking fails when extending a logger due to failure to walk inheritance tree
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/303
+(2009-05-23 peterfarrell)
+
 * View context throws an ambiguous exception appending view content on to a complex event-arg
 We now assert the target contentArg/Key is a simple value and throw a friendly 
 exception if it is not.
+
+For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/263
 (2009-03-30 peterfarrell)
 
  * BuildUrl() and related methods orders args randomly
 Fixed so all args are ordered alpha-numeric which provides consistent URLs for 
 search engines.
+
+For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
 (2009-02-26 kurtwiersma)
 
@@ -90,9 +99,22 @@ https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/178
 
 * Event-arg command accepts complex XML values (struct / array)
 
-Form more information see:
+For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/293
 (2009-05-20 peterfarrell)
+
+* Full email configuration support for EmailLogger
+Improved email configuration support. Additional parameters for 
+username, password, charset, spoolenable and timeout.
+
+Form more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/265
+(2009-05-21 brianfitzgerald)
+
+* EmaiLogger only send emails when a specific log level is tripped
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/302
+(2009-05-23 peterfarrell)
 
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes

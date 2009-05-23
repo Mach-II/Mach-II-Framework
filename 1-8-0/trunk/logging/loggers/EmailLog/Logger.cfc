@@ -133,7 +133,7 @@ See that file header for configuration of filter criteria.
 			<cfset setEmailTemplateFile(getParameter("emailTemplateFile")) />
 		</cfif>
 
-		<cfset setLoggingLevelEmailTrigger(getParameter(loggingLevelEmailTrigger, "fatal")) />
+		<cfset setLoggingLevelEmailTrigger(getParameter("loggingLevelEmailTrigger", "fatal")) />
 		
 		<cfif getAssert().hasText(getParameter("to")
 			, "A parameter named 'to' is required."
@@ -344,7 +344,7 @@ See that file header for configuration of filter criteria.
 
 		<cfif Len(getUsername()) AND Len(getPassword())>
 			<cfset result = true />
-		<cfelse>
+		<cfelseif len(getUsername()) and not len(getPassword()) or len(getPassword()) and not len(getUsername())>
 			<cfthrow message="If you provide a value for the username or password parameter, you must specify both a username AND password"
 				detail="The passed values are username: '#getUsername()#', password: '#getPassword()#'." />
 		</cfif>
@@ -385,10 +385,10 @@ See that file header for configuration of filter criteria.
 		hint="Sets the human readable logging level name which is translated to ">
 		<cfargument name="loggingLevelEmailTrigger" type="string" required="true" />
 		<!--- Set the numerical representation of this logging level name --->
-		<cfset setLevelEmailTrigger(translateNameToLevel(arguments.loggingLevelEmailTrigger)) />
+		<cfset setLevelEmailTrigger(getLogAdapter().translateNameToLevel(arguments.loggingLevelEmailTrigger)) />
 	</cffunction>
 	<cffunction name="getLoggingLevelEmailTrigger" access="public" returntype="numeric" output="false">
-		<cfreturn translateLevelToName(getLevelEmailTrigger()) />
+		<cfreturn getLogAdapter().translateLevelToName(getLevelEmailTrigger()) />
 	</cffunction>
 	
 	<cffunction name="setLevelEmailTrigger" access="private" returntype="void" output="false">
