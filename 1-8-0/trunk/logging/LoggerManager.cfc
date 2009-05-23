@@ -41,9 +41,14 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	--->
 	<cffunction name="init" access="public" returntype="LoggerManager" 
 		hint="Initializes the manager.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="false"
+			default="#CreateObject("component", "MachII.logging.LogFactory").init()#"
+			hint="A log factory instance to use. Otherwise it will create it's own instance." />
 		<cfargument name="parentLoggerManager" type="MachII.logging.LoggerManager" required="false" />
 		
+		<!--- Create a log factory if an external one is not  --->
+		<cfif StructKeyExists(arguments, "logFactory")>
+		</cfif>	
 		<cfset setLogFactory(arguments.logFactory) />
 		
 		<!--- Set optional arguments if they exist --->

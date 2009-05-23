@@ -148,6 +148,67 @@ Notes:
 		hint="Checks if a filter has been defined for this adapter.">
 		<cfreturn IsObject(variables.filter) />
 	</cffunction>
+
+	<cffunction name="translateLevelToName" access="public" returntype="string" output="false"
+		hint="Translate a numerical logging level to human readable string.">
+		<cfargument name="level" type="numeric" required="true" />
+
+		<cfset var loggingLevelName = "" />
+		
+		<cfif arguments.level EQ 1>
+			<cfset loggingLevelName = "trace" />
+		<cfelseif  arguments.level EQ 2>
+			<cfset loggingLevelName = "debug" />
+		<cfelseif  arguments.level EQ 3>
+			<cfset loggingLevelName = "info" />
+		<cfelseif  arguments.level EQ 4>
+			<cfset loggingLevelName = "warn" />
+		<cfelseif  arguments.level EQ 5>
+			<cfset loggingLevelName = "error" />
+		<cfelseif  arguments.level EQ 6>
+			<cfset loggingLevelName = "fatal" />
+		<cfelseif  arguments.level EQ 0>
+			<cfset loggingLevelName = "all" />
+		<cfelseif  arguments.level EQ 7>
+			<cfset loggingLevelName = "off" />
+		<cfelse>
+			<cfthrow message="The argument named 'level' accepts a number in the range of 1 through 7."
+				detail="Passed value: '#arguments.level#'" />
+		</cfif>
+		
+		<cfreturn loggingLevelName />
+	</cffunction>
+	
+	<cffunction name="translateNameToLevel" access="public" returntype="string" output="false"
+		hint="Translate a human readable string to a numerical logging level.">
+		<cfargument name="name" type="string" required="true"
+			hint="The leave" />
+		
+		<cfset var level = "" />
+		
+		<cfif arguments.name EQ "trace">
+			<cfset level = 1 />
+		<cfelseif  arguments.name EQ "debug">
+			<cfset level = 2 />
+		<cfelseif  arguments.name EQ "info">
+			<cfset level = 3 />
+		<cfelseif  arguments.name EQ "warn">
+			<cfset level = 4 />
+		<cfelseif  arguments.name EQ "error">
+			<cfset level = 5 />
+		<cfelseif  arguments.name EQ "fatal">
+			<cfset level = 6 />
+		<cfelseif  arguments.name EQ "all">
+			<cfset level = 0 />
+		<cfelseif  arguments.name EQ "off">
+			<cfset level = 7 />
+		<cfelse>
+			<cfthrow message="The argument named 'name' accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'."
+				detail="Passed value: '#arguments.name#'" />
+		</cfif>
+
+		<cfreturn level />
+	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">

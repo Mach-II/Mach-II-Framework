@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
@@ -291,68 +291,15 @@ Configuration Example:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="translateLevelToName" access="private" returntype="string" output="false"
-		hint="Translate a numerical logging level to human readable string.">
-		<cfargument name="level" type="numeric" required="true" />
-
-		<cfset var loggingLevelName = "" />
-		
-		<cfif arguments.level EQ 1>
-			<cfset loggingLevelName = "trace" />
-		<cfelseif  arguments.level EQ 2>
-			<cfset loggingLevelName = "debug" />
-		<cfelseif  arguments.level EQ 3>
-			<cfset loggingLevelName = "info" />
-		<cfelseif  arguments.level EQ 4>
-			<cfset loggingLevelName = "warn" />
-		<cfelseif  arguments.level EQ 5>
-			<cfset loggingLevelName = "error" />
-		<cfelseif  arguments.level EQ 6>
-			<cfset loggingLevelName = "fatal" />
-		<cfelseif  arguments.level EQ 0>
-			<cfset loggingLevelName = "all" />
-		<cfelseif  arguments.level EQ 7>
-			<cfset loggingLevelName = "off" />
-		</cfif>
-		
-		<cfreturn loggingLevelName />
-	</cffunction>
-	
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setLoggingLevel" access="public" returntype="void" output="false"
 		hint="Sets the logging level by name.">
 		<cfargument name="loggingLevelName" type="string" required="true"
-			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />
-		
-		<cfset var level = "" />
-		
-		<cfif NOT ListFindNoCase("trace|debug|info|warn|error|fatal|all|off",  arguments.loggingLevelName, "|")>
-			<cfthrow message="The argument named 'loggingLevelName' accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'."
-				detail="Passed value:#arguments.loggingLevelName#" />
-		</cfif>
-		
-		<cfif arguments.loggingLevelName EQ "trace">
-			<cfset level = 1 />
-		<cfelseif  arguments.loggingLevelName EQ "debug">
-			<cfset level = 2 />
-		<cfelseif  arguments.loggingLevelName EQ "info">
-			<cfset level = 3 />
-		<cfelseif  arguments.loggingLevelName EQ "warn">
-			<cfset level = 4 />
-		<cfelseif  arguments.loggingLevelName EQ "error">
-			<cfset level = 5 />
-		<cfelseif  arguments.loggingLevelName EQ "fatal">
-			<cfset level = 6 />
-		<cfelseif  arguments.loggingLevelName EQ "all">
-			<cfset level = 0 />
-		<cfelseif  arguments.loggingLevelName EQ "off">
-			<cfset level = 7 />
-		</cfif>
-		
+			hint="Accepts 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'all' or 'off'." />		
 		<!--- Set the numerical representation of this logging level name --->
-		<cfset setLevel(level) />
+		<cfset setLevel(translateNameToLevel(arguments.loggingLevelName)) />
 	</cffunction>
 	<cffunction name="getLoggingLevel" access="public" returntype="string" output="false"
 		hint="Gets the logging level by name.">
