@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->

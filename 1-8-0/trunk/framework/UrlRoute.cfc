@@ -41,7 +41,8 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="URLRoute" output="false">
+	<cffunction name="init" access="public" returntype="UrlRoute" output="false"
+		hint="Initializes the route.">
 		<cfargument name="name" type="string" required="false" default="" />
 		<cfargument name="moduleName" type="string" required="false" default="" />
 		<cfargument name="urlAlias" type="string" required="false" default="" />
@@ -60,14 +61,13 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS	
 	--->
-	<cffunction name="parseRoute" access="public" returntype="struct" output="false">
+	<cffunction name="parseRoute" access="public" returntype="struct" output="false"
+		hint="Parses route to event and module name with incoming url elements to name/value pairs.">
 		<cfargument name="urlElements" type="array" required="true" />
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		<cfargument name="eventParameter" type="string" required="true" />
 		
-		<cfset var params = 0 />
-		
-		<cfset params = parseRouteParams(arguments.urlElements) />
+		<cfset var params = parseRouteParams(arguments.urlElements) />
 
 		<cfif getModuleName() eq "">
 			<cfset params[arguments.eventParameter] = getEventName() />
@@ -75,15 +75,19 @@ Notes:
 			<cfset params[arguments.eventParameter] = getModuleName() & arguments.moduleDelimiter & getEventName() />
 		</cfif>
 		
-		 <!--- <cfdump var="#getRequiredParameters()#" label="required params">
+		 <!---
+		 Debugging code: Please do not uncommment
+		 <cfdump var="#getRequiredParameters()#" label="required params">
 		 <cfdump var="#getOptionalParameters()#" label="optional params">
-		 <cfdump var="#params#" /><cfabort /> --->   
+		 <cfdump var="#params#" />
+		 <cfabort />
+		 --->   
 		
 		<cfreturn params />
 	</cffunction>
 	
-	<!--- Used in the RequestManager to form the current route url for buildCurrentUrl() --->
-	<cffunction name="parseRouteParams" access="public" returntype="struct" output="false">
+	<cffunction name="parseRouteParams" access="public" returntype="struct" output="false"
+		hint="Used in the RequestManager to form the current route url for buildCurrentUrl().">
 		<cfargument name="urlElements" type="array" required="true" />
 		
 		<cfset var params = StructNew() />
@@ -92,7 +96,11 @@ Notes:
 		<cfset var totalArgsProcessed = 0 />
 		<cfset var element = "" />
 		
-		<!--- <cfdump var="#arguments.urlElements#" /><cfabort /> --->
+		<!---
+		Debugging code: Please do not uncomment
+		<cfdump var="#arguments.urlElements#" />
+		<cfabort />
+		--->
 		
 		<!--- Start at position 2 since position 1 was the route name --->
 		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
@@ -104,11 +112,16 @@ Notes:
 			</cfif>
 			<!--- <cftrace text="i = #i#"> --->
 		</cfloop>
-		<cfset totalArgsProcessed = i - 2 /><!--- Hold total number of url args processed not counting the route name --->
+		
+		<!--- Hold total number of url args processed not counting the route name --->
+		<cfset totalArgsProcessed = i - 2 />
 
-		<!--- <cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#">  --->
+		<!---
+		Debugging code: Please do not uncomment
+		<cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#"/>
+		--->
 
-		<!--- handle optionalArguments --->	
+		<!--- Handle optionalArguments and add in defaults --->	
 		<cfif totalArgsProcessed lt totalArgCount>
 			<cfloop from="#totalArgsProcessed#" to="#totalArgCount - 1#" index="i">
 				<!--- <cftrace text="optional element #i# at #(totalArgCount - i)# " />  --->
@@ -119,12 +132,17 @@ Notes:
 			</cfloop>
 		</cfif>
 		
-		<!--- <cfdump var="#params#" /><cfabort />  ---> 
+		<!---
+		Debugging code: Please do not uncomment
+		<cfdump var="#params#" />
+		<cfabort />
+		---> 
 		
 		<cfreturn params />
 	</cffunction>
 	
-	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false">
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
+		hint="Builds a URL that matches this route definition.">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with." />
 		<cfargument name="urlParameters" type="struct" required="true"
@@ -232,62 +250,63 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getName" access="public" returntype="string" output="false">
-		<cfreturn variables.name />
-	</cffunction>
 	<cffunction name="setName" access="public" returntype="void" output="false">
 		<cfargument name="name" type="string" required="true" />
 		<cfset variables.name = arguments.name />
 	</cffunction>
-	
-	<cffunction name="getModuleName" access="public" returntype="string" output="false">
-		<cfreturn variables.moduleName />
+	<cffunction name="getName" access="public" returntype="string" output="false">
+		<cfreturn variables.name />
 	</cffunction>
+
 	<cffunction name="setModuleName" access="public" returntype="void" output="false">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfset variables.moduleName = arguments.moduleName />
+	</cffunction>	
+	<cffunction name="getModuleName" access="public" returntype="string" output="false">
+		<cfreturn variables.moduleName />
 	</cffunction>
-	
-	<cffunction name="getEventName" access="public" returntype="string" output="false">
-		<cfreturn variables.eventName />
-	</cffunction>
+
 	<cffunction name="setEventName" access="public" returntype="void" output="false">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfset variables.eventName = arguments.eventName />
+	</cffunction>	
+	<cffunction name="getEventName" access="public" returntype="string" output="false">
+		<cfreturn variables.eventName />
 	</cffunction>
-	
-	<cffunction name="getUrlAlias" access="public" returntype="string" output="false">
-		<cfreturn variables.urlAlias />
-	</cffunction>
+
 	<cffunction name="setUrlAlias" access="public" returntype="void" output="false">
 		<cfargument name="urlAlias" type="string" required="true" />
 		<cfset variables.urlAlias = arguments.urlAlias />
+	</cffunction>	
+	<cffunction name="getUrlAlias" access="public" returntype="string" output="false">
+		<cfreturn variables.urlAlias />
 	</cffunction>
-	
-	<cffunction name="getRequiredParameters" access="public" returntype="string" output="false">
-		<cfreturn variables.requiredParameters />
-	</cffunction>
+
 	<cffunction name="setRequiredParameters" access="public" returntype="void" output="false">
 		<cfargument name="requiredParameters" type="string" required="true" />
 		<cfset variables.requiredParameters = arguments.requiredParameters />
+	</cffunction>	
+	<cffunction name="getRequiredParameters" access="public" returntype="string" output="false">
+		<cfreturn variables.requiredParameters />
 	</cffunction>
-	
-	<cffunction name="getOptionalParameters" access="public" returntype="string" output="false">
-		<cfreturn variables.optionalParameters />
-	</cffunction>
+
 	<cffunction name="setOptionalParameters" access="public" returntype="void" output="false">
 		<cfargument name="optionalParameters" type="string" required="true" />
 		
 		<cfset var param = "" />
 		
-		<cfset variables.optionalParameters = arguments.optionalParameters />
-		
+		<!--- Verify that all optional parameters have a default defined --->
 		<cfloop list="#arguments.optionalParameters#" index="param">
 			<cfif NOT ListLen(param, ":") eq 2>
 				<cfthrow type="MachII.properties.UrlRoute.InvalidOptionalParams"
 					message="The optional URL Route '#getName()#' with parameter '#listGetAt(param, 1, ":")#' does not have default defined.">
 			</cfif>
 		</cfloop>
+		
+		<cfset variables.optionalParameters = arguments.optionalParameters />
+	</cffunction>	
+	<cffunction name="getOptionalParameters" access="public" returntype="string" output="false">
+		<cfreturn variables.optionalParameters />
 	</cffunction>
 
 </cfcomponent>
