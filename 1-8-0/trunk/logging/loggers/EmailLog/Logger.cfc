@@ -387,7 +387,7 @@ See that file header for configuration of filter criteria.
 		<!--- Set the numerical representation of this logging level name --->
 		<cfset setLevelEmailTrigger(getLogAdapter().translateNameToLevel(arguments.loggingLevelEmailTrigger)) />
 	</cffunction>
-	<cffunction name="getLoggingLevelEmailTrigger" access="public" returntype="numeric" output="false">
+	<cffunction name="getLoggingLevelEmailTrigger" access="public" returntype="string" output="false">
 		<cfreturn getLogAdapter().translateLevelToName(getLevelEmailTrigger()) />
 	</cffunction>
 	
