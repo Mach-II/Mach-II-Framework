@@ -327,26 +327,31 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var diffTimestamp = getCurrentTickCount() />
 		
-		<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
+		<!--- No point in running periodic cleanups if the cache lasts "forever" --->
+		<cfif getTimespanString() NEQ "forever">
 		
-		<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
-			<!--- Don't wait because an exclusive lock that has already been obtained
-				indicates that a clean is in progress and we should not wait for the
-				second check in the double-lock-check routine
-				Setting the timeout to 0 indicates to wait indefinitely --->
-			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-				timeout="1" throwontimeout="false">
-				<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
-					<cfif getThreadingAdapter().allowThreading()>
-						<!--- We have to set last cleanup here because execlusive
-						threads locks in cfthread are not shared in the parent thread --->
-						<cfset variables.lastCleanup = getCurrentTickCount() />
-						<cfset getThreadingAdapter().run(this, "reap") />
-					<cfelse>
-						<cfset reap() />
+			<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
+			
+			<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
+				<!--- Don't wait because an exclusive lock that has already been obtained
+					indicates that a clean is in progress and we should not wait for the
+					second check in the double-lock-check routine
+					Setting the timeout to 0 indicates to wait indefinitely --->
+				<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
+					timeout="1" throwontimeout="false">
+					<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
+						<cfif getThreadingAdapter().allowThreading()>
+							<!--- We have to set last cleanup here because execlusive
+							threads locks in cfthread are not shared in the parent thread --->
+							<cfset variables.lastCleanup = getCurrentTickCount() />
+							<cfset getThreadingAdapter().run(this, "reap") />
+						<cfelse>
+							<cfset reap() />
+						</cfif>
 					</cfif>
-				</cfif>
-			</cflock>
+				</cflock>
+			</cfif>
+		
 		</cfif>
 	</cffunction>
 	
