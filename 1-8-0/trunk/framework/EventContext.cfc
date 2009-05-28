@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -597,7 +597,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.HTMLHeadElementCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.HTMLHeadElementCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.HTMLHeadElementCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.HTMLHeadElementCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -618,7 +618,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.HTTPHeaderCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.HTTPHeaderCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.HTTPHeaderCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.HTTPHeaderCallbacks, i) />
 				<cfbreak />
 			</cfif>
