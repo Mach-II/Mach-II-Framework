@@ -31,6 +31,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "undefined" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.expressionEvaluator = "" />
@@ -77,6 +78,10 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="getCommandType" access="public" returntype="string" output="false">
+		<cfreturn variables.commandType />
+	</cffunction>
+	
 	<cffunction name="setParameter" access="public" returntype="void" output="false">
 		<cfargument name="name" type="string" required="true" />
 		<cfargument name="value" type="any" required="true" />

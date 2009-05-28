@@ -32,6 +32,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "notify" />
 	<cfset variables.listenerProxy = "" />
 	<cfset variables.method = "" />
 	<cfset variables.resultKey = "" />

@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id: CacheCommand.cfc 595 2007-12-17 02:39:01Z kurtwiersma $
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->

@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -32,6 +32,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "view-page" />
 	<cfset variables.viewName = "" />
 	<cfset variables.contentKey = "" />
 	<cfset variables.contentArg = "" />

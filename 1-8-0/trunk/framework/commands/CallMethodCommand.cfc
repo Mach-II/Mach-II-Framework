@@ -45,6 +45,7 @@ or
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "call-method" />
 	<cfset variables.beanId = "" />
 	<cfset variables.bean = "" />
 	<cfset variables.method = "" />

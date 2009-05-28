@@ -32,6 +32,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.commandType = "filter" />
 	<cfset variables.filterProxy = "" />
 	<cfset variables.paramArgs = "" />
 	
