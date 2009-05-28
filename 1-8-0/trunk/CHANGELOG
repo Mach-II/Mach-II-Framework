@@ -35,6 +35,12 @@ limitations under the License.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+
+* HTMLHeadElement and HTTPHeader callbacks failed to be removed from EventContext
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/305
+(2009-05-28 peterfarrell)
+
 * Method checking fails when extending a logger due to failure to walk inheritance tree
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/303
