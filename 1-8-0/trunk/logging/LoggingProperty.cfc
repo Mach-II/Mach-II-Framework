@@ -202,7 +202,7 @@ will bind to root parameter values.
 				
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT isLoggingEnabled()>
-			<cfset getAppManager().getLogFactory().disableLogging() />
+			<cfset getLoggerManager().getLogFactory().disableLogging() />
 		</cfif>
 	</cffunction>
 	
@@ -210,8 +210,8 @@ will bind to root parameter values.
 		hint="Unregisters some log adapters and callbacks.">
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var logFactory = getAppManager().getLogFactory() />
-		<cfset var thisInstanceLoggers = getLoggerManager().getLoggers() />
+		<cfset var logFactory = getLoggerManager().getLogFactory() />
+		<cfset var thisInstanceLoggers = getLoggers() />
 		<cfset var key = "" />
 		<cfset var currentLogger = "" />
 		
@@ -236,10 +236,28 @@ will bind to root parameter values.
 		hint="Disables logging.">
 		<cfset getAppManager().getLogFactory().disableLogging() />
 	</cffunction>
-	
 	<cffunction name="enableLogging" access="public" returntype="void" output="false"
 		hint="Enables logging.">
 		<cfset getAppManager().getLogFactory().enableLogging() />
+	</cffunction>
+	
+	<cffunction name="getLoggerByName" access="public" returntype="MachII.logging.loggers.AbstractLogger" output="false"
+		hint="Helper method to get a logger by name from the logger manager.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent logger manager." />
+		<cfreturn getLoggerManager().getLoggerByName(arguments.loggerName, arguments.checkParent) />
+	</cffunction>
+	<cffunction name="isLoggerDefined" access="public" returntype="boolean" output="false"
+		hint="Helper method that checks if a logger is defined by name in the logger manager.">
+		<cfargument name="loggerName" type="string" required="true" />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent logger manager." />
+		<cfreturn getLoggerManager().isLoggerDefined(arguments.loggerName, arguments.checkParent) />
+	</cffunction>
+	<cffunction name="getLoggers" access="public" returntype="struct" output="false"
+		hint="Gets all the registered loggers from the logger manager.">
+		<cfreturn getLoggerManager().getLoggers() />
 	</cffunction>
 	
 	<!---
@@ -285,7 +303,7 @@ will bind to root parameter values.
 		</cfif>
 		
 		<!--- Load the logger  --->
-		<cfset variables.loggerManager.loadLogger(arguments.loggerName, loggerId, arguments.parameters.type, arguments.parameters) />
+		<cfset getLoggerManager().loadLogger(arguments.loggerName, loggerId, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
 	<cffunction name="createLoggerId" access="private" returntype="string" output="false"

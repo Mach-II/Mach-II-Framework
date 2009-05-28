@@ -75,7 +75,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="getLoggerByName" access="public" returntype="MachII.caching.loggers.AbstractLogger" output="false"
+	<cffunction name="getLoggerByName" access="public" returntype="MachII.logging.loggers.AbstractLogger" output="false"
 		hint="Gets a logger with the specified name.">
 		<cfargument name="loggerName" type="string" required="true" />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
