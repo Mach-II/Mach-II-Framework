@@ -45,12 +45,14 @@ Notes:
 		hint="Initializes the route.">
 		<cfargument name="name" type="string" required="false" default="" />
 		<cfargument name="moduleName" type="string" required="false" default="" />
+		<cfargument name="eventName" type="string" required="false" default="" />
 		<cfargument name="urlAlias" type="string" required="false" default="" />
 		<cfargument name="requiredParameters" type="string" required="false" default="" />
 		<cfargument name="optionalParameters" type="string" required="false" default="" />
 		
 		<cfset setName(arguments.name) />
 		<cfset setModuleName(arguments.moduleName) />
+		<cfset setEventName(arguments.eventName) />
 		<cfset setUrlAlias(arguments.urlAlias) />
 		<cfset setRequiredParameters(arguments.requiredParameters) />
 		<cfset setOptionalParameters(arguments.optionalParameters) />
@@ -102,49 +104,51 @@ Notes:
 		<cfabort />
 		--->
 		
-		<!--- Start at position 2 since position 1 was the route name --->
-		<cfloop from="2" to="#arrayLen(arguments.urlElements)#" index="i">
-			<cfif ListLen(getRequiredParameters()) gte i - 1>
-				<cfset params[ListGetAt(ListGetAt(getRequiredParameters(), i - 1), 1, ":")] = arguments.urlElements[i] />
-			<cfelse>
-				<!--- <cftrace text="element #i#, ListLen(getRequiredParameters()) = #ListLen(getRequiredParameters())#" /> --->
-				<cfset params[ListGetAt(ListGetAt(getOptionalParameters(), (i - ListLen(getRequiredParameters()) - 1)), 1, ":")] = arguments.urlElements[i] />
-			</cfif>
-			<!--- <cftrace text="i = #i#"> --->
-		</cfloop>
-		
-		<!--- Hold total number of url args processed not counting the route name --->
-		<cfset totalArgsProcessed = i - 2 />
-
-		<!---
-		Debugging code: Please do not uncomment
-		<cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#"/>
-		--->
-
-		<!--- Handle optionalArguments and add in defaults --->	
-		<cfif totalArgsProcessed lt totalArgCount>
-			<cfloop from="#totalArgsProcessed#" to="#totalArgCount - 1#" index="i">
-				<!--- <cftrace text="optional element #i# at #(totalArgCount - i)# " />  --->
-				<cfset element = ListGetAt(getOptionalParameters(), (totalArgCount - i)) />
-				<cfif ListLen(element, ":") gt 1>
-					<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
+		<cfif ArrayLen(arguments.urlElements) GT 1>
+			
+			<!--- Start at position 2 since position 1 was the route name --->
+			<cfloop from="2" to="#ArrayLen(arguments.urlElements)#" index="i">
+				<cfif ListLen(getRequiredParameters()) gte i - 1>
+					<cfset params[ListGetAt(ListGetAt(getRequiredParameters(), i - 1), 1, ":")] = arguments.urlElements[i] />
+				<cfelse>
+					<!--- <cftrace text="element #i#, ListLen(getRequiredParameters()) = #ListLen(getRequiredParameters())#" /> --->
+					<cfset params[ListGetAt(ListGetAt(getOptionalParameters(), (i - ListLen(getRequiredParameters()) - 1)), 1, ":")] = arguments.urlElements[i] />
 				</cfif>
+				<!--- <cftrace text="i = #i#"> --->
 			</cfloop>
+			
+			<!--- Hold total number of url args processed not counting the route name --->
+			<cfset totalArgsProcessed = i - 2 />
+	
+			<!---
+			Debugging code: Please do not uncomment
+			<cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#"/>
+			--->
+	
+			<!--- Handle optionalArguments and add in defaults --->	
+			<cfif totalArgsProcessed lt totalArgCount>
+				<cfloop from="#totalArgsProcessed#" to="#totalArgCount - 1#" index="i">
+					<!--- <cftrace text="optional element #i# at #(totalArgCount - i)# " />  --->
+					<cfset element = ListGetAt(getOptionalParameters(), (totalArgCount - i)) />
+					<cfif ListLen(element, ":") gt 1>
+						<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
+					</cfif>
+				</cfloop>
+			</cfif>
+		
 		</cfif>
 		
 		<!---
 		Debugging code: Please do not uncomment
 		<cfdump var="#params#" />
 		<cfabort />
-		---> 
+		--->
 		
 		<cfreturn params />
 	</cffunction>
 	
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a URL that matches this route definition.">
-		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with." />
 		<cfargument name="urlParameters" type="struct" required="true"
 			hint="Name/value pairs to build the url with a struct of data." />
 		<cfargument name="queryStringParameters" type="struct" required="false" default="#StructNew()#"

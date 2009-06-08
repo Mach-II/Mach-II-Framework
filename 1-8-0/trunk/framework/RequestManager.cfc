@@ -163,7 +163,7 @@ Notes:
 			<cfset persistId = savePersistEventData(arguments.persistArgs) />
 		</cfif>
 		
-		<cfset redirectToUrl = buildRouteUrl("", arguments.routeName, arguments.routeArgs) />
+		<cfset redirectToUrl = buildRouteUrl(arguments.routeName, arguments.routeArgs) />
 
 		<cfset redirectUrl(redirectToUrl, arguments.statusType) />
 	</cffunction>
@@ -318,13 +318,11 @@ Notes:
 	
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
-		<cfargument name="moduleName" type="string" required="true"
-			hint="Name of the module to build the url with." />
 		<cfargument name="routeName" type="string" required="true"
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="queryStringParameters" type="string" required="false" default=""
+		<cfargument name="queryStringParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
@@ -333,7 +331,7 @@ Notes:
 		<cfset var queryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters)>
 		<cfset var route = getRoute(arguments.routeName) />	
 		
-		<cfreturn route.buildRouteUrl(arguments.moduleName, params, queryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter())>
+		<cfreturn route.buildRouteUrl(params, queryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter()) />
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"

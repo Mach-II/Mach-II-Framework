@@ -202,7 +202,20 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
-	
+
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name of the route to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />		
+		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
+	</cffunction>
+
 	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
 		hint="Resolves a value by deployed environment name or group (explicit environment names are searched first then groups then default).">
 		<cfargument name="environmentValues" type="struct" required="true"

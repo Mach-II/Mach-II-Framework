@@ -19,10 +19,11 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.1.1
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
-- Compatible only with Adobe ColdFusion MX 7.0+ or NewAtlanta BlueDragon 7+.
+- Compatible only with Adobe ColdFusion MX 7+, NewAtlanta BlueDragon 7+
+	and Open BlueDragaon 1+.
 - Call loadFramework in your onApplicationStart() event.
 - Call handleRequest in your onRequestStart() or onRequest() events.
 
@@ -33,6 +34,16 @@ Remoting or event gateway requests.
 
 ColdFusion MX will not execute these types of requests if you implement 
 the handleRequest() method in the onRequest() application event.
+
+Certain methods are not available for use until after loadFramework() has 
+completed execution.  This is because the following method require the
+framework to be loaded as they interact with framework components:
+
+* setProperty()
+* getProperty()
+* isPropertyDefined()
+* getAppManager()
+* shouldReloadConfig()
 --->
 <cfcomponent
 	displayname="mach-ii"

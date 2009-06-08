@@ -164,14 +164,10 @@ Notes:
 			hint="Name of the route to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="queryStringParameters" type="string" required="false" default=""
+		<cfargument name="queryStringParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
-			hint="Base of the url. Defaults to the value of the urlBase property." />
-		
-		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
-		
+			hint="Base of the url. Defaults to the value of the urlBase property." />		
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
 

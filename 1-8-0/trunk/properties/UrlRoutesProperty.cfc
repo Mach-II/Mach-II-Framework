@@ -70,6 +70,7 @@ index.cfm/product/A12345/fancy/
 		<cfset var parameter = 0 />
 		<cfset var i = 0 />
 		<cfset var route = 0 />
+		<cfset var currentModuleName = getAppManager().getModuleName() />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
 			<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
@@ -82,6 +83,8 @@ index.cfm/product/A12345/fancy/
 			
 			<cfif StructKeyExists(parameter, "module")>
 				<cfset route.setModuleName(parameter.module) />
+			<cfelse>
+				<cfset route.setModuleName(currentModuleName) />
 			</cfif>
 			<cfif StructKeyExists(parameter, "urlAlias")>
 				<cfset route.setUrlAlias(parameter.urlAlias) />
