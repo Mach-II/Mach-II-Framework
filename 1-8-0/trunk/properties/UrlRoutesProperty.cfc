@@ -27,6 +27,12 @@ Notes:
 Usage:
 <property name="routes" type="MachII.properties.UrlRoutesProperty">
   <parameters>
+	<parameter name="rewriteConfigFile">
+		<!-- Creates file with Apache Rewrite rules for the routes so you can exclude index.cfm -->
+		<struct>
+			<key name="filePath" value=".htaccess" />
+		</struct>
+	</parameter>
     <parameter name="product">
       <struct>
          <key name="event" value="showProduct" />
@@ -55,9 +61,9 @@ index.cfm/product/A12345/fancy/
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.routes = StructNew() />
 	<cfset variables.routeNames = CreateObject("java", "java.util.HashSet").init() />
 	<cfset variables.routeAliases = CreateObject("java", "java.util.HashSet").init() />
+	<cfset variables.rewriteConfigFile = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -77,28 +83,36 @@ index.cfm/product/A12345/fancy/
 			
 			<cfset parameter = getParameter(parameterName) />
 			
-			<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
-				"You must provide a struct key for 'event' for route '#parameterName#'") />	
-			<cfset route.setEventName(parameter.event) />
-			
-			<cfif StructKeyExists(parameter, "module")>
-				<cfset route.setModuleName(parameter.module) />
+			<cfif parameterName neq "rewriteConfigFile">
+				<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
+					"You must provide a struct key for 'event' for route '#parameterName#'") />	
+				<cfset route.setEventName(parameter.event) />
+				
+				<cfif StructKeyExists(parameter, "module")>
+					<cfset route.setModuleName(parameter.module) />
+				<cfelse>
+					<cfset route.setModuleName(currentModuleName) />
+				</cfif>
+				<cfif StructKeyExists(parameter, "urlAlias")>
+					<cfset route.setUrlAlias(parameter.urlAlias) />
+				</cfif>
+	
+				<cfif StructKeyExists(parameter, "requiredParameters")>
+					<cfset route.setRequiredParameters(evaluateParameters(parameter.requiredParameters)) />
+				</cfif>
+				<cfif StructKeyExists(parameter, "optionalParameters")>
+					<cfset route.setOptionalParameters(evaluateParameters(parameter.optionalParameters)) />
+				</cfif>	
+				
+				<cfset addRoute(parameterName, route) />
 			<cfelse>
-				<cfset route.setModuleName(currentModuleName) />
+				<cfif StructKeyExists(parameter, "filePath")>
+					<cfset setRewriteConfigFile(evaluateParameters(parameter.filePath)) />
+				</cfif>
 			</cfif>
-			<cfif StructKeyExists(parameter, "urlAlias")>
-				<cfset route.setUrlAlias(parameter.urlAlias) />
-			</cfif>
-
-			<cfif StructKeyExists(parameter, "requiredParameters")>
-				<cfset route.setRequiredParameters(evaluateParameters(parameter.requiredParameters)) />
-			</cfif>
-			<cfif StructKeyExists(parameter, "optionalParameters")>
-				<cfset route.setOptionalParameters(evaluateParameters(parameter.optionalParameters)) />
-			</cfif>	
-			
-			<cfset addRoute(parameterName, route) />
 		</cfloop>
+		
+		<cfif getRewriteConfigFile() neq ""><cfset createRewriteConfigFile() /></cfif>
 		
 	</cffunction>
 	
@@ -165,6 +179,30 @@ index.cfm/product/A12345/fancy/
 		<cfreturn parsedParam />
 	</cffunction>
 	
+	<cffunction name="createRewriteConfigFile" access="private" returntype="void" output="false">
+		
+		<cfset var lf = Chr(10) />
+		<cfset var configFilePath = expandPath(getRewriteConfigFile()) />
+		<cfset var contents = "RewriteEngine on" & lf />
+		<cfset var requestManager = getAppManager().getRequestManager() />
+		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot")>
+		<cfset var names = variables.routeNames.toArray() />
+		<cfset var route = 0 />
+		<cfset var i = 0>
+
+		<cfif Right(appRoot, 1) neq "/">
+			<cfset appRoot = appRoot & "/" />
+		</cfif>
+
+		<cfloop from="1" to="#ArrayLen(names)#" index="i">
+			<cfset route = requestManager.getRoute(names[i]) />
+			<cfset contents = contents & "RewriteRule ^#appRoot##route.getUrlAlias()#/(.*)$ #appRoot#index.cfm/#route.getUrlAlias()#/$1 [PT,L]" & lf />
+		</cfloop>
+		
+		<cffile action="write" file="#configFilePath#" output="#contents#" fixnewline="yes" />
+		
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS	
 	--->
@@ -192,5 +230,12 @@ index.cfm/product/A12345/fancy/
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setRewriteConfigFile" access="private" returntype="void" output="false">
+		<cfargument name="rewriteConfigFile" type="string" required="true" />
+		<cfset variables.rewriteConfigFile = arguments.rewriteConfigFile />
+	</cffunction>
+	<cffunction name="getRewriteConfigFile" access="private" returntype="string" output="false">
+		<cfreturn variables.rewriteConfigFile />
+	</cffunction>
 	
 </cfcomponent>
