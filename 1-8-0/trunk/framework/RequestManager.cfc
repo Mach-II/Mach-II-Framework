@@ -203,6 +203,7 @@ Notes:
 		<cfset var key = "" />
 		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
 		<cfset var currentSESParams = getRequestHandler().getCurrentSESParams() />
+		<cfset var log = getLog() />
 		
 		<cfloop collection="#url#" item="key">
 			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
@@ -213,7 +214,8 @@ Notes:
 		<!--- <cfdump var="#getRequestHandler().getCurrentRouteParams()#"><cfabort> --->
 		
 		<cfif Len(routeName)>
-			<cfreturn buildRouteUrl(getAppManager().getModuleName(), routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
+			<cfset log.debug("Building route url for route '#routeName#'") />
+			<cfreturn buildRouteUrl(routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
 		<cfelseif StructCount(currentSESParams)>
 			<cfloop collection="#currentSESParams#" item="key">
 				<cfif key eq getEventParameter()>
@@ -328,10 +330,10 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
-		<cfset var queryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters)>
+		<cfset var parsedQueryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters) />
 		<cfset var route = getRoute(arguments.routeName) />	
 		
-		<cfreturn route.buildRouteUrl(params, queryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter()) />
+		<cfreturn route.buildRouteUrl(params, parsedQueryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter()) />
 	</cffunction>
 	
 	<cffunction name="parseSesParameters" access="public" returntype="struct" output="false"
@@ -369,6 +371,7 @@ Notes:
 					<cfset params = parseRoute(names[1], names) />
 				<cfelse>
 					<!--- No route found for this url --->
+					<!--- TODO: if no route was found when there was no event parameter it we might need to create a missing route exception event --->
 					<cfset params = parseNonRoute(names) />
 					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
