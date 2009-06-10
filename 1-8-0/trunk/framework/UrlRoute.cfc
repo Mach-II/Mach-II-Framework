@@ -186,12 +186,8 @@ Notes:
 		<cfset var optionalParameters = getOptionalParameters() />
 		<cfset var optionalParameterPosition = 0 />
 		
-		<!--- Add in the route name or use alias if defined --->
-		<cfif NOT Len(getUrlAlias())>
-			<cfset queryString = queryString & getUrlAlias() />		
-		<cfelse>
-			<cfset queryString = queryString & getName() />
-		</cfif>		
+		<!--- Add URL alias (defaults to route name if not defined) --->
+		<cfset queryString = queryString & getUrlAlias() />		
 		
 		<!--- Build with required parameters --->
 		<cfloop from="1" to="#ArrayLen(requiredParameters)#" index="i">
