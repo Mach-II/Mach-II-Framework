@@ -80,13 +80,16 @@ index.cfm/product/A12345/fancy/
 		<cfset var currentModuleName = getAppManager().getModuleName() />
 		
 		<cfloop list="#parameterNames#" index="parameterName">
-			<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
 			
 			<cfset parameter = getParameter(parameterName) />
 			
-			<cfif parameterName neq "rewriteConfigFile">
-				<cfset getAssert().isTrue(StructKeyExists(parameter, "event"), 
-					"You must provide a struct key for 'event' for route '#parameterName#'") />	
+			<cfif parameterName NEQ "rewriteConfigFile">
+				
+				<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
+				
+				<cfset getAssert().isTrue(StructKeyExists(parameter, "event")
+						, "You must provide a struct key for 'event' for route '#parameterName#'") />
+				
 				<cfset route.setEventName(parameter.event) />
 				
 				<cfif StructKeyExists(parameter, "module")>
@@ -94,6 +97,7 @@ index.cfm/product/A12345/fancy/
 				<cfelse>
 					<cfset route.setModuleName(currentModuleName) />
 				</cfif>
+				
 				<cfif StructKeyExists(parameter, "urlAlias")>
 					<cfset route.setUrlAlias(parameter.urlAlias) />
 				</cfif>
@@ -101,6 +105,7 @@ index.cfm/product/A12345/fancy/
 				<cfif StructKeyExists(parameter, "requiredParameters")>
 					<cfset route.setRequiredParameters(evaluateParameters(parameter.requiredParameters)) />
 				</cfif>
+				
 				<cfif StructKeyExists(parameter, "optionalParameters")>
 					<cfset route.setOptionalParameters(evaluateParameters(parameter.optionalParameters)) />
 				</cfif>	
@@ -108,13 +113,14 @@ index.cfm/product/A12345/fancy/
 				<cfset addRoute(parameterName, route) />
 			<cfelse>
 				<cfif StructKeyExists(parameter, "filePath")>
-					<cfset setRewriteConfigFile(evaluateParameters(parameter.filePath)) />
+					<cfset setRewriteConfigFile(parameter.filePath) />
 				</cfif>
 			</cfif>
 		</cfloop>
 		
-		<cfif getRewriteConfigFile() neq ""><cfset createRewriteConfigFile() /></cfif>
-		
+		<cfif Len(getRewriteConfigFile())>
+			<cfset createRewriteConfigFile() />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
@@ -133,15 +139,18 @@ index.cfm/product/A12345/fancy/
 		</cfloop>
 		<cfset variables.routeNames.clear() />
 		
+		<!--- Remove route aliases --->
 		<cfset aliases = variables.routeAliases.toArray() />
 		<cfloop from="1" to="#ArrayLen(aliases)#" index="i">
-			<!--- Remove route alias --->
 			<cfset requestManager.removeRouteAlias(aliases[i]) />
 		</cfloop>
 		<cfset variables.routeAliases.clear() />
 		
 	</cffunction>
 	
+	<!---
+	PRPOTECTED FUNCTIONS
+	--->
 	<cffunction name="evaluateParameters" access="private" returntype="array" output="false"
 		hint="Evaluates parameters (required and optional) and returns an evaluated array.">
 		<cfargument name="parameters" type="any" required="true"
@@ -179,28 +188,43 @@ index.cfm/product/A12345/fancy/
 		<cfreturn parsedParam />
 	</cffunction>
 	
-	<cffunction name="createRewriteConfigFile" access="private" returntype="void" output="false">
+	<cffunction name="createRewriteConfigFile" access="private" returntype="void" output="false"
+		hint="Creates a rewrite config file.">
 		
 		<cfset var lf = Chr(10) />
-		<cfset var configFilePath = expandPath(getRewriteConfigFile()) />
-		<cfset var contents = "RewriteEngine on" & lf />
+		<cfset var configFilePath = ExpandPath(getRewriteConfigFile()) />
+		<cfset var contents = getAppManager().getUtils().getMutableSequenceCharactersObject() />
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot")>
+		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var names = variables.routeNames.toArray() />
 		<cfset var route = 0 />
-		<cfset var i = 0>
+		<cfset var i = 0 />
 
+		<!--- Clean up the appRoot --->
 		<cfif Right(appRoot, 1) neq "/">
 			<cfset appRoot = appRoot & "/" />
 		</cfif>
+		
+		<!--- Build rewrite rules --->
+		<cfset contents.append("RewriteEngine on" & lf) />
 
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<cfset route = requestManager.getRoute(names[i]) />
-			<cfset contents = contents & "RewriteRule ^#appRoot##route.getUrlAlias()#/(.*)$ #appRoot#index.cfm/#route.getUrlAlias()#/$1 [PT,L]" & lf />
+			<cfset contents.append("RewriteRule ^" & appRoot & route.getUrlAlias() & "/(.*)$ " & appRoot & "index.cfm/" & route.getUrlAlias() & "/$1 [PT,L]" & lf) />
 		</cfloop>
 		
-		<cffile action="write" file="#configFilePath#" output="#contents#" fixnewline="yes" />
-		
+		<!--- Write to file --->
+		<cftry>
+			<cffile action="write" 
+				file="#configFilePath#" 
+				output="#contents.toString()#" 
+				fixnewline="yes" />
+			<cfcatch type="all">
+				<cfthrow type="MachII.properties.UrlRoutesProperty.RulesWritePermissions"
+					message="Cannot write rewrite rules file to '#configFilePath#'. Does your CFML engine have write permissions to this directory?"
+					detail="Original message: #cfcatch.message#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<!---
@@ -214,7 +238,6 @@ index.cfm/product/A12345/fancy/
 			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and aliases
 			as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler)
 		--->
-		
 		<cfset variables.routeNames.add(arguments.routeName) />
 		
 		<cfif NOT Len(arguments.route.getUrlAlias())>
@@ -235,7 +258,7 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="rewriteConfigFile" type="string" required="true" />
 		<cfset variables.rewriteConfigFile = arguments.rewriteConfigFile />
 	</cffunction>
-	<cffunction name="getRewriteConfigFile" access="private" returntype="string" output="false">
+	<cffunction name="getRewriteConfigFile" access="public" returntype="string" output="false">
 		<cfreturn variables.rewriteConfigFile />
 	</cffunction>
 	
