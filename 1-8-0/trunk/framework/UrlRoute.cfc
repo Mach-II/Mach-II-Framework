@@ -47,8 +47,8 @@ Notes:
 		<cfargument name="moduleName" type="string" required="false" default="" />
 		<cfargument name="eventName" type="string" required="false" default="" />
 		<cfargument name="urlAlias" type="string" required="false" default="" />
-		<cfargument name="requiredParameters" type="string" required="false" default="" />
-		<cfargument name="optionalParameters" type="string" required="false" default="" />
+		<cfargument name="requiredParameters" type="array" required="false" default="#ArrayNew(1)#" />
+		<cfargument name="optionalParameters" type="array" required="false" default="#ArrayNew(1)#" />
 		
 		<cfset setName(arguments.name) />
 		<cfset setModuleName(arguments.moduleName) />
@@ -77,13 +77,13 @@ Notes:
 			<cfset params[arguments.eventParameter] = getModuleName() & arguments.moduleDelimiter & getEventName() />
 		</cfif>
 		
-		 <!---
-		 Debugging code: Please do not uncommment
-		 <cfdump var="#getRequiredParameters()#" label="required params">
-		 <cfdump var="#getOptionalParameters()#" label="optional params">
-		 <cfdump var="#params#" />
-		 <cfabort />
-		 --->   
+		<!---
+		Debugging code: Please do not uncommment
+		<cfdump var="#getRequiredParameters()#" label="required route parameters" />
+		<cfdump var="#getOptionalParameters()#" label="optional route parameters" />
+		<cfdump var="#params#" label="parsed route parameters" />
+		<cfabort />
+		--->
 		
 		<cfreturn params />
 	</cffunction>
@@ -93,51 +93,64 @@ Notes:
 		<cfargument name="urlElements" type="array" required="true" />
 		
 		<cfset var params = StructNew() />
-		<cfset var i = 0 />
-		<cfset var totalArgCount = ListLen(getRequiredParameters()) + ListLen(getOptionalParameters()) />
+		<cfset var requiredParameters = getRequiredParameters() />
+		<cfset var optionalParameters = getOptionalParameters() />
+		<cfset var totalArgCount = ArrayLen(requiredParameters) + ArrayLen(optionalParameters) />
 		<cfset var totalArgsProcessed = 0 />
 		<cfset var element = "" />
+		<cfset var i = 0 />
 		
+		<!--- Remove route name from URL elements so we do not have to correct for it --->
+		<cfset ArrayDeleteAt(arguments.urlElements, 1) />
+
 		<!---
 		Debugging code: Please do not uncomment
 		<cfdump var="#arguments.urlElements#" />
 		<cfabort />
 		--->
 		
-		<cfif ArrayLen(arguments.urlElements) GT 1>
+		<cfif ArrayLen(arguments.urlElements) GTE 1>
 			
-			<!--- Start at position 2 since position 1 was the route name --->
-			<cfloop from="2" to="#ArrayLen(arguments.urlElements)#" index="i">
-				<cfif ListLen(getRequiredParameters()) gte i - 1>
-					<cfset params[ListGetAt(ListGetAt(getRequiredParameters(), i - 1), 1, ":")] = arguments.urlElements[i] />
+			<cfloop from="1" to="#ArrayLen(arguments.urlElements)#" index="i">
+				<cfif ArrayLen(requiredParameters) GTE i>
+					<cfset params[ListGetAt(requiredParameters[i], 1, ":")] = arguments.urlElements[i] />
 				<cfelse>
-					<!--- <cftrace text="element #i#, ListLen(getRequiredParameters()) = #ListLen(getRequiredParameters())#" /> --->
-					<cfset params[ListGetAt(ListGetAt(getOptionalParameters(), (i - ListLen(getRequiredParameters()) - 1)), 1, ":")] = arguments.urlElements[i] />
+					<!--- <cftrace text="element #i#, ArraLen(requiredParameters) = #ArrayLen(requiredParameters)#" /> --->
+					<cfset params[ListGetAt(optionalParameters[i - ListArray(requiredParameters)], 1, ":")] = arguments.urlElements[i] />
 				</cfif>
 				<!--- <cftrace text="i = #i#"> --->
 			</cfloop>
 			
 			<!--- Hold total number of url args processed not counting the route name --->
-			<cfset totalArgsProcessed = i - 2 />
+			<cfset totalArgsProcessed = i />
 	
 			<!---
 			Debugging code: Please do not uncomment
 			<cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#"/>
 			--->
-	
-			<!--- Handle optionalArguments and add in defaults --->	
-			<cfif totalArgsProcessed lt totalArgCount>
-				<cfloop from="#totalArgsProcessed#" to="#totalArgCount - 1#" index="i">
-					<!--- <cftrace text="optional element #i# at #(totalArgCount - i)# " />  --->
-					<cfset element = ListGetAt(getOptionalParameters(), (totalArgCount - i)) />
-					<cfif ListLen(element, ":") gt 1>
-						<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
-					</cfif>
-				</cfloop>
-			</cfif>
-		
 		</cfif>
+	
+		<!--- Total Processed Args:
+		<cfdump var="#totalArgsProcessed#">
+		Total Arg Count:
+		<cfdump var="#totalArgCount#">
+		Loop:
+		<cfdump var="#totalArgCount - totalArgsProcessed + 1#" />
+		<cfabort> --->
 		
+	
+		<!--- Handle optionalArguments and add in defaults --->	
+		<cfif totalArgsProcessed LT totalArgCount>
+			<cfloop from="#totalArgCount - totalArgsProcessed#" to="#ArrayLen(optionalParameters)#" index="i">
+				<cfset element = optionalParameters[i] />
+				<cfif ListGetAt(element, 2, ":") EQ "''">
+					<cfset params[ListGetAt(element, 1, ":")] = "" />
+				<cfelse>
+					<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
+				</cfif>
+			</cfloop>
+		</cfif>
+				
 		<!---
 		Debugging code: Please do not uncomment
 		<cfdump var="#params#" />
@@ -151,7 +164,7 @@ Notes:
 		hint="Builds a URL that matches this route definition.">
 		<cfargument name="urlParameters" type="struct" required="true"
 			hint="Name/value pairs to build the url with a struct of data." />
-		<cfargument name="queryStringParameters" type="struct" required="false" default="#StructNew()#"
+		<cfargument name="queryStringParameters" type="struct" required="true"
 			hint="Name/value pairs to build the query string with a struct of data." />
 		<cfargument name="urlBase" type="string" required="true" 
 			hint="Base of the url." />
@@ -164,60 +177,125 @@ Notes:
 		<cfset var value = "" />
 		<cfset var i = "" />
 		<cfset var defaultValue = "" />	
+		<cfset var isDefaultValueDefined = false />
+		<cfset var usedDefaultValue = false />
 		<cfset var element = "" />
 		<cfset var param = 0 />
 		<cfset var orderedParams = arrayNew(1) />
+		<cfset var requiredParameters = getRequiredParameters() />
+		<cfset var optionalParameters = getOptionalParameters() />
+		<cfset var optionalParameterPosition = 0 />
 		
-		<cfif getUrlAlias() neq "">
+		<!--- Add in the route name or use alias if defined --->
+		<cfif NOT Len(getUrlAlias())>
 			<cfset queryString = queryString & getUrlAlias() />		
 		<cfelse>
 			<cfset queryString = queryString & getName() />
 		</cfif>		
 		
-		<!--- Check to see if all required arguments were passed in --->
-		<cfloop list="#getRequiredParameters()#" index="i">
+		<!--- Build with required parameters --->
+		<cfloop from="1" to="#ArrayLen(requiredParameters)#" index="i">
+			
+			<!--- Reset variables --->
 			<cfset defaultValue = "" />
-			<cfif ListLen(i, ":") gt 1>
-				<cfset defaultValue = ListGetAt(i, 2, ":") />
-				<cfset element = ListGetAt(i, 1, ":") />
-			<cfelse>
-				<cfset element = i />
+			<cfset isDefaultValueDefined = false />
+			
+			<!--- Get the required parameter --->
+			<cfset element = ListGetAt(requiredParameters[i], 1, ":") />
+			
+			<!--- Get the default if defined --->
+			<cfif ListLen(requiredParameters[i], ":") GT 1>
+				<cfset defaultValue = ListGetAt(requiredParameters[i], 2, ":") />
+				<cfif defaultValue EQ "''">
+					<cfset defaultValue = "" />
+				</cfif>
+				<cfset isDefaultValueDefined = true />
 			</cfif>
-			<cfif NOT structKeyExists(params, element) AND defaultValue eq "">
+			
+			<!--- Ensure the required parameter has a default value --->
+			<cfif NOT StructKeyExists(params, element) AND NOT isDefaultValueDefined>
 				<cfthrow type="MachII.framework.UrlRoute.RouteArgumentMissing"
 					message="When attempting to build a url for the route '#getName()#' required argument '#element#' was not specified.">
-			<cfelseif NOT structKeyExists(params, element)>
+			</cfif>
+			
+			<!--- Reset variables --->
+			<cfset param = StructNew() />
+			
+			<!--- Required parameter has not been defined so use the default value --->
+			<cfif NOT StructKeyExists(params, element)>
 				<cfset params[element] = defaultValue />
-				<cfset param = StructNew() />
 				<cfset param.name = element />
 				<cfset param.value = defaultValue />
-				<cfset ArrayAppend(orderedParams, param)>
+			
+			<!--- Required parameter has been defined in the url params with a value so we just need to put in the ordered array --->
 			<cfelse>
-				<!--- Parameter is in params with a value already set so we just need to put in the ordered array --->
-				<cfset param = StructNew() />
 				<cfset param.name = element />
 				<cfset param.value = params[element] />
-				<cfset ArrayAppend(orderedParams, param)>
 			</cfif>
+			
+			<cfset ArrayAppend(orderedParams, param) />
 		</cfloop>
 		
-		<cfloop list="#getOptionalParameters()#" index="i">
-			<cfset defaultValue = "" />
-			<cfif ListLen(i, ":") gt 1>
-				<cfset defaultValue = ListGetAt(i, 2, ":") />
-				<cfset element = ListGetAt(i, 1, ":") />
-			<cfelse>
-				<cfset element = i />
-			</cfif>
-			<cfif structKeyExists(params, element)>
-				<cfset param = StructNew() />
-				<cfset param.name = element />
-				<cfset param.value = params[element] />
-				<cfset ArrayAppend(orderedParams, param)>
-			</cfif>
-		</cfloop>
-		
+		<!--- Take the ordered required parameters and build the onto the URL --->
 		<cfloop from="1" to="#ArrayLen(orderedParams)#" index="i">
+			<cfif IsSimpleValue(orderedParams[i].value)>
+				<cfset queryString = queryString & "/" & URLEncodedFormat(orderedParams[i].value) />
+			</cfif>
+		</cfloop>
+		
+		<!--- Reset ordered parameters for optional params --->
+		<cfset orderedParams = ArrayNew(1) />
+
+		<!--- Build with optional parameters --->
+		<cfloop from="1" to="#ArrayLen(optionalParameters)#" index="i">
+			
+			<!--- Reset variables --->
+			<cfset defaultValue = "" />
+			<cfset isDefaultValueDefined = false />
+			<cfset usedDefaultValue = false />
+			<cfset param = StructNew() />
+			
+			<!--- Get the optional parameter --->
+			<cfset element = ListGetAt(optionalParameters[i], 1, ":") />
+			
+			<!--- Get the default if defined --->
+			<cfif ListLen(optionalParameters[i], ":") GT 1>
+				<cfset defaultValue = ListGetAt(optionalParameters[i], 2, ":") />
+				<cfif defaultValue EQ "''">
+					<cfset defaultValue = "" />
+				</cfif>
+				<cfset isDefaultValueDefined = true />
+			</cfif>
+			
+			<!--- Optional parameter has not been defined so use the default value --->
+			<cfif NOT StructKeyExists(params, element)>
+				<cfset params[element] = defaultValue />
+				<cfset param.name = element />
+				<cfset param.value = defaultValue />
+				<cfset usedDefaultValue = true />
+			
+			<!--- Optional parameter has been defined in the url params with a value so we just need to put in the ordered array --->
+			<cfelse>
+				<cfset param.name = element />
+				<cfset param.value = params[element] />
+			</cfif>
+			
+			<cfset ArrayAppend(orderedParams, param) />
+			
+			<!---
+				Optional parameters must used up until the position 
+				(i.e. if only 3rd optional parameter is defined then the 1st and 2nd parameters must be used)
+			--->
+			<cfif NOT usedDefaultValue>
+				<cfset optionalParameterPosition = i />
+			</cfif>
+		</cfloop>
+		
+		<!---
+			Take the ordered required parameters and build the onto the URL but only up to the point
+			in which the optional parameters have to used
+		--->
+		<cfloop from="1" to="#optionalParameterPosition#" index="i">
 			<cfif IsSimpleValue(orderedParams[i].value)>
 				<cfset queryString = queryString & "/" & URLEncodedFormat(orderedParams[i].value) />
 			</cfif>
@@ -234,11 +312,14 @@ Notes:
 		</cfif>
 		
 		<!--- Add any additional query string parameters from arguments.queryStringParameters --->
-		<cfif StructKeyList(arguments.queryStringParameters) neq "">
+		<cfif StructKeyList(arguments.queryStringParameters) NEQ "">
 			<cfset builtUrl = builtUrl & "?" />
-			<cfset i = 1>
+			<cfset i = 1 />
+			
 			<cfloop collection="#arguments.queryStringParameters#" item="param">
-				<cfif i gt 1><cfset builtUrl = builtUrl & "&" /></cfif>
+				<cfif i GT 1>
+					<cfset builtUrl = builtUrl & "&" />
+				</cfif>
 				<cfset builtUrl = builtUrl & param & "=" & URLEncodedFormat(arguments.queryStringParameters[param]) />
 				<cfset i = i + 1 />
 			</cfloop>
@@ -287,29 +368,29 @@ Notes:
 	</cffunction>
 
 	<cffunction name="setRequiredParameters" access="public" returntype="void" output="false">
-		<cfargument name="requiredParameters" type="string" required="true" />
+		<cfargument name="requiredParameters" type="array" required="true" />
 		<cfset variables.requiredParameters = arguments.requiredParameters />
 	</cffunction>	
-	<cffunction name="getRequiredParameters" access="public" returntype="string" output="false">
+	<cffunction name="getRequiredParameters" access="public" returntype="array" output="false">
 		<cfreturn variables.requiredParameters />
 	</cffunction>
 
 	<cffunction name="setOptionalParameters" access="public" returntype="void" output="false">
-		<cfargument name="optionalParameters" type="string" required="true" />
+		<cfargument name="optionalParameters" type="array" required="true" />
 		
-		<cfset var param = "" />
+		<cfset var i = 0 />
 		
 		<!--- Verify that all optional parameters have a default defined --->
-		<cfloop list="#arguments.optionalParameters#" index="param">
-			<cfif NOT ListLen(param, ":") eq 2>
+		<cfloop from="1" to="#ArrayLen(arguments.optionalParameters)#" index="i">			
+			<cfif NOT ListLen(arguments.optionalParameters[i], ":") EQ 2>
 				<cfthrow type="MachII.properties.UrlRoute.InvalidOptionalParams"
-					message="The optional URL Route '#getName()#' with parameter '#listGetAt(param, 1, ":")#' does not have default defined.">
+					message="The optional URL Route '#getName()#' with parameter '#ListGetAt(arguments.optionalParameters[i], 1, ":")#' does not have default defined.">
 			</cfif>
 		</cfloop>
 		
 		<cfset variables.optionalParameters = arguments.optionalParameters />
 	</cffunction>	
-	<cffunction name="getOptionalParameters" access="public" returntype="string" output="false">
+	<cffunction name="getOptionalParameters" access="public" returntype="array" output="false">
 		<cfreturn variables.optionalParameters />
 	</cffunction>
 

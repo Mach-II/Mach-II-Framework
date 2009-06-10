@@ -63,6 +63,7 @@ index.cfm/product/A12345/fancy/
 	--->
 	<cfset variables.routeNames = CreateObject("java", "java.util.HashSet").init() />
 	<cfset variables.routeAliases = CreateObject("java", "java.util.HashSet").init() />
+	<cfset variables.dummyEvent = CreateObject("component", "MachII.framework.Event").init() />
 	<cfset variables.rewriteConfigFile = "" />
 	
 	<!---
@@ -141,38 +142,37 @@ index.cfm/product/A12345/fancy/
 		
 	</cffunction>
 	
-	<cffunction name="evaluateParameters" access="private" returntype="string" output="false">
-		<cfargument name="parameters" type="any" required="true" />
+	<cffunction name="evaluateParameters" access="private" returntype="array" output="false"
+		hint="Evaluates parameters (required and optional) and returns an evaluated array.">
+		<cfargument name="parameters" type="any" required="true"
+			hint="A list or array of parameters to evaluate." />
 		
-		<cfset var param = "" />
-		<cfset var parsedParameters = "" />
+		<cfset var utils = getAppManager().getUtils() />
 		<cfset var i = 0 />
 		
+		<!--- Convert a list to array (and trim the list just in case) --->
 		<cfif isSimpleValue(arguments.parameters)>
-			<cfloop list="#arguments.parameters#" index="param">
-				<cfset parsedParameters = ListAppend(parsedParameters, parseParameter(param)) />
-			</cfloop>
-		<cfelseif isArray(arguments.parameters)>
-			<!--- handle passing in an array of parameters --->
-			<cfloop from="1" to="#ArrayLen(arguments.parameters)#" index="i">
-				<cfset parsedParameters = ListAppend(parsedParameters, parseParameter(arguments.parameters[i])) />
-			</cfloop>
+			<cfset arguments.parameters = ListToArray(utils.trimList(arguments.parameters)) />
 		</cfif>
+
+		<!--- Parse the array of parameters --->
+		<cfloop from="1" to="#ArrayLen(arguments.parameters)#" index="i">
+			<cfset arguments.parameters[i] = parseParameter(arguments.parameters[i]) />
+		</cfloop>
 		
-		<cfreturn parsedParameters />
+		<cfreturn arguments.parameters />
 	</cffunction>
 	
 	<cffunction name="parseParameter" access="private" returntype="string" output="false">
 		<cfargument name="param" type="string" required="true" />
 		
 		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
-		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset var parsedParam = arguments.param />
 		
-		<cfif ListLen(parsedParam, ":") eq 2>
+		<cfif ListLen(parsedParam, ":") EQ 2>
 			<cfif expressionEvaluator.isExpression(ListGetAt(parsedParam, 2, ":"))>
 				<cfset parsedParam = ListSetAt(parsedParam, 2, 
-					expressionEvaluator.evaluateExpression(ListGetAt(parsedParam, 2, ":"), event, getAppManager().getPropertyManager()), ":") />
+					expressionEvaluator.evaluateExpression(ListGetAt(parsedParam, 2, ":"), variables.dummyEvent, getAppManager().getPropertyManager()), ":") />
 			</cfif>
 		</cfif>
 		
@@ -216,7 +216,8 @@ index.cfm/product/A12345/fancy/
 		--->
 		
 		<cfset variables.routeNames.add(arguments.routeName) />
-		<cfif arguments.route.getUrlAlias() neq "">
+		
+		<cfif NOT Len(arguments.route.getUrlAlias())>
 			<cfset variables.routeAliases.add(arguments.route.getUrlAlias()) />
 		</cfif>
 		
