@@ -36,6 +36,8 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 	<cfset variables.DEFAULT_PATH_SEPARATOR = "/" />
 	<cfset variables.pathSeparator = variables.DEFAULT_PATH_SEPARATOR />
 	
+	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -85,7 +87,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<cfset var part = "" />
 		<cfset var puts = 0 />
 		<cfset var i = 0 />
-		<cfset var result = CreateObject("java", "java.lang.StringBuffer") />
+		<cfset var result = variables.utils.getMutableSequenceCharactersObject() />
 
 		<!--- Add any path parts that have a wildcarded pattern part --->
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
