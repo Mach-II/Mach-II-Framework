@@ -31,12 +31,26 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.mutableSequenceCharactersClassName = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="Utils" output="false"
 		hint="Initialization function called by the framework.">
+		
+		<!---
+			I know we are trying to be like "static" class but this is more efficient
+			to decided which builder we should return to use
+		--->
+		<cfif checkJavaClassAvailable("java.lang.StringBuilder")>
+			<!--- Available on JVM 1.5 or higher --->
+			<cfset variables.mutableSequenceCharactersClassName = "java.lang.StringBuilder" />
+		<cfelse>
+			<!--- Available on JVM 1.4 or lower (legacy support) --->
+			<cfset variables.mutableSequenceCharactersClassName = "java.lang.StringBuffer" />
+		</cfif>	
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -252,6 +266,30 @@ Notes:
 				</cfif>
 			</cfif>
 		</cfloop>
+	</cffunction>
+
+	<cffunction name="checkJavaClassAvailable" access="public" returntype="boolean" output="false"
+		hint="Checks if the passed java class name is available.">
+		<cfargument name="javaClassName" type="string" required="true"
+			hint="The name of the Java class to check if available." />
+			
+		<cftry>
+			<!--- forName() automatically instantiates the class so avoid it by passing in false and null classloader --->
+			<cfset CreateObject("java", "java.lang.Class").forName(arguments.javaClassName, JavaCast("boolean", false), JavaCast("null", "")) />
+			
+			<cfcatch type="java.lang.ClassNotFoundException">
+				<cfreturn false />
+			</cfcatch>
+		</cftry>
+		
+		<cfreturn true />
+	</cffunction>
+	
+	<cffunction name="getMutableSequenceCharactersObject" access="public" returntype="any" output="false"
+		hint="Gets a 'StringBuilder' (fast, un-synchronized and available JVM 1.5 or higher) or 
+			'StringBuffer' (slower, synchronized and available JVM 1.4) depending on availablity. 
+			Beware the 'StringBuilder' is non-thread safe and not synchronized like 'StringBuffer'.">
+		<cfreturn CreateObject("java", variables.mutableSequenceCharactersClassName) />
 	</cffunction>
 
 </cfcomponent>
