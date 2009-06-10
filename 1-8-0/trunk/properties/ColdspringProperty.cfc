@@ -767,7 +767,7 @@ application.serviceFactory_account variable.
 		<cfargument name="autowireBeanNames" type="array" required="true" />
 		
 		<cfset var beanName = "" />
-		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
+		<cfset var cfcData = getAppManager().getUtils().getMutableSequenceCharactersObject() />
 		<cfset var cfcName = "" />
 		<cfset var cfcDirectory = getCfcGenerationLocation() />
 		<cfset var autowireCfc = "" />
@@ -783,8 +783,7 @@ application.serviceFactory_account variable.
 			<cfset beanName = Trim(arguments.autowireBeanNames[i]) />
 
 			<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
-			<cfset cfcData.append('<cffunction name="set#beanName#" access="public" returntype="void" output="false"><cfargument name="#beanName#" type="any" required="true" /><cfset variables.#beanName# = arguments.#beanName# /></' & 'cffunction>') />
-			<cfset cfcData.append('<cffunction name="get#beanName#" access="public" returntype="any" output="false"><cfreturn variables.#beanName# /></' & 'cffunction>') />
+			<cfset cfcData.append('<cffunction name="set' & beanName & '" access="public" returntype="void" output="false"><cfargument name="' & beanName & '" type="any" required="true" /><cfset variables.' & beanName & ' = arguments.' & beanName & ' /></' & 'cffunction><cffunction name="get' & beanName & '" access="public" returntype="any" output="false"><cfreturn variables.' & beanName & ' /></' & 'cffunction>') />
 		</cfloop>
 
 		<!--- Add the closing cfcomponent tag --->
