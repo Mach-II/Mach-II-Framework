@@ -153,7 +153,7 @@ Notes:
 		<cfif NOT IsObject(getAppManager().getParent())>
 			<cfloop collection="#modules#" item="module">
 				<cfif modules[module].shouldReloadConfig()>
-					<cfset modules[module].shouldReloadConfig() />
+					<cfset modules[module].reloadModuleConfig(arguments.validateXml) />
 				</cfif>
 			</cfloop>
 		</cfif>
