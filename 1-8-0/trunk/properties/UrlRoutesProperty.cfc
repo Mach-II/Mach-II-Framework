@@ -193,7 +193,7 @@ index.cfm/product/A12345/fancy/
 		
 		<cfset var lf = Chr(10) />
 		<cfset var configFilePath = ExpandPath(getRewriteConfigFile()) />
-		<cfset var contents = getAppManager().getUtils().getMutableSequenceCharactersObject() />
+		<cfset var contents = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
 		<cfset var names = variables.routeNames.toArray() />

@@ -767,7 +767,7 @@ application.serviceFactory_account variable.
 		<cfargument name="autowireBeanNames" type="array" required="true" />
 		
 		<cfset var beanName = "" />
-		<cfset var cfcData = getAppManager().getUtils().getMutableSequenceCharactersObject() />
+		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var cfcName = "" />
 		<cfset var cfcDirectory = getCfcGenerationLocation() />
 		<cfset var autowireCfc = "" />

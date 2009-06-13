@@ -87,7 +87,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<cfset var part = "" />
 		<cfset var puts = 0 />
 		<cfset var i = 0 />
-		<cfset var result = variables.utils.getMutableSequenceCharactersObject() />
+		<cfset var result = CreateObject("java", "java.lang.StringBuffer") />
 
 		<!--- Add any path parts that have a wildcarded pattern part --->
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">

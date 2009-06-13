@@ -80,8 +80,6 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
 	
-	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
-	
 	<!---	
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -284,7 +282,7 @@ See that file header for configuration of filter criteria.
 		Also, cleans up invalid HTML syntax so debugging output will not mess up HTML validators.">
 		<cfargument name="dataToDump" type="any" required="true" />
 		
-		<cfset var data = variables.utils.getMutableSequenceCharactersObject() />
+		<cfset var data = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var results = StructNew() />
 		<cfset var reFindResults = "" />
 		<cfset var temp = "" />
