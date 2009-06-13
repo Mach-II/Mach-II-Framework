@@ -40,8 +40,8 @@ ${scope.key NEQ scope.key2}
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.operandList = "eq,neq,gt,gte,lt,lte" />
-	<cfset variables.parsedExpressions = StructNew() />
+	<cfset variables.OPERAND_LIST = "eq,neq,gt,gte,lt,lte" />
+	<cfset variables.SCOPE_LIST = "properties,event" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -101,9 +101,9 @@ ${scope.key NEQ scope.key2}
 			</cfif>
 			<cfif len(body)>
 				<cfset expDetails.operand = listGetAt(body, 1, " ") />
-				<cfif NOT listFindNoCase(variables.operandList, expDetails.operand)>
+				<cfif NOT listFindNoCase(variables.OPERAND_LIST, expDetails.operand)>
 					<cfthrow type="MachII.util.InvalidExpression" 
-						message="The operand '#operand#' from the expression '#arguments.expressionBody#' is not one of the following supported operands. (#variables.operandList#)" />
+						message="The operand '#operand#' from the expression '#arguments.expressionBody#' is not one of the following supported operands. (#variables.OPERAND_LIST#)" />
 				</cfif>
 				<cfset body = listDeleteAt(body, 1, " ") />
 				<cfif len(body)>
@@ -130,6 +130,28 @@ ${scope.key NEQ scope.key2}
 		<cfreturn result />
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - UTIL
+	--->
+	<cffunction name="isExpression" access="public" returntype="boolean" output="false"
+		hint="Checks if passed argument is a valid expression.">
+		<cfargument name="expression" type="any" required="true" 
+			hint="This argument should be a string otherwise it this method will return false." />
+		<cfif isSimpleValue(arguments.expression)>
+			<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="getScopeList" access="public" returntype="string" output="false"
+		hint="Gets a list of scopes.">
+		<cfreturn variables.SCOPE_LIST />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
 	<cffunction name="parseOutParam" access="private" returntype="struct" output="false">
 		<cfargument name="body" type="string" required="true" />
 		
@@ -232,17 +254,6 @@ ${scope.key NEQ scope.key2}
 		</cfif>
 	
 		<cfreturn result />
-	</cffunction>
-	
-	<cffunction name="isExpression" access="public" returntype="boolean" output="false"
-		hint="Checks if passed argument is a valid expression.">
-		<cfargument name="expression" type="any" required="true" 
-			hint="This argument should be a string otherwise it this method will return false." />
-		<cfif isSimpleValue(arguments.expression)>
-			<cfreturn REFindNoCase("\${(.)*?}", arguments.expression) />
-		<cfelse>
-			<cfreturn false />
-		</cfif>
 	</cffunction>
 	
 	<!---

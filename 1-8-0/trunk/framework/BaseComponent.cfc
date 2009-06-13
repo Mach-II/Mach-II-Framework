@@ -372,19 +372,46 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="parameterValue" type="any" required="true"
 			hint="The current value of the parameter." />
 		
-		<cfset var propertyName = "" />
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator()>
 		<cfset var value =  arguments.parameterValue />
+		<cfset var scope = "" />
+		<cfset var event = "" />
 		
 		<!--- Can only bind simple parameter values --->
-		<cfif IsSimpleValue(arguments.parameterValue) AND REFindNoCase("\${(.)*?}", arguments.parameterValue)>
-			<cfset propertyName = Mid(arguments.parameterValue, 3, Len(arguments.parameterValue) -3) />
-			<cfif getPropertyManager().isPropertyDefined(propertyName) 
-				OR (IsObject(getAppManager().getParent()) AND getAppManager().getParent().getPropertyManager().isPropertyDefined(propertyName))>
-				<cfset value = getProperty(propertyName) />
+		<cfif IsSimpleValue(arguments.parameterValue) 
+			AND expressionEvaluator.isExpression(arguments.parameterValue)>
+			
+			<!---
+				For BC with bindable property parameters, a scope name was not "required" 
+				(during framework loading) and defaults to "properties", however it is best 
+				practice to provide a scope
+			--->
+			<cfif getAppManager().isLoading()>
+				<!--- Disallow event scope during framework load --->
+				<cfif value.toLowerCase().startsWith("${event.")>
+					<cfthrow type="MachII.framework.BindToParameterInvalidScope" 
+						message="Cannot bind to a parameter named '#arguments.parameterName#' for '#getComponentNameForLogging()#' because the 'event.' scope is not available for use during on framework load." />
+				
+				<!--- Add in properties scope if missing --->
+				<cfelseif NOT value.toLowerCase().startsWith("${properties.")>
+					<cfset value = Insert("properties.", value, 2) />
+				</cfif>
+				
+				<!--- Create a dummy event object to pass in --->
+				<cfset event = CreateObject("component", "MachII.framework.Event").init() />
 			<cfelse>
-				<cfthrow type="MachII.framework.ProperyNotDefinedToBindToParameter" 
-					message="The required property is not defined to bind to a parameter named '#arguments.parameterName#'." />
+				<cfset event = getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
 			</cfif>
+			
+			<cftry>
+				<cfset value = expressionEvaluator.evaluateExpression(value, event, getPropertyManager()) />
+				
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.BindToParameterException" 
+						message="Error trying bind to a parameter named '#arguments.parameterName#' for '#getComponentNameForLogging()#'."
+						detail="Please check your expression for errors." />
+				</cfcatch>
+			</cftry>
 		</cfif>
 		
 		<cfreturn value />
