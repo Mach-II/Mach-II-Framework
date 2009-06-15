@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -77,7 +77,7 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-	
-	<cfoutput>#doStartTag()#<input name="__#attributes.name#" type="hidden" value="" /></cfoutput>
+<cfelse>
+	<cfset thisTag.GeneratedContent = doStartTag() & '<input name="__#attributes.name#" type="hidden" value="" />' />
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

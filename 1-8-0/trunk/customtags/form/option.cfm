@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -62,17 +62,18 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-	
-	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
 	<cfif NOT Len(thisTag.GeneratedContent)>
 		<!--- Put a non-breaking space if value is nothing so it does not break validation --->
 		<cfif NOT Len(attributes.label)>
-			<cfset thisTag.GeneratedContent = "&nbsp;" />
+			<cfset setContent("&nbsp;") />
 		<cfelse>
 			<cfset setContent(HTMLEditFormat(attributes.label)) />
 		</cfif>
+	<cfelse>
+		<cfset setContent(thisTag.GeneratedContent) />
 	</cfif>
-	<cfoutput>#doEndTag()#</cfoutput>
+
+	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

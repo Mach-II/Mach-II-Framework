@@ -50,7 +50,6 @@ onkeypress	= [string]
 onkeydown	= [string]
 onkeyup		= [string]
 --->
-</cfsilent>
 
 <!---
 PROPERTIES
@@ -308,3 +307,5 @@ ACCESSORS
 <cffunction name="getContent" access="public" returntype="string" output="false">
 	<cfreturn variables.content />
 </cffunction>
+
+</cfsilent>

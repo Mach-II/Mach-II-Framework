@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -89,14 +89,14 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-	
-	<cfoutput>#doStartTag()#</cfoutput>
-<cfelse>	
+<cfelse>
+	<!--- Use the label attribute value if defined otherwise default to the nested content --->
 	<cfif StructKeyExists(attributes, "label")>
 		<cfset setContent(HTMLEditFormat(attributes.label)) />
-		<cfset thisTag.GeneratedContent = "" />
+	<cfelse>
+		<cfset setContent(Trim(thisTag.GeneratedContent)) />
 	</cfif>
 	
-	<cfoutput>#doEndTag()#</cfoutput>
+	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

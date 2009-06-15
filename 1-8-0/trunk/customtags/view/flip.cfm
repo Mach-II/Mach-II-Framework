@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -27,7 +27,7 @@ Notes:
 	value	= [numeric] value to evaluate against
 	items	= [string] a list of items to use when evaluating the value
 --->
-<cfif thisTag.ExecutionMode IS "start">
+<cfif thisTag.ExecutionMode IS "end">
 
 	<!--- Assert required attributes are present --->
 	<cfif NOT StructKeyExists(attributes, "value") OR NOT IsNumeric(attributes.value)>
@@ -57,6 +57,7 @@ Notes:
 	<cfelse>
 		<cfset variables.output = attributes.items[variables.modResult] />
 	</cfif>
-	<cfoutput>#Trim(variables.output)#</cfoutput>
+	
+	<cfset thisTag.GeneratedContent = Trim(variables.output) />
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

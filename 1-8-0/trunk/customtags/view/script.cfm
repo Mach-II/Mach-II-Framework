@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -38,4 +38,4 @@ Notes:
 		<cfset thisTag.GeneratedContent = variables.js />
 	</cfif>
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

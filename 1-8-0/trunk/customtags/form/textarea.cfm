@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -28,6 +28,7 @@ Notes:
 - OPTIONAL ATTRIBUTES
 	rows		= [numeric] 
 	cols		= [numeric]
+	value		= [string]
 - STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
 --->
@@ -49,8 +50,6 @@ Notes:
 	</cfif>
 	<cfparam name="attributes.name" type="string" 
 		default="#attributes.path#" />
-	<cfparam name="attributes.value" type="string" 
-		default="" />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
@@ -64,7 +63,13 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 <cfelse>
-	<cfset setContent(attributes.value) />
+	<!--- Use the value (or resolved value) if defined otherwise default to the nested content --->
+	<cfif StructKeyExists(attributes, "value")>
+		<cfset setContent(attributes.value) />
+	<cfelse>
+		<cfset setContent(thisTag.GeneratedContent) />
+	</cfif>
+	
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

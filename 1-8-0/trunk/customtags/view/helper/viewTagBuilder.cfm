@@ -25,7 +25,6 @@ Updated version: 1.8.0
 Notes:
 Concrete tag builder for the Mach-II view tag library inherits from base builder.
 --->
-</cfsilent>
 
 <cfinclude template="/MachII/customtags/baseTagBuilder.cfm" />
 
@@ -37,3 +36,4 @@ PROPERTIES
 <!---
 PUBLIC FUNCTIONS
 --->
+</cfsilent>

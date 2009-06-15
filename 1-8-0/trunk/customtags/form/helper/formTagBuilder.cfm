@@ -25,7 +25,6 @@ Updated version: 1.8.0
 Notes:
 Concrete tag builder for the Mach-II form tag library inherits from base builder.
 --->
-</cfsilent>
 
 <cfinclude template="/MachII/customtags/baseTagBuilder.cfm" />
 
@@ -101,3 +100,5 @@ PUBLIC FUNCTIONS
 	
 	<cfreturn value />
 </cffunction>
+
+</cfsilent>

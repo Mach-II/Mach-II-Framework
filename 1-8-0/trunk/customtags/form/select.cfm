@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfprocessingdirective  suppresswhitespace="true"><cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -34,9 +34,10 @@ Notes:
 - EVENT ATTRIBUTES
 --->
 <cfimport prefix="form" taglib="/MachII/customtags/form/" />
-
+</cfsilent>
 <cfif thisTag.ExecutionMode IS "start">
-
+	<cfsilent>
+	
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("select", false) />
@@ -78,11 +79,13 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
+	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
 	<cfif StructKeyExists(attributes, "items")>
 		<cfoutput><form:options items="#attributes.items#" delimiter="#attributes.delimiter#"/></cfoutput>
 	</cfif>
+	
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfprocessingdirective><cfsetting enablecfoutputonly="false" />

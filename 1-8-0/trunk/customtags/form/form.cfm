@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 License:
 Copyright 2008 GreatBizTools, LLC
@@ -33,7 +33,9 @@ Notes:
 	method			= specifies the type of form post to make (defaults to "post")
 	bind			= specifies the name of the event arg to try to bind to (default to event object)
 --->
+</cfsilent>
 <cfif thisTag.ExecutionMode IS "start">
+	<cfsilent>
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />	
@@ -85,7 +87,8 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
-		
+	
+	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
 	<cfoutput>#doEndTag()#</cfoutput>
