@@ -71,7 +71,7 @@ Notes:
 			<cfset setContent(HTMLEditFormat(attributes.label)) />
 		</cfif>
 	<cfelse>
-		<cfset setContent(thisTag.GeneratedContent) />
+		<cfset setContent(HTMLEditFormat(thisTag.GeneratedContent)) />
 	</cfif>
 
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />

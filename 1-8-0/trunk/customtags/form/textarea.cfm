@@ -65,7 +65,7 @@ Notes:
 <cfelse>
 	<!--- Use the value (or resolved value) if defined otherwise default to the nested content --->
 	<cfif StructKeyExists(attributes, "value")>
-		<cfset setContent(attributes.value) />
+		<cfset setContent(HTMLEditFormat(attributes.value)) />
 	<cfelse>
 		<cfset setContent(thisTag.GeneratedContent) />
 	</cfif>

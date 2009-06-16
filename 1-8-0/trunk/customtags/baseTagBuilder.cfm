@@ -120,7 +120,7 @@ PUBLIC FUNCTIONS
 	<cfset var result = "" />	
 	
 	<cfif Len(getContent())>
-		<cfset result = result & HtmlEditFormat(getContent()) />
+		<cfset result = result & getContent() />
 	</cfif>
 	
 	<cfif NOT isSelfClosingTag()>
