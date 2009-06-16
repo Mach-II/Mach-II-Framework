@@ -273,6 +273,25 @@ PUBLIC FUNCTIONS - UTIL
 	<cfreturn tagAttributes />
 </cffunction>
 
+<cffunction name="evaluateExpressionStruct" access="public" returntype="void" output="false"
+	hint="Evaluates a struct for expressions using the Expresion Evaluator.">
+	<cfargument name="target" type="struct" required="true" />
+	<cfargument name="event" type="MachII.framework.Event" required="false"
+		default="#caller.this.getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent()#" />
+	<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="false"
+		default="#caller.this.getPropertyManager()#" />
+	<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="false"
+		default="#caller.this.getAppManager().getExpressionEvaluator()#" />
+	
+	<cfset var key = "" />
+	
+	<cfloop collection="#arguments.target#" item="key">
+		<cfif arguments.expressionEvaluator.isExpression(arguments.target[key])>
+			<cfset arguments.target[key] = arguments.expressionEvaluator.evaluateExpression(arguments.target[key], arguments.event, arguments.propertyManager) />
+		</cfif>
+	</cfloop>
+</cffunction>
+
 <!---
 ACCESSORS
 --->
