@@ -62,7 +62,6 @@ index.cfm/product/A12345/fancy/
 	PROPERTIES
 	--->
 	<cfset variables.routeNames = CreateObject("java", "java.util.HashSet").init() />
-	<cfset variables.routeAliases = CreateObject("java", "java.util.HashSet").init() />
 	<cfset variables.dummyEvent = CreateObject("component", "MachII.framework.Event").init() />
 	<cfset variables.rewriteConfigFile = "" />
 	
@@ -131,21 +130,13 @@ index.cfm/product/A12345/fancy/
 		<cfset var aliases = "" />
 		<cfset var i = 0 />
 		
-		<!--- Cleanup this property's routes --->
+		<!--- Removes this property's routes --->
 		<cfset names = variables.routeNames.toArray() />
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<!--- Remove route --->
 			<cfset requestManager.removeRoute(names[i]) />
 		</cfloop>
 		<cfset variables.routeNames.clear() />
-		
-		<!--- Remove route aliases --->
-		<cfset aliases = variables.routeAliases.toArray() />
-		<cfloop from="1" to="#ArrayLen(aliases)#" index="i">
-			<cfset requestManager.removeRouteAlias(aliases[i]) />
-		</cfloop>
-		<cfset variables.routeAliases.clear() />
-		
 	</cffunction>
 	
 	<!---
@@ -239,10 +230,6 @@ index.cfm/product/A12345/fancy/
 			as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler)
 		--->
 		<cfset variables.routeNames.add(arguments.routeName) />
-		
-		<cfif NOT Len(arguments.route.getUrlAlias())>
-			<cfset variables.routeAliases.add(arguments.route.getUrlAlias()) />
-		</cfif>
 		
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>
