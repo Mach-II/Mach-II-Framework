@@ -631,18 +631,21 @@ Notes:
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
 		
-		<cfif arguments.route.getUrlAlias() neq "">
+		<cfif arguments.route.isUrlAliasDefined()>
 			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="removeRoute" access="public" returntype="void" output="false">
 		<cfargument name="routeName" type="string" required="true" />
+		
+		<cfset var route = getRoute(arguments.routeName) />
+		
 		<cfset StructDelete(variables.routes, arguments.routeName) />
-	</cffunction>
-	<cffunction name="removeRouteAlias" access="public" returntype="void" output="false">
-		<cfargument name="routeAlias" type="string" required="true" />
-		<cfset StructDelete(variables.routesAliases, arguments.routeAlias) />
+		
+		<cfif route.isUrlAliasDefined()>
+			<cfset StructDelete(variables.routesAliases, route.getUrlAlias()) />
+		</cfif>
 	</cffunction>
 	
 	<!---

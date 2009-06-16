@@ -361,11 +361,15 @@ Notes:
 	</cffunction>	
 	<cffunction name="getUrlAlias" access="public" returntype="string" output="false"
 		hint="If url alias is '' (zero-length string), return the route name.">
-		<cfif Len(variables.urlAlias)>
+		<cfif isUrlAliasDefined()>
 			<cfreturn variables.urlAlias />
 		<cfelse>
 			<cfreturn getName() />
 		</cfif>
+	</cffunction>
+	<cffunction name="isUrlAliasDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if a url alias is defined.">
+		<cfreturn Len(variables.urlAlias) />
 	</cffunction>
 
 	<cffunction name="setRequiredParameters" access="public" returntype="void" output="false">
