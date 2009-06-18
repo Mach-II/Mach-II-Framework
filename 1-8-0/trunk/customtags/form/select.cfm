@@ -34,10 +34,8 @@ Notes:
 - EVENT ATTRIBUTES
 --->
 <cfimport prefix="form" taglib="/MachII/customtags/form/" />
-</cfsilent>
-<cfif thisTag.ExecutionMode IS "start">
-	<cfsilent>
-	
+
+<cfif thisTag.ExecutionMode IS "start">	
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("select", false) />
@@ -79,13 +77,17 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
-	</cfsilent>
-	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
+	<!--- Set temp variables --->
+	<cfset variables.content = "" />
+
 	<cfif StructKeyExists(attributes, "items")>
-		<cfoutput><form:options items="#attributes.items#" delimiter="#attributes.delimiter#"/></cfoutput>
+		<cfsavecontent variable="variables.content"><cfoutput><form:options attributeCollection="#attributes#"/></cfoutput></cfsavecontent>
 	</cfif>
 	
-	<cfoutput>#doEndTag()#</cfoutput>
+	<!--- Any options generated from items are append at the end of any nested option tags --->
+	<cfset setContent(thisTag.GeneratedContent & variables.content) />
+	
+	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-</cfprocessingdirective><cfsetting enablecfoutputonly="false" />
+</cfsilent></cfprocessingdirective><cfsetting enablecfoutputonly="false" />

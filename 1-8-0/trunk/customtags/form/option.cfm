@@ -43,7 +43,7 @@ Notes:
 	
 	<!--- Set defaults --->
 	<cfparam name="attributes.id" type="string"
-		default="#getParentTagAttribute("select", "id")#_#replaceSpaces(attributes.value)#" />
+		default="#getParentTagAttribute("select", "id")#_#createCleanId(attributes.value)#" />
 	<cfparam name="attributes.label" type="string"  
 		default="#attributes.value#" />
 	

@@ -292,6 +292,18 @@ PUBLIC FUNCTIONS - UTIL
 	</cfloop>
 </cffunction>
 
+<cffunction name="createCleanId" access="public" returntype="string" output="false"
+	hint="Creates a cleaned version to be used as an 'id'. Changes spaces to '_' and removes most punctuation (that conforms to RegEx '[[:punct:]]').">
+	<cfargument name="dirtyId" type="string" required="true"  />
+	
+	<cfset var cleanedId = arguments.dirtyId />
+	
+	<cfset cleanedId = REReplaceNoCase(cleanedId, "[[:punct:]]", "", "all") />
+	<cfset cleanedId = ReplaceNoCase(cleanedId, " ", "_", "all") />
+	
+	<cfreturn cleanedId />
+</cffunction>
+
 <!---
 ACCESSORS
 --->

@@ -58,7 +58,7 @@ Notes:
 	<cfparam name="attributes.value" type="string" 
 		default="" />
 	<cfparam name="attributes.id" type="string" 
-		default="#attributes.name#_#attributes.value#" />
+		default="#attributes.name#_#createCleanId(attributes.value)#" />
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "checkbox") />

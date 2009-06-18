@@ -59,7 +59,7 @@ Notes:
 	<cfparam name="attributes.value" type="string" 
 		default="1" />
 	<cfparam name="attributes.id" type="string" 
-		default="#attributes.name#_#replaceSpaces(attributes.value)#" />
+		default="#attributes.name#_#createCleanId(attributes.value)#" />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "radio") />

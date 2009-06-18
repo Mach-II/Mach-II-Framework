@@ -24,7 +24,7 @@ Updated version: 1.8.0
 
 Notes:
 - REQUIRED ATTRIBUTES
-	items		= [struct]|[array]
+	items		= [list]|[struct]|[query]|[array]
 --->
 <cfimport prefix="form" taglib="/MachII/customtags/form/" />
 
@@ -37,11 +37,15 @@ Notes:
 	<!--- Set optional attributes --->
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
+	<cfparam name="attributes.valueCol" type="string"
+		default="value" />
+	<cfparam name="attributes.labelCol" type="string"
+		default="label" />
 
 <cfelse>
 	<!---
-		In order to keep whitespace down to a minimum, a lot of 
-		stuff has to stay on a single line 
+		In order to keep whitespace down to a minimum, all cfsavecontent  
+		must stay on a single line 
 	--->
 	<cfif IsSimpleValue(attributes.items)>
 		<cfsavecontent variable="variables.content"><cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#"><cfoutput><form:option value="#Trim(i)#" /></cfoutput></cfloop></cfsavecontent>
@@ -49,11 +53,13 @@ Notes:
 		<cfset variables.itemOrder = StructSort(attributes.items, "text") />
 		<cfsavecontent variable="variables.content"><cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i"><cfoutput><form:option value="#LCase(variables.itemOrder[i])#" label="#attributes.items[variables.itemOrder[i]]#" /></cfoutput></cfloop></cfsavecontent>
 	<cfelseif IsArray(attributes.items)>
-		<cfsavecontent variable="variables.content"><cfloop from="1" to="#ArrayLen(attributes.items)#" index="i"><cfoutput><form:option value="#attributes.items[i]#" /></cfoutput></cfloop></cfsavecontent>
+		<cfsavecontent variable="variables.content"><cfloop from="1" to="#ArrayLen(attributes.items)#" index="i"><cfoutput><form:option value="#Trim(attributes.items[i])#" /></cfoutput></cfloop></cfsavecontent>
+	<cfelseif IsQuery(attributes.query)>
+		<cfsavecontent variable="variables.content"><cfloop query="attributes.items"><cfoutput><form:option value="#attributes.items[attributes.valueCol]#" label="#attributes.items[labelCol]#" /></cfoutput></cfloop></cfsavecontent>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.#getTagType()#"
 			message="The 'items' attribute for #getTagType()# custom tag does not support the passed datatype."
-			detail="The 'items' attribute only supports lists, structs and arrays." />
+			detail="The 'items' attribute only supports lists, structs, queries and arrays." />
 	</cfif>
 	
 	<cfset thisTag.GeneratedContent = variables.content />
