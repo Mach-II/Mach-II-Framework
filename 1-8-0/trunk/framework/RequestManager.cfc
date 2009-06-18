@@ -644,7 +644,7 @@ Notes:
 		<cfset StructDelete(variables.routes, arguments.routeName) />
 		
 		<cfif route.isUrlAliasDefined()>
-			<cfset StructDelete(variables.routesAliases, route.getUrlAlias()) />
+			<cfset StructDelete(variables.routeAliases, route.getUrlAlias()) />
 		</cfif>
 	</cffunction>
 	
