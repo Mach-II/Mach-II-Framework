@@ -111,8 +111,18 @@ index.cfm/product/A12345/fancy/
 				
 				<cfset addRoute(parameterName, route) />
 			<cfelse>
-				<cfif StructKeyExists(parameter, "filePath")>
-					<cfset setRewriteConfigFile(parameter.filePath) />
+				<cfif StructKeyExists(parameter, "rewriteFileOn")>
+					<cfif parameter.rewriteFileOn>
+						<cfif StructKeyExists(parameter, "filePath")>
+							<cfset setRewriteConfigFile(parameter.filePath) />
+						<cfelse>
+							<cfif Len(currentModuleName)>
+								<cfset setRewriteConfigFile("rewriteRules_#currentModuleName#.cfm") />
+							<cfelse>
+								<cfset setRewriteConfigFile("rewriteRules_base.cfm") />
+							</cfif>
+						</cfif>
+					</cfif>
 				</cfif>
 			</cfif>
 		</cfloop>
@@ -186,7 +196,8 @@ index.cfm/product/A12345/fancy/
 		<cfset var configFilePath = ExpandPath(getRewriteConfigFile()) />
 		<cfset var contents = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("applicationRoot") />
+		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("urlBase") />
+		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var names = variables.routeNames.toArray() />
 		<cfset var route = 0 />
 		<cfset var i = 0 />
@@ -197,12 +208,19 @@ index.cfm/product/A12345/fancy/
 		</cfif>
 		
 		<!--- Build rewrite rules --->
+		<cfset contents.append('#### <cfsetting enabledCfoutputOnly="true"/>' & lf) />
+		<cfset contents.append("#### Date Generated: #dateFormat(now(), "m/d/yyyy")# #timeFormat(now(), "h:mm tt")#" & lf) />
+		<cfset contents.append("#### Module Name: #moduleName#" & lf) />
+		<cfset contents.append(lf) />
 		<cfset contents.append("RewriteEngine on" & lf) />
 
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<cfset route = requestManager.getRoute(names[i]) />
 			<cfset contents.append("RewriteRule ^" & appRoot & route.getUrlAlias() & "/(.*)$ " & appRoot & "index.cfm/" & route.getUrlAlias() & "/$1 [PT,L]" & lf) />
 		</cfloop>
+		
+		<cfset contents.append(lf) />
+		<cfset contents.append('#### <cfsetting enabledCfoutputOnly="false"/>' & lf) />
 		
 		<!--- Write to file --->
 		<cftry>
