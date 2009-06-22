@@ -585,7 +585,8 @@ Notes:
 		<cfreturn variables.postRedirectCallbacks />
 	</cffunction>
 	
-	<cffunction name="getRouteNames" access="public" returntype="string" output="false">
+	<cffunction name="getRouteNames" access="public" returntype="string" output="false"
+		hint="Gets a list of URL routes (route names + route aliases).">
 		<cfreturn StructKeyList(variables.routes) & "," & StructKeyList(variables.routeAliases) />
 	</cffunction>
 	
@@ -597,7 +598,8 @@ Notes:
 		<cfset variables.routes = arguments.routes />
 	</cffunction>
 	
-	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false">
+	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
+		hint="Gets a route by route nam or alias.">
 		<cfargument name="routeName" type="string" required="true" />
 		
 		<cfset var routes = getRoutes() />
@@ -608,26 +610,24 @@ Notes:
 			<cfreturn variables.routes[variables.routeAliases[arguments.routeName]] />
 		<cfelse>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route named '#arguments.routeName#' could be found.'" />
+				message="No route named '#arguments.routeName#' could be found." />
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="getRouteByAlias" access="public" returntype="struct" output="false">
-		<cfargument name="routeAlias" type="string" required="true" />
-		
-		<cfset var routeAliases = variables.routeAliases />
-		
-		<cfif NOT StructKeyExists(routeAliases, arguments.routeAlias)>
-			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route with alias '#arguments.routeAlias#' could be found.'" />
-		</cfif>
-		
-		<cfreturn getRoute(routeAliases[arguments.routeAlias]) />
 	</cffunction>
 
-	<cffunction name="addRoute" access="public" returntype="void" output="false">
+	<cffunction name="addRoute" access="public" returntype="void" output="false"
+		hint="Adds a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		
+		<!--- Check for conflicts --->
+		<cfif StructKeyExists(variables.routes,  arguments.routeName)>
+			<cfthrow type="MachII.RequestManager.RouteNameConflict"
+				message="A route named '#arguments.routeName#' is already defined. Please remove the route name conflict." />
+		<cfelseif arguments.route.isUrlAliasDefined() 
+			AND StructKeyExists(variables.routeAliases, arguments.route.getUrlAlias())>
+			<cfthrow type="MachII.RequestManager.RouteNameConflict"
+				message="A route named '#arguments.routeName#' with an URL alias of '#arguments.route.getUrlAlias()#' is already defined. Please remove the route alias conflict." />			
+		</cfif>
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
 		
@@ -636,7 +636,8 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="removeRoute" access="public" returntype="void" output="false">
+	<cffunction name="removeRoute" access="public" returntype="void" output="false"
+		hint="Removes a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
 		
 		<cfset var route = getRoute(arguments.routeName) />
