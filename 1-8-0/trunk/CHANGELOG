@@ -138,3 +138,10 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
 * Logging package now uses a LoggerManager
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/295
 (2009-05-21 peterfarrell)
+
+* Many spelling / grammar fixes in comments and hints
+Special thanks to Doug Smith and Eli Tapolcsanyi at The Lampo 
+Group, Inc for contributing this patch.
+
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/321
+(2009-06-23 peterfarrell)
