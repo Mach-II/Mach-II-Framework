@@ -332,9 +332,9 @@ from the parent application.
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
 		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
 		<cfargument name="paths" type="any" required="true"
-			hint="A single string, comma-delimited list or array of web accessible paths to .js files.">
+			hint="A single string, comma-delimited list or array of web accessible paths to .js files." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline).">
+			hint="Indicates the output type for the generated HTML code (head, inline)." />
 		
 		<cfset var code = "" />
 		<cfset var i = 0 />
@@ -367,7 +367,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline).">
+			hint="Indicates the output type for the generated HTML code (head, inline)." />
 		<cfargument name="forIEVersion" type="string" required="false"
 			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
@@ -460,7 +460,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline).">
+			hint="Indicates to output type for the generated HTML code (head, inline). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
 		<cfset var code = '<link href="' & arguments.url & '"' />
@@ -485,7 +485,7 @@ from the parent application.
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline).">			
+			hint="Indicates the output type for the generated HTML code (head, inline). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var code = "" />
 		<cfset var key = "" />
