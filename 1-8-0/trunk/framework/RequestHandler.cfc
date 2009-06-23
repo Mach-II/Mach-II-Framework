@@ -95,66 +95,79 @@ Notes:
 		<cfset var exception = "" />
 		<cfset var missingEvent = "" />
 		<cfset var log = getLog() />
+		<cfset var errorFound = false />
 
-		<cfset eventArgs = getRequestEventArgs() />
-		<cfset result = parseEventParameter(eventArgs) />
-		
-		<cfif log.isInfoEnabled()>
-			<cfset log.info("Begin processing request. Incoming event arguments:", eventArgs) />
-		</cfif>
-		
-		<!--- Set the module and name for now (in case module not found we need the original event name) --->
-		<cfset setRequestEventName(result.eventName) />
-		<cfset setRequestModuleName(result.moduleName) />
-		<cfset setupEventContext(appManager) />
-		
 		<cftry>
-			<!--- Get the correct AppManager if inital event is in a module --->
-			<cfif Len(result.moduleName)>
-				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
-					<cfthrow type="MachII.framework.ModuleNotDefined"  	
-						message="Cound not announce event '#result.eventName#' because module '#result.moduleName#' is not defined." />
-				<cfelse>
-					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
-				</cfif>
+			<cfset eventArgs = getRequestEventArgs() />
+			
+			<cfcatch type="MachII.framework.UrlRouteNotDefined">
+				<cfset setupEventContext(appManager) />
+				<cfset exception = wrapException(cfcatch) />
+				<cfset getEventContext().handleException(exception, true) />
+				<cfset errorFound = true />
+			</cfcatch>
+		</cftry>		
+		
+		<cfif NOT errorFound>
+			<cfset result = parseEventParameter(eventArgs) />
+			
+			<cfif log.isInfoEnabled()>
+				<cfset log.info("Begin processing request. Incoming event arguments:", eventArgs) />
 			</cfif>
 			
-			<!--- Get default event	if no event listed --->
-			<cfif NOT Len(result.eventName)>
-				<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
-				<!--- Syncronize with new name --->
-				<cfset setRequestEventName(result.eventName) />
-			</cfif>
+			<!--- Set the module and name for now (in case module not found we need the original event name) --->
+			<cfset setRequestEventName(result.eventName) />
+			<cfset setRequestModuleName(result.moduleName) />
+			<cfset setupEventContext(appManager) />
 			
-			<!--- Check if the event exists and is publically accessible --->
-			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
-				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined."
-					detail="Check for event-handler misspellings in your XML configuration file or links." />
-			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
-				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is marked as private and not accessible via the URL."
-					detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
-			</cfif>
-			
-			<!--- Create and queue the event. --->
-			<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName) />
-			<cfset getEventQueue().put(nextEvent) />
-			<cfset setupEventContext(appManager, nextEvent) />
-			
-			<!--- Handle any errors with the exception event --->
-			<cfcatch type="any">
-				<cfif log.isWarnEnabled()>
-					<cfset log.warn("#cfcatch.message#", cfcatch) />
+			<cftry>
+				<!--- Get the correct AppManager if inital event is in a module --->
+				<cfif Len(result.moduleName)>
+					<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
+						<cfthrow type="MachII.framework.ModuleNotDefined"  	
+							message="Cound not announce event '#result.eventName#' because module '#result.moduleName#' is not defined." />
+					<cfelse>
+						<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
+					</cfif>
 				</cfif>
 				
-				<!--- Setup the eventContext again in case we are announcing an event in a module --->
-				<cfset setupEventContext(appManager) />
-				<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
-				<cfset exception = wrapException(cfcatch) />
-				<cfset getEventContext().handleException(exception, true, missingEvent) />
-			</cfcatch>
-		</cftry>
+				<!--- Get default event	if no event listed --->
+				<cfif NOT Len(result.eventName)>
+					<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
+					<!--- Syncronize with new name --->
+					<cfset setRequestEventName(result.eventName) />
+				</cfif>
+				
+				<!--- Check if the event exists and is publically accessible --->
+				<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
+					<cfthrow type="MachII.framework.EventHandlerNotDefined" 
+						message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined."
+						detail="Check for event-handler misspellings in your XML configuration file or links." />
+				<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
+					<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
+						message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is marked as private and not accessible via the URL."
+						detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
+				</cfif>
+				
+				<!--- Create and queue the event. --->
+				<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName) />
+				<cfset getEventQueue().put(nextEvent) />
+				<cfset setupEventContext(appManager, nextEvent) />
+				
+				<!--- Handle any errors with the exception event --->
+				<cfcatch type="any">
+					<cfif log.isWarnEnabled()>
+						<cfset log.warn("#cfcatch.message#", cfcatch) />
+					</cfif>
+					
+					<!--- Setup the eventContext again in case we are announcing an event in a module --->
+					<cfset setupEventContext(appManager) />
+					<cfset missingEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName, false) />
+					<cfset exception = wrapException(cfcatch) />
+					<cfset getEventContext().handleException(exception, true, missingEvent) />
+				</cfcatch>
+			</cftry>
+		</cfif>
 		
 		<!--- Start the event processing --->
 		<cfset processEvents() />

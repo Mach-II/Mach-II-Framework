@@ -371,7 +371,8 @@ Notes:
 					<cfset params = parseRoute(names[1], names) />
 				<cfelse>
 					<!--- No route found for this url --->
-					<!--- TODO: if no route was found when there was no event parameter it we might need to create a missing route exception event --->
+					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
+						message="Could not find a configured url route with the name or alias of '#names[1]#'" />
 					<cfset params = parseNonRoute(names) />
 					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
@@ -387,6 +388,9 @@ Notes:
 				AND ArrayLen(names) GTE 1>
 				<cfif ListFindNoCase(getRouteNames(), names[1])>
 					<cfset params = parseRoute(names[1], names) />
+				<cfelse>
+					<cfthrow type="MachII.framework.UrlRouteNotDefined" 
+						message="Could not find a configured url route with the name or alias of '#names[1]#'" />
 				</cfif>
 			</cfif>
 		</cfif>
