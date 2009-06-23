@@ -116,7 +116,7 @@ Notes:
 			<cfset temp.override = false />
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.AppFactory.BaseConfigFileParseException"
-					message="Exception ocurred parsing base config file '#arguments.configXmlPath#' for module '#arguments.moduleName#'. Original exception: #cfcatch.message#"
+					message="Exception occurred parsing base config file '#arguments.configXmlPath#' for module '#arguments.moduleName#'. Original exception: #cfcatch.message#"
 					detail="#cfcatch.detail#" />
 			</cfcatch>
 		</cftry>
@@ -311,7 +311,7 @@ Notes:
 			<cftry>
 				<cfset temp.configXml = XmlParse(includeXmlFile) />
 				<cfcatch type="any">
-					<cfthrow type="MachII.framework.AppFactory.IncldueConfigFileParseException"
+					<cfthrow type="MachII.framework.AppFactory.IncludeConfigFileParseException"
 						message="Exception ocurred parsing include config file '#includeFilePath#' in module '#arguments.moduleName#'. Original exception: #cfcatch.message#"
 						detail="#cfcatch.detail#" />
 				</cfcatch>

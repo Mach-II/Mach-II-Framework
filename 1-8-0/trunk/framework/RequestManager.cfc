@@ -68,7 +68,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures nothing.">
+		hint="Configures properties required to manage requests.">
 
 		<cfset var urlDelimiters = "" />	
 
@@ -210,8 +210,6 @@ Notes:
 				<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
 			</cfif>
 		</cfloop>
-		
-		<!--- <cfdump var="#getRequestHandler().getCurrentRouteParams()#"><cfabort> --->
 		
 		<cfif Len(routeName)>
 			<cfset log.debug("Building route url for route '#routeName#'") />

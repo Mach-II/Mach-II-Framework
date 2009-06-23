@@ -288,7 +288,7 @@ properties struct can take complex datatypes like structs and arrays.
 
 		<!--- Assert the environment group name --->
 		<cfset getAssert().isTrue(ListFindNoCase(variables.ENVIRONMENT_GROUP_NAMES, arguments.environmentData.environmentGroup) 
-					, "The 'environmentGroup' value is no a valid group name for environment named '#arguments.environmentName#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
+					, "The 'environmentGroup' value is not a valid group name for environment named '#arguments.environmentName#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
 					, "Valid environment groups: #variables.ENVIRONMENT_GROUP_NAMES#") />
 		
 		<!--- Transform list to an array of servers --->

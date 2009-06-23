@@ -178,7 +178,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void"
-		hint="Performs deconiguration logic.">
+		hint="Performs deconfiguration logic.">
 
 		<cfset var aPlugin = 0 />
 		<cfset var i = 0 />

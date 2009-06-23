@@ -207,7 +207,7 @@ Notes:
 			<cfset condition = Trim(arguments.commandNode.xmlAttributes["condition"]) />	
 		</cfif>
 		
-		<!--- Ensure there are not bother criteria (attribute) and criterion nodes --->
+		<!--- Ensure there are not both criteria (attribute) and criterion nodes --->
 		<cfif Len(criteria) AND ArrayLen(criterionNodes)>
 			<cfthrow type="MachII.CommandLoaderBase.InvalidCacheClearCriteria"
 				message="When using cache-clear you must use either all nested criterion elements or the 'criteria' attribute."

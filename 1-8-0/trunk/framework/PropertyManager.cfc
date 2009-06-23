@@ -269,7 +269,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="deconfigure" access="public" returntype="void"
-		hint="Preforms deconfiguration logic.">
+		hint="Performs deconfiguration logic.">
 		
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />

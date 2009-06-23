@@ -299,7 +299,7 @@ from the parent application.
 		<cfargument name="assetPackageNames" type="any" required="true"
 			hint="A list or array of the asset packages names to add." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline)." />
+			hint="Indicates tthe output type for the generated HTML code (head, inline)." />
 		
 		<cfset var package = "" />
 		<cfset var code = "" />
@@ -334,7 +334,7 @@ from the parent application.
 		<cfargument name="paths" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible paths to .js files.">
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline).">
+			hint="Indicates the output type for the generated HTML code (head, inline).">
 		
 		<cfset var code = "" />
 		<cfset var i = 0 />
@@ -367,7 +367,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline).">
+			hint="Indicates the output type for the generated HTML code (head, inline).">
 		<cfargument name="forIEVersion" type="string" required="false"
 			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
@@ -467,7 +467,7 @@ from the parent application.
 		<cfset var key = "" />
 		
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
-		<cfset StructAppend(arguments.attributes, resolveMimeTypeAndGetData(arguments.type), false) />
+		<cfset StructAppend(arguments.attributes, mimeTypeData, false) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
 			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
@@ -485,7 +485,7 @@ from the parent application.
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline).">			
+			hint="Indicates the output type for the generated HTML code (head, inline).">			
 		
 		<cfset var code = "" />
 		<cfset var key = "" />

@@ -190,6 +190,10 @@ See that file header for configuration of filter criteria.
 			AND getLogAdapter().isLoggingDataDefined()
 			AND hasReachedLoggingLevelEmailTrigger()>
 			
+			<!---
+			This variable is used by the email template file which is included
+			and therefore needs to remain as a var'ed local variable.
+			--->
 			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<!--- Save the body of the email --->

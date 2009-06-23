@@ -141,7 +141,7 @@ Notes:
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		
-		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
+		<!--- Clear the event queue since we do not want the Application.cfc/cfm error
 			handling to catch a cfabort --->
 		<cfset clearEventQueue() />
 		

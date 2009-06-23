@@ -160,7 +160,7 @@ See individual caching strategies for more information on configuration.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
-		<!--- Decide the logging enabled mode --->
+		<!--- Decide the caching enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "cachingEnabled")>
 			<cftry>
 				<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
