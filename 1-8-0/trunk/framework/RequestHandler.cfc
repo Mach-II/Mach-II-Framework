@@ -129,10 +129,12 @@ Notes:
 			<!--- Check if the event exists and is publically accessible --->
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined." />
+					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined."
+					detail="Check for event-handler misspellings in your XML configuration file or links." />
 			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not accessible." />
+					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is marked as private and not accessible via the URL."
+					detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
 			</cfif>
 			
 			<!--- Create and queue the event. --->
