@@ -149,7 +149,7 @@ properties struct can take complex datatypes like structs and arrays.
 		
 		<!--- Synchronize environment group names --->
 		<cfif getAppManager().inModule()>
-			<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = getAppManager().getEnvironmentGroupNames() />
+			<cfset variables.ENVIRONMENT_GROUP_NAMES = getAppManager().getEnvironmentGroupNames() />
 		<cfelse>
 			<cfset getAppManager().setEnvironmentGroupNames(variables.ENVIRONMENT_GROUP_NAMES) />
 		</cfif>
