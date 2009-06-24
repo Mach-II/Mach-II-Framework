@@ -208,7 +208,7 @@ index.cfm/product/A12345/fancy/
 		</cfif>
 		
 		<!--- Build rewrite rules --->
-		<cfset contents.append('#### <cfsetting enabledCfoutputOnly="true"/>' & lf) />
+		<cfset contents.append('#### <cfsetting enablecfoutputonly="true"/>' & lf) />
 		<cfset contents.append("#### Date Generated: #dateFormat(now(), "m/d/yyyy")# #timeFormat(now(), "h:mm tt")#" & lf) />
 		<cfset contents.append("#### Module Name: #moduleName#" & lf) />
 		<cfset contents.append(lf) />
@@ -220,7 +220,7 @@ index.cfm/product/A12345/fancy/
 		</cfloop>
 		
 		<cfset contents.append(lf) />
-		<cfset contents.append('#### <cfsetting enabledCfoutputOnly="false"/>' & lf) />
+		<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/>' & lf) />
 		
 		<!--- Write to file --->
 		<cftry>
