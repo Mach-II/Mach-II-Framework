@@ -409,7 +409,7 @@ Notes:
 		
 		<cfset result.eventName = getExceptionEventName() />
 		
-		<cftry>
+		<cftry>			
 			<!--- Create eventArg data --->			
 			<cfset eventArgs.exception = arguments.exception />
 			<cfif hasCurrentEvent()>

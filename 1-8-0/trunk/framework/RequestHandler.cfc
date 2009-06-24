@@ -96,9 +96,10 @@ Notes:
 		<cfset var missingEvent = "" />
 		<cfset var log = getLog() />
 
-		<!--- We have to default the module and event name in case the call to getRequestEventArgs()
-			throws a UrlRouteNotDefined exception
-		 --->
+		<!---
+		We have to default the module and event name in case the call to 
+		getRequestEventArgs() throws a UrlRouteNotDefined exception
+		--->
 		<cfset result.eventName = "" />
 		<cfset result.moduleName = "" />
 
@@ -135,11 +136,11 @@ Notes:
 			<!--- Check if the event exists and is publically accessible --->
 			<cfif NOT appManager.getEventManager().isEventDefined(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is not defined."
-					detail="Check for event-handler misspellings in your XML configuration file or links." />
+					message="Event-handler for event '#result.eventName#' in module '#result.moduleName#' is not defined."
+					detail="Check that the event-handler exists and for misspellings in your links or XML configuration file." />
 			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
-					message="Event-handler for event '#result.eventName#', module '#result.moduleName#' is marked as private and not accessible via the URL."
+					message="Event-handler for event '#result.eventName#' in module '#result.moduleName#' is marked as private and not accessible via the URL."
 					detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
 			</cfif>
 			
@@ -151,7 +152,7 @@ Notes:
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
 				<cfif log.isWarnEnabled()>
-					<cfset log.warn("#cfcatch.message#", cfcatch) />
+					<cfset log.warn(getAppManager().getUtils().buildLogMessageFromCfCatch(cfcatch), cfcatch) />
 				</cfif>
 				
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
@@ -161,7 +162,8 @@ Notes:
 					result.eventName, 
 					eventArgs, 
 					result.eventName, 
-					result.moduleName, false) />
+					result.moduleName, 
+					false) />
 				<cfset exception = wrapException(cfcatch) />
 				<cfset getEventContext().handleException(exception, true, missingEvent) />
 			</cfcatch>
@@ -254,8 +256,7 @@ Notes:
 			</cfloop>
 			
 			<cfif hasMoreEvents()>
-				<cfthrow
-					type="MachII.framework.MaxEventsExceededDuringException"
+				<cfthrow type="MachII.framework.MaxEventsExceededDuringException"
 					message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events was exceeded again during the handling of the exception."
 					detail="Please check your exception handling since it initiated an infinite loop." />
 			</cfif>
@@ -263,8 +264,7 @@ Notes:
 			wrong with the developer's exception handling, so throw an exception --->
 		<cfelseif getIsException() AND hasMoreEvents()>
 			<cfset exception = getEventContext().getCurrentEvent().getArg("exception").getCaughtException() />
-			<cfthrow
-				type="MachII.framework.MaxEventsExceededDuringException"
+			<cfthrow type="MachII.framework.MaxEventsExceededDuringException"
 				message="The maximum number of events (#getMaxEvents()#) has been exceeded. An exception was generated, but the maximum number of events was exceeded again during the handling of the exception."
 				detail="The last exception was '#exception.detail#' which occurred on line #exception.tagContext[1].line# in '#exception.tagContext[1].template#'." />
 		</cfif>
@@ -274,7 +274,7 @@ Notes:
 		<cfset pluginManager.postProcess(getEventContext()) />
 		
 		<cfif log.isInfoEnabled()>
-			<cfset log.Info("End processing request.") />
+			<cfset log.info("End processing request.") />
 		</cfif>
 		
 		<!--- Run On-Request-End callbacks --->
@@ -292,9 +292,8 @@ Notes:
 	<cffunction name="handleNextEvent" access="private" returntype="void" output="true"
 		hint="Handles the next event in the queue.">
 
-		<cfset var exception = 0 />
+		<cfset var exception = "" />
 		<cfset var log = getLog() />
-		<cfset var message = "" />
 		
 		<cftry>
 			<cfset incrementEventCount() />
@@ -308,26 +307,7 @@ Notes:
 					<cfrethrow />
 				<cfelse>
 					<cfif log.isFatalEnabled()>
-						<cfset message = "message: " & cfcatch.message />
-						<cfset message = message & " || detail: " & cfcatch.detail />
-						
-						<cfif StructKeyExists(cfcatch, "template")>
-							<cfset message = message & " ||  template: " & cfcatch.template />
-							<cfif StructKeyExists(cfcatch, "line")>
-								<cfset message = message & " at line " & cfcatch.line />
-							</cfif>
-						</cfif>
-						
-						<cfif cfcatch.type EQ "database">
-							<cfif StructKeyExists(cfcatch, "datasource")>
-								<cfset message = message & " || datasource: " & cfcatch.datasource />
-							</cfif>
-							<cfif StructKeyExists(cfcatch, "sql")>
-								<cfset message = message & " || sql: " & cfcatch.sql />
-							</cfif>
-						</cfif>
-						
-						<cfset log.fatal(message, cfcatch) />
+						<cfset log.fatal(getAppManager().getUtils().buildLogMessageFromCfCatch(cfcatch), cfcatch) />
 					</cfif>
 					<cfset exception = wrapException(cfcatch) />
 					<cfset getEventContext().handleException(exception, true) />

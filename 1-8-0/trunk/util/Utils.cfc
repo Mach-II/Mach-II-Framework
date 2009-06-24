@@ -253,5 +253,37 @@ Notes:
 			</cfif>
 		</cfloop>
 	</cffunction>
+	
+	<cffunction name="buildLogMessageFromCfCatch" access="public" returntype="string" output="false"
+		hint="Builds a log message from a cfcatch.">
+		<cfargument name="catch" type="any" required="true"
+			hint="A cfcatch to build a message with." />
+		
+		<cfset var message = "" />
+
+		<cfset message = "type: " & arguments.catch.type />
+		<cfset message = message & " || message: " & arguments.catch.message />
+		<cfset message = message & " || detail: " & arguments.catch.detail />
+		
+		<!--- Set additional information on the template if available --->
+		<cfif StructKeyExists(arguments.catch, "template")>
+			<cfset message = message & " ||  template: " & arguments.catch.template />
+			<cfif StructKeyExists(arguments.catch, "line")>
+				<cfset message = message & " at line " & arguments.catch.line />
+			</cfif>
+		</cfif>
+		
+		<!--- Set additional information on the database if available --->
+		<cfif arguments.catch.type EQ "database">
+			<cfif StructKeyExists(arguments.catch, "datasource")>
+				<cfset message = message & " || datasource: " & arguments.catch.datasource />
+			</cfif>
+			<cfif StructKeyExists(arguments.catch, "sql")>
+				<cfset message = message & " || sql: " & arguments.catch.sql />
+			</cfif>
+		</cfif>
+		
+		<cfreturn message />
+	</cffunction>
 
 </cfcomponent>
