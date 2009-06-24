@@ -369,10 +369,10 @@ Notes:
 					<cfset params = parseRoute(names[1], names) />
 				<cfelse>
 					<!--- No route found for this url --->
+					<!--- <cfset params = parseNonRoute(names) />
+					<cfset getRequestHandler().setCurrentSESParams(params) /> --->
 					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
 						message="Could not find a configured url route with the name or alias of '#names[1]#'" />
-					<cfset params = parseNonRoute(names) />
-					<cfset getRequestHandler().setCurrentSESParams(params) />
 				</cfif>
 			</cfif>	
 		<cfelseif NOT getParseSes()>
