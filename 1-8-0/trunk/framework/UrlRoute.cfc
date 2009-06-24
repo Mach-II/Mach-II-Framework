@@ -71,7 +71,7 @@ Notes:
 		
 		<cfset var params = parseRouteParams(arguments.urlElements) />
 
-		<cfif getModuleName() eq "">
+		<cfif getModuleName() EQ "">
 			<cfset params[arguments.eventParameter] = getEventName() />
 		<cfelse>
 			<cfset params[arguments.eventParameter] = getModuleName() & arguments.moduleDelimiter & getEventName() />
@@ -89,8 +89,9 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="parseRouteParams" access="public" returntype="struct" output="false"
-		hint="Used in the RequestManager to form the current route url for buildCurrentUrl().">
-		<cfargument name="urlElements" type="array" required="true" />
+		hint="Used in the RequestManager to form the current route url for buildCurrentUrl() and to parse params on an incoming route invocation.">
+		<cfargument name="urlElements" type="array" required="true"
+			hint="Array of URL elements built from the available path_info." />
 		
 		<cfset var params = StructNew() />
 		<cfset var requiredParameters = getRequiredParameters() />
@@ -111,13 +112,18 @@ Notes:
 		
 		<cfif ArrayLen(arguments.urlElements) GTE 1>
 			
+			<!--- Parse the URL elements for required parameters, when required parameters run out continue with optional parameters --->
 			<cfloop from="1" to="#ArrayLen(arguments.urlElements)#" index="i">
+				<!--- Builds all the required parameters from the known URL elements --->
 				<cfif ArrayLen(requiredParameters) GTE i>
 					<cfset params[ListGetAt(requiredParameters[i], 1, ":")] = arguments.urlElements[i] />
-				<cfelse>
+				
+				<!--- Continues to build with optional parameters from the remaining known URL elements --->
+				<cfelseif ArrayLen(optionalParameters) GTE i - ArrayLen(requiredParameters)>
 					<!--- <cftrace text="element #i#, ArraLen(requiredParameters) = #ArrayLen(requiredParameters)#" /> --->
-					<cfset params[ListGetAt(optionalParameters[i - ListArray(requiredParameters)], 1, ":")] = arguments.urlElements[i] />
+					<cfset params[ListGetAt(optionalParameters[i - ArrayLen(requiredParameters)], 1, ":")] = arguments.urlElements[i] />
 				</cfif>
+				
 				<!--- <cftrace text="i = #i#"> --->
 			</cfloop>
 			
@@ -130,14 +136,16 @@ Notes:
 			--->
 		</cfif>
 	
-		<!--- Total Processed Args:
+		<!---
+		Debugging code: Please do not uncomment
+		Total Processed Args:
 		<cfdump var="#totalArgsProcessed#">
 		Total Arg Count:
 		<cfdump var="#totalArgCount#">
 		Loop:
 		<cfdump var="#totalArgCount - totalArgsProcessed + 1#" />
-		<cfabort> --->
-		
+		<cfabort>
+		--->
 	
 		<!--- Handle optionalArguments and add in defaults --->	
 		<cfif totalArgsProcessed LT totalArgCount>
