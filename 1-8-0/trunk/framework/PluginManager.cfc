@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -140,18 +140,15 @@ Notes:
 				<cfset plugin = CreateObject("component", pluginType) />
 				<cfset plugin.init(getAppManager(), pluginParams) />
 
-				<cfcatch type="expression">
-					<cfthrow type="MachII.framework.PluginSyntaxException"
-						message="Mach-II could not register a plugin with type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-						detail="#cfcatch.detail#" />
-				</cfcatch>		
 				<cfcatch type="any">
-					<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ pluginType>
 						<cfthrow type="MachII.framework.CannotFindPlugin"
 							message="Cannot find a CFC with the type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
-							detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file.">
+							detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file." />
 					<cfelse>
-						<cfrethrow />
+						<cfthrow type="MachII.framework.PluginSyntaxException"
+							message="Mach-II could not register a plugin with type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+							detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 					</cfif>
 				</cfcatch>
 			</cftry>
@@ -299,18 +296,15 @@ Notes:
 			<cfset newPlugin = CreateObject("component", baseProxy.getType()) />
 			<cfset newPlugin.init(getAppManager(), baseProxy.getOriginalParameters()) />
 
-			<cfcatch type="expression">
-				<cfthrow type="MachII.framework.PluginSyntaxException"
-					message="Mach-II could not register an plugin with type of '#baseProxy.getType()#' for the plugin named '#arguments.pluginName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-					detail="#cfcatch.detail#" />
-			</cfcatch>	
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ baseProxy.getType()>
 					<cfthrow type="MachII.framework.CannotFindPlugin"
 						message="Cannot find a CFC with the type of '#baseProxy.getType()#' for the plugin named '#arguments.pluginName#' in module named '#getAppManager().getModuleName()#'."
-						detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file.">
+						detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file." />
 				<cfelse>
-					<cfrethrow />
+					<cfthrow type="MachII.framework.PluginSyntaxException"
+						message="Mach-II could not register a plugin with type of '#baseProxy.getType()#' for the plugin named '#arguments.pluginName#' in module named '#getAppManager().getModuleName()#'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfif>
 			</cfcatch>
 		</cftry>

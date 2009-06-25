@@ -143,18 +143,15 @@ Notes:
 					<cfset listener = CreateObject("component", listenerType) />
 					<cfset listener.init(getAppManager(), listenerParams) />
 					
-					<cfcatch type="expression">
-						<cfthrow type="MachII.framework.ListenerSyntaxException"
-							message="Mach-II could not register a listener with type of '#listenerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-							detail="#cfcatch.detail#" />
-					</cfcatch>
 					<cfcatch type="any">
-						<cfif StructKeyExists(cfcatch, "missingFileName")>
+						<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ listenerType>
 							<cfthrow type="MachII.framework.CannotFindListener"
 								message="Cannot find a listener CFC with type of '#listenerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'."
 								detail="Please check that this listener exists and that there is not a misconfiguration in the XML configuration file." />
 						<cfelse>
-							<cfrethrow />
+							<cfthrow type="MachII.framework.ListenerSyntaxException"
+								message="Mach-II could not register a listener with type of '#listenerType#' for the listener named '#listenerName#' in module named '#getAppManager().getModuleName()#'."
+								detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 						</cfif>						
 					</cfcatch>
 				</cftry>
@@ -295,19 +292,16 @@ Notes:
 			<cfset newListener = CreateObject("component", baseProxy.getType()) />
 			<cfset newListener.init(getAppManager(), baseProxy.getOriginalParameters()) />
 			
-			<cfcatch type="expression">
-				<cfthrow type="MachII.framework.ListenerSyntaxException"
-					message="Mach-II could not register a listener with type of '#baseProxy.getType()#' for the listener named '#arguments.listenerName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-					detail="#cfcatch.detail#" />
-			</cfcatch>
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ baseProxy.getType()>
 					<cfthrow type="MachII.framework.CannotFindListener"
 						message="Cannot find a listener CFC with type of '#baseProxy.getType()#' for the listener named '#arguments.listenerName#' in module named '#getAppManager().getModuleName()#'."
 						detail="Please check that this listener exists and that there is not a misconfiguration in the XML configuration file." />
 				<cfelse>
-					<cfrethrow />
-				</cfif>						
+					<cfthrow type="MachII.framework.ListenerSyntaxException"
+						message="Mach-II could not register a listener with type of '#baseProxy.getType()#' for the listener named '#arguments.listenerName#' in module named '#getAppManager().getModuleName()#'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+				</cfif>
 			</cfcatch>
 		</cftry>
 		

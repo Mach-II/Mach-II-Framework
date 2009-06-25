@@ -134,18 +134,15 @@ Notes:
 					<cfset filter = CreateObject("component", filterType) />
 					<cfset filter.init(getAppManager(), filterParams) />
 
-					<cfcatch type="expression">
-						<cfthrow type="MachII.framework.EventFilterSyntaxException"
-							message="Mach-II could not register an event-filter with type of '#filterType#' for the event-filter named '#filterName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-							detail="#cfcatch.detail#" />
-					</cfcatch>	
 					<cfcatch type="any">
-						<cfif StructKeyExists(cfcatch, "missingFileName")>
+						<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ filterType>
 							<cfthrow type="MachII.framework.CannotFindEventFilter"
 								message="Cannot find a CFC with the type of '#filterType#' for the event-filter named '#filterName#' in module named '#getAppManager().getModuleName()#'."
-								detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file.">
+								detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file." />
 						<cfelse>
-							<cfrethrow />
+							<cfthrow type="MachII.framework.EventFilterSyntaxException"
+								message="Mach-II could not register an event-filter with type of '#filterType#' for the event-filter named '#filterName#' in module named '#getAppManager().getModuleName()#'."
+								detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 						</cfif>
 					</cfcatch>
 				</cftry>
@@ -251,18 +248,15 @@ Notes:
 			<cfset newFilter = CreateObject("component", baseProxy.getType()) />
 			<cfset newFilter.init(getAppManager(), baseProxy.getOriginalParameters()) />
 
-			<cfcatch type="expression">
-				<cfthrow type="MachII.framework.EventFilterSyntaxException"
-					message="Mach-II could not register an event-filter with type of '#baseProxy.getType()#' for the event-filter named '#arguments.filterName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-					detail="#cfcatch.detail#" />
-			</cfcatch>	
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ baseProxy.getType()>
 					<cfthrow type="MachII.framework.CannotFindEventFilter"
 						message="Cannot find a CFC with the type of '#baseProxy.getType()#' for the event-filter named '#arguments.filterName#' in module named '#getAppManager().getModuleName()#'."
-						detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file.">
+						detail="Please check that a event-filter exists and that there is not a misconfiguration in the XML configuration file." />
 				<cfelse>
-					<cfrethrow />
+					<cfthrow type="MachII.framework.EventFilterSyntaxException"
+						message="Mach-II could not register an event-filter with type of '#baseProxy.getType()#' for the event-filter named '#arguments.filterName#' in module named '#getAppManager().getModuleName()#'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfif>
 			</cfcatch>
 		</cftry>

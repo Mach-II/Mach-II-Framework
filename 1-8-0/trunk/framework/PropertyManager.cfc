@@ -145,18 +145,15 @@ Notes:
 						<cfset propertyValue = CreateObject("component", propertyType) />
 						<cfset propertyValue.init(getAppManager(), propertyParams) />
 
-						<cfcatch type="expression">
-							<cfthrow type="MachII.framework.PropertySyntaxException"
-								message="Mach-II could not register a property with type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-								detail="#cfcatch.detail#" />
-						</cfcatch>
 						<cfcatch type="any">
-							<cfif StructKeyExists(cfcatch, "missingFileName")>
+							<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ propertyType>
 								<cfthrow type="MachII.framework.CannotFindProperty"
 									message="Cannot find a CFC with the type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'."
-									detail="Please check that a property exists and that there is not a misconfiguration in the XML configuration file.">
+									detail="Please check that a property exists and that there is not a misconfiguration in the XML configuration file." />
 							<cfelse>
-								<cfrethrow />
+								<cfthrow type="MachII.framework.PropertySyntaxException"
+									message="Mach-II could not register a property with type of '#propertyType#' for the property named '#propertyName#' in module named '#getAppManager().getModuleName()#'."
+									detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 							</cfif>
 						</cfcatch>
 					</cftry>
@@ -416,18 +413,15 @@ Notes:
 			<cfset newProperty = CreateObject("component", baseProxy.getType()) />
 			<cfset newProperty.init(getAppManager(), baseProxy.getOriginalParameters()) />
 			
-			<cfcatch type="expression">
-				<cfthrow type="MachII.framework.PropertySyntaxException"
-					message="Mach-II could not register a property with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-					detail="#cfcatch.detail#" />
-			</cfcatch>
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ baseProxy.getType()>
 					<cfthrow type="MachII.framework.CannotFindProperty"
 						message="Cannot find a listener CFC with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'."
 						detail="Please check that this property exists and that there is not a misconfiguration in the XML configuration file." />
 				<cfelse>
-					<cfrethrow />
+					<cfthrow type="MachII.framework.PropertySyntaxException"
+						message="Mach-II could not register a property with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfif>						
 			</cfcatch>
 		</cftry>
