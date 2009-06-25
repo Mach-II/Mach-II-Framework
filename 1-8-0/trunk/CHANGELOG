@@ -145,3 +145,11 @@ Group, Inc for contributing this patch.
 
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/321
 (2009-06-23 peterfarrell)
+
+* Improved exception handling logic when loading Mach-II extended components
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/331
+(2009-06-24 peterfarrell)
+
+* Improved logging message when logging data from cftry/cfcatch blocks
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/326
+(2009-06-24 peterfarrell)
