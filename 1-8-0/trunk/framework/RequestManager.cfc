@@ -319,7 +319,7 @@ Notes:
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
 		<cfargument name="routeName" type="string" required="true"
-			hint="Name of the event to build the url with." />
+			hint="Name or Url alias of the route to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="queryStringParameters" type="any" required="false" default=""
@@ -364,15 +364,14 @@ Notes:
 				<cfset params = parseNonRoute(names) />
 				<cfset getRequestHandler().setCurrentSESParams(params) />
 			<cfelse>
-				<!--- No event parameter was found so check to see if a route name is present --->
-				<cfif ListFindNoCase(getRouteNames(), names[1])>
-					<cfset params = parseRoute(names[1], names) />
+				<!--- No event parameter was found so check to see if a route url alias is present --->
+				<cfif StructKeyExists(variables.routeAliases, names[1])>
+					<cfset params = parseRoute(variables.routeAliases[names[1]], names) />
 				<cfelse>
 					<!--- No route found for this url --->
-					<!--- <cfset params = parseNonRoute(names) />
-					<cfset getRequestHandler().setCurrentSESParams(params) /> --->
 					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
-						message="Could not find a configured url route with the name or alias of '#names[1]#'" />
+						message="Could not find a configured url route with the url alias of '#names[1]#'"
+						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl()." />
 				</cfif>
 			</cfif>	
 		<cfelseif NOT getParseSes()>
@@ -587,11 +586,6 @@ Notes:
 		<cfreturn variables.postRedirectCallbacks />
 	</cffunction>
 	
-	<cffunction name="getRouteNames" access="public" returntype="string" output="false"
-		hint="Gets a list of URL routes (route names + route aliases).">
-		<cfreturn StructKeyList(variables.routes) & "," & StructKeyList(variables.routeAliases) />
-	</cffunction>
-	
 	<cffunction name="getRoutes" access="public" returntype="struct" output="false">
 		<cfreturn variables.routes />
 	</cffunction>
@@ -601,21 +595,21 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
-		hint="Gets a route by route nam or alias.">
-		<cfargument name="routeName" type="string" required="true" />
+		hint="Gets a route by route name.">
+		<cfargument name="routeNameOrUrlAlias" type="string" required="true" />
 		
 		<cfset var routes = getRoutes() />
 		
-		<cfif StructKeyExists(routes, arguments.routeName)>
-			<cfreturn variables.routes[arguments.routeName] />
-		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeName)>
-			<cfreturn variables.routes[variables.routeAliases[arguments.routeName]] />
+		<cfif StructKeyExists(routes, arguments.routeNameOrUrlAlias)>
+			<cfreturn variables.routes[arguments.routeNameOrUrlAlias] />
+		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeNameOrUrlAlias)>
+			<cfreturn variables.routes[variables.routeAliases[arguments.routeNameOrUrlAlias]] />
 		<cfelse>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No route named '#arguments.routeName#' could be found." />
+				message="No named route or route Url alias of '#arguments.routeName#' could be found." />
 		</cfif>
 	</cffunction>
-
+	
 	<cffunction name="addRoute" access="public" returntype="void" output="false"
 		hint="Adds a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
