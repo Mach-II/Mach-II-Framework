@@ -166,8 +166,8 @@ See individual caching strategies for more information on configuration.
 				<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
 				<cfcatch type="MachII.util.IllegalArgument">
 					<cfthrow type="MachII.caching.InvalidEnvironmentConfiguration"
-						message="#cfcatch.message#"
-						detail="This misconfiguration error occurred in cache strategy named '#arguments.cacheName#' in module named '#moduleName#'." />
+						message="This misconfiguration error occurred in cache strategy named '#arguments.cacheName#' in module named '#moduleName#'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfcatch>
 				<cfcatch type="any">
 					<cfrethrow />
@@ -244,8 +244,8 @@ See individual caching strategies for more information on configuration.
 			<cfset variables.cachingEnabled = decidedCachingEnabled(arguments.cachingEnabled) />
 			<cfcatch type="MachII.util.IllegalArgument">
 				<cfthrow type="MachII.caching.InvalidEnvironmentConfiguration"
-					message="#cfcatch.message#"
-					detail="This misconfiguration error is defined in the property-wide 'cachingEnabled' parameter in the caching property in module named '#getModuleName()#'." />
+					message="This misconfiguration error is defined in the property-wide 'cachingEnabled' parameter in the caching property in module named '#getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 			<cfcatch type="any">
 				<cfrethrow />

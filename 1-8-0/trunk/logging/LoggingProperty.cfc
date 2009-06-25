@@ -293,8 +293,8 @@ will bind to root parameter values.
 				<cfset arguments.parameters["loggingEnabled"] = decidedLoggingEnabled(arguments.parameters["loggingEnabled"]) />
 				<cfcatch type="MachII.util.IllegalArgument">
 					<cfthrow type="MachII.logging.InvalidEnvironmentConfiguration"
-						message="#cfcatch.message#"
-						detail="This misconfiguration error occurred in logger named '#arguments.loggerName#' in module named '#moduleName#'." />
+						message="This misconfiguration error occurred in logger named '#arguments.loggerName#' in module named '#moduleName#'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfcatch>
 				<cfcatch type="any">
 					<cfrethrow />
@@ -356,8 +356,8 @@ will bind to root parameter values.
 			<cfset variables.loggingEnabled = decidedLoggingEnabled(arguments.loggingEnabled) />
 			<cfcatch type="MachII.util.IllegalArgument">
 				<cfthrow type="MachII.logging.InvalidEnvironmentConfiguration"
-					message="#cfcatch.message#"
-					detail="This misconfiguration error is defined in the property-wide 'loggingEnabled' parameter in the logging property in module named '#getModuleName()#'." />
+					message="This misconfiguration error is defined in the property-wide 'loggingEnabled' parameter in the logging property in module named '#getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 			<cfcatch type="any">
 				<cfrethrow />

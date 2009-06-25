@@ -542,7 +542,7 @@ Notes:
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionStartPluginPointException"
 					message="An exception occured in the onSessionStart point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
-					detail="Orginal message: #cfcatch.message# | Orginal detail: #cfcatch.detail#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -570,7 +570,7 @@ Notes:
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
 					message="An exception occured in the onSessionEnd point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
-					detail="Orginal message: #cfcatch.message# | Orginal detail: #cfcatch.detail#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>

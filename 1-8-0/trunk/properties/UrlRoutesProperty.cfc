@@ -231,7 +231,7 @@ index.cfm/product/A12345/fancy/
 			<cfcatch type="all">
 				<cfthrow type="MachII.properties.UrlRoutesProperty.RulesWritePermissions"
 					message="Cannot write rewrite rules file to '#configFilePath#'. Does your CFML engine have write permissions to this directory?"
-					detail="Original message: #cfcatch.message#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>

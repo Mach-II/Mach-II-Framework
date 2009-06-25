@@ -121,8 +121,8 @@ Notes:
 			<cfset addCacheHandler(cacheHandler, arguments.override) />
 			<cfcatch type="any">
 				<cfthrow type="#cfcatch.type#"
-					message="#cfcatch.message#" 
-					detail="This exception occurred in #arguments.parentHandlerType# named '#arguments.parentHandlerName#'. #cfcatch.detail#" />
+					message="An exception occurred in #arguments.parentHandlerType# named '#arguments.parentHandlerName#'." 
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 		

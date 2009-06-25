@@ -334,8 +334,8 @@ application.serviceFactory_account variable.
 			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
 			<cfcatch type="any">
 				<cfthrow type="MachII.properties.ColdSpringProperty.LoadBeansFromXmlFileException"
-					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'. Orginal exception: #cfcatch.message#"
-					detail="#cfcatch.detail#" />
+					message="A ColdSpring load XML file exception occurred in module '#getAppManager().getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 
@@ -800,7 +800,7 @@ application.serviceFactory_account variable.
 			<cfcatch type="all">
 				<cfthrow type="MachII.properties.ColdspringProperty.CFCWritePermissions"
 					message="Cannot write temporary CFC for autowiring to '#cfcDirectory#'. Does your CFML engine have write permissions to this directory?"
-					detail="Original message: #cfcatch.message#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 		

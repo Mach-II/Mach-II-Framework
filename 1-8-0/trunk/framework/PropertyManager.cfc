@@ -420,7 +420,7 @@ Notes:
 						detail="Please check that this property exists and that there is not a misconfiguration in the XML configuration file." />
 				<cfelse>
 					<cfthrow type="MachII.framework.PropertySyntaxException"
-						message="Mach-II could not register a property with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
+						message="Mach-II could not register a property with type of '#baseProxy.getType()#' for the property named '#arguments.propertyName#' in module named '#getAppManager().getModuleName()#'."
 						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfif>						
 			</cfcatch>

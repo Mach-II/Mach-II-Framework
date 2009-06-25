@@ -165,18 +165,15 @@ Notes:
 				<cfset viewLoader = CreateObject("component", viewLoaderType) />
 				<cfset viewLoader.init(getAppManager(), viewLoaderParams) />
 				
-				<cfcatch type="expression">
-					<cfthrow type="MachII.framework.ViewLoaderSyntaxException"
-						message="Mach-II could not register a view-loader with type of '#viewLoaderType#' for a view-loader in module named '#getAppManager().getModuleName()#'. #cfcatch.message#"
-						detail="#cfcatch.detail#" />
-				</cfcatch>
 				<cfcatch type="any">
-					<cfif StructKeyExists(cfcatch, "missingFileName")>
+					<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ viewLoaderType>
 						<cfthrow type="MachII.framework.CannotFindViewLoader"
 							message="Cannot find a view-loader CFC with type of '#viewLoaderType#' for a view-loader in module named '#getAppManager().getModuleName()#'."
 							detail="Please check that this view-loader exists and that there is not a misconfiguration in the XML configuration file." />
 					<cfelse>
-						<cfrethrow />
+						<cfthrow type="MachII.framework.ViewLoaderSyntaxException"
+							message="Mach-II could not register a view-loader with type of '#viewLoaderType#' for a view-loader in module named '#getAppManager().getModuleName()#'."
+							detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 					</cfif>						
 				</cfcatch>
 			</cftry>
