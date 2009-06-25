@@ -152,7 +152,7 @@ Notes:
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
 				<cfif log.isWarnEnabled()>
-					<cfset log.warn(getAppManager().getUtils().buildLogMessageFromCfCatch(cfcatch), cfcatch) />
+					<cfset log.warn(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
 				</cfif>
 				
 				<!--- Setup the eventContext again in case we are announcing an event in a module --->
@@ -307,7 +307,7 @@ Notes:
 					<cfrethrow />
 				<cfelse>
 					<cfif log.isFatalEnabled()>
-						<cfset log.fatal(getAppManager().getUtils().buildLogMessageFromCfCatch(cfcatch), cfcatch) />
+						<cfset log.fatal(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
 					</cfif>
 					<cfset exception = wrapException(cfcatch) />
 					<cfset getEventContext().handleException(exception, true) />

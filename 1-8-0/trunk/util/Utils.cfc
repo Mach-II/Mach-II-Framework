@@ -254,20 +254,26 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="buildLogMessageFromCfCatch" access="public" returntype="string" output="false"
-		hint="Builds a log message from a cfcatch.">
+	<cffunction name="buildMessageFromCfCatch" access="public" returntype="string" output="false"
+		hint="Builds a message string from a cfcatch.">
 		<cfargument name="catch" type="any" required="true"
 			hint="A cfcatch to build a message with." />
 		
 		<cfset var message = "" />
 
-		<cfset message = "type: " & arguments.catch.type />
-		<cfset message = message & " || message: " & arguments.catch.message />
-		<cfset message = message & " || detail: " & arguments.catch.detail />
+		<!--- Set always available cfcatch data points --->
+		<cfset message = "Type: " & arguments.catch.type />
+		<cfset message = message & " || Message: " & arguments.catch.message />
+		<cfset message = message & " || Detail: " & arguments.catch.detail />
+		
+		<!--- Set additional information on missing file name if available --->
+		<cfif StructKeyExists(arguments.catch, "missingFileName")>
+			<cfset message = message & " || Missing File Name: " & arguments.catch.missingFileName />
+		</cfif>
 		
 		<!--- Set additional information on the template if available --->
 		<cfif StructKeyExists(arguments.catch, "template")>
-			<cfset message = message & " ||  template: " & arguments.catch.template />
+			<cfset message = message & " ||  Template: " & arguments.catch.template />
 			<cfif StructKeyExists(arguments.catch, "line")>
 				<cfset message = message & " at line " & arguments.catch.line />
 			</cfif>
@@ -276,10 +282,10 @@ Notes:
 		<!--- Set additional information on the database if available --->
 		<cfif arguments.catch.type EQ "database">
 			<cfif StructKeyExists(arguments.catch, "datasource")>
-				<cfset message = message & " || datasource: " & arguments.catch.datasource />
+				<cfset message = message & " || Datasource: " & arguments.catch.datasource />
 			</cfif>
 			<cfif StructKeyExists(arguments.catch, "sql")>
-				<cfset message = message & " || sql: " & arguments.catch.sql />
+				<cfset message = message & " || SQL: " & arguments.catch.sql />
 			</cfif>
 		</cfif>
 		
