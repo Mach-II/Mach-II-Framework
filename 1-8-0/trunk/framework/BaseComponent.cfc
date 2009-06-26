@@ -36,6 +36,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.baseProxy = "" />
+	<cfset variables.componentNameForLogging = ListLast(getMetaData(this).name, ".") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -341,7 +342,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	
 	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
 		hint="Gets the component name for logging.">
-		<cfreturn ListLast(getMetaData(this).name, ".") />
+		<cfreturn variables.componentNameForLogging />
 	</cffunction>
 	
 	<!---

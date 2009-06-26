@@ -95,6 +95,7 @@ Notes:
 		
 		<cfset var params = StructNew() />
 		<cfset var requiredParameters = getRequiredParameters() />
+		<cfset var requiredParametersCount = ArrayLen(requiredParameters) />
 		<cfset var optionalParameters = getOptionalParameters() />
 		<cfset var totalArgCount = ArrayLen(requiredParameters) + ArrayLen(optionalParameters) />
 		<cfset var totalArgsProcessed = 0 />
@@ -115,13 +116,13 @@ Notes:
 			<!--- Parse the URL elements for required parameters, when required parameters run out continue with optional parameters --->
 			<cfloop from="1" to="#ArrayLen(arguments.urlElements)#" index="i">
 				<!--- Builds all the required parameters from the known URL elements --->
-				<cfif ArrayLen(requiredParameters) GTE i>
+				<cfif requiredParametersCount GTE i>
 					<cfset params[ListGetAt(requiredParameters[i], 1, ":")] = arguments.urlElements[i] />
 				
 				<!--- Continues to build with optional parameters from the remaining known URL elements --->
-				<cfelseif ArrayLen(optionalParameters) GTE i - ArrayLen(requiredParameters)>
-					<!--- <cftrace text="element #i#, ArraLen(requiredParameters) = #ArrayLen(requiredParameters)#" /> --->
-					<cfset params[ListGetAt(optionalParameters[i - ArrayLen(requiredParameters)], 1, ":")] = arguments.urlElements[i] />
+				<cfelseif ArrayLen(optionalParameters) GTE i - requiredParametersCount>
+					<!--- <cftrace text="element #i#, ArraLen(requiredParameters) = #requiredParametersCount#" /> --->
+					<cfset params[ListGetAt(optionalParameters[i - requiredParametersCount], 1, ":")] = arguments.urlElements[i] />
 				</cfif>
 				
 				<!--- <cftrace text="i = #i#"> --->
@@ -316,7 +317,7 @@ Notes:
 		</cfif>
 		
 		<!--- Add any additional query string parameters from arguments.queryStringParameters --->
-		<cfif StructKeyList(arguments.queryStringParameters) NEQ "">
+		<cfif StructCount(arguments.queryStringParameters)>
 			<cfset builtUrl = builtUrl & "?" />
 			<cfset i = 1 />
 			

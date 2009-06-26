@@ -33,6 +33,7 @@ Notes:
 	--->
 	<cfset variables.object = "" />
 	<cfset variables.type = "" />
+	<cfset variables.targetObjectPath = "" />
 	<cfset variables.originalParameters = StructNew() />
 	
 	<!---
@@ -47,9 +48,13 @@ Notes:
 		<cfargument name="originalParameters" type="struct" required="false" default="#StructNew()#"
 			hint="The original set of parameters."/>
 		
+		<!--- Run setters --->
 		<cfset setObject(arguments.object) />
 		<cfset setType(arguments.type) />
 		<cfset setOriginalParameters(arguments.originalParameters) />
+		
+		<!--- Run path location --->
+		<cfset variables.targetObjectPath = GetMetadata(getObject()).path />
 		
 		<cfreturn this />
 	</cffunction>
@@ -72,11 +77,12 @@ Notes:
 	<cffunction name="computeObjectReloadHash" access="public" returntype="string" output="false"
 		hint="Computes the current reload hash of the target object.">
 
-		<cfset var targetObjectPath = GetMetadata(getObject()).path />
 		<cfset var directoryResults = "" />
 
-		<cfdirectory action="LIST" directory="#GetDirectoryFromPath(targetObjectPath)#" 
-			name="directoryResults" filter="#GetFileFromPath(targetObjectPath)#" />
+		<cfdirectory action="LIST" 
+			directory="#GetDirectoryFromPath(variables.targetObjectPath)#" 
+			name="directoryResults" 
+			filter="#GetFileFromPath(variables.targetObjectPath)#" />
 
 		<cfreturn Hash(directoryResults.dateLastModified & directoryResults.size) />
 	</cffunction>

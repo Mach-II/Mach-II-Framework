@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -54,11 +54,12 @@ Notes:
 			hint="The eventArg to set the result in." />
 		
 		<cfset var resultValue = "" />
+		<cfset var componentNameForLogging = arguments.listener.getComponentNameForLogging() />
 		<cfset var log = arguments.listener.getLog() />
 		
 		<cftry>
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Listener '#arguments.listener.getComponentNameForLogging()#' invoking method '#arguments.method#'.") />
+				<cfset log.debug("Listener '#componentNameForLogging#' invoking method '#arguments.method#'.") />
 			</cfif>
 			
 			<cfinvoke 
@@ -70,14 +71,14 @@ Notes:
 			<!--- resultKey --->
 			<cfif arguments.resultKey NEQ ''>
 				<cfif log.isWarnEnabled()>
-					<cfset log.warn("DEPRECATED: The ResultKey attribute has been deprecated. This was called by listener '#arguments.listener.getComponentNameForLogging()#' invoking method '#arguments.method#'.") />
+					<cfset log.warn("DEPRECATED: The ResultKey attribute has been deprecated. This was called by listener '#componentNameForLogging#' invoking method '#arguments.method#'.") />
 				</cfif>
 				<cfset "#arguments.resultKey#" = resultValue />
 			</cfif>
 			<!--- resultArg --->
 			<cfif arguments.resultArg NEQ ''>
 				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' returned data in event-arg '#arguments.resultArg#.'", resultValue) />
+					<cfset log.debug("Listener '#componentNameForLogging#' method '#arguments.method#' returned data in event-arg '#arguments.resultArg#.'", resultValue) />
 				</cfif>
 				<cfset arguments.event.setArg(arguments.resultArg, resultValue) />
 			</cfif>
@@ -85,21 +86,21 @@ Notes:
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has returned void but a ResultArg/Key has been defined.",  cfcatch) />
+						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has returned void but a ResultArg/Key has been defined.",  cfcatch) />
 					</cfif>
 					<cfthrow type="MachII.framework.VoidReturnType"
 							message="A ResultArg/Key has been specified on a notify command method that is returning void. This can also happen if your listener method returns a Java null."
 							detail="Listener: '#getMetadata(listener).name#' Method: '#arguments.method#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has caused an exception.",  cfcatch) />
+						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception.",  cfcatch) />
 					</cfif>
 					<cfrethrow />
 				</cfif>
 			</cfcatch>
 			<cfcatch type="Any">
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Listener '#arguments.listener.getComponentNameForLogging()#' method '#arguments.method#' has caused an exception.",  cfcatch) />
+						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception.",  cfcatch) />
 					</cfif>
 				<cfrethrow />
 			</cfcatch>

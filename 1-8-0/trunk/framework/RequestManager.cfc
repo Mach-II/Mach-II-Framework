@@ -268,6 +268,9 @@ Notes:
 		<cfset var value = "" />
 		<cfset var i = "" />
 		<cfset var keyList = StructKeyList(params) />
+		<cfset var seriesDelimiter = getSeriesDelimiter() />
+		<cfset var pairDelimiter = getPairDelimiter() />
+		<cfset var parseSes = getParseSes() />
 
 		<!--- Nested the appending of the event parameter inside the next block
 			Moving it causes redirect commands with just urls to wrongly append
@@ -277,13 +280,13 @@ Notes:
 		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
 			<!--- Attach event parameter only if it not supposed to be excluded --->
 			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
-				<cfset queryString = getEventParameter() & getPairDelimiter() />
+				<cfset queryString = getEventParameter() & pairDelimiter />
 			</cfif>
 			<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
 		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
 			<!--- Attach event parameter only if it not supposed to be excluded --->
 			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
-				<cfset queryString = getEventParameter() & getPairDelimiter() />
+				<cfset queryString = getEventParameter() & pairDelimiter />
 			</cfif>
 			<cfset queryString = queryString & arguments.eventName />
 		</cfif>
@@ -295,21 +298,21 @@ Notes:
 		<cfloop list="#keyList#" index="i">
 			<cfif IsSimpleValue(params[i])>
 				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
-				<cfif getParseSes()>
+				<cfif parseSes>
 					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
 				</cfif>
-				<cfif NOT Len(params[i]) AND getSeriesDelimiter() EQ getPairDelimiter() AND getParseSes()>
+				<cfif NOT Len(params[i]) AND seriesDelimiter EQ pairDelimiter AND parseSes>
 					<cfset params[i] = "_-_NULL_-_" />
 				</cfif>
-				<cfset queryString = queryString & getSeriesDelimiter() & i & getPairDelimiter() & URLEncodedFormat(params[i]) />
+				<cfset queryString = queryString & seriesDelimiter & i & pairDelimiter & URLEncodedFormat(params[i]) />
 			</cfif>
 		</cfloop>
 		
 		<!--- Prepend the urlBase and add trailing series delimiter --->
 		<cfif Len(queryString)>
 			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
-			<cfif getSeriesDelimiter() NEQ "&">
-				<cfset builtUrl = builtUrl & getSeriesDelimiter() />
+			<cfif seriesDelimiter NEQ "&">
+				<cfset builtUrl = builtUrl & seriesDelimiter />
 			</cfif>
 		<cfelse>
 			<cfset builtUrl = arguments.urlBase />

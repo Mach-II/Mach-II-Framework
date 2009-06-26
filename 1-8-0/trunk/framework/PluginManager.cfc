@@ -338,23 +338,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
-			<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preProcessPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
 			</cfif>
 			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preProcess(arguments.eventContext) />
 			</cfif>
@@ -370,23 +371,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
-			<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preEventPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
 			</cfif>
 			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preEvent(arguments.eventContext) />
 			</cfif>
@@ -402,23 +404,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postEvent(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
-			<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postEventPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-event point.") />
 			</cfif>
 			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postEvent(arguments.eventContext) />
 			</cfif>
@@ -434,23 +437,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preView(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
-			<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.preViewPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
 			</cfif>
 			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().preView(arguments.eventContext) />
 			</cfif>
@@ -466,23 +470,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postView(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
-			<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postViewPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-view point.") />
 			</cfif>
 			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postView(arguments.eventContext) />
 			</cfif>
@@ -498,23 +503,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postProcess(arguments.eventContext) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
-			<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.postProcessPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-process point.") />
 			</cfif>
 			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().postProcess(arguments.eventContext) />
 			</cfif>
@@ -522,7 +528,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
-		hint="onSessionStart() is called at the start of a session.">
+		hint="onSessionStart() is called at the start of a session. All onSessionStart() points are invoked regardless of the module so no run parent is needed.">
 
 		<cfset var loggingName = "" />
 		<cfset var log = "" />
@@ -530,6 +536,7 @@ Notes:
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
+				<!--- Logging name must always be available as it can be used in the throw --->
 				<cfset loggingName = variables.onSessionStartPlugins[i].getComponentNameForLogging() />
 				<cfset log = variables.onSessionStartPlugins[i].getLog() />
 			
@@ -548,7 +555,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
-		hint="onSessionEnd() is called at the end of a session.">
+		hint="onSessionEnd() is called at the end of a session. All onSessionEnd() points are invoked regardless of the module so no run parent is needed.">
 		<cfargument name="sessionScope" type="struct" required="true"
 			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
 		
@@ -558,6 +565,7 @@ Notes:
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
+				<!--- Logging name must always be available as it can be used in the throw --->
 				<cfset loggingName = variables.onSessionEndPlugins[i].getComponentNameForLogging() />
 				<cfset log = variables.onSessionEndPlugins[i].getLog() />
 			
@@ -586,23 +594,24 @@ Notes:
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
-		<cfif getRunParent() eq "before">
+		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
+		<cfif variables.runParent eq "before">
 			<cfif IsObject(getParent())>
 				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 			</cfif>
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
-			<cfset loggingName = variables.handleExceptionPlugins[i].getComponentNameForLogging() />
 			<cfset log = variables.handleExceptionPlugins[i].getLog() />
 			
 			<cfif log.isDebugEnabled()>
+				<cfset loggingName = variables.handleExceptionPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
 			</cfif>
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
 
-		<cfif getRunParent() eq "after" OR getRunParent() eq "">
+		<cfif variables.runParent eq "after" OR variables.runParent eq "">
 			<cfif IsObject(getParent())>
 				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 			</cfif>

@@ -223,7 +223,8 @@ Notes:
 	
 	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
 		hint="Triggers a server side redirect to a route.">
-		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name of the Url route to redirect to." />
 		<cfargument name="routeArgs" type="any" required="false" default=""
 			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
