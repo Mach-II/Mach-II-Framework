@@ -65,24 +65,26 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.dummyEvent = CreateObject("component", "MachII.framework.Event").init() />
 	<cfset variables.rewriteConfigFile = "" />
 	
+	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile" />
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property by building the routes.">
 		
-		<cfset var parameterNames = getParameterNames() />
+		<cfset var parameters = getParameters() />
 		<cfset var parameterName = "" />
 		<cfset var parameter = 0 />
 		<cfset var i = 0 />
 		<cfset var route = 0 />
 		<cfset var currentModuleName = getAppManager().getModuleName() />
 		
-		<cfloop list="#parameterNames#" index="parameterName">
+		<cfloop collection="#parameters#" item="parameterName">
 			
-			<cfset parameter = getParameter(parameterName) />
+			<cfset parameter = parameters[parameterName] />
 			
-			<cfif parameterName NEQ "rewriteConfigFile">
+			<cfif NOT ListFindNoCase(variables.RESERVED_PARAMETER_NAMES, parameterName)>
 				
 				<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
 				
@@ -127,6 +129,7 @@ index.cfm/product/A12345/fancy/
 			</cfif>
 		</cfloop>
 		
+		<!--- This operation must be done after all routes have been added --->
 		<cfif Len(getRewriteConfigFile())>
 			<cfset createRewriteConfigFile() />
 		</cfif>
@@ -136,16 +139,17 @@ index.cfm/product/A12345/fancy/
 		hint="Deconfigures the property by un-registering routes and route aliases.">
 		
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var names = "" />
+		<cfset var names = variables.routeNames.toArray() />
 		<cfset var aliases = "" />
 		<cfset var i = 0 />
 		
 		<!--- Removes this property's routes --->
-		<cfset names = variables.routeNames.toArray() />
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<!--- Remove route --->
 			<cfset requestManager.removeRoute(names[i]) />
 		</cfloop>
+		
+		<!--- Clear route names --->
 		<cfset variables.routeNames.clear() />
 	</cffunction>
 	
@@ -208,7 +212,8 @@ index.cfm/product/A12345/fancy/
 		</cfif>
 		
 		<!--- Build rewrite rules --->
-		<cfset contents.append('#### <cfsetting enablecfoutputonly="true"/>' & lf) />
+		<!--- Some CFML engines do no obey enable cfouput only use cfsilent is required as well --->
+		<cfset contents.append('#### <cfsilent><cfsetting enablecfoutputonly="true"/>' & lf) />
 		<cfset contents.append("#### Date Generated: #dateFormat(now(), "m/d/yyyy")# #timeFormat(now(), "h:mm tt")#" & lf) />
 		<cfset contents.append("#### Module Name: #moduleName#" & lf) />
 		<cfset contents.append(lf) />
@@ -220,7 +225,8 @@ index.cfm/product/A12345/fancy/
 		</cfloop>
 		
 		<cfset contents.append(lf) />
-		<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/>' & lf) />
+		<!--- The ampersand in the middle of the append is so that CFEclipse does think this is invalid code --->
+		<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/></' & 'cfsilent>' & lf) />
 		
 		<!--- Write to file --->
 		<cftry>
@@ -228,7 +234,7 @@ index.cfm/product/A12345/fancy/
 				file="#configFilePath#" 
 				output="#contents.toString()#" 
 				fixnewline="yes" />
-			<cfcatch type="all">
+			<cfcatch type="any">
 				<cfthrow type="MachII.properties.UrlRoutesProperty.RulesWritePermissions"
 					message="Cannot write rewrite rules file to '#configFilePath#'. Does your CFML engine have write permissions to this directory?"
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />

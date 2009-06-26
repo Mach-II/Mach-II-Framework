@@ -37,7 +37,7 @@ Spring Framework (http://www.springframework.org)
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="SimplePatternMatcher"  output="false"
+	<cffunction name="init" access="public" returntype="SimplePatternMatcher" output="false"
 		hint="Initializes the utilty.">
 		<cfreturn this />
 	</cffunction>
@@ -77,8 +77,10 @@ Spring Framework (http://www.springframework.org)
 	--->
 	<cffunction name="doMatch" access="private" returntype="boolean" output="false"
 		hint="Performs the match.">
-		<cfargument name="pattern" type="string" required="true" />
-		<cfargument name="text" type="string" required="true" />
+		<cfargument name="pattern" type="string" required="true"
+			hint="The pattern to perform the match with." />
+		<cfargument name="text" type="string" required="true"
+			hint="The text to apply the pattern against." />
 		
 		<cfset var firstAsteriskLoc = arguments.pattern.indexOf("*") />
 		<cfset var nextAsteriskLoc = "" />

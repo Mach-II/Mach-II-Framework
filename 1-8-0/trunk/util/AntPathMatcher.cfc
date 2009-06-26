@@ -36,8 +36,6 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 	<cfset variables.DEFAULT_PATH_SEPARATOR = "/" />
 	<cfset variables.pathSeparator = variables.DEFAULT_PATH_SEPARATOR />
 	
-	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
-	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -87,14 +85,15 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<cfset var part = "" />
 		<cfset var puts = 0 />
 		<cfset var i = 0 />
+		<cfset var pathSeparator = getPathSeparator() />
 		<cfset var result = CreateObject("java", "java.lang.StringBuffer") />
 
 		<!--- Add any path parts that have a wildcarded pattern part --->
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
 			<cfset part = patternParts[i] />
 			<cfif (Find("*", part) OR Find("?", part)) AND ArrayLen(pathParts) GTE i>
-				<cfif puts GT 0 OR (i EQ 1 AND NOT Left(arguments.pattern, 1) EQ getPathSeparator())>
-					<cfset result.append(getPathSeparator()) />
+				<cfif puts GT 0 OR (i EQ 1 AND NOT Left(arguments.pattern, 1) EQ pathSeparator)>
+					<cfset result.append(pathSeparator) />
 				</cfif>
 				<cfset result.append(pathParts[i]) />
 				<cfset puts = puts + 1 />
@@ -104,7 +103,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<!--- Append any trailing path parts --->
 		<cfloop from="#ArrayLen(patternParts) + 1#" to="#ArrayLen(pathParts)#" index="i">
 			<cfif puts GT 0 OR i GT 1>
-				<cfset result.append(getPathSeparator()) />
+				<cfset result.append(pathSeparator) />
 			</cfif>
 			<cfset result.append(pathParts[i]) />
 		</cfloop>
@@ -117,8 +116,10 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 	--->
 	<cffunction name="doMatch" access="private" returntype="boolean" output="false"
 		hint="Performs a match against the given path against the given pattern.">
-		<cfargument name="pattern" type="string" required="true" />
-		<cfargument name="path" type="string" required="true" />
+		<cfargument name="pattern" type="string" required="true"
+			hint="The pattern to perform the match with." />
+		<cfargument name="path" type="string" required="true"
+			hint="The string in which apply the pattern against." />
 		<cfargument name="fullMatch" type="boolean" required="true"
 			hint="Whether a full pattern match is required">
 		
@@ -135,18 +136,19 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<cfset var foundIdx = -1 />
 		<cfset var subPattern = "" />
 		<cfset var subString = "" />
+		<cfset var pathSeparator = getPathSeparator() />
 		<cfset var continueOutterLoop = false />
 		<cfset var continueInnerLoop = false />
 		<cfset var i = 1 />
 		<cfset var j = 1 />
 		
-		<cfif arguments.path.startsWith(getPathSeparator()) NEQ arguments.pattern.startsWith(getPathSeparator())>
+		<cfif arguments.path.startsWith(pathSeparator) NEQ arguments.pattern.startsWith(pathSeparator)>
 			<cfreturn false />
 		</cfif>
 		
 		<!--- ListToArray may have problems with some path separators --->
-		<cfset patternDirectories = ListToArray(arguments.pattern, getPathSeparator()) />
-		<cfset pathDirectories = ListToArray(arguments.path, getPathSeparator()) />
+		<cfset patternDirectories = ListToArray(arguments.pattern, pathSeparator) />
+		<cfset pathDirectories = ListToArray(arguments.path, pathSeparator) />
 		<cfset patternEnd = ArrayLen(patternDirectories) />
 		<cfset pathEnd = ArrayLen(pathDirectories) />
 		
@@ -167,9 +169,9 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<cfif pathStart GT pathEnd>
 
 			<cfif patternStart GT patternEnd>
-				<cfif arguments.pattern.endsWith(getPathSeparator())>
+				<cfif arguments.pattern.endsWith(pathSeparator)>
 					<cfreturn true />
-				<cfelseif NOT arguments.path.endsWith(getPathSeparator())>
+				<cfelseif NOT arguments.path.endsWith(pathSeparator)>
 					<cfreturn true />
 				<cfelse>
 					<cfreturn false />
@@ -180,7 +182,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 				<cfreturn true />
 			</cfif>
 			
-			<cfif patternStart EQ patternEnd AND patternDirectories[patternStart] EQ '*' AND arguments.path.endsWith(getPathSeparator())>
+			<cfif patternStart EQ patternEnd AND patternDirectories[patternStart] EQ '*' AND arguments.path.endsWith(pathSeparator)>
 				<cfreturn true />
 			</cfif>
 			
@@ -219,6 +221,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 					<cfreturn false />
 				</cfif>
 			</cfloop>
+			
 			<cfreturn true />
 		</cfif>
 

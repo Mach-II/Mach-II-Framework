@@ -141,9 +141,8 @@ See that file header for configuration of filter criteria.
 
 			<cfset data = getLogAdapter().getLoggingData().data />
 			
-			<cfsavecontent variable="output">
-				<cfinclude template="#getDisplayOutputTemplateFile()#" />
-			</cfsavecontent>
+			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
+			<cfsavecontent variable="output"><cfinclude template="#getDisplayOutputTemplateFile()#" /></cfsavecontent>
 			
 			<!--- Get the buffer which differs on Adobe CF --->
 			<cftry>

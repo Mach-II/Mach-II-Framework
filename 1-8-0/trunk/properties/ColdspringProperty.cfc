@@ -440,6 +440,7 @@ application.serviceFactory_account variable.
 		<cfset var targetBase = StructNew() />
 		<cfset var targetObj = 0 />
 		<cfset var targetMetadata = "" />
+		<cfset var autowireAttributeName = getAutowireAttributeName() />
 		<cfset var i = 0 />
 		
 		<!--- Only resolve if dependency resolution is on --->
@@ -460,7 +461,7 @@ application.serviceFactory_account variable.
 				<cfset targetMetadata = GetMetadata(targetObj) />
 				
 				<!--- Autowire by dynamic method generation --->
-				<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, getAutowireAttributeName()) />
+				<cfset autowireByDynamicMethodGeneration(targetObj, targetMetadata, autowireAttributeName) />
 	
 				<!--- Autowire by defined setters --->
 				<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
@@ -527,6 +528,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Add any imports by using the bean factory's built-in functionality --->
 		<cfset getProperty(getProperty("beanFactoryName")).findImports(imports, arguments.baseConfigFilePath) />
+
 		<!--- FindImports does not return a variable, but the data is available in the imports var via reference --->
 		<cfloop collection="#imports#" item="i">
 			<cfset ArrayAppend(configFiles, i) />
@@ -797,7 +799,7 @@ application.serviceFactory_account variable.
 			<cffile action="write" 
 				output="#cfcData.toString()#" 
 				file="#cfcDirectory#/#cfcName#.cfc" />
-			<cfcatch type="all">
+			<cfcatch type="any">
 				<cfthrow type="MachII.properties.ColdspringProperty.CFCWritePermissions"
 					message="Cannot write temporary CFC for autowiring to '#cfcDirectory#'. Does your CFML engine have write permissions to this directory?"
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />

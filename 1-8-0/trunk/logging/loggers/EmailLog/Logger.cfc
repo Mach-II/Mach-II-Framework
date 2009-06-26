@@ -197,9 +197,8 @@ See that file header for configuration of filter criteria.
 			<cfset data = getLogAdapter().getLoggingData().data />
 			
 			<!--- Save the body of the email --->
-			<cfsavecontent variable="body">
-				<cfinclude template="#getEmailTemplateFile()#" />
-			</cfsavecontent>
+			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
+			<cfsavecontent variable="body"><cfinclude template="#getEmailTemplateFile()#" /></cfsavecontent>
 
 			<!--- Send the email --->
 			<cfif Len(getServers())>

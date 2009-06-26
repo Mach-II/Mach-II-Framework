@@ -31,6 +31,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.system = CreateObject("java", "java.lang.System") />
+
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -157,18 +159,11 @@ Notes:
 	
 	<cffunction name="assertSame" access="public" returntype="boolean" output="false"
 		hint="Asserts of the passed objects are the same instance or not.">
-		<cfargument name="reference" type="any" required="true" />
-		<cfargument name="comparison" type="any" required="true" />
-		
-		<cfset var system = CreateObject("java", "java.lang.System") />
-		<cfset var referenceHashCode = system.identityHashCode(arguments.reference) />
-		<cfset var comparisonHashCode = system.identityHashCode(arguments.comparison) />
-		
-		<cfif referenceHashCode EQ comparisonHashCode>
-			<cfreturn true />
-		<cfelse>
-			<cfreturn false />
-		</cfif>
+		<cfargument name="reference" type="any" required="true"
+			hint="A reference to an item you want to use as the main comparison." />
+		<cfargument name="comparison" type="any" required="true"
+			hint="A reference to an item to use for comparison." />
+		<cfreturn variables.system.identityHashCode(arguments.reference) EQ variables.system.identityHashCode(arguments.comparison) />
 	</cffunction>
 	
 	<cffunction name="trimList" access="public" returntype="string" output="false"
@@ -211,7 +206,7 @@ Notes:
 		<cfelse>
 			<cfthrow
 				type="MachII.framework.InvalidAttributeType"
-				message="The 'parseAttributesIntoStruct' method takes a struct or a string."/>
+				message="The 'parseAttributesIntoStruct' method takes a struct or a string." />
 		</cfif>
 		
 		<cfreturn result />
@@ -240,7 +235,7 @@ Notes:
 					
 					<!--- Check if the value is an expression and if so, evaluate the expression --->
 					<cfif expressionEvaluator.isExpression(temp)>
-						<cfset temp = expressionEvalutor.evaluateExpression(temp, event, propertyManager) />
+						<cfset temp = expressionEvaluator.evaluateExpression(temp, event, propertyManager) />
 					</cfif>
 				<cfelse>
 					<cfset temp = event.getArg(ListFirst(i, "=")) />
@@ -252,7 +247,7 @@ Notes:
 		<cfelse>
 			<cfthrow
 				type="MachII.framework.InvalidAttributeType"
-				message="The 'parseAttributesAndEvaluateExpressionsIntoStruct' method takes a struct or a string."/>
+				message="The 'parseAttributesAndEvaluateExpressionsIntoStruct' method takes a struct or a string." />
 		</cfif>
 		
 		<cfreturn result />
