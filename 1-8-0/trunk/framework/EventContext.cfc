@@ -167,11 +167,9 @@ Notes:
 		<cfset var nextEvent = "" />
 		<cfset var nextModuleName = arguments.moduleName />
 		<cfset var nextEventName = arguments.eventName />
-		<cfset var arg = "" />
 		<cfset var eventArgs = StructNew() />
-		<cfset var event = getCurrentEvent() />
 		<cfset var argsToPersist = StructNew() />
-		<cfset var expEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset var utils = getAppManager().getUtils() />
 		
 		<!--- Check for an event-mapping. --->
 		<cfif isEventMappingDefined(arguments.eventName)>
@@ -180,37 +178,37 @@ Notes:
 			<cfset nextEventName = mapping.eventName />			
 		</cfif>
 		
-		<cfif NOT IsStruct(arguments.args)>
-			<!--- Resolve args to place in the URL --->
-			<cfloop list="#arguments.args#" index="arg">
-				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
-					<cfset eventArgs[ListGetAt(arg, 1, "=")] = 
-						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
-				<cfelse>
-					<cfset eventArgs[arg] = event.getArg(arg) />
-				</cfif>
-			</cfloop>
-		<cfelse>
+		<cfif IsSimpleValue(arguments.args)>
+			<!--- Resolve args to place in as url parameters --->
+			<cfset eventArgs = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+										utils.trimList(arguments.args)
+										, getAppManager()
+										, ",") />
+		<cfelseif IsStruct(arguments.args)>
 			<cfset eventArgs = arguments.args />
+		<cfelse>
+			<cfthrow type="MachII.framework.RedirectEventArgsInvalidDatatype"
+				message="The 'args' argument for redirectEvent only accepts 'string' or 'struct'."
+				detail="Please check your code." />
 		</cfif>
 		
-		<cfif NOT IsStruct(arguments.persistArgs)>
+		<cfif IsSimpleValue(arguments.persistArgs)>
 			<!--- Resolve args to persist --->
-			<cfif ListLen(arguments.persistArgs) gt 0>
-				<cfloop list="#arguments.persistArgs#" index="arg">
-					<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
-						<cfset argsToPersist[ListGetAt(arg, 1, "=")] = 
-							expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
-					<cfelse>
-						<cfset argsToPersist[arg] = event.getArg(arg) />
-					</cfif>
-				</cfloop>
-			<cfelseif arguments.persist>
-				<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
-				<cfset argsToPersist = event.getArgs() />
+			<cfset argsToPersist = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+											utils.trimList(arguments.persistArgs)
+											, getAppManager()
+											, ",") />
+			
+			<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
+			<cfif arguments.persist AND NOT StructCount(argsToPersist)>
+				<cfset argsToPersist = getCurrentEvent().getArgs() />
 			</cfif>
-		<cfelse>
+		<cfelseif IsStruct(arguments.persistArgs)>
 			<cfset argsToPersist = arguments.persistArgs />
+		<cfelse>
+			<cfthrow type="MachII.framework.RedirectEventPersistArgsInvalidDatatype"
+				message="The 'persistArgs' argument for redirectEvent only accepts 'string' or 'struct'."
+				detail="Please check your code." />
 		</cfif>
 		
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
@@ -218,7 +216,12 @@ Notes:
 		<cfset clearEventQueue() />
 		
 		<cfset getAppManager().getRequestManager().redirectEvent(
-			nextEventName, eventArgs, nextModuleName, arguments.persist, argsToPersist, arguments.statusType) />
+				nextEventName
+				, eventArgs
+				, nextModuleName
+				, arguments.persist
+				, argsToPersist
+				, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
@@ -234,38 +237,41 @@ Notes:
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		
-		<cfset var arg = "" />
 		<cfset var eventArgs = StructNew() />
-		<cfset var event = getCurrentEvent() />
 		<cfset var argsToPersist = StructNew() />
-		<cfset var expEvaluator = getAppManager().getExpressionEvaluator() />
-		
-		<cfif NOT IsStruct(arguments.routeArgs)>
-			<!--- Resolve args to place in the URL --->
-			<cfloop list="#arguments.routeArgs#" index="arg">
-				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
-					<cfset eventArgs[ListGetAt(arg, 1, "=")] = 
-						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
-				<cfelse>
-					<cfset eventArgs[arg] = event.getArg(arg) />
-				</cfif>
-			</cfloop>
-		<cfelse>
+		<cfset var utils = getAppManager().getUtils() />
+
+		<cfif IsSimpleValue(arguments.routeArgs)>
+			<!--- Resolve args to place in as url parameters --->
+			<cfset eventArgs = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+										utils.trimList(arguments.routeArgs)
+										, getAppManager()
+										, ",") />
+		<cfelseif IsStruct(arguments.routeArgs)>
 			<cfset eventArgs = arguments.routeArgs />
+		<cfelse>
+			<cfthrow type="MachII.framework.RedirectRouteArgsInvalidDatatype"
+				message="The 'args' argument for redirectRoute only accepts 'string' or 'struct'."
+				detail="Please check your code." />
 		</cfif>
 		
-		<cfif NOT IsStruct(arguments.persistArgs)>
+		<cfif IsSimpleValue(arguments.persistArgs)>
 			<!--- Resolve args to persist --->
-			<cfloop list="#arguments.persistArgs#" index="arg">
-				<cfif ListLen(arg, "=") eq 2 AND expEvaluator.isExpression(ListGetAt(arg, 2, "="))>
-					<cfset argsToPersist[ListGetAt(arg, 1, "=")] = 
-						expEvaluator.evaluateExpression(ListGetAt(arg, 2, "="), event, getAppManager().getPropertyManager()) />
-				<cfelse>
-					<cfset argsToPersist[arg] = event.getArg(arg) />
-				</cfif>
-			</cfloop>
-		<cfelse>
+			<cfset argsToPersist = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+											utils.trimList(arguments.persistArgs)
+											, getAppManager()
+											, ",") />
+			
+			<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
+			<cfif arguments.persist AND NOT StructCount(argsToPersist)>
+				<cfset argsToPersist = getCurrentEvent().getArgs() />
+			</cfif>
+		<cfelseif IsStruct(arguments.persistArgs)>
 			<cfset argsToPersist = arguments.persistArgs />
+		<cfelse>
+			<cfthrow type="MachII.framework.RedirectRoutePersistArgsInvalidDatatype"
+				message="The 'persistArgs' argument for redirectRoute only accepts 'string' or 'struct'."
+				detail="Please check your code." />
 		</cfif>
 		
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
@@ -273,7 +279,11 @@ Notes:
 		<cfset clearEventQueue() />
 		
 		<cfset getAppManager().getRequestManager().redirectRoute(
-			arguments.routeName, eventArgs, arguments.persist, argsToPersist, arguments.statusType) />
+					arguments.routeName
+					, eventArgs
+					, arguments.persist
+					, argsToPersist
+					, arguments.statusType) />
 	</cffunction>
 	
 	<cffunction name="executeSubroutine" access="public" returntype="boolean" output="true"

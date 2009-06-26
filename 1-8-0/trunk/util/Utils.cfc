@@ -187,16 +187,18 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="parseAttributesIntoStruct" access="public" returntype="struct" output="false"
-		hint="Parses the build url parameters into a useable form.">
+		hint="Parses the a list of name/value parameters into a struct.">
 		<cfargument name="attributes" type="any" required="true"
-			hint="Takes string of name/value pairs or a struct.">
+			hint="Takes string of name/value pairs (format of 'name1=value1|name2=value2' where '|' is the delimiter) or a struct.">
+		<cfargument name="delimiters" type="string" required="false" default="|"
+			hint="Defaults to '|' when not defined (must be '|' for backward compatibility)." />
 		
 		<cfset var result = StructNew() />
 		<cfset var temp = "" />
 		<cfset var i = "" />
 		
 		<cfif IsSimpleValue(arguments.attributes)>
-			<cfloop list="#arguments.attributes#" index="i" delimiters="|">
+			<cfloop list="#arguments.attributes#" index="i" delimiters="#arguments.delimiters#">
 				<cfif ListLen(i, "=") EQ 2>
 					<cfset temp = ListLast(i, "=") />
 				<cfelse>
@@ -209,7 +211,48 @@ Notes:
 		<cfelse>
 			<cfthrow
 				type="MachII.framework.InvalidAttributeType"
-				message="The parseAttributesIntoStruct takes a struct or a string."/>
+				message="The 'parseAttributesIntoStruct' method takes a struct or a string."/>
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="parseAttributesBindToEventAndEvaluateExpressionsIntoStruct" access="public" returntype="struct" output="false"
+		hint="Parses the a list of name/value parameters into a struct. If a struct, the struct values are NOT evaluated as expressions.">
+		<cfargument name="attributes" type="any" required="true"
+			hint="Takes string of name/value pairs (format of 'name1=value1|name2=value2' where '|' is the delimiter) or a struct.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager in the context you want to use (parent/child modules)." />
+		<cfargument name="delimiters" type="string" required="false" default="|"
+			hint="Defaults to '|' when not defined (must be '|' for backward compatibility)." />
+
+		<cfset var event = arguments.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var propertyManager = arguments.appManager.getPropertyManager() />
+		<cfset var expressionEvaluator = arguments.appManager.getExpressionEvaluator() />		
+		<cfset var result = StructNew() />
+		<cfset var temp = "" />
+		<cfset var i = "" />
+		
+		<cfif IsSimpleValue(arguments.attributes)>
+			<cfloop list="#arguments.attributes#" index="i" delimiters="#arguments.delimiters#">
+				<cfif ListLen(i, "=") EQ 2>
+					<cfset temp = ListLast(i, "=") />
+					
+					<!--- Check if the value is an expression and if so, evaluate the expression --->
+					<cfif expressionEvaluator.isExpression(temp)>
+						<cfset temp = expressionEvalutor.evaluateExpression(temp, event, propertyManager) />
+					</cfif>
+				<cfelse>
+					<cfset temp = event.getArg(ListFirst(i, "=")) />
+				</cfif>
+				<cfset result[ListFirst(i, "=")] = temp />
+			</cfloop>
+		<cfelseif IsStruct(arguments.attributes)>
+			<cfset result = arguments.attributes />
+		<cfelse>
+			<cfthrow
+				type="MachII.framework.InvalidAttributeType"
+				message="The 'parseAttributesAndEvaluateExpressionsIntoStruct' method takes a struct or a string."/>
 		</cfif>
 		
 		<cfreturn result />
@@ -217,9 +260,12 @@ Notes:
 	
 	<cffunction name="copyToScope" access="public" returntype="void" output="false"
 		hint="Copies an evaluation string to a scope.">
-		<cfargument name="evaluationString" type="string" required="true" />
-		<cfargument name="scopeReference" type="struct" required="true" />
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfargument name="evaluationString" type="string" required="true"
+			hint="The string to evaluate." />
+		<cfargument name="scopeReference" type="struct" required="true"
+			hint="A reference to the scope in which to place the scope copies." />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager in the context you want to use (parent/child modules)." />`
 		
 		<cfset var event = arguments.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
 		<cfset var propertyManager = arguments.appManager.getPropertyManager() />
