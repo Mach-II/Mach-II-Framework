@@ -53,11 +53,6 @@ Notes:
 		<cfset setType(arguments.type) />
 		<cfset setOriginalParameters(arguments.originalParameters) />
 		
-		<!--- Run path location --->
-		<cfset variables.targetObjectPath = GetMetadata(getObject()).path />
-		
-		<cfset setLastReloadHash(computeObjectReloadHash()) />
-		
 		<cfreturn this />
 	</cffunction>
 	
@@ -94,9 +89,10 @@ Notes:
 	--->
 	<cffunction name="setObject" access="public" returntype="void" output="false">
 		<cfargument name="object" type="any" required="true" />
-
 		<cfset variables.object = arguments.object />
 		
+		<!--- Update related info --->
+		<cfset variables.targetObjectPath = GetMetadata(getObject()).path />
 		<cfset setLastReloadHash(computeObjectReloadHash()) />
 	</cffunction>
 	<cffunction name="getObject" access="public" returntype="any" output="false">
@@ -124,6 +120,9 @@ Notes:
 		<cfset variables.lastReloadHash = arguments.lastReloadHash />
 	</cffunction>
 	<cffunction name="getLastReloadHash" access="public" returntype="string" output="false">
+		<cfif NOT Len(variables.lastReloadHash)>
+			<cfset setLastReloadHash(computeObjectReloadHash()) />
+		</cfif>
 		<cfreturn variables.lastReloadHash />
 	</cffunction>
 

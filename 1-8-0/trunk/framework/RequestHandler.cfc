@@ -104,11 +104,15 @@ Notes:
 		<cfset result.moduleName = "" />
 
 		<cftry>
+			<cfif log.isInfoEnabled()>
+				<cfset log.info("Begin processing request.") />
+			</cfif>
+
 			<cfset eventArgs = getRequestEventArgs() />
 			<cfset result = parseEventParameter(eventArgs) />
-			
-			<cfif log.isInfoEnabled()>
-				<cfset log.info("Begin processing request. Incoming event arguments:", eventArgs) />
+
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Incoming event arguments:", eventArgs) />
 			</cfif>
 			
 			<!--- Set the module and name for now (in case module not found we need the original event name) --->
@@ -411,6 +415,7 @@ Notes:
 	
 	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false"
 		hint="Builds a struct of incoming event args.">
+		
 		<cfset var eventArgs = StructNew() />
 		<cfset var overwriteFormParams = (getParameterPrecedence() EQ "url") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
