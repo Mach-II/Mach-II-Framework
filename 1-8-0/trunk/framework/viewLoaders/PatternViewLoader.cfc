@@ -97,8 +97,9 @@ Wildcards for patterns:
 	--->
 	<cffunction name="discoverViews" access="public" returntype="struct" output="false"
 		hint="Loads views based on the defined parameters.">
-			
-		<cfset var appRootPath = ExpandPath(getApplicationRoot()) />
+		
+		<cfset var appRoot = getApplicationRoot() />	
+		<cfset var appRootPath = ExpandPath(appRoot) />
 		<cfset var pattern = getPattern() />
 		<cfset var exclude = getExclude() />
 		<cfset var pageViewQuery = "" />
@@ -131,9 +132,9 @@ Wildcards for patterns:
 		<cfloop from="#ArrayLen(pageViewPaths)#" to="1" index="i" step="-1">
 			<cfloop from="1" to="#ArrayLen(exclude)#" index="j">
 				<!--- If pattern and pattern matches or if exact path --->
-				<cfif (variables.pathMatcher.isPattern(exclude[j]) 
-					AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))
-					OR exclude[j] EQ pageViewPaths[i]>
+				<cfif exclude[j] EQ pageViewPaths[i]
+					OR (variables.pathMatcher.isPattern(exclude[j]) 
+					AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))>
 					<!--- If a pattern is found, delete and break out of the inner loop (short-circuit) --->
 					<cfset ArrayDeleteAt(pageViewPaths, i) />
 					<cfbreak />
@@ -146,7 +147,7 @@ Wildcards for patterns:
 			<cfif variables.pathMatcher.match(pattern, pageViewPaths[i])>
 				<cfset viewData = StructNew() />
 				<cfset viewData.page = pageViewPaths[i] />
-				<cfset viewData.appRoot = getApplicationRoot() />
+				<cfset viewData.appRoot = appRoot />
 				<cfset viewData.appRootType = "local" />
 				<cfset results[buildPageViewName(pattern, pageViewPaths[i])] = viewData />
 			</cfif>
@@ -156,7 +157,7 @@ Wildcards for patterns:
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="appRoot '#appRootPath#'" />
+				detail="Full appRootPath '#appRootPath#' for appRoot '#appRoot#'." />
 		</cfif>
 		
 		<cfreturn results />
