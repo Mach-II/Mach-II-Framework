@@ -365,7 +365,7 @@ Notes:
 		
 			<cfset names = ListToArray(arguments.pathInfo, seriesDelimiter) />
 			<!--- Check to see if we are dealing with processing routes --->
-			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), seriesDelimiter) gt 0>
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), seriesDelimiter) GT 0>
 				<!--- The SES url has the event parameter in it so routes are disabled --->
 				<cfset params = parseNonRoute(names) />
 				<cfset getRequestHandler().setCurrentSESParams(params) />
@@ -387,7 +387,7 @@ Notes:
 				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
 			</cfif>
 			<cfset names = ListToArray(arguments.pathInfo, "/") />
-			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), seriesDelimiter) EQ 0
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), "/") EQ 0
 				AND ArrayLen(names) GTE 1>
 				<cfif StructKeyExists(variables.routeAliases, names[1])>
 					<cfset params = parseRoute(names[1], names) />
