@@ -203,6 +203,7 @@ Notes:
 		<cfset var key = "" />
 		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
 		<cfset var currentSESParams = getRequestHandler().getCurrentSESParams() />
+		<cfset var moduleDelimiter = getModuleDelimiter() />
 		<cfset var log = getLog() />
 		
 		<cfloop collection="#url#" item="key">
@@ -213,14 +214,15 @@ Notes:
 		
 		<cfif Len(routeName)>
 			<cfset log.debug("Building route url for route '#routeName#'") />
+
 			<cfreturn buildRouteUrl(routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
 		<cfelseif StructCount(currentSESParams)>
 			<cfloop collection="#currentSESParams#" item="key">
 				<cfif key eq getEventParameter()>
 					<cfset eventName = currentSESParams[key] />
-					<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
-						<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
-						<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+					<cfif ListLen(eventName, moduleDelimiter) GT 1>
+						<cfset parsedModuleName = ListGetAt(eventName, 1, moduleDelimiter) />
+						<cfset eventName = ListGetAt(eventName, 2, moduleDelimiter) />
 					<cfelse>
 						<cfset parsedModuleName = arguments.moduleName />
 					</cfif>
@@ -237,9 +239,9 @@ Notes:
 				<cfset eventName = form[eventParameterName] />		
 			</cfif>
 			
-			<cfif ListLen(eventName, getModuleDelimiter()) gt 1>
-				<cfset parsedModuleName = ListGetAt(eventName, 1, getModuleDelimiter()) />
-				<cfset eventName = ListGetAt(eventName, 2, getModuleDelimiter()) />
+			<cfif ListLen(eventName, moduleDelimiter) gt 1>
+				<cfset parsedModuleName = ListGetAt(eventName, 1, moduleDelimiter) />
+				<cfset eventName = ListGetAt(eventName, 2, moduleDelimiter) />
 			<cfelse>
 				<cfset parsedModuleName = arguments.moduleName />
 			</cfif>
@@ -343,6 +345,7 @@ Notes:
 		<cfset var params = StructNew() />
 		<cfset var i = "" />
 		<cfset var routeName = "" />
+		<cfset var seriesDelimiter = getSeriesDelimiter() />
 
 		<!--- Remove the query string delimiter --->
 		<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo)) />
@@ -353,13 +356,13 @@ Notes:
 		<!--- Parse SES if necessary --->
 		<cfif getParseSes() AND Len(arguments.pathInfo) GT 1>
 			<!--- Remove trailing series delimiter if defined --->
-			<cfif Right(arguments.pathInfo, 1) IS getSeriesDelimiter()>
+			<cfif Right(arguments.pathInfo, 1) IS seriesDelimiter>
 				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
 			</cfif>
 		
-			<cfset names = ListToArray(arguments.pathInfo, getSeriesDelimiter()) />
+			<cfset names = ListToArray(arguments.pathInfo, seriesDelimiter) />
 			<!--- Check to see if we are dealing with processing routes --->
-			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) gt 0>
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), seriesDelimiter) gt 0>
 				<!--- The SES url has the event parameter in it so routes are disabled --->
 				<cfset params = parseNonRoute(names) />
 				<cfset getRequestHandler().setCurrentSESParams(params) />
@@ -381,27 +384,29 @@ Notes:
 				<cfset arguments.pathInfo = Mid(arguments.pathInfo, 1, Len(arguments.pathInfo) - 1) />
 			</cfif>
 			<cfset names = ListToArray(arguments.pathInfo, "/") />
-			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), getSeriesDelimiter()) EQ 0
+			<cfif ListFindNoCase(arguments.pathInfo, getEventParameter(), seriesDelimiter) EQ 0
 				AND ArrayLen(names) GTE 1>
-				<cfif ListFindNoCase(getRouteNames(), names[1])>
+				<cfif StructKeyExists(variables.routeAliases, names[1])>
 					<cfset params = parseRoute(names[1], names) />
 				<cfelse>
-					<cfthrow type="MachII.framework.UrlRouteNotDefined" 
-						message="Could not find a configured url route with the name or alias of '#names[1]#'" />
-				</cfif>
+					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
+						message="Could not find a configured url route with the url alias of '#names[1]#'"
+						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl()." />				</cfif>
 			</cfif>
 		</cfif>
 		
 		<cfreturn params />
 	</cffunction>
 	
-	<cffunction name="parseNonRoute" access="private" returntype="struct" output="false">
+	<cffunction name="parseNonRoute" access="private" returntype="struct" output="false"
+		hint="Parses a non-route Url elements into request data.">
 		<cfargument name="urlElements" type="array" required="true" />
 		
 		<cfset var value = "" />
 		<cfset var i = 0 />
 		<cfset var names = arguments.urlElements />
 		<cfset var params = StructNew() />
+		<cfset var pairDelimiter = getPairDelimiter() />
 		
 		<!---
 		If the event name was excluded from the URL and there are an odd number of
@@ -412,7 +417,7 @@ Notes:
 			<cfset ArrayDeleteAt(names, 1) />
 		</cfif>
 	
-		<cfif getSeriesDelimiter() EQ getPairDelimiter()>
+		<cfif getSeriesDelimiter() EQ pairDelimiter>
 			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
 				<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
 					<cfset value = names[i+1] />
@@ -423,19 +428,20 @@ Notes:
 			</cfloop>
 		<cfelse>
 			<cfloop from="1" to="#ArrayLen(names)#" index="i">
-				<cfif ListLen(names[i], getPairDelimiter()) EQ 2>
-					<cfset value = ListGetAt(names[i], 2, getPairDelimiter()) />
+				<cfif ListLen(names[i], pairDelimiter) EQ 2>
+					<cfset value = ListGetAt(names[i], 2, pairDelimiter) />
 				<cfelse>
 					<cfset value = "" />
 				</cfif>
-				<cfset params[ListGetAt(names[i], 1, getPairDelimiter())] =  value />
+				<cfset params[ListGetAt(names[i], 1, pairDelimiter)] =  value />
 			</cfloop>
 		</cfif>
 		
 		<cfreturn params />
 	</cffunction>
 	
-	<cffunction name="parseRoute" access="private" returntype="struct" output="false">
+	<cffunction name="parseRoute" access="private" returntype="struct" output="false"
+		hint="Parses a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="urlElements" type="array" required="true" />
 		
@@ -586,12 +592,9 @@ Notes:
 		<cfreturn variables.postRedirectCallbacks />
 	</cffunction>
 	
-	<cffunction name="getRoutes" access="public" returntype="struct" output="false">
+	<cffunction name="getRoutes" access="public" returntype="struct" output="false"
+		hint="Get all registered url routes.">
 		<cfreturn variables.routes />
-	</cffunction>
-	<cffunction name="setRoutes" access="public" returntype="void" output="false">
-		<cfargument name="routes" type="struct" required="true" />
-		<cfset variables.routes = arguments.routes />
 	</cffunction>
 	
 	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
@@ -606,7 +609,7 @@ Notes:
 			<cfreturn variables.routes[variables.routeAliases[arguments.routeNameOrUrlAlias]] />
 		<cfelse>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No named route or route Url alias of '#arguments.routeName#' could be found." />
+				message="No named route or route url alias of '#arguments.routeNameOrUrlAlias#' could be found." />
 		</cfif>
 	</cffunction>
 	
