@@ -56,6 +56,8 @@ Notes:
 		<!--- Run path location --->
 		<cfset variables.targetObjectPath = GetMetadata(getObject()).path />
 		
+		<cfset setLastReloadHash(computeObjectReloadHash()) />
+		
 		<cfreturn this />
 	</cffunction>
 	
