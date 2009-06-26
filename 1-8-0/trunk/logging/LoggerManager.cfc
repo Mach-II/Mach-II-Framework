@@ -143,7 +143,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 			<cfset logger = CreateObject("component", arguments.LoggerType).init(arguments.loggerId, arguments.LoggerParameters) />
 
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.LoggerType>
 					<cfthrow type="MachII.logger.CannotFindLogger"
 						message="Cannot find a logger CFC with type of '#arguments.LoggerType#' for the logger named '#arguments.loggerName#'."
 						detail="Please check that the logger exists and that there is not a misconfiguration." />

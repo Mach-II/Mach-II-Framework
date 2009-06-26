@@ -129,7 +129,7 @@ Notes:
 			<cfset strategy = CreateObject("component", arguments.cacheStrategyType).init(arguments.cacheStrategyParameters) />
 
 			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
+				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.cacheStrategyType>
 					<cfthrow type="MachII.caching.CannotFindCacheStrategy"
 						message="Cannot find a cache strategy CFC with type of '#arguments.cacheStrategyType#' for the cache named '#arguments.cacheStrategyName#'."
 						detail="Please check that the cache strategy exists and that there is not a misconfiguration." />
