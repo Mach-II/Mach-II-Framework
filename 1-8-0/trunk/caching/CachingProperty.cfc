@@ -208,11 +208,10 @@ See individual caching strategies for more information on configuration.
 		hint="Decides if the caching is enabled.">
 		<cfargument name="cachingEnabled" type="any" required="true" />
 		
-		<cfset var environmentName = getAppManager().getEnvironmentName() />
 		<cfset var result = true />
 		
 		<cfset getAssert().isTrue(IsBoolean(arguments.cachingEnabled) OR IsStruct(arguments.cachingEnabled)
-				, "The 'cachingEnabled' parameter must be boolean or a struct of environment names / groups.") />
+				, "The 'cachingEnabled' parameter for 'CachingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
 		
 		<!--- Load caching enabled since this is a simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.cachingEnabled)>

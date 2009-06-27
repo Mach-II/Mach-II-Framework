@@ -332,7 +332,7 @@ will bind to root parameter values.
 		<cfset var result = true />
 		
 		<cfset getAssert().isTrue(IsBoolean(arguments.loggingEnabled) OR IsStruct(arguments.loggingEnabled)
-				, "The 'loggingEnabled' parameter must be boolean or a struct of environments.") />
+				, "The 'loggingEnabled' parameter in 'LoggingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
 		
 		<!--- Load logging enabled by simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.loggingEnabled)>
