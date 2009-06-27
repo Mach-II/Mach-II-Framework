@@ -113,18 +113,9 @@ from the parent application.
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
 		
-		<cfif IsStruct(getParameter("cacheAssetPaths"))>
-			<cfset cacheAssetPaths = getParameter("cacheAssetPaths") />
-			
-			<cfif StructKeyExists(cacheAssetPaths, getAppManager().getEnvironmentName())>
-				<cfset setCacheAssetPaths(cacheAssetPaths[getAppManager().getEnvironmentName()]) />
-			<cfelse>
-				<cfset setCacheAssetPaths("false") />
-			</cfif>
-		<cfelse>
-			<cfset setCacheAssetPaths(getParameter("cacheAssetPaths", "false")) />
-		</cfif>
+		<cfset setCacheAssetPaths(getParameter("cacheAssetPaths", "false")) />
 		
+		<!--- These paths are defaulted in the pseudo-constructor area --->
 		<cfif isParameterDefined("webrootBasePath")>
 			<cfset setWebrootBasePath(ExpandPath(getParameter("webrootBasePath"))) />
 		</cfif>
@@ -140,11 +131,11 @@ from the parent application.
 		
 		<cfset setAssetPackages(configureAssetPackages(getParameter("assetPackages", StructNew()))) />
 		
-		<!--- Build data --->
+		<!--- Build reference data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
 	</cffunction>
-	
+		
 	<cffunction name="configureAssetPackages" access="private" returntype="struct" output="false"
 		hint="Configures asset packages from the 'package' parameter.">
 		<cfargument name="rawPackages" type="struct" required="true" />
@@ -256,7 +247,12 @@ from the parent application.
 		hint="Adds an HTML meta element with passed charset.">
 		<cfargument name="charset" type="string" required="false" default="utf-8"
 			hint="Sets the document charset. Defaults to utf-8." />
-		<cfreturn '<meta http-equiv="Content-Type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates tthe output type for the generated HTML code (head, inline)." />
+
+		<cfset var code = '<meta http-equiv="Content-Type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
+
+		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
 	
 	<cffunction name="addDocType" access="public" returntype="string" output="false"
@@ -286,10 +282,13 @@ from the parent application.
 			<cfcase value="html-4.0-frame">
 				<cfreturn '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">' />
 			</cfcase>
+			<cfcase value="html-5.0">
+				<cfreturn '<!DOCTYPE HTML>' />
+			</cfcase>
 			<cfdefaultcase>
 				<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
 					message="The renderDocType method does not accept the type of '#arguments.type#'."
-						detail="Allowed values for 'type' are xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame." />
+					detail="Allowed values for 'type' are xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame." />
 			</cfdefaultcase>
 		</cfswitch>
 	</cffunction>
@@ -659,13 +658,13 @@ from the parent application.
 	</cffunction>
 	
 	<cffunction name="appendFileExtension" access="public" returntype="string" output="false"
-		hint="Appends the default file extension if no file extension is present.">
+		hint="Appends the default file extension if no file extension is present and is safe for paths with '.' in the file name.">
 		<cfargument name="assetType" type="string" required="true" />
 		<cfargument name="assetPath" type="string" required="true" />
 		
 		<cfset var file = ListLast(arguments.assetPath, "/") />
 		
-		<cfif NOT FindNoCase(".", file)>
+		<cfif ListLast(arguments.assetPath, ".") NEQ arguments.assetType>
 			<cfreturn arguments.assetPath & "." & arguments.assetType />
 		<cfelse>
 			<cfreturn arguments.assetPath />
@@ -697,7 +696,27 @@ from the parent application.
 		<cfargument name="content" type="string" required="true" />
 		<cfreturn REReplace(arguments.content, variables.CLEANUP_CONTROL_CHARACTERS_REGEX, "", "ALL") />
 	</cffunction>
-	
+
+	<cffunction name="decidedCacheAssetPathsEnabled" access="private" returntype="boolean" output="false"
+		hint="Decides if the asset path caching is enabled.">
+		<cfargument name="cacheAssetPathsEnabled" type="any" required="true" />
+		
+		<cfset var result = false />
+		
+		<cfset getAssert().isTrue(IsBoolean(arguments.cacheAssetPathsEnabled) OR IsStruct(arguments.cacheAssetPathsEnabled)
+				, "The 'cacheAssetPathsEnabled' parameter for 'HtmlHelperProperty' must be boolean or a struct of environment names / groups.") />
+		
+		<!--- Load cache asset paths enabled since this is a simple value (no environment names / groups) --->
+		<cfif IsBoolean(arguments.cacheAssetPathsEnabled)>
+			<cfset result = arguments.cacheAssetPathsEnabled />
+		<!--- Load cache asset paths enabled enabled by environment names / groups --->
+		<cfelse>
+			<cfset result = resolveValueByEnvironment(arguments.cacheAssetPathsEnabled) />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
@@ -708,10 +727,22 @@ from the parent application.
 	<cffunction name="getMetaTitleSuffix" access="public" returntype="string" output="false">
 		<cfreturn variables.metaTitleSuffix />
 	</cffunction>
-	
-	<cffunction name="setCacheAssetPaths" access="private" returntype="void" output="false">
-		<cfargument name="cacheAssetPaths" type="boolean" required="true" />
-		<cfset variables.cacheAssetPaths = arguments.cacheAssetPaths />
+
+	<cffunction name="setCacheAssetPaths" access="private" returntype="void" output="false"
+		hint="Sets if cache asset paths is enabled.">
+		<cfargument name="cacheAssetPaths" type="any" required="true" />
+		
+		<cftry>
+			<cfset variables.cacheAssetPaths = decidedCacheAssetPathsEnabled(arguments.cacheAssetPaths) />
+			<cfcatch type="MachII.util.IllegalArgument">
+				<cfthrow type="MachII.properties.HtmlHelperProperty.InvalidEnvironmentConfiguration"
+					message="This misconfiguration error is defined in the property-wide 'cacheAssetPaths' parameter in the HTML Helper property in module '#getAppManager().getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfrethrow />
+			</cfcatch>			
+		</cftry>
 	</cffunction>
 	<cffunction name="getCacheAssetPaths" access="public" returntype="boolean" output="false">
 		<cfreturn variables.cacheAssetPaths />
