@@ -175,6 +175,12 @@ from the parent application.
 					<cfelse>
 						<cfset element.attributes = temp.attributes />
 					</cfif>
+					
+					<cfif NOT StructKeyExists(temp, "forIEVersion")>
+						<cfset element.forIEVersion = "" />
+					<cfelse>
+						<cfset element.forIEVersion = temp.forIEVersion />
+					</cfif>
 				</cfif>
 				
 				<!--- Assert that type is supported --->
@@ -318,7 +324,7 @@ from the parent application.
 				<cfif package[j].type EQ "js">
 					<cfset code = code & addJavascript(package[j].paths, arguments.outputType) />
 				<cfelseif package[j].type EQ "css">
-					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType) />
+					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType, package[i].forIEVersion) />
 				</cfif>
 			</cfloop>
 		</cfloop>
@@ -403,7 +409,7 @@ from the parent application.
 		</cfloop>
 		
 		<!--- Enclose in an IE conditional comment if available --->
-		<cfif StructKeyExists(arguments, "forIEVersion")>
+		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion) >
 			<cfset code = wrapIEConditionalComment(arguments.forIEVersion, code) />
 		</cfif>
 		
@@ -527,15 +533,20 @@ from the parent application.
 		<cfset var conditional = Trim(arguments.forIEVersion) />
 		<cfset var comment = Chr(13) />
 		
-		<!--- Nothing in the version means all versions of IE --->
-		<cfif NOT Len(conditional)>
+		<!--- "all" in the version means all versions of IE --->
+		<cfif conditional EQ "all">
 			<cfset comment = comment & "<!--[if IE]>" & Chr(13) />
 		<!--- No operator (just version number) means EQ for version --->
 		<cfelseif IsNumeric(conditional)>
 			<cfset comment = comment & "<!--[if IE " & conditional &  "]>" & Chr(13)  />
 		<!--- Use operator and version --->
-		<cfelse>
+		<cfelseif ListLen(conditional, " ") EQ 2>
 			<cfset comment = comment & "<!--[if " & ListFirst(conditional, " ") & " IE " & ListLast(conditional, " ") &  "]>" & Chr(13)  />
+		<!--- Throw an exception because of no match for conditional --->
+		<cfelse>
+			<cfthrow type="MachII.properties.HTMLHelperProperty.invalidIEConditional"
+				message="An IE conditional of '#conditional#' is invalid."
+				detail="The conditional value must be 'all', IE version number (numeric) or operator (lt, gte) plus IE version number." />
 		</cfif>
 		
 		<!--- Append the code --->
