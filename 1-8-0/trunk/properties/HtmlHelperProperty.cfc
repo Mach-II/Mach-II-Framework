@@ -26,7 +26,7 @@ Provides HTML helper functionality and enables you to easily make
 HTML related tags faster and less hassle to output such as 
 outputting doctypes, css and javascript links and HTML metadata.
 
-All javascript and css files get a timestamp appended for easy
+All javascript, css and image files get a timestamp appended for easy
 webserver caching.
 
 Configuration Usage:
@@ -64,6 +64,7 @@ Configuration Usage:
 								<key name="paths" value="/css/lightwindow.cfm" />
 								<key name="type" value="css" />
 								<key name="attributes" value="media=screen,projection" />
+								<key name="forIEVersion" value="gte 7" />
 							</struct>
 						</element>
 					</array>
@@ -262,9 +263,9 @@ from the parent application.
 	</cffunction>
 	
 	<cffunction name="addDocType" access="public" returntype="string" output="false"
-		hint="Adds an HTML document type.">
+		hint="Returns a full HTML document type. Returns a string to output and does not added to head because the document type is outside of the HTML head section.">
 		<cfargument name="type" type="string" required="false" default="xhtml-1.0-strict" 
-			hint="The doc type to render. (xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame)" />
+			hint="The doc type to render. Accepted values are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
 		
 		<cfswitch expression="#arguments.type#">
 			<cfcase value="xhtml-1.0-strict">
@@ -293,8 +294,8 @@ from the parent application.
 			</cfcase>
 			<cfdefaultcase>
 				<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
-					message="The renderDocType method does not accept the type of '#arguments.type#'."
-					detail="Allowed values for 'type' are xhtml-1.0-strict, xhtml-1.0-trans, xhtml-1.0-frame, xhtml-1.1, html-4.0-strict, html-4.0-trans, html-4.0-frame." />
+					message="The 'addDocType' method in the 'HtmlHelperProperty' does not accept the type of '#arguments.type#'."
+					detail="Allowed values for 'type' are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
 			</cfdefaultcase>
 		</cfswitch>
 	</cffunction>
@@ -509,6 +510,31 @@ from the parent application.
 	</cffunction>
 	
 	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="flushAssetPathCache" access="public" returntype="void" output="false"
+		hint="Flushes the entire asset path cache. Does not clear a parent HtmlHelperProperty asset path cache.">
+		<cfset variables.assetPathsCache = StructNew() />
+	</cffunction>
+	
+	<cffunction name="clearAssetPathCacheByPath" access="package" returntype="boolean" output="false"
+		hint="Clears an asset path cache element by type and path. Returns true if removed and false if not existing.">
+		<cfargument name="assetType" type="string" required="true"
+			hint="The type of asset ('img', 'js' and 'css')." />
+		<cfargument name="assetPath" type="string" required="true"
+			hint="The asset path which will be resolved to a full path as necessary." />
+
+		<cfset var resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />		
+		<cfset var assetPathHash = createAssetPathHash(resolvedPath) />
+		
+		<!---
+		StructDelete returns 'true'  if key is not existing so we have to flip 
+		the value for the correct return value for this method
+		--->
+		<cfreturn NOT StructDelete(variables.assetPathsCache, assetPathHash, true) />
+	</cffunction>
+	
+	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="renderOrAppendToHead" access="private" returntype="string" output="false"
@@ -556,11 +582,12 @@ from the parent application.
 	</cffunction>
 	
 	<cffunction name="isAssetPathInWatchList" access="private" returntype="boolean" output="false"
-		hint="Checks if an asset path is in the watch list. Returns true if the asset is already on watch list and false if it is not on list.">
-		<cfargument name="assetPath" type="string" required="true"
-			hint="Path to element." />
+		hint="Checks if a resolved asset path is in the watch list. Returns true if the asset is already on watch list and false if it is not on list.">
+		<cfargument name="resolvedPath" type="string" required="true"
+			hint="Resolved path to the asset." />
 		
-		<cfset var assetPathHash = Hash(UCase(arguments.assetPath)) />
+		<!--- Most file systems are case sensitive so the path should not be UCase first --->
+		<cfset var assetPathHash = Hash(arguments.resolvedPath) />
 		
 		<cfif NOT StructKeyExists(request, "_MachIIHTMLHelper_HTMLHeadElementPaths")>
 			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths = StructNew() />
@@ -569,7 +596,7 @@ from the parent application.
 		<cfif StructKeyExists(request._MachIIHTMLHelper_HTMLHeadElementPaths, assetPathHash)>
 			<cfreturn true />
 		<cfelse>
-			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = arguments.assetPath />
+			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = arguments.resolvedPath />
 			<cfreturn false />
 		</cfif>
 	</cffunction>
@@ -616,33 +643,45 @@ from the parent application.
 	
 	<cffunction name="computeAssetPath" access="private" returntype="string" output="false"
 		hint="Checks if the raw asset path and type is already in the asset path cache.">
-		<cfargument name="assetType" type="string" required="true" />
-		<cfargument name="assetPath" type="string" required="true" />
+		<cfargument name="assetType" type="string" required="true"
+			hint="The type of asset ('img', 'js' and 'css')." />
+		<cfargument name="assetPath" type="string" required="true"
+			hint="The asset path which will be resolved to a full path as necessary." />
 		
 		<cfset var assetPathHash = "" />
-		<cfset var path = "" />
+		<cfset var assetPathTimestamp = "" />
+		<cfset var resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
 		
 		<!--- Check if we are caching asset paths --->
 		<cfif getCacheAssetPaths()>
-			<cfset assetPathHash = Hash(UCase(arguments.assetType & "_" & arguments.assetPath)) />
+			<cfset assetPathHash = createAssetPathHash(resolvedPath) />
+
 			<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
-				<cfset path = variables.assetPathsCache[assetPathHash] />
+				<cfset assetPathTimestamp = variables.assetPathsCache[assetPathHash] />
 			<cfelse>
-				<cfset path = buildAssetPath(arguments.assetType, arguments.assetPath) />
-				<cfset variables.assetPathsCache[assetPathHash] = path />
+				<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
+				<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
 			</cfif>
+			
+			<cfreturn resolvedPath & "?" & assetPathTimestamp />
 		<cfelse>
-			<cfset path = buildAssetPath(arguments.assetType, arguments.assetPath) />
-		</cfif>
-		
-		<cfreturn path />
+			<cfreturn resolvedPath />
+		</cfif>	
+	</cffunction>
+	
+	<cffunction name="createAssetPathHash" access="private" returntype="string" output="false"
+		hint="Creates an asset path hash which can be used as a struct key.">
+		<cfargument name="resolvedPath" type="string" required="true"
+			hint="A full web-root resolved asset path." />
+		<cfreturn Hash(arguments.resolvedPath) />
 	</cffunction>
 	
 	<cffunction name="buildAssetPath" access="private" returntype="string" output="false"
-		hint="Builds the asset path for a raw path and type.">
+		hint="Builds a fully resolved asset path from a raw path and type.">
 		<cfargument name="assetType" type="string" required="true"
 			hint="The asset type for passed asset path. Takes 'img', 'css' or 'js'." />
-		<cfargument name="assetPath" type="string" required="true" />
+		<cfargument name="assetPath" type="string" required="true"
+			hint="An unresolved asset path to resolve to a full web-root path." />
 		
 		<cfset var path = arguments.assetPath />
 		
@@ -661,9 +700,6 @@ from the parent application.
 		<cfif arguments.assetType NEQ "img">
 			<cfset path = appendFileExtension(arguments.assetType, path) />
 		</cfif>
-		
-		<!--- Append the timestamp --->
-		<cfset path = path & "?" & fetchAssetTimestamp(path) />
 		
 		<cfreturn path />
 	</cffunction>
@@ -684,14 +720,16 @@ from the parent application.
 		
 	<cffunction name="fetchAssetTimestamp" access="private" returntype="numeric" output="false"
 		hint="Fetches the asset timestamp (seconds from epoch) from the passed target asset path.">
-		<cfargument name="assetPath" type="string" required="true"
-			hint="This is the full asset path from the webroot." />
+		<cfargument name="resolvedPath" type="string" required="true"
+			hint="This is the full resolved asset path from the webroot." />
 		
-		<cfset var path = getWebrootBasePath() & "/" & arguments.assetPath />
+		<cfset var path = getWebrootBasePath() & "/" & arguments.resolvedPath />
 		<cfset var directoryResults = "" />
 		
-		<cfdirectory action="LIST" directory="#GetDirectoryFromPath(path)#" 
-			name="directoryResults" filter="#GetFileFromPath(path)#" />
+		<cfdirectory name="directoryResults"
+			action="list" 
+			directory="#GetDirectoryFromPath(path)#" 
+			filter="#GetFileFromPath(path)#" />
 
 		<!--- Assert the file was found --->
 		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
@@ -699,7 +737,7 @@ from the parent application.
 				, "Asset path: '#path#'") />
 		
 		<!--- Conver current time to UTC because epoch is essentially UTC --->
-		<cfreturn DateDiff("s", CreateDate(1970, 1, 1), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+		<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
 	</cffunction>
 	
 	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
