@@ -81,7 +81,7 @@ Notes:
 		<cfset var key = "" />
 		
 		<!--- Don't run if there are nothing subscribed --->
-		<cfif StructCount(subcribers)>
+		<cfif StructCount(subscribers)>
 			
 			<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
 			<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
