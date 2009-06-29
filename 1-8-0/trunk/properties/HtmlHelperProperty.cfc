@@ -159,6 +159,7 @@ from the parent application.
 					<cfset element.paths = Trim(temp) />
 					<cfset element.type = ListLast(element.paths, ".") />
 					<cfset element.attributes = "" />
+					<cfset element.forIEVersion = "" />
 				<cfelseif IsStruct(temp)>
 					<cfset getAssert().isTrue(StructKeyExists(temp, "paths")
 						, "A key named 'paths' must exist for an element in position '#i#' of a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
