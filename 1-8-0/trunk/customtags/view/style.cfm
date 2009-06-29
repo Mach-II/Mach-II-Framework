@@ -25,6 +25,8 @@ Updated version: 1.8.0
 Notes:
 - OPTIONAL ATTRIBUTES
 	outputType	= [string] outputs the code to "head" or "inline"
+	meida = [string] specifies styles for different media types
+	forIEVersion = [string] wraps an IE conditional comment around the incoming code
 --->
 <cfparam name="attributes.outputType" type="string" 
 	default="head" />
@@ -36,6 +38,10 @@ Notes:
 	default="" />
 
 <cfif thisTag.ExecutionMode IS "end">
+
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
+
 	<cfset variables.js = Chr(13) & '<style type="text/css"' />
 	
 	<cfif Len(attributes.media)>
