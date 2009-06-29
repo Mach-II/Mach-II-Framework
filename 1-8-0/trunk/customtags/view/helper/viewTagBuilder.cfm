@@ -36,4 +36,33 @@ PROPERTIES
 <!---
 PUBLIC FUNCTIONS
 --->
+<cffunction name="wrapIEConditionalComment" access="private" returntype="string" output="false"
+	hint="Wraps an IE conditional comment around the incoming code.">
+	<cfargument name="forIEVersion" type="string" required="true" />
+	<cfargument name="code" type="string" required="true" />
+	
+	<cfset var conditional = Trim(arguments.forIEVersion) />
+	<cfset var comment = Chr(13) />
+	
+	<!--- "all" in the version means all versions of IE --->
+	<cfif conditional EQ "all">
+		<cfset comment = comment & "<!--[if IE]>" & Chr(13) />
+	<!--- No operator (just version number) means EQ for version --->
+	<cfelseif IsNumeric(conditional)>
+		<cfset comment = comment & "<!--[if IE " & conditional &  "]>" & Chr(13)  />
+	<!--- Use operator and version --->
+	<cfelseif ListLen(conditional, " ") EQ 2>
+		<cfset comment = comment & "<!--[if " & ListFirst(conditional, " ") & " IE " & ListLast(conditional, " ") &  "]>" & Chr(13)  />
+	<!--- Throw an exception because of no match for conditional --->
+	<cfelse>
+		<cfthrow type="MachII.customtags.view.invalidIEConditional"
+			message="An IE conditional of '#conditional#' is invalid."
+			detail="The conditional value must be 'all', IE version number (numeric) or operator (lt, gte) plus IE version number." />
+	</cfif>
+	
+	<!--- Append the code --->
+	<cfset comment = comment & arguments.code & Chr(13) & "<![endif]-->" & Chr(13) />
+
+	<cfreturn comment />
+</cffunction>
 </cfsilent>
