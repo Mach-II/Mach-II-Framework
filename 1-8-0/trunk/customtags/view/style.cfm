@@ -29,11 +29,20 @@ Notes:
 <cfparam name="attributes.outputType" type="string" 
 	default="head" />
 
+<cfparam name="media" type="string"
+	default="" />
+
 <cfparam name="attributes.forIEVersion" type="string"
 	default="" />
 
 <cfif thisTag.ExecutionMode IS "end">
-	<cfset variables.js = Chr(13) & '<style type="text/css">' & Chr(13) & '<!--//--><![CDATA[//><!--' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//--><!]]>' & Chr(13) &  '</style>' & Chr(13) />
+	<cfset variables.js = Chr(13) & '<style type="text/css"' />
+	
+	<cfif Len(attributes.media)>
+		<cfset variables.js = variables.js & ' media="' & attributes.media & '"' />
+	</cfif>
+			
+	<cfset variables.js = variables.js & '>' & Chr(13) & '<!--//--><![CDATA[//><!--' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//--><!]]>' & Chr(13) &  '</style>' & Chr(13) />
 	
 	<!--- Wrap in an IE conditional if defined --->
 	<cfif Len(attributes.forIEVersion)>
