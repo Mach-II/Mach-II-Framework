@@ -31,7 +31,7 @@ Notes:
 <cfparam name="attributes.outputType" type="string" 
 	default="head" />
 
-<cfparam name="media" type="string"
+<cfparam name="attributes.media" type="string"
 	default="" />
 
 <cfparam name="attributes.forIEVersion" type="string"
