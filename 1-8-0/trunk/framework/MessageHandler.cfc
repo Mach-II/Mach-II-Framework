@@ -80,57 +80,66 @@ Notes:
 		<cfset var log = getLog() />
 		<cfset var key = "" />
 		
-		<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
-		<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
-		
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
-			</cfif>
+		<!--- Don't run if there are nothing subscribed --->
+		<cfif StructCount(subcribers)>
 			
-			<!--- Setup parameters --->
-			<cfset parameters.event = arguments.event />
-			<cfset parameters.eventContext = arguments.eventContext />
+			<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
+			<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
 			
-			<!--- Run all the threads --->
-			<cfloop collection="#subscribers#" item="key">
-				<cfset threadIds[threadingAdapter.run(subscribers[key], "execute", parameters)] = key />
-			</cfloop>
-			
-			<!--- Wait and join --->
-			<cfif getWaitForThreads()>
 				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
+					<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
 				</cfif>
-
-				<cfset results = threadingAdapter.join(threadIds, getTimeout()) />
 				
-				<!--- Create an exception --->
-				<cfif ArrayLen(results.errors)>
-					<cfset continue = false />
-					<!--- We can only handle one exception at once so use the first error --->
-					<cfif log.isErrorEnabled()>
-						<cfset log.error("#results[results.errors[1]].error.message#", results[results.errors[1]].error) />
-					</cfif>					
-					<cfset exception = arguments.eventContext.getRequestHandler().wrapException(results[results.errors[1]].error) />
-					<cfset arguments.eventContext.handleException(exception, true) />
+				<!--- Setup parameters --->
+				<cfset parameters.event = arguments.event />
+				<cfset parameters.eventContext = arguments.eventContext />
+				
+				<!--- Run all the threads --->
+				<cfloop collection="#subscribers#" item="key">
+					<cfset threadIds[threadingAdapter.run(subscribers[key], "execute", parameters)] = key />
+				</cfloop>
+				
+				<!--- Wait and join --->
+				<cfif getWaitForThreads()>
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
+					</cfif>
+	
+					<cfset results = threadingAdapter.join(threadIds, getTimeout()) />
+					
+					<!--- Create an exception --->
+					<cfif ArrayLen(results.errors)>
+						<cfset continue = false />
+						<!--- We can only handle one exception at once so use the first error --->
+						<cfif log.isErrorEnabled()>
+							<cfset log.error("#results[results.errors[1]].error.message#", results[results.errors[1]].error) />
+						</cfif>					
+						<cfset exception = arguments.eventContext.getRequestHandler().wrapException(results[results.errors[1]].error) />
+						<cfset arguments.eventContext.handleException(exception, true) />
+					</cfif>
+				<!--- Or set thread ids into the event --->
+				<cfelse>
+					<cfif log.isTraceEnabled()>
+						<cfset log.trace("Not waiting to join message threads.") />
+					</cfif>
+					<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
+					<cfset arguments.event.setArg("_publishThreadIds", publishThreadIdsInEvent) />
 				</cfif>
-			<!--- Or set thread ids into the event --->
+			<!--- Run in serial --->
 			<cfelse>
-				<cfif log.isTraceEnabled()>
-					<cfset log.trace("Not waiting to join message threads.") />
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
 				</cfif>
-				<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
-				<cfset arguments.event.setArg("_publishThreadIds", publishThreadIdsInEvent) />
+	
+				<cfloop collection="#subscribers#" item="key">
+					<cfset subscribers[key].execute(arguments.event, arguments.eventContext) />
+				</cfloop>
 			</cfif>
-		<!--- Run in serial --->
+		
 		<cfelse>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
+			<cfif log.isWarnEnabled()>
+				<cfset log.warn("There are no listeners or beans that have subscribed to a message named '#getMessageName()#'. Please check your configuration.") />
 			</cfif>
-
-			<cfloop collection="#subscribers#" item="key">
-				<cfset subscribers[key].execute(arguments.event, arguments.eventContext) />
-			</cfloop>
 		</cfif>
 		
 		<cfreturn continue />
