@@ -46,11 +46,11 @@ Configuration Usage:
 		<!-- Defaults to ExpandPath(".") -->
 		<parameter name="webrootBasePath" value="/path/to/webroot" />
 		<!-- Defaults to webroot base path + "/js" -->
-		<parameter name="jsBasePath" value="/path/from/webroot" />
+		<parameter name="jsBasePath" value="/path/from/webroot/js" />
 		<!-- Defaults to webroot base path + "/css" -->
-		<parameter name="cssBasePath" value="/path/from/webroot" />
+		<parameter name="cssBasePath" value="/path/from/webroot/css" />
 		<!-- Defaults to webroot base path + "/img" -->
-		<parameter name="imgBasePath" value="/path/from/webroot" />
+		<parameter name="imgBasePath" value="/path/from/webroot/img" />
 		<parameter name="assetPackages">
 			<struct>
 				<key name="lightwindow">
@@ -410,7 +410,7 @@ from the parent application.
 		</cfloop>
 		
 		<!--- Enclose in an IE conditional comment if available --->
-		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion) >
+		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
 			<cfset code = wrapIEConditionalComment(arguments.forIEVersion, code) />
 		</cfif>
 		
@@ -420,36 +420,39 @@ from the parent application.
 	<cffunction name="addImage" access="public" returntype="string" output="false"
 		hint="Adds code for an img tag for inline use.">
 		<cfargument name="path" type="string" required="true"
-			hint="A path to a web accessible image file." />
-		<cfargument name="width" type="numeric" required="false" 
-			hint="The width of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
-		<cfargument name="height" type="numeric" required="false"
-			hint="The height of the image in pixels. A value of '-1' will cause this attribute to be omitted." />
+			hint="A path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
+		<cfargument name="width" type="string" required="false" 
+			hint="The width of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted." />
+		<cfargument name="height" type="string" required="false"
+			hint="The height of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted." />
 		<cfargument name="alt" type="string" required="false"
-			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. A zero-length string will cause this attribute to be omitted." />
+			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. If not defined, the value of 'alt=""' will be used as this attribute is required by the W3C specification." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		
 		<cfset var code = '<img src="' & computeAssetPath("img", arguments.path) & '"' />
 		<cfset var key = "" />
 		
-		<cfif StructKeyExists(arguments, "height") AND arguments.height LT 0>
+		<cfif StructKeyExists(arguments, "height") AND arguments.height EQ -1>
 			<cfset code = code & ' height="' & arguments.height  & '"' />
 		</cfif>
 		
-		<cfif StructKeyExists(arguments, "width") AND arguments.width LT 0>
+		<cfif StructKeyExists(arguments, "width") AND arguments.width EQ -1>
 			<cfset code = code & ' width="' & arguments.width  & '"' />
 		</cfif>
 		
+		<!--- The 'alt' attribute is required by the W3C specification --->
 		<cfif StructKeyExists(arguments, "alt") AND Len(arguments.alt)>
 			<cfset code = code & ' alt="' & HTMLEditFormat(arguments.alt)  & '"' />
+		<cfelse>
+			<cfset code = code & ' alt="' & '"' />
 		</cfif>
 		
 		<!--- Explode attributes to struct --->
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
-			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
+			<cfset code = code & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
 		</cfloop>
 		
 		<cfset code = code & ' />' />

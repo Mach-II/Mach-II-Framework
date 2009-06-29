@@ -250,8 +250,11 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
 		<!---
-			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and aliases
-			as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler)
+			We need a local list of names because if the deconfigure() is run we have to remove the routes from
+			the RequestManager which is a singleton.
+			
+			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and 
+			aliases as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler).
 		--->
 		<cfset variables.routeNames.add(arguments.routeName) />
 		
