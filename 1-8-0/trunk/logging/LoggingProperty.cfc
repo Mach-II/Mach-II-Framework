@@ -154,6 +154,7 @@ will bind to root parameter values.
 		<cfset var defaultLoggerParameters = StructNew() />
 		<cfset var loggers = StructNew() />
 		<cfset var moduleName = getAppManager().getModuleName() />
+		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var key = "" />
 		
 		<!--- Setup a manager for all of the loggers --->
@@ -190,13 +191,13 @@ will bind to root parameter values.
 		<cfloop collection="#loggers#" item="key">
 			<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 			<cfif loggers[key].isOnRequestEndAvailable()>
-				<cfset getAppManager().getRequestManager().addOnRequestEndCallback(loggers[key], "onRequestEnd") />
+				<cfset requestManager.addOnRequestEndCallback(loggers[key], "onRequestEnd") />
 			</cfif>
 			
 			<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
 			<cfif loggers[key].isPrePostRedirectAvailable()>
-				<cfset getAppManager().getRequestManager().addPreRedirectCallback(loggers[key], "preRedirect") />
-				<cfset getAppManager().getRequestManager().addPostRedirectCallback(loggers[key], "postRedirect") />
+				<cfset requestManager.addPreRedirectCallback(loggers[key], "preRedirect") />
+				<cfset requestManager.addPostRedirectCallback(loggers[key], "postRedirect") />
 			</cfif>
 		</cfloop>
 				

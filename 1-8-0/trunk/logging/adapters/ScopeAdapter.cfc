@@ -25,34 +25,6 @@ Notes:
 Special thanks to the Simple Log in Apache Commons Logging project for inspiration for this component.
 
 Uses the GenericChannelFitler for filtering. See that CFC for information on how to use to setup filters.
-
-Configuration Example:
-<property name="logging" type="MachII.properties.LoggingProperty">
-	<parameters>
-		<parameter name="MachIILog">
-			<struct>
-				<key name="type" value="MachII.logging.adapters.MachIILogAdapter" />
-				<!-- Optional and defaults to true />
-				<key name="loggingEnabled" value="true|false" />
-				<!-- Optional and defaults to 'info' -->
-				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
-				<!-- Optional and defaults to false -->
-				<key name="debugModeOnly" value="true|false" />
-				<!-- Optional -->
-				<key name="filter" value="list,of,filter,criteria" />
-				- OR -
-				<key name="filter">
-					<array>
-						<element value="array" />
-						<element value="of" />
-						<element value="filter" />
-						<element value="criteria" />
-					</array>
-				</key>
-			</struct>
-		</parameter>
-	</parameters>
-</property>
 --->
 <cfcomponent
 	displayname="ScopeAdapter"

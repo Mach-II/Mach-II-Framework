@@ -88,8 +88,9 @@ first [Hash(UCase(arguments.channell))]
 	</cffunction>
 	
 	<cffunction name="removeLogAdapter" access="public" returntype="void" output="false"
-		hints="Removes a log adapter by log adapter name.">
-		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
+		hints="Removes a log adapter by log adapter instance.">
+		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true"
+			hint="The instance of the log adapter to remove" />
 		
 		<cfset var utils = getUtils() />
 		<cfset var key = "" />

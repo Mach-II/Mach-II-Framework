@@ -19,10 +19,18 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface.
+
+Logging levels in order of least severe to most severe:
+ * trace
+ * debug
+ * info
+ * warn
+ * error
+ * fatal
 --->
 <cfcomponent
 	displayname="Log"
@@ -40,8 +48,10 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	--->
 	<cffunction name="init" access="public" returntype="Log" output="false"
 		hint="Initializes the logging facade.">
-		<cfargument name="channel" type="string" required="true" />
-		<cfargument name="logAdapters" type="struct" required="true" />
+		<cfargument name="channel" type="string" required="true"
+			hint="The channel name for this Log." />
+		<cfargument name="logAdapters" type="struct" required="true"
+			hint="A struct of registered log adapters. Struct are by reference total number of adapters may change during the lifetime of the application." />
 
 		<cfset setChannel(arguments.channel) />
 		<cfset setLogAdapters(arguments.logAdapters) />
@@ -54,98 +64,133 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	--->
 	<cffunction name="debug" access="public" returntype="void" output="false"
 		hint="Logs a message with debug log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].debug(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+
+		<!---
+		The result of the StructKeyExists evaluation will not change after the first evaluation.
+		Having two loops saves on multiple StructKeyExist calls over the lifetime 
+		of the request instead of an internally nested conditional statement.
+		--->
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].debug(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].debug(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="error" access="public" returntype="void" output="false"
 		hint="Logs a message with error log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].error(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].error(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].error(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].error(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="fatal" access="public" returntype="void" output="false"
 		hint="Logs a message with fatal log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].fatal(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].fatal(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].fatal(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="info" access="public" returntype="void" output="false"
 		hint="Logs a message with info log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].info(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].info(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].info(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].info(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="trace" access="public" returntype="void" output="false"
 		hint="Logs a message with trace log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].trace(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].trace(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].trace(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="warn" access="public" returntype="void" output="false"
 		hint="Logs a message with warn log level.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="additionalInformation" type="any" required="false" />
+		<cfargument name="message" type="string" required="true"
+			hint="A message to log." />
+		<cfargument name="additionalInformation" type="any" required="false"
+			hint="Any additional information which may or may not be used by the adapters. Takes all data types." />
 
+		<cfset var channel = getChannel() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.logAdapters#" item="key">
-			<cfif StructKeyExists(arguments, "additionalInformation")>
-				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message, arguments.additionalInformation) />
-			<cfelse>
-				<cfset variables.logAdapters[key].warn(getChannel(), arguments.message) />
-			</cfif>
-		</cfloop>
+		<cfif StructKeyExists(arguments, "additionalInformation")>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].warn(channel, arguments.message, arguments.additionalInformation) />
+			</cfloop>
+		<cfelse>
+			<cfloop collection="#variables.logAdapters#" item="key">
+				<cfset variables.logAdapters[key].warn(channel, arguments.message) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="isDebugEnabled" access="public" returntype="boolean" output="false"
