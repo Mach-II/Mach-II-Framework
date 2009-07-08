@@ -621,7 +621,7 @@ Notes:
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
-		<!--- Check for conflicts --->
+		<!--- Check for name conflicts --->
 		<cfif StructKeyExists(variables.routes,  arguments.routeName)>
 			<cfthrow type="MachII.RequestManager.RouteNameConflict"
 				message="A route named '#arguments.routeName#' is already defined. Please remove the route name conflict." />
@@ -636,6 +636,22 @@ Notes:
 		<cfif arguments.route.isUrlAliasDefined()>
 			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="checkRouteParameterNames" access="private" returntype="void" output="false">
+		<cfset var route = 0 />
+		<cfset var routes = getRoutes() />
+		<cfset var index = "" />
+		
+		<cfloop list="#StructKeyList(routes)#" index="index">
+			<cfset route = routes[index] />
+			
+			<!--- Check to see if any parameter names match the eventParameter --->
+			<cfif ListFindNoCase(route.getAllParameterNames(), getEventParameter()) gt 0>
+				<cfthrow type="MachII.RequestManager.RouteParameterNameConflict"
+					message="A route named '#index#' with an URL alias of '#route.getUrlAlias()#' has a parameter called '#getEventParameter()#' which is same as the event parameter name. Route parameters can not have the same name as the event parameter." />			
+			</cfif>
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="removeRoute" access="public" returntype="void" output="false"
@@ -673,6 +689,7 @@ Notes:
 	<cffunction name="setEventParameter" access="private" returntype="void" output="false">
 		<cfargument name="eventParameter" type="string" required="true" />
 		<cfset variables.eventParameter = arguments.eventParameter />
+		<cfset checkRouteParameterNames() />
 	</cffunction>
 	<cffunction name="getEventParameter" access="private" returntype="string" output="false">
 		<cfreturn variables.eventParameter />

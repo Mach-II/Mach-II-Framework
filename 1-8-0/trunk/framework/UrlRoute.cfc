@@ -388,6 +388,31 @@ Notes:
 	<cffunction name="getRequiredParameters" access="public" returntype="array" output="false">
 		<cfreturn variables.requiredParameters />
 	</cffunction>
+	
+	<cffunction name="getAllParameterNames" access="public" returntype="string" output="false">
+		<cfset var parameterList = "" />
+		<cfset var optionalParameters = getOptionalParameters() />
+		<cfset var requiredParameters = getRequiredParameters() />
+		<cfset var i = 0>
+		
+		<cfloop from="1" to="#arrayLen(optionalParameters)#" index="i">
+			<cfif NOT ListLen(optionalParameters[i], ":") EQ 2>
+				<cfset parameterList = ListAppend(parameterList, optionalParameters[i]) />
+			<cfelse>
+				<cfset parameterList = ListAppend(parameterList, ListGetAt(optionalParameters[i], 1, ":")) />
+			</cfif>
+		</cfloop>
+		
+		<cfloop from="1" to="#arrayLen(requiredParameters)#" index="i">
+			<cfif NOT ListLen(requiredParameters[i], ":") EQ 2>
+				<cfset parameterList = ListAppend(parameterList, requiredParameters[i]) />
+			<cfelse>
+				<cfset parameterList = ListAppend(parameterList, ListGetAt(requiredParameters[i], 1, ":")) />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn parameterList />
+	</cffunction>
 
 	<cffunction name="setOptionalParameters" access="public" returntype="void" output="false">
 		<cfargument name="optionalParameters" type="array" required="true" />
