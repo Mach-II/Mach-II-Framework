@@ -72,16 +72,19 @@ in the Mach-II dashboard.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="put" access="public" returntype="void" output="false"
+	<cffunction name="put" access="public" returntype="void" output="false" 
 		hint="Puts an element by key into the cache.">
-		<cfargument name="key" type="string" required="true" />
-		<cfargument name="data" type="any" required="true" />
+		<cfargument name="key" type="string" required="true"
+			hint="The unique key for the data to put in the cache." />
+		<cfargument name="data" type="any" required="true"
+			hint="The data to cache." />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
 		hint="Gets an element by key from the cache.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true"
+			hint="The unique key for the data to get from the cache." />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
@@ -97,13 +100,15 @@ in the Mach-II dashboard.
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checks if an element exists by key in the cache.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true"
+			hint="The unique key for the data to check if it is in the cache." />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	
 	<cffunction name="remove" access="public" returntype="void" output="false"
 		hint="Removes a cached element by key.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true"
+			hint="The unique key for the data to remove from the cache." />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 	

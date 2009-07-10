@@ -147,7 +147,7 @@ via reap() which is run every 3 minutes.
 
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
 		
-		<!--- Setup and clear the cache by running a flush() --->
+		<!--- Setup the cache by running a flush() --->
 		<cfset flush() />
 	</cffunction>
 	
@@ -157,7 +157,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="put" access="public" returntype="void" output="false"
 		hint="Puts an element by key into the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key should not be a hashed key." />
+			hint="The key to put the data in the cache. The key should not be a hashed key." />
 		<cfargument name="data" type="any" required="true"
 			hint="The data to cache." />
 
@@ -187,7 +187,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="get" access="public" returntype="any" output="false"
 		hint="Gets en element by key from the cache. Returns 'null' if the key is not in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key should not be a hashed key." />
+			hint="The key to get the data from the cache. The key should not be a hashed key." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
@@ -221,7 +221,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="keyExists" access="public" returntype="any" output="false"
 		hint="Checks if an element exists by key in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key should not be a hashed key." />
+			hint="The key to check if the data exists in the cache. The key should not be a hashed key." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
@@ -246,7 +246,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="remove" access="public" returntype="void" output="false"
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key should not be a hashed key." />
+			hint="The key to use to remove data from the cache. The key should not be a hashed key." />
 		<cfset removeByHashedKey(hashKey(arguments.key)) />
 	</cffunction>
 	
@@ -310,14 +310,19 @@ via reap() which is run every 3 minutes.
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var cacheElement = "" />
+		<cfset var elementExists = "" />
 
 		<cfif StructKeyExists(dataStorage, arguments.hashedKey)>
 			<cfset cacheElement = dataStorage[arguments.hashedKey] />
 			
  			<cfif cacheElement.isStale>
-				<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
-				<cfset getCacheStats().incrementEvictions(1) />
-				<cfset getCacheStats().decrementTotalElements(1) />
+				<cfset elementExists = StructDelete(dataStorage, arguments.hashedKey, true) />
+
+				<!--- Only update the cache stats if the element still existed (due to a possible race condition) --->
+				<cfif elementExists>
+					<cfset getCacheStats().incrementEvictions(1) />
+					<cfset getCacheStats().decrementTotalElements(1) />
+				</cfif>
 			<cfelse>
 				<cfset cacheElement.isStale = true />
 				<cfset getCacheStats().decrementActiveElements(1) />
@@ -336,18 +341,22 @@ via reap() which is run every 3 minutes.
 			<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
 			
 			<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
-				<!--- Don't wait because an exclusive lock that has already been obtained
-					indicates that a clean is in progress and we should not wait for the
-					second check in the double-lock-check routine
-					Setting the timeout to 0 indicates to wait indefinitely --->
+				<!---
+				Don't wait because an exclusive lock that has already been obtained
+				indicates that a clean is in progress and we should not wait for the
+				second check in the double-lock-check routine
+				Setting the timeout to 0 indicates to wait indefinitely
+				--->
 				<cflock name="#getNamedLockName("cleanup")#" 
 						type="exclusive" 
 						timeout="1" 
 						throwontimeout="false">
 					<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
 						<cfif getThreadingAdapter().allowThreading()>
-							<!--- We have to set last cleanup here because execlusive
-							threads locks in cfthread are not shared in the parent thread --->
+							<!---
+							We have to set last cleanup here because execlusive
+							threads locks in cfthread are not shared in the parent thread
+							--->
 							<cfset variables.lastCleanup = getCurrentTickCount() />
 							<cfset getThreadingAdapter().run(this, "reap") />
 						<cfelse>
@@ -392,16 +401,21 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var name = "_MachIITimeSpanCache_" & arguments.actionType & "_" & getScopeKey() />
 		
-		<!--- We don't want all sessions to share the same named lock
-			since they will run reap independently whereas reap 
-			done in the application or server scopes will only run once --->
+		<!---
+		We don't want all sessions to share the same named lock
+		since they will run reap independently whereas reap 
+		done in the application or server scopes will only run once
+		--->
 		<cfif getScope() EQ "session">
-			<!--- Cannot directly access session scope because most CFML
-			engine will throw an error if sessions are disabled --->
-			<!--- A StructClear(session) eliminates the sessionId needed
-				so only use it if it available, otherwise too bad for you
-				as all repeats will be single threaded because we have no 
-				unique identifier --->
+			<!---
+			Cannot directly access session scope because most CFML
+			engine will throw an error if sessions are disabled.
+			
+			A StructClear(session) eliminates the sessionId needed
+			so only use it if it available, otherwise too bad for you
+			as all repeats will be single threaded because we have no 
+			unique identifier
+			--->
 			<cfif StructKeyExists(StructGet("session"), "sessionId")>
 				<cfset name = name & "_" & StructGet("session").sessionId />
 			</cfif>

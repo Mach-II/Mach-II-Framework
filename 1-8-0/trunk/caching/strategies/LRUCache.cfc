@@ -116,6 +116,7 @@ in the application scope.
 			<cfset setScopeKey("_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		
+		<!--- Setup the cache by running a flush() --->
 		<cfset flush() />
 	</cffunction>
 	
@@ -125,8 +126,9 @@ in the application scope.
 	<cffunction name="put" access="public" returntype="void" output="false"
 		hint="Puts data into the cache by key.">
 		<cfargument name="key" type="string" required="true"
-			hint="Key does not need to be hashed." />
-		<cfargument name="data" type="any" required="true" />
+			hint="The key to used for the cache data. Key should not be pre-hashed." />
+		<cfargument name="data" type="any" required="true"
+			hint="The data to be put in the cache." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var cacheElement = StructNew() />
@@ -149,7 +151,7 @@ in the application scope.
 	<cffunction name="get" access="public" returntype="any" output="false"
 		hint="Gets data from the cache by key. Returns null if the key is not in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="Key does not need to be hashed." />
+			hint="The key to use to get data from the cache. Key should not be hashed." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var cacheElement = "" />
@@ -179,18 +181,14 @@ in the application scope.
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
 		hint="Checkes if a key exists in the cache.">
 		<cfargument name="key" type="string" required="true"
-			hint="Key should not be hashed." />
-		<cfif NOT StructKeyExists(getStorage(), hashKey(arguments.key))>
-			<cfreturn false />
-		<cfelse>
-			<cfreturn true />
-		</cfif>
+			hint="The key to use to check if the data is in the cache. Key should not be hashed." />
+		<cfreturn StructKeyExists(getStorage(), hashKey(arguments.key)) />
 	</cffunction>
 	
 	<cffunction name="remove" access="public" returntype="void" output="false"
 		hint="Removes data from the cache by key.">
 		<cfargument name="key" type="string" required="true"
-			hint="The key does not need to be hashed." />
+			hint="The key to use to remove the data from the cache. The key should not be hashed." />
 		<cfset removeHashedKey(hashKey(arguments.key)) />
 	</cffunction>
 	
@@ -203,10 +201,12 @@ in the application scope.
 		
 		<cfif (StructCount(dataStorage) + 1) GT getSize()>
 	
-			<!--- Don't wait because an exclusive lock that has already been obtained
-				indicates that a reap is in progress and we should not wait for the
-				second check in the double-lock-check routine
-				Setting the timeout to 0 indicates to wait indefinitely --->
+			<!---
+			Don't wait because an exclusive lock that has already been obtained
+			indicates that a reap is in progress and we should not wait for the
+			second check in the double-lock-check routine
+			Setting the timeout to 0 indicates to wait indefinitely
+			--->
 			<cflock name="#getNamedLockName("cleanup")#" 
 				type="exclusive" 
 				timeout="1" 
@@ -258,9 +258,10 @@ in the application scope.
 			hint="The key must be hashed." />
 
 		<cfset var dataStorage = getStorage() />
+		<cfset var elementExists = StructDelete(dataStorage, arguments.hashedKey, true) />
 
-		<cfif StructKeyExists(dataStorage, arguments.hashedKey)>
-			<cfset StructDelete(dataStorage, arguments.hashedKey, false) />
+		<!--- Only update the cache stats if the element still existed (due to a possible race condition) --->
+		<cfif elementExists>
 			<cfset getCacheStats().incrementEvictions(1) />
 			<cfset getCacheStats().decrementTotalElements(1) />
 			<cfset getCacheStats().decrementActiveElements(1) />
