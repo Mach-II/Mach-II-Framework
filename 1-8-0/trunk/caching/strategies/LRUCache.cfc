@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -207,8 +207,10 @@ in the application scope.
 				indicates that a reap is in progress and we should not wait for the
 				second check in the double-lock-check routine
 				Setting the timeout to 0 indicates to wait indefinitely --->
-			<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-				timeout="20" throwontimeout="false">
+			<cflock name="#getNamedLockName("cleanup")#" 
+				type="exclusive" 
+				timeout="1" 
+				throwontimeout="false">
 				
 				<cfif (StructCount(dataStorage) + 1) GT getSize()>
 				

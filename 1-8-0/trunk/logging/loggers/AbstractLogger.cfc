@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ Updated version: 1.8.0
 
 Notes:
 When implementing a logger, do not implement onRequestEnd, onRedirectStart
-and onRedirectEnd method if required. Mach-II introspecs your logger and
-only executes methods that have been implemented to increase performance. 
+and onRedirectEnd method unless required. Mach-II introspecs your logger and
+only executes methods that have been implemented in order to increase performance. 
 --->
 <cfcomponent
 	displayname="AbstractLogger"
@@ -46,8 +46,10 @@ only executes methods that have been implemented to increase performance.
 	--->
 	<cffunction name="init" access="public" returntype="AbstractLogger" output="false"
 		hint="Initializes the logger. Do not override.">
-		<cfargument name="loggerId" type="string" required="true" />
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="loggerId" type="string" required="true"
+			hint="The unique id for this logger." />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of configure time parameters." />
 		
 		<!--- Run setters --->
 		<cfset setLoggerId(arguments.loggerId) />

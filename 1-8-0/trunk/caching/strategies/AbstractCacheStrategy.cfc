@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Caching strategies:
@@ -55,7 +55,8 @@ in the Mach-II dashboard.
 	--->
 	<cffunction name="init" access="public" returntype="AbstractCacheStrategy" output="false"
 		hint="Initializes the caching strategy. Do not override.">
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of configure time parameters." />
 		
 		<cfset setParameters(arguments.parameters) />
 		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />

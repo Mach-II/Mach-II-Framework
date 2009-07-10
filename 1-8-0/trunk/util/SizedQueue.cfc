@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
+Queue methods are not synchronized so an external synchronization is required (i.e. cflock).
 --->
 <cfcomponent 
 	displayname="SizedQueue" 
@@ -39,7 +40,8 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="SizedQueue" output="false"
 		hint="Initializes the queue.">
-		<cfargument name="maxSize" type="numeric" required="false" default="100" />
+		<cfargument name="maxSize" type="numeric" required="false" default="100"
+			hint="The maximum size of the queue before an exception is raised." />
 		
 		<cfset super.init() />
 		<cfset setMaxSize(arguments.maxSize) />

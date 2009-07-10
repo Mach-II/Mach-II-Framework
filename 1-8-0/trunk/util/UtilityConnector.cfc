@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Connects Mach-II managed components for use in ColdSpring.
@@ -123,14 +123,6 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
-	</cffunction>
-	
-	<cffunction name="setModuleName" access="private" returntype="void" output="false">
-		<cfargument name="moduleName" type="string" required="true" />
-		<cfset variables.moduleName = arguments.moduleName />
-	</cffunction>
-	<cffunction name="getModuleName" access="public" returntype="string" output="false">
-		<cfreturn variables.moduleName />
 	</cffunction>
 	
 </cfcomponent>

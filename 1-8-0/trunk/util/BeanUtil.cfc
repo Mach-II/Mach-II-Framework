@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -141,7 +141,8 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 		
 		<cfset var fieldValue = "" />
 		
-		<cfinvoke component="#arguments.bean#" method="get#arguments.field#" 
+		<cfinvoke component="#arguments.bean#" 
+			method="get#arguments.field#" 
 			returnvariable="fieldValue" />
 			
 		<cfreturn fieldValue />
@@ -169,7 +170,8 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 				<cfset fieldName = Right(metaFunction.name, Len(metaFunction.name)-3) />
 				<!--- Lowercase the first letter of the field name --->
 				<cfset fieldName = LCase(Left(fieldName,1)) & Right(fieldName, Len(fieldName)-1) />
-				<cfinvoke component="#arguments.bean#" method="#metaFunction.name#" 
+				<cfinvoke component="#arguments.bean#" 
+					method="#metaFunction.name#" 
 					returnVariable="fieldValue" />
 				<cfset map[fieldName] = fieldValue />
 			</cfif>

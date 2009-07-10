@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -158,7 +158,8 @@ via reap() which is run every 3 minutes.
 		hint="Puts an element by key into the cache.">
 		<cfargument name="key" type="string" required="true"
 			hint="The key should not be a hashed key." />
-		<cfargument name="data" type="any" required="true" />
+		<cfargument name="data" type="any" required="true"
+			hint="The data to cache." />
 
 		<cfset var dataStorage = getStorage() />
 		<cfset var hashedKey = hashKey(arguments.key) />
@@ -258,8 +259,10 @@ via reap() which is run every 3 minutes.
 		<cfset var i = "" />
 		<cfset var count = 0 />
 		
-		<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-			timeout="1" throwontimeout="false">
+		<cflock name="#getNamedLockName("cleanup")#" 
+			type="exclusive" 
+			timeout="1" 
+			throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
 			<cfset variables.lastCleanup = currentTick />
@@ -337,8 +340,10 @@ via reap() which is run every 3 minutes.
 					indicates that a clean is in progress and we should not wait for the
 					second check in the double-lock-check routine
 					Setting the timeout to 0 indicates to wait indefinitely --->
-				<cflock name="#getNamedLockName("cleanup")#" type="exclusive" 
-					timeout="1" throwontimeout="false">
+				<cflock name="#getNamedLockName("cleanup")#" 
+						type="exclusive" 
+						timeout="1" 
+						throwontimeout="false">
 					<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
 						<cfif getThreadingAdapter().allowThreading()>
 							<!--- We have to set last cleanup here because execlusive
@@ -360,7 +365,8 @@ via reap() which is run every 3 minutes.
 	--->
 	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hash from a key name.">
-		<cfargument name="key" type="string" required="true" />
+		<cfargument name="key" type="string" required="true"
+			hint="The key to hash." />
 		<cfreturn Hash(UCase(Trim(arguments.key))) />
 	</cffunction>
 	
@@ -458,7 +464,8 @@ via reap() which is run every 3 minutes.
 				
 		<cfset variables.instance.timespan = offset />
 	</cffunction>
-	<cffunction name="getTimespan" access="public" returntype="any" output="false">
+	<cffunction name="getTimespan" access="public" returntype="any" output="false"
+		hint="Gets the timespan interval which is of type java.lang.BigInteger">
 		<cfreturn variables.instance.timespan />
 	</cffunction>
 

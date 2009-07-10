@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="AbstractLogAdapter" output="false"
 		hint="Initializes the logging adapter. Do not override.">
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of configure time parameters." />
 		
 		<cfset setParameters(arguments.parameters) />
 		

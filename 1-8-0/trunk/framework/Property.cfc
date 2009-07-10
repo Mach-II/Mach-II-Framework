@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 
 Notes:
 All user-defined properties extend this base property component.
@@ -40,9 +40,9 @@ All user-defined properties extend this base property component.
 	<cffunction name="init" access="public" returntype="Property" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
-			hint="The framework instances' AppManager." />
+			hint="The AppManager of the context in which this listener belongs to." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
-			hint="The initial set of configuration parameters." />
+			hint="The property configure time parameters." />
 		
 		<cfset super.init(arguments.appManager, arguments.parameters) />
 		

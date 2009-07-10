@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.5.0
+Updated version: 1.8.0
 --->
 <cfcomponent 
 	displayname="EventFilter"
@@ -36,8 +36,10 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="init" access="public" returntype="EventFilter" output="false"
 		hint="Used by the framework for initialization. Do not override.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager of the context in which this listener belongs to." />
+		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
+			hint="The event-filter configure time parameters." />
 		
 		<cfset super.init(arguments.appManager, arguments.parameters) />
 		
@@ -49,9 +51,12 @@ Updated version: 1.5.0
 	--->
 	<cffunction name="filterEvent" access="public" returntype="boolean" output="false"
 		hint="Override (be sure to keep the same arguments and returntype) to provide event filtering logic.">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="event" type="MachII.framework.Event" required="true"
+			hint="The current Event." />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
+			hint="The current EventContext." />
+		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of available runtime parameters." />
 		
 		<cfreturn true />
 	</cffunction>

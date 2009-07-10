@@ -1,7 +1,7 @@
 <cfsilent>
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -275,7 +275,8 @@ PUBLIC FUNCTIONS - UTIL
 
 <cffunction name="evaluateExpressionStruct" access="public" returntype="void" output="false"
 	hint="Evaluates a struct for expressions using the Expresion Evaluator.">
-	<cfargument name="target" type="struct" required="true" />
+	<cfargument name="targets" type="struct" required="true"
+		hint="A struct of targets to evaluate for expressions." />
 	<cfargument name="event" type="MachII.framework.Event" required="false"
 		default="#caller.this.getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent()#" />
 	<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="false"
@@ -285,9 +286,9 @@ PUBLIC FUNCTIONS - UTIL
 	
 	<cfset var key = "" />
 	
-	<cfloop collection="#arguments.target#" item="key">
-		<cfif arguments.expressionEvaluator.isExpression(arguments.target[key])>
-			<cfset arguments.target[key] = arguments.expressionEvaluator.evaluateExpression(arguments.target[key], arguments.event, arguments.propertyManager) />
+	<cfloop collection="#arguments.targets#" item="key">
+		<cfif arguments.expressionEvaluator.isExpression(arguments.targets[key])>
+			<cfset arguments.targets[key] = arguments.expressionEvaluator.evaluateExpression(arguments.targets[key], arguments.event, arguments.propertyManager) />
 		</cfif>
 	</cfloop>
 </cffunction>

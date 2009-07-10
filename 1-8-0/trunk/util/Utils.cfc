@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -167,15 +167,17 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="trimList" access="public" returntype="string" output="false"
-		hint="Trims each list item.">
-		<cfargument name="list" type="string" required="true" />
-		<cfargument name="delimiter" type="string" required="false" default="," />
+		hint="Trims each list item using Trim() and returns a cleaned list.">
+		<cfargument name="list" type="string" required="true"
+			hint="List to trim each item." />
+		<cfargument name="delimiters" type="string" required="false" default=","
+			hint="The delimiters of the list. Defaults to ',' when not defined." />
 		
 		<cfset var trimmedList = "" />
 		<cfset var i = 0 />
 		
-		<cfloop from="1" to="#ListLen(arguments.list)#" index="i">
-			<cfset trimmedList = ListAppend(trimmedList, Trim(ListGetAt(arguments.list, i, arguments.delimiter)), arguments.delimiter) />
+		<cfloop list="#arguments.list#" index="i" delimiters="#arguments.delimiters#">
+			<cfset trimmedList = ListAppend(trimmedList, Trim(i), arguments.delimiters) />
 		</cfloop>
 		
 		<cfreturn trimmedList />
@@ -186,7 +188,7 @@ Notes:
 		<cfargument name="attributes" type="any" required="true"
 			hint="Takes string of name/value pairs (format of 'name1=value1|name2=value2' where '|' is the delimiter) or a struct.">
 		<cfargument name="delimiters" type="string" required="false" default="|"
-			hint="Defaults to '|' when not defined (must be '|' for backward compatibility)." />
+			hint="The delimiters of the list. Defaults to '|' when not defined (must be '|' for backward compatibility)." />
 		
 		<cfset var result = StructNew() />
 		<cfset var temp = "" />
@@ -206,7 +208,7 @@ Notes:
 		<cfelse>
 			<cfthrow
 				type="MachII.framework.InvalidAttributeType"
-				message="The 'parseAttributesIntoStruct' method takes a struct or a string." />
+				message="The 'parseAttributesIntoStruct' method takes a struct or string." />
 		</cfif>
 		
 		<cfreturn result />
@@ -297,36 +299,36 @@ Notes:
 	
 	<cffunction name="buildMessageFromCfCatch" access="public" returntype="string" output="false"
 		hint="Builds a message string from a cfcatch.">
-		<cfargument name="catch" type="any" required="true"
+		<cfargument name="caughtException" type="any" required="true"
 			hint="A cfcatch to build a message with." />
 		
 		<cfset var message = "" />
 
 		<!--- Set always available cfcatch data points --->
-		<cfset message = "Type: " & arguments.catch.type />
-		<cfset message = message & " || Message: " & arguments.catch.message />
-		<cfset message = message & " || Detail: " & arguments.catch.detail />
+		<cfset message = "Type: " & arguments.caughtException.type />
+		<cfset message = message & " || Message: " & arguments.caughtException.message />
+		<cfset message = message & " || Detail: " & arguments.caughtException.detail />
 		
 		<!--- Set additional information on missing file name if available --->
-		<cfif StructKeyExists(arguments.catch, "missingFileName")>
-			<cfset message = message & " || Missing File Name: " & arguments.catch.missingFileName />
+		<cfif StructKeyExists(arguments.caughtException, "missingFileName")>
+			<cfset message = message & " || Missing File Name: " & arguments.caughtException.missingFileName />
 		</cfif>
 		
 		<!--- Set additional information on the template if available --->
-		<cfif StructKeyExists(arguments.catch, "template")>
-			<cfset message = message & " ||  Template: " & arguments.catch.template />
-			<cfif StructKeyExists(arguments.catch, "line")>
-				<cfset message = message & " at line " & arguments.catch.line />
+		<cfif StructKeyExists(arguments.caughtException, "template")>
+			<cfset message = message & " ||  Template: " & arguments.caughtException.template />
+			<cfif StructKeyExists(arguments.caughtException, "line")>
+				<cfset message = message & " at line " & arguments.caughtException.line />
 			</cfif>
 		</cfif>
 		
 		<!--- Set additional information on the database if available --->
-		<cfif arguments.catch.type EQ "database">
-			<cfif StructKeyExists(arguments.catch, "datasource")>
-				<cfset message = message & " || Datasource: " & arguments.catch.datasource />
+		<cfif arguments.caughtException.type EQ "database">
+			<cfif StructKeyExists(arguments.caughtException, "datasource")>
+				<cfset message = message & " || Datasource: " & arguments.caughtException.datasource />
 			</cfif>
-			<cfif StructKeyExists(arguments.catch, "sql")>
-				<cfset message = message & " || SQL: " & arguments.catch.sql />
+			<cfif StructKeyExists(arguments.caughtException, "sql")>
+				<cfset message = message & " || SQL: " & arguments.caughtException.sql />
 			</cfif>
 		</cfif>
 		

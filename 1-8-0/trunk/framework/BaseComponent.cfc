@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.baseProxy = "" />
-	<cfset variables.componentNameForLogging = ListLast(getMetaData(this).name, ".") />
+	<cfset variables.componentNameForLogging = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -51,6 +51,9 @@ quick access to things such as announcing a new event or getting/setting propert
 		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
+
+		<!--- Compute the compoent name that will be used for logging --->
+		<cfset variables.componentNameForLogging = ListLast(getMetaData(this).name, ".") />
 		
 		<cfset setLog(getAppManager().getLogFactory()) />
 	</cffunction>

@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ The second conditional in the state returns as null and thus the exception.
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.CHARACTER = CreateObject("java", "java.lang.Character") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -72,7 +73,7 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The detail to throw if the assertion fails." />
 				
 		<cfif FindNoCase(arguments.substring, arguments.text)>
-			<cfset throw(arguments.message, arguments.detail) />
+			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
 		
 		<cfreturn true />
@@ -89,7 +90,7 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The detail to throw if the assertion fails." />
 				
 		<cfif NOT Len(arguments.text)>
-			<cfset throw(arguments.message, arguments.detail) />
+			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
 		
 		<cfreturn true />
@@ -106,7 +107,7 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The detail to throw if the assertion fails." />
 		
 		<cfif NOT checkValidTextContent(arguments.text)>
-			<cfset throw(arguments.message, arguments.detail) />
+			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
 		
 		<cfreturn true />
@@ -123,7 +124,7 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The detail to throw if the assertion fails." />
 		
 		<cfif NOT IsNumeric(arguments.text)>
-			<cfset throw(arguments.message, arguments.detail) />
+			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
 		
 		<cfreturn true />
@@ -140,7 +141,7 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The detail to throw if the assertion fails." />
 		
 		<cfif NOT arguments.expression>
-			<cfset throw(arguments.message, arguments.detail) />
+			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
 		
 		<cfreturn true />
@@ -162,7 +163,7 @@ The second conditional in the state returns as null and thus the exception.
 					<cfset arguments.message = "[Assertion failed] - this array must not be empty; it must contain at least one element." />
 				</cfif>
 				
-				<cfset throw(arguments.message, arguments.detail) />
+				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsStruct(arguments.object)>
 			<cfif NOT StructCount(arguments.object)>
@@ -170,7 +171,7 @@ The second conditional in the state returns as null and thus the exception.
 					<cfset arguments.message = "[Assertion failed] - this struct must not be empty; it must contain at least one key." />
 				</cfif>
 				
-				<cfset throw(arguments.message, arguments.detail) />
+				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsQuery(arguments.object)>
 			<cfif NOT arguments.object.recordcount>
@@ -178,7 +179,7 @@ The second conditional in the state returns as null and thus the exception.
 					<cfset arguments.message = "[Assertion failed] - this query must not be empty; it must contain at least one row." />
 				</cfif>
 				
-				<cfset throw(arguments.message, arguments.detail) />
+				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.util.IllegalDatatype"
@@ -191,10 +192,12 @@ The second conditional in the state returns as null and thus the exception.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="throw" access="private" returntype="void" output="false"
+	<cffunction name="doThrow" access="private" returntype="void" output="false"
 		hint="Throws an exception if an assertion fails.">
-		<cfargument name="message" type="string" required="true" />
-		<cfargument name="detail" type="string" required="true" />
+		<cfargument name="message" type="string" required="true"
+			hint="Message to use in the thrown exception." />
+		<cfargument name="detail" type="string" required="true"
+			hint="Detail to use in the thrown exception" />
 		
 		<cfthrow type="MachII.util.IllegalArgument"
 			message="#arguments.message#"
@@ -207,7 +210,6 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The text to check the length." />
 		
 		<cfset var textCharArray =  "" />
-		<cfset var char = CreateObject("java", "java.lang.Character") />
 		<cfset var i = 0 />
 		
 		<!--- Check for length --->
@@ -223,7 +225,7 @@ The second conditional in the state returns as null and thus the exception.
 		and short-circuit to true if a non-whitespace character is found
 		--->
 		<cfloop from="1" to="#ArrayLen(textCharArray)#" index="i">
-			<cfif NOT char.isWhitespace(textCharArray[i])>
+			<cfif NOT variables.CHARACTER.isWhitespace(textCharArray[i])>
 				<cfreturn true />	
 			</cfif>
 		</cfloop>

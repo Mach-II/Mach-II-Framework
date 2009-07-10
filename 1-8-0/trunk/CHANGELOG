@@ -153,3 +153,9 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/331
 * Improved log message when logging data from cftry/cfcatch blocks
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/326
 (2009-06-24 peterfarrell)
+
+* Many small performance improvements
+- Removed repeated method calls to resources and conditionals that 
+  evaluated the same in loop iterations.
+- Changes some Java objects to be more "static" in nature instead
+  of being instantiated in each method body repeatedly. 

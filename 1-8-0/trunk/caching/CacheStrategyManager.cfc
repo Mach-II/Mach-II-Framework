@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="CacheStrategyManager" output="false"
 		hint="Initializes the manager.">
-		<cfargument name="parentCacheStrategyManager" type="MachII.caching.CacheStrategyManager" required="false" />
+		<cfargument name="parentCacheStrategyManager" type="MachII.caching.CacheStrategyManager" required="false"
+			hint="A reference to a parent CacheStrategyManager if available." />
 		
 		<!--- Set optional arguments if they exist --->
 		<cfif StructKeyExists(arguments, "parentCacheStrategyManager")>
@@ -65,7 +66,8 @@ Notes:
 	--->
 	<cffunction name="getCacheStrategyByName" access="public" returntype="MachII.caching.strategies.AbstractCacheStrategy" output="false"
 		hint="Gets a cache strategy with the specified name.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
+		<cfargument name="cacheStrategyName" type="string" required="true"
+			hint="The name of the cache stategy to get." />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Flag to check parent strategy manager." />
 		
@@ -82,9 +84,12 @@ Notes:
 
 	<cffunction name="addCacheStrategy" access="public" returntype="void" output="false"
 		hint="Registers a cache strategy with the specified name.">
-		<cfargument name="cacheStrategyName" type="string" required="true" />
-		<cfargument name="cacheStrategy" type="MachII.caching.strategies.AbstractCacheStrategy" required="true" />
-		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
+		<cfargument name="cacheStrategyName" type="string" required="true"
+			hint="The name of the cache strategy to add." />
+		<cfargument name="cacheStrategy" type="MachII.caching.strategies.AbstractCacheStrategy" required="true"
+			hint="A reference to the cache strategy." />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
+			hint="A boolean to allow an already managed cache strategy to be overrided with a new one. Defaults to false." />
 		
 		<cfif NOT arguments.overrideCheck AND isCacheStrategyDefined(arguments.cacheStrategyName)>
 			<cfthrow type="MachII.caching.CacheStrategyAlreadyDefined"
@@ -97,7 +102,7 @@ Notes:
 	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a cache strategy is registered with the specified name. Does NOT check parent.">
 		<cfargument name="cacheStrategyName" type="string" required="true"
-			hint="Name of cache strategy to check if defined." />
+			hint="Name of cache strategy to check." />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Flag to check parent strategy manager." />
 		

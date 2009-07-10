@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 This component evaluates expressions using the syntax below. Currently it 
@@ -55,9 +55,12 @@ ${scope.key NEQ scope.key2}
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="evaluateExpression" access="public" returntype="any" output="false">
-		<cfargument name="expression" type="string" required="true" />
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
+		<cfargument name="expression" type="string" required="true"
+			hint="A string expression to evaluate including the '${}'." />
+		<cfargument name="event" type="MachII.framework.Event" required="true"
+			hint="The current Event." />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"\
+			hint="The PropertyManager of the current EventContext." />
 		
 		<cfset var body = "" />
 		<cfset var result = "" />
@@ -74,9 +77,12 @@ ${scope.key NEQ scope.key2}
 	</cffunction>
 	
 	<cffunction name="evaluateExpressionBody" access="public" returntype="any" output="false">
-		<cfargument name="expressionBody" type="string" required="true" />
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
+		<cfargument name="expressionBody" type="string" required="true"
+			hint="A string expression body to evaluate without the '${}'." />
+		<cfargument name="event" type="MachII.framework.Event" required="true"
+			hint="The current Event." />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"
+			hint="The PropertyManager of the current EventContext." />
 		
 		<cfset var body = arguments.expressionBody />
 		<cfset var result = "" />
@@ -145,15 +151,21 @@ ${scope.key NEQ scope.key2}
 	</cffunction>
 	
 	<cffunction name="getScopeList" access="public" returntype="string" output="false"
-		hint="Gets a list of scopes.">
+		hint="Gets a list of valid scopes.">
 		<cfreturn variables.SCOPE_LIST />
+	</cffunction>
+	
+	<cffunction name="getOperandList" access="public" returntype="string" output="false"
+		hint="Gets a list of valid operands.">
+		<cfreturn variables.OPERAND_LIST />
 	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="parseOutParam" access="private" returntype="struct" output="false">
-		<cfargument name="body" type="string" required="true" />
+		<cfargument name="body" type="string" required="true"
+			hint="The body of the expression without the '${}'." />
 		
 		<cfset var result = structNew() />
 		<cfset var leftParam = "" />
@@ -261,8 +273,10 @@ ${scope.key NEQ scope.key2}
 	--->
 	<cffunction name="evaluateDeepNestedPath" access="private" returntype="any" output="false"
 		hint="Evaluates a deeply nested path.">
-		<cfargument name="target" type="any" required="true" />
-		<cfargument name="expressionElement" type="string" required="true" />
+		<cfargument name="target" type="any" required="true"
+			hint="The target datatype to evaluate against (object, struct)." />
+		<cfargument name="expressionElement" type="string" required="true"
+			hint="The expression element to use against the target." />
 		
 		<cfset var key = ListFirst(arguments.expressionElement, ".") />
 		<cfset var keyBody = ListDeleteAt(arguments.expressionElement, 1, ".") />

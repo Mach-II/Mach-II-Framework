@@ -1,6 +1,6 @@
 <!---
 License:
-Copyright 2008 GreatBizTools, LLC
+Copyright 2009 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ or
 		<cfif NOT IsObject(bean)>
 			<cfthrow type="MachII.framework.commands.NoBean"
 				message="A call-method commands was encountered that did not have a bean named '#getBeanId#' autowired into it."
-				detail="Ensure your IoC property such as ColdSpring is of a version that supports the call-method command." />
+				detail="Ensure your IoC property such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
 		</cfif>
 		
 		<cfloop from="1" to="#ArrayLen(args)#" index="i">
