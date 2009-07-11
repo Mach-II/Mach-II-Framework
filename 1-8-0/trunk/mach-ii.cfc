@@ -133,8 +133,8 @@ framework to be loaded as they interact with framework components:
 		DO NOT USE THIS LEGACY CODE
 		THIS HAS BEEN DEPRECATED AND WILL BE REMOVED IN MACH-II 2.0
 		--->
-		<cfif StructKeyExists(request,"MachIIConfigMode")>
-			<cfset MACHII_CONFIG_MODE = request.MachIIConfigMode />
+		<cfif StructKeyExists(request, "MachIIConfigMode")>
+			<cfset variables.MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
 		
 		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
