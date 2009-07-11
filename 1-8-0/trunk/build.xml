@@ -21,9 +21,11 @@ $Id: build.xml 6362 2007-09-07 03:06:02Z pfarrell $
 
 Requirements:
 - ANT 1.5+
+- MXUnit ANT task and MXUnit (if using testing options)
+
+Bundled task jars:
 - Apache Net-Commons (if using FTP options)
 - SVNAnt task
-- MXUnit ANT task and MXUnit (if using testing options)
 
 Notes:
 
@@ -49,12 +51,30 @@ Notes:
 	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
 	
 	<property name="mxunit.output" value="${basedir}/tests/output"/>
+	
+	<property name="tasks.classpath" value="${basedir}/build"/>
 
 	<!--
 	TASK DEFINITIONS
 	-->
-	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml"/>
-	<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask"/>
+	<taskdef resource="net/jtools/classloadertask/antlib.xml" 
+		classpath="${tasks.classpath}/ant-classloadertask.jar"/>
+	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml">
+		<classpath>
+			<pathelement location="${tasks.classpath}/ganymed.jar"/>
+			<pathelement location="${tasks.classpath}/svnant.jar"/>
+			<pathelement location="${tasks.classpath}/svnClientAdapter.jar"/>
+			<pathelement location="${tasks.classpath}/svnjavahl.jar"/>
+			<pathelement location="${tasks.classpath}/svnkit.jar"/>
+		</classpath>
+	</taskdef>
+	<!-- 
+	<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask">
+		<classpath refid="tasks.classpath"/>
+	</taskdef>
+	 -->
+	<classloader loader="project" classpath="${tasks.classpath}/commons-net-1.4.1.jar"/>
+	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>	
 	
 	<!--
 	TARGETS
@@ -103,6 +123,7 @@ Notes:
 				<exclude name="zip/"/>
 				<exclude name="tests/output/"/>
 				<exclude name="uml/"/>
+				<exclued name="build/"/>
 				<exclude name=".project"/>
 				<exclude name=".settings/"/>
 			</fileset>
@@ -183,9 +204,8 @@ Notes:
 	</target>
 	
 	<target name="test">
-		<echo message="---------------------------------------------"/>
+		<!-- 
 		<echo message="Testing the framework"/>
-		<echo message="---------------------------------------------"/>
 		<delete dir="${mxunit.output}"/>
 		<mkdir dir="${mxunit.output}"/>
 		<mxunit server="localhost"
@@ -194,6 +214,7 @@ Notes:
 			haltonerror="true">
 			<directory path="${basedir}/tests" recurse="true" componentpath="MachII.tests" /> 
 		</mxunit>
+		 -->
 	</target>
 
 	<target name="testReport" depends="test">
