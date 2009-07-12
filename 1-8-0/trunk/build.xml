@@ -28,7 +28,10 @@ Bundled task jars:
 - SVNAnt task
 
 Notes:
+MXUnit should be located at http://localhost:8080/mxunit/
+VarScopre should be located at http://localhost:8080/varscoper/
 
+You may need to change the properties to set the URIs for these resources.
 -->
 <project
 	name="Mach-II Framework 1.8.0"
@@ -53,6 +56,7 @@ Notes:
 	<property name="mxunit.server" value="localhost"/>
 	<property name="mxunit.port" value="8080"/>
 	<property name="mxunit.output" value="${basedir}/tests/mxunitoutput"/>
+	<property name="mxunit.antClassPathUrl" value="http://${mxunit.server}:${mxunit.port}/mxunit/ant/lib/mxunit-ant.jar"/>
 	
 	<property name="tasks.classpath" value="${basedir}/build"/>
 
@@ -208,7 +212,11 @@ Notes:
 	</target>
 	
 	<target name="test">
-		<classloader loader="project" classpath="${tasks.classpath}/mxunit-ant.jar"/>
+		<classloader loader="project">
+			<classpath>
+				<urlpathelement path="${mxunit.antClassPathUrl}"/>
+			</classpath>
+		</classloader>
 		<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask"/>
 		<echo message="---------------------------------------------"/>
 		<echo message="Testing the framework"/>
