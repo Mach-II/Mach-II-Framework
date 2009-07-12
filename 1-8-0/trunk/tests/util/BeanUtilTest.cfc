@@ -81,8 +81,8 @@ Notes:
 		<cfset variables.beanUtil.setBeanFields(bean, "firstName", testData) />
 		
 		<!--- Assert that only firstName was populated --->
-		<cfset assertSame(bean.getFirstName(), "Mach-II") />
-		<cfset assertSame(bean.getLastName(), "") />
+		<cfset assertSame(bean.getFirstName(), "Mach-II", "The value from 'getFirstName()' is '#bean.getFirstName()#' which does not match expected 'Mach-II'.") />
+		<cfset assertSame(bean.getLastName(), "", "The value from 'getLastName()' is '#bean.getLastName()#' which does not match expected ''.") />
 	</cffunction>
 
 	<cffunction name="testSetAutoBeanFields" access="public" returntype="void" output="false"
@@ -100,8 +100,8 @@ Notes:
 		<cfset variables.beanUtil.setBeanAutoFields(bean, testData) />
 		
 		<!--- Assert that both firstName and lastName was populated --->
-		<cfset assertSame(bean.getFirstName(), "Mach-II") />
-		<cfset assertSame(bean.getLastName(), "Framework") />
+		<cfset assertSame(bean.getFirstName(), "Mach-II", "The value from 'getFirstName()' is '#bean.getFirstName()#' which does not match expected 'Mach-II'.") />
+		<cfset assertSame(bean.getLastName(), "Framework", "The value from 'getLastName()' is '#bean.getLastName()#' which does not match expected 'Framework'.") />
 	</cffunction>
 
 	<cffunction name="testSetGetBeanField" access="public" returntype="void" output="false"
