@@ -75,8 +75,9 @@ Notes:
 		<cfset var comparison = StructNew() />
 		
 		<!--- Create comparison data --->
-		<cfset comparison.a = 1 />
-		<cfset comparison.b = 2 />
+		<!--- For some reason, not using quotes around the values causes the test case to fail on Open BD --->
+		<cfset comparison.a = "1" />
+		<cfset comparison.b = "2" />
 		
 		<cfset assertTrue(comparison.equals(variables.utils.recurseComplexValues(xml.root))) />
 	</cffunction>
@@ -88,8 +89,9 @@ Notes:
 		<cfset var comparison = ArrayNew(1) />
 		
 		<!--- Create comparison data --->
-		<cfset comparison[1] = 1 />
-		<cfset comparison[2] = 2 />
+		<!--- For some reason, not using quotes around the values causes the test case to fail on Open BD --->
+		<cfset comparison[1] = "1" />
+		<cfset comparison[2] = "2" />
 		
 		<cfset assertTrue(comparison.equals(variables.utils.recurseComplexValues(xml.root))) />
 	</cffunction>
@@ -109,10 +111,11 @@ Notes:
 		<cfset var comparison = StructNew() />
 
 		<!--- Create comparison data --->
-		<cfset comparison.a = 1 />
+		<!--- For some reason, not using quotes around the values causes the test case to fail on Open BD --->
+		<cfset comparison.a = "1" />
 		<cfset comparison.b = ArrayNew(1) />
-		<cfset comparison.b[1] = 1 />
-		<cfset comparison.b[2] = 2 />
+		<cfset comparison.b[1] = "1" />
+		<cfset comparison.b[2] = "2" />
 		<cfset comparison.c = "simple" />
 		
 		<cfset assertTrue(comparison.equals(variables.utils.recurseComplexValues(xml.root))) />
