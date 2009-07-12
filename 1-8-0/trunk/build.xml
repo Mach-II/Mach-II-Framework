@@ -50,10 +50,16 @@ Notes:
 	<property name="ftp.user" value="machii"/>
 	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
 	
-	<property name="mxunit.output" value="${basedir}/tests/output"/>
+	<property name="mxunit.server" value="localhost"/>
+	<property name="mxunit.port" value="8080"/>
+	<property name="mxunit.output" value="${basedir}/tests/mxunitoutput"/>
 	
 	<property name="tasks.classpath" value="${basedir}/build"/>
 
+	<property name="varscoper.server" value="localhost"/>
+	<property name="varscoper.port" value="8080"/>
+	<property name="varscoper.output" value="${basedir}/tests/varscoperoutput"/>
+	
 	<!--
 	TASK DEFINITIONS
 	-->
@@ -68,13 +74,8 @@ Notes:
 			<pathelement location="${tasks.classpath}/svnkit.jar"/>
 		</classpath>
 	</taskdef>
-	<!-- 
-	<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask">
-		<classpath refid="tasks.classpath"/>
-	</taskdef>
-	 -->
 	<classloader loader="project" classpath="${tasks.classpath}/commons-net-1.4.1.jar"/>
-	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>	
+	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>
 	
 	<!--
 	TARGETS
@@ -104,6 +105,7 @@ Notes:
 		<delete dir="${dest}"/>
 		<delete dir="${zip}"/>
 		<delete dir="${mxunit.output}"/>
+		<delete dir="${varscoper.output}"/>
 	</target>
 
 	<target name="build" depends="clean,lastCommitRevision" description="Creates a build in the 'dest' directory.">
@@ -123,7 +125,7 @@ Notes:
 				<exclude name="zip/"/>
 				<exclude name="tests/output/"/>
 				<exclude name="uml/"/>
-				<exclued name="build/"/>
+				<exclude name="build/"/>
 				<exclude name=".project"/>
 				<exclude name=".settings/"/>
 			</fileset>
@@ -154,6 +156,8 @@ Notes:
 			preservelastmodified="true"
 			verbose="${debug}"/>
 		<echo message="Built as version '${buildVersion}'"/>
+		<antcall target="testReport"/>
+		<antcall target="varScopeCheck"/>
 	</target>
 	
 	<target name="buildNightly">
@@ -204,17 +208,21 @@ Notes:
 	</target>
 	
 	<target name="test">
-		<!-- 
+		<classloader loader="project" classpath="${tasks.classpath}/mxunit-ant.jar"/>
+		<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask"/>
+		<echo message="---------------------------------------------"/>
 		<echo message="Testing the framework"/>
+		<echo message="---------------------------------------------"/>
 		<delete dir="${mxunit.output}"/>
 		<mkdir dir="${mxunit.output}"/>
-		<mxunit server="localhost"
+		<mxunit server="${mxunit.server}"
+			port="${mxunit.port}"
 			outputdir="${mxunit.output}"
 			verbose="${debug}"
-			haltonerror="true">
+			failureproperty="mxunit.failure"
+			errorproperty="mxunit.error">
 			<directory path="${basedir}/tests" recurse="true" componentpath="MachII.tests" /> 
 		</mxunit>
-		 -->
 	</target>
 
 	<target name="testReport" depends="test">
@@ -232,7 +240,48 @@ Notes:
 		<echo message="---------------------------------------------"/>
 		<echo message="Report available at: file:///${mxunit.output}/report/junit-noframes.html"/>
 		<echo message="---------------------------------------------"/>
+		<fail message="Test failure. See report.">
+			<condition>
+				<isset property="mxunit.failure"/>
+			</condition>
+		</fail>
+		<fail message="Test error. See report.">
+			<condition>
+				<isset property="mxunit.error"/>
+			</condition>
+		</fail>
 	</target>
+	
+	<target name="varScopeCheck">
+		<echo message="---------------------------------------------"/> 
+		<echo message="Checking the framework for unscoped variables"/>
+		<echo message="---------------------------------------------"/>
+	   
+		<mkdir dir="${varscoper.output}"/>
+		
+		<get dest="${varscoper.output}/results.csv" 
+			src="http://${varscoper.server}:${varscoper.port}/varscoper/varScoper.cfm?filePath=${dest}/MachII&amp;submitbutton=start&amp;displayFormat=csv&amp;showDuplicates=true&amp;recursiveDirectory=true"/>
+	  
+		<!-- check csv file for any violations -->
+		<loadfile srcfile="${varscoper.output}/results.csv" property="varscoper.results">  
+			<filterchain>
+				<headfilter skip="1"/>
+				<trim/>
+			</filterchain>
+		</loadfile>
+	  
+		<!-- will be set if violations found else variable will be unset -->
+		<echo message="${varscoper.results}"/>
+	  
+		<fail message="Var scope violation is found.">
+			<condition>
+				<isset property="varscoper.results"/>
+			</condition>
+		</fail>
+		<echo message="---------------------------------------------"/>
+		<echo message="Successful check for unscoped variables"/>
+		<echo message="---------------------------------------------"/>
+	 </target>
 	
 	<target name="zip-init">
 		<echo message="Gettting last commit revision number"/>
@@ -244,7 +293,7 @@ Notes:
 			defaultvalue="${svnBuildVersion}"/>
 	</target>
 	
-	<target name="zip" depends="zip-init,build,test" description="Creates a build zip in the 'zip' directory.">
+	<target name="zip" depends="zip-init,build" description="Creates a build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the build"/>
 		<echo message="---------------------------------------------"/>
@@ -258,7 +307,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped,test" description="Creates a duck-typed build zip in the 'zip' directory">
+	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped" description="Creates a duck-typed build zip in the 'zip' directory">
 		<echo message="---------------------------------------------"/>
 		<echo message="Zipping the duck typed build"/>
 		<echo message="---------------------------------------------"/>
@@ -272,7 +321,7 @@ Notes:
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="zipNightly" depends="lastCommitRevision,buildNightly,test" description="Creates a nightly build zip in the 'zip' directory.">
+	<target name="zipNightly" depends="lastCommitRevision,buildNightly" description="Creates a nightly build zip in the 'zip' directory.">
 		<echo message="---------------------------------------------"/>
 		<echo message="Building nightly zip"/>
 		<echo message="---------------------------------------------"/>
