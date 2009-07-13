@@ -59,7 +59,7 @@ ${scope.key NEQ scope.key2}
 			hint="A string expression to evaluate including the '${}'." />
 		<cfargument name="event" type="MachII.framework.Event" required="true"
 			hint="The current Event." />
-		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"\
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"
 			hint="The PropertyManager of the current EventContext." />
 		
 		<cfset var body = "" />
