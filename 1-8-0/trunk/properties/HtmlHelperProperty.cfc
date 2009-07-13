@@ -764,7 +764,7 @@ from the parent application.
 			<cfset result = arguments.cacheAssetPathsEnabled />
 		<!--- Load cache asset paths enabled enabled by environment names / groups --->
 		<cfelse>
-			<cfset result = resolveValueByEnvironment(arguments.cacheAssetPathsEnabled) />
+			<cfset result = resolveValueByEnvironment(arguments.cacheAssetPathsEnabled, true) />
 		</cfif>
 		
 		<cfreturn result />

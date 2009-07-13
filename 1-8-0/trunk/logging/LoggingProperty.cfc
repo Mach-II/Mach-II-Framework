@@ -340,7 +340,7 @@ will bind to root parameter values.
 			<cfset result = arguments.loggingEnabled />
 		<!--- Load logging enabled by environment name / group --->
 		<cfelse>
-			<cfset result = resolveValueByEnvironment(arguments.loggingEnabled) />
+			<cfset result = resolveValueByEnvironment(arguments.loggingEnabled, true) />
 		</cfif>
 		
 		<cfreturn result />

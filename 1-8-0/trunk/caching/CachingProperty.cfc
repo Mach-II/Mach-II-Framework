@@ -218,7 +218,7 @@ See individual caching strategies for more information on configuration.
 			<cfset result = arguments.cachingEnabled />
 		<!--- Load caching enabled by environment name / group --->
 		<cfelse>
-			<cfset result = resolveValueByEnvironment(arguments.cachingEnabled) />
+			<cfset result = resolveValueByEnvironment(arguments.cachingEnabled, true) />
 		</cfif>
 		
 		<cfreturn result />
