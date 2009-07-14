@@ -21,17 +21,25 @@ $Id: build.xml 6362 2007-09-07 03:06:02Z pfarrell $
 
 Requirements:
 - ANT 1.5+
-- MXUnit ANT task and MXUnit (if using testing options)
+- MXUnit from http://www.mxunit.org
+- VarScoper from http://varscoper.riaforge.com
 
 Bundled task jars:
-- Apache Net-Commons (if using FTP options)
-- SVNAnt task
+- Apache Net-Commons for FTP
+- SVNAnt Task for SVN
+- JTools ANT Classloader Task
 
-Notes:
+Usage Notes:
 MXUnit should be located at http://localhost:8080/mxunit/
-VarScopre should be located at http://localhost:8080/varscoper/
+VarScoper should be located at http://localhost:8080/varscoper/
 
-You may need to change the properties to set the URIs for these resources.
+You may need to change the properties to set the server / port for 
+these resources which should be located in /build/user.properties.
+This file is SVN ignored so it will not be version controlled.
+
+You can set a property named ftp.password and autoUpdate.password
+in your user.properties to hold the spassword.
+DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 -->
 <project
 	name="Mach-II Framework 1.8.0"
@@ -43,6 +51,9 @@ You may need to change the properties to set the URIs for these resources.
 	<!--
 	PROPERTIES
 	-->
+	<!-- Add user properties in this file to override defaults below -->
+	<property file="${basedir}/build/user.properties"/>
+	
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
 	<property name="majorVersion" value="1-8-0"/>
