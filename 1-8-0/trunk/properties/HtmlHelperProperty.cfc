@@ -324,9 +324,9 @@ from the parent application.
 		
 			<cfloop from="1" to="#ArrayLen(package)#" index="j">
 				<cfif package[j].type EQ "js">
-					<cfset code = code & addJavascript(package[j].paths, arguments.outputType) />
+					<cfset code = code & addJavascript(package[j].paths, arguments.outputType) & Chr(13) />
 				<cfelseif package[j].type EQ "css">
-					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType, package[i].forIEVersion) />
+					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType, package[j].forIEVersion) & Chr(13) />
 				</cfif>
 			</cfloop>
 		</cfloop>
@@ -357,10 +357,7 @@ from the parent application.
 			<cfset assetPath = computeAssetPath("js", arguments.paths[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
-				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' />
-				<cfif ArrayLen(arguments.paths) NEQ i>
-					<cfset code = code & Chr(13) />
-				</cfif>
+				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
 			</cfif>
 		</cfloop>
 		
@@ -396,17 +393,12 @@ from the parent application.
 		<cfloop collection="#arguments.attributes#" item="key">
 			<cfset attributesCode = attributesCode & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
 		</cfloop>
-		
-		<cfset attributesCode = attributesCode & ' />' />
 
 		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
 			<cfset assetPath = computeAssetPath("css", arguments.paths[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
-				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode />
-				<cfif ArrayLen(arguments.paths) NEQ i>
-					<cfset code = code & Chr(13) />
-				</cfif>
+				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
 			</cfif>
 		</cfloop>
 		
