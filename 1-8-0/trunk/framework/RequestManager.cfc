@@ -297,7 +297,7 @@ Notes:
 		<!--- Attach each additional arguments if it exists and is a simple value --->
 		<cfloop list="#keyList#" index="i">
 			<cfif IsSimpleValue(params[i])>
-				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug in JRUN --->
+				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug #78782 in Adobe ColdFusion --->
 				<cfif parseSes>
 					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
 				</cfif>
@@ -353,7 +353,7 @@ Notes:
 		<!--- Remove the query string delimiter --->
 		<cfset arguments.pathInfo = Mid(arguments.pathInfo, 2, Len(arguments.pathInfo)) />
 		
-		<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug in JRUN --->
+		<!--- Decode all 'U+03B' back to ';' which is part of the fix for the path info truncation bug #78782 in Adobe ColdFusion --->
 		<cfset arguments.pathInfo = Replace(arguments.pathInfo, "U_03B", ";", "all") />
 
 		<!--- Parse SES if necessary --->
