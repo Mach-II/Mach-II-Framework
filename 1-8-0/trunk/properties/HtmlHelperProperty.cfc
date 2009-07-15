@@ -218,12 +218,12 @@ from the parent application.
 		<cfset temp = StructNew() />
 		<cfset temp.type = "application/rss+xml" />
 		<cfset temp.rel = "alternate" />
-		<cfset mimeShortcutMap.rss = "application/rss+xml" />
+		<cfset mimeShortcutMap.rss = temp />
 		
 		<cfset temp = StructNew() />
 		<cfset temp.type = "text/html" />
 		<cfset temp.rel = "alternate" />
-		<cfset mimeShortcutMap.html = "text/html" />	
+		<cfset mimeShortcutMap.html = temp />	
 		
 		<cfset setMimeShortcutMap(mimeShortcutMap) />
 	</cffunction>
