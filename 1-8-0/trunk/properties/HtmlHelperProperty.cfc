@@ -135,11 +135,13 @@ from the parent application.
 		<!--- Build reference data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
+		<cfset buildDocTypeReferenceMap() />
 	</cffunction>
 		
 	<cffunction name="configureAssetPackages" access="private" returntype="struct" output="false"
 		hint="Configures asset packages from the 'package' parameter.">
-		<cfargument name="rawPackages" type="struct" required="true" />
+		<cfargument name="rawPackages" type="struct" required="true"
+			hint="The raw data from the 'assetPackages' parameter." />
 		
 		<cfset var packages = StructNew() />
 		<cfset var packageElements = ArrayNew(1) />
@@ -233,19 +235,36 @@ from the parent application.
 		
 		<cfset var httpEquivReferenceMap = StructNew() />
 		
-			<cfset httpEquivReferenceMap["allow"] = "" />
-			<cfset httpEquivReferenceMap["content-encoding"] = "" />
-			<cfset httpEquivReferenceMap["content-length"] = "" />
-			<cfset httpEquivReferenceMap["content-type"] = "" />
-			<cfset httpEquivReferenceMap["date"] = "" />
-			<cfset httpEquivReferenceMap["expires"] = "" />
-			<cfset httpEquivReferenceMap["last-modified"] = "" />
-			<cfset httpEquivReferenceMap["location"] = "" />
-			<cfset httpEquivReferenceMap["refresh"] = "" />
-			<cfset httpEquivReferenceMap["set-cookie"] = "" />
-			<cfset httpEquivReferenceMap["www-authenticate"] = "" />
+		<cfset httpEquivReferenceMap["allow"] = "" />
+		<cfset httpEquivReferenceMap["content-encoding"] = "" />
+		<cfset httpEquivReferenceMap["content-length"] = "" />
+		<cfset httpEquivReferenceMap["content-type"] = "" />
+		<cfset httpEquivReferenceMap["date"] = "" />
+		<cfset httpEquivReferenceMap["expires"] = "" />
+		<cfset httpEquivReferenceMap["last-modified"] = "" />
+		<cfset httpEquivReferenceMap["location"] = "" />
+		<cfset httpEquivReferenceMap["refresh"] = "" />
+		<cfset httpEquivReferenceMap["set-cookie"] = "" />
+		<cfset httpEquivReferenceMap["www-authenticate"] = "" />
 
 		<cfset setHttpEquivReferenceMap(httpEquivReferenceMap) />
+	</cffunction>
+	
+	<cffunction name="buildDocTypeReferenceMap" access="private" returntype="void" output="false"
+		hint="Build the available HTML doctype reference map.">
+		
+		<cfset var docTypeReferenceMap = StructNew() />
+		
+		<cfset docTypeReferenceMap["xhtml-1.0-strict"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' />
+		<cfset docTypeReferenceMap["xhtml-1.0-trans"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' />
+		<cfset docTypeReferenceMap["xhtml-1.0-frame"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">' />
+		<cfset docTypeReferenceMap["xhtml-1.1"] 		= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' />
+		<cfset docTypeReferenceMap["html-4.0-strict"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">' />
+		<cfset docTypeReferenceMap["html-4.0-trans"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' />
+		<cfset docTypeReferenceMap["html-4.0-frame"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">' />
+		<cfset docTypeReferenceMap["html-5.0"] 			= '<!DOCTYPE HTML>' />
+		
+		<cfset setDocTypeReferenceMap(docTypeReferenceMap) />
 	</cffunction>
 	
 	<!---
@@ -268,37 +287,15 @@ from the parent application.
 		<cfargument name="type" type="string" required="false" default="xhtml-1.0-strict" 
 			hint="The doc type to render. Accepted values are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
 		
-		<cfswitch expression="#arguments.type#">
-			<cfcase value="xhtml-1.0-strict">
-				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' />
-			</cfcase>
-			<cfcase value="xhtml-1.0-trans">
-				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' />
-			</cfcase>
-			<cfcase value="xhtml-1.0-frame">
-				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">' />
-			</cfcase>
-			<cfcase value="xhtml-1.1">
-				<cfreturn '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' />
-			</cfcase>
-			<cfcase value="html-4.0-strict">
-				<cfreturn '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">' />
-			</cfcase>
-			<cfcase value="html-4.0-trans">
-				<cfreturn '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' />
-			</cfcase>
-			<cfcase value="html-4.0-frame">
-				<cfreturn '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">' />
-			</cfcase>
-			<cfcase value="html-5.0">
-				<cfreturn '<!DOCTYPE HTML>' />
-			</cfcase>
-			<cfdefaultcase>
-				<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
-					message="The 'addDocType' method in the 'HtmlHelperProperty' does not accept the type of '#arguments.type#'."
-					detail="Allowed values for 'type' are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
-			</cfdefaultcase>
-		</cfswitch>
+		<cfset var docTypes = getDocTypeReferenceMap() />
+		
+		<cfif NOT StructKeyExists(docTypes, arguments.type)>
+			<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
+				message="The 'addDocType' method in the 'HtmlHelperProperty' does not accept the type of '#arguments.type#'."
+				detail="Allowed values for 'type' are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
+		</cfif>
+
+		<cfreturn docTypes[arguments.type] />
 	</cffunction>
 	
 	<cffunction name="addAssetPackage" access="public" returntype="string" output="false"
@@ -306,7 +303,7 @@ from the parent application.
 		<cfargument name="assetPackageNames" type="any" required="true"
 			hint="A list or array of the asset packages names to add." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates tthe output type for the generated HTML code (head, inline)." />
+			hint="Indicates tthe output type for the generated HTML code ('head', 'inline')." />
 		
 		<cfset var package = "" />
 		<cfset var code = "" />
@@ -345,7 +342,6 @@ from the parent application.
 		
 		<cfset var code = "" />
 		<cfset var i = 0 />
-		<cfset var log = getLog() />
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
@@ -371,7 +367,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline)." />
+			hint="Indicates the output type for the generated HTML code ('head', 'inline')." />
 		<cfargument name="forIEVersion" type="string" required="false"
 			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
@@ -462,7 +458,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code (head, inline). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
+			hint="Indicates to output type for the generated HTML code ('head', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
 		<cfset var code = '<link href="' & arguments.url & '"' />
@@ -487,7 +483,7 @@ from the parent application.
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
+			hint="Indicates the output type for the generated HTML code ('head', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var code = "" />
 		<cfset var key = "" />
@@ -495,7 +491,7 @@ from the parent application.
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & HTMLEditFormat(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
 		<cfelse>
-			<cfif isHttpEquivMetaType(arguments.type)>
+			<cfif StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
 				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 			<cfelse>
 				<cfset code = '<meta name="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
@@ -535,8 +531,10 @@ from the parent application.
 	--->
 	<cffunction name="renderOrAppendToHead" access="private" returntype="string" output="false"
 		hint="Renders the code or append to head.">
-		<cfargument name="code" type="string" required="true" />
-		<cfargument name="outputType" type="string" required="true" />
+		<cfargument name="code" type="string" required="true"
+			hint="The code to append to head or return to output inline." />
+		<cfargument name="outputType" type="string" required="true"
+			hint="The output type ('inline', 'head')." />
 
 		<!--- Output the code inline or append to HTML head --->
 		<cfif arguments.outputType EQ "inline">
@@ -549,8 +547,10 @@ from the parent application.
 	
 	<cffunction name="wrapIEConditionalComment" access="private" returntype="string" output="false"
 		hint="Wraps an IE conditional comment around the incoming code.">
-		<cfargument name="forIEVersion" type="string" required="true" />
-		<cfargument name="code" type="string" required="true" />
+		<cfargument name="forIEVersion" type="string" required="true"
+			hint="The control code use 'all' for IE versions, a version number like '7' to indicate a specific IE version or operator plus version number like 'lt 7'." />
+		<cfargument name="code" type="string" required="true"
+			hint="The code to wrap the conditional comment around." />
 		
 		<cfset var conditional = Trim(arguments.forIEVersion) />
 		<cfset var comment = Chr(13) />
@@ -561,14 +561,14 @@ from the parent application.
 		<!--- No operator (just version number) means EQ for version --->
 		<cfelseif IsNumeric(conditional)>
 			<cfset comment = comment & "<!--[if IE " & conditional &  "]>" & Chr(13)  />
-		<!--- Use operator and version --->
+		<!--- Use operator ('lt', 'gte') and version number--->
 		<cfelseif ListLen(conditional, " ") EQ 2>
 			<cfset comment = comment & "<!--[if " & ListFirst(conditional, " ") & " IE " & ListLast(conditional, " ") &  "]>" & Chr(13)  />
 		<!--- Throw an exception because of no match for conditional --->
 		<cfelse>
 			<cfthrow type="MachII.properties.HTMLHelperProperty.invalidIEConditional"
 				message="An IE conditional of '#conditional#' is invalid."
-				detail="The conditional value must be 'all', IE version number (numeric) or operator (lt, gte) plus IE version number." />
+				detail="The conditional value must be 'all', IE version number (numeric) or operator ('lt', 'gte') plus IE version number." />
 		</cfif>
 		
 		<!--- Append the code --->
@@ -598,8 +598,9 @@ from the parent application.
 	</cffunction>
 	
 	<cffunction name="resolveMimeTypeAndGetData" access="private" returntype="struct" output="false"
-		hint="Resolves if the passed MIME type is a shortcut and defaults the passed mime type if not.">
-		<cfargument name="type" type="string" required="true" />
+		hint="Resolves if the passed MIME type is a shortcut and defaults the passed MIME type if not.">
+		<cfargument name="type" type="string" required="true"
+			hint="The MIME type shortcut or full MIME type." />
 		
 		<cfset var mimeShortcutMap = getMimeShortcutMap() />
 		<cfset var result = StructNew() />
@@ -613,15 +614,10 @@ from the parent application.
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="isHttpEquivMetaType" access="private" returntype="boolean" output="false"
-		hint="Checks if the passed type of the meta tag is an http-equiv.">
-		<cfargument name="type" type="string" required="true" />
-		<cfreturn StructKeyExists(getHttpEquivReferenceMap(), arguments.type) />
-	</cffunction>
-	
 	<cffunction name="getAssetPackageByName" access="private" returntype="array" output="false"
-		hint="Gets a asset package by name. Checks parent if defined.">
-		<cfargument name="assetPackageName" type="string" required="true" />
+		hint="Gets a asset package by name. Checks parent if available.">
+		<cfargument name="assetPackageName" type="string" required="true"
+			hint="The asset package name to get. Checks parent if parent is available." />
 		
 		<cfset var packages = getAssetPackages() />
 		<cfset var parentPackages = getAssetParentPackages() />
@@ -702,8 +698,10 @@ from the parent application.
 	
 	<cffunction name="appendFileExtension" access="public" returntype="string" output="false"
 		hint="Appends the default file extension if no file extension is present and is safe for paths with '.' in the file name.">
-		<cfargument name="assetType" type="string" required="true" />
-		<cfargument name="assetPath" type="string" required="true" />
+		<cfargument name="assetType" type="string" required="true"
+			hint="The asset type ('js', 'css')." />
+		<cfargument name="assetPath" type="string" required="true"
+			hint="The asset path to append the file extension to." />
 		
 		<cfset var file = ListLast(arguments.assetPath, "/") />
 		
@@ -729,7 +727,7 @@ from the parent application.
 
 		<!--- Assert the file was found --->
 		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
-				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset paths."
+				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path."
 				, "Asset path: '#path#'") />
 		
 		<!--- Conver current time to UTC because epoch is essentially UTC --->
@@ -738,13 +736,15 @@ from the parent application.
 	
 	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
 		hint="Cleans up content text by removing undesireable control characters.">
-		<cfargument name="content" type="string" required="true" />
+		<cfargument name="content" type="string" required="true"
+			hint="The content to clean up." />
 		<cfreturn REReplace(arguments.content, variables.CLEANUP_CONTROL_CHARACTERS_REGEX, "", "ALL") />
 	</cffunction>
 
 	<cffunction name="decidedCacheAssetPathsEnabled" access="private" returntype="boolean" output="false"
 		hint="Decides if the asset path caching is enabled.">
-		<cfargument name="cacheAssetPathsEnabled" type="any" required="true" />
+		<cfargument name="cacheAssetPathsEnabled" type="any" required="true"
+			hint="This argument must be boolean or a struct of environment names / groups." />
 		
 		<cfset var result = false />
 		
@@ -756,7 +756,7 @@ from the parent application.
 			<cfset result = arguments.cacheAssetPathsEnabled />
 		<!--- Load cache asset paths enabled enabled by environment names / groups --->
 		<cfelse>
-			<cfset result = resolveValueByEnvironment(arguments.cacheAssetPathsEnabled, true) />
+			<cfset result = resolveValueByEnvironment(arguments.cacheAssetPathsEnabled, false) />
 		</cfif>
 		
 		<cfreturn result />
@@ -774,7 +774,7 @@ from the parent application.
 	</cffunction>
 
 	<cffunction name="setCacheAssetPaths" access="private" returntype="void" output="false"
-		hint="Sets if cache asset paths is enabled.">
+		hint="Sets if cache asset paths is enabled. Accepts boolean or an environemnt struct of booleans.">
 		<cfargument name="cacheAssetPaths" type="any" required="true" />
 		
 		<cftry>
@@ -839,6 +839,14 @@ from the parent application.
 	</cffunction>
 	<cffunction name="getHttpEquivReferenceMap" access="public" returntype="struct" output="false">
 		<cfreturn variables.httpEquivReferenceMap />
+	</cffunction>
+	
+	<cffunction name="setDocTypeReferenceMap" access="private" returntype="void" output="false">
+		<cfargument name="docTypeReferenceMap" type="struct" required="true" />
+		<cfset variables.docTypeReferenceMap = arguments.docTypeReferenceMap />
+	</cffunction>
+	<cffunction name="getDocTypeReferenceMap" access="public" returntype="struct" output="false">
+		<cfreturn variables.docTypeReferenceMap />
 	</cffunction>
 	
 	<cffunction name="setAssetPackages" access="private" returntype="void" output="false"
