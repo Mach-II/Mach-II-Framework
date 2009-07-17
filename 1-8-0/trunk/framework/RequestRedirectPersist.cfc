@@ -70,7 +70,20 @@ machinery.
 		<cfset parameters.cleanupIntervalInMinutes = 1 />
 		
 		<cfset variables.timeSpanCache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
-		<cfset variables.timeSpanCache.configure() />
+		
+		<!--- The only exception we will usually see here is that the session scope is not enabled --->
+		<cftry>
+			<cfset variables.timeSpanCache.configure() />
+			<cfcatch type="any">
+				<cfif FindNoCase("session", cfcatch.message) OR FindNoCase("session", cfcatch.detail)>
+					<cfthrow type="MachII.framework.RequestRedirectPersist.UnavailableScope"
+						message="The redirect persist feature cannot access the session scope because it has not been enabled in your application."
+						detail="The sesion scope is used by default, however it is configurable if you have disabled the session scope in your application. Add (or change if already defined) the 'redirectPersistScope' property to your XML configuration file with a value of 'application' or 'server.'" />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 
 		<cfreturn this />
 	</cffunction>
