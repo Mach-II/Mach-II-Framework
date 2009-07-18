@@ -74,6 +74,13 @@ Notes:
 		<cfset setContent(HTMLEditFormat(thisTag.GeneratedContent)) />
 	</cfif>
 
-	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
+	<cfset variables.generatedContent = doStartTag() & doEndTag() />
+	
+	<cfif attributes.output>
+		<cfset thisTag.GeneratedContent = "" />
+		<cfset appendGeneratedContentToBuffer(variables.generatedContent, attributes.outputBuffer) />
+	<cfelse>
+		<cfset thisTag.GeneratedContent = generatedContent />
+	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

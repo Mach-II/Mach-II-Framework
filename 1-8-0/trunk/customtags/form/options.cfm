@@ -47,21 +47,49 @@ Notes:
 		In order to keep whitespace down to a minimum, all cfsavecontent  
 		must stay on a single line 
 	--->
+	
+	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
+	<cfset variables.outputBuffer = StructNew() />
+	<cfset variables.outputBuffer.content = "" />
+	
 	<cfif IsSimpleValue(attributes.items)>
-		<cfsavecontent variable="variables.content"><cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#"><cfoutput><form:option value="#Trim(i)#" /></cfoutput></cfloop></cfsavecontent>
+		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
+			<form:option value="#Trim(i)#" 
+				output="true" 
+				outputBuffer="#variables.outputBuffer#" />
+		</cfloop>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.itemOrder = StructSort(attributes.items, "text") />
-		<cfsavecontent variable="variables.content"><cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i"><cfoutput><form:option value="#LCase(variables.itemOrder[i])#" label="#attributes.items[variables.itemOrder[i]]#" /></cfoutput></cfloop></cfsavecontent>
+		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
+			<form:option value="#LCase(variables.itemOrder[i])#" 
+				label="#attributes.items[variables.itemOrder[i]]#" 
+				output="true" 
+				outputBuffer="#variables.outputBuffer#" />
+		</cfloop>
 	<cfelseif IsArray(attributes.items)>
-		<cfsavecontent variable="variables.content"><cfloop from="1" to="#ArrayLen(attributes.items)#" index="i"><cfoutput><form:option value="#Trim(attributes.items[i])#" /></cfoutput></cfloop></cfsavecontent>
+		<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
+			<form:option value="#Trim(attributes.items[i])#" 
+				output="true" 
+				outputBuffer="#variables.outputBuffer#" />
+		</cfloop>
 	<cfelseif IsQuery(attributes.query)>
-		<cfsavecontent variable="variables.content"><cfloop query="attributes.items"><cfoutput><form:option value="#attributes.items[attributes.valueCol]#" label="#attributes.items[labelCol]#" /></cfoutput></cfloop></cfsavecontent>
+		<cfloop query="attributes.items">
+			<form:option value="#attributes.items[attributes.valueCol]#" 
+				label="#attributes.items[labelCol]#" 
+				output="true" 
+				outputBuffer="#variables.outputBuffer#" />
+		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.#getTagType()#"
 			message="The 'items' attribute for #getTagType()# custom tag does not support the passed datatype."
 			detail="The 'items' attribute only supports lists, structs, queries and arrays." />
 	</cfif>
 	
-	<cfset thisTag.GeneratedContent = variables.content />
+	<cfif attributes.output>
+		<cfset thisTag.GeneratedContent = "" />
+		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content, attributes.outputBuffer) />
+	<cfelse>
+		<cfset thisTag.GeneratedContent = variables.outputBuffer.content />
+	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

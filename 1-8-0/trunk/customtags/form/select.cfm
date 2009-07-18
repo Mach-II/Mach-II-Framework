@@ -78,15 +78,19 @@ Notes:
 	<cfset setEventAttributes() />
 	
 <cfelse>
-	<!--- Set temp variables --->
-	<cfset variables.content = "" />
+	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
+	<cfset variables.outputBuffer = StructNew() />
+	<cfset variables.outputBuffer.content = "" />
 
 	<cfif StructKeyExists(attributes, "items")>
-		<cfsavecontent variable="variables.content"><cfoutput><form:options attributeCollection="#attributes#"/></cfoutput></cfsavecontent>
+		<form:options attributeCollection="#attributes#"
+			output="true" 
+			outputBuffer="#variables.outputBuffer#"/>
+		<cfset variables.outputBuffer.content = Chr(13) & variables.outputBuffer.content />
 	</cfif>
 	
 	<!--- Any options generated from items are append at the end of any nested option tags --->
-	<cfset setContent(thisTag.GeneratedContent & variables.content) />
+	<cfset setContent(thisTag.GeneratedContent & variables.outputBuffer.content) />
 	
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>

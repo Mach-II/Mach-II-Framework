@@ -78,6 +78,13 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 <cfelse>
-	<cfset thisTag.GeneratedContent = doStartTag() & '<input name="__#attributes.name#" type="hidden" value="" />' />
+	<cfset variables.generatedContent = doStartTag() & '<input name="__#attributes.name#" type="hidden" value="" />' />
+	
+	<cfif attributes.output>
+		<cfset thisTag.GeneratedContent = "" />
+		<cfset appendGeneratedContentToBuffer(variables.generatedContent, attributes.outputBuffer) />
+	<cfelse>
+		<cfset thisTag.GeneratedContent = generatedContent />
+	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

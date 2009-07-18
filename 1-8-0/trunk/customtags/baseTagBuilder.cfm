@@ -71,6 +71,10 @@ PUBLIC FUNCTIONS
 	<cfset setTagType(arguments.tagType) />
 	<cfset setSelfClosingTag(arguments.selfClosingTag) />
 	
+	<!--- This is used by output buffers of the options, radioGroup and checkboxGroup tags --->
+	<cfparam name="attributes.output" default="false" 
+		type="boolean" />
+	
 	<cfif NOT thisTag.hasEndTag>
 		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.endTag"
 			message="The '#getTagType()#' in the '#getTagLib()#' tag library must have an end tag." />
@@ -79,9 +83,16 @@ PUBLIC FUNCTIONS
 
 <cffunction name="getParentTagAttribute" access="public" returntype="string" output="false"
 	hint="Gets the parents tag's attribute value (ex: used by option tag to get select tag id)">
-	<cfargument name="tagName" type="string" required="true" />
+	<cfargument name="parentTagName" type="string" required="true" />
 	<cfargument name="attributeName" type="string" required="true" />	
-	<cfreturn GetBaseTagData("cf_" & arguments.tagName).attributes[arguments.attributeName] />
+	<cfreturn GetBaseTagData("cf_" & arguments.parentTagName).attributes[arguments.attributeName] />
+</cffunction>
+
+<cffunction name="appendGeneratedContentToBuffer" access="public" returntype="void" output="false"
+	hint="Appends the passed generated content to the parent tag output buffer struct.">
+	<cfargument name="generatedContent" type="string" required="true" />
+	<cfargument name="outputBuffer" type="struct" required="true" />
+	<cfset arguments.outputBuffer.content = arguments.outputBuffer.content & arguments.generatedContent & Chr(13) />
 </cffunction>
 
 <cffunction name="replaceSpaces" access="public" returntype="string" output="false"
