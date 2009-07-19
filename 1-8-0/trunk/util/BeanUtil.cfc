@@ -91,12 +91,20 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 			hint="A comma-delimited list of fields to set in the bean." />
 		<cfargument name="fieldCollection" type="struct" required="true"
 			hint="A struct of field names mapped to values." />
+		<cfargument name="prefix" type="string" required="false" default=""
+			hint="String to append in front of the field name. Example prefix = address, bean.setAddress1(fieldCollection['address.address1'])">
 		
 		<cfset var field = 0  />
 		
 		<cfloop list="#arguments.fields#" index="field" delimiters=",">
-			<cfif StructKeyExists(arguments.fieldCollection, field)>
-				<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+			<cfif arguments.prefix neq "">
+				<cfif StructKeyExists(arguments.fieldCollection, "#prefix#.#field#")>
+					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection["#prefix#.#field#"]) />
+				</cfif>
+			<cfelse>
+				<cfif StructKeyExists(arguments.fieldCollection, field)>
+					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+				</cfif>
 			</cfif>
 		</cfloop>
 	</cffunction>
@@ -107,13 +115,21 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 			hint="The bean to populate." />
 		<cfargument name="fieldCollection" type="struct" required="true"
 			hint="A struct of field names mapped to values." />
+		<cfargument name="prefix" type="string" required="false" default=""
+			hint="String to append in front of the field name. Example prefix = address, bean.setAddress1(fieldCollection['address.address1'])">
 		
 		<cfset var field = 0 />
 		<cfset var map = describeBean(arguments.bean) />
 		
 		<cfloop collection="#map#" item="field">
-			<cfif StructKeyExists(arguments.fieldCollection, field)>
-				<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+			<cfif arguments.prefix neq "">
+				<cfif StructKeyExists(arguments.fieldCollection, "#prefix#.#field#")>
+					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection["#prefix#.#field#"]) />
+				</cfif>
+			<cfelse>
+				<cfif StructKeyExists(arguments.fieldCollection, field)>
+					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+				</cfif>
 			</cfif>
 		</cfloop>
 	</cffunction>

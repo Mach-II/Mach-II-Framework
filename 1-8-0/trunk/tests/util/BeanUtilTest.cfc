@@ -85,19 +85,38 @@ Notes:
 		<cfset assertSame(bean.getLastName(), "", "The value from 'getLastName()' is '#bean.getLastName()#' which does not match expected ''.") />
 	</cffunction>
 
-	<cffunction name="testSetAutoBeanFields" access="public" returntype="void" output="false"
-		hint="Tests seting bean fields automatically mapped from the bean accessors.">
+	<cffunction name="testSetBeanFieldsWithPrefix" access="public" returntype="void" output="false"
+		hint="Tests seting bean fields.">
 	
 		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
 		<cfset var testData = StructNew() />
 		
 		<!--- Setup test data --->
-		<cfset testData.firstName = "Mach-II" />
-		<cfset testData.lastName = "Framework" />
-		<cfset testData.dummy = false />
+		<cfset testData["test.firstName"] = "Mach-II" />
+		<cfset testData["test.lastName"] = "Framework" />
+		<cfset testData["test.dummy"] = false />
 
 		<!--- Set only the firstName --->
-		<cfset variables.beanUtil.setBeanAutoFields(bean, testData) />
+		<cfset variables.beanUtil.setBeanFields(bean, "firstName", testData, "test") />
+		
+		<!--- Assert that only firstName was populated --->
+		<cfset assertSame(bean.getFirstName(), "Mach-II", "The value from 'getFirstName()' is '#bean.getFirstName()#' which does not match expected 'Mach-II'.") />
+		<cfset assertSame(bean.getLastName(), "", "The value from 'getLastName()' is '#bean.getLastName()#' which does not match expected ''.") />
+	</cffunction>
+
+	<cffunction name="testSetAutoBeanFieldsWithPrefix" access="public" returntype="void" output="false"
+		hint="Tests seting bean fields automatically mapped from the bean accessors with a prefix.">
+	
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var testData = StructNew() />
+		
+		<!--- Setup test data --->
+		<cfset testData["test.firstName"] = "Mach-II" />
+		<cfset testData["test.lastName"] = "Framework" />
+		<cfset testData["test.dummy"] = false />
+
+		<!--- Set only the firstName --->
+		<cfset variables.beanUtil.setBeanAutoFields(bean, testData, "test") />
 		
 		<!--- Assert that both firstName and lastName was populated --->
 		<cfset assertSame(bean.getFirstName(), "Mach-II", "The value from 'getFirstName()' is '#bean.getFirstName()#' which does not match expected 'Mach-II'.") />

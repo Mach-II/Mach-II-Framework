@@ -471,13 +471,34 @@ Notes:
 		
 		<cfset var command = "" />
 		<cfset var beanName = arguments.commandNode.xmlAttributes["name"] />
-		<cfset var beanType = arguments.commandNode.xmlAttributes["type"] />
+		<cfset var beanType = "" />
 		<cfset var beanFields = "" />
 		<cfset var reinit = true />
+		<cfset var innerBeans = ArrayNew(1) />
+		<cfset var innerBean = "" />
+		<cfset var field = "" />
+		<cfset var fields = "" />
+		<cfset var fieldsList = "" />
+		<cfset var fieldItem = "" />
+		<cfset var innerBeanChildren = "" />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
+		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "type")>
+			<cfset beanType = arguments.commandNode.xmlAttributes["type"] />
+		</cfif>
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "fields")>
 			<cfset beanFields = variables.utils.trimList(arguments.commandNode.xmlAttributes["fields"]) />
+			<!---<cfset fieldsList = variables.utils.trimList(arguments.commandNode.xmlAttributes["fields"]) />
+			<cfloop list="#fieldsList#" index="fieldItem">
+				<cfset field = StructNew()>
+				<cfset field.name = fieldItem />
+				<cfset field.value = "" />
+				<cfset ArrayAppend(beanFields, field) /> 
+			</cfloop>--->	
 		</cfif>
+		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "reinit")>
 			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
 		</cfif>
@@ -485,6 +506,64 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(beanName, beanType, beanFields, reinit, variables.beanUtil) />
 		
 		<cfset command.setLog(variables.eventBeanCommandLog) />
+		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		
+		<!--- support adding inner-bean and field tags inside event-bean --->
+		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
+			<cfif arguments.commandNode.xmlChildren[i].xmlName eq "inner-bean">
+			
+				<cfset innerBean = CreateObject("component", "MachII.util.BeanInfo").init() />
+				
+				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")>
+					<cfset innerBean.setName(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
+				<cfelse>
+					<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanNameRequired"
+						message="A name is required for the inner-bean that is part of event-bean '#beanName#'." />
+				</cfif>
+				
+				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "prefix")>
+					<cfset innerBean.setPrefix(arguments.commandNode.xmlChildren[i].xmlAttributes["prefix"]) />
+				<cfelse>
+					<cfset innerBean.setPrefix(innerBean.getName()) />
+				</cfif>
+				
+				<cfset fields = ArrayNew(1) />
+				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "fields")>
+					<cfset fieldsList = variables.utils.trimList(arguments.commandNode.xmlChildren[i].xmlAttributes["fields"]) />
+					<cfloop list="#fieldsList#" index="fieldItem">
+						<cfset field = StructNew() />
+						<cfset field.name = fieldItem />
+						<cfset field.value = "" />
+						<cfset ArrayAppend(fields, field) />
+					</cfloop>
+				</cfif>
+				
+				<cfset innerBeanChildren = arguments.commandNode.xmlChildren[i].xmlChildren />
+				<cfif ArrayLen(innerBeanChildren)>
+					<cfloop from="1" to="#ArrayLen(innerBeanChildren)#" index="j">
+						<cfif innerBeanChildren[j].xmlName eq "field">
+							<cfset field = StructNew() />
+							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "name")>
+								<cfset field.name = innerBeanChildren[j].xmlAttributes["name"] />
+							<cfelse>
+								<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanFieldNameRequired"
+									message="In event-bean '#beanName#' field names are required for inner-bean '#innerBean.getName()#'" />
+							</cfif>
+							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "value")>
+								<cfset field.value = innerBeanChildren[j].xmlAttributes["value"] />
+							<cfelse>
+								<cfset field.value = "" />
+							</cfif>
+							<cfset ArrayAppend(fields, field) />
+						</cfif>
+					</cfloop>
+				</cfif>
+				
+				<cfset innerBean.setFields(fields) />
+				<cfset command.addInnerBean(innerBean) />
+				
+			</cfif>
+		</cfloop>
 
 		<cfreturn command />
 	</cffunction>

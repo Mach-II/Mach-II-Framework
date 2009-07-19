@@ -38,6 +38,7 @@ Notes:
 	<cfset variables.beanFields = "" />
 	<cfset variables.reinit = "" />
 	<cfset variables.beanUtil = "" />
+	<cfset variables.innerBeans = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -68,8 +69,18 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var bean = "" />
+		<cfset var innerBean = "" />
 		<cfset var log = getLog() />
-		
+		<cfset var innerBeanName = "" />
+		<cfset var innerBeanInfo = "" />
+		<cfset var fieldNames = "" />
+		<cfset var fieldName = "" />
+		<cfset var i = 0 />
+		<cfset var fields = "" />
+		<cfset var fieldNamesWithValues = "" />
+		<cfset var fieldValues = "" />
+		<cfset var expEvaluator = getExpressionEvaluator()	/>
+				
 		<!--- If reinit is FALSE, get the bean from the event --->
 		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName())>
 			<cfif log.isDebugEnabled()>
@@ -98,7 +109,52 @@ Notes:
 			<cfset arguments.event.setArg(getBeanName(), bean, getBeanType()) />
 		</cfif>
 		
+		<!--- populate any inner-beans --->
+		<cfloop list="#StructKeyList(variables.innerBeans)#" index="innerBeanName">
+			<cfset innerBeanInfo = variables.innerBeans[innerBeanName] />
+			<cfinvoke component="#bean#" method="get#innerBeanName#" returnvariable="innerBean" />
+			
+			<cfset fields = innerBeanInfo.getFields() />
+			<cfset fieldNamesWithValues = StructNew() />
+			<cfif ArrayLen(fields) eq 0>
+				<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
+			<cfelse>
+				<!--- Handle specific fields for the inner-bean --->
+				<cfloop from="1" to="#ArrayLen(fields)#" index="i">
+					<cfif fields[i].value neq "">
+						<cfset fieldNames = ListAppend(fieldNames, fields[i].name) />
+					<cfelse>
+						<cfset fieldNamesWithValues[fields[i].name] = fields[i].value />
+					</cfif>
+				</cfloop>
+				<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
+				
+				<!--- TODO: handle expressions which concat fields together (${event.birthmonth}/${birthday}/${birthyear}) in the innerBean fields --->
+				<cfset fieldNames = "" />
+				<cfset fieldValues = StructNew() />
+				<cfloop list="#StructKeyList(fieldNamesWithValues)#" index="fieldName">
+					<cfset fieldNames = ListAppend(fieldNames, fieldName) />
+					<cfif expEvaluator.isExpression(fieldNamesWithValues[fieldName])>
+						<cfset fieldValues[fieldName] = expEvaluator.evaluateExpression(
+							fieldNamesWithValues[fieldName], arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />					
+					<cfelse>
+						<cfset fieldValues[fieldName] = fieldNamesWithValues[fieldName] />	
+					</cfif>		
+				</cfloop>
+				<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, fieldValues, innerBeanInfo.getPrefix()) />				
+			</cfif>
+			
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Inner-bean '#innerBeanInfo.getName()#' with prefix '#innerBeanInfo.getPrefix()#' from event-bean '#getBeanName()#' populated with data.") />
+			</cfif>
+		</cfloop>
+		
 		<cfreturn true />
+	</cffunction>
+	
+	<cffunction name="addInnerBean" access="public" returntype="void" output="false">
+		<cfargument name="innerBean" type="MachII.util.BeanInfo" required="true" />
+		<cfset variables.innerBeans[arguments.innerBean.getName()] = arguments.innerBean />
 	</cffunction>
 	
 	<!---
@@ -128,7 +184,7 @@ Notes:
 		<cfreturn variables.beanFields />
 	</cffunction>
 	<cffunction name="isBeanFieldsDefined" access="public" returntype="boolean" output="false">
-		<cfreturn Len(variables.beanFields) />
+		<cfreturn Len(variables.beanFields) gt 0 />
 	</cffunction>
 	
 	<cffunction name="setReinit" access="private" returntype="void" output="false">
