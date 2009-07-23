@@ -36,7 +36,7 @@ Notes:
 	            		<key name="production" value="true"/>
 	            	</struct>
 	            </key>
-				<!-- Optional and defaults to 'fatal' -->
+				<!-- Optional and defaults to 'trace' -->
 				<key name="loggingLevel" value="all|trace|debug|info|warn|error|fatal|off" />
 				<!-- Optional and defaults to the default display template if not defined -->
 				<key name="displayOutputTemplateFile" value="/path/to/customOutputTemplate.cfm" />

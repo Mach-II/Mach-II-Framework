@@ -181,6 +181,7 @@ will bind to root parameter values.
 		<!--- Configure the default logger since no loggers are registered --->
 		<cfif NOT StructCount(getLoggerManager().getLoggers())>
 			<cfset defaultLoggerParameters.type = variables.defaultLoggerType />
+			<cfset defaultLoggerParameters.loggingLevel = "trace" />
 			<cfset configureLogger(variables.defaultLoggerName, defaultLoggerParameters) />
 		</cfif>	
 		
