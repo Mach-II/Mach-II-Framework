@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Copyright: GreatBizTools, LLC
-Author: Ben Edwards (ben@ben-edwards.com)
-$Id: BeanUtil.cfc 1664 2009-07-10 00:21:50Z peterfarrell $
+Author: Kurt Wiersma (kurt@mach-ii.com)
+$Id$
 
 Created version: 1.8.0
 Updated version: 1.8.0
