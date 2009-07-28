@@ -527,23 +527,23 @@ Notes:
 		<cfargument name="isProcessing" type="boolean" required="true" />
 		<cfset variables.isProcessing = arguments.isProcessing />
 	</cffunction>
-	<cffunction name="getIsProcessing" access="private" returntype="boolean" output="false">
+	<cffunction name="getIsProcessing" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isProcessing />
 	</cffunction>
 
-	<cffunction name="getIsException" access="private" returntype="string" output="false">
-		<cfreturn variables.isException />
-	</cffunction>	
 	<cffunction name="setIsException" access="private" returntype="void" output="false">
 		<cfargument name="isException" type="boolean" required="true" />
 		<cfset variables.isException = arguments.isException />
 	</cffunction>
+	<cffunction name="getIsException" access="public" returntype="string" output="false">
+		<cfreturn variables.isException />
+	</cffunction>	
 	
 	<cffunction name="setMaxEvents" access="private" returntype="void" output="false">
 		<cfargument name="maxEvents" type="numeric" required="true" />
 		<cfset variables.maxEvents = arguments.maxEvents />
 	</cffunction>
-	<cffunction name="getMaxEvents" access="private" returntype="numeric" output="false">
+	<cffunction name="getMaxEvents" access="public" returntype="numeric" output="false">
 		<cfreturn variables.maxEvents />
 	</cffunction>
 

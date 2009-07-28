@@ -69,7 +69,7 @@ Not using the 'local' prefix can cause errors due to threading.
 	</tr>
 	<cfif NOT IsSimpleValue(data[local.i].additionalInformation)>
 	<tr>
-		<td colspan="4"><cfdump var="#data[local.i].additionalInformation#" expand="false" /></td>
+		<td colspan="4"><cfdump var="#data[local.i].additionalInformation#" /></td>
 	</tr>
 	</cfif>
 </cfloop>
@@ -82,4 +82,14 @@ Not using the 'local' prefix can cause errors due to threading.
 	</tr>
 </cfif>
 </table>
+
+<!--- If exception event, show original event at the time of the fatal problem --->
+<cfif arguments.appManager.getRequestHandler().getIsException()>
+	<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().getArg("exceptionEvent") />
+<cfelse>
+	<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent() />
+</cfif>
+
+<h3>Event</h3>
+<cfdump var="#local.event.getArgs()#" />
 </cfoutput>
