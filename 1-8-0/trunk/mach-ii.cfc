@@ -167,7 +167,7 @@ framework to be loaded as they interact with framework components:
 		</cfif>
 
 		<!--- Handle the request --->
-		<cfset 	getAppManager().getRequestHandler().handleRequest() />
+		<cfset getAppManager().getRequestHandler().handleRequest() />
 	</cffunction>
 
 	<!---
@@ -193,12 +193,26 @@ framework to be loaded as they interact with framework components:
 	
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Get the Mach-II AppManager. Not available until loadFramework has been called.">
-		<cfreturn application[getAppKey()].appLoader.getAppManager() />
+		<cftry>
+			<cfreturn application[getAppKey()].appLoader.getAppManager() />
+			<cfcatch type="application">
+				<cfthrow type="MachII.framework.AppManagerNotAvailable"
+					message="Calls to getAppManager(), getProperty(), setProperty() and isPropertyDefined() in your Application.cfc cannot be made until after loadFramework has completed processing."
+					detail="This indicates a premature call to one of the listed methods in your Application.cfc before the framework has completely loaded. Please check your code." />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
-		hint="Returns if the config should be dynamically reloaded.">
-		<cfreturn application[getAppKey()].appLoader.shouldReloadConfig() />
+		hint="Returns if the config should be dynamically reloaded. Not available until loadFramework has been called.">
+		<cftry>
+			<cfreturn application[getAppKey()].appLoader.shouldReloadConfig() />
+			<cfcatch type="application">
+				<cfthrow type="MachII.framework.AppLoderNotAvailable"
+					message="Calls to shouldReloadConfig() in your Application.cfc cannot be made until after loadFramework has completed processing."
+					detail="This indicates a premature call to this method in your Application.cfc before the framework has completely loaded. Please check your code." />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<cffunction name="getAppKey" access="public" returntype="string" output="false"

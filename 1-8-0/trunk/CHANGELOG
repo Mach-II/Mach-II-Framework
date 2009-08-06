@@ -158,6 +158,11 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/331
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/326
 (2009-06-24 peterfarrell)
 
+* Improved how exceptions are handled if premature calls made to
+method in bootstrapper before framework has completely loaded
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/358
+(2009-08-05 peterfarrell)
+
 * Many small performance improvements
 - Removed repeated method calls to resources and conditionals that 
   evaluated the same in loop iterations.
