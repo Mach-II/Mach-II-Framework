@@ -48,7 +48,7 @@ Notes:
 		<cfset variables.js = variables.js & ' media="' & attributes.media & '"' />
 	</cfif>
 			
-	<cfset variables.js = variables.js & '>' & Chr(13) & '<!--//--><![CDATA[//><!--' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//--><!]]>' & Chr(13) &  '</style>' & Chr(13) />
+	<cfset variables.js = variables.js & '>' & Chr(13) & '/* <![CDATA[ */' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '/* ]]> */' & Chr(13) &  '</style>' & Chr(13) />
 	
 	<!--- Wrap in an IE conditional if defined --->
 	<cfif Len(attributes.forIEVersion)>
