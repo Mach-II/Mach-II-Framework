@@ -43,6 +43,7 @@ Notes:
 	<cfset variables.maxEvents = 10 />
 	<cfset variables.isProcessing = false />
 	<cfset variables.isException = false />
+	<cfset variables.cleanedPathInfo = "" />
 	<cfset variables.log = "" />
 	<cfset variables.currentRouteParams = StructNew() />
 	<cfset variables.currentSESParams = StructNew() />
@@ -107,6 +108,9 @@ Notes:
 			<cfif log.isInfoEnabled()>
 				<cfset log.info("Begin processing request.") />
 			</cfif>
+			
+			<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
+			<cfset cleanPathInfo() />
 
 			<cfset eventArgs = getRequestEventArgs() />
 			<cfset result = parseEventParameter(eventArgs) />
@@ -424,12 +428,25 @@ Notes:
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
 		<!--- requestManager.parseSesParameters() could throw a UrlRouteNotDefined exception --->
-		<cfset StructAppend(eventArgs, requestManager.parseSesParameters(cgi.PATH_INFO), overwriteFormParams) />
+		<cfset StructAppend(eventArgs, requestManager.parseSesParameters(getCleanedPathInfo()), overwriteFormParams) />
 		
 		<!--- Get redirect persist data and overwrite other args if conflct --->
 		<cfset StructAppend(eventArgs, requestManager.readPersistEventData(eventArgs), true) />
 		
 		<cfreturn eventArgs />
+	</cffunction>
+	
+	<cffunction name="cleanPathInfo" access="private" returntype="void" output="false"
+		hint="Cleans the path info to an usable string (IIS6 breaks the RFC specification by inserting the script name into the path info).">
+		
+		<cfset var pathInfo = cgi.PATH_INFO />
+		<cfset var scriptName = cgi.SCRIPT_NAME />
+		
+		<cfif pathInfo.toLowerCase().startsWith(scriptName.toLowerCase())>
+			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
+		</cfif>
+		
+		<cfset setCleanedPathInfo(pathInfo) />
 	</cffunction>
 	
 	<!---
@@ -545,6 +562,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getMaxEvents" access="public" returntype="numeric" output="false">
 		<cfreturn variables.maxEvents />
+	</cffunction>
+	
+	<cffunction name="setCleanedPathInfo" access="private" returntype="void" output="false">
+		<cfargument name="cleanedPathInfo" type="string" required="true" />
+		<cfset variables.cleanedPathInfo = arguments.cleanedPathInfo />
+	</cffunction>
+	<cffunction name="getCleanedPathInfo" access="public" returntype="string" output="false">
+		<cfreturn variables.cleanedPathInfo />
 	</cffunction>
 
 	<cffunction name="setOnRequestEndCallbacks" access="private" returntype="void" output="false">
