@@ -148,7 +148,7 @@ Notes:
 		<cfelse>
 			<cfthrow type="MachII.customtags.form.radiogroup" 
 					message="Unsupported Number of Array Dimensions in Radio Group Tag" 
-					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be eithersimple values or strcuts. The array you passed to the tag is #attributes.items.getDimension()#." />
+					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset sortedKeys = StructSort(attributes.items, "text") />
