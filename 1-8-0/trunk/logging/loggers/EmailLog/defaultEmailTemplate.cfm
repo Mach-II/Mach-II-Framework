@@ -85,7 +85,13 @@ Not using the 'local' prefix can cause errors due to threading.
 
 <!--- If exception event, show original event at the time of the fatal problem --->
 <cfif arguments.appManager.getRequestHandler().getIsException()>
-	<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().getArg("exceptionEvent") />
+	<cfif arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().isArgDefined("exceptionEvent")>
+		<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().getArg("exceptionEvent") />
+	<cfelseif arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().isArgDefined("missingEvent")>
+		<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent().getArg("missingEvent") />
+	<cfelse>
+		<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent() />
+	</cfif>
 <cfelse>
 	<cfset local.event = arguments.appManager.getRequestHandler().getEventContext().getCurrentEvent() />
 </cfif>
