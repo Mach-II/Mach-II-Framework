@@ -144,6 +144,10 @@ Notes:
 					
 					<cfoutput>#finalOutput#</cfoutput>
 				</cfloop>
+			<cfelse>
+				<cfthrow type="MachII.customtags.form.radiogroup" 
+						message="Unsupported Data Type in Array" 
+						detail="The radio group form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.customtags.form.radiogroup" 
