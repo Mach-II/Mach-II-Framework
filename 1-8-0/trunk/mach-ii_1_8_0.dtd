@@ -373,12 +373,29 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[fields] - the fields in the event to set in the bean
 		[reinit] - allows you to reuse and repopulate the bean if it is available in the Event object
 -->
-<!ELEMENT event-bean EMPTY>
+<!ELEMENT event-bean (field|inner-bean)*>
 <!ATTLIST event-bean
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 	fields CDATA #IMPLIED
 	reinit (true|false) "true"
+>
+
+<!ELEMENT inner-bean (field)*>
+<!ATTLIST event-bean
+	name CDATA #REQUIRED
+	fields CDATA #IMPLIED
+>
+
+<!--
+	"field"
+		name - the name of the field
+		[value] - the value of the field		
+-->
+<!ELEMENT field (value?)>
+<!ATTLIST field
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
 >
 
 <!--
@@ -393,7 +410,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
 		[route] - the url route to redirect to
 -->
-<!ELEMENT redirect (arg | persistArg)*>
+<!ELEMENT redirect (arg|persistArg)*>
 <!ATTLIST redirect
 	event CDATA #IMPLIED
 	module CDATA #IMPLIED
