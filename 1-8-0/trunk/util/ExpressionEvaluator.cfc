@@ -34,6 +34,7 @@ ${scope.key EQ "foobar"}
 ${scope.key NEQ scope.key2}
 --->
 <cfcomponent 
+	displayname="ExpressionEvaluator"
 	output="false"
 	hint="Evaluates expressions and returns data.">
 	
