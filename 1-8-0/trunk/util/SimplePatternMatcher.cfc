@@ -45,6 +45,12 @@ Spring Framework (http://www.springframework.org)
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="isPattern" access="public" returntype="boolean" output="false"
+		hint="Does the passed path have a pattern in it (i.e. '*').">
+		<cfargument name="pattern" type="string" required="true" />
+		<cfreturn Find("*", arguments.pattern) />
+	</cffunction>
+	
 	<cffunction name="match" access="public" returntype="boolean" output="false"
 		hint="Performs a match of simple a pattern or array of patterns against the text.">
 		<cfargument name="pattern" type="any" required="true"
