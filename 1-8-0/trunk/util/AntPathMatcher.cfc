@@ -54,7 +54,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="isPattern" access="public" returntype="boolean" output="false"
-		hint="Does the passed path have a pattern in it.">
+		hint="Does the passed path have a pattern in it (i.e. contains one or more of '?' and/or '*').">
 		<cfargument name="pattern" type="string" required="true" />
 		<cfreturn Find("*", arguments.pattern) OR Find("?", arguments.pattern) />
 	</cffunction>
