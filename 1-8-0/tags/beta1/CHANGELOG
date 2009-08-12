@@ -1,0 +1,170 @@
+------------------------------------------------
+    __  ___           __          ________
+   /  |/  /___ ______/ /_        /  _/  _/
+  / /|_/ / __ `/ ___/ __ \______ / / / /  
+ / /  / / /_/ / /__/ / / /_____// /_/ /   
+/_/  /_/\__,_/\___/_/ /_/     /___/___/  
+
+Version: 1.8.0.@minorVersion@
+Built-on: @buildDatetime@
+$Id$
+------------------------------------------------
+If version number and built-on are placeholders (e.g. @xyz@), you are 
+using a  bleeding edge release (BER) of the framework.
+------------------------------------------------
+
+Copyright 2003-2009 GreatBizTools, LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+------------------------------------------------
+ _                         
+/ |_  _.._  _  _   |  _  _ 
+\_| |(_|| |(_|(/_  |_(_)(_|
+            _|           _|
+------------------------------------------------
+Fixed Defects
+------------------------------------------------
+
+* HTMLHeadElement and HTTPHeader callbacks failed to be removed from EventContext
+This defect can cause strange problems when using nested cache blocks such as
+an event-handler with a cache block that calls a subroutine with a cache block.
+
+This defect affected Mach-II 1.6.0 and 1.6.1. It has been fixed in the 1.8 release.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/305
+(2009-05-28 peterfarrell)
+
+* Method checking fails when extending a logger due to failure to walk inheritance tree
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/303
+(2009-05-23 peterfarrell)
+
+* View context throws an ambiguous exception appending view content on to a complex event-arg
+We now assert the target contentArg/Key is a simple value and throw a friendly 
+exception if it is not.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/263
+(2009-03-30 peterfarrell)
+
+ * BuildUrl() and related methods orders args randomly
+Fixed so all args are ordered alpha-numeric which provides consistent URLs for 
+search engines. This is especially important for SES URLs.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
+(2009-02-26 kurtwiersma)
+
+------------------------------------------------
+Improvements / Enhancements
+------------------------------------------------
+* View-Loaders
+View loaders allow a developers to load views based on convention such as 
+using an ANT-style path matching pattern.
+
+For more information see:
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationViewLoaders
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/175
+(2008-11-15 peterfarrell) 
+
+* EnvironmentProperty
+Implemented a way to manage the deployment environment of Mach-II applications. This 
+feature allows developers to setup properties specific to a particular environment 
+and to drive other features (such as caching and logging) to change their behavior 
+based on the environment in which the application is deployed. 
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/wiki/EnvironmentSpecificProperities#SolutionforMach-II1.8
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/224
+(various dates peterfarrell)
+
+* Toolkit enhancements
+- AntPathMatcher.cfc 
+- Assert.cfc
+- SimplePatternMatcher.cfc
+
+For more information see:
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/wiki/MachII1.8SpecificationToolkitEnhancements
+(various dates peterfarrell)
+
+* Added buildUnescapedUrl() and buildUnescapedUrlToModule() to ViewContext
+buildUrl() and buildUrlToModule() returned urls with escaped entities which
+made it impossible to use the returned urls in JS or other situations where
+unescaped urls are required.
+
+For more information see:
+https://greatbiztoolsllc-trac.cvsdude.com/mach-ii/ticket/178
+(2008-11-17 peterfarrell)
+
+* Event-arg command accepts complex XML values (struct / array)
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/293
+(2009-05-20 peterfarrell)
+
+* Full email configuration support for EmailLogger
+Improved email configuration support. Additional parameters for 
+username, password, charset, spoolenable and timeout.
+
+Form more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/265
+(2009-05-21 brianfitzgerald)
+
+* EmaiLogger only send emails when a specific log level is tripped
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/302
+(2009-05-23 peterfarrell)
+
+* EmailLogger added event-args of event or exception event
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/353
+(2009-07-28 peterfarrell)
+
+------------------------------------------------
+Internal Framework Improvements / Enhancements / Other Changes
+------------------------------------------------
+
+* Trace Plugin reports that is has been deprecated in the trace output
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
+(2009-04-10 peterfarrell)
+
+* Logging package now uses a LoggerManager
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/295
+(2009-05-21 peterfarrell)
+
+* Many spelling / grammar fixes in comments and hints
+Special thanks to Doug Smith and Eli Tapolcsanyi at The Lampo 
+Group, Inc for contributing this patch.
+
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/321
+(2009-06-23 peterfarrell)
+
+* Improved exception handling logic when loading Mach-II extended components
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/331
+(2009-06-24 peterfarrell)
+
+* Improved log message when logging data from cftry/cfcatch blocks
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/326
+(2009-06-24 peterfarrell)
+
+* Improved how exceptions are handled if premature calls made to
+method in bootstrapper before framework has completely loaded
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/358
+(2009-08-05 peterfarrell)
+
+* Many small performance improvements
+- Removed repeated method calls to resources and conditionals that 
+  evaluated the same in loop iterations.
+- Changes some Java objects to be more "static" in nature instead
+  of being instantiated in each method body repeatedly. 
