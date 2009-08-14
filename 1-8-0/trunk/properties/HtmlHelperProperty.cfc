@@ -99,6 +99,7 @@ from the parent application.
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.assetPathsCache = StructNew() />
 	
+	<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
 	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
 	<!--- Tabs, line feeds and carriage returns --->
 	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
@@ -410,23 +411,35 @@ from the parent application.
 		hint="Adds code for an img tag for inline use.">
 		<cfargument name="path" type="string" required="true"
 			hint="A path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
-		<cfargument name="width" type="string" required="false" 
-			hint="The width of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted." />
-		<cfargument name="height" type="string" required="false"
-			hint="The height of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted." />
+		<cfargument name="width" type="string" required="false" default=""
+			hint="The width of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted. Auto dimension are applied when zero-length string is used." />
+		<cfargument name="height" type="string" required="false" default=""
+			hint="The height of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted. Auto dimension are applied when zero-length string is used." />
 		<cfargument name="alt" type="string" required="false"
 			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. If not defined, the value of 'alt=""' will be used as this attribute is required by the W3C specification." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		
 		<cfset var code = '<img src="' & computeAssetPath("img", arguments.path) & '"' />
+		<cfset var dimensions = "" />
 		<cfset var key = "" />
 		
-		<cfif StructKeyExists(arguments, "height") AND arguments.height EQ -1>
+		<!--- Set auto dimensions --->
+		<cfif NOT Len(arguments.width) OR NOT Len(arguments.height)>
+			<cfset dimensions = getImageDimensions(arguments.path) />
+			
+			<cfif NOT Len(arguments.height)>
+				<cfset arguments.height = dimensions.height />
+			</cfif>
+			<cfif NOT Len(arguments.width)>
+				<cfset arguments.height = dimensions.width />
+			</cfif>
+		</cfif>
+
+		<cfif arguments.height EQ -1>
 			<cfset code = code & ' height="' & arguments.height  & '"' />
 		</cfif>
-		
-		<cfif StructKeyExists(arguments, "width") AND arguments.width EQ -1>
+		<cfif arguments.width EQ -1>
 			<cfset code = code & ' width="' & arguments.width  & '"' />
 		</cfif>
 		
@@ -717,21 +730,46 @@ from the parent application.
 		<cfargument name="resolvedPath" type="string" required="true"
 			hint="This is the full resolved asset path from the webroot." />
 		
-		<cfset var path = getWebrootBasePath() & "/" & arguments.resolvedPath />
+		<cfset var fullPath = getWebrootBasePath() & "/" & arguments.resolvedPath />
 		<cfset var directoryResults = "" />
 		
 		<cfdirectory name="directoryResults"
 			action="list" 
-			directory="#GetDirectoryFromPath(path)#" 
-			filter="#GetFileFromPath(path)#" />
+			directory="#GetDirectoryFromPath(fullPath)#" 
+			filter="#GetFileFromPath(fullPath)#" />
 
 		<!--- Assert the file was found --->
 		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
 				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path."
-				, "Asset path: '#path#'") />
+				, "Asset path: '#fullPath#'") />
 		
 		<!--- Conver current time to UTC because epoch is essentially UTC --->
 		<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+	</cffunction>
+	
+	<cffunction name="getImageDimensions" access="private" returntype="struct" output="false"
+		hint="Gets image dimensions for GIF, PNG and JPG file types.">
+		<cfargument name="path" type="string" required="true"
+			hint="A unresolved path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
+		
+		<cfset var fullPath = getWebrootBasePath() & "/" & buildAssetPath("img", arguments.path) />
+		<cfset var image = "" />
+		<cfset var dimensions = StructNew() />
+		
+		<cftry>
+			<cfset image = variables.AWT_TOOLKIT.getImage(fullPath) />
+		
+			<cfset dimensions.width = image.getWidth() />
+			<cfset dimensions.height = image.getHeight() />
+			
+			<cfcatch type="any">
+				<cfthrow type="MachII.properties.HtmlHelperProperty.ImageDimensionException"
+					message="Unable to read image dimensions. Ensure image is of type GIF, PNG or JPG."
+					detail="Asset path: #fullPath# || Original Exception: #getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
+		
+		<cfreturn dimensions />
 	</cffunction>
 	
 	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
