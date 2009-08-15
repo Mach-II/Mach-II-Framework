@@ -44,12 +44,18 @@ PUBLIC FUNCTIONS
 		
 	<cfset request._MachIIFormLib.bind = request.event />
 	
-	<cfif StructKeyExists(attributes, "bind") AND IsSimpleValue(attributes.bind)>
-		<cfif request.event.isArgDefined(ListFirst(attributes.bind, "."))>
-			<cfset request._MachIIFormLib.bind = resolvePath(attributes.bind) />
+	<cfif StructKeyExists(attributes, "bind")>
+		<!--- Passed in path --->
+		<cfif IsSimpleValue(attributes.bind)>
+			<cfif request.event.isArgDefined(ListFirst(attributes.bind, "."))>
+				<cfset request._MachIIFormLib.bind = resolvePath(attributes.bind) />
+			<cfelse>
+				<cfthrow type="MachII.customtags.form.form.noBindInEvent"
+					message="A bind path named '#attributes.bind#' is not available the current event object." />
+			</cfif>
+		<!--- Passed in bean --->
 		<cfelse>
-			<cfthrow type="MachII.customtags.form.form.noBindInEvent"
-				message="A bind named '#attributes.bind#' is not available the current event object." />
+			<cfset request._MachIIFormLib.bind = attributes.bind />
 		</cfif>
 	</cfif>
 	
@@ -65,6 +71,16 @@ PUBLIC FUNCTIONS
 		AND NOT StructKeyExists(attributes, "name")>
 		<cfthrow type="MachII.customtags.form.#variables.tagData.tagName#.noPath"
 			message="This tag must have an attribute named 'path' or 'name' or both." />
+	</cfif>
+</cffunction>
+
+<cffunction name="ensureByName" acces="public" returntype="void" output="false"
+	hint="Ensures a key is available by name in the attributes.">
+	<cfargument name="name" type="string" required="true"
+		hint="The name of the key to look up." />
+	<cfif NOT StructKeyExists(attributes, arguments.name) >
+		<cfthrow type="MachII.customtags.form.#variables.tagData.tagName#.noPath"
+			message="This tag must have an attribute named '#arguments.name#." />
 	</cfif>
 </cffunction>
 

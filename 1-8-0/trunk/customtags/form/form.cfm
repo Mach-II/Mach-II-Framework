@@ -31,7 +31,7 @@ Notes:
 	actionUrlParams	= name value pairs in pipe (|) list of url params or struct
 	encType			= specifies the encType of the form (defaults to "multipart/form-data")
 	method			= specifies the type of form post to make (defaults to "post")
-	bind			= specifies the name of the event arg to try to bind to (default to event object)
+	bind			= the path to use to bind to process this form (default to event object)
 --->
 </cfsilent>
 <cfif thisTag.ExecutionMode IS "start">
