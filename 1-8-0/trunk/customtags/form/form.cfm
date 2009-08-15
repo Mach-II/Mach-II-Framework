@@ -38,7 +38,8 @@ Notes:
 	<cfsilent>
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />	
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
+	<!--- This includes setting up the bind --->
 	<cfset setupFormTag() />
 
 	<!--- Set defaults --->
@@ -91,6 +92,8 @@ Notes:
 	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
+	<!--- Clean up bind as this serves as a "check" by other tags to ensure bind is available --->
+	<cfset StructDelete(request, "_MachIIFormLib.bind", false) />
 	<cfoutput>#doEndTag()#</cfoutput>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

@@ -41,22 +41,9 @@ PUBLIC FUNCTIONS
 	
 	<cfset setTagType("form") />
 	<cfset setSelfClosingTag(false) />
-		
-	<cfset request._MachIIFormLib.bind = request.event />
 	
 	<cfif StructKeyExists(attributes, "bind")>
-		<!--- Passed in path --->
-		<cfif IsSimpleValue(attributes.bind)>
-			<cfif request.event.isArgDefined(ListFirst(attributes.bind, "."))>
-				<cfset request._MachIIFormLib.bind = resolvePath(attributes.bind) />
-			<cfelse>
-				<cfthrow type="MachII.customtags.form.form.noBindInEvent"
-					message="A bind path named '#attributes.bind#' is not available the current event object." />
-			</cfif>
-		<!--- Passed in bean --->
-		<cfelse>
-			<cfset request._MachIIFormLib.bind = attributes.bind />
-		</cfif>
+		<cfset setupBind(attributes.bind) />
 	</cfif>
 	
 	<cfif NOT thisTag.hasEndTag>
@@ -65,7 +52,37 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
-<cffunction name="ensurePathOrName" acces="public" returntype="void" output="false"
+<cffunction name="setupBind" access="public" returntype="void" output="false"
+	hint="Sets up a bind by target path.">
+	<cfargument name="target" type="any" required="true"
+		hint="A target dot path, evaluator expression or object." />
+
+	<cfset var expressionEvaluator = caller.this.getAppManager().getExpressionEvaluator() />
+	<cfset var event = request.event />	
+	<cfset var propertyManager = caller.this.getPropertyManager() />
+	
+	<cfset request._MachIIFormLib.bind = event />
+
+	<!--- Passed in path --->
+	<cfif IsSimpleValue(attributes.target)>
+		<cftry>
+			<cfif expressionEvaluator.isExpression(attributes.target)>
+				<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpression(attributes.target, event, propertyManager) />
+			<cfelse>
+				<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpressionBody("event." & attributes.target, event, propertyManager) />
+			</cfif>
+			<cfcatch>
+				<cfthrow type="MachII.customtags.form.#getTagType()#.noBindInEvent"
+					message="A bind path named '#attributes.target#' is not available the current event object." />
+			</cfcatch>
+		</cftry>
+	<!--- Passed in bean --->
+	<cfelse>
+		<cfset request._MachIIFormLib.bind = attributes.target />
+	</cfif>
+</cffunction>
+
+<cffunction name="ensurePathOrName" access="public" returntype="void" output="false"
 	hint="Ensures a path or name is available in the attributes.">
 	<cfif NOT StructKeyExists(attributes, "path") 
 		AND NOT StructKeyExists(attributes, "name")>
@@ -74,7 +91,7 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
-<cffunction name="ensureByName" acces="public" returntype="void" output="false"
+<cffunction name="ensureByName" access="public" returntype="void" output="false"
 	hint="Ensures a key is available by name in the attributes.">
 	<cfargument name="name" type="string" required="true"
 		hint="The name of the key to look up." />

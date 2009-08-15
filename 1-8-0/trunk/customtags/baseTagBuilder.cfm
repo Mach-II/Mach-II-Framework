@@ -289,7 +289,7 @@ PUBLIC FUNCTIONS - UTIL
 	<cfargument name="targets" type="struct" required="true"
 		hint="A struct of targets to evaluate for expressions." />
 	<cfargument name="event" type="MachII.framework.Event" required="false"
-		default="#caller.this.getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent()#" />
+		default="#request.event#" />
 	<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="false"
 		default="#caller.this.getPropertyManager()#" />
 	<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="false"
