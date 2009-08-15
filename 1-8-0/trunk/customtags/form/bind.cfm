@@ -34,16 +34,17 @@ Notes:
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
 	<cfset setupTag("bind", false) />
 
-	<!--- Ensure certain attributes are available --->
-	<cfset ensureByName("target") />
-
 	<!--- Store a reference to the original bind if available --->
 	<cfif IsDefined("request._MachIIFormLib.bind")>
 		<cfset variables.originalBind = request._MachIIFormLib.bind />
 	</cfif>
 	
-	<!--- Get the new bind --->
-	<cfset setupBind(attributes.target) />
+	<!--- Setup the bind --->
+	<cfif StructKeyExists(attributes, "target")>
+		<cfset setupBind(attributes.target) />
+	<cfelse>
+		<cfset setupBind() />
+	</cfif>
 <cfelse>
 	<!--- Restore the original bind --->
 	<cfif StructKeyExists(variables, "originalBind")>

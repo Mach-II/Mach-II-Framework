@@ -39,8 +39,14 @@ Notes:
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
-	<!--- This includes setting up the bind --->
-	<cfset setupFormTag() />
+	<cfset setupTag("form", false) />
+	
+	<!--- Setup the bind --->
+	<cfif StructKeyExists(attributes, "bind")>
+		<cfset setupBind(attributes.bind) />
+	<cfelse>
+		<cfset setupBind() />
+	</cfif>
 
 	<!--- Set defaults --->
 	<cfparam name="attributes.encType" type="string" 

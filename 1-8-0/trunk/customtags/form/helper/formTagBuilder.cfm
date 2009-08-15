@@ -36,25 +36,9 @@ PROPERTIES
 <!---
 PUBLIC FUNCTIONS
 --->
-<cffunction name="setupFormTag" access="public" returntype="void" output="false"
-	hint="Sets up the form tag for use.">
-	
-	<cfset setTagType("form") />
-	<cfset setSelfClosingTag(false) />
-	
-	<cfif StructKeyExists(attributes, "bind")>
-		<cfset setupBind(attributes.bind) />
-	</cfif>
-	
-	<cfif NOT thisTag.hasEndTag>
-		<cfthrow type="MachII.customtags.form.#getTagType()#"
-			message="The #getTagType()# must have an end tag." />
-	</cfif>
-</cffunction>
-
 <cffunction name="setupBind" access="public" returntype="void" output="false"
 	hint="Sets up a bind by target path.">
-	<cfargument name="target" type="any" required="true"
+	<cfargument name="target" type="any" required="false"
 		hint="A target dot path, evaluator expression or object." />
 
 	<cfset var expressionEvaluator = caller.this.getAppManager().getExpressionEvaluator() />
@@ -63,22 +47,26 @@ PUBLIC FUNCTIONS
 	
 	<cfset request._MachIIFormLib.bind = event />
 
-	<!--- Passed in path --->
-	<cfif IsSimpleValue(attributes.target)>
-		<cftry>
-			<cfif expressionEvaluator.isExpression(attributes.target)>
-				<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpression(attributes.target, event, propertyManager) />
-			<cfelse>
-				<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpressionBody("event." & attributes.target, event, propertyManager) />
-			</cfif>
-			<cfcatch>
-				<cfthrow type="MachII.customtags.form.#getTagType()#.noBindInEvent"
-					message="A bind path named '#attributes.target#' is not available the current event object." />
-			</cfcatch>
-		</cftry>
-	<!--- Passed in bean --->
-	<cfelse>
-		<cfset request._MachIIFormLib.bind = attributes.target />
+	<cfif StructKeyExists(arguments, "target")>
+		<!--- Target is an unkown path type --->
+		<cfif IsSimpleValue(attributes.target)>
+			<cftry>
+				<!--- Target is a M2 EL expression --->
+				<cfif expressionEvaluator.isExpression(attributes.target)>
+					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpression(attributes.target, event, propertyManager) />
+				<!--- Target is a simple shortcut path --->
+				<cfelse>
+					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpressionBody("event." & attributes.target, event, propertyManager) />
+				</cfif>
+				<cfcatch>
+					<cfthrow type="MachII.customtags.form.#getTagType()#.noBindInEvent"
+						message="A bind path named '#attributes.target#' is not available the current event object." />
+				</cfcatch>
+			</cftry>
+		<!--- Target is a bean --->
+		<cfelse>
+			<cfset request._MachIIFormLib.bind = attributes.target />
+		</cfif>
 	</cfif>
 </cffunction>
 
