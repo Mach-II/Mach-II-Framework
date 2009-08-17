@@ -74,8 +74,8 @@ PUBLIC FUNCTIONS
 	hint="Ensures a path or name is available in the attributes.">
 	<cfif NOT StructKeyExists(attributes, "path") 
 		AND NOT StructKeyExists(attributes, "name")>
-		<cfthrow type="MachII.customtags.form.#variables.tagData.tagName#.noPath"
-			message="This tag must have an attribute named 'path' or 'name' or both." />
+		<cfthrow type="MachII.customtags.form.#variables.tagType#.noPath"
+			message="This '#variables.tagType#' tag must have an attribute named 'path' or 'name' or both." />
 	</cfif>
 </cffunction>
 
@@ -84,8 +84,8 @@ PUBLIC FUNCTIONS
 	<cfargument name="name" type="string" required="true"
 		hint="The name of the key to look up." />
 	<cfif NOT StructKeyExists(attributes, arguments.name) >
-		<cfthrow type="MachII.customtags.form.#variables.tagData.tagName#.noPath"
-			message="This tag must have an attribute named '#arguments.name#." />
+		<cfthrow type="MachII.customtags.form.#variables.tagType#.noAttribute"
+			message="The '#variables.tagType#' tag must have an attribute named '#arguments.name#." />
 	</cfif>
 </cffunction>
 
