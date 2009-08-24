@@ -155,7 +155,7 @@ properties struct can take complex datatypes like structs and arrays.
 		</cfif>
 		
 		<!--- Load in parameters --->
-		<cfset setDefaultEnvironment(getParameter("defaultEnvironment", "")) />
+		<cfset setDefaultEnvironment(getParameter("defaultEnvironmentName", "")) />
 		<cfset setServerPropertyName(getParameter("serverPropertyName", "serverName")) />
 
 		<!--- Set additional settings --->
