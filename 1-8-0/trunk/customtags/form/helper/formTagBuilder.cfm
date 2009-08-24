@@ -49,23 +49,24 @@ PUBLIC FUNCTIONS
 
 	<cfif StructKeyExists(arguments, "target")>
 		<!--- Target is an unkown path type --->
-		<cfif IsSimpleValue(attributes.target)>
+		<cfif IsSimpleValue(arguments.target)>
 			<cftry>
 				<!--- Target is a M2 EL expression --->
-				<cfif expressionEvaluator.isExpression(attributes.target)>
-					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpression(attributes.target, event, propertyManager) />
+				<cfif expressionEvaluator.isExpression(arguments.target)>
+					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpression(arguments.target, event, propertyManager) />
 				<!--- Target is a simple shortcut path --->
 				<cfelse>
-					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpressionBody("event." & attributes.target, event, propertyManager) />
+					<cfset request._MachIIFormLib.bind = expressionEvaluator.evaluateExpressionBody("event." & arguments.target, event, propertyManager) />
 				</cfif>
 				<cfcatch>
 					<cfthrow type="MachII.customtags.form.#getTagType()#.noBindInEvent"
-						message="A bind path named '#attributes.target#' is not available the current event object." />
+						message="A bind path with the value of '#arguments.target#' is not available the current event object."
+						detail="#cfcatch.message# || #cfcatch.detail#" />
 				</cfcatch>
 			</cftry>
 		<!--- Target is a bean --->
 		<cfelse>
-			<cfset request._MachIIFormLib.bind = attributes.target />
+			<cfset request._MachIIFormLib.bind = arguments.target />
 		</cfif>
 	</cfif>
 </cffunction>
