@@ -43,10 +43,10 @@ Application.cfc throw an exception when an session timeouts.
 This edge-case defect affected Mach-II 1.5, 1.6.0 and 1.6.1. It has been fixed 
 in the 1.8 release.
 
-A special thanks to Brandon Culpepper for discovering this defect and
-working with Team Mach-II to provide us with a sample test application
-that illustrated the issue.  Without his efforts, this defect would have
-been much more time intensive to track down.
+A special thanks to Brandon Culpepper at Direct Solutions International, Inc.
+for discovering this defect and working with Team Mach-II to provide us with 
+a sample test application that illustrated the issue.  Without his efforts, 
+this defect would have been much more time intensive to track down.
 
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/373
