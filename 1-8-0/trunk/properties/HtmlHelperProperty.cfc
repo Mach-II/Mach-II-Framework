@@ -100,7 +100,11 @@ from the parent application.
 	<cfset variables.assetPathsCache = StructNew() />
 	
 	<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
+
+	<!--- Do not use these locators as they may change in future versions --->
+	<cfset variables.HTML_HELPER_PROPERTY_NAME = "_HTMLHelper" />
 	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
+
 	<!--- Tabs, line feeds and carriage returns --->
 	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
 	
@@ -137,6 +141,9 @@ from the parent application.
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
 		<cfset buildDocTypeReferenceMap() />
+		
+		<!--- Add a reference of the helper in a known property location --->
+		<cfset setProperty(variables.HTML_HELPER_PROPERTY_NAME, this) />
 	</cffunction>
 		
 	<cffunction name="configureAssetPackages" access="private" returntype="struct" output="false"
@@ -432,14 +439,14 @@ from the parent application.
 				<cfset arguments.height = dimensions.height />
 			</cfif>
 			<cfif NOT Len(arguments.width)>
-				<cfset arguments.height = dimensions.width />
+				<cfset arguments.width = dimensions.width />
 			</cfif>
 		</cfif>
 
-		<cfif arguments.height EQ -1>
+		<cfif arguments.height NEQ -1>
 			<cfset code = code & ' height="' & arguments.height  & '"' />
 		</cfif>
-		<cfif arguments.width EQ -1>
+		<cfif arguments.width NEQ -1>
 			<cfset code = code & ' width="' & arguments.width  & '"' />
 		</cfif>
 		
