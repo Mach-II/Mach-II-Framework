@@ -36,6 +36,22 @@ limitations under the License.
 Fixed Defects
 ------------------------------------------------
 
+* Calls to non-Mach-II URLs throw exceptions when sessions timeout
+Direct calls to .cfm files in directories below the directory that contains your 
+Application.cfc throw an exception when an session timeouts.
+
+This edge-case defect affected Mach-II 1.5, 1.6.0 and 1.6.1. It has been fixed 
+in the 1.8 release.
+
+A special thanks to Brandon Culpepper for discovering this defect and
+working with Team Mach-II to provide us with a sample test application
+that illustrated the issue.  Without his efforts, this defect would have
+been much more time intensive to track down.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/373
+(2009-09-02 peterfarrell)
+
 * HTMLHeadElement and HTTPHeader callbacks failed to be removed from EventContext
 This defect can cause strange problems when using nested cache blocks such as
 an event-handler with a cache block that calls a subroutine with a cache block.

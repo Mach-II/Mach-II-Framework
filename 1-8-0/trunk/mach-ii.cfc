@@ -58,7 +58,7 @@ framework to be loaded as they interact with framework components:
 	<!--- Set the configuration mode (when to reload): -1=never, 0=dynamic, 1=always --->
 	<cfparam name="MACHII_CONFIG_MODE" type="numeric" default="0" />
 	<!--- Set the app key for sub-applications within a single cf-application. Default to the folder name. --->
-	<cfparam name="MACHII_APP_KEY" type="string" default="#GetFileFromPath(ExpandPath('.'))#" />
+	<cfparam name="MACHII_APP_KEY" type="string" default="#GetFileFromPath(GetDirectoryFromPath(GetCurrentTemplatePath()))#" />
 	<!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 	<cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 	<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_8_0.dtd. --->
