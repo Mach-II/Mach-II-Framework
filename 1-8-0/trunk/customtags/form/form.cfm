@@ -95,6 +95,10 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 	
+	<!--- Add event attributes specific to form tag --->
+	<cfset setAttributeIfDefined("onsubmit") />
+	<cfset setAttributeIfDefined("onreset") />
+	
 	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
