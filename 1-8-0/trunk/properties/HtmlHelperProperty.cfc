@@ -529,7 +529,7 @@ from the parent application.
 		<cfset variables.assetPathsCache = StructNew() />
 	</cffunction>
 	
-	<cffunction name="clearAssetPathCacheByPath" access="package" returntype="boolean" output="false"
+	<cffunction name="clearAssetPathCacheByPath" access="public" returntype="boolean" output="false"
 		hint="Clears an asset path cache element by type and path. Returns true if removed and false if not existing.">
 		<cfargument name="assetType" type="string" required="true"
 			hint="The type of asset ('img', 'js' and 'css')." />
@@ -544,6 +544,34 @@ from the parent application.
 		the value for the correct return value for this method
 		--->
 		<cfreturn NOT StructDelete(variables.assetPathsCache, assetPathHash, true) />
+	</cffunction>
+	
+	<cffunction name="computeAssetPath" access="public" returntype="string" output="false"
+		hint="Checks if the raw asset path and type is already in the asset path cache.">
+		<cfargument name="assetType" type="string" required="true"
+			hint="The type of asset ('img', 'js' and 'css')." />
+		<cfargument name="assetPath" type="string" required="true"
+			hint="The asset path which will be resolved to a full path as necessary." />
+		
+		<cfset var assetPathHash = "" />
+		<cfset var assetPathTimestamp = "" />
+		<cfset var resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
+		
+		<!--- Check if we are caching asset paths --->
+		<cfif getCacheAssetPaths()>
+			<cfset assetPathHash = createAssetPathHash(resolvedPath) />
+
+			<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
+				<cfset assetPathTimestamp = variables.assetPathsCache[assetPathHash] />
+			<cfelse>
+				<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
+				<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
+			</cfif>
+			
+			<cfreturn resolvedPath & "?" & assetPathTimestamp />
+		<cfelse>
+			<cfreturn resolvedPath />
+		</cfif>	
 	</cffunction>
 	
 	<!---
@@ -651,34 +679,6 @@ from the parent application.
 				message="A asset package named '#arguments.assetPackageName#' cannot be found."
 				detail="Asset Packages: #StructKeyList(packages)# Parent Asset Packages: #StructKeyList(parentPackages)#" />
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="computeAssetPath" access="private" returntype="string" output="false"
-		hint="Checks if the raw asset path and type is already in the asset path cache.">
-		<cfargument name="assetType" type="string" required="true"
-			hint="The type of asset ('img', 'js' and 'css')." />
-		<cfargument name="assetPath" type="string" required="true"
-			hint="The asset path which will be resolved to a full path as necessary." />
-		
-		<cfset var assetPathHash = "" />
-		<cfset var assetPathTimestamp = "" />
-		<cfset var resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
-		
-		<!--- Check if we are caching asset paths --->
-		<cfif getCacheAssetPaths()>
-			<cfset assetPathHash = createAssetPathHash(resolvedPath) />
-
-			<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
-				<cfset assetPathTimestamp = variables.assetPathsCache[assetPathHash] />
-			<cfelse>
-				<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
-				<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
-			</cfif>
-			
-			<cfreturn resolvedPath & "?" & assetPathTimestamp />
-		<cfelse>
-			<cfreturn resolvedPath />
-		</cfif>	
 	</cffunction>
 	
 	<cffunction name="createAssetPathHash" access="private" returntype="string" output="false"

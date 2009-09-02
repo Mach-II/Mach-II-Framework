@@ -37,25 +37,15 @@ Notes:
 	<cfset setupTag("img", true) />
 	
 	<!--- Setup required --->
-	<cfset ensureByName("src")>
-	<cfset variables.path = attributes.src />
+	<cfset ensureByName("src") />
 	
 	<!--- Setup optional but requried by the addImage() API --->
-	<cfif StructKeyExists(attributes, "width")>
-		<cfset variables.width = attributes.width />
-	<cfelse>
-		<cfset variables.width = "" />
-	</cfif>
-	<cfif StructKeyExists(attributes, "height")>
-		<cfset variables.height = attributes.height />
-	<cfelse>
-		<cfset variables.height = "" />
-	</cfif>
-	<cfif StructKeyExists(attributes, "alt")>
-		<cfset variables.alt = attributes.alt />
-	<cfelse>
-		<cfset variables.alt = "" />
-	</cfif>
+	<cfparam name="attributes.width" type="string" 
+		default="" />
+	<cfparam name="attributes.height" type="string" 
+		default="" />
+	<cfparam name="attributes.alt" type="string" 
+		default="" />
 	
 	<!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
 	<cfset variables.additionalAttributes = StructNew() />
@@ -67,6 +57,6 @@ Notes:
 	<cfset StructDelete(variables.additionalAttributes, "output", "false") />
 	
 <cfelse>
-	<cfset thisTag.GeneratedContent = locateHtmlHelper().addImage(variables.path, variables.width, variables.height, variables.alt, variables.additionalAttributes) />
+	<cfset thisTag.GeneratedContent = locateHtmlHelper().addImage(attributes.src, attributes.width, attributes.height, attributes.alt, variables.additionalAttributes) />
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
