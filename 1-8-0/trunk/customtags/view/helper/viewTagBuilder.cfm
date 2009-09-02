@@ -36,7 +36,7 @@ PROPERTIES
 <!---
 PUBLIC FUNCTIONS
 --->
-<cffunction name="wrapIEConditionalComment" access="private" returntype="string" output="false"
+<cffunction name="wrapIEConditionalComment" access="public" returntype="string" output="false"
 	hint="Wraps an IE conditional comment around the incoming code.">
 	<cfargument name="forIEVersion" type="string" required="true" />
 	<cfargument name="code" type="string" required="true" />
@@ -65,4 +65,19 @@ PUBLIC FUNCTIONS
 
 	<cfreturn comment />
 </cffunction>
+
+<cffunction name="locateHtmlHelper" access="public" returntype="MachII.properties.HtmlHelperProperty" output="false"
+	hint="Locates the HtmlHelperProperty for use by certain view library custom tags.">
+	
+	<cfset var htmlHelper = caller.this.getProperty("_HTMLHelper", "") />
+	
+	<cfif IsObject(htmlHelper)>
+		<cfreturn htmlHelper />
+	<cfelse>
+		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.htmlHelperUnavailable"
+			message="The '#getTagType()#' in the '#getTagLib()#' tag library cannot locate an HtmlHelperProperty configured for this application."
+			detail="Do you have an HtmlHelperProperty setup for in this application?" />
+	</cfif>
+</cffunction>
+
 </cfsilent>

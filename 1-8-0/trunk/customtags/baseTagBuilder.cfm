@@ -81,6 +81,16 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
+<cffunction name="ensureByName" access="public" returntype="void" output="false"
+	hint="Ensures a key is available by name in the attributes.">
+	<cfargument name="name" type="string" required="true"
+		hint="The name of the key to look up." />
+	<cfif NOT StructKeyExists(attributes, arguments.name) >
+		<cfthrow type="MachII.customtags.form.#variables.tagType#.noAttribute"
+			message="The '#variables.tagType#' tag must have an attribute named '#arguments.name#." />
+	</cfif>
+</cffunction>
+
 <cffunction name="getParentTagAttribute" access="public" returntype="string" output="false"
 	hint="Gets the parents tag's attribute value (ex: used by option tag to get select tag id)">
 	<cfargument name="parentTagName" type="string" required="true" />

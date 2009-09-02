@@ -80,16 +80,6 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
-<cffunction name="ensureByName" access="public" returntype="void" output="false"
-	hint="Ensures a key is available by name in the attributes.">
-	<cfargument name="name" type="string" required="true"
-		hint="The name of the key to look up." />
-	<cfif NOT StructKeyExists(attributes, arguments.name) >
-		<cfthrow type="MachII.customtags.form.#variables.tagType#.noAttribute"
-			message="The '#variables.tagType#' tag must have an attribute named '#arguments.name#." />
-	</cfif>
-</cffunction>
-
 <cffunction name="resolvePath" access="public" returntype="any" output="false"
 	hint="Resolves a path and returns a value.">
 	<cfargument name="path" type="string" required="true" />
