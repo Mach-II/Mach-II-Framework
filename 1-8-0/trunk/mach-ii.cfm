@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.1
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 This bootstrapper is DEPRECATED since Mach-II no longer officially 
@@ -28,8 +28,11 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <cfparam name="MACHII_CONFIG_PATH" type="string" default="#ExpandPath('./config/mach-ii.xml')#" />
 <!--- Set the configuration mode (when to reload): -1=never, 0=dynamic, 1=always --->
 <cfparam name="MACHII_CONFIG_MODE" type="numeric" default="0" />
-<!--- Set the app key for sub-applications within a single cf-application. Default to the folder name. --->
-<cfparam name="MACHII_APP_KEY" type="string" default="#GetFileFromPath(ExpandPath('.'))#" />
+<!---
+	Set the app key for sub-applications within a single cf-application. Default to the folder name below the Application.cfc/cfm.
+	Windows systems use the nasty "\" so we convert all "\" to "/".
+--->
+<cfparam name="MACHII_APP_KEY" type="string" default="#ListLast(ReplaceNoCase(GetDirectoryFromPath(GetCurrentTemplatePath()), "\", "/", "all"), "/")#" />
 <!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 <cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 <!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_8_0.dtd. --->
