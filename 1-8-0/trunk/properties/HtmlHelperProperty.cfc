@@ -724,8 +724,9 @@ from the parent application.
 			hint="The asset path to append the file extension to." />
 		
 		<cfset var file = ListLast(arguments.assetPath, "/") />
+		<cfset var fileExt = ListLast(arguments.assetPath, ".") />
 		
-		<cfif ListLast(arguments.assetPath, ".") NEQ arguments.assetType>
+		<cfif fileExt NEQ arguments.assetType AND fileExt NEQ "cfm">
 			<cfreturn arguments.assetPath & "." & arguments.assetType />
 		<cfelse>
 			<cfreturn arguments.assetPath />
