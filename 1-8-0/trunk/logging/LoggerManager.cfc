@@ -27,7 +27,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 <cfcomponent
 	displayname="LoggerManager"
 	output="false"
-	hint="A manager that handles loggers">
+	hint="A manager that handles loggers.">
 	
 	<!---
 	PROPERTIES
@@ -35,16 +35,22 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	<cfset variables.parent = "" />
 	<cfset variables.logFactory = "" />
 	<cfset variables.loggers = StructNew() />
+
+	<cfset variables.LOGGER_SHORTCUTS = StructNew() />
+	<cfset variables.LOGGER_SHORTCUTS["CFLogLogger"] = "MachII.logging.loggers.CFLog.Logger" />
+	<cfset variables.LOGGER_SHORTCUTS["EmailLogger"] = "MachII.logging.loggers.EmailLog.Logger" />
+	<cfset variables.LOGGER_SHORTCUTS["MachIILogger"] = "MachII.logging.loggers.MachIILog.Logger" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="LoggerManager" 
+	<cffunction name="init" access="public" returntype="LoggerManager" output="false" 
 		hint="Initializes the manager.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="false"
 			default="#CreateObject("component", "MachII.logging.LogFactory").init()#"
 			hint="A log factory instance to use. Otherwise it will create its own instance." />
-		<cfargument name="parentLoggerManager" type="MachII.logging.LoggerManager" required="false" />
+		<cfargument name="parentLoggerManager" type="MachII.logging.LoggerManager" required="false"
+			hint="The parent LoggerManager. Used in hierarchical circumstances like Mach-II modules." />
 		
 		<!--- Set the log factory use the default of an external one is not provided  --->
 		<cfset setLogFactory(arguments.logFactory) />
@@ -136,6 +142,11 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		
 		<cfset var logger = "" />
 		
+		<!--- Resolve if a shortcut --->
+		<cfset arguments.loggerType = resolveLoggerTypeShortcut(arguments.loggerType) />
+		<!--- Ensure type is correct in parameters (where it is duplicated) --->
+		<cfset arguments.loggerParameters.type = arguments.loggerType />
+		
 		<!--- Create the logger --->
 		<cftry>
 			<cfset logger = CreateObject("component", arguments.LoggerType).init(arguments.loggerId, arguments.LoggerParameters) />
@@ -152,6 +163,18 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		</cftry>
 
 		<cfset addLogger(arguments.loggerName, logger) />
+	</cffunction>
+
+	<cffunction name="resolveLoggerTypeShortcut" access="public" returntype="string" output="false"
+		hint="Resolves a logger type shorcut and returns the passed value if no match is found.">
+		<cfargument name="loggerType" type="string" required="true"
+			hint="Dot path to the logger strategy." />
+		
+		<cfif StructKeyExists(variables.LOGGER_SHORTCUTS, arguments.loggerType)>
+			<cfreturn variables.LOGGER_SHORTCUTS[arguments.loggerType] />
+		<cfelse>
+			<cfreturn arguments.loggerType />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="getLoggers" access="public" returntype="struct" output="false"
