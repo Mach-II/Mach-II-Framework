@@ -147,6 +147,24 @@ For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/353
 (2009-07-28 peterfarrell)
 
+* Added shortcuts for type dot paths when defining cache strategies
+This feature allows you to use shortcut types for the bundled cache
+strategies with the framework. Goes from MachII.caching.strategies.TimeSpanCache
+to just TimeSpanCache. See the documentation for full list of shortcuts.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/375
+(2009-09-09 peterfarrell)
+
+* Added shortcuts for type dot paths when defining loggers
+This feature allows you to use shortcut types for the bundled loggers
+strategies with the framework. Goes from MachII.logging.loggers.MachIILog.Logger
+to just MachIILogger. See the documentation for full list of shortcuts.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/376
+(2009-09-09 peterfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
