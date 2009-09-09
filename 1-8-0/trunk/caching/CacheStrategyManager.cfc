@@ -34,6 +34,10 @@ Notes:
 	<cfset variables.parent = "" />
 	<cfset variables.cacheStrategies = StructNew() />
 	
+	<cfset variables.CACHE_STRATEGIES_SHORTCUTS = StructNew() />
+	<cfset variables.CACHE_STRATEGIES_SHORTCUTS["TimeSpanCache"] = "MachII.caching.strategies.TimeSpanCache" />
+	<cfset variables.CACHE_STRATEGIES_SHORTCUTS["LRUCache"] = "MachII.caching.strategies.LRUCache" />
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -129,6 +133,11 @@ Notes:
 		
 		<cfset var strategy = "" />
 		
+		<!--- Resolve if a shortcut --->
+		<cfset arguments.cacheStrategyType = resolveCacheTypeShortcut(arguments.cacheStrategyType) />
+		<!--- Ensure type is correct in parameters (where it is duplicated) --->
+		<cfset arguments.cacheStrategyParameters.type = arguments.cacheStrategyType />
+		
 		<!--- Create the strategy --->
 		<cftry>
 			<cfset strategy = CreateObject("component", arguments.cacheStrategyType).init(arguments.cacheStrategyParameters) />
@@ -145,6 +154,48 @@ Notes:
 		</cftry>
 
 		<cfset addCacheStrategy(arguments.cacheStrategyName, strategy) />
+	</cffunction>
+	
+	<cffunction name="generateScopeKey" access="public" returntype="string" output="false"
+		hint="Generates scope key for a cache strategy.">
+		<cfargument name="cacheName" type="string" required="true"
+			hint="The name of the cache strategy." />
+		<cfargument name="appKey" type="string" required="false" default=""
+			hint="The scope prefix before '._MachIICaching'. In Mach-II applications, this is the 'appKey' in the bootstrapper. This value should be a valid struct key (no spaces, dashes, periods, etc.)." />
+		<cfargument name="moduleName" type="string" required="false"
+			hint="The module name of the Mach-II application. Not required by non-Mach-II applications." />
+		
+		<cfset var baseKey = "" />
+		<cfset var stringToHash = "_" />
+		
+		<!--- Fix that the base module in Mach-II applications is '' (zero-length string) --->
+		<cfif StructKeyExists(arguments, "moduleName") AND NOT Len(arguments.moduleName)>
+			<cfset arguments.moduleName = "_base_" />
+		<cfelseif NOT StructKeyExists(arguments, "moduleName")>
+			<cfset arguments.moduleName = "" />
+		</cfif>
+		
+		<!--- Build the base key --->
+		<cfset baseKey = arguments.appKey />
+		<cfset baseKey = ListAppend(baseKey, "_MachIICaching", ".") />
+		
+		<!--- Build the string to hash --->
+		<cfset stringToHash = arguments.moduleName />
+		<cfset stringToHash = ListAppend(stringToHash, arguments.cachename, "_") />
+		
+		<cfreturn ListAppend(baseKey, "_" & Hash(stringToHash), ".") />
+	</cffunction>
+
+	<cffunction name="resolveCacheTypeShortcut" access="public" returntype="string" output="false"
+		hint="Resolves a cache type shorcut and returns the passed value if no match is found.">
+		<cfargument name="cacheStrategyType" type="string" required="true"
+			hint="Dot path to the cache strategy." />
+		
+		<cfif StructKeyExists(variables.CACHE_STRATEGIES_SHORTCUTS, arguments.cacheStrategyType)>
+			<cfreturn variables.CACHE_STRATEGIES_SHORTCUTS[arguments.cacheStrategyType] />
+		<cfelse>
+			<cfreturn arguments.cacheStrategyType />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"

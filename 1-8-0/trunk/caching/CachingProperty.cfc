@@ -143,7 +143,8 @@ See individual caching strategies for more information on configuration.
 		<cfargument name="parameters" type="struct" required="true"
 			hint="Parameters for this strategy." />
 
-		<cfset var moduleName = getModuleName() />
+		<cfset var cacheStrategyManager = getAppManager().getCacheManager().getCacheStrategyManager() />
+		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var key = "" />
 		
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
@@ -152,8 +153,8 @@ See individual caching strategies for more information on configuration.
 				message="You must specify a parameter named 'type' for cache named '#arguments.cacheName#' in module named '#moduleName#'." />
 		</cfif>
 
-		<!--- Add in scopeKey as a parameter --->
-		<cfset arguments.parameters.generatedScopeKey = createCacheId(arguments.cacheName) />
+		<!--- Generated a scopeKey as a parameter --->
+		<cfset arguments.parameters.generatedScopeKey = cacheStrategyManager.generateScopeKey(arguments.cacheName, getAppManager().getAppKey(), moduleName) />
 		
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
@@ -176,32 +177,7 @@ See individual caching strategies for more information on configuration.
 		</cfif>
 		
 		<!--- Load the strategy  --->
-		<cfset getAppManager().getCacheManager().getCacheStrategyManager().loadStrategy(arguments.cacheName, arguments.parameters.type, arguments.parameters) />
-	</cffunction>
-	
-	<cffunction name="createCacheId" access="private" returntype="string" output="false"
-		hint="Creates a cache indentifier.">
-		<cfargument name="cacheName" type="string" required="true" />
-		
-		<cfset var moduleName = getAppManager().getModuleName() />
-		
-		<cfif NOT Len(moduleName)>
-			<cfset moduleName = "_base_" />
-		</cfif>
-		
-		<cfreturn getAppManager().getAppKey() & "._MachIICaching._" & Hash(moduleName & "_" & arguments.cacheName) />
-	</cffunction>
-	
-	<cffunction name="getModuleName" access="private" returntype="string" output="false"
-		hint="Gets the module name.">
-
-		<cfset var moduleName = getAppManager().getModuleName() />
-		
-		<cfif NOT Len(moduleName)>
-			<cfset moduleName = "_base_" />
-		</cfif>
-
-		<cfreturn moduleName />
+		<cfset cacheStrategyManager.loadStrategy(arguments.cacheName, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
 	<cffunction name="decidedCachingEnabled" access="private" returntype="boolean" output="false"
