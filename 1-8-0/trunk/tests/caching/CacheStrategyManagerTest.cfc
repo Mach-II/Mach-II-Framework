@@ -19,7 +19,7 @@ Author: Peter J. Farrell(peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -49,7 +49,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testLoadConfigureGet" access="public" returntype="void"
+	<cffunction name="testLoadConfigureGet" access="public" returntype="void" output="false"
 		hint="Tests load(), configure() and get() routines.">
 		
 		<cfset var strategy = "" />
@@ -65,6 +65,23 @@ Notes:
 		
 		<!--- Assert we got a strategy back --->
 		<cfset assertTrue(IsObject(strategy)) />
+	</cffunction>
+	
+	<cffunction name="testGenerateScopeKey" access="public" returntype="void" output="false"
+		hint="Tests generateScopeKey() in a multitude of ways.">
+
+		<cfset assertTrue(variables.cacheStrategyManager.generateScopeKey("name")
+				EQ "_MachIICaching._B068931CC450442B63F5B3D276EA4297"
+				, "Failed with no additional arguments.") />
+		<cfset assertTrue(variables.cacheStrategyManager.generateScopeKey("name", "lightpost")
+				EQ "lightpost._MachIICaching._B068931CC450442B63F5B3D276EA4297"
+				, "Failed with only 'appKey'.") />
+		<cfset assertTrue(variables.cacheStrategyManager.generateScopeKey("name", "lightpost", "")
+				EQ "lightpost._MachIICaching._0BD4AEB7F2399D0058D587D20D1BD358"
+				, "Failed with both appKey and moduleName (base module of '')") />
+		<cfset assertTrue(variables.cacheStrategyManager.generateScopeKey("name", "lightpost", "blog")
+				EQ "lightpost._MachIICaching._995AA76C09C5691B2E690FAA7C8B35FE"
+				, "Failed with both appKey and moduleName (based module of 'blog')") />
 	</cffunction>
 	
 </cfcomponent>
