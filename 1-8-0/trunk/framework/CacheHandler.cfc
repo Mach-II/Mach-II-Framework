@@ -75,7 +75,7 @@ Notes:
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-
+		<!-- CACHE HANDLE STARTS HERE -->
 		<cfset var preCommandEventDataSnapshot = StructNew() />
 		<cfset var dataToCache = StructNew() />
 		<cfset var key = getKeyWithCriteria(arguments.event) />
@@ -176,7 +176,7 @@ Notes:
 			<!--- Run the commands, out the result and continue decision --->
 			<cfset commandResult = executeCommands(arguments.event, arguments.eventContext) />
 			
-			<cfoutput>#commandResult.output#</cfoutput>
+			<cfoutput><!-- CACHE OUTPUT STARTS HERE -->#commandResult.output#<!-- CACHE OUPUT ENDS HERE (output length is #Len(commandResult.output)#)--></cfoutput>
 			
 			<cfreturn commandResult.continue />
 		</cfif>
@@ -254,13 +254,14 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
 		<cfset var result = StructNew() />
+		<cfset var output = "" />
 		<cfset var command = "" />
 		<cfset var i = 0 />
 		
 		<cfset result.continue = true />
 		<cfset result.output = "" />
 		
-		<cfsavecontent variable="result.output">
+		<cfsavecontent variable="output">
 			<cfloop from="1" to="#ArrayLen(variables.commands)#" index="i">
 				<cfset command = variables.commands[i] />
 				<cfset result.continue = command.execute(arguments.event, arguments.eventContext) />
@@ -269,6 +270,9 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfsavecontent>
+		
+		<!--- Suppress some whitespace --->
+		<cfset result.ouput = Trim(output) />
 		
 		<cfreturn result />
 	</cffunction>
