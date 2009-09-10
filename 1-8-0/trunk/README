@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version: 1.8.0.@minorVersion@
+Version: 1.8.0.@minorVersion@ (Simplicity)
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -21,14 +21,42 @@ web applications.  The framework focuses on easing software development and
 maintenance.  Mach-II was the first object-oriented framework for CFML 
 and continues to mature as a strong and viable framework choice for developers.
 
+Team Mach-II would like to send a special thanks to the following individuals
+that helped us produce Mach-II Simplicity by providing feedback, testing 
+nightly / release candidate builds, test cases / application or finding 
+defects (in no particular order):
+
+* Doug Smith (The Lampo Group, Inc.)
+* Eli Tapolcsanyi (The Lampo Group, Inc.)
+* Ty Delong (The Lampo Group, Inc.)
+* Phil Thomas (The Lampo Group, Inc.)
+* Brandon Culpepper (Direct Solutions International, Inc.)
+* Derrick Jackson (The United States Senate - Sergeant at Arms)
+* Joel Cox (Goodyear Tire and Rubber Company)
+* Chris Irwin (WolfNet Technologies)
+* Adrian Scott (Allura Direct) 
+* Brian Klaas (Johns Hopkins University - Bloomberg School of Public Health)
+* Brian Pickens (Forum Communications Company)
+* Jonah (Creori)
+* Dan Skaggs 
+* Jorge Loyo
+* Zack Pitts 
+* Joseph FitzGerald
+* Jayel (no last name given)
+
+This list is by no means a complete list of people Team Mach-II would like to
+thank.  If you participated by filing a defect, patch, enhancement and have been 
+inadvertently left of this list, we're so sorry we forgot you. You're efforts have
+not been forgotten and please consider yourself thanked!
+
 ------------------------------------------------
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
 ------------------------------------------------
-Mach-II 1.8.0 is released under the Apache 2.0 license.  You can use Mach-II 
-on any commercial application as long as you abide by the license. For more 
-details, please see the NOTICE and LICENSE files that are shipped with the 
-framework.
+Mach-II Simplicity (1.8.0) is released under the Apache 2.0 license.  You can 
+use Mach-II on any commercial application as long as you abide by the license. 
+For more details, please see the NOTICE and LICENSE files that are shipped with 
+the framework.
 
 Copyright 2003-2009 GreatBizTools, LLC
 
