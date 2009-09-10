@@ -272,7 +272,7 @@ Notes:
 		</cfsavecontent>
 		
 		<!--- Suppress some whitespace --->
-		<cfset result.ouput = Trim(output) />
+		<cfset result.output = Trim(output) />
 		
 		<cfreturn result />
 	</cffunction>
