@@ -24,6 +24,7 @@ Notes:
 This bootstrapper is DEPRECATED since Mach-II no longer officially 
 supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 --->
+
 <!--- Set the path to the application's mach-ii.xml file. Default to ./config/mach-ii.xml. --->
 <cfparam name="MACHII_CONFIG_PATH" type="string" default="#ExpandPath('./config/mach-ii.xml')#" />
 <!--- Set the configuration mode (when to reload): -1=never, 0=dynamic, 1=always --->
@@ -96,5 +97,9 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <!--- Log a message that the mach-ii.cfm bootstrapper is deprecated --->
 <cfset application[MACHII_APP_KEY].appLoader.getLog().warn("DEPRECATED: The mach-ii.cfm bootstrapper is deprecated. Please use the mach-ii.cfc bootstrapper for Application.cfc.") />
 
-<!--- Handle the Request --->
-<cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() />
+<!---
+	Handle the request and suppress whitespace. Enableoutputonly may be false 
+	so turn it back on for trailing whitespace. All these tags must be on the
+	same line or additional whitespace may be introduced.
+--->
+<cfprocessingdirective suppresswhitespace="true" /><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
