@@ -62,11 +62,12 @@ Notes:
 				<cfset log.debug("Listener '#componentNameForLogging#' invoking method '#arguments.method#'.") />
 			</cfif>
 			
-			<cfinvoke 
+			<!--- Enable output and invoke listener method --->
+			<cfsetting enablecfoutputonly="false" /><cfinvoke 
 				component="#arguments.listener#" 
 				method="#arguments.method#" 
 				event="#arguments.event#" 
-				returnvariable="resultValue" />
+				returnvariable="resultValue" /><cfsetting enablecfoutputonly="true" />
 			
 			<!--- resultKey --->
 			<cfif arguments.resultKey NEQ ''>

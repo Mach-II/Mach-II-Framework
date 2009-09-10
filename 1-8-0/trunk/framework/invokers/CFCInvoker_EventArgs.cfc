@@ -60,11 +60,12 @@ Please use EventArgsInvoker.cfc instead.
 		<cfset var log = arguments.listener.getLog() />
 		
 		<cftry>
-			<cfinvoke 
+			<!--- Enable output and invoke listener method --->
+			<cfsetting enablecfoutputonly="false" /><cfinvoke 
 				component="#arguments.listener#" 
 				method="#arguments.method#" 
 				argumentcollection="#arguments.event.getArgs()#" 
-				returnvariable="resultValue" />
+				returnvariable="resultValue" /><cfsetting enablecfoutputonly="true" />
 			
 			<!--- resultKey --->
 			<cfif arguments.resultKey NEQ ''>
