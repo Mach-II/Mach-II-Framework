@@ -157,6 +157,7 @@ from the parent application.
 		<cfset var element = "" />
 		<cfset var key = "" />
 		<cfset var i = 0 />
+		<cfset var k = 0 />
 		
 		<cfloop collection="#arguments.rawPackages#" item="key">
 			<cfset packageElements = ArrayNew(1) />
@@ -194,11 +195,6 @@ from the parent application.
 						<cfset element.forIEVersion = temp.forIEVersion />
 					</cfif>
 				</cfif>
-				
-				<!--- Assert that type is supported --->
-				<cfset getAssert().isTrue(ListFindNoCase("js,css", element.type)
-						, "The type for path '#element.paths#' in package '#key#' in module '#getAppManager().getModuleName()#' is not supported."
-						, "Valid types are 'js' or 'css'. It could be that it was not possible to auto-resolve the type by the file extension.") />
 				
 				<cfset ArrayAppend(packageElements, element) />
 			</cfloop>
@@ -555,22 +551,31 @@ from the parent application.
 		
 		<cfset var assetPathHash = "" />
 		<cfset var assetPathTimestamp = "" />
-		<cfset var resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
+		<cfset var resolvedPath = "" />
 		
-		<!--- Check if we are caching asset paths --->
-		<cfif getCacheAssetPaths()>
-			<cfset assetPathHash = createAssetPathHash(resolvedPath) />
-
-			<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
-				<cfset assetPathTimestamp = variables.assetPathsCache[assetPathHash] />
-			<cfelse>
-				<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
-				<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
-			</cfif>
-			
-			<cfreturn resolvedPath & "?" & assetPathTimestamp />
+		<!--- Check for external path --->
+		<cfif arguments.assetPath.toLowercase().startsWith("http://") 
+			OR arguments.assetPath.toLowercase().startsWith("https://")>
+			<cfreturn arguments.assetPath />
+		<!--- Resolve local path --->
 		<cfelse>
-			<cfreturn resolvedPath />
+			<cfset resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
+			
+			<!--- Check if we are caching asset paths --->
+			<cfif getCacheAssetPaths()>
+				<cfset assetPathHash = createAssetPathHash(resolvedPath) />
+	
+				<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
+					<cfset assetPathTimestamp = variables.assetPathsCache[assetPathHash] />
+				<cfelse>
+					<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
+					<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
+				</cfif>
+				
+				<cfreturn resolvedPath & "?" & assetPathTimestamp />
+			<cfelse>
+				<cfreturn resolvedPath />
+			</cfif>
 		</cfif>	
 	</cffunction>
 	
