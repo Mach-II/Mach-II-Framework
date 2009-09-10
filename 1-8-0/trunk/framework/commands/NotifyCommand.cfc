@@ -67,7 +67,7 @@ Notes:
 		<cfset var listener = getListenerProxy().getObject() />
 		<cfset var invoker = listener.getInvoker() />
 		
-		<cfset invoker.invokeListener(arguments.event, listener, getMethod(), getResultKey(), getResultArg()) />
+		<cfsetting enablecfoutputonly="false" /><cfset invoker.invokeListener(arguments.event, listener, getMethod(), getResultKey(), getResultArg()) /><cfsetting enablecfoutputonly="true" />
 		
 		<cfreturn true />
 	</cffunction>

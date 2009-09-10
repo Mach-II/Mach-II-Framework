@@ -352,7 +352,7 @@ Notes:
 				<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
 			</cfif>
-			<cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">
@@ -385,7 +385,7 @@ Notes:
 				<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
 			</cfif>
-			<cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">
@@ -418,7 +418,7 @@ Notes:
 				<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-event point.") />
 			</cfif>
-			<cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">
@@ -451,7 +451,7 @@ Notes:
 				<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
 			</cfif>
-			<cfset variables.preViewPlugins[i].preView(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">
@@ -484,7 +484,7 @@ Notes:
 				<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-view point.") />
 			</cfif>
-			<cfset variables.postViewPlugins[i].postView(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">
@@ -517,7 +517,7 @@ Notes:
 				<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
 				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-process point.") />
 			</cfif>
-			<cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) />
+			<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
 		<cfif variables.runParent eq "after" OR variables.runParent eq "">

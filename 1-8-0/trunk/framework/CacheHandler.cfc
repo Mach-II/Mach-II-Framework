@@ -19,7 +19,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id: CacheHandler.cfc 595 2007-12-17 02:39:01Z kurtwiersma $
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -71,11 +71,11 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="handleCache" access="public" returntype="boolean" output="true"
+	<cffunction name="handleCache" access="public" returntype="boolean"
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		<!-- CACHE HANDLE STARTS HERE -->
+
 		<cfset var preCommandEventDataSnapshot = StructNew() />
 		<cfset var dataToCache = StructNew() />
 		<cfset var key = getKeyWithCriteria(arguments.event) />
@@ -118,7 +118,7 @@ Notes:
 						</cfcatch>
 					</cftry>
 					
-					<cfoutput>#commandResult.output#</cfoutput>
+					<cfsetting enablecfoutputonly="false" /><cfoutput>#commandResult.output#</cfoutput><cfsetting enablecfoutputonly="true" />
 				
 					<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 					<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
@@ -149,7 +149,7 @@ Notes:
 				
 			<!--- Replay the data and output from the cache --->
 			<cfelse>
-				<cfoutput>#dataFromCache.output#</cfoutput>
+				<cfsetting enablecfoutputonly="false" /><cfoutput>#dataFromCache.output#</cfoutput><cfsetting enablecfoutputonly="true" />
 				<cfset arguments.event.setArgs(dataFromCache.data) />
 				<cfset replayHTMLHeadElements(dataFromCache.HTMLHeadElements, arguments.eventContext) />
 				<cfset replayHTTPHeaders(dataFromCache.HTTPHeaders, arguments.eventContext) />
@@ -176,7 +176,7 @@ Notes:
 			<!--- Run the commands, out the result and continue decision --->
 			<cfset commandResult = executeCommands(arguments.event, arguments.eventContext) />
 			
-			<cfoutput><!-- CACHE OUTPUT STARTS HERE -->#commandResult.output#<!-- CACHE OUPUT ENDS HERE (output length is #Len(commandResult.output)#)--></cfoutput>
+			<cfsetting enablecfoutputonly="false" /><cfoutput>#commandResult.output#</cfoutput><cfsetting enablecfoutputonly="true" />
 			
 			<cfreturn commandResult.continue />
 		</cfif>

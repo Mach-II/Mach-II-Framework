@@ -84,12 +84,18 @@ Notes:
 		<!--- This has been left in for BC --->
 		<cfset request.event = arguments.event />
 
+		<!--- Include must be on same line as save content or an extra tab will occur --->
+		<cfsavecontent variable="viewContent"><cfsetting enablecfoutputonly="false" /><cfinclude template="#viewPath#" /><cfsetting enablecfoutputonly="true" /></cfsavecontent>
+
+		<!--- Suppress any whitespace --->
+		<cfset viewContent = Trim(viewContent) />
+
+
 		<cfif arguments.contentKey NEQ ''>
 			<cfif log.isWarnEnabled()>
 				<cfset log.warn("DEPRECATED: The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
 			</cfif>
-			<!--- Include must be on same line as save content or an extra tab will occur --->
-			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
+			
 			<cfif arguments.append AND IsDefined(arguments.contentKey)>
 				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
 				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
@@ -101,8 +107,6 @@ Notes:
 		</cfif>
 		
 		<cfif arguments.contentArg NEQ ''>
-			<!--- Include must be on same line as save content or an extra tab will occur --->
-			<cfsavecontent variable="viewContent"><cfinclude template="#viewPath#" /></cfsavecontent>
 			<cfif arguments.append>
 				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
 				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
@@ -114,7 +118,7 @@ Notes:
 		</cfif>
 		
 		<cfif arguments.contentKey EQ '' AND arguments.contentArg EQ ''>
-			<cfinclude template="#viewPath#" />
+			<cfoutput>#viewContent#</cfoutput>
 		</cfif>
 	</cffunction>
 	

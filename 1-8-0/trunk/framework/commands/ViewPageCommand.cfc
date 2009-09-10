@@ -59,7 +59,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="execute" access="public" returntype="boolean" output="true"
+	<cffunction name="execute" access="public" returntype="boolean"
 		hint="Executes the command.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />

@@ -244,7 +244,7 @@ Notes:
 		
 		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
 	
-		<!--- Pre-Process. --->
+		<!--- Execute all pre-process plugin points. --->
 		<cfset pluginManager.preProcess(getEventContext()) />
 		
 		<cfloop condition="hasMoreEvents() AND getEventCount() LT getMaxEvents()">
@@ -277,8 +277,7 @@ Notes:
 				detail="The last exception was '#exception.detail#' which occurred on line #exception.tagContext[1].line# in '#exception.tagContext[1].template#'." />
 		</cfif>
 		
-		<!--- Post-Process. --->
-		<cfset pluginManager = getEventContext().getAppManager().getPluginManager() />
+		<!--- Execute all post-process plugin points. --->
 		<cfset pluginManager.postProcess(getEventContext()) />
 		
 		<cfif log.isInfoEnabled()>

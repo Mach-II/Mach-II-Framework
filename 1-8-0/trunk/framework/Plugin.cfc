@@ -61,56 +61,56 @@ All user-defined plugins extend this base plugin component.
 	<!---
 	PLUGIN POINT FUNCTIONS called from EventContext
 	--->
-	<cffunction name="preProcess" access="public" returntype="void" output="true"
+	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="Plugin point called before Event processing begins. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="preEvent" access="public" returntype="void" output="true"
+	<cffunction name="preEvent" access="public" returntype="void" output="false"
 		hint="Plugin point called before each Event is processed. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in.  Call arguments.eventContext.getCurrentEvent() to access the Event." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="postEvent" access="public" returntype="void" output="true"
+	<cffunction name="postEvent" access="public" returntype="void" output="false"
 		hint="Plugin point called after each Event is processed. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in.  Call arguments.eventContext.getCurrentEvent() to access the Event." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="preView" access="public" returntype="void" output="true"
+	<cffunction name="preView" access="public" returntype="void" output="false"
 		hint="Plugin point called before each View is processed. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="postView" access="public" returntype="void" output="true"
+	<cffunction name="postView" access="public" returntype="void" output="false"
 		hint="Plugin point called after each View is processed. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="postProcess" access="public" returntype="void" output="true"
+	<cffunction name="postProcess" access="public" returntype="void" output="false"
 		hint="Plugin point called after Event processing finishes. Override to provide custom functionality.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 
-	<cffunction name="onSessionStart" access="public" returntype="void" output="true"
+	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="Plugin point called when a session starts. Override to provide custom functionality.">
 		<!--- There is no access to the eventContext since sessions start asynchronously 
 			from the Mach-II request life cycle--->
 		<!--- Override to provide custom functionality. --->
 	</cffunction>
 	
-	<cffunction name="onSessionEnd" access="public" returntype="void" output="true"
+	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
 		hint="Plugin point called when a session ends. Override to provide custom functionality.">
 		<cfargument name="sessionScope" type="struct" required="true"
 			hint="The session scope is passed in since direct access to it is not available." />

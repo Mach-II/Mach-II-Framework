@@ -71,11 +71,11 @@ Notes:
 			</cfif>
 		</cfif>
 		
-		<cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
+		<cfsetting enablecfoutputonly="false" /><cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
 			<cfinvokeargument name="event" value="#arguments.event#" />
 			<cfinvokeargument name="eventContext" value="#arguments.eventContext#" />
 			<cfinvokeargument name="paramArgs" value="#paramArgs#" />
-		</cfinvoke>
+		</cfinvoke><cfsetting enablecfoutputonly="true" />
 
 		<cfif NOT continue AND log.isInfoEnabled()>
 			<cfset log.info("Filter '#filter.getComponentNameForLogging()# has changed the flow of this event.") />
