@@ -102,4 +102,4 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 	so turn it back on for trailing whitespace. All these tags must be on the
 	same line or additional whitespace may be introduced.
 --->
-<cfprocessingdirective suppresswhitespace="true" /><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>

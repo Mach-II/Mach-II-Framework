@@ -174,7 +174,7 @@ framework to be loaded as they interact with framework components:
 			so turn it back on for trailing whitespace. All these tags must be on the
 			same line or additional whitespace may be introduced.
 		--->
-		<cfprocessingdirective suppresswhitespace="true" /><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
 	</cffunction>
 
 	<!---
