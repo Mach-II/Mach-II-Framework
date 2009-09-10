@@ -69,7 +69,7 @@ Pattern matches are not case sensitive.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="decide" access="public" returntype="boolean" output="true"
+	<cffunction name="decide" access="public" returntype="boolean" output="false"
 		hint="Decides whether or not the passed channel should be logged.">
 		<cfargument name="logMessageElements" type="struct" required="true" />
 		
