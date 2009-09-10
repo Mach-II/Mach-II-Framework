@@ -20,7 +20,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 You must use the 'local' prefix for all variables created in this template 
@@ -40,15 +40,45 @@ Not using the 'local' prefix can cause errors due to threading.
 	</tr>
 	<tr>
 		<td><h4>Request Module Name</h4></td>
-		<td><p>#arguments.appManager.getRequestHandler().getRequestModuleName()#</p></td>
+		<td>
+		<cfif Len(arguments.appManager.getRequestHandler().getRequestModuleName())>
+			<p>#arguments.appManager.getRequestHandler().getRequestModuleName()#</p>
+		<cfelse>
+			<p><em>Base Application</em></p>
+		</cfif>
+		</td>
 	</tr>
 	<tr>
 		<td><h4>Server Name</h4></td>
 		<td><p>#cgi.SERVER_NAME#</p></td>
 	</tr>
 	<tr>
+		<td><h4>Mach-II Version</h4></td>
+		<td><p>#getMachIIVersion(arguments.appManager.getPropertyManager().getVersion())#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Mach-II Environment Name</h4></td>
+		<td><p>#arguments.appManager.getEnvironmentName()#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Mach-II Environment Group Name</h4></td>
+		<td><p>#arguments.appManager.getEnvironmentGroup()#</p></td>
+	</tr>
+	<tr>
 		<td><h4>Timestamp</h4></td>
 		<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Remote IP</h4></td>
+		<td><p>#cgi.remote_addr#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Remote User Agent</h4></td>
+		<td><p>#cgi.http_user_agent#</p></td>
+	</tr>
+	<tr>
+		<td><h4>Locale</h4></td>
+		<td><p>#getLocale()#</p></td>
 	</tr>
 </table>
 
