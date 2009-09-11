@@ -99,6 +99,9 @@ Notes:
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
 			<cfif ArrayLen(pluginNodes) gt 0 AND StructKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
 				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
+			<cfelse>
+				<!--- If no 'runParent' attribute set, use the default of 'after' --->
+				<cfset setRunParent("after") />
 			</cfif>
 		</cfif>
 
@@ -339,10 +342,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preProcess(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().preProcess(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
@@ -355,10 +356,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preProcess(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().preProcess(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -372,10 +371,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preEvent(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().preEvent(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
@@ -388,10 +385,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preEvent(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().preEvent(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -405,10 +400,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postEvent(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().postEvent(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
@@ -421,10 +414,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postEvent(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().postEvent(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -438,10 +429,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preView(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().preView(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
@@ -454,10 +443,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().preView(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().preView(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -471,10 +458,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postView(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().postView(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
@@ -487,10 +472,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postView(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().postView(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -504,10 +487,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postProcess(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().postProcess(arguments.eventContext) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
@@ -520,10 +501,8 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().postProcess(arguments.eventContext) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().postProcess(arguments.eventContext) />
 		</cfif>
 	</cffunction>
 
@@ -595,10 +574,8 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Usually it's best practice to use a getter like getRunParent() but we are direct accessing it for performance --->
-		<cfif variables.runParent eq "before">
-			<cfif IsObject(getParent())>
-				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
-			</cfif>
+		<cfif variables.runParent eq "before" AND IsObject(getParent())>
+			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
@@ -611,10 +588,8 @@ Notes:
 			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 		</cfloop>
 
-		<cfif variables.runParent eq "after" OR variables.runParent eq "">
-			<cfif IsObject(getParent())>
-				<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
-			</cfif>
+		<cfif variables.runParent eq "after" AND IsObject(getParent())>
+			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 		</cfif>
 	</cffunction>
 
