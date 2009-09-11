@@ -26,15 +26,21 @@ Notes:
 <cfcomponent 
 	displayname="BaseProxy"
 	output="false"
-	hint="">
+	hint="Acts as proxy (holder) for all user extendable components so we reload them while maintaining a reference.">
 
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.object = "" />
 	<cfset variables.type = "" />
-	<cfset variables.targetObjectPath = "" />
+	<cfset variables.targetObjectPaths = ArrayNew(1) />
 	<cfset variables.originalParameters = StructNew() />
+	
+	<cfset variables.BASE_OBJECT_TYPES = StructNew() />
+	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.EventFilter"] = "" />
+	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Listener"] = "" />
+	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Plugin"] = "" />
+	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Property"] = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -75,13 +81,54 @@ Notes:
 		hint="Computes the current reload hash of the target object.">
 
 		<cfset var directoryResults = "" />
+		<cfset var stringToHash = "" />
+		<cfset var i = 0 />
+		
+		<!--- Ensure we have paths to compute reload hash off of --->
+		<cfif NOT ArrayLen(variables.targetObjectPaths)>
+			<cfset buildTargetObjectPaths() />
+		</cfif>
 
-		<cfdirectory action="LIST" 
-			directory="#GetDirectoryFromPath(variables.targetObjectPath)#" 
-			name="directoryResults" 
-			filter="#GetFileFromPath(variables.targetObjectPath)#" />
+		<!--- The hash needs to be based off entire target object path hierarchy --->
+		<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
+			<cfdirectory action="LIST" 
+				directory="#GetDirectoryFromPath(variables.targetObjectPaths[i])#" 
+				name="directoryResults" 
+				filter="#GetFileFromPath(variables.targetObjectPaths[i])#" />
+			<cfset stringToHash = stringToHash & directoryResults.dateLastModified & directoryResults.size />
+		</cfloop>
 
-		<cfreturn Hash(directoryResults.dateLastModified & directoryResults.size) />
+		<cfreturn Hash(stringToHash) />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="buildTargetObjectPaths" access="private" returntype="void" output="false"
+		hint="Builds an hierarchical array of object paths based on the target object.">
+
+		<cfset var targetObjectMetadata =  GetMetadata(getObject()) />
+		<cfset var i = 0 />
+
+		<!--- Set the path for the target object --->
+		<cfset ArrayAppend(variables.targetObjectPaths, targetObjectMetadata.path) />
+
+		<!--- Build hierarchy path array and stop when a base object type is found --->
+		<cfloop condition="true">
+			<cfif StructKeyExists(targetObjectMetadata, "extends")>
+				<cfset targetObjectMetadata = targetObjectMetadata.extends />
+				
+				<cfif NOT StructKeyExists(variables.BASE_OBJECT_TYPES, targetObjectMetadata.name)>
+					<cfset ArrayAppend(variables.targetObjectPaths, targetObjectMetadata.path) />
+				<cfelse>
+					<cfbreak />
+				</cfif>
+			<cfelse>
+				<cfbreak />
+			</cfif>
+		</cfloop>
+		
+		<cfset setLastReloadHash(computeObjectReloadHash()) />
 	</cffunction>
 	
 	<!---
@@ -90,10 +137,7 @@ Notes:
 	<cffunction name="setObject" access="public" returntype="void" output="false">
 		<cfargument name="object" type="any" required="true" />
 		<cfset variables.object = arguments.object />
-		
-		<!--- Update related info --->
-		<cfset variables.targetObjectPath = GetMetadata(getObject()).path />
-		<cfset setLastReloadHash(computeObjectReloadHash()) />
+		<cfset buildTargetObjectPaths() />
 	</cffunction>
 	<cffunction name="getObject" access="public" returntype="any" output="false">
 		<cfreturn variables.object />
