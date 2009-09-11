@@ -257,7 +257,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!--
 	The "plugins" element defines all of the plugins to be registered with the framework.
-	Plugins are referenced by name.	
+	Plugins are referenced by name.
+		[runParent] - a directive on when to run parent plugins when in a module (defaults to 'after')
 -->
 <!ELEMENT plugins (plugin*)>
 <!ATTLIST plugins
