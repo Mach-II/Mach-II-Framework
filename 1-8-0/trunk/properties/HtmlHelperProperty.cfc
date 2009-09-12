@@ -55,9 +55,9 @@ Configuration Usage:
 			<struct>
 				<key name="lightwindow">
 					<array>
-						<element value="/js/prototype.js,/js/effects.js,/js/lightwindow.js" />
+						<element value="prototype.js,effects.js,otherDirectory/lightwindow.js" />
 						<!-- SIMPLE -->
-						<element value="/css/lightwindow.css">
+						<element value="lightwindow.css">
 						<!-- VERBOSE-->
 						<element>
 							<struct>
@@ -164,21 +164,43 @@ from the parent application.
 			
 			<cfloop from="1" to="#ArrayLen(arguments.rawPackages[key])#" index="i">
 				<cfset temp = arguments.rawPackages[key][i] />
-				<cfset element = StructNew() />
+				<cfset element = StructNew() />				
 				
 				<cfif IsSimpleValue(temp)>
-					<cfset element.paths = Trim(temp) />
-					<cfset element.type = ListLast(element.paths, ".") />
+					<cfif NOT IsArray(temp)>
+						<cfset element.paths = ListToArray(getUtils().trimList(temp)) />
+					<cfelse>
+						<cfset element.paths = temp />
+					</cfif>
+					<cfset element.type = ensureAndDetectAssetPackageType(element.paths) />
+					
+					<cfif element.type EQ "">
+						<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
+							message="Unable to determine asset types for asset package named '#key#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
+							detail="Asset paths: '#ArrayToList(element.paths)#" />
+					</cfif>
+
 					<cfset element.attributes = "" />
 					<cfset element.forIEVersion = "" />
 				<cfelseif IsStruct(temp)>
 					<cfset getAssert().isTrue(StructKeyExists(temp, "paths")
 						, "A key named 'paths' must exist for an element in position '#i#' of a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
 				
-					<cfset element.paths = Trim(temp.paths) />
+					<!--- Explode the list to an array --->
+					<cfif NOT IsArray(temp.paths)>
+			 			<cfset element.paths = ListToArray(getUtils().trimList(temp.paths)) />
+			 		<cfelse>
+						<cfset element.paths = temp.paths />
+					</cfif>
 					
 					<cfif NOT StructKeyExists(temp,  "type")>
-						<cfset element.type = ListLast(element.paths, ".") />
+						<cfset element.type = ensureAndDetectAssetPackageType(temp.paths) />
+						
+						<cfif element.type EQ "">
+							<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
+							message="Unable to determine asset types for asset package named '#key#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
+							detail="Asset paths: '#ArrayToList(element.paths)#" />
+						</cfif>
 					<cfelse>
 						<cfset element.type = temp.type />
 					</cfif>
@@ -339,8 +361,8 @@ from the parent application.
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
 		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
-		<cfargument name="paths" type="any" required="true"
-			hint="A single string, comma-delimited list or array of web accessible paths to .js files." />
+		<cfargument name="href" type="any" required="true"
+			hint="A single string, comma-delimited list or array of web accessible hrefs to .js files." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates the output type for the generated HTML code (head, inline)." />
 		
@@ -349,12 +371,12 @@ from the parent application.
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.paths)>
- 			<cfset arguments.paths = ListToArray(getUtils().trimList(arguments.paths)) />
+		<cfif NOT IsArray(arguments.href)>
+ 			<cfset arguments.href = ListToArray(getUtils().trimList(arguments.href)) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
-			<cfset assetPath = computeAssetPath("js", arguments.paths[i]) />
+		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
+			<cfset assetPath = computeAssetPath("js", arguments.href[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
@@ -366,8 +388,8 @@ from the parent application.
 	
 	<cffunction name="addStylesheet" access="public" returntype="string" output="false"
 		hint="Adds css stylesheet code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
-		<cfargument name="paths" type="any" required="true"
-			hint="A single string, comma-delimited list or array of web accessible paths to .css files." />
+		<cfargument name="href" type="any" required="true"
+			hint="A single string, comma-delimited list or array of web accessible hrefs to .css files." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
@@ -382,8 +404,8 @@ from the parent application.
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.paths)>
- 			<cfset arguments.paths = ListToArray(getUtils().trimList(arguments.paths)) />
+		<cfif NOT IsArray(arguments.href)>
+ 			<cfset arguments.href = ListToArray(getUtils().trimList(arguments.href)) />
 		</cfif>
 		
 		<!--- Explode attributes to struct --->
@@ -394,8 +416,8 @@ from the parent application.
 			<cfset attributesCode = attributesCode & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
 		</cfloop>
 
-		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
-			<cfset assetPath = computeAssetPath("css", arguments.paths[i]) />
+		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
+			<cfset assetPath = computeAssetPath("css", arguments.href[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
@@ -412,8 +434,8 @@ from the parent application.
 	
 	<cffunction name="addImage" access="public" returntype="string" output="false"
 		hint="Adds code for an img tag for inline use.">
-		<cfargument name="path" type="string" required="true"
-			hint="A path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
+		<cfargument name="src" type="string" required="true"
+			hint="The src path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
 		<cfargument name="width" type="string" required="false" default=""
 			hint="The width of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted. Auto dimension are applied when zero-length string is used." />
 		<cfargument name="height" type="string" required="false" default=""
@@ -423,13 +445,13 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		
-		<cfset var code = '<img src="' & computeAssetPath("img", arguments.path) & '"' />
+		<cfset var code = '<img src="' & computeAssetPath("img", arguments.src) & '"' />
 		<cfset var dimensions = "" />
 		<cfset var key = "" />
 		
 		<!--- Set auto dimensions --->
 		<cfif NOT Len(arguments.width) OR NOT Len(arguments.height)>
-			<cfset dimensions = getImageDimensions(arguments.path) />
+			<cfset dimensions = getImageDimensions(arguments.src) />
 			
 			<cfif NOT Len(arguments.height)>
 				<cfset arguments.height = dimensions.height />
@@ -469,15 +491,15 @@ from the parent application.
 		hint="Adds code for a link tag for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
 				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
-		<cfargument name="url" type="string" required="true"
-			hint="A the path to a web accessible location of the link file." />
+		<cfargument name="href" type="string" required="true"
+			hint="The href path to a web accessible location of the link file." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates to output type for the generated HTML code ('head', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
-		<cfset var code = '<link href="' & arguments.url & '"' />
+		<cfset var code = '<link href="' & arguments.href & '"' />
 		<cfset var key = "" />
 		
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
@@ -777,8 +799,8 @@ from the parent application.
 			
 			<cfcatch type="any">
 				<cfthrow type="MachII.properties.HtmlHelperProperty.ImageDimensionException"
-					message="Unable to read image dimensions. Ensure image is of type GIF, PNG or JPG."
-					detail="Asset path: #fullPath# || Original Exception: #getUtils().buildMessageFromCfCatch(cfcatch)#" />
+					message="Unable to read image dimensions on asset path '#fullPath#'. Ensure image is of type GIF, PNG or JPG."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
 		
@@ -811,6 +833,43 @@ from the parent application.
 		</cfif>
 		
 		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="ensureAndDetectAssetPackageType" access="private" returntype="string" output="false"
+		hint="Ensures all paths in a list are of the same type (either JS or CSS) and returns the asset type or "" if no match.">
+		<cfargument name="paths" type="any" required="true"
+			hint="A list or array assets paths to ensure and detect asset types for." />
+		
+		<cfset var fileName = "" />
+		<cfset var assetType = "" />
+		<cfset var currentAssetType = "" />
+		<cfset var i = 0 />
+		
+		<cfif NOT IsArray(arguments.paths)>
+			<cfset arguments.paths = ListToArray(getUtils().trimList(arguments.paths)) />
+		</cfif>
+		
+		<!--- Check the paths for asset type --->
+		<cfloop from="1" to="#ArrayLen(arguments.paths)#" index="i">
+			<!--- We need the file name only and strip out any query string (however it's get confused by SES paths) --->
+			<cfset fileName = GetFileFromPath(arguments.paths[i]) />
+			<cfset fileName = ListFirst(fileName, "?") />
+			<cfset currentAssetType = ListLast(fileName, ".") />
+
+			<!--- We have nothing to match against yet on the first interation --->
+			<cfif assetType EQ "">
+				<cfset assetType = currentAssetType />
+			<!---
+				If the asset type differs from the previous or if the asset 
+				type is ambigous such as .cfm then break by returning "" for no match
+			--->
+			<cfelseif assetType NEQ currentAssetType 
+				OR NOT ListFindNoCase("js,css", currentAssetType)>
+				<cfreturn "" />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn assetType />
 	</cffunction>
 
 	<!---
