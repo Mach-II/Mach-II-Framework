@@ -87,6 +87,7 @@ Notes:
 		<cfset setSeriesDelimiter(ListGetAt(urlDelimiters, 2, "|")) />
 		<cfset setPairDelimiter(ListGetAt(urlDelimiters, 3, "|")) />
 		
+		<!--- Check if we are using standard query string URLs --->
 		<cfif getQueryStringDelimiter() EQ "?"
 			AND getSeriesDelimiter() EQ "&"
 			AND getPairDelimiter() EQ "=">
