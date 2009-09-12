@@ -65,6 +65,17 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures all the cache strategies.">
+		
+		<cfset var strategies = getCacheStrategies() />
+		<cfset var key = "" />
+		
+		<cfloop collection="#strategies#" item="key">
+			<cfset strategies[key].deconfigure() />
+		</cfloop>
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->

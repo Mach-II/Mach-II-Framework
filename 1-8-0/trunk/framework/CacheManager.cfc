@@ -130,7 +130,7 @@ Notes:
 	</cffunction>
 		
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the cache handlers.">
+		hint="Configures the cache handlers and runs configure in the CacheStrategyManager.">
 		
 		<cfset var handlerId = "" />
 		<cfset var cacheStrategy = "" />
@@ -174,6 +174,15 @@ Notes:
 		</cfloop>
 		
 		<cfset super.configure() />
+	</cffunction>
+
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Runs deconfigure in the CacheStrategyManager.">
+		
+		<cfset var cacheStrategyManager = getCacheStrategyManager() />
+		
+		<!--- Configure all loaded cache strategies --->
+		<cfset cacheStrategyManager.deconfigure() />
 	</cffunction>
 	
 	<!---

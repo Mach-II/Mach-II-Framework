@@ -115,6 +115,7 @@ Notes:
 		<!--- In order in which the managers are called is important
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
 		<cfset getPropertyManager().deconfigure() />
+		<cfset getCacheManager().deconfigure() />
 		<cfset getPluginManager().deconfigure() />
 		<cfset getListenerManager().deconfigure() />
 		<cfset getFilterManager().deconfigure() />

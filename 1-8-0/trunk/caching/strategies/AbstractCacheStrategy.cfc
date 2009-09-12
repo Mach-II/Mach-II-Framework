@@ -68,6 +68,11 @@ in the Mach-II dashboard.
 		hint="Configures the strategy. Override to provide custom functionality.">
 		<!--- Does nothing. Override to provide custom functionality. --->
 	</cffunction>
+
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures the strategy. Override to provide custom functionality.">
+		<!--- Does nothing. Override to provide custom functionality. --->
+	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS
