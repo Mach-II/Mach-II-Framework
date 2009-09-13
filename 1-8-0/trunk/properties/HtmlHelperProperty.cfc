@@ -262,6 +262,7 @@ from the parent application.
 		<cfset var httpEquivReferenceMap = StructNew() />
 		
 		<cfset httpEquivReferenceMap["allow"] = "" />
+		<cfset httpEquivReferenceMap["content-language"] = "" />
 		<cfset httpEquivReferenceMap["content-encoding"] = "" />
 		<cfset httpEquivReferenceMap["content-length"] = "" />
 		<cfset httpEquivReferenceMap["content-type"] = "" />
