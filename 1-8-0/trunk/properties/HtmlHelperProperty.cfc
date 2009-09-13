@@ -367,7 +367,7 @@ from the parent application.
 	
 	<cffunction name="addJavascript" access="public" returntype="string" output="false"
 		hint="Adds javascript files script code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
-		<cfargument name="href" type="any" required="true"
+		<cfargument name="src" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible hrefs to .js files." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates the output type for the generated HTML code (head, inline)." />
@@ -377,12 +377,12 @@ from the parent application.
 		<cfset var assetPath = "" />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.href)>
- 			<cfset arguments.href = ListToArray(getUtils().trimList(arguments.href)) />
+		<cfif NOT IsArray(arguments.src)>
+ 			<cfset arguments.src = ListToArray(getUtils().trimList(arguments.src)) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
-			<cfset assetPath = computeAssetPath("js", arguments.href[i]) />
+		<cfloop from="1" to="#ArrayLen(arguments.src)#" index="i">
+			<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
 			<cfif arguments.outputType EQ "inline" OR
 				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
 				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
