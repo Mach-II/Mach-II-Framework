@@ -25,41 +25,72 @@ Updated version: 1.8.0
 Notes:
 - OPTIONAL ATTRIBUTES
 	outputType	= [string] outputs the code to "head" or "inline"
-	meida = [string] specifies styles for different media types
+	media = [string] specifies styles for different media types
 	forIEVersion = [string] wraps an IE conditional comment around the incoming code
 --->
-<cfparam name="attributes.outputType" type="string" 
-	default="head" />
 
-<cfparam name="attributes.media" type="string"
-	default="" />
 
-<cfparam name="attributes.forIEVersion" type="string"
-	default="" />
-
-<cfif thisTag.ExecutionMode IS "end">
+<cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
+	<cfset setupTag("script", false) />
 
-	<cfset variables.js = Chr(13) & '<style type="text/css"' />
+	<!--- Setup defaults --->
+	<cfparam name="attributes.outputType" type="string" 
+		default="head" />
+	<cfparam name="attributes.forIEVersion" type="string" 
+		default="" />
+		
+	<!--- Set required attributes--->
+	<cfset setAttribute("type", "text/css") />
 	
-	<cfif Len(attributes.media)>
-		<cfset variables.js = variables.js & ' media="' & attributes.media & '"' />
+	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("media") />
+	
+	<!--- Set standard attributes --->
+	<cfset setStandardAttributes() />
+		
+<cfelse>
+	<!--- Setup generation variables --->
+	<cfset variables.bodyContent = Trim(thisTag.GeneratedContent) />
+	<cfset thisTag.GeneratedContent = "" />
+	
+	<!--- For external files --->
+	<cfif StructKeyExists(attributes, "href")>
+	
+		<!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
+		<cfset variables.additionalAttributes = StructNew() />
+		<cfset StructAppend(variables.additionalAttributes, attributes) />
+		<cfset StructDelete(variables.additionalAttributes, "href", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "forIEVersion", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "output", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "outputType", "false") />
+
+		<cfif attributes.outputType EQ "head">
+			<cfset locateHtmlHelper().addStylesheet(attributes.href, variables.additionalAttributes, attributes.outputType, attributes.forIEVersion) />
+		<cfelse>
+			<cfset thisTag.GeneratedContent = locateHtmlHelper().addStylesheet(attributes.href, variables.additionalAttributes, attributes.outputType, attributes.forIEVersion) />
+		</cfif>
 	</cfif>
-			
-	<cfset variables.js = variables.js & '>' & Chr(13) & '/* <![CDATA[ */' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '/* ]]> */' & Chr(13) &  '</style>' & Chr(13) />
 	
-	<!--- Wrap in an IE conditional if defined --->
-	<cfif Len(attributes.forIEVersion)>
-		<cfset variables.js = wrapIEConditionalComment(attributes.forIEVersion, variables.js) />
-	</cfif>
-	
-	<cfif attributes.outputType EQ "head">
-		<cfset caller.this.addHTMLHeadElement(variables.js) />
-		<cfset thisTag.GeneratedContent = "" />
-	<cfelse>
-		<cfset thisTag.GeneratedContent = variables.js />
+	<!--- For body content --->
+	<cfif Len(variables.bodyContent)>
+		<cfset setContent(Chr(13) & '/* <![CDATA[ */' & variables.bodyContent & '/* ]]> */' & Chr(13)) />
+		
+		<cfset variables.styles = doStartTag() & doEndTag() />
+		
+		<!--- Wrap in an IE conditional if defined --->
+		<cfif Len(attributes.forIEVersion)>
+			<cfset variables.styles = wrapIEConditionalComment(attributes.forIEVersion, variables.styles) />
+		</cfif>
+
+		<cfif attributes.outputType EQ "head">
+			<cfset caller.this.addHTMLHeadElement(variables.styles) />
+			<cfset thisTag.GeneratedContent = "" />
+		<cfelse>
+			<cfset thisTag.GeneratedContent = this.GeneratedContent & variables.styles />
+		</cfif>	
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

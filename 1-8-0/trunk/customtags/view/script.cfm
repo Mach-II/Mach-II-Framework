@@ -24,18 +24,51 @@ Updated version: 1.8.0
 
 Notes:
 - OPTIONAL ATTRIBUTES
-	outputType	= [string] outputs the code to "head" or "inline"
+	src			= [string|list|array] A single string, comma-delimited list or array of web accessible hrefs to .js files.
+	outputType	= [string] Indicates the output type for the generated HTML code (head, inline).
+	
+External files are *always* outputted inline first or appended to the head first before
+any inline javascript code.
 --->
-<cfparam name="attributes.outputType" type="string" 
-	default="head" />
 
-<cfif thisTag.ExecutionMode IS "end">
-	<cfset variables.js = Chr(13) & '<script type="text/javascript">' & Chr(13) & '//<![CDATA[' & Chr(13) & thisTag.GeneratedContent & Chr(13) & '//]]>' & Chr(13) &  '</script>' & Chr(13) />
-	<cfif attributes.outputType EQ "head">
-		<cfset caller.this.addHTMLHeadElement(variables.js) />
-		<cfset thisTag.GeneratedContent = "" />
-	<cfelse>
-		<cfset thisTag.GeneratedContent = variables.js />
+<cfif thisTag.ExecutionMode IS "start">
+	
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
+	<cfset setupTag("script", false) />
+
+	<!--- Setup defaults --->
+	<cfparam name="attributes.outputType" type="string" 
+		default="head" />
+		
+	<!--- Set required attributes--->
+	<cfset setAttribute("type", "text/javascript") />
+
+<cfelse>
+	<!--- Setup generation variables --->
+	<cfset variables.bodyContent = Trim(thisTag.GeneratedContent) />
+	<cfset thisTag.GeneratedContent = "" />
+
+	<!--- For external files --->
+	<cfif StructKeyExists(attributes, "src")>
+		<cfif attributes.outputType EQ "head">
+			<cfset locateHtmlHelper().addJavascript(attributes.src, attributes.outputType) />
+		<cfelse>
+			<cfset thisTag.GeneratedContent = locateHtmlHelper().addJavascript(attributes.src, attributes.outputType) />
+		</cfif>
+	</cfif>
+	
+	<!--- For body content --->
+	<cfif Len(variables.bodyContent)>
+		<cfset setContent(Chr(13) & '//<![CDATA[' & variables.bodyContent & '//]]>' & Chr(13)) />
+		
+		<cfset variables.js = doStartTag() & doEndTag() />
+
+		<cfif attributes.outputType EQ "head">
+			<cfset caller.this.addHTMLHeadElement(variables.js) />
+		<cfelse>
+			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.js />
+		</cfif>
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
