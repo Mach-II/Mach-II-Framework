@@ -54,6 +54,12 @@ N.B. Links to CSS files should use the <style> tag's "src" attribute.
 	<cfset StructDelete(variables.additionalAttributes, "output", "false") />
 	
 <cfelse>
-	<cfset thisTag.GeneratedContent = locateHtmlHelper().addLink(attributes.href, attributes.type, variables.additionalAttributes, attributes.outputType) />
+<cftry>
+	<cfset thisTag.GeneratedContent = locateHtmlHelper().addLink(attributes.type, attributes.href, variables.additionalAttributes, attributes.outputType) />
+	<cfcatch>
+		<cfdump var="#cfcatch#">
+		<cfabort>
+	</cfcatch>
+</cftry>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
