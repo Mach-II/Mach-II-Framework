@@ -304,7 +304,7 @@ from the parent application.
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates tthe output type for the generated HTML code (head, inline)." />
 
-		<cfset var code = '<meta http-equiv="Content-Type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
+		<cfset var code = '<meta http-equiv="content-type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
 
 		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
 	</cffunction>
@@ -684,7 +684,7 @@ from the parent application.
 		<cfif StructKeyExists(mimeShortcutMap, arguments.type)>
 			<cfset result = mimeShortcutMap[arguments.type] />
 		<cfelse>
-			<cfset result.type = argments.type />
+			<cfset result.type = arguments.type />
 		</cfif>
 		
 		<cfreturn result />
