@@ -209,7 +209,7 @@ PUBLIC FUNCTIONS
 	<cfset var nonStandardAttributes = normalizeStructByNamespace("x") />	
 	
 	<cfif StructKeyExists(attributes, "x")>
-		<cfset StructAppend(nonStandardAttributes, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.x), false) />
+		<cfset StructAppend(nonStandardAttributes, request.eventContext.getAppManager().getUtils().parseAttributesIntoStruct(attributes.x), false) />
 	</cfif>
 	
 	<cfset setAttributes(nonStandardAttributes) />
@@ -301,9 +301,9 @@ PUBLIC FUNCTIONS - UTIL
 	<cfargument name="event" type="MachII.framework.Event" required="false"
 		default="#request.event#" />
 	<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="false"
-		default="#caller.this.getPropertyManager()#" />
+		default="#request.eventContext.getAppManager().getPropertyManager()#" />
 	<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="false"
-		default="#caller.this.getAppManager().getExpressionEvaluator()#" />
+		default="#request.eventContext.getAppManager().getExpressionEvaluator()#" />
 	
 	<cfset var key = "" />
 	

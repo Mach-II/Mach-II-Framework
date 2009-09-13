@@ -76,7 +76,7 @@ Notes:
 	
 	<!--- For body content --->
 	<cfif Len(variables.bodyContent)>
-		<cfset setContent(Chr(13) & '/* <![CDATA[ */' & variables.bodyContent & '/* ]]> */' & Chr(13)) />
+		<cfset setContent(Chr(13) & '/* <![CDATA[ */' & Chr(13) & variables.bodyContent & Chr(13) & '/* ]]> */' & Chr(13)) />
 		
 		<cfset variables.styles = doStartTag() & doEndTag() />
 		

@@ -41,9 +41,10 @@ PUBLIC FUNCTIONS
 	<cfargument name="target" type="any" required="false"
 		hint="A target dot path, evaluator expression or object." />
 
-	<cfset var expressionEvaluator = caller.this.getAppManager().getExpressionEvaluator() />
+	<cfset var appManager = request.eventContext.getAppManager() />
+	<cfset var expressionEvaluator = appManager.getExpressionEvaluator() />
 	<cfset var event = request.event />	
-	<cfset var propertyManager = caller.this.getPropertyManager() />
+	<cfset var propertyManager = appManager.getPropertyManager() />
 	
 	<cfset request._MachIIFormLib.bind = event />
 

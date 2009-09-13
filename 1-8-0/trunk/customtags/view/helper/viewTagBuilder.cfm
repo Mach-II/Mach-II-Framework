@@ -69,7 +69,7 @@ PUBLIC FUNCTIONS
 <cffunction name="locateHtmlHelper" access="public" returntype="MachII.properties.HtmlHelperProperty" output="false"
 	hint="Locates the HtmlHelperProperty for use by certain view library custom tags.">
 	
-	<cfset var htmlHelper = caller.this.getProperty("_HTMLHelper", "") />
+	<cfset var htmlHelper = request.eventContext.getAppManager().getPropertyManager().getProperty("_HTMLHelper", "") />
 	
 	<cfif IsObject(htmlHelper)>
 		<cfreturn htmlHelper />
