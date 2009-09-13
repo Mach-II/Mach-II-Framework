@@ -251,7 +251,12 @@ from the parent application.
 		<cfset temp = StructNew() />
 		<cfset temp.type = "text/html" />
 		<cfset temp.rel = "alternate" />
-		<cfset mimeShortcutMap.html = temp />	
+		<cfset mimeShortcutMap.html = temp />
+
+		<!--- Canonical link do not have a "type" attribute --->
+		<cfset temp = StructNew() />
+		<cfset temp.rel = "canonical" />
+		<cfset mimeShortcutMap.html = temp />
 		
 		<cfset setMimeShortcutMap(mimeShortcutMap) />
 	</cffunction>
@@ -491,7 +496,7 @@ from the parent application.
 	<cffunction name="addLink" access="public" returntype="string" output="false"
 		hint="Adds code for a link tag for inline use or in the HTML head.">
 		<cfargument name="type" type="string" required="true"
-				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required." />
+				hint="The type of link. Supports type shortcuts 'icon', 'rss', 'atom', 'html' and 'canonical', otherwise a complete MIME type is required." />
 		<cfargument name="href" type="string" required="true"
 			hint="The href path to a web accessible location of the link file." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
