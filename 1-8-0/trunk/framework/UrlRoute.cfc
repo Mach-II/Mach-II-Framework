@@ -220,7 +220,8 @@ Notes:
 			<!--- Ensure the required parameter has a default value --->
 			<cfif NOT StructKeyExists(params, element) AND NOT isDefaultValueDefined>
 				<cfthrow type="MachII.framework.UrlRoute.RouteArgumentMissing"
-					message="When attempting to build a url for the route '#getName()#' required argument '#element#' was not specified.">
+					message="When attempting to build a url for the route '#getName()#' required parameter '#element#' was not specified."
+					detail="Required parameters: #ArrayToList(requiredParameters)#" />
 			</cfif>
 			
 			<!--- Reset variables --->
