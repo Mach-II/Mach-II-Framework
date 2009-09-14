@@ -88,9 +88,9 @@ Notes:
 		<cftry>
 			<cfsavecontent variable="viewContent"><cfsetting enablecfoutputonly="false" /><cfinclude template="#viewPath#" /><cfsetting enablecfoutputonly="true" /></cfsavecontent>
 			<cfcatch type="any">
-				<cfthrow type="#cfcatch.type#"
-					message="An exception occurred in a view named '#arguments.viewName#'. See detail for more information."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))#" />
+				<cfset getAppManager().getUtils().rebundledException("An exception occurred in a view named '#arguments.viewName#'."
+											, cfcatch
+											, getUnresolvedPath(arguments.viewName)) />
 			</cfcatch>
 		</cftry>
 

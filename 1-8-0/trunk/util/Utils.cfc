@@ -33,7 +33,6 @@ Notes:
 	--->
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
 
-
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -297,6 +296,33 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="rebundledException" access="public" returntype="void" output="false"
+		hint="Rebundles an exception and rethrows.">
+		<cfargument name="message" type="string" required="true"
+			hint="The message value for the exception being thrown." />
+		<cfargument name="caughtException" type="any" required="true"
+			hint="A cfcatch to build a message with." />
+		<cfargument name="correctTemplatePath" type="string" required="false"
+			hint="Used to correct the reported template path and line number." />
+		
+		<cfset var illegalExceptionTypes = "security,expression,application,database,template,missingInclude,expression,lock,searchengine" />
+		<cfset var exceptionType = arguments.caughtException.type />
+		
+		<!---
+			Adobe CF strangely (or more stupidly) disallows you from throwing exception with 
+			one of the "built-in" exception types. Oddly, it enforces some and not others
+			despite what the documenation states. It would be nice to be able to rebundle
+			and rethrow an exception with the "original" exception type.
+		--->
+		<cfif ListFindNoCase(illegalExceptionTypes, exceptionType)>
+			<cfset exceptionType = "_" & exceptionType />
+		</cfif>
+		
+		<cfthrow type="#exceptionType#"
+			message="#arguments.message# See detail for more information."
+			detail="#buildMessageFromCfCatch(arguments.caughtException, arguments.correctTemplatePath)#" />
+	</cffunction>
+	
 	<cffunction name="buildMessageFromCfCatch" access="public" returntype="string" output="false"
 		hint="Builds a message string from a cfcatch.">
 		<cfargument name="caughtException" type="any" required="true"
@@ -305,7 +331,6 @@ Notes:
 			hint="Used to correct the reported template path and line number." />
 		
 		<cfset var message = "" />
-		<cfset var unableToCorrectTemplatePath = false />
 		<cfset var i = 0 />
 
 		<!--- Set always available cfcatch data points --->
@@ -319,34 +344,36 @@ Notes:
 		</cfif>
 		
 		<!--- Set additional information on the template if available --->
-		<cfif StructKeyExists(arguments.caughtException, "template")>
-			<!--- Try to correct the reported template path and line --->
-			<cfif StructKeyExists(arguments, "correctTemplatePath")>
-				<cfif StructKeyExists(arguments.caughtException, "tagcontext") AND IsArray(arguments.caughtException.tagcontext)>
-					<cfloop from="#ArrayLen(arguments.caughtException.tagcontext)#" to="1" step="-1" index="i">
-						<!--- Write details if tag context template ends with the requested correct template path --->
-						<cfif arguments.caughtException.tagcontext[i].template.endsWith(arguments.correctTemplatePath)>
-							<cfset message = message & " ||  Template: " & arguments.caughtException.tagcontext[i].template />
-							<cfif StructKeyExists(arguments.caughtException.tagcontext[i], "line")>
-								<cfset message = message & " at line " & arguments.caughtException.tagcontext[i].line />
-							</cfif>
-							<cfbreak>
-						<!--- No cigar, the requested correct template path so just report template that caused the exception --->
-						<cfelseif i EQ 1>
-							<cfabort>
-							<cfset unableToCorrectTemplatePath = true />
+		
+		<!--- Try to correct the reported template path and line --->
+		<cfif StructKeyExists(arguments, "correctTemplatePath")>
+			<cfif StructKeyExists(arguments.caughtException, "tagcontext") 
+				AND IsArray(arguments.caughtException.tagcontext) 
+				AND ArrayLen(arguments.caughtException.tagcontext) GTE 1>
+				<cfloop from="#ArrayLen(arguments.caughtException.tagcontext)#" to="1" step="-1" index="i">
+					<!--- Write details if tag context template ends with the requested correct template path --->
+					<cfif arguments.caughtException.tagcontext[i].template.endsWith(arguments.correctTemplatePath)>
+						<cfset message = message & " || Base Template: " & arguments.caughtException.tagcontext[i].template />
+						<cfif StructKeyExists(arguments.caughtException.tagcontext[i], "line")>
+							<cfset message = message & " at line " & arguments.caughtException.tagcontext[i].line />
 						</cfif>
-					</cfloop>
-				<cfelse>
-					<cfset unableToCorrectTemplatePath = true />
-				</cfif>
+						<cfbreak />
+					</cfif>
+				</cfloop>
 			</cfif>
-			
-			<cfif NOT StructKeyExists(arguments, "correctTemplatePath") OR unableToCorrectTemplatePath>
-				<cfset message = message & " ||  Template: " & arguments.caughtException.template />
-				<cfif StructKeyExists(arguments.caughtException, "line")>
-					<cfset message = message & " at line " & arguments.caughtException.line />
-				</cfif>
+		</cfif>
+		
+		<cfif StructKeyExists(arguments.caughtException, "template")>
+			<cfset message = message & " || Original Template: " & arguments.caughtException.template />
+			<cfif StructKeyExists(arguments.caughtException, "line")>
+				<cfset message = message & " at line " & arguments.caughtException.line />
+			</cfif>
+		<cfelseif StructKeyExists(arguments.caughtException, "tagcontext") 
+			AND IsArray(arguments.caughtException.tagcontext) 
+			AND ArrayLen(arguments.caughtException.tagcontext) GTE 1>
+			<cfset message = message & " || Original Template: " & arguments.caughtException.tagcontext[1].template />
+			<cfif StructKeyExists(arguments.caughtException.tagcontext[1], "line")>
+				<cfset message = message & " at line " & arguments.caughtException.tagcontext[1].line />
 			</cfif>
 		</cfif>
 		

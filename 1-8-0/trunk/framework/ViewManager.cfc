@@ -275,10 +275,16 @@ Notes:
 		<cfreturn StructKeyExists(variables.viewData, arguments.viewName) />
 	</cffunction>
 	
+	<cffunction name="getViewData" access="public" returntype="struct" output="false"
+		hint="Gets the view data. Used for internal debugging purposes.">
+		<cfreturn variables.viewData />
+	</cffunction>
+	
 	<cffunction name="getViewLoaders" access="public" returntype="array" output="false"
 		hint="Gets all view loader for this context.">
 		<cfreturn variables.viewLoaders />
 	</cffunction>
+	
 	
 	<!---
 	ACCESSORS
