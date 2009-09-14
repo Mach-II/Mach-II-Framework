@@ -115,13 +115,18 @@ Wildcards for patterns:
 			directory="#appRootPath#/#extractSearchPathBaseFromPattern(pattern)#" 
 			recurse="true" />
 		
+		<!--- Trailing slashes are bad on the appRootPath--->
+		<cfif appRootPath.endsWith("/") OR appRootPath.endsWith("\")>
+			<cfset appRootPath = Left(appRootPath, Len(appRootPath) -1) />
+		</cfif>
+		
 		<!---
 		Build possible page view paths by removing the applicationRoot 
 		(because cfinclude cannot use absolute file path) and then clean the paths
 		--->
 		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
 			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, "/" & cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
+				<cfset ArrayAppend(pageViewPaths, cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
 			</cfif>
 		</cfloop>
 		
