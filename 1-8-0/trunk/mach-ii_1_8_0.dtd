@@ -276,7 +276,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 <!ATTLIST plugin 
 	name CDATA #REQUIRED
 	type CDATA #IMPLIED
-	overrideAction (useParent|addFromParent) #IMPLIED
+	overrideAction (addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
 >
 
