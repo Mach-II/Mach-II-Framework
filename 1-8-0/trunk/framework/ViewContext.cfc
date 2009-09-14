@@ -85,11 +85,17 @@ Notes:
 		<cfset request.event = arguments.event />
 
 		<!--- Include must be on same line as save content or an extra tab will occur --->
-		<cfsavecontent variable="viewContent"><cfsetting enablecfoutputonly="false" /><cfinclude template="#viewPath#" /><cfsetting enablecfoutputonly="true" /></cfsavecontent>
+		<cftry>
+			<cfsavecontent variable="viewContent"><cfsetting enablecfoutputonly="false" /><cfinclude template="#viewPath#" /><cfsetting enablecfoutputonly="true" /></cfsavecontent>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occurred in a view named '#arguments.viewName#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Suppress any whitespace --->
 		<cfset viewContent = Trim(viewContent) />
-
 
 		<cfif arguments.contentKey NEQ ''>
 			<cfif log.isWarnEnabled()>
@@ -172,6 +178,7 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />		
+		
 		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
 
@@ -283,6 +290,12 @@ Notes:
 		hint="Gets the full path of a view by view name from the view manager.">
 		<cfargument name="viewName" type="string" required="true" />
 		<cfreturn getAppManager().getViewManager().getViewPath(arguments.viewName) />
+	</cffunction>
+	
+	<cffunction name="getUnresolvedPath" access="private" returntype="string" output="false"
+		hint="Gets the full path of a view by view name from the view manager.">
+		<cfargument name="viewName" type="string" required="true" />
+		<cfreturn getAppManager().getViewManager().getUnresolvedViewPath(arguments.viewName) />
 	</cffunction>
 	
 	<!---

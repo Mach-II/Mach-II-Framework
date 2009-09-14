@@ -301,8 +301,12 @@ Notes:
 		hint="Builds a message string from a cfcatch.">
 		<cfargument name="caughtException" type="any" required="true"
 			hint="A cfcatch to build a message with." />
+		<cfargument name="correctTemplatePath" type="string" required="false"
+			hint="Used to correct the reported template path and line number." />
 		
 		<cfset var message = "" />
+		<cfset var unableToCorrectTemplatePath = false />
+		<cfset var i = 0 />
 
 		<!--- Set always available cfcatch data points --->
 		<cfset message = "Type: " & arguments.caughtException.type />
@@ -316,9 +320,33 @@ Notes:
 		
 		<!--- Set additional information on the template if available --->
 		<cfif StructKeyExists(arguments.caughtException, "template")>
-			<cfset message = message & " ||  Template: " & arguments.caughtException.template />
-			<cfif StructKeyExists(arguments.caughtException, "line")>
-				<cfset message = message & " at line " & arguments.caughtException.line />
+			<!--- Try to correct the reported template path and line --->
+			<cfif StructKeyExists(arguments, "correctTemplatePath")>
+				<cfif StructKeyExists(arguments.caughtException, "tagcontext") AND IsArray(arguments.caughtException.tagcontext)>
+					<cfloop from="#ArrayLen(arguments.caughtException.tagcontext)#" to="1" step="-1" index="i">
+						<!--- Write details if tag context template ends with the requested correct template path --->
+						<cfif arguments.caughtException.tagcontext[i].template.endsWith(arguments.correctTemplatePath)>
+							<cfset message = message & " ||  Template: " & arguments.caughtException.tagcontext[i].template />
+							<cfif StructKeyExists(arguments.caughtException.tagcontext[i], "line")>
+								<cfset message = message & " at line " & arguments.caughtException.tagcontext[i].line />
+							</cfif>
+							<cfbreak>
+						<!--- No cigar, the requested correct template path so just report template that caused the exception --->
+						<cfelseif i EQ 1>
+							<cfabort>
+							<cfset unableToCorrectTemplatePath = true />
+						</cfif>
+					</cfloop>
+				<cfelse>
+					<cfset unableToCorrectTemplatePath = true />
+				</cfif>
+			</cfif>
+			
+			<cfif NOT StructKeyExists(arguments, "correctTemplatePath") OR unableToCorrectTemplatePath>
+				<cfset message = message & " ||  Template: " & arguments.caughtException.template />
+				<cfif StructKeyExists(arguments.caughtException, "line")>
+					<cfset message = message & " at line " & arguments.caughtException.line />
+				</cfif>
 			</cfif>
 		</cfif>
 		

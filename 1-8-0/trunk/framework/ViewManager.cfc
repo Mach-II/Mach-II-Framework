@@ -243,6 +243,16 @@ Notes:
 		<cfreturn viewData.appRoot & viewData.page />
 	</cffunction>
 	
+	<cffunction name="getUnresolvedViewPath" access="public" returntype="string" output="false"
+		hint="Gets a resolved view path by view name.">
+		<cfargument name="viewName" type="string" required="true"
+			hint="Name of the view path to get." />
+		
+		<cfset var viewData = getView(arguments.viewName) />
+		
+		<cfreturn viewData.page />
+	</cffunction>
+	
 	<cffunction name="getView" access="public" returntype="struct" output="false"
 		hint="Gets view data information. Checks parent if child manager.">
 		<cfargument name="viewName" type="string" required="true"

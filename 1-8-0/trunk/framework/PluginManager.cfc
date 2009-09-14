@@ -337,7 +337,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
@@ -346,15 +345,21 @@ Notes:
 			<cfset getParent().preProcess(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
-			<cfset log = variables.preProcessPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.preProcessPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
+				<cfset log = variables.preProcessPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'preProcess' point in plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preProcessPlugins[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().preProcess(arguments.eventContext) />
@@ -366,7 +371,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
@@ -375,15 +379,21 @@ Notes:
 			<cfset getParent().preEvent(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
-			<cfset log = variables.preEventPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.preEventPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
+				<cfset log = variables.preEventPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'preEvent' point in plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preEventPlugins[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().preEvent(arguments.eventContext) />
@@ -395,7 +405,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext the Event occurred in. Call arguments.eventContext.getCurrentEvent() to access the Event." />
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
@@ -404,15 +413,21 @@ Notes:
 			<cfset getParent().postEvent(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
-			<cfset log = variables.postEventPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.postEventPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-event point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
+				<cfset log = variables.postEventPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-event point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'postEvent' point in plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postEventPlugins[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().postEvent(arguments.eventContext) />
@@ -424,7 +439,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
@@ -433,15 +447,21 @@ Notes:
 			<cfset getParent().preView(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
-			<cfset log = variables.preViewPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.preViewPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
+				<cfset log = variables.preViewPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'preView' point in plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preView[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().preView(arguments.eventContext) />
@@ -453,7 +473,6 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true"
 			hint="The EventContext of the processing." />
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
@@ -462,15 +481,21 @@ Notes:
 			<cfset getParent().postView(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
-			<cfset log = variables.postViewPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.postViewPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-view point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
+				<cfset log = variables.postViewPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-view point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'postView' point in plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postViewPlugins[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().postView(arguments.eventContext) />
@@ -491,15 +516,21 @@ Notes:
 			<cfset getParent().postProcess(arguments.eventContext) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
-			<cfset log = variables.postProcessPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.postProcessPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running post-process point.") />
-			</cfif>
-			<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
+				<cfset log = variables.postProcessPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-process point.") />
+				</cfif>
+				<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="An exception occured in the 'postProcess' point in plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. See detail for more information."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postProcessPlugins[i]).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().postProcess(arguments.eventContext) />
@@ -509,26 +540,22 @@ Notes:
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="onSessionStart() is called at the start of a session. All onSessionStart() points are invoked regardless of the module so no run parent is needed.">
 
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
-				<!--- Logging name must always be available as it can be used in the throw --->
-				<cfset loggingName = variables.onSessionStartPlugins[i].getComponentNameForLogging() />
 				<cfset log = variables.onSessionStartPlugins[i].getLog() />
 			
 				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
+					<cfset log.debug("Plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
 				</cfif>
-				
 				<cfset variables.onSessionStartPlugins[i].onSessionStart() />
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionStartPluginPointException"
-					message="An exception occured in the onSessionStart point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+					message="An exception occured in the 'onSessionStart' point in plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionStartPlugins[i]).path))#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -538,26 +565,22 @@ Notes:
 		<cfargument name="sessionScope" type="struct" required="true"
 			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
 		
-		<cfset var loggingName = "" />
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
-				<!--- Logging name must always be available as it can be used in the throw --->
-				<cfset loggingName = variables.onSessionEndPlugins[i].getComponentNameForLogging() />
 				<cfset log = variables.onSessionEndPlugins[i].getLog() />
 			
 				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
+					<cfset log.debug("Plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
 				</cfif>
-				
 				<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
-					message="An exception occured in the onSessionEnd point in plugin '#loggingName#' in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+					message="An exception occured in the 'onSessionEnd' point in plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionEndPlugins[i]).path))#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -578,15 +601,21 @@ Notes:
 			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />
 		</cfif>
 
-		<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
-			<cfset log = variables.handleExceptionPlugins[i].getLog() />
-			
-			<cfif log.isDebugEnabled()>
-				<cfset loggingName = variables.handleExceptionPlugins[i].getComponentNameForLogging() />
-				<cfset log.debug("Plugin '#loggingName#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
-			</cfif>
-			<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
+				<cfset log = variables.handleExceptionPlugins[i].getLog() />
+				
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
+				</cfif>
+				<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
+					message="An exception occured in the 'handleException' point in plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.handleExceptionPlugins[i]).path))#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif variables.runParent eq "after" AND IsObject(getParent())>
 			<cfset getParent().handleException(arguments.eventContext, arguments.exception) />

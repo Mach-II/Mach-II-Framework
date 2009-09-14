@@ -71,11 +71,18 @@ Notes:
 			</cfif>
 		</cfif>
 		
-		<cfsetting enablecfoutputonly="false" /><cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
-			<cfinvokeargument name="event" value="#arguments.event#" />
-			<cfinvokeargument name="eventContext" value="#arguments.eventContext#" />
-			<cfinvokeargument name="paramArgs" value="#paramArgs#" />
-		</cfinvoke><cfsetting enablecfoutputonly="true" />
+		<cftry>
+			<cfsetting enablecfoutputonly="false" /><cfinvoke component="#filter#" method="filterEvent" returnVariable="continue">
+				<cfinvokeargument name="event" value="#arguments.event#" />
+				<cfinvokeargument name="eventContext" value="#arguments.eventContext#" />
+				<cfinvokeargument name="paramArgs" value="#paramArgs#" />
+			</cfinvoke><cfsetting enablecfoutputonly="true" />
+			<cfcatch type="any">
+				<cfthrow type="#cfcatch.type#"
+					message="Event-filter '#filter.getComponentNameForLogging()#' has caused an exception. See detail for more information."
+					detail="#filter.getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(filter).path)#" />
+			</cfcatch>
+		</cftry>
 
 		<cfif NOT continue AND log.isInfoEnabled()>
 			<cfset log.info("Filter '#filter.getComponentNameForLogging()# has changed the flow of this event.") />
