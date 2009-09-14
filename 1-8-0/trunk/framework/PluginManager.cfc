@@ -230,7 +230,7 @@ Notes:
 				<cfif StructKeyExists(variables, pointName & "Plugins")>
 					<cfif ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)>
 						<cfset variables[pointName & "Plugins"][ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)] = arguments.plugin />
-					<cfelse>
+					<cfelse>					
 						<cfset ArrayInsertAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName], arguments.plugin) />
 						<cfif ListLen(variables[pointName & "PluginsPosition"]) GT 1>
 							<cfset variables[pointName & "PluginsPosition"] = ListInsertAt(variables[pointName & "PluginsPosition"], variables.pluginArrayPosition[arguments.pluginName], arguments.pluginName) />
@@ -555,7 +555,7 @@ Notes:
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionStartPluginPointException"
 					message="An exception occured in the 'onSessionStart' point in plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionStartPlugins[i]).path))#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionStartPlugins[i]).path)#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -580,7 +580,7 @@ Notes:
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
 					message="An exception occured in the 'onSessionEnd' point in plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionEndPlugins[i]).path))#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionEndPlugins[i]).path)#" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -613,7 +613,7 @@ Notes:
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.onSessionEndPluginPointException"
 					message="An exception occured in the 'handleException' point in plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.handleExceptionPlugins[i]).path))#" />
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.handleExceptionPlugins[i]).path)#" />
 			</cfcatch>
 		</cftry>
 
