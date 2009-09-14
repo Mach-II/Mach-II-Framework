@@ -121,7 +121,7 @@ Wildcards for patterns:
 		--->
 		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
 			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
+				<cfset ArrayAppend(pageViewPaths, "/" & cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
 			</cfif>
 		</cfloop>
 		
