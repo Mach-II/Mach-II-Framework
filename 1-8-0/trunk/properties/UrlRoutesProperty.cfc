@@ -154,53 +154,33 @@ index.cfm/product/A12345/fancy/
 	</cffunction>
 	
 	<!---
-	PRPOTECTED FUNCTIONS
+	PUBLIC FUNCTIONS	
 	--->
-	<cffunction name="evaluateParameters" access="private" returntype="array" output="false"
-		hint="Evaluates parameters (required and optional) and returns an evaluated array.">
-		<cfargument name="parameters" type="any" required="true"
-			hint="A list or array of parameters to evaluate." />
+	<cffunction name="addRoute" access="public" returntype="void" output="false"
+		hint="Adds a route by name and UrlRoute object.">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
-		<cfset var utils = getAppManager().getUtils() />
-		<cfset var i = 0 />
+		<!---
+			We need a local list of names because if the deconfigure() is run we have to remove the routes from
+			the RequestManager which is a singleton.
+			
+			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and 
+			aliases as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler).
+		--->
+		<cfset variables.routeNames.add(arguments.routeName) />
 		
-		<!--- Convert a list to array (and trim the list just in case) --->
-		<cfif isSimpleValue(arguments.parameters)>
-			<cfset arguments.parameters = ListToArray(utils.trimList(arguments.parameters)) />
-		</cfif>
-
-		<!--- Parse the array of parameters --->
-		<cfloop from="1" to="#ArrayLen(arguments.parameters)#" index="i">
-			<cfset arguments.parameters[i] = parseParameter(arguments.parameters[i]) />
-		</cfloop>
-		
-		<cfreturn arguments.parameters />
+		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>
 	
-	<cffunction name="parseParameter" access="private" returntype="string" output="false">
-		<cfargument name="param" type="string" required="true" />
-		
-		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
-		<cfset var parsedParam = arguments.param />
-		
-		<cfif ListLen(parsedParam, ":") EQ 2>
-			<cfif expressionEvaluator.isExpression(ListGetAt(parsedParam, 2, ":"))>
-				<cfset parsedParam = ListSetAt(parsedParam, 2, 
-					expressionEvaluator.evaluateExpression(ListGetAt(parsedParam, 2, ":"), variables.dummyEvent, getAppManager().getPropertyManager()), ":") />
-			</cfif>
-		</cfif>
-		
-		<cfreturn parsedParam />
-	</cffunction>
-	
-	<cffunction name="createRewriteConfigFile" access="private" returntype="void" output="false"
+	<cffunction name="createRewriteConfigFile" access="public" returntype="void" output="false"
 		hint="Creates a rewrite config file.">
 		
 		<cfset var lf = Chr(10) />
 		<cfset var configFilePath = ExpandPath(getRewriteConfigFile()) />
 		<cfset var contents = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var appRoot = getAppManager().getPropertyManager().getProperty("urlBase") />
+		<cfset var appRoot = getProperty("urlBase") />
 		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var names = variables.routeNames.toArray() />
 		<cfset var route = 0 />
@@ -243,27 +223,45 @@ index.cfm/product/A12345/fancy/
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS	
-	--->
-	<cffunction name="addRoute" access="public" returntype="void" output="false">
-		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
-		
-		<!---
-			We need a local list of names because if the deconfigure() is run we have to remove the routes from
-			the RequestManager which is a singleton.
-			
-			Lists can be really slow if there are a lot of routes or aliases so a HashSet is used for names and 
-			aliases as it is consistent speed-wise as the dataset grows (see clearCache() in CacheHandler).
-		--->
-		<cfset variables.routeNames.add(arguments.routeName) />
-		
-		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
-	</cffunction>
-	
-	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="parseParameter" access="private" returntype="string" output="false">
+		<cfargument name="param" type="string" required="true" />
+		
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset var parsedParam = arguments.param />
+		
+		<cfif ListLen(parsedParam, ":") EQ 2>
+			<cfif expressionEvaluator.isExpression(ListGetAt(parsedParam, 2, ":"))>
+				<cfset parsedParam = ListSetAt(parsedParam, 2, 
+					expressionEvaluator.evaluateExpression(ListGetAt(parsedParam, 2, ":"), variables.dummyEvent, getAppManager().getPropertyManager()), ":") />
+			</cfif>
+		</cfif>
+		
+		<cfreturn parsedParam />
+	</cffunction>
+
+	<cffunction name="evaluateParameters" access="private" returntype="array" output="false"
+		hint="Evaluates parameters (required and optional) and returns an evaluated array.">
+		<cfargument name="parameters" type="any" required="true"
+			hint="A list or array of parameters to evaluate." />
+		
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<!--- Convert a list to array (and trim the list just in case) --->
+		<cfif isSimpleValue(arguments.parameters)>
+			<cfset arguments.parameters = ListToArray(utils.trimList(arguments.parameters)) />
+		</cfif>
+
+		<!--- Parse the array of parameters --->
+		<cfloop from="1" to="#ArrayLen(arguments.parameters)#" index="i">
+			<cfset arguments.parameters[i] = parseParameter(arguments.parameters[i]) />
+		</cfloop>
+		
+		<cfreturn arguments.parameters />
+	</cffunction>
+
 
 	<!---
 	ACCESSORS
