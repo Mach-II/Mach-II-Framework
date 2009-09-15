@@ -237,6 +237,7 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/295
 Special thanks to Doug Smith and Eli Tapolcsanyi at The Lampo 
 Group, Inc for contributing this patch.
 
+For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/321
 (2009-06-23 peterfarrell)
 
@@ -250,8 +251,21 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/326
 
 * Improved how exceptions are handled if premature calls made to
 method in bootstrapper before framework has completely loaded
+
+For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/358
 (2009-08-05 peterfarrell)
+
+* Improve how exceptions are handled in views, listeners, plugins and filters
+Added additional information to exception data available. This includes 
+looking back in the cfcatch.tagcontext for the template path that the 
+exception occurred in so the correct template and line is reported instead
+of a general ViewContext exception (causing the developer to read the stack
+trace). 
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/384
+(2009-09-14 peterfarrell)
 
 * Many small performance improvements
 - Removed repeated method calls to resources and conditionals that 
