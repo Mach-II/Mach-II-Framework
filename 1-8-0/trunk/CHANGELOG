@@ -36,6 +36,21 @@ limitations under the License.
 Fixed Defects
 ------------------------------------------------
 
+* Local cachingEnabled is not respected when set to false
+The local cachingEnabled parameter for caching strategies
+was not being respected and being overrided by the global
+setting.
+
+This defect affected Mach-II 1.6.0 and 1.6.1. It has been fixed
+in the 1.8 release.
+
+A special thanks to Doug Smith at The Lampo Group, Inc. for
+discovering this defect.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/388
+(2009-09-14 peterfarrell)
+
 * Calls to non-Mach-II URLs throw exceptions when sessions timeout
 Direct calls to .cfm files in directories below the directory that contains your 
 Application.cfc throw an exception when an session timeouts.

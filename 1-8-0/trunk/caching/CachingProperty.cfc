@@ -88,6 +88,7 @@ See individual caching strategies for more information on configuration.
 		<cfset var defaultCacheParameters = StructNew() />
 		<cfset var key = "" />
 
+		<!--- Set the "global" caching enabled directive --->
 		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
 		
 		<!--- Load defined cache strategies --->
@@ -114,11 +115,6 @@ See individual caching strategies for more information on configuration.
 		<!--- Set the default cache strategy name (this must be done only after all strategies 
 			have been added)--->
 		<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
-		
-		<!--- Set caching enabled/disabled --->
-		<cfif NOT isCachingEnabled()>
-			<cfset getAppManager().getCacheManager().disableCaching() />
-		</cfif>
 	</cffunction>
 	
 	<!---
@@ -161,7 +157,7 @@ See individual caching strategies for more information on configuration.
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
 		
-		<!--- Decide the caching enabled mode --->
+		<!--- Decide the "local" caching enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "cachingEnabled")>
 			<cftry>
 				<cfset arguments.parameters["cachingEnabled"] = decidedCachingEnabled(arguments.parameters["cachingEnabled"]) />
@@ -174,6 +170,9 @@ See individual caching strategies for more information on configuration.
 					<cfrethrow />
 				</cfcatch>
 			</cftry>
+		<!--- Fall back to the "global" caching mode if no "local" mode defined--->
+		<cfelse>
+			<cfset arguments.parameters["cachingEnabled"] = isCachingEnabled() />
 		</cfif>
 		
 		<!--- Load the strategy  --->

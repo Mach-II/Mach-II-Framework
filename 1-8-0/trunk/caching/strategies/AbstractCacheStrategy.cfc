@@ -44,8 +44,8 @@ in the Mach-II dashboard.
 	--->
 	<cfset variables.instance = StructNew() />
 	<cfset variables.instance.strategyTypeName = "undefined" />
-	<cfset variables.instance.isCacheEnabled = true />
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.parameters.cachingEnabled = true />
 	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
 	<cfset variables.log = 0 />
 	<cfset variables.assert = "" />
@@ -175,12 +175,12 @@ in the Mach-II dashboard.
 	
 	<cffunction name="setCacheEnabled" access="public" returntype="void" output="false"
 		hint="Sets the boolean suggestion that isCacheEnabled() returns.">
-		<cfargument name="isCacheEnabled" type="boolean" required="true" />
-		<cfset variables.instance.isCacheEnabled = arguments.isCacheEnabled />
+		<cfargument name="cachingEnabled" type="boolean" required="true" />
+		<cfset variables.parameters.cachingEnabled = arguments.cachingEnabled />
 	</cffunction>
 	<cffunction name="isCacheEnabled" access="public" returntype="boolean" output="false"
 		hint="Provides a boolean suggestion to the *calling code* if caching should be used. This does not explicitly turn caching on/off.">
-		<cfreturn variables.instance.isCacheEnabled />
+		<cfreturn variables.parameters.cachingEnabled />
 	</cffunction>
 	
 	<cffunction name="setAssert" access="private" returntype="void" output="false"
