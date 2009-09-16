@@ -99,7 +99,8 @@ Wildcards for patterns:
 		hint="Loads views based on the defined parameters.">
 		
 		<cfset var appRoot = getApplicationRoot() />	
-		<cfset var appRootPath = ExpandPath(appRoot) />
+		<cfset var appRootPath = cleanPath(ExpandPath(appRoot)) />
+		<cfset var searchPath = "" />
 		<cfset var pattern = getPattern() />
 		<cfset var exclude = getExclude() />
 		<cfset var pageViewQuery = "" />
@@ -108,17 +109,27 @@ Wildcards for patterns:
 		<cfset var viewData = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
+
+		<!--- Trailing slashes are bad on the appRootPath--->
+		<cfif appRootPath.endsWith("/")>
+			<cfset appRootPath = Left(appRootPath, Len(appRootPath) -1) />
+		</cfif>
+		
+		<!--- Decide if we need to resolve a relative pattern path   --->
+		<cfif pattern.startsWith(".")>
+			<cfset searchPath = getUtils().expandRelativePath(appRootPath, extractSearchPathBaseFromPattern(pattern)) />
+			<!--- Clean up pattern --->
+			<cfset pattern = removeRelativePartsFromPattern(pattern) />
+			<cfset appRootPath = ReplaceNoCase(searchPath, extractSearchPathBaseFromPattern(pattern), "") />
+		<cfelse>
+			<cfset searchPath = appRootPath & "/" & extractSearchPathBaseFromPattern(pattern) />
+		</cfif>
 		
 		<!--- Get all the possible page views --->
 		<cfdirectory name="pageViewQuery" 
 			action="list" 
-			directory="#appRootPath#/#extractSearchPathBaseFromPattern(pattern)#" 
+			directory="#searchPath#" 
 			recurse="true" />
-		
-		<!--- Trailing slashes are bad on the appRootPath--->
-		<cfif appRootPath.endsWith("/") OR appRootPath.endsWith("\")>
-			<cfset appRootPath = Left(appRootPath, Len(appRootPath) -1) />
-		</cfif>
 		
 		<!---
 		Build possible page view paths by removing the applicationRoot 
@@ -162,7 +173,7 @@ Wildcards for patterns:
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="Full appRootPath '#appRootPath#' for appRoot '#appRoot#'." />
+				detail="Search path '#searchPath#'." />
 		</cfif>
 		
 		<cfreturn results />
@@ -224,6 +235,23 @@ Wildcards for patterns:
 		
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
 			<cfif NOT variables.pathMatcher.isPattern(patternParts[i])>
+				<cfset patternBase = ListAppend(patternBase, patternParts[i], "/") />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn patternBase />
+	</cffunction>
+	
+	<cffunction name="removeRelativePartsFromPattern" access="private" returntype="string" output="false"
+		hint="Removes the relative parts form the pattern.">
+		<cfargument name="pattern" type="string" required="true" />
+		
+		<cfset var patternParts = ListToArray(arguments.pattern, "/") />
+		<cfset var patternBase = "" />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
+			<cfif NOT ListFindNoCase(".|..", patternParts[i], "|")>
 				<cfset patternBase = ListAppend(patternBase, patternParts[i], "/") />
 			</cfif>
 		</cfloop>
