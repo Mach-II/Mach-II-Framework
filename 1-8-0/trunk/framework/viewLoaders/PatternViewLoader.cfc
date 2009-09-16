@@ -119,6 +119,7 @@ Wildcards for patterns:
 		<cfif pattern.startsWith(".")>
 			<cfset searchPath = getUtils().expandRelativePath(appRootPath, extractSearchPathBaseFromPattern(pattern)) />
 			<!--- Clean up pattern --->
+			<cfset appRoot = appRoot & Replace(pattern, removeRelativePartsFromPattern(pattern), "", "one") />
 			<cfset pattern = removeRelativePartsFromPattern(pattern) />
 			<cfset appRootPath = ReplaceNoCase(searchPath, extractSearchPathBaseFromPattern(pattern), "") />
 		<cfelse>
