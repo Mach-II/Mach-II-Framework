@@ -138,7 +138,7 @@ Wildcards for patterns:
 		--->
 		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
 			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, cleanPath(ReplaceNoCase(pageViewQuery.directory[i], appRootPath, "", "one")) & "/" & pageViewQuery.name[i]) />
+				<cfset ArrayAppend(pageViewPaths, ReplaceNoCase(cleanPath(pageViewQuery.directory[i]), appRootPath, "", "one") & "/" & pageViewQuery.name[i]) />
 			</cfif>
 		</cfloop>
 		
@@ -174,7 +174,7 @@ Wildcards for patterns:
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="Search path '#searchPath#'." />
+				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#pageViewPaths#'." />
 		</cfif>
 		
 		<cfreturn results />
