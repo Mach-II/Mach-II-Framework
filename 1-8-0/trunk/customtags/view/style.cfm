@@ -28,13 +28,11 @@ Notes:
 	media = [string] specifies styles for different media types
 	forIEVersion = [string] wraps an IE conditional comment around the incoming code
 --->
-
-
 <cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
-	<cfset setupTag("script", false) />
+	<cfset setupTag("style", false) />
 
 	<!--- Setup defaults --->
 	<cfparam name="attributes.outputType" type="string" 
@@ -55,6 +53,11 @@ Notes:
 	<!--- Setup generation variables --->
 	<cfset variables.bodyContent = Trim(thisTag.GeneratedContent) />
 	<cfset thisTag.GeneratedContent = "" />
+	
+	<!--- Ensure attributes if no body content --->
+	<cfif NOT Len(variables.bodyContent)>
+		<cfset ensureByName("href") />
+	</cfif>
 	
 	<!--- For external files --->
 	<cfif StructKeyExists(attributes, "href")>

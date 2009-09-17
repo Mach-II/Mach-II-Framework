@@ -49,6 +49,11 @@ any inline javascript code.
 	<cfset variables.bodyContent = Trim(thisTag.GeneratedContent) />
 	<cfset thisTag.GeneratedContent = "" />
 
+	<!--- Ensure attributes if no body content --->
+	<cfif NOT Len(variables.bodyContent)>
+		<cfset ensureByName("src") />
+	</cfif>
+
 	<!--- For external files --->
 	<cfif StructKeyExists(attributes, "src")>
 		<cfif attributes.outputType EQ "head">
