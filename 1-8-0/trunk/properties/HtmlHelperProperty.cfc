@@ -793,7 +793,8 @@ from the parent application.
 		<cfargument name="path" type="string" required="true"
 			hint="A unresolved path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
 		
-		<cfset var fullPath = getWebrootBasePath() & "/" & buildAssetPath("img", arguments.path) />
+		<!--- Append the tick count so awt won't cache the image forever --->
+		<cfset var fullPath = getWebrootBasePath() & "/" & buildAssetPath("img", arguments.path) & "?" & getTickCount() />
 		<cfset var image = "" />
 		<cfset var dimensions = StructNew() />
 		
@@ -802,6 +803,9 @@ from the parent application.
 		
 			<cfset dimensions.width = image.getWidth() />
 			<cfset dimensions.height = image.getHeight() />
+			
+			<!--- Flush the image metadata (appears to not work most of the time, hence the tick count trick) --->
+			<cfset image.flush() />
 			
 			<cfcatch type="any">
 				<cfthrow type="MachII.properties.HtmlHelperProperty.ImageDimensionException"
