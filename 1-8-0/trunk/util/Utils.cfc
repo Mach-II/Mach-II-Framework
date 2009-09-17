@@ -317,7 +317,7 @@ Notes:
 		<cfargument name="correctTemplatePath" type="string" required="false"
 			hint="Used to correct the reported template path and line number." />
 		
-		<cfset var illegalExceptionTypes = "security,expression,application,database,template,missingInclude,expression,lock,searchengine" />
+		<cfset var illegalExceptionTypes = "security,expression,application,database,template,missingInclude,expression,lock,searchengine,object" />
 		<cfset var exceptionType = arguments.caughtException.type />
 		
 		<!---
