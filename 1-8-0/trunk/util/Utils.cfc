@@ -222,12 +222,24 @@ Notes:
 		<cfargument name="delimiters" type="string" required="false" default="|"
 			hint="Defaults to '|' when not defined (must be '|' for backward compatibility)." />
 
-		<cfset var event = arguments.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var eventContext = arguments.appManager.getRequestManager().getRequestHandler().getEventContext() />
+		<cfset var event = "" />
 		<cfset var propertyManager = arguments.appManager.getPropertyManager() />
 		<cfset var expressionEvaluator = arguments.appManager.getExpressionEvaluator() />		
 		<cfset var result = StructNew() />
 		<cfset var temp = "" />
 		<cfset var i = "" />
+		
+		<!--- Ff there is no current event, then it is the preProcess so get the next event --->
+		<cfif eventContext.hasCurrentEvent()>
+			<cfset event = eventContext.getCurrentEvent() />
+		<cfelseif eventContext.hasNextEvent()>
+			<cfset event = eventContext.getNextEvent() />
+		<cfelse>
+			<cfthrow
+				type="MachII.framework.NoEventAvailable"
+				message="The 'parseAttributesBindToEventAndEvaluateExpressionsIntoStruct' method cannot find an available event." />
+		</cfif>
 		
 		<cfif IsSimpleValue(arguments.attributes)>
 			<cfloop list="#arguments.attributes#" index="i" delimiters="#arguments.delimiters#">

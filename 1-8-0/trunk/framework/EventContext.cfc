@@ -179,11 +179,18 @@ Notes:
 		</cfif>
 		
 		<cfif IsSimpleValue(arguments.args)>
-			<!--- Resolve args to place in as url parameters --->
-			<cfset eventArgs = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
-										utils.trimList(arguments.args)
-										, getAppManager()
-										, ",") />
+			<cftry>
+				<!--- Resolve args to place in as url parameters --->
+				<cfset eventArgs = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+											utils.trimList(arguments.args)
+											, getAppManager()
+											, ",") />
+				<cfcatch type="MachII.framework.NoEventAvailable">
+					<cfthrow type="MachII.framework.NoEventAvailable"
+						message="The 'redirectEvent' method cannot find an available event. Be sure you have not cleared the event queue before calling this method."
+						detail="Please check your code." />
+				</cfcatch>
+			</cftry>
 		<cfelseif IsStruct(arguments.args)>
 			<cfset eventArgs = arguments.args />
 		<cfelse>
@@ -193,16 +200,35 @@ Notes:
 		</cfif>
 		
 		<cfif IsSimpleValue(arguments.persistArgs)>
-			<!--- Resolve args to persist --->
-			<cfset argsToPersist = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
-											utils.trimList(arguments.persistArgs)
-											, getAppManager()
-											, ",") />
-			
-			<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
-			<cfif arguments.persist AND NOT StructCount(argsToPersist)>
-				<cfset argsToPersist = getCurrentEvent().getArgs() />
-			</cfif>
+			<cftry>
+				<!--- Resolve args to persist --->
+				<cfset argsToPersist = utils.parseAttributesBindToEventAndEvaluateExpressionsIntoStruct(
+												utils.trimList(arguments.persistArgs)
+												, getAppManager()
+												, ",") />
+				
+				<!--- If persist is enabled and no persistArgs are specified then persist all the event args --->
+				<cfif arguments.persist AND NOT StructCount(argsToPersist)>
+					<!--- Ff there is no current event, then it is the preProcess so get the next event --->
+					<cfif hasCurrentEvent()>
+						<cfset argsToPersist = getCurrentEvent().getArgs() />
+					<cfelseif hasNextEvent()>
+						<cfset argsToPersist = getNextEvent().getArgs() />
+					<cfelse>
+						<cfthrow
+							type="MachII.framework.NoEventAvailable"
+							message="The 'redirectEvent' method cannot find an available event." />
+					</cfif>
+				</cfif>
+				<cfcatch type="MachII.framework.NoEventAvailable">
+					<cfthrow type="MachII.framework.NoEventAvailable"
+						message="The 'redirectEvent' method cannot find an available event. Be sure you have not cleared the event queue before calling this method."
+						detail="Please check your code." />
+				</cfcatch>
+				<cfcatch type="any">
+					<cfrethrow />
+				</cfcatch>
+			</cftry>
 		<cfelseif IsStruct(arguments.persistArgs)>
 			<cfset argsToPersist = arguments.persistArgs />
 		<cfelse>
