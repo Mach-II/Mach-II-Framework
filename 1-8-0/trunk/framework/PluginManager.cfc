@@ -99,7 +99,7 @@ Notes:
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
 			<cfif ArrayLen(pluginNodes) gt 0 AND StructKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
 				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
-			<cfelse>
+			<cfelseif NOT arguments.override>
 				<!--- If no 'runParent' attribute set, use the default of 'after' --->
 				<cfset setRunParent("after") />
 			</cfif>
