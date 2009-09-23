@@ -85,9 +85,12 @@ PUBLIC FUNCTIONS
 	hint="Ensures a key is available by name in the attributes.">
 	<cfargument name="name" type="string" required="true"
 		hint="The name of the key to look up." />
+	<cfargument name="detail" type="string" required="false" default="No additional details."
+		hint="Additional details to use in the exception." />
 	<cfif NOT StructKeyExists(attributes, arguments.name) >
-		<cfthrow type="MachII.customtags.form.#variables.tagType#.noAttribute"
-			message="The '#variables.tagType#' tag must have an attribute named '#arguments.name#." />
+		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.noAttribute"
+			message="The '#variables.tagType#' tag must have an attribute named '#arguments.name#."
+			detail="#arguments.detail#" />
 	</cfif>
 </cffunction>
 
@@ -324,6 +327,32 @@ PUBLIC FUNCTIONS - UTIL
 	<cfset cleanedId = ReplaceNoCase(cleanedId, " ", "_", "all") />
 	
 	<cfreturn cleanedId />
+</cffunction>
+
+<cffunction name="booleanize" access="public" returntype="numeric" output="false"
+	hint="Converts 'Yes/No' and 'True/False' strings to 'true' boolean. Leaves numerics alone.">
+	<cfargument name="input" type="any" required="true" 
+		hint="Input to convert." />
+	<cfargument name="attributeName" type="string" required="true" 
+		hint="Name of the attribute." />
+
+	<cfif IsNumeric(arguments.input)>
+		<cfreturn arguments.input />	
+	<cfelseif IsSimpleValue(arguments.input)>
+		<cfif REFindNoCase("yes|true", arguments.input)>
+			<cfreturn 1 />
+		<cfelseif REFindNoCase("no|false", arguments.input)>
+			<cfreturn 0 />
+		<cfelse>
+			<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.#arguments.attributeName#.UnableToBooleanize"
+				message="Unable to booleanize an attribute named '#arguments.attributeName#' in the '#variables.tagType#' library."
+				detail="Incoming value: #arguments.input#" />
+		</cfif>
+	<cfelse>
+		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.#arguments.attributeName#.UnableToBooleanize"
+			message="Unable to booleanize an attribute named '#arguments.attributeName#' in the '#variables.tagType#' library."
+			detail="Incoming value is a struct, array or object." />	
+	</cfif>
 </cffunction>
 
 <!---

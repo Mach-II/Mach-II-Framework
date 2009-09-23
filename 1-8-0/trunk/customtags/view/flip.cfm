@@ -29,22 +29,23 @@ Notes:
 --->
 <cfif thisTag.ExecutionMode IS "end">
 
-	<!--- Assert required attributes are present --->
-	<cfif NOT StructKeyExists(attributes, "value") OR NOT IsNumeric(attributes.value)>
-		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
-			message="An attribute named 'value' required and must be numeric." />
-	</cfif>
-	<cfif NOT StructKeyExists(attributes, "items")>
-		<cfthrow type="MachII.customtags.view.flip.missingAttribute"
-			message="An attribute named 'items' required and must be a list or an array." />
-	</cfif>
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
+	<cfset setupTag("flip", true) />
+
+	<!--- Setup required --->
+	<cfset ensureByName("value") />
+	<cfset ensureByName("items", "Must be a list or an array.") />
+
+	<!--- Convert a "string" boolean to a number --->
+	<cfset attributes.value = booleanize(attributes.value, "value") />
 	
 	<!--- Convert items array to list --->
 	<cfif IsSimpleValue(attributes.items)>
 		<cfset attributes.items = ListToArray(attributes.items) />
 	</cfif>
 	
-	<!--- We can't zebra strip if there is only one item so assume nothing for the second item --->
+	<!--- We can't zebra stripe if there is only one item so assume nothing for the second item --->
 	<cfif ArrayLen(attributes.items) EQ 1>
 		<cfset ArrayAppend(attributes.items, "") />
 	</cfif>
