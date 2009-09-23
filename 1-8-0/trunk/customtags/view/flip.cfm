@@ -24,7 +24,7 @@ Updated version: 1.8.0
 
 Notes:
 - REQUIRED ATTRIBUTES
-	value	= [numeric] value to evaluate against
+	value	= [numeric|boolean] value to evaluate against (converts a value of "yes|true" to 1 and "no|false" to 0)
 	items	= [string] a list of items to use when evaluating the value
 --->
 <cfif thisTag.ExecutionMode IS "end">
