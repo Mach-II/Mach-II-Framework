@@ -82,7 +82,7 @@ Notes:
 		<cfset var expEvaluator = getExpressionEvaluator()	/>
 				
 		<!--- If reinit is FALSE, get the bean from the event --->
-		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName())>
+		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName()) AND IsObject(arguments.event.getArg(getBeanName()))>
 			<cfif log.isDebugEnabled()>
 				<cfset log.debug("Event-bean '#getBeanName()#' already in event. Repopulated with data.") />
 			</cfif>
