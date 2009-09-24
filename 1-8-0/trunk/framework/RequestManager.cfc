@@ -170,8 +170,10 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="redirectUrl" access="public" returntype="void" output="false">
-		<cfargument name="redirectUrl" type="string" required="true" />
-		<cfargument name="statusType" type="string" required="false" default="" />
+		<cfargument name="redirectUrl" type="string" required="true"
+			hint="An URL to redirect to." />
+		<cfargument name="statusType" type="string" required="false" default="temporary"
+			hint="The status type to use. Valid option: 'permanent' (301), 'prg' (303 - See Other), 'temporary' (302) [default option]" />
 
 		<!--- Redirect based on the HTTP status type --->
 		<cfif arguments.statusType EQ "permanent">
@@ -401,68 +403,44 @@ Notes:
 		
 		<cfreturn params />
 	</cffunction>
-	
-	<cffunction name="parseNonRoute" access="private" returntype="struct" output="false"
-		hint="Parses a non-route Url elements into request data.">
-		<cfargument name="urlElements" type="array" required="true" />
-		
-		<cfset var value = "" />
-		<cfset var i = 0 />
-		<cfset var names = arguments.urlElements />
-		<cfset var params = StructNew() />
-		<cfset var pairDelimiter = getPairDelimiter() />
-		
-		<!---
-		If the event name was excluded from the URL and there are an odd number of
-		URL elements then pop off the first element
-		--->
-		<cfif getUrlExcludeEventParameter() AND ArrayLen(arguments.urlElements) MOD 2>
-			<cfset params[getEventParameter()] = arguments.urlElements[1] />
-			<cfset ArrayDeleteAt(names, 1) />
-		</cfif>
-	
-		<cfif getSeriesDelimiter() EQ pairDelimiter>
-			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
-				<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
-					<cfset value = names[i+1] />
-				<cfelse>
-					<cfset value = "" />
-				</cfif>
-				<cfset params[names[i]] = value />
-			</cfloop>
-		<cfelse>
-			<cfloop from="1" to="#ArrayLen(names)#" index="i">
-				<cfif ListLen(names[i], pairDelimiter) EQ 2>
-					<cfset value = ListGetAt(names[i], 2, pairDelimiter) />
-				<cfelse>
-					<cfset value = "" />
-				</cfif>
-				<cfset params[ListGetAt(names[i], 1, pairDelimiter)] =  value />
-			</cfloop>
-		</cfif>
-		
-		<cfreturn params />
-	</cffunction>
-	
-	<cffunction name="parseRoute" access="private" returntype="struct" output="false"
-		hint="Parses a route by route name.">
-		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="urlElements" type="array" required="true" />
-		
-		<cfset var route = getRoute(arguments.routeName) />
-		<cfset var routeParams = 0 />
-		
-		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
-		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
-		<cfset getRequestHandler().setCurrentRouteName(arguments.routeName) />
-		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
-		
-		<cfreturn routeParams />
-	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - UTIL
+	--->
+	<!---
+	REDIRECT PERSIST
+	--->
+	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
+		hint="Saves persisted event data and returns the persistId.">
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="A struct of event-args to persist." />
+		
+		<cfset var persistId = "" />
+		<cfset var data = StructNew() />
+		<cfset var preRedirectCallbacks = getPreRedirectCallbacks() />
+		<cfset var i = "" />
+		
+		<cfloop from="1" to="#ArrayLen(preRedirectCallbacks)#" index="i">
+			<cfinvoke component="#preRedirectCallbacks[i].callback#"
+				method="#preRedirectCallbacks[i].method#">
+				<cfinvokeargument name="data" value="#data#" />
+			</cfinvoke>
+		</cfloop>
+		
+		<cfset data.eventArgs = arguments.eventArgs />
+		
+		<cfset persistId = getRequestRedirectPersist().save(data) />
+		
+		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
+			<cfcookie name="#getPropertyManager().getProperty("redirectPersistParameter")#" value="#persistId#" />
+		</cfif>
+		
+		<cfreturn persistId />
+	</cffunction>
 	<cffunction name="readPersistEventData" access="public" returntype="struct" output="false"
 		hint="Gets a persisted event by id if found in event args.">
-		<cfargument name="eventArgs" type="struct" required="true" />
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The current eventArgs to append the redirect persist event args to via a reference." />
 		
 		<cfset var data = "" />
 		<cfset var postRedirectCallbacks = getPostRedirectCallbacks() />
@@ -494,33 +472,9 @@ Notes:
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
-		hint="Saves persisted event data and returns the persistId.">
-		<cfargument name="eventArgs" type="struct" required="true" />
-		
-		<cfset var persistId = "" />
-		<cfset var data = StructNew() />
-		<cfset var preRedirectCallbacks = getPreRedirectCallbacks() />
-		<cfset var i = "" />
-		
-		<cfloop from="1" to="#ArrayLen(preRedirectCallbacks)#" index="i">
-			<cfinvoke component="#preRedirectCallbacks[i].callback#"
-				method="#preRedirectCallbacks[i].method#">
-				<cfinvokeargument name="data" value="#data#" />
-			</cfinvoke>
-		</cfloop>
-		
-		<cfset data.eventArgs = arguments.eventArgs />
-		
-		<cfset persistId = getRequestRedirectPersist().save(data) />
-		
-		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
-			<cfcookie name="#getPropertyManager().getProperty("redirectPersistParameter")#" value="#persistId#" />
-		</cfif>
-		
-		<cfreturn persistId />
-	</cffunction>
-	
+	<!---
+	REQUEST CALLBACKS
+	--->
 	<cffunction name="addOnRequestEndCallback" access="public" returntype="void" output="false"
 		hint="Adds an on request end callback to be run at the end of processing an event.">
 		<cfargument name="callback" type="any" required="true" />
@@ -596,27 +550,9 @@ Notes:
 		<cfreturn variables.postRedirectCallbacks />
 	</cffunction>
 	
-	<cffunction name="getRoutes" access="public" returntype="struct" output="false"
-		hint="Get all registered url routes.">
-		<cfreturn variables.routes />
-	</cffunction>
-	
-	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
-		hint="Gets a route by route name.">
-		<cfargument name="routeNameOrUrlAlias" type="string" required="true" />
-		
-		<cfset var routes = getRoutes() />
-		
-		<cfif StructKeyExists(routes, arguments.routeNameOrUrlAlias)>
-			<cfreturn variables.routes[arguments.routeNameOrUrlAlias] />
-		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeNameOrUrlAlias)>
-			<cfreturn variables.routes[variables.routeAliases[arguments.routeNameOrUrlAlias]] />
-		<cfelse>
-			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No named route or route url alias of '#arguments.routeNameOrUrlAlias#' could be found." />
-		</cfif>
-	</cffunction>
-	
+	<!---
+	ROUTES
+	--->
 	<cffunction name="addRoute" access="public" returntype="void" output="false"
 		hint="Adds a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
@@ -638,6 +574,98 @@ Notes:
 			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
 		</cfif>
 	</cffunction>
+	<cffunction name="removeRoute" access="public" returntype="void" output="false"
+		hint="Removes a route by route name.">
+		<cfargument name="routeName" type="string" required="true" />
+		
+		<cfset var route = getRoute(arguments.routeName) />
+		
+		<cfset StructDelete(variables.routes, arguments.routeName) />
+		
+		<cfif route.isUrlAliasDefined()>
+			<cfset StructDelete(variables.routeAliases, route.getUrlAlias()) />
+		</cfif>
+	</cffunction>
+	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
+		hint="Gets a route by route name.">
+		<cfargument name="routeNameOrUrlAlias" type="string" required="true" />
+		
+		<cfset var routes = getRoutes() />
+		
+		<cfif StructKeyExists(routes, arguments.routeNameOrUrlAlias)>
+			<cfreturn variables.routes[arguments.routeNameOrUrlAlias] />
+		<cfelseif StructKeyExists(variables.routeAliases, arguments.routeNameOrUrlAlias)>
+			<cfreturn variables.routes[variables.routeAliases[arguments.routeNameOrUrlAlias]] />
+		<cfelse>
+			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
+				message="No named route or route url alias of '#arguments.routeNameOrUrlAlias#' could be found." />
+		</cfif>
+	</cffunction>
+	<cffunction name="getRoutes" access="public" returntype="struct" output="false"
+		hint="Get all registered url routes.">
+		<cfreturn variables.routes />
+	</cffunction>
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="parseNonRoute" access="private" returntype="struct" output="false"
+		hint="Parses a non-route Url elements into request data.">
+		<cfargument name="urlElements" type="array" required="true" />
+		
+		<cfset var value = "" />
+		<cfset var i = 0 />
+		<cfset var names = arguments.urlElements />
+		<cfset var params = StructNew() />
+		<cfset var pairDelimiter = getPairDelimiter() />
+		
+		<!---
+		If the event name was excluded from the URL and there are an odd number of
+		URL elements then pop off the first element
+		--->
+		<cfif getUrlExcludeEventParameter() AND ArrayLen(arguments.urlElements) MOD 2>
+			<cfset params[getEventParameter()] = arguments.urlElements[1] />
+			<cfset ArrayDeleteAt(names, 1) />
+		</cfif>
+	
+		<cfif getSeriesDelimiter() EQ pairDelimiter>
+			<cfloop from="1" to="#ArrayLen(names)#" index="i" step="2">
+				<cfif i + 1 LTE ArrayLen(names) AND names[i+1] NEQ "_-_NULL_-_">
+					<cfset value = names[i+1] />
+				<cfelse>
+					<cfset value = "" />
+				</cfif>
+				<cfset params[names[i]] = value />
+			</cfloop>
+		<cfelse>
+			<cfloop from="1" to="#ArrayLen(names)#" index="i">
+				<cfif ListLen(names[i], pairDelimiter) EQ 2>
+					<cfset value = ListGetAt(names[i], 2, pairDelimiter) />
+				<cfelse>
+					<cfset value = "" />
+				</cfif>
+				<cfset params[ListGetAt(names[i], 1, pairDelimiter)] =  value />
+			</cfloop>
+		</cfif>
+		
+		<cfreturn params />
+	</cffunction>
+	
+	<cffunction name="parseRoute" access="private" returntype="struct" output="false"
+		hint="Parses a route by route name.">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="urlElements" type="array" required="true" />
+		
+		<cfset var route = getRoute(arguments.routeName) />
+		<cfset var routeParams = 0 />
+		
+		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
+		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
+		<cfset getRequestHandler().setCurrentRouteName(arguments.routeName) />
+		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
+		
+		<cfreturn routeParams />
+	</cffunction>
 	
 	<cffunction name="checkRouteParameterNames" access="private" returntype="void" output="false">
 		<cfset var route = 0 />
@@ -653,19 +681,6 @@ Notes:
 					message="A route named '#index#' with an URL alias of '#route.getUrlAlias()#' has a parameter called '#getEventParameter()#' which is same as the event parameter name. Route parameters can not have the same name as the event parameter." />			
 			</cfif>
 		</cfloop>
-	</cffunction>
-	
-	<cffunction name="removeRoute" access="public" returntype="void" output="false"
-		hint="Removes a route by route name.">
-		<cfargument name="routeName" type="string" required="true" />
-		
-		<cfset var route = getRoute(arguments.routeName) />
-		
-		<cfset StructDelete(variables.routes, arguments.routeName) />
-		
-		<cfif route.isUrlAliasDefined()>
-			<cfset StructDelete(variables.routeAliases, route.getUrlAlias()) />
-		</cfif>
 	</cffunction>
 	
 	<!---
