@@ -88,6 +88,11 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getAppManager().getEnvironmentName() />
 	</cffunction>
 	
+	<cffunction name="getEnvironmentGroup" access="public" returntype="string" output="false"
+		hint="Gets the environment group.">
+		<cfreturn getAppManager().getEnvironmentGroup() />
+	</cffunction>
+	
 	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false"
 		hint="Gets the LogFactory.">
 		<cfreturn getAppManager().getLogFactory() />
@@ -112,6 +117,94 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Flag to check parent strategy manager." />
 		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.name, arguments.checkParent) />
+	</cffunction>
+	
+	<cffunction name="buildUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		
+		<cfset var builtUrl = "" />
+		<cfset var queryString = "" />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var value = "" />
+		<cfset var i = "" />
+		<cfset var keyList = StructKeyList(params) />
+		<cfset var seriesDelimiter = getSeriesDelimiter() />
+		<cfset var pairDelimiter = getPairDelimiter() />
+		<cfset var parseSes = getParseSes() />
+
+		<!--- Nested the appending of the event parameter inside the next block
+			Moving it causes redirect commands with just urls to wrongly append
+			the event parameter on the end of the url --->
+
+		<!--- Attach the module/event name if defined --->
+		<cfif Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<!--- Attach event parameter only if it not supposed to be excluded --->
+			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
+				<cfset queryString = getEventParameter() & pairDelimiter />
+			</cfif>
+			<cfset queryString = queryString & arguments.moduleName & getModuleDelimiter() & arguments.eventName />
+		<cfelseif NOT Len(arguments.moduleName) AND Len(arguments.eventName)>
+			<!--- Attach event parameter only if it not supposed to be excluded --->
+			<cfif NOT getUrlExcludeEventParameter() OR isQueryStringUrls()>
+				<cfset queryString = getEventParameter() & pairDelimiter />
+			</cfif>
+			<cfset queryString = queryString & arguments.eventName />
+		</cfif>
+		
+		<!--- Sort the list of url args to keep them in a consistent order --->
+		<cfset keyList = ListSort(keyList, "textnocase") />
+		
+		<!--- Attach each additional arguments if it exists and is a simple value --->
+		<cfloop list="#keyList#" index="i">
+			<cfif IsSimpleValue(params[i])>
+				<!--- Encode all ';' to 'U+03B' (unicode) which is part of the fix for the path info truncation bug #78782 in Adobe ColdFusion --->
+				<cfif parseSes>
+					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
+				</cfif>
+				<cfif NOT Len(params[i]) AND seriesDelimiter EQ pairDelimiter AND parseSes>
+					<cfset params[i] = "_-_NULL_-_" />
+				</cfif>
+				<cfset queryString = queryString & seriesDelimiter & i & pairDelimiter & URLEncodedFormat(params[i]) />
+			</cfif>
+		</cfloop>
+		
+		<!--- Prepend the urlBase and add trailing series delimiter --->
+		<cfif Len(queryString)>
+			<cfset builtUrl = arguments.urlBase & getQueryStringDelimiter() & queryString />
+			<cfif seriesDelimiter NEQ "&">
+				<cfset builtUrl = builtUrl & seriesDelimiter />
+			</cfif>
+		<cfelse>
+			<cfset builtUrl = arguments.urlBase />
+		</cfif>
+		
+		<cfreturn builtUrl />
+	</cffunction>
+	
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url.">
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name or Url alias of the route to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
+		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var parsedQueryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters) />
+		<cfset var route = getRoute(arguments.routeName) />	
+		
+		<cfreturn route.buildRouteUrl(params, parsedQueryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter()) />
 	</cffunction>
 	
 	<!---
