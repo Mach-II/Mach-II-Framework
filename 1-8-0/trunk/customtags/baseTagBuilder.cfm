@@ -241,10 +241,10 @@ PUBLIC FUNCTIONS
 		<cfset setAttribute("onchange", attributes.onChange) />
 	</cfif>
 	<cfif StructKeyExists(attributes, "onclick")>
-		<cfset setAttribute("onclick", attributes.onChange) />
+		<cfset setAttribute("onclick", attributes.onClick) />
 	</cfif>
 	<cfif StructKeyExists(attributes, "ondblcick")>
-		<cfset setAttribute("ondblclick", attributes.onDblClick) />m
+		<cfset setAttribute("ondblclick", attributes.onDblClick) />
 	</cfif>
 	<cfif StructKeyExists(attributes, "onmousedown")>
 		<cfset setAttribute("onmousedown", attributes.onMouseDown) />
