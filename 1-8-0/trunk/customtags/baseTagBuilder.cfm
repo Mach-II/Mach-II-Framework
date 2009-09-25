@@ -282,8 +282,10 @@ PUBLIC FUNCTIONS - UTIL
 </cffunction>
 
 <cffunction name="normalizeStructByNamespace" access="public" returntype="struct" output="false">
-	<cfargument name="namespace" type="string" required="true" />
-	<cfargument name="target" type="struct" required="true" default="#attributes#" />
+	<cfargument name="namespace" type="string" required="true"
+		hint="A string that is the namespace prefix. The ':' is appended automatically." />
+	<cfargument name="target" type="struct" required="true" default="#attributes#"
+		hint="A reference to the struct that holds the namespaced keys. Defaults to 'attributes' scope." />
 	
 	<cfset var tagAttributes = StructNew() />
 	<cfset var key = "" />
@@ -294,6 +296,20 @@ PUBLIC FUNCTIONS - UTIL
 			<cfset tagAttributes[ReplaceNoCase(key, namespaceStem, "", "one").toLowercase()] = arguments.target[key] />
 		</cfif>
 	</cfloop>
+	
+	<!---
+		Commercial versions of BlueDragon does not handle namespace prefixes and normalizes 
+		automatically by putting the key names in all uppercase and adding a key p="true"
+	--->
+	<cfif StructKeyExists(arguments.target, arguments.namespace) 
+		AND IsBoolean(arguments.target[arguments.namespace])
+		AND arguments.target[arguments.namespace]>
+		<cfloop collection="#arguments.target#" item="key">
+			<cfif Compare(key, key.toUppercase()) EQ 0>
+				<cfset tagAttributes[key.toLowercase()] = arguments.target[key] />
+			</cfif>
+		</cfloop>
+	</cfif>
 	
 	<cfreturn tagAttributes />
 </cffunction>
