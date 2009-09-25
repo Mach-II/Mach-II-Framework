@@ -142,5 +142,10 @@ Notes:
 		
 		<cfset assertTrue(returnedList EQ comparisonList) />
 	</cffunction>
+	
+	<cffunction name="testEscapeHtml" access="public" returntype="void" output="false"
+		hint="Test escapeHtml().">
+		<cfset assertTrue(Compare(variables.utils.escapeHtml("< > Planchers de bambou, li&egrave;ge, ch&ecirc;ne FSC, &eacute;rable FSC, pin et eucalyptus &eacute;cologiques et durables &&& Peter&Matt"), "&lt; &gt; Planchers de bambou, li&egrave;ge, ch&ecirc;ne FSC, &eacute;rable FSC, pin et eucalyptus &eacute;cologiques et durables &amp;&amp;&amp; Peter&amp;Matt") EQ 0) />
+	</cffunction>
 
 </cfcomponent>

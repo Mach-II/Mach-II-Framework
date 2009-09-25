@@ -68,10 +68,10 @@ Notes:
 		<cfif NOT Len(attributes.label)>
 			<cfset setContent("&nbsp;") />
 		<cfelse>
-			<cfset setContent(HTMLEditFormat(attributes.label)) />
+			<cfset setContent(attributes.label, true) />
 		</cfif>
 	<cfelse>
-		<cfset setContent(HTMLEditFormat(thisTag.GeneratedContent)) />
+		<cfset setContent(thisTag.GeneratedContent, true) />
 	</cfif>
 
 	<cfset variables.generatedContent = doStartTag() & doEndTag() />

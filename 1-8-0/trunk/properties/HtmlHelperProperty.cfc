@@ -447,7 +447,7 @@ from the parent application.
 		<cfargument name="height" type="string" required="false" default=""
 			hint="The height of the image in pixels or percentage if a percent sign `%` is defined. A value of '-1' will cause this attribute to be omitted. Auto dimension are applied when zero-length string is used." />
 		<cfargument name="alt" type="string" required="false"
-			hint="The text for the 'alt' attribute and automatically HTMLEditFormats the value. If not defined, the value of 'alt=""' will be used as this attribute is required by the W3C specification." />
+			hint="The text for the 'alt' attribute and automatically html escapes the value. If not defined, the value of 'alt=""' will be used as this attribute is required by the W3C specification." />
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		
@@ -476,7 +476,7 @@ from the parent application.
 		
 		<!--- The 'alt' attribute is required by the W3C specification --->
 		<cfif StructKeyExists(arguments, "alt") AND Len(arguments.alt)>
-			<cfset code = code & ' alt="' & HTMLEditFormat(arguments.alt)  & '"' />
+			<cfset code = code & ' alt="' & getUtils().escapeHtml(arguments.alt)  & '"' />
 		<cfelse>
 			<cfset code = code & ' alt="' & '"' />
 		</cfif>
@@ -512,7 +512,7 @@ from the parent application.
 		<cfset StructAppend(arguments.attributes, mimeTypeData, false) />
 		
 		<cfloop collection="#arguments.attributes#" item="key">
-			<cfset code = code & ' ' & LCase(key) & '="' & HTMLEditFormat(arguments.attributes[key]) & '"' />
+			<cfset code = code & ' ' & LCase(key) & '="' & getUtils().escapeHtml(arguments.attributes[key]) & '"' />
 		</cfloop>
 		
 		<cfset code = code & ' />' & Chr(13) />
@@ -533,12 +533,12 @@ from the parent application.
 		<cfset var key = "" />
 		
 		<cfif arguments.type EQ "title">
-			<cfset code = '<title>' & HTMLEditFormat(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
+			<cfset code = '<title>' & getUtils().escapeHtml(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
 		<cfelse>
 			<cfif StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
-				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
+				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 			<cfelse>
-				<cfset code = '<meta name="' & arguments.type & '" content="' & HTMLEditFormat(cleanupContent(arguments.content)) & '" />' & Chr(13) />
+				<cfset code = '<meta name="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 			</cfif>
 		</cfif>
 		

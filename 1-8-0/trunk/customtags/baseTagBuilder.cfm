@@ -59,6 +59,7 @@ PROPERTIES
 <cfset variables.selfClosingTag = false />
 <cfset variables.attributeCollection = StructNew() />
 <cfset variables.content = "" />
+<cfset variables.utils = request.eventContext.getAppManager().getUtils() />
 
 <!---
 PUBLIC FUNCTIONS
@@ -123,7 +124,7 @@ PUBLIC FUNCTIONS
 	
 	<cfloop collection="#attributeCollection#" item="i">
 		<cfif i EQ "value">
-			<cfset result = result & ' ' & i & '="' & HTMLEditFormat(attributeCollection[i]) & '"' />
+			<cfset result = result & ' ' & i & '="' & variables.utils.escapeHtml(attributeCollection[i]) & '"' />
 		<cfelse>
 			<cfset result = result & ' ' & i & '="' & attributeCollection[i] & '"' />
 		</cfif>
@@ -383,7 +384,14 @@ ACCESSORS
 </cffunction>
 
 <cffunction name="setContent" access="public" returntype="void" output="false">
-	<cfargument name="content" type="string" required="true" />
+	<cfargument name="content" type="string" required="true"
+		hint="Inner body content." />
+	<cfargument name="escapeHtml" type="boolean" required="false" default="false"
+		hint="Escapes special HTML characters." />
+	
+	<cfif arguments.escapeHtml>
+		<cfset arguments.content = variables.utils.escapeHtml(arguments.content) />
+	</cfif>
 	<cfset variables.content = arguments.content />
 </cffunction>
 <cffunction name="getContent" access="public" returntype="string" output="false">

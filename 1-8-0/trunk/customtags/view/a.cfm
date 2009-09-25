@@ -104,7 +104,7 @@ Notes:
 <cfelse>
 	<!--- Use the label attribute value if defined otherwise default to the nested content --->
 	<cfif StructKeyExists(attributes, "label")>
-		<cfset setContent(HTMLEditFormat(attributes.label)) />
+		<cfset setContent(attributes.label, true) />
 	<cfelse>
 		<cfset setContent(Trim(thisTag.GeneratedContent)) />
 	</cfif>

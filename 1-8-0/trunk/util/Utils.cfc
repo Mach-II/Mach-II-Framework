@@ -308,6 +308,22 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="escapeHtml" access="public" returntype="string" output="false"
+		hint="Escapes special characters '<', '>', '""' and '&' except it leaves already escaped entities alone unlike HtmlEditFormat().">
+		<cfargument name="input" type="string" required="true"
+			hint="String to escape." />
+		
+		<cfset var output = arguments.input />
+		
+		<!--- The & is a special case since could be part of an already escaped entity --->
+		<cfset output = REReplaceNoCase(output, "&(?!([a-zA-Z][a-zA-Z0-9]*|(##\d+)){2,6};)", "&amp;", "all") />
+	
+		<!--- Deal with the easy characters --->
+		<cfset output = ReplaceList(output, '<,>,"', "&lt;,&gt;,&quot;") />
+			
+		<cfreturn output />
+	</cffunction>
+	
 	<cffunction name="rebundledException" access="public" returntype="void" output="false"
 		hint="Rebundles an exception and rethrows.">
 		<cfargument name="message" type="string" required="true"
