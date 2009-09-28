@@ -173,6 +173,42 @@ index.cfm/product/A12345/fancy/
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>
 	
+	<cffunction name="addRouteByAttributes" access="public" returntype="void" output="false">
+		<cfargument name="routeName" type="String" required="true" />
+		<cfargument name="event" type="String" required="true" />
+		<cfargument name="module" type="String" required="false" default="" />
+		<cfargument name="urlAlias" type="String" required="false" default="" />
+		<cfargument name="requiredParameters" type="String" required="false" default="" />
+		<cfargument name="optionalParameters" type="String" required="false" default="" />
+		
+		<cfset var route = 0 />
+		<cfset var currentModuleName = getAppManager().getModuleName() />
+		
+		<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(arguments.routeName) />
+				
+		<cfset route.setEventName(arguments.event) />
+		
+		<cfif arguments.module neq "">
+			<cfset route.setModuleName(arguments.module) />
+		<cfelse>
+			<cfset route.setModuleName(currentModuleName) />
+		</cfif>
+		
+		<cfif arguments.urlAlias neq "">
+			<cfset route.setUrlAlias(arguments.urlAlias) />
+		</cfif>
+
+		<cfif arguments.requiredParameters neq "">
+			<cfset route.setRequiredParameters(evaluateParameters(arguments.requiredParameters)) />
+		</cfif>
+		
+		<cfif arguments.optionalParameters neq "">
+			<cfset route.setOptionalParameters(evaluateParameters(arguments.optionalParameters)) />
+		</cfif>	
+		
+		<cfset addRoute(arguments.routeName, route) />
+	</cffunction>
+	
 	<cffunction name="createRewriteConfigFile" access="public" returntype="void" output="false"
 		hint="Creates a rewrite config file.">
 		
