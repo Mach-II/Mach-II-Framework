@@ -170,9 +170,7 @@ Notes:
 		
 		<!--- Support redirect urls using a url route --->
 		<cfif Len(evaluatedRouteName)>
-			<!--- Grab the module name from the context of the currently executing request--->
 			<cfset redirectUrl = arguments.eventContext.getAppManager().getRequestManager().buildRouteUrl(
-				arguments.eventContext.getAppManager().getModuleName(),
 				evaluatedRouteName,
 				params) />
 		<cfelse>
