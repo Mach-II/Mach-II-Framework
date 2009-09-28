@@ -198,6 +198,8 @@ Notes:
 			hint="Name of the module to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
+		<cfargument name="urlParametersToRemove" type="string" required="false" default=""
+			hint="Comma delimited list of url parameter names of items to remove from the current url" />
 			
 		<cfset var eventParameterName = getEventParameter() />
 		<cfset var eventName = "" />
@@ -209,8 +211,12 @@ Notes:
 		<cfset var moduleDelimiter = getModuleDelimiter() />
 		<cfset var log = getLog() />
 		
+		<!--- Automatically remove the Mach II redirect persist id from the url params --->
+		<cfset arguments.urlParametersToRemove = ListAppend(arguments.urlParametersToRemove, "persistId")>
+		
 		<cfloop collection="#url#" item="key">
-			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+			<cfif NOT StructKeyExists(params, key) AND key neq eventParameterName 
+				AND NOT ListFindNoCase(arguments.urlParametersToRemove, key)>
 				<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#url[key]#", "|") />
 			</cfif>
 		</cfloop>
@@ -229,7 +235,8 @@ Notes:
 					<cfelse>
 						<cfset parsedModuleName = arguments.moduleName />
 					</cfif>
-				<cfelseif NOT StructKeyExists(params, key) AND key neq eventParameterName>
+				<cfelseif NOT StructKeyExists(params, key) AND key neq eventParameterName
+					AND NOT ListFindNoCase(arguments.urlParametersToRemove, key)>
 					<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#currentSESParams[key]#", "|") />
 				</cfif>
 			</cfloop>

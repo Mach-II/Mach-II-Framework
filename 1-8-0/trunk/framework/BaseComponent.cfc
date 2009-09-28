@@ -224,7 +224,9 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
-		
+		<cfargument name="urlParametersToRemove" type="string" required="false" default=""
+			hint="Comma delimited list of url parameter names of items to remove from the current url" />
+			
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 
