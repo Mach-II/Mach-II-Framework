@@ -576,10 +576,7 @@ Notes:
 		</cfif>
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
-		
-		<cfif arguments.route.isUrlAliasDefined()>
-			<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
-		</cfif>
+		<cfset variables.routeAliases[arguments.route.getUrlAlias()] = arguments.routeName />
 	</cffunction>
 	<cffunction name="removeRoute" access="public" returntype="void" output="false"
 		hint="Removes a route by route name.">
@@ -587,11 +584,8 @@ Notes:
 		
 		<cfset var route = getRoute(arguments.routeName) />
 		
-		<cfset StructDelete(variables.routes, arguments.routeName) />
-		
-		<cfif route.isUrlAliasDefined()>
-			<cfset StructDelete(variables.routeAliases, route.getUrlAlias()) />
-		</cfif>
+		<cfset StructDelete(variables.routes, arguments.routeName, false) />
+		<cfset StructDelete(variables.routeAliases, route.getUrlAlias(), false) />
 	</cffunction>
 	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
 		hint="Gets a route by route name.">

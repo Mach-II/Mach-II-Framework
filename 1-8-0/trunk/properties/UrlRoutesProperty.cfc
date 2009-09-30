@@ -86,32 +86,13 @@ index.cfm/product/A12345/fancy/
 			
 			<cfif NOT ListFindNoCase(variables.RESERVED_PARAMETER_NAMES, parameterName)>
 				
-				<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(parameterName) />
-				
 				<cfset getAssert().isTrue(StructKeyExists(parameter, "event")
 						, "You must provide a struct key for 'event' for route '#parameterName#'") />
 				
-				<cfset route.setEventName(parameter.event) />
+				<!--- Add the route name to the parameters so it can be use as an argument collection --->
+				<cfset parameter.routeName = parameterName />
 				
-				<cfif StructKeyExists(parameter, "module")>
-					<cfset route.setModuleName(parameter.module) />
-				<cfelse>
-					<cfset route.setModuleName(currentModuleName) />
-				</cfif>
-				
-				<cfif StructKeyExists(parameter, "urlAlias")>
-					<cfset route.setUrlAlias(parameter.urlAlias) />
-				</cfif>
-	
-				<cfif StructKeyExists(parameter, "requiredParameters")>
-					<cfset route.setRequiredParameters(evaluateParameters(parameter.requiredParameters)) />
-				</cfif>
-				
-				<cfif StructKeyExists(parameter, "optionalParameters")>
-					<cfset route.setOptionalParameters(evaluateParameters(parameter.optionalParameters)) />
-				</cfif>	
-				
-				<cfset addRoute(parameterName, route) />
+				<cfset addRouteByAttributes(argumentcollection=parameter) />
 			<cfelse>
 				<cfif StructKeyExists(parameter, "rewriteFileOn")>
 					<cfif parameter.rewriteFileOn>
@@ -143,6 +124,8 @@ index.cfm/product/A12345/fancy/
 		<cfset var aliases = "" />
 		<cfset var i = 0 />
 		
+		<cfabort showerror="I got called">
+		
 		<!--- Removes this property's routes --->
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<!--- Remove route --->
@@ -173,36 +156,36 @@ index.cfm/product/A12345/fancy/
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
 	</cffunction>
 	
-	<cffunction name="addRouteByAttributes" access="public" returntype="void" output="false">
-		<cfargument name="routeName" type="String" required="true" />
-		<cfargument name="event" type="String" required="true" />
-		<cfargument name="module" type="String" required="false" default="" />
-		<cfargument name="urlAlias" type="String" required="false" default="" />
-		<cfargument name="requiredParameters" type="String" required="false" default="" />
-		<cfargument name="optionalParameters" type="String" required="false" default="" />
+	<cffunction name="addRouteByAttributes" access="public" returntype="void" output="false"
+		hint="Adds a route by attributes.">
+		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="event" type="string" required="true" />
+		<cfargument name="module" type="string" required="false" />
+		<cfargument name="urlAlias" type="string" required="false" />
+		<cfargument name="requiredParameters" type="any" required="false"
+			hint="An array or comma-delimited list of required parameters." />
+		<cfargument name="optionalParameters" type="any" required="false"
+			hint="An array or comma-delimited list of optional parameters." />
 		
-		<cfset var route = 0 />
-		<cfset var currentModuleName = getAppManager().getModuleName() />
-		
-		<cfset route = CreateObject("component", "MachII.framework.UrlRoute").init(arguments.routeName) />
+		<cfset var route = CreateObject("component", "MachII.framework.UrlRoute").init(arguments.routeName) />		
 				
 		<cfset route.setEventName(arguments.event) />
 		
-		<cfif arguments.module neq "">
+		<cfif  StructKeyExists(arguments, "module")>
 			<cfset route.setModuleName(arguments.module) />
 		<cfelse>
-			<cfset route.setModuleName(currentModuleName) />
+			<cfset route.setModuleName(getAppManager().getModuleName()) />
 		</cfif>
 		
-		<cfif arguments.urlAlias neq "">
+		<cfif StructKeyExists(arguments, "urlAlias")>
 			<cfset route.setUrlAlias(arguments.urlAlias) />
 		</cfif>
 
-		<cfif arguments.requiredParameters neq "">
+		<cfif StructKeyExists(arguments, "requiredParameters")>
 			<cfset route.setRequiredParameters(evaluateParameters(arguments.requiredParameters)) />
 		</cfif>
 		
-		<cfif arguments.optionalParameters neq "">
+		<cfif  StructKeyExists(arguments, "optionalParameters")>
 			<cfset route.setOptionalParameters(evaluateParameters(arguments.optionalParameters)) />
 		</cfif>	
 		
