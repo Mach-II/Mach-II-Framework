@@ -564,15 +564,18 @@ Notes:
 		hint="Adds a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		<cfargument name="overwrite" type="boolean" required="false" default="false" />
 		
-		<!--- Check for name conflicts --->
-		<cfif StructKeyExists(variables.routes,  arguments.routeName)>
-			<cfthrow type="MachII.RequestManager.RouteNameConflict"
-				message="A route named '#arguments.routeName#' is already defined. Please remove the route name conflict." />
-		<cfelseif arguments.route.isUrlAliasDefined() 
-			AND StructKeyExists(variables.routeAliases, arguments.route.getUrlAlias())>
-			<cfthrow type="MachII.RequestManager.RouteNameConflict"
-				message="A route named '#arguments.routeName#' with an URL alias of '#arguments.route.getUrlAlias()#' is already defined. Please remove the route alias conflict." />			
+		<!--- Check for name conflicts if this is not an overwrite --->
+		<cfif NOT arguments.overwrite>
+			<cfif StructKeyExists(variables.routes,  arguments.routeName)>
+				<cfthrow type="MachII.RequestManager.RouteNameConflict"
+					message="A route named '#arguments.routeName#' is already defined. Please remove the route name conflict." />
+			<cfelseif arguments.route.isUrlAliasDefined() 
+				AND StructKeyExists(variables.routeAliases, arguments.route.getUrlAlias())>
+				<cfthrow type="MachII.RequestManager.RouteNameConflict"
+					message="A route named '#arguments.routeName#' with an URL alias of '#arguments.route.getUrlAlias()#' is already defined. Please remove the route alias conflict." />			
+			</cfif>
 		</cfif>
 		
 		<cfset variables.routes[arguments.routeName] = arguments.route />
@@ -580,12 +583,17 @@ Notes:
 	</cffunction>
 	<cffunction name="removeRoute" access="public" returntype="void" output="false"
 		hint="Removes a route by route name.">
-		<cfargument name="routeName" type="string" required="true" />
+		<cfargument name="routeName" type="string" required="true"
+			hint="The name of the route to remove." />
+		<cfargument name="ownerId" type="string" required="false"
+			hint="The owner id of the owner if the route. If defined, the route will only be removed if the owner id matches." />
 		
 		<cfset var route = getRoute(arguments.routeName) />
 		
-		<cfset StructDelete(variables.routes, arguments.routeName, false) />
-		<cfset StructDelete(variables.routeAliases, route.getUrlAlias(), false) />
+		<cfif NOT StructKeyExists(arguments, "ownerId") OR route.getOwnerId() EQ arguments.ownerId>
+			<cfset StructDelete(variables.routes, arguments.routeName, false) />
+			<cfset StructDelete(variables.routeAliases, route.getUrlAlias(), false) />
+		</cfif>
 	</cffunction>
 	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
 		hint="Gets a route by route name.">

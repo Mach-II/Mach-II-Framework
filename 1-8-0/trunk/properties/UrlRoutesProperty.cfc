@@ -66,6 +66,7 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.rewriteConfigFile = "" />
 	
 	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile" />
+	<cfset variables.OWNER_ID = "_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -124,12 +125,10 @@ index.cfm/product/A12345/fancy/
 		<cfset var aliases = "" />
 		<cfset var i = 0 />
 		
-		<cfabort showerror="I got called">
-		
 		<!--- Removes this property's routes --->
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<!--- Remove route --->
-			<cfset requestManager.removeRoute(names[i]) />
+			<cfset requestManager.removeRoute(names[i], variables.OWNER_ID) />
 		</cfloop>
 		
 		<!--- Clear route names --->
@@ -144,6 +143,9 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="routeName" type="string" required="true" />
 		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
 		
+		<!--- Insert the owner ID so we can know which routes are managed by this property --->
+		<cfset arguments.route.setOwnerId(variables.OWNER_ID) />
+		
 		<!---
 			We need a local list of names because if the deconfigure() is run we have to remove the routes from
 			the RequestManager which is a singleton.
@@ -153,7 +155,7 @@ index.cfm/product/A12345/fancy/
 		--->
 		<cfset variables.routeNames.add(arguments.routeName) />
 		
-		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route) />
+		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route, true) />
 	</cffunction>
 	
 	<cffunction name="addRouteByAttributes" access="public" returntype="void" output="false"

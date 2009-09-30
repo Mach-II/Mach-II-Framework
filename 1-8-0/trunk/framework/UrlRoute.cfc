@@ -37,6 +37,7 @@ Notes:
 	<cfset variables.urlAlias = "" />
 	<cfset variables.requiredParameters = "" />
 	<cfset variables.optionalParameters = "" />
+	<cfset variables.ownerId = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -432,6 +433,14 @@ Notes:
 	</cffunction>	
 	<cffunction name="getOptionalParameters" access="public" returntype="array" output="false">
 		<cfreturn variables.optionalParameters />
+	</cffunction>
+	
+	<cffunction name="setOwnerId" access="public" returntype="void" output="false">
+		<cfargument name="ownerId" type="string" required="true" />
+		<cfset variables.ownerId = arguments.ownerId />
+	</cffunction>	
+	<cffunction name="getOwnerId" access="public" returntype="string" output="false">
+		<cfreturn variables.ownerId />
 	</cffunction>
 
 </cfcomponent>
