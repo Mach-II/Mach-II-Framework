@@ -145,13 +145,17 @@ properties struct can take complex datatypes like structs and arrays.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
+		<cfset var appManager = getAppManager() />
 		<cfset var i = "" />
 		
 		<!--- Synchronize environment group names --->
-		<cfif getAppManager().inModule()>
-			<cfset variables.ENVIRONMENT_GROUP_NAMES = getAppManager().getEnvironmentGroupNames() />
+		<cfif appManager.inModule()>
+			<!--- Only use the environment group names if they are available from the parent --->
+			<cfif Len(appManager.getEnvironmentGroupNames())>
+				<cfset variables.ENVIRONMENT_GROUP_NAMES = appManager.getEnvironmentGroupNames() />
+			</cfif>
 		<cfelse>
-			<cfset getAppManager().setEnvironmentGroupNames(variables.ENVIRONMENT_GROUP_NAMES) />
+			<cfset appManager.setEnvironmentGroupNames(variables.ENVIRONMENT_GROUP_NAMES) />
 		</cfif>
 		
 		<!--- Load in parameters --->
