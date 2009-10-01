@@ -78,7 +78,7 @@ Notes:
 				<cfinvokeargument name="paramArgs" value="#paramArgs#" />
 			</cfinvoke><cfsetting enablecfoutputonly="true" />
 			<cfcatch type="any">
-				<cfset filter.getUtils().rebundledException("Event-filter '#filter.getComponentNameForLogging()#' has caused an exception.\"
+				<cfset filter.getUtils().rebundledException("Event-filter '#filter.getComponentNameForLogging()#' has caused an exception."
 							, cfcatch
 							, getMetadata(filter).path) />
 				<cfthrow type="#cfcatch.type#"
