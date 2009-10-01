@@ -50,7 +50,7 @@ Notes:
 		
 		<!--- Setup the Invoker, Listener and Event --->
 		<cfset variables.invoker = CreateObject("component", "MachII.framework.invokers.EventArgsInvoker").init() />
-		<cfset variables.listener = CreateObject("component", "MachII.tests.framework.invokers.DummyListenerForInvokerTests").init(appManager, StructNew(), variables.invoker) />
+		<cfset variables.listener = CreateObject("component", "MachII.tests.dummy.DummyListener").init(appManager, StructNew(), variables.invoker) />
 		<cfset variables.listener.configure() />
 		
 		<cfset eventArgs.test1 = "value1" />
