@@ -24,9 +24,9 @@ Updated version: 1.6.0
 Notes:
 --->
 <cfcomponent
-	displayname="EventTest"
+	displayname="RequestRedirectPersistTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.framework.Event.">
+	hint="Test cases for MachII.framework.RequestRedirectPersist.">
 	
 	<!---
 	PROPERTIES
@@ -44,8 +44,6 @@ Notes:
 		
 		<!--- Setup the AppManager with the required collaborators --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />
-		<cfset appManager.setUtils(CreateObject("component", "MachII.util.Utils").init()) />
-		<cfset appManager.setLogFactory(CreateObject("component", "MachII.logging.LogFactory").init()) />
 		<cfset appManager.setAppKey("dummy") />
 		
 		<!--- Setup the PropertyManager with the required collaboration data --->
