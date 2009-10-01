@@ -107,7 +107,7 @@ Notes:
 	<cffunction name="buildTargetObjectPaths" access="private" returntype="void" output="false"
 		hint="Builds an hierarchical array of object paths based on the target object.">
 
-		<cfset var targetObjectMetadata =  GetMetadata(getObject()) />
+		<cfset var targetObjectMetadata = GetMetadata(getObject()) />
 		<cfset var i = 0 />
 
 		<!--- Set the path for the target object --->
