@@ -37,7 +37,7 @@ This is a test bean for the BeanUtilTest.cfc test case.
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="DummyBeanForBeanUtilTest" output="false">
+	<cffunction name="init" access="public" returntype="DummyBeanForBeanUtil" output="false">
 		<cfargument name="firstName" type="string" required="false" default="" />
 		<cfargument name="lastName" type="string" required="false" default="" />
 
