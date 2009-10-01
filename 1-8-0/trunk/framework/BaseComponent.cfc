@@ -394,7 +394,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="parameterValue" type="any" required="true"
 			hint="The current value of the parameter." />
 		
-		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator()>
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
 		<cfset var value =  arguments.parameterValue />
 		<cfset var scope = "" />
 		<cfset var event = "" />
