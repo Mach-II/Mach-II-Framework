@@ -196,7 +196,9 @@ properties struct can take complex datatypes like structs and arrays.
 			Check if this is a module since we defer to the environment name of 
 			the parent application unless otherwise directed
 		--->
-		<cfif getAppManager().inModule() AND getUseResolvedEnvironmentNameFromParent() >
+		<cfif getAppManager().inModule() 
+			AND getUseResolvedEnvironmentNameFromParent() 
+			AND getAppManager().getParent().getEnvironmentName() NEQ "_default_">
 			<cfset environmentName = getAppManager().getParent().getEnvironmentName() />
 			<cfset environmentNameInherited = true />
 		<cfelse>
@@ -213,7 +215,7 @@ properties struct can take complex datatypes like structs and arrays.
 						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module."
 						, "Please define a default environment for this module or add defined an environment with the name of '#environmentName#'.") />
 			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved() AND NOT environmentNameInherited
-						, "No environment can be resolved for '#cgi.SERVER_NAME#' and no default environment has been defined."
+						, "No environment can be resolved for server named '#cgi.SERVER_NAME#' and no default environment has been defined."
 						, "Please define a default environment to use or add this server to a defined environment.") />
 			
 			<cfset loadPropertiesByEnvironmentName(getDefaultEnvironment()) />

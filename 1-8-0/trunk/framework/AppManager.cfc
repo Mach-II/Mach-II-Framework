@@ -53,8 +53,8 @@ Notes:
 
 	<cfset variables.appkey = "" />
 	<cfset variables.loading = TRUE />
-	<cfset variables.environmentName = "default" />
-	<cfset variables.environmentGroup = "default" />
+	<cfset variables.environmentName = "_default_" />
+	<cfset variables.environmentGroup = "_default_" />
 	<cfset variables.environmentGroupNames = "production,qa,staging,development,local" />
 	<cfset variables.moduleName = "" />
 	
@@ -246,7 +246,7 @@ Notes:
 	</cffunction>
 	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
 		hint="Gets the environment name. If module, gets value from parent since environment name is a singleton.">
-		<cfif IsObject(getParent()) AND variables.environmentGroup EQ "default">
+		<cfif IsObject(getParent()) AND variables.environmentGroup EQ "_default_">
 			<cfreturn getParent().getEnvironmentName() />
 		<cfelse>
 			<cfreturn variables.environmentName />
@@ -260,7 +260,7 @@ Notes:
 	</cffunction>
 	<cffunction name="getEnvironmentGroup" access="public" returntype="string" output="false"
 		hint="Gets the environment group. If module, gets value from parent since environment group is a singleton.">
-		<cfif IsObject(getParent()) AND variables.environmentGroup EQ "default">
+		<cfif IsObject(getParent()) AND variables.environmentGroup EQ "_default_">
 			<cfreturn getParent().getEnvironmentGroup() />
 		<cfelse>
 			<cfreturn variables.environmentGroup />
