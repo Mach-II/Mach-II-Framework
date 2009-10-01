@@ -60,16 +60,16 @@ Notes:
 		<cfset initArgs.lastName = "Framework" />
 		
 		<!--- Test wihtout initArgs --->
-		<cfset bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 
 		<!--- Test wihtout initArgs --->
-		<cfset bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean", initArgs) />
+		<cfset bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest", initArgs) />
 	</cffunction>
 	
 	<cffunction name="testSetBeanFields" access="public" returntype="void" output="false"
 		hint="Tests seting bean fields.">
 	
-		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 		<cfset var testData = StructNew() />
 		
 		<!--- Setup test data --->
@@ -88,7 +88,7 @@ Notes:
 	<cffunction name="testSetBeanFieldsWithPrefix" access="public" returntype="void" output="false"
 		hint="Tests seting bean fields.">
 	
-		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 		<cfset var testData = StructNew() />
 		
 		<!--- Setup test data --->
@@ -107,7 +107,7 @@ Notes:
 	<cffunction name="testSetAutoBeanFieldsWithPrefix" access="public" returntype="void" output="false"
 		hint="Tests seting bean fields automatically mapped from the bean accessors with a prefix.">
 	
-		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 		<cfset var testData = StructNew() />
 		
 		<!--- Setup test data --->
@@ -126,7 +126,7 @@ Notes:
 	<cffunction name="testSetGetBeanField" access="public" returntype="void" output="false"
 		hint="Tests setting and getting bean fields.">
 	
-		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 		
 		<!--- Set a bean field --->
 		<cfset variables.beanUtil.setBeanField(bean, "firstName", "Mach-II") />
@@ -138,7 +138,7 @@ Notes:
 	<cffunction name="testDescribeBean" access="public" returntype="void" output="false"
 		hint="Tests describeBean() mapping util.">
 	
-		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.BeanUtilTestBean") />
+		<cfset var bean = variables.beanUtil.createBean("MachII.tests.util.DummyBeanForBeanUtilTest") />
 		<cfset var map = StructNew() />
 		
 		<!--- Populate the bean with some dummy datat --->
