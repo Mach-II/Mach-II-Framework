@@ -64,7 +64,7 @@ can be resolved against the defined server names in all environments.
 
 The [serverPropertyName] parameter optionally sets the name of the property used
 to populate the name of the server found when resolving environments. Defaults to
-'serverName'. 
+'serverName'.
 
 Usage:
 <property name="environment" type="MachII.properties.EnvironmentProperty">
@@ -74,6 +74,13 @@ Usage:
 		
 		<!-- Optional: Name of property to place in name of the resolved server -->
 		<parameter name="serverPropertyName" value="serverName" />
+		
+		<!--
+			Optional: Use the resolved parent environment name from base application if in an module
+				This parameter only applies when EnvironmentProperty is defined in a module
+			Defaults to "true"
+		-->
+		<parameter name="useResolvedEnvironmentNameFromParent" value="true" />
 		
 		<!-- Name of environment (can be any name as 'development' is an example) -->
 		<parameter name="development">
@@ -94,7 +101,8 @@ Usage:
 				<!-- Struct of development properties to set -->
 				<key name="properties">
 					<struct>
-						<key name="" value="" />
+						<key name="property1" value="value1" />
+						<key name="property2" value="value2" />
 					</struct>				
 				</key>
 			</struct>
@@ -130,6 +138,7 @@ properties struct can take complex datatypes like structs and arrays.
 	--->
 	<cfset variables.defaultEnvironment = "" />
 	<cfset variables.serverPropertyName = "serverName" />
+	<cfset variables.useResolvedEnvironmentNameFromParent = true />
 	<cfset variables.throwIfEnvironmentUnresolved = false />
 	<cfset variables.serverMap = StructNew() />
 	<cfset variables.environments = StructNew() />
@@ -137,7 +146,7 @@ properties struct can take complex datatypes like structs and arrays.
 	
 	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironmentName,serverPropertyName" />
 	<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = "environmentGroup,servers,properties" />
-	<cfset variables.ENVIRONMENT_GROUP_NAMES = "production,qa,staging,development,local" />
+	<cfset variables.ENVIRONMENT_GROUP_NAMES = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -145,22 +154,14 @@ properties struct can take complex datatypes like structs and arrays.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
 		
-		<cfset var appManager = getAppManager() />
 		<cfset var i = "" />
 		
-		<!--- Synchronize environment group names --->
-		<cfif appManager.inModule()>
-			<!--- Only use the environment group names if they are available from the parent --->
-			<cfif Len(appManager.getEnvironmentGroupNames())>
-				<cfset variables.ENVIRONMENT_GROUP_NAMES = appManager.getEnvironmentGroupNames() />
-			</cfif>
-		<cfelse>
-			<cfset appManager.setEnvironmentGroupNames(variables.ENVIRONMENT_GROUP_NAMES) />
-		</cfif>
+		<cfset variables.ENVIRONMENT_GROUP_NAMES = getAppManager().getEnvironmentGroupNames() />
 		
 		<!--- Load in parameters --->
 		<cfset setDefaultEnvironment(getParameter("defaultEnvironmentName", "")) />
 		<cfset setServerPropertyName(getParameter("serverPropertyName", "serverName")) />
+		<cfset setUseResolvedEnvironmentNameFromParent(getParameter("useResolvedEnvironmentNameFromParent", true)) />
 
 		<!--- Set additional settings --->
 		<cfif NOT Len(getDefaultEnvironment())>
@@ -172,8 +173,8 @@ properties struct can take complex datatypes like structs and arrays.
 			<cfset variables.serverMap[i] = ArrayNew(1) />	
 		</cfloop>
 		
-		<!--- Discover environments and resolve environment by server name --->
-		<cfset discoverEnvironments() />
+		<!--- Build server reference  and resolve environment by server name --->
+		<cfset buildEnvironments() />
 		<cfset resolveEnvironmentByServer() />
 	</cffunction>
 	
@@ -187,65 +188,40 @@ properties struct can take complex datatypes like structs and arrays.
 	<cffunction name="resolveEnvironmentByServer" access="private" returntype="void" output="false"
 		hint="Dectects the server and loads environment by server name.">
 		
-		<!--- We are knowningly breaking encapsulation by using the cgi scope --->
-		<cfset var thisServer = cgi.SERVER_NAME />
 		<cfset var environmentName = "" />
+		<cfset var environmentNameInherited = false />
 		<cfset var properties = StructNew() />
-		<cfset var environmentGroupServerMap = "" />
-		<cfset var resolvedEnvironment = false />
-		<cfset var key = "" />
-		<cfset var i = 0 />
-		<cfset var j = 0 />
-		
-		<!--- Check if this is a module since we differ to the environment of the parent application --->
-		<cfif IsObject(getAppManager().getParent())>
-			<cfset environmentName = getAppManager().getParent().getEnvironmentName() />
-		<cfelse>
-			<!--- Loop through the environment groups in order --->
-			<cfloop list="#variables.ENVIRONMENT_GROUP_NAMES#" index="i">
-				<cfset environmentGroupServerMap = variables.serverMap[i] />
-				
-				<cfloop from="1" to="#ArrayLen(environmentGroupServerMap)#" index="j">
-					<cfif variables.matcher.match(environmentGroupServerMap[j].server, thisServer)>
-						<cfset environmentName = environmentGroupServerMap[j].environmentName />
-						<cfset getAppManager().setEnvironmentName(environmentName) />
-						<cfset getAppManager().setEnvironmentGroup(i) />
-						<cfset resolvedEnvironment = true />
-						<cfbreak />
-					</cfif>
-				</cfloop>
-				
-				<cfif resolvedEnvironment>
-					<cfbreak />
-				</cfif>
-			</cfloop>
-		</cfif>
 		
 		<!---
-			Get properties by environment and fail back to default environment if
-			no environment match is found (because we might have gotten the environment
-			from the parent application and there may not be any corresponding environment)
+			Check if this is a module since we defer to the environment name of 
+			the parent application unless otherwise directed
 		--->
-		<cfif StructKeyExists(variables.environments, environmentName)>
-			<cfset properties = variables.environments[environmentName].properties />
+		<cfif getAppManager().inModule() AND getUseResolvedEnvironmentNameFromParent() >
+			<cfset environmentName = getAppManager().getParent().getEnvironmentName() />
+			<cfset environmentNameInherited = true />
 		<cfelse>
-			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved()
-						, "No environment can be resolved for '#thisServer#' and no default environment has been defined."
-						, "Please define a default environment or add this server to a defined environment.") />
-			<cfset properties = variables.environments[getDefaultEnvironment()].properties />
+			<cfset environmentName = matchServerToEnvironmentName() />
 		</cfif>
-
-		<!--- Set the server name to the property --->
-		<cfset setProperty(getServerPropertyName(), thisServer) />
 		
-		<!--- Load properties by environment --->
-		<cfloop collection="#properties#" item="key">
-			<cfset setProperty(key, properties[key]) />
-		</cfloop>
+		<!--- Get properties by environment --->
+		<cfif isEnvironmentDefined(environmentName)>
+			<cfset loadPropertiesByEnvironmentName(environmentName) />
+		<!--- Fail back to default environment if no environment match is found --->
+		<cfelse>
+			<!--- Do some checks --->
+			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved() AND environmentNameInherited
+						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module."
+						, "Please define a default environment for this module or add defined an environment with the name of '#environmentName#'.") />
+			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved() AND NOT environmentNameInherited
+						, "No environment can be resolved for '#cgi.SERVER_NAME#' and no default environment has been defined."
+						, "Please define a default environment to use or add this server to a defined environment.") />
+			
+			<cfset loadPropertiesByEnvironmentName(getDefaultEnvironment()) />
+		</cfif>
 	</cffunction>
 	
-	<cffunction name="discoverEnvironments" access="private" returntype="void" output="false"
-		hint="Loads all the environment servers.">
+	<cffunction name="buildEnvironments" access="private" returntype="void" output="false"
+		hint="Builds all the environments.">
 			
 		<cfset var parameters = getParameters() />
 		<cfset var key = "" />
@@ -285,9 +261,11 @@ properties struct can take complex datatypes like structs and arrays.
 		
 		<!--- Assert that the required keys are available in the environment data --->
 		<cfloop list="#variables.REQUIRED_ENVIRONMENT_KEY_NAMES#" index="i">
-			<cfset getAssert().isTrue(StructKeyExists(arguments.environmentData, i)
-						, "An environment named '#arguments.environmentName#' is missing a required key named '#i#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
-						, "All environments require these keys: #variables.REQUIRED_ENVIRONMENT_KEY_NAMES#") />
+			<cfif getUseResolvedEnvironmentNameFromParent() AND i NEQ "servers">
+				<cfset getAssert().isTrue(StructKeyExists(arguments.environmentData, i)
+							, "An environment named '#arguments.environmentName#' is missing a required key named '#i#' for the EnvironmentProperty in module '#getAppManager().getModuleName()#'."
+							, "All environments require these keys: #variables.REQUIRED_ENVIRONMENT_KEY_NAMES#") />
+			</cfif>
 		</cfloop>
 
 		<!--- Assert the environment group name --->
@@ -315,6 +293,56 @@ properties struct can take complex datatypes like structs and arrays.
 	<!---
 	PROCTECTED FUNCTIONS - UTILS
 	--->
+	<cffunction name="matchServerToEnvironmentName" access="private" returntype="string" output="false"
+		hint="Matches the current server to an environment name.">
+		
+		<!--- We are knowningly breaking encapsulation by using the cgi scope --->
+		<cfset var thisServer = cgi.SERVER_NAME />
+		<cfset var environmentName = "" />
+		<cfset var environmentGroupServerMap = "" />
+		<cfset var resolvedEnvironment = false />
+		<cfset var key = "" />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
+		
+		<!--- Loop through the environment groups in order --->
+		<cfloop list="#variables.ENVIRONMENT_GROUP_NAMES#" index="i">
+			<cfset environmentGroupServerMap = variables.serverMap[i] />
+			
+			<cfloop from="1" to="#ArrayLen(environmentGroupServerMap)#" index="j">
+				<cfif variables.matcher.match(environmentGroupServerMap[j].server, thisServer)>
+					<cfset environmentName = environmentGroupServerMap[j].environmentName />
+					<cfset getAppManager().setEnvironmentName(environmentName) />
+					<cfset getAppManager().setEnvironmentGroup(i) />
+					<cfset resolvedEnvironment = true />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+			
+			<cfif resolvedEnvironment>
+				<cfbreak />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn environmentName />
+	</cffunction>
+	
+	<cffunction name="loadPropertiesByEnvironmentName" access="private" returntype="void" output="false"
+		hint="Loads environment properties by environment name. Does not check if the environment is available so be sure the isEnvironmentDefined() is true.">
+		<cfargument name="environmentName" type="string" required="true" />
+		
+		<cfset var properties = variables.environments[environmentName].properties />
+		<cfset var key = "" />
+
+		<!--- Load properties by environment --->
+		<cfloop collection="#properties#" item="key">
+			<cfset setProperty(key, properties[key]) />
+		</cfloop>
+	
+		<!--- Set the server name to the property --->
+		<cfset setProperty(getServerPropertyName(), cgi.SERVER_NAME) />
+	</cffunction>
+	
 	<cffunction name="setEnvironmentByName" access="private" returntype="void" output="false"
 		hint="Sets an environment and data by name.">
 		<cfargument name="environmentName" type="string" required="true" />
@@ -345,6 +373,14 @@ properties struct can take complex datatypes like structs and arrays.
 	</cffunction>
 	<cffunction name="getDefaultEnvironment" access="public" returntype="string" output="false">
 		<cfreturn variables.defaultEnvironment />
+	</cffunction>
+	
+	<cffunction name="setUseResolvedEnvironmentNameFromParent" access="private" returntype="void" output="false">
+		<cfargument name="useResolvedEnvironmentNameFromParent" type="string" required="true" />
+		<cfset variables.useResolvedEnvironmentNameFromParent = arguments.useResolvedEnvironmentNameFromParent />
+	</cffunction>
+	<cffunction name="getUseResolvedEnvironmentNameFromParent" access="public" returntype="string" output="false">
+		<cfreturn variables.useResolvedEnvironmentNameFromParent />
 	</cffunction>
 	
 	<cffunction name="setThrowIfEnvironmentUnresolved" access="private" returntype="void" output="false">

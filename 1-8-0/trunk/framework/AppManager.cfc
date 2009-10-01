@@ -55,7 +55,7 @@ Notes:
 	<cfset variables.loading = TRUE />
 	<cfset variables.environmentName = "default" />
 	<cfset variables.environmentGroup = "production" />
-	<cfset variables.environmentGroupNames = "" />
+	<cfset variables.environmentGroupNames = "production,qa,staging,development,local" />
 	<cfset variables.moduleName = "" />
 	
 	<!---
@@ -242,58 +242,26 @@ Notes:
 	<cffunction name="setEnvironmentName" access="public" returntype="void" output="false"
 		hint="Sets the environment name.">
 		<cfargument name="environmentName" type="string" required="true" />
-		<cfif NOT IsObject(getParent())>
-			<cfset variables.environmentName = arguments.environmentName />
-		<cfelse>
-			<cfthrow type="MachII.framework.CannotSetEnvironmentName"
-				message="Cannot set environment name from module. Modules can only inherit environment name from parent application." />
-		</cfif>
+		<cfset variables.environmentName = arguments.environmentName />
 	</cffunction>
 	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
-		hint="Gets the environment name. If module, gets value from parent since environment name is a singleton.">
-		<cfif IsObject(getParent())>
-			<cfreturn getParent().getEnvironmentName() />
-		<cfelse>
-			<cfreturn variables.environmentName />
-		</cfif>
+		hint="Gets the environment name.">
+		<cfreturn variables.environmentName />
 	</cffunction>
 	
 	<cffunction name="setEnvironmentGroup" access="public" returntype="void" output="false"
 		hint="Sets the environment group.">
 		<cfargument name="environmentGroup" type="string" required="true" />
-		<cfif NOT IsObject(getParent())>
-			<cfset variables.environmentGroup = arguments.environmentGroup />
-		<cfelse>
-			<cfthrow type="MachII.framework.CannotSetEnvironment"
-				message="Cannot set environment from module. Modules can only inherit environment from parent application." />
-		</cfif>
+		<cfset variables.environmentGroup = arguments.environmentGroup />
 	</cffunction>
 	<cffunction name="getEnvironmentGroup" access="public" returntype="string" output="false"
-		hint="Gets the environment group. If module, gets value from parent since environment group is a singleton.">
-		<cfif IsObject(getParent())>
-			<cfreturn getParent().getEnvironmentGroup() />
-		<cfelse>
-			<cfreturn variables.environmentGroup />
-		</cfif>
+		hint="Gets the environment group.">
+		<cfreturn variables.environmentGroup />
 	</cffunction>
 	
-	<cffunction name="setEnvironmentGroupNames" access="public" returntype="void" output="false"
-		hint="Sets a list of valid environment group names (used by custom environment loaders).">
-		<cfargument name="environmentGroupNames" type="string" required="true" />
-		<cfif NOT IsObject(getParent())>
-			<cfset variables.environmentGroupNames = arguments.environmentGroupNames />
-		<cfelse>
-			<cfthrow type="MachII.framework.CannotSetEnvironmentNames"
-				message="Cannot set environment names from module. Modules can only inherit environment names from parent application." />
-		</cfif>
-	</cffunction>
 	<cffunction name="getEnvironmentGroupNames" access="public" returntype="string" output="false"
-		hint="Gets a list of valid environment group names. If module, gets value from parent since the list of environment group names is a singleton.">
-		<cfif IsObject(getParent())>
-			<cfreturn getParent().getEnvironmentGroupNames() />
-		<cfelse>
-			<cfreturn variables.environmentGroupNames />
-		</cfif>
+		hint="Gets a list of valid environment group names.">
+		<cfreturn variables.environmentGroupNames />
 	</cffunction>
 	
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
