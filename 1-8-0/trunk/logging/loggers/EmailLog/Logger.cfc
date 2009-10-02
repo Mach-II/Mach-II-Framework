@@ -307,6 +307,51 @@ See that file header for configuration of filter criteria.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="getMachIIVersion" access="private" returntype="string" output="false"
+		hint="Gets a nice version number istead of just numbers.">
+		<cfargument name="version" type="string" required="true" />
+
+		<cfset var release = "" />
+		
+		<cfswitch expression="#ListLast(arguments.version, ".")#">
+			<cfcase value="0">
+				<cfset release = "BER - Unknown build" />
+			</cfcase>
+			<cfcase value="1">
+				<cfset release = "Alpha" />
+			</cfcase>
+			<cfcase value="2">
+				<cfset release = "Beta" />
+			</cfcase>
+			<cfcase value="3">
+				<cfset release = "RC1" />
+			</cfcase>
+			<cfcase value="4">
+				<cfset release = "RC2" />
+			</cfcase>
+			<cfcase value="5">
+				<cfset release = "RC3" />
+			</cfcase>
+			<cfcase value="6">
+				<cfset release = "RC4" />
+			</cfcase>
+			<cfcase value="7">
+				<cfset release = "RC5" />
+			</cfcase>
+			<cfcase value="8">
+				<cfset release = "Production Stable" />
+			</cfcase>
+			<cfcase value="9">
+				<cfset release = "Production-Only Stable (duck-typed)" />
+			</cfcase>
+			<cfdefaultcase>
+				<cfset release = "BER - Build " & ListLast(arguments.version, ".") />
+			</cfdefaultcase>
+		</cfswitch>
+		
+		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
+	</cffunction>
+	
 	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
