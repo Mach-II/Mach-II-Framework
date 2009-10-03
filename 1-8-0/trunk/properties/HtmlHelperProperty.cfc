@@ -731,7 +731,7 @@ from the parent application.
 		<cfset var path = arguments.assetPath />
 		
 		<!--- Get path if the asset path is not a full path from webroot --->
-		<cfif NOT path.startsWith("/")>
+		<cfif NOT path.startsWith("/") AND NOT path.startsWith("index.cfm")>
 			<cfif arguments.assetType EQ "js">
 				<cfset path = getJsBasePath() & "/" & path />
 			<cfelseif arguments.assetType EQ "css">
