@@ -36,6 +36,7 @@ Notes:
 	<cfset variables.beanName = "" />
 	<cfset variables.beanType = "" />
 	<cfset variables.beanFields = "" />
+	<cfset variables.ignoreFields = "" />
 	<cfset variables.reinit = "" />
 	<cfset variables.beanUtil = "" />
 	<cfset variables.innerBeans = StructNew() />
@@ -48,12 +49,14 @@ Notes:
 		<cfargument name="beanName" type="string" required="true" />
 		<cfargument name="beanType" type="string" required="true" />
 		<cfargument name="beanFields" type="string" required="true" />
+		<cfargument name="ignoreFields" type="string" required="true" />
 		<cfargument name="reinit" type="boolean" required="true" />
 		<cfargument name="beanUtil" type="MachII.util.BeanUtil" required="true" />
 		
 		<cfset setBeanName(arguments.beanName) />
 		<cfset setBeanType(arguments.beanType) />
 		<cfset setBeanFields(arguments.beanFields) />
+		<cfset setIgnoreFields(arguments.ignoreFields) />
 		<cfset setReinit(arguments.reinit) />
 		<cfset setBeanUtil(arguments.beanUtil) />
 		
@@ -84,7 +87,7 @@ Notes:
 		<!--- If reinit is FALSE, get the bean from the event --->
 		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName()) AND IsObject(arguments.event.getArg(getBeanName()))>
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Event-bean '#getBeanName()#' already in event. Repopulated with data.") />
+				<cfset log.debug("Event-bean '#getBeanName()#' already in event. Repopulated with data. Fields: '#getBeanFields()#', Ignored Fields: '#getIgnoreFields()#'") />
 			</cfif>
 			
 			<cfset bean = arguments.event.getArg(getBeanName()) />
@@ -92,18 +95,18 @@ Notes:
 			<cfif isBeanFieldsDefined()>
 				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
 			<cfelse>
-				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs()) />
+				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs(), getIgnoreFields()) />
 			</cfif>
 		<cfelse>
 			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Event-bean '#getBeanName()#' created and populated with data.") />
+				<cfset log.debug("Event-bean '#getBeanName()#' created and populated with data. Fields:'#getBeanFields()#', Ignored Fields: '#getIgnoreFields()#'") />
 			</cfif>
 
 			<cfif isBeanFieldsDefined()>
 				<cfset bean = getBeanUtil().createBean(getBeanType()) />
 				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
 			<cfelse>
-				<cfset bean = getBeanUtil().createBean(getBeanType(), arguments.event.getArgs()) />
+				<cfset bean = getBeanUtil().createBean(getBeanType(), arguments.event.getArgs(), getIgnoreFields()) />
 			</cfif>			
 
 			<cfset arguments.event.setArg(getBeanName(), bean, getBeanType()) />
@@ -116,17 +119,21 @@ Notes:
 			
 			<cfset fields = innerBeanInfo.getFields() />
 			<cfset fieldNamesWithValues = StructNew() />
-			<cfif ArrayLen(fields) eq 0>
-				<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
+			<cfset ignoreFields = "" />
+			<!--- Handle specific fields for the inner-bean --->
+			<cfloop from="1" to="#ArrayLen(fields)#" index="i">
+				<cfif fields[i].value eq "" AND NOT fields[i].ignore>
+					<cfset fieldNames = ListAppend(fieldNames, fields[i].name) />
+				<cfelseif NOT fields[i].ignore>
+					<cfset fieldNamesWithValues[fields[i].name] = fields[i].value />
+				<cfelse>
+					<cfset ignoreFields = ListAppend(ignoreFields, fields[i].name) />
+				</cfif>
+			</cfloop>
+			<cfif Len(fieldNames) eq 0 AND Len(StructKeyList(fieldNamesWithValues)) eq 0>
+				<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix(), ignoreFields) />
 			<cfelse>
-				<!--- Handle specific fields for the inner-bean --->
-				<cfloop from="1" to="#ArrayLen(fields)#" index="i">
-					<cfif fields[i].value neq "">
-						<cfset fieldNames = ListAppend(fieldNames, fields[i].name) />
-					<cfelse>
-						<cfset fieldNamesWithValues[fields[i].name] = fields[i].value />
-					</cfif>
-				</cfloop>
+				<!--- Populate bean with fields which do not have value expression to be evaluated --->
 				<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
 				
 				<!--- TODO: handle expressions which concat fields together (${event.birthmonth}/${birthday}/${birthyear}) in the innerBean fields --->
@@ -185,6 +192,25 @@ Notes:
 	</cffunction>
 	<cffunction name="isBeanFieldsDefined" access="public" returntype="boolean" output="false">
 		<cfreturn Len(variables.beanFields) gt 0 />
+	</cffunction>
+	<cffunction name="addBeanField" access="public" returntype="void" output="false">
+		<cfargument name="beanField" type="string" required="true" />
+		<cfset variables.beanFields = ListAppend(variables.beanFields, arguments.beanField) />
+	</cffunction>
+	
+	<cffunction name="setIgnoreFields" access="private" returntype="void" output="false">
+		<cfargument name="ignoreFields" type="string" required="true" />
+		<cfset variables.ignoreFields = arguments.ignoreFields />
+	</cffunction>
+	<cffunction name="getIgnoreFields" access="private" returntype="string" output="false">
+		<cfreturn variables.ignoreFields />
+	</cffunction>
+	<cffunction name="hasIgnoreFields" access="public" returntype="boolean" output="false">
+		<cfreturn Len(variables.ignoreFields) gt 0 />
+	</cffunction>
+	<cffunction name="addIgnoreField" access="public" returntype="void" output="false">
+		<cfargument name="ignoreField" type="string" required="true" />
+		<cfset variables.ignoreFields = ListAppend(variables.ignoreFields, arguments.ignoreField) />
 	</cffunction>
 	
 	<cffunction name="setReinit" access="private" returntype="void" output="false">

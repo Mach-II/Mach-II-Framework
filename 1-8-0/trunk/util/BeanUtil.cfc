@@ -56,15 +56,28 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 			hint="A fully qualified path to the bean CFC." />
 		<cfargument name="initArgs" type="struct" required="false" 
 			hint="Optional. The set of arguments to pass to the init() function as an argument collection." />
+		<cfargument name="skipFieldsList" type="string" required="false" default=""
+			hint="Comma-delimited list of fields to exclude from populating" />
 		
 		<cfset var bean = "" />
+		<cfset var initData = 0 />
+		<cfset var field = "" />
+
+		<cfif StructKeyExists(arguments, "initArgs") AND Len(arguments.skipFieldsList)>
+			<cfset initData = StructCopy(arguments.initArgs) />
+			<cfloop list="#arguments.skipFieldsList#" index="field">
+				<cfset structDelete(initData, field, false) />
+			</cfloop> 
+		<cfelseif StructKeyExists(arguments, "initArgs")>
+			<cfset initData = arguments.initArgs />
+		</cfif>	
 		
 		<cftry>
 			<!--- Do not method chain the init() method on to the instantiation of the bean --->
 			<cfset bean = CreateObject("component", arguments.beanType) />
 			
 			<cfif StructKeyExists(arguments, "initArgs")>
-				<cfset bean.init(argumentcollection=arguments.initArgs) />
+				<cfset bean.init(argumentcollection=initData) />
 			<cfelse>
 				<cfset bean.init() />
 			</cfif>
@@ -117,17 +130,21 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 			hint="A struct of field names mapped to values." />
 		<cfargument name="prefix" type="string" required="false" default=""
 			hint="String to append in front of the field name. Example prefix = address, bean.setAddress1(fieldCollection['address.address1'])">
+		<cfargument name="skipFieldsList" type="string" required="false" default=""
+			hint="Comma-delimited list of fields to exclude from populating" />
 		
 		<cfset var field = 0 />
 		<cfset var map = describeBean(arguments.bean) />
 		
 		<cfloop collection="#map#" item="field">
 			<cfif arguments.prefix neq "">
-				<cfif StructKeyExists(arguments.fieldCollection, "#prefix#.#field#")>
+				<cfif NOT ListFindNoCase(arguments.skipFieldsList, field) 
+					AND StructKeyExists(arguments.fieldCollection, "#prefix#.#field#")>
 					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection["#prefix#.#field#"]) />
 				</cfif>
 			<cfelse>
-				<cfif StructKeyExists(arguments.fieldCollection, field)>
+				<cfif NOT ListFindNoCase(arguments.skipFieldsList, field) 
+					AND StructKeyExists(arguments.fieldCollection, field)>
 					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
 				</cfif>
 			</cfif>
