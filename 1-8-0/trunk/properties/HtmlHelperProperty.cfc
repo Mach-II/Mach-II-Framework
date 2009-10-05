@@ -115,16 +115,15 @@ from the parent application.
 		hint="Configures the property.">
 		
 		<cfset var cacheAssetPaths = StructNew() />
+		<cfset var webrootBasePath  = "" />
 		
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
 		
 		<cfset setCacheAssetPaths(getParameter("cacheAssetPaths", "false")) />
+		<cfset setWebrootBasePath(ExpandPath(getParameter("webrootBasePath", "."))) />
 		
 		<!--- These paths are defaulted in the pseudo-constructor area --->
-		<cfif isParameterDefined("webrootBasePath")>
-			<cfset setWebrootBasePath(ExpandPath(getParameter("webrootBasePath"))) />
-		</cfif>
 		<cfif isParameterDefined("jsBasePath")>
 			<cfset setJsBasePath(getParameter("jsBasePath")) />
 		</cfif>
@@ -454,7 +453,7 @@ from the parent application.
 		<cfset var code = '<img src="' & computeAssetPath("img", arguments.src) & '"' />
 		<cfset var dimensions = "" />
 		<cfset var key = "" />
-		
+	
 		<!--- Set auto dimensions --->
 		<cfif NOT Len(arguments.width) OR NOT Len(arguments.height)>
 			<cfset dimensions = getImageDimensions(arguments.src) />
@@ -793,19 +792,18 @@ from the parent application.
 		<cfargument name="path" type="string" required="true"
 			hint="A unresolved path to a web accessible image file. Shortcut paths are allowed, however file name extensions cannot be omitted and must be specified." />
 		
-		<!--- Append the tick count so awt won't cache the image forever --->
-		<cfset var fullPath = getWebrootBasePath() & "/" & buildAssetPath("img", arguments.path) & "?" & getTickCount() />
+		<cfset var fullPath = Replace(getWebrootBasePath() & "/" & buildAssetPath("img", arguments.path), "//", "/", "all") />
 		<cfset var image = "" />
 		<cfset var dimensions = StructNew() />
 		
 		<cftry>
 			<cfset image = variables.AWT_TOOLKIT.getImage(fullPath) />
+
+			<!--- Flush the image metadata --->
+			<cfset image.flush() />
 		
 			<cfset dimensions.width = image.getWidth() />
 			<cfset dimensions.height = image.getHeight() />
-			
-			<!--- Flush the image metadata (appears to not work most of the time, hence the tick count trick) --->
-			<cfset image.flush() />
 			
 			<cfcatch type="any">
 				<cfthrow type="MachII.properties.HtmlHelperProperty.ImageDimensionException"
@@ -915,6 +913,15 @@ from the parent application.
 
 	<cffunction name="setWebrootBasePath" access="private" returntype="void" output="false">
 		<cfargument name="webrootBasePath" type="string" required="true" />
+		
+		<!--- Convert all "\" to "/" (Windows) --->
+		<cfset arguments.webrootBasePath = Replace(arguments.webrootBasePath, "\", "/", "all") />
+		
+		<!--- Some CFML engines append a trailing "/" so remove--->
+		<cfif arguments.webrootBasePath.endsWith("/")>
+			<cfset arguments.webrootBasePath = Left(arguments.webrootBasePath, Len(arguments.webrootBasePath) - 1) />
+		</cfif>
+		
 		<cfset variables.webrootBasePath = arguments.webrootBasePath />
 	</cffunction>
 	<cffunction name="getWebrootBasePath" access="public" returntype="string" output="false">
