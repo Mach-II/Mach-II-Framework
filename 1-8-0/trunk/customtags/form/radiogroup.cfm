@@ -34,6 +34,19 @@ Notes:
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("radiogroup", true) />
+
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
+	
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.checkValue" type="string" 
+			default="#resolvePath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
+		<cfparam name="attributes.checkValue" type="string" 
+			default="" />
+	</cfif>
 	
 	<!--- Set optional attributes --->
 	<cfparam name="attributes.delimiter" type="string"
@@ -44,14 +57,10 @@ Notes:
 		default="label" />
 
 <cfelse>
-	<!---
-		In order to keep whitespace down to a minimum, all cfsavecontent  
-		must stay on a single line 
-	--->
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
 	<cfset thisTag.GeneratedContent = "" />
 
-	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
+	<!--- Create a crazy outbuffer struct so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
 	

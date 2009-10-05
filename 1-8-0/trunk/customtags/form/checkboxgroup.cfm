@@ -34,6 +34,23 @@ Notes:
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("checkboxgroup", true) />
+
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensurePathOrName() />
+
+	<!--- Resolve path if defined--->
+	<cfif StructKeyExists(attributes, "path")>
+		<cfparam name="attributes.checkValue" type="string" 
+			default="#resolvePath(attributes.path)#" />
+	<cfelse>
+		<cfset attributes.path = "" />
+		<!--- setting this to type="any" because on OpenBD at least, 
+				if you do pass in a checkValue attribute and it isn't a 
+				string, this blows up with an "attributes.checkValue is 
+				not of type String" error --->
+		<cfparam name="attributes.checkValue" type="any" 
+			default="" />
+	</cfif>
 	
 	<!--- Set optional attributes --->
 	<cfparam name="attributes.delimiter" type="string"
