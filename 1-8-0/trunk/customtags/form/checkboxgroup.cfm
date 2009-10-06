@@ -53,6 +53,7 @@ Notes:
 	</cfif>
 	
 	<!--- Set optional attributes --->
+	<cfparam name="attributes.name" type="string" default="#attributes.path#" />
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
 	<cfparam name="attributes.valueCol" type="string"
@@ -61,10 +62,6 @@ Notes:
 		default="label" />
 
 <cfelse>
-	<!---
-		In order to keep whitespace down to a minimum, all cfsavecontent  
-		must stay on a single line 
-	--->
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
 	<cfset thisTag.GeneratedContent = "" />
 

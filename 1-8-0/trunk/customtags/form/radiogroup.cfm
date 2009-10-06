@@ -49,6 +49,7 @@ Notes:
 	</cfif>
 	
 	<!--- Set optional attributes --->
+	<cfparam name="attributes.name" type="string" default="#attributes.path#" />
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
 	<cfparam name="attributes.valueCol" type="string"
