@@ -58,7 +58,12 @@ Notes:
 	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
 	
 	<cfif StructKeyExists(attributes, "actionUrlParams")>
-		<cfset StructAppend(variables.urlParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.actionUrlParams), false) />
+		<cfset StructAppend(variables.urlParameters, variables.utils.parseAttributesIntoStruct(attributes.actionUrlParams), false) />
+	</cfif>
+	
+	<!--- Evaluate the url parameters --->
+	<cfif StructCount(variables.urlParameters)>
+		<cfset evaluateExpressionStruct(variables.urlParameters) />
 	</cfif>
 	
 	<!--- Set required attributes--->
@@ -73,7 +78,7 @@ Notes:
 		<cfset variables.queryStringParameters = normalizeStructByNamespace("q") />
 
 		<cfif StructKeyExists(attributes, "q")>
-			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
+			<cfset StructAppend(variables.queryStringParameters, variables.utils.parseAttributesIntoStruct(attributes.q), false) />
 		</cfif>
 
 		<cfset setAttribute("action", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />

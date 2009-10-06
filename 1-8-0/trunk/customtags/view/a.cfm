@@ -49,7 +49,7 @@ Notes:
 	
 	<!--- Convert and merge the "string" version of the URL parameters into a struct --->
 	<cfif StructKeyExists(attributes, "p")>
-		<cfset StructAppend(variables.urlParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.p), false) />
+		<cfset StructAppend(variables.urlParameters, variables.utils.parseAttributesIntoStruct(attributes.p), false) />
 	</cfif>
 
 	<!--- Evaluate the url parameters --->
@@ -70,7 +70,7 @@ Notes:
 
 		<!--- Convert and merge the "string" version of the query string parameters into a struct --->
 		<cfif StructKeyExists(attributes, "q")>
-			<cfset StructAppend(variables.queryStringParameters, caller.this.getAppManager().getUtils().parseAttributesIntoStruct(attributes.q), false) />
+			<cfset StructAppend(variables.queryStringParameters, variables.utils.parseAttributesIntoStruct(attributes.q), false) />
 		</cfif>
 		
 		<!--- Evaluate the query string parameters --->
