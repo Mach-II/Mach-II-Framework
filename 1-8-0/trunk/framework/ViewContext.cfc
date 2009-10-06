@@ -143,7 +143,7 @@ Notes:
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 		
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
+		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
@@ -156,7 +156,7 @@ Notes:
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
+		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
 	<cffunction name="buildUnescapedCurrentUrl" access="public" returntype="string" output="false"
@@ -181,7 +181,7 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />		
 		
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
+		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedRouteUrl" access="public" returntype="string" output="false"
@@ -226,7 +226,7 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn HtmlEditFormat(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
+		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedUrlToModule" access="public" returntype="string" output="false"
