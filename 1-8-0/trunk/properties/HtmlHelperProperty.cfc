@@ -729,20 +729,23 @@ from the parent application.
 		
 		<cfset var path = arguments.assetPath />
 		
-		<!--- Get path if the asset path is not a full path from webroot --->
-		<cfif NOT path.startsWith("/") AND NOT path.startsWith("index.cfm")>
-			<cfif arguments.assetType EQ "js">
-				<cfset path = getJsBasePath() & "/" & path />
-			<cfelseif arguments.assetType EQ "css">
-				<cfset path = getCssBasePath() & "/" & path />
-			<cfelseif arguments.assetType EQ "img">
-				<cfset path = getImgBasePath() & "/" & path />
+		<!--- Don't do resolution on assets that are dynamically served --->
+		<cfif NOT path.startsWith(getProperty("urlBase"))>
+			<!--- Get path if the asset path is not a full path from webroot --->
+			<cfif NOT path.startsWith("/")>
+				<cfif arguments.assetType EQ "js">
+					<cfset path = getJsBasePath() & "/" & path />
+				<cfelseif arguments.assetType EQ "css">
+					<cfset path = getCssBasePath() & "/" & path />
+				<cfelseif arguments.assetType EQ "img">
+					<cfset path = getImgBasePath() & "/" & path />
+				</cfif>
 			</cfif>
-		</cfif>
-		
-		<!--- Append the file extension if not defined --->
-		<cfif arguments.assetType NEQ "img">
-			<cfset path = appendFileExtension(arguments.assetType, path) />
+			
+			<!--- Append the file extension if not defined --->
+			<cfif arguments.assetType NEQ "img">
+				<cfset path = appendFileExtension(arguments.assetType, path) />
+			</cfif>
 		</cfif>
 		
 		<cfreturn path />
