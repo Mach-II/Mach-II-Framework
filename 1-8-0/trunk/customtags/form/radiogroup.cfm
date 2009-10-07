@@ -49,7 +49,8 @@ Notes:
 	</cfif>
 	
 	<!--- Set optional attributes --->
-	<cfparam name="attributes.name" type="string" default="#attributes.path#" />
+	<cfparam name="attributes.name" type="string" 
+		default="#attributes.path#" />
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
 	<cfparam name="attributes.valueCol" type="string"
@@ -216,7 +217,7 @@ Notes:
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.radiogroup" 
 					message="Unsupported Data Type" 
-					detail="The radio group form tag only supports lists, arrays, and queries." />
+					detail="The radio group form tag only supports lists, arrays, structs and queries." />
 	</cfif>
 
 	<cfif attributes.output>
