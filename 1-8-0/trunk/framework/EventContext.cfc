@@ -535,7 +535,7 @@ Notes:
 				<cfset arguments.statusText = getAppManager().getUtils().getHTTPHeaderStatusTextByStatusCode(arguments.statusCode) />
 				
 				<cfif NOT Len(arguments.statusText) AND log.isWarnEnabled()>
-					<cfset log.warn("Enabled to resolve a status text shortcut for a HTTP header with the status code of '#arguments.statusCode#'.") />
+					<cfset log.warn("Unabled to resolve a status text shortcut for a HTTP header with the status code of '#arguments.statusCode#'. Please check that you are using a supported status code.") />
 				</cfif>
 			</cfif>
 			<cfheader statuscode="#arguments.statusCode#" 
