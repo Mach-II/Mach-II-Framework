@@ -56,7 +56,13 @@ Notes:
 	
 	<!--- Ensure attributes if no body content --->
 	<cfif NOT Len(variables.bodyContent)>
-		<cfset ensureByName("href") />
+		<cfset ensureOneByNameList("href,event,route") />
+	</cfif>
+	
+	<!--- If the href is not present, then make an URL using event/module/route --->
+	<cfif NOT StructKeyExists(attributes, "href")
+		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
+		<cfset attributes.href = makeUrl() />
 	</cfif>
 	
 	<!--- For external files --->
@@ -69,6 +75,11 @@ Notes:
 		<cfset StructDelete(variables.additionalAttributes, "forIEVersion", "false") />
 		<cfset StructDelete(variables.additionalAttributes, "output", "false") />
 		<cfset StructDelete(variables.additionalAttributes, "outputType", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "event", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "module", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "route", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "p", "false") />
+		<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 
 		<cfif attributes.outputType EQ "head">
 			<cfset locateHtmlHelper().addStylesheet(attributes.href, variables.additionalAttributes, attributes.outputType, attributes.forIEVersion) />

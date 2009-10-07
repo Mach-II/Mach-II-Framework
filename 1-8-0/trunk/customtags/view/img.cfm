@@ -37,7 +37,12 @@ Notes:
 	<cfset setupTag("img", true) />
 	
 	<!--- Setup required --->
-	<cfset ensureByName("src") />
+	<cfset ensureOneByNameList("src,event,route") />
+	
+	<!--- If the src is not present, then make an URL using event/module/route --->
+	<cfif NOT StructKeyExists(attributes, "src")>
+		<cfset attributes.src = makeUrl() />
+	</cfif>
 	
 	<!--- Setup optional but requried by the addImage() API --->
 	<cfparam name="attributes.width" type="string" 
@@ -47,7 +52,10 @@ Notes:
 	<cfparam name="attributes.alt" type="string" 
 		default="" />
 	
-	<!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
+	<!---
+		Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes
+		Normalized namespaced attributes have already been removed.
+	--->
 	<cfset variables.additionalAttributes = StructNew() />
 	<cfset StructAppend(variables.additionalAttributes, attributes) />
 	<cfset StructDelete(variables.additionalAttributes, "src", "false") />
@@ -55,6 +63,11 @@ Notes:
 	<cfset StructDelete(variables.additionalAttributes, "height", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "alt", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "output", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "event", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "module", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "route", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "p", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 	
 <cfelse>
 	<cfset thisTag.GeneratedContent = locateHtmlHelper().addImage(attributes.src, attributes.width, attributes.height, attributes.alt, variables.additionalAttributes) />

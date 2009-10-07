@@ -38,20 +38,33 @@ N.B. Links to CSS files should use the <style> tag's "src" attribute.
 	<cfset setupTag("link", true) />
 	
 	<!--- Setup required --->
-	<cfset ensureByName("href") />
+	<cfset ensureOneByNameList("href,event,route") />
 	<cfset ensureByName("type") />
+	
+	<!--- If the href is not present, then make an URL using event/module/route --->
+	<cfif NOT StructKeyExists(attributes, "href")>
+		<cfset attributes.href = makeUrl() />
+	</cfif>
 	
 	<!--- Setup optional --->
 	<cfparam name="attributes.outputType" type="string" 
 		default="head" />
 		
-	<!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
+	<!---
+		Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes
+		Normalized namespaced attributes have already been removed.
+	--->
 	<cfset variables.additionalAttributes = StructNew() />
 	<cfset StructAppend(variables.additionalAttributes, attributes) />
 	<cfset StructDelete(variables.additionalAttributes, "href", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "type", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "outputType", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "output", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "event", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "module", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "route", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "p", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 	
 <cfelse>
 	<cfset thisTag.GeneratedContent = locateHtmlHelper().addLink(attributes.type, attributes.href, variables.additionalAttributes, attributes.outputType) />

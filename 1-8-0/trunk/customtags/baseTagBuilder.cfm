@@ -95,6 +95,28 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
+<cffunction name="ensureOneByNameList" access="public" returntype="void" output="false"
+	hint="Ensures at least *one* of the keys is available by name in the attributes.">
+	<cfargument name="nameList" type="string" required="true"
+		hint="The name of the key to look up." />
+	<cfargument name="detail" type="string" required="false" default="No additional details."
+		hint="Additional details to use in the exception." />
+	
+	<cfset var i = "" />
+	
+	<cfloop list="#arguments.nameList#" index="i">
+		<cfif StructKeyExists(attributes, i)>
+			<!--- Short-circuit and exit since we ensured at least one of the attributes --->
+			<cfreturn />
+		</cfif>
+	</cfloop>
+	
+	<!--- If we've gotten to this point, then none of the required attributes were found --->
+	<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.noAttribute"
+		message="The '#variables.tagType#' tag must have an attribute named of one of the following: '#arguments.nameList#."
+		detail="#arguments.detail#" />
+</cffunction>
+
 <cffunction name="getParentTagAttribute" access="public" returntype="string" output="false"
 	hint="Gets the parents tag's attribute value (ex: used by option tag to get select tag id)">
 	<cfargument name="parentTagName" type="string" required="true" />
@@ -294,6 +316,8 @@ PUBLIC FUNCTIONS - UTIL
 	<cfloop collection="#arguments.target#" item="key">
 		<cfif key.toLowercase().startsWith(namespaceStem)>
 			<cfset tagAttributes[ReplaceNoCase(key, namespaceStem, "", "one").toLowercase()] = arguments.target[key] />
+			<!--- Clean up and remove from the target struct --->
+			<cfset StructDelete(arguments.target,  key, "false") />	
 		</cfif>
 	</cfloop>
 	
@@ -307,6 +331,7 @@ PUBLIC FUNCTIONS - UTIL
 		<cfloop collection="#arguments.target#" item="key">
 			<cfif Compare(key, key.toUppercase()) EQ 0>
 				<cfset tagAttributes[key.toLowercase()] = arguments.target[key] />
+				<cfset StructDelete(arguments.target,  key, "false") />	
 			</cfif>
 		</cfloop>
 	</cfif>
