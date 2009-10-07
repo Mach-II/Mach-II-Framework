@@ -243,6 +243,22 @@ be looked up automatically and sent with the header.
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/405
 (2009-10-07 peterfarrell)
 
+* Added ability to pass in the Event object to 
+announceEvent / redirectEvent / redirectRoute methods
+
+Old syntax to pass entire event-args:
+<cfset announceEvent("someEvent", arguments.event.getArgs()) />
+
+New syntax to pass entire event-args:
+<cfset announceEvent("someEvent", arguments.event) />
+
+This also applies to the persistArgs argument for redirectEvent(), 
+redirectEventInModule() and redirectRoute() methods as well. However, 
+you can still us the old syntax so this is completely backwards compatible. 
+
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/406
+{2009-10-07 peterfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
