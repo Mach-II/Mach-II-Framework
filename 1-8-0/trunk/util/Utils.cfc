@@ -32,13 +32,54 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
+	<cfset variables.statusCodeShortcutMap = StructNew() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="Utils" output="false"
 		hint="Initialization function called by the framework.">
+		
+		<cfset buildStatusCodeShortcutMap() />
+		
 		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="buildStatusCodeShortcutMap" access="private" returntype="void" output="false"
+		hint="Builds a shortcut map for HTTP header status code.">
+		
+		<cfset var statusCodeShortcutMap = StructNew() />
+		
+		<cfset statusCodeShortcutMap["100"] = "Continue" />
+		<cfset statusCodeShortcutMap["101"] = "Switching Protocols" />
+		<cfset statusCodeShortcutMap["200"] = "OK" />
+		<cfset statusCodeShortcutMap["201"] = "Created" />
+		<cfset statusCodeShortcutMap["202"] = "Accepted" />
+		<cfset statusCodeShortcutMap["203"] = "Non-Authoritative Information" />
+		<cfset statusCodeShortcutMap["204"] = "No Content" />
+		<cfset statusCodeShortcutMap["205"] = "Reset Content" />
+		<cfset statusCodeShortcutMap["206"] = "Partial Content" />
+		<cfset statusCodeShortcutMap["300"] = "Multiple Choices" />
+		<cfset statusCodeShortcutMap["301"] = "Moved Permanently" />
+		<cfset statusCodeShortcutMap["302"] = "Found" />
+		<cfset statusCodeShortcutMap["303"] = "See Other" />
+		<cfset statusCodeShortcutMap["304"] = "Not Modified" />
+		<cfset statusCodeShortcutMap["307"] = "Temporary Redirect" />
+		<cfset statusCodeShortcutMap["400"] = "Bad Request" />
+		<cfset statusCodeShortcutMap["401"] = "Unauthorized" />
+		<cfset statusCodeShortcutMap["403"] = "Forbidden" />
+		<cfset statusCodeShortcutMap["404"] = "Not Found" />
+		<cfset statusCodeShortcutMap["405"] = "Method Not Allowed" />
+		<cfset statusCodeShortcutMap["406"] = "Not Acceptable" />
+		<cfset statusCodeShortcutMap["408"] = "Request Timeout" />
+		<cfset statusCodeShortcutMap["410"] = "Gone" />
+		<cfset statusCodeShortcutMap["500"] = "Internal Server Error" />
+		<cfset statusCodeShortcutMap["501"] = "Not Implemented" />
+		<cfset statusCodeShortcutMap["502"] = "Bad Gateway" />
+		<cfset statusCodeShortcutMap["503"] = "Service Unavailable" />
+		<cfset statusCodeShortcutMap["504"] = "Gateway Timeout" />
+		
+		<cfset variables.statusCodeShortcutMap = statusCodeShortcutMap />
 	</cffunction>
 	
 	<!---
@@ -419,6 +460,17 @@ Notes:
 		</cfif>
 		
 		<cfreturn message />
+	</cffunction>
+	
+	<cffunction name="getHTTPHeaderStatusTextByStatusCode" access="public" returntype="string" output="false"
+		hint="Gets the HTTP header status text by status code.">
+		<cfargument name="statusCode" type="numeric" required="true" />
+		
+		<cfif StructKeyExists(variables.statusCodeShortcutMap, arguments.statusCode)>
+			<cfreturn variables.statusCodeShortcutMap[arguments.statusCode] />
+		<cfelse>
+			<cfreturn "" />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>

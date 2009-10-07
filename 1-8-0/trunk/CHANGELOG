@@ -236,6 +236,13 @@ For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/377
 (2009-09-10 peterfarrell)
 
+* Added shortcuts for status text when only status code is defined for addHTTPHeaderByStatus
+This allows you do addHTTPHeaderByStatus("500") and the proper status text will
+be looked up automatically and sent with the header.
+
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/405
+(2009-10-07 peterfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------

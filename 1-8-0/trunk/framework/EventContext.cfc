@@ -519,6 +519,7 @@ Notes:
 		<cfargument name="charset" type="string" required="false" default="" />
 		
 		<cfset var i = 0 />
+		<cfset var log = getLog() />
 		
 		<cfif Len(arguments.name)>
 			<cfif Len(arguments.charset)>
@@ -530,6 +531,13 @@ Notes:
 					value="#arguments.value#" />
 			</cfif>
 		<cfelseif arguments.statusCode NEQ 0>
+			<cfif NOT Len(arguments.statusText)>
+				<cfset arguments.statusText = getAppManager().getUtils().getHTTPHeaderStatusTextByStatusCode(arguments.statusCode) />
+				
+				<cfif NOT Len(arguments.statusText) AND log.isWarnEnabled()>
+					<cfset log.warn("Enabled to resolve a status text shortcut for a HTTP header with the status code of '#arguments.statusCode#'.") />
+				</cfif>
+			</cfif>
 			<cfheader statuscode="#arguments.statusCode#" 
 				statustext="#arguments.statusText#" />
 		<cfelse>
