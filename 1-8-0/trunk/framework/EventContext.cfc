@@ -89,9 +89,12 @@ Notes:
 	--->
 	<cffunction name="announceEvent" access="public" returntype="void" output="true"
 		hint="Queues an event for the framework to handle.">
-		<cfargument name="eventName" type="string" required="true" />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#" />
-		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#" />
+		<cfargument name="eventName" type="string" required="true"
+			hint="The name of the event to announce." />
+		<cfargument name="eventArgs" type="any" required="false" default="#StructNew()#"
+			hint="A struct of arguments or an entire Event object to set as the event's args." />
+		<cfargument name="moduleName" type="string" required="false" default="#getAppManager().getModuleName()#"
+			hint="The name of the module in which event exists." />
 		
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
@@ -102,6 +105,11 @@ Notes:
 		<cfset var log = getLog() />
 		
 		<cftry>
+			<!--- Convert an Event object to a struct of args --->
+			<cfif IsObject(arguments.eventArgs)>
+				<cfset arguments.eventArgs = arguments.eventArgs.getArgs() />
+			</cfif>
+			
 			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(arguments.eventName)>
 				<cfset mapping = getEventMapping(arguments.eventName) />
@@ -187,7 +195,7 @@ Notes:
 											, ",") />
 				<cfcatch type="MachII.framework.NoEventAvailable">
 					<cfthrow type="MachII.framework.NoEventAvailable"
-						message="The 'redirectEvent' method cannot find an available event. Be sure you have not cleared the event queue before calling this method."
+						message="The 'redirectEvent' method cannot find an available event. Be sure you have not cleared the event queue via 'clearEventQueue()' before calling this method."
 						detail="Please check your code." />
 				</cfcatch>
 			</cftry>
@@ -229,6 +237,12 @@ Notes:
 					<cfrethrow />
 				</cfcatch>
 			</cftry>
+		<!---
+			CFML's isStruct on an object will evaluate to true so
+			check if it's an Event object first
+		--->
+		<cfelseif IsObject(arguments.persistArgs)>
+			<cfset argsToPersist = arguments.persistArgs.getArgs() />
 		<cfelseif IsStruct(arguments.persistArgs)>
 			<cfset argsToPersist = arguments.persistArgs />
 		<cfelse>
@@ -292,6 +306,12 @@ Notes:
 			<cfif arguments.persist AND NOT StructCount(argsToPersist)>
 				<cfset argsToPersist = getCurrentEvent().getArgs() />
 			</cfif>
+		<!---
+			CFML's isStruct on an object will evaluate to true so
+			check if it's an Event object first
+		--->
+		<cfelseif IsObject(arguments.persistArgs)>
+			<cfset argsToPersist = arguments.persistArgs.getArgs() />
 		<cfelseif IsStruct(arguments.persistArgs)>
 			<cfset argsToPersist = arguments.persistArgs />
 		<cfelse>

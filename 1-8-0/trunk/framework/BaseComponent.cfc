@@ -95,8 +95,8 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Announces a new event to the framework.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the event to announce." />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
-			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="eventArgs" type="any" required="false" default="#StructNew()#"
+			hint="A struct of arguments or an entire Event object to set as the event's args." />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
 	</cffunction>
 	
@@ -106,8 +106,8 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the module in which event exists." />
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the event to announce." />
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
-			hint="A struct of arguments to set as the event's args." />
+		<cfargument name="eventArgs" type="any" required="false" default="#StructNew()#"
+			hint="A struct of arguments or an entire Event object  to set as the event's args." />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 	</cffunction>
 	
@@ -120,7 +120,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
 		<cfargument name="persistArgs" type="any" required="false" default=""
-			hint="You can pass in either a struct of items or a list of event args to persist." />
+			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
@@ -136,7 +136,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the event to redirect to." />
 		<cfargument name="args" type="any" required="false" default=""
-			hint="You can pass in either a struct of arguments or a list of event args names from the current event to place in the url." />
+			hint="You can pass in either an Event object, a struct of arguments or a list of event args names from the current event to place in the url." />
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
 		<cfargument name="persistArgs" type="any" required="false" default=""
@@ -156,7 +156,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="persist" type="boolean" required="false" default="false"
 			hint="Choose whether or not to sort any of the persistArgs into the session scope." />
 		<cfargument name="persistArgs" type="any" required="false" default=""
-			hint="You can pass in either a struct of items or a list of event args to persist." />
+			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
