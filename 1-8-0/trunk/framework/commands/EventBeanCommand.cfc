@@ -82,6 +82,7 @@ Notes:
 		<cfset var fields = "" />
 		<cfset var fieldNamesWithValues = "" />
 		<cfset var fieldValues = "" />
+		<cfset var ignoreFields = "" />
 		<cfset var expEvaluator = getExpressionEvaluator()	/>
 				
 		<!--- If reinit is FALSE, get the bean from the event --->
@@ -120,6 +121,7 @@ Notes:
 			<cfset fields = innerBeanInfo.getFields() />
 			<cfset fieldNamesWithValues = StructNew() />
 			<cfset ignoreFields = "" />
+
 			<!--- Handle specific fields for the inner-bean --->
 			<cfloop from="1" to="#ArrayLen(fields)#" index="i">
 				<cfif fields[i].value eq "" AND NOT fields[i].ignore>
