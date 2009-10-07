@@ -44,47 +44,7 @@ Notes:
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("a", false) />
 	
-	<!--- Build url parameters --->
-	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
-	
-	<!--- Convert and merge the "string" version of the URL parameters into a struct --->
-	<cfif StructKeyExists(attributes, "p")>
-		<cfset StructAppend(variables.urlParameters, variables.utils.parseAttributesIntoStruct(attributes.p), false) />
-	</cfif>
-
-	<!--- Evaluate the url parameters --->
-	<cfif StructCount(variables.urlParameters)>
-		<cfset evaluateExpressionStruct(variables.urlParameters) />
-	</cfif>
-	
-	<!--- Set required attributes--->
-	<cfif StructKeyExists(attributes, "event")>
-		<cfif StructKeyExists(attributes, "module")>
-			<cfset setAttribute("href", caller.this.buildUrlToModule(attributes.module, attributes.event, variables.urlParameters)) />
-		<cfelse>
-			<cfset setAttribute("href", caller.this.buildUrl(attributes.event, variables.urlParameters)) />
-		</cfif>
-	<cfelseif StructKeyExists(attributes, "route")>
-		<!--- Build query string parameters --->
-		<cfset variables.queryStringParameters = normalizeStructByNamespace("q") />
-
-		<!--- Convert and merge the "string" version of the query string parameters into a struct --->
-		<cfif StructKeyExists(attributes, "q")>
-			<cfset StructAppend(variables.queryStringParameters, variables.utils.parseAttributesIntoStruct(attributes.q), false) />
-		</cfif>
-		
-		<!--- Evaluate the query string parameters --->
-		<cfif StructCount(variables.queryStringParameters)>
-			<cfset evaluateExpressionStruct(variables.queryStringParameters) />
-		</cfif>
-
-		<cfset setAttribute("href", caller.this.buildRouteUrl(attributes.route, variables.urlParameters, variables.queryStringParameters))/>
-	<cfelseif StructKeyExists(attributes, "useCurrentUrl")>
-		<cfset setAttribute("href", caller.this.buildCurrentUrl(variables.urlParameters)) />
-	<cfelse>
-		<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrl"
-			message="The 'a' tag must have an attribute named 'event', 'route' or 'useCurrentUrl'." />
-	</cfif>
+	<cfset setAttribute("href", makeUrl()) />
 	
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("charset") />

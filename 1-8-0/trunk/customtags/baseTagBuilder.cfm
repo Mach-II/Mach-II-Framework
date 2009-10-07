@@ -346,6 +346,67 @@ PUBLIC FUNCTIONS - UTIL
 	<cfreturn cleanedId />
 </cffunction>
 
+<cffunction name="makeUrl" access="public" returntype="string" output="false"
+	hint="Makes URLs for custom tags.">
+	<cfargument name="attributeNameForEvent" type="string" default="event" />
+	<cfargument name="attributeNameForModule" type="string" default="module" />
+	<cfargument name="attributeNameForRoute" type="string" default="route" />
+	<cfargument name="attributeNameForUrlParameters" type="string" default="p" />
+
+	<!--- Build url parameters --->
+	<cfset var urlParameters = normalizeStructByNamespace("p") />
+	<cfset var queryStringParameters = "" />
+	<cfset var url = "" />
+	
+	<!--- Convert and merge the "string" version of the URL parameters into a struct --->
+	<cfif StructKeyExists(attributes, arguments.attributeNameForUrlParameters)>
+		<cfset StructAppend(urlParameters, variables.utils.parseAttributesIntoStruct(attributes[arguments.attributeNameForUrlParameters]), false) />
+	</cfif>
+
+	<!--- Evaluate the url parameters --->
+	<cfif StructCount(urlParameters)>
+		<cfset evaluateExpressionStruct(urlParameters) />
+	</cfif>
+	
+	<!--- Set required attributes--->
+	<cfif StructKeyExists(attributes, arguments.attributeNameForEvent)>
+		<cfif StructKeyExists(attributes, arguments.attributeNameForModule)>
+			<cfset url = request.eventContext.getAppManager().getRequestManager().buildUrl(attributes[arguments.attributeNameForModule], attributes[attributeNameForEvent], urlParameters) />
+		<cfelse>
+			<cfset url = request.eventContext.getAppManager().getRequestManager().buildUrl(request.eventContext.getAppManager().getModuleName(), attributes[arguments.attributeNameForEvent], urlParameters) />
+		</cfif>
+	<cfelseif StructKeyExists(attributes, arguments.attributeNameForRoute)>
+		<!--- Build query string parameters --->
+		<cfset queryStringParameters = normalizeStructByNamespace("q") />
+
+		<!--- Convert and merge the "string" version of the query string parameters into a struct --->
+		<cfif StructKeyExists(attributes, "q")>
+			<cfset StructAppend(queryStringParameters, variables.utils.parseAttributesIntoStruct(attributes.q), false) />
+		</cfif>
+		
+		<!--- Evaluate the query string parameters --->
+		<cfif StructCount(queryStringParameters)>
+			<cfset evaluateExpressionStruct(queryStringParameters) />
+		</cfif>
+
+		<cfset url = request.eventContext.getAppManager().getRequestManager().buildRouteUrl(attributes[arguments.attributeNameForRoute], urlParameters, queryStringParameters) />
+	<cfelse>
+		<cfif getTagLib() EQ "view" AND getTagType() EQ "a">
+			<cfif StructKeyExists(attributes, "useCurrentUrl")>
+				<cfset url = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(urlParameters) />
+			<cfelse>
+				<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrlAttribute"
+					message="The 'a' tag must have an attribute named 'event', 'route' or 'useCurrentUrl'." />
+			</cfif>
+		<cfelse>
+			<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.noEventOrRouteAttribute"
+				message="The '#getTagType()#' tag must have an attribute named '#arguments.attributeNameForEvent#' or '#arguments.attributeNameForRoute#'." />
+		</cfif>
+	</cfif>
+	
+	<cfreturn variables.utils.escapeHtml(url) />
+</cffunction>
+
 <cffunction name="booleanize" access="public" returntype="numeric" output="false"
 	hint="Converts 'Yes/No' and 'True/False' strings to 'true' boolean. Leaves numerics alone.">
 	<cfargument name="input" type="any" required="true" 

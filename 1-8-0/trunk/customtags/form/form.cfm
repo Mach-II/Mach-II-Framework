@@ -53,39 +53,8 @@ Notes:
 		default="multipart/form-data" />
 	<cfparam name="attributes.method" type="string" 
 		default="post" />
-		
-	<!--- Build url parameters --->
-	<cfset variables.urlParameters = normalizeStructByNamespace("p") />
-	
-	<cfif StructKeyExists(attributes, "actionUrlParams")>
-		<cfset StructAppend(variables.urlParameters, variables.utils.parseAttributesIntoStruct(attributes.actionUrlParams), false) />
-	</cfif>
-	
-	<!--- Evaluate the url parameters --->
-	<cfif StructCount(variables.urlParameters)>
-		<cfset evaluateExpressionStruct(variables.urlParameters) />
-	</cfif>
-	
-	<!--- Set required attributes--->
-	<cfif StructKeyExists(attributes, "actionEvent")>
-		<cfif NOT StructKeyExists(attributes, "actionModule")>
-			<cfset setAttribute("action", caller.this.buildUrl(attributes.actionEvent, variables.urlParameters)) />
-		<cfelse>
-			<cfset setAttribute("action", caller.this.buildUrlToModule(attributes.actionModule, attributes.actionEvent, variables.urlParameters)) />
-		</cfif>
-	<cfelseif StructKeyExists(attributes, "actionRoute")>
-		<!--- Build query string parameters --->
-		<cfset variables.queryStringParameters = normalizeStructByNamespace("q") />
 
-		<cfif StructKeyExists(attributes, "q")>
-			<cfset StructAppend(variables.queryStringParameters, variables.utils.parseAttributesIntoStruct(attributes.q), false) />
-		</cfif>
-
-		<cfset setAttribute("action", caller.this.buildRoute(attributes.route, variables.urlParameters, variables.queryStringParameters)) />
-	<cfelse>
-		<cfthrow type="MachII.customtags.form.form.noEventOrRoute"
-			message="The 'form' tag must have an attribute named 'actionEvent' or 'actionRoute'." />
-	</cfif>
+	<cfset setAttribute("action", makeUrl("actionEvent", "actionModule", "actionRoute", "actionUrlParams")) />
 	<cfset setAttribute("method") />
 	<cfset setAttribute("encType") />
 	
