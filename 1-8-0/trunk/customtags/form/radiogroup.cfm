@@ -99,9 +99,9 @@ Notes:
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 			
-			<cfset finalOutput = Replace(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = Replace(finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
-			<cfset finalOutput = Replace(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
+			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
 			
 			<cfset variables.outputBuffer.content = "" />
 			
@@ -124,9 +124,9 @@ Notes:
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
 					
-					<cfset finalOutput = Replace(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-					<cfset finalOutput = Replace(finalOutput, "${output.label}", attributes.labels[i]) />
-					<cfset finalOutput = Replace(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
+					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.labels[i]) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
 					
 					<cfset variables.outputBuffer.content = "" />
 					
@@ -147,9 +147,9 @@ Notes:
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
 
-					<cfset finalOutput = Replace(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-					<cfset finalOutput = Replace(finalOutput, "${output.label}", attributes.items[i].label) />
-					<cfset finalOutput = Replace(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i].value)) />
+					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i].label) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i].value)) />
 					
 					<cfset variables.outputBuffer.content = "" />
 					
@@ -183,9 +183,9 @@ Notes:
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 			
-			<cfset finalOutput = Replace(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = Replace(finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
-			<cfset finalOutput = Replace(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
+			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
 			
 			<cfset variables.outputBuffer.content = "" />
 			
@@ -206,9 +206,9 @@ Notes:
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 			
-			<cfset finalOutput = Replace(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = Replace(finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset finalOutput = Replace(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
+			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
+			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
 			
 			<cfset variables.outputBuffer.content = "" />
 			
