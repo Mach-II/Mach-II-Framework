@@ -44,7 +44,12 @@ Notes:
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("a", false) />
 	
-	<cfset setAttribute("href", makeUrl()) />
+	<cfset ensureOneByNameList("href,event,route,useCurrentUrl") />
+	
+	<!--- If the href is not present, then make an URL using event/module/route --->
+	<cfif NOT StructKeyExists(attributes, "href")>
+		<cfset attributes.href = makeUrl() />
+	</cfif>
 	
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("charset") />
