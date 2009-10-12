@@ -47,8 +47,10 @@ Notes:
 	<cfset ensureOneByNameList("href,event,route,useCurrentUrl") />
 	
 	<!--- If the href is not present, then make an URL using event/module/route --->
-	<cfif NOT StructKeyExists(attributes, "href")>
-		<cfset attributes.href = makeUrl() />
+	<cfif StructKeyExists(attributes, "href")>
+		<cfset setAttribute("href", attributes.href) />
+	<cfelse>
+		<cfset setAttribute("href", makeUrl()) />
 	</cfif>
 	
 	<!--- Set optional attributes --->
