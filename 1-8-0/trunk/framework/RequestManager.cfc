@@ -387,7 +387,7 @@ Notes:
 					<!--- No route found for this url --->
 					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
 						message="Could not find a configured url route with the url alias of '#names[1]#'"
-						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl()." />
+						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl(). Cleaned path_info='#arguments.pathInfo#'" />
 				</cfif>
 			</cfif>	
 		<cfelseif NOT getParseSes()>
@@ -404,7 +404,8 @@ Notes:
 				<cfelse>
 					<cfthrow type="MachII.framework.UrlRouteNotDefined"  
 						message="Could not find a configured url route with the url alias of '#names[1]#'"
-						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl()." />				</cfif>
+						detail="Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl(). Cleaned path_info='#arguments.pathInfo#'" />
+				</cfif>
 			</cfif>
 		</cfif>
 		
