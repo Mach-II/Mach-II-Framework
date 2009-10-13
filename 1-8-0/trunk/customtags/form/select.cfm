@@ -1,4 +1,4 @@
-<cfprocessingdirective  suppresswhitespace="true"><cfsetting enablecfoutputonly="true" /><cfsilent>
+<!--- <cfprocessingdirective suppresswhitespace="true"><cfsetting enablecfoutputonly="true" /><cfsilent> --->
 <!---
 License:
 Copyright 2009 GreatBizTools, LLC
@@ -83,9 +83,12 @@ Notes:
 	<cfset variables.outputBuffer.content = "" />
 
 	<cfif StructKeyExists(attributes, "items")>
+		<cftry>
 		<form:options attributeCollection="#attributes#"
 			output="true" 
 			outputBuffer="#variables.outputBuffer#"/>
+		<cfcatch><cfoutput><cfdump var="#cfcatch#"></cfoutput><cfabort></cfcatch>
+		</cftry>
 		<cfset variables.outputBuffer.content = Chr(13) & variables.outputBuffer.content />
 	</cfif>
 	
@@ -94,4 +97,4 @@ Notes:
 	
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-</cfsilent></cfprocessingdirective><cfsetting enablecfoutputonly="false" />
+<!--- </cfsilent></cfprocessingdirective><cfsetting enablecfoutputonly="false" /> --->

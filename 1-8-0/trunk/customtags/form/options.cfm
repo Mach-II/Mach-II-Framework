@@ -72,10 +72,10 @@ Notes:
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
-	<cfelseif IsQuery(attributes.query)>
+	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
-			<form:option value="#attributes.items[attributes.valueCol]#" 
-				label="#attributes.items[labelCol]#" 
+			<form:option value="#attributes.items[attributes.valueCol][attributes.items.currentRow]#" 
+				label="#attributes.items[attributes.labelCol][attributes.items.currentRow]#" 
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
