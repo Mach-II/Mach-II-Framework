@@ -25,12 +25,15 @@ Updated version: 1.8.0
 Notes:
 Helper functions for the Mach-II form tag library.
 
-STANDARD FORM ATTRIBUTES
+STANDARD ATTRIBUTES
 id			= AUTOMATIC|[string]
 class		= [string]
 style		= [string]
 dir			= ltr|rtl (Sets the text direction)
 lang		= [string] (Sets the language code)
+title		= [string]
+accesskey	= [string]
+tabindex	= [string]
 
 EVENT ATTRIBUTES
 tabindex	= [numeric]
@@ -226,6 +229,15 @@ PUBLIC FUNCTIONS
 	</cfif>
 	<cfif StructKeyExists(attributes, "lang")>
 		<cfset setAttribute("lang", attributes.lang) />
+	</cfif>
+	<cfif StructKeyExists(attributes, "title")>
+		<cfset setAttribute("title", attributes.title) />
+	</cfif>
+	<cfif StructKeyExists(attributes, "accesskey")>
+		<cfset setAttribute("accesskey", attributes.accesskey) />
+	</cfif>
+	<cfif StructKeyExists(attributes, "tabindex")>
+		<cfset setAttribute("tabindex", attributes.tabindex) />
 	</cfif>
 </cffunction>
 
