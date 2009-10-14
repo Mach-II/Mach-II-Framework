@@ -36,15 +36,16 @@ If you are creating a custom output template and using custom CSS, create a
 reference to your CSS in the local.headElement variable and the MachIILogger will
 automatically put your CSS in the head section via <cfhtmlhead />
 --->
-<cfset local.headElement = "" />
-<cfset local.cfdumpData = "" />
-<cfset local.hasAppendedHeadElementFromCfdump = false />
-<cfset local.i = 1 />
-<cfset local.cookieRow = 1 />
+	<cfimport prefix="view" taglib="/MachII/customtags/view" />
+	<cfset local.headElement = "" />
+	<cfset local.cfdumpData = "" />
+	<cfset local.hasAppendedHeadElementFromCfdump = false />
+	<cfset local.i = 1 />
+	<cfset local.cookieRow = 1 />
 </cfsilent>
 <cfoutput>
 <cfsavecontent variable="local.headElement">
-<style type="text/css"><!--
+<view:style outputType="inline">
 	##MachIIRequestLogDisplay {
 		color: ##000;
 		background-color: ##FFF;
@@ -118,8 +119,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 	##MachIIRequestLogDisplay .strong {
 		font-weight: bold;
 	}
--->
-</style>
+</view:style>
 </cfsavecontent>
 <div id="MachIIRequestLogDisplay">
 	<table>
@@ -131,7 +131,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		</tr>
 	<cfif ArrayLen(data)>
 		<cfloop from="1" to="#ArrayLen(data)#" index="local.i">
-			<tr class="<cfif local.i MOD 2>shade </cfif>#data[local.i].logLevelName#">
+			<tr class="<view:flip value="#local.i#" items="shade" /> #data[local.i].logLevelName#">
 				<td><p>#data[local.i].channel#</p></td>
 				<td><p>#data[local.i].logLevelName#</p></td>
 				<td><p>#HtmlEditFormat(data[local.i].message)#</p></td>
@@ -167,11 +167,11 @@ automatically put your CSS in the head section via <cfhtmlhead />
 		<tr>
 			<th colspan="2"><h3>Request Information</h3></th>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td style="width:20%;"><h4>Request Event Name</h4></td>
 			<td style="width:80%;"><p>#arguments.appManager.getRequestHandler().getRequestEventName()#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Request Module Name</h4></td>
 			<td>
 			<cfif Len(arguments.appManager.getRequestHandler().getRequestModuleName())>
@@ -181,31 +181,31 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			</cfif>
 			</td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Mach-II Version</h4></td>
 			<td><p>#getMachIIVersion(arguments.appManager.getPropertyManager().getVersion())#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Mach-II Environment Name</h4></td>
 			<td><p>#arguments.appManager.getEnvironmentName()#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Mach-II Environment Group Name</h4></td>
 			<td><p>#arguments.appManager.getEnvironmentGroup()#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Timestamp</h4></td>
 			<td><p>#DateFormat(Now())# #TimeFormat(Now())#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Remote IP</h4></td>
 			<td><p>#cgi.remote_addr#</p></td>
 		</tr>
-		<tr class="shade">
+		<tr>
 			<td><h4>Remote User Agent</h4></td>
 			<td><p>#cgi.http_user_agent#</p></td>
 		</tr>
-		<tr>
+		<tr class="shade">
 			<td><h4>Locale</h4></td>
 			<td><p>#getLocale()#</p></td>
 		</tr>
@@ -216,7 +216,7 @@ automatically put your CSS in the head section via <cfhtmlhead />
 			<th colspan="2"><h3>Cookies</h3></th>
 		</tr>
 	<cfloop collection="#cookie#" item="local.i">
-		<tr <cfif local.cookieRow MOD 2>class="shade"</cfif>>
+		<tr class="<view:flip value="#local.cookieRow#" items="shade" />">
 			<td style="width:20%;"><h4>#local.i#</h4></td>
 			<td style="width:80%;"><p>#HtmlEditFormat(cookie[local.i])#</p></td>
 		</tr>
