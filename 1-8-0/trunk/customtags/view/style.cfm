@@ -103,7 +103,7 @@ Notes:
 			<cfset caller.this.addHTMLHeadElement(variables.styles) />
 			<cfset thisTag.GeneratedContent = "" />
 		<cfelse>
-			<cfset thisTag.GeneratedContent = this.GeneratedContent & variables.styles />
+			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.styles />
 		</cfif>	
 	</cfif>
 </cfif>
