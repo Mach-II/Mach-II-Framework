@@ -44,7 +44,7 @@ Notes:
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.value" type="string" 
-			default="#resolvePath(attributes.path)#" />
+			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
 	</cfif>

@@ -41,7 +41,7 @@ Notes:
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.checkValue" type="string" 
-			default="#resolvePath(attributes.path)#" />
+			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
 		<!--- setting this to type="any" because on OpenBD at least, 

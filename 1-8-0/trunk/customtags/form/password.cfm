@@ -50,7 +50,7 @@ Notes:
 		<cfif StructKeyExists(attributes, "showPassword") 
 			AND attributes.showPassword>
 			<cfparam name="attributes.value" type="string" 
-				default="#resolvePath(attributes.path)#" />
+				default="#wrapResolvePath(attributes.path)#" />
 		</cfif>
 	<cfelse>
 		<cfset attributes.path = "" />

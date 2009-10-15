@@ -81,7 +81,22 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
-<cffunction name="resolvePath" access="public" returntype="any" output="false"
+<cffunction name="wrapResolvePath" access="public" returntype="any" output="false"
+	hint="Wraps the 'resolvePath' method so we can provide good exceptions if needed.">
+	<cfargument name="path" type="string" required="true" />
+	<cfargument name="bind" type="any" required="false" />
+	
+	<cftry>
+		<cfreturn resolvePath(argumentCollection=arguments) />
+		<cfcatch>
+			<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
+				message="Unable to bind to path '#arguments.path#'. #cfcatch.message#"
+				detail="#cfcatch.detail#" />
+		</cfcatch>
+	</cftry>	
+</cffunction>
+
+<cffunction name="resolvePath" access="private" returntype="any" output="false"
 	hint="Resolves a path and returns a value.">
 	<cfargument name="path" type="string" required="true" />
 	<cfargument name="bind" type="any" required="false" default="#request._MachIIFormLib.bind#" />
