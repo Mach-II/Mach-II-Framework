@@ -169,6 +169,7 @@ Notes:
 		<cfset var serverName = server.coldfusion.productname />
 		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
 		<cfset var serverMinorVersion = 0 />
+		<cfset var threadingAvailable = false />
 		
 		<!--- Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release 
 				but this will be added; however, probably not wise to always assume it's there. Set a 
@@ -189,10 +190,21 @@ Notes:
 		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 3>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
 		 --->
-		<!--- Default theading adapter (used to check if threading is allowed on this engine) --->
-		<cfelse>
+		</cfif>
+		
+		<!--- Test for threading availability --->
+		<cfif IsObject(threadingAdapter)>
+			<cfset threadingAvailable = threadingAdapter.testIfThreadingAvailable() />
+		</cfif>
+		
+		<!---
+			Default theading adapter used to check if threading is implemented on this engine or 
+			threading is disabled on target system due to security sandbox
+		--->
+		<cfif NOT IsObject(threadingAdapter) OR NOT threadingAvailable>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapter").init() />
 		</cfif>
+
 		
 		<cfreturn threadingAdapter />
 	</cffunction>

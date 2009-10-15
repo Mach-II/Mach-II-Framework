@@ -68,8 +68,30 @@ Notes:
 	PUBLIC FUNCTIONS - UTIL
 	--->
 	<cffunction name="allowThreading" access="public" returntype="boolean" output="false"
-		hint="Returns a boolean if threading is allowed.">
+		hint="Returns a boolean if threading is allowed. Does not actually test if threading works, but a boolean of if threading is implemented in the target CFML engine in general.">
 		<cfreturn variables.allowThreading />
+	</cffunction>
+	
+	<cffunction name="testIfThreadingAvailable" access="public" returntype="boolean" output="false"
+		hint="Tests if threading is available because some configurations disable threading in the security sandbox.">
+		
+		<cfset var available = true />
+		
+		<cftry>
+			<cfset run(this, "dummyTestMethod") />
+			
+			<!--- If any error occurs, then threading has been disabled --->
+			<cfcatch type="any">
+				<cfset available = false />
+			</cfcatch>
+		</cftry>
+		
+		<cfreturn available />
+	</cffunction>
+	
+	<cffunction name="dummyTestMethod" access="public" returntype="boolean" output="false"
+		hint="This is just a dummy method for the testIfThreadingAvailable() method to call. DO NOT CALL THIS METHOD.">
+		<cfreturn true />
 	</cffunction>
 	
 	<!---

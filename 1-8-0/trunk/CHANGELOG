@@ -36,6 +36,20 @@ limitations under the License.
 Fixed Defects
 ------------------------------------------------
 
+* Disabled cfthread in security sandbox can cause exceptions
+Some CFML engines are configured to disable threading via cfhread
+even though the engine has threading implemented. This ticket
+adds in a check to see if threading is not only implemented, but
+available for use on the target system in which the application is
+deployed.
+
+Special thanks to Derrick Jackson at the United States Senate - Sergeant
+at Arms for discovering this edge case defect.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/411
+(2009-10-15 peterfarrell)
+
 * Local cachingEnabled is not respected when set to false
 The local cachingEnabled parameter for caching strategies
 was not being respected and being overrided by the global
