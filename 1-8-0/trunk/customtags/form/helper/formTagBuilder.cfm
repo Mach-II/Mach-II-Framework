@@ -88,10 +88,10 @@ PUBLIC FUNCTIONS
 	
 	<cftry>
 		<cfreturn resolvePath(argumentCollection=arguments) />
-		<cfcatch>
+		<cfcatch type="any">
 			<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
-				message="Unable to bind to path '#arguments.path#'. #cfcatch.message#"
-				detail="#cfcatch.detail#" />
+				message="Unable to bind to path '#arguments.path#'. This could be because the path was incorrect or the target CFC caused an exception. See details for more information."
+				detail="#cfcatch.message# || #cfcatch.detail#" />
 		</cfcatch>
 	</cftry>	
 </cffunction>
