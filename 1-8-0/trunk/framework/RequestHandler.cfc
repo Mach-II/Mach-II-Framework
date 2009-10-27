@@ -63,6 +63,7 @@ Notes:
 		
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEventParameter(arguments.eventParameter) />
+		<cfset setParameterPrecedence(arguments.parameterPrecedence) />
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		<cfset setMaxEvents(arguments.maxEvents) />
 		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
@@ -493,7 +494,7 @@ Notes:
 	
 	<cffunction name="setParameterPrecedence" access="private" returntype="void" output="false">
 		<cfargument name="parameterPrecedence" type="string" required="true" />
-		<cfset variables.parameterPrecedence = arguments.parameterPrecedencerameter />
+		<cfset variables.parameterPrecedence = arguments.parameterPrecedence />
 	</cffunction>
 	<cffunction name="getParameterPrecedence" access="private" returntype="string" output="false">
 		<cfreturn variables.parameterPrecedence />
