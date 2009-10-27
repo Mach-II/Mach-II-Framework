@@ -108,7 +108,7 @@ Notes:
 			<cfelse>
 				<cfthrow type="MachII.customtags.form.checkboxgroup" 
 						message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
-						detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the checkValue attribute is #attributes.items.getDimension()# dimensions." />
+						detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the checkValue attribute is #attributes.checkValue.getDimension()# dimensions." />
 			</cfif>
 		<cfelseif IsStruct(attributes.checkValue)>
 			<cfloop collection="#attributes.checkValue#" item="item">
