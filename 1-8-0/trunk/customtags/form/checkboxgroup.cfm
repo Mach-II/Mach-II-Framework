@@ -61,6 +61,10 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelCol" type="string"
 		default="label" />
+	<cfparam name="attributes.valueKey" type="string"
+		default="value" />
+	<cfparam name="attributes.labelKey" type="string"
+		default="label" />
 
 <cfelse>
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
@@ -165,14 +169,14 @@ Notes:
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset checkboxAttributes.value = attributes.items[i].value />
+					<cfset checkboxAttributes.value = attributes.items[i][attributes.valueKey] />
 					
 					<form:checkbox attributeCollection="#checkboxAttributes#" 
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
 
 					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i].label) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
 					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i].value)) />
 					
 					<cfset variables.outputBuffer.content = "" />

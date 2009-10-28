@@ -41,6 +41,10 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelCol" type="string"
 		default="label" />
+	<cfparam name="attributes.valueKey" type="string"
+		default="value" />
+	<cfparam name="attributes.labelKey" type="string"
+		default="label" />
 
 <cfelse>
 	<!---
@@ -67,11 +71,41 @@ Notes:
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
-		<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-			<form:option value="#Trim(attributes.items[i])#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-		</cfloop>
+		<cfif attributes.items.getDimension() EQ 1>
+			<!--- need to check to see if this may be an array of structs --->
+			<cfif IsSimpleValue(attributes.items[1])>
+				<!--- this is an array of simple values, proceed as needed --->
+				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
+					<form:option value="#Trim(attributes.items[i])#" 
+						output="true" 
+						outputBuffer="#variables.outputBuffer#" />
+				</cfloop>
+			<cfelseif IsStruct(attributes.items[1])>
+				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
+				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
+					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
+						<form:option value="#attributes.items[i][attributes.valueKey]#" 
+							label="#attributes.items[i][attributes.labelKey]#" 
+							output="true" 
+							outputBuffer="#variables.outputBuffer#" />
+					</cfloop>
+				<cfelse>
+					<!--- either the valueCol or lableCol attributes were not found in the structure, throw an error --->
+					<cfthrow type="MachII.customtags.form.options" 
+							message="Missing struct key values" 
+							detail="The options form tag supports an array of struct elements, however the valueKey and labelKey attributes do not match the struct keys contained in the first array element." />
+				</cfif>
+			<cfelse>
+				<cfthrow type="MachII.customtags.form.options" 
+						message="Unsupported Data Type in Array" 
+						detail="The options form tag only supports simple values or structs as array elements." />
+			</cfif>
+		<cfelse>
+			<!--- only single dimension arrays are support, throw an exception for the multi-dimensional array passed --->
+			<cfthrow type="MachII.customtags.form.options" 
+					message="Unsupported Number of Array Dimensions in Options Tag" 
+					detail="The options form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the items attribute is #attributes.items.getDimension()# dimensions." />
+		</cfif>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
 			<form:option value="#attributes.items[attributes.valueCol][attributes.items.currentRow]#" 

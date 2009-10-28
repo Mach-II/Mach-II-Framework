@@ -57,6 +57,10 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelCol" type="string"
 		default="label" />
+	<cfparam name="attributes.valueKey" type="string"
+		default="value" />
+	<cfparam name="attributes.labelKey" type="string"
+		default="label" />
 
 <cfelse>
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
@@ -135,21 +139,21 @@ Notes:
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfif StructKeyExists(attributes, "checkValue") and 
-							attributes.checkValue eq attributes.items[i].value>
+							attributes.checkValue eq attributes.items[i][attributes.valueKey]>
 						<cfset radioAttributes.checked = true />
 					<cfelse>
 						<cfset StructDelete(radioAttributes, "checked", false) />
 					</cfif>
 					
-					<cfset radioAttributes.value = attributes.items[i].value />
+					<cfset radioAttributes.value = attributes.items[i][attributes.valueKey] />
 					
 					<form:radio attributeCollection="#radioAttributes#" 
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
 
 					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i].label) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i].value)) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
+					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
 					
 					<cfset variables.outputBuffer.content = "" />
 					
