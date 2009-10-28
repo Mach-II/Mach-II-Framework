@@ -36,6 +36,18 @@ limitations under the License.
 Fixed Defects
 ------------------------------------------------
 
+* SES Urls fail to be parsed
+SES Urls fail to be parsed when the urlDelimiters properity are set to 
+non-query string parameters. This is because the urlParseSES is also 
+required to be set to true, but by default is set to false. This was 
+fixed by setting the value of urlParseSES to true if the property is 
+not defined and when the urlDelimiters is set to something other 
+than ?|&|= (i.e. non-query string urls).
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/417
+(2009-10-27 peterfarrell)
+
 * Disabled cfthread in security sandbox can cause exceptions
 Some CFML engines are configured to disable threading via cfhread
 even though the engine has threading implemented. This ticket

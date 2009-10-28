@@ -232,7 +232,15 @@ Notes:
 					message="The 'urlDelimiters' property must have a list length of 3 with a delimiter of a '|'." />
 			</cfif>
 			<cfif NOT isPropertyDefined("urlParseSES")>
-				<cfset setProperty("urlParseSES", false) />
+				<!---
+					Automatically parse for SES urls if the delimiters are not set to query 
+					string and no urlParseSES is defined
+				--->
+				<cfif getProperty("urlDelimiters") NEQ "?|&|=">
+					<cfset setProperty("urlParseSES", true) />
+				<cfelse>
+					<cfset setProperty("urlParseSES", false) />
+				</cfif>
 			<cfelseif NOT IsBoolean(getProperty("urlParseSES"))>
 				<cfthrow type="MachII.framework.invalidPropertyValue"
 					message="The 'urlParseSES' property must be a boolean." />
