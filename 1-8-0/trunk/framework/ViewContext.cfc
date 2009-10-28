@@ -244,7 +244,8 @@ Notes:
 
 	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
 		hint="Adds a HTML head element.">
-		<cfargument name="text" type="string" required="true" />
+		<cfargument name="text" type="string" required="true"
+			hint="Text to add to the HTML head section." />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.text) />
 	</cffunction>
 	
@@ -260,23 +261,30 @@ Notes:
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header by name/value.">
-		<cfargument name="name" type="string" required="true" />
-		<cfargument name="value" type="string" required="true" />
-		<cfargument name="charset" type="string" required="false" />
+		<cfargument name="name" type="string" required="true"
+			hint="The HTTP header name." />
+		<cfargument name="value" type="string" required="true"
+			hint="The HTTP header value." />
+		<cfargument name="charset" type="string" required="false"
+			hint="The charset to use for the HTTP header." />
 		<cfset addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header by statusCode/statusText.">
-		<cfargument name="statuscode" type="string" required="true" />
-		<cfargument name="statustext" type="string" required="false" />
+		<cfargument name="statuscode" type="string" required="true"
+			hint="The statuscode for the HTTP header." />
+		<cfargument name="statustext" type="string" required="false"
+			hint="The text for the statuscode for the HTTP header. Defaults to the correct text if the statuscode matches a standard statuscode." />
 		<cfset addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="copyToScope" access="public" returntype="void" output="false"
 		hint="Copies an evaluation string to a scope.">
-		<cfargument name="evaluationString" type="string" required="true" />
-		<cfargument name="scopeReference" type="struct" required="false" default="#variables#" />
+		<cfargument name="evaluationString" type="string" required="true"
+			hint="A list of EL items to evaluate." />
+		<cfargument name="scopeReference" type="struct" required="false" default="#variables#"
+			hint="A reference to the scope to to place the copies into. Defaults to the variables scope." />
 		<cfset getAppManager().getUtils().copyToScope(arguments.evaluationString, arguments.scopeReference, getAppManager()) />
 	</cffunction>
 	
