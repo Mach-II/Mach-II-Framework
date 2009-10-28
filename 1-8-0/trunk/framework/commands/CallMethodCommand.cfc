@@ -94,7 +94,7 @@ or
 		
 		<cfif NOT IsObject(bean)>
 			<cfthrow type="MachII.framework.commands.NoBean"
-				message="A call-method commands was encountered that did not have a bean named '#getBeanId#' autowired into it."
+				message="A call-method commands was encountered that did not have a bean named '#getBeanId()#' autowired into it."
 				detail="Ensure your IoC property such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
 		</cfif>
 		
