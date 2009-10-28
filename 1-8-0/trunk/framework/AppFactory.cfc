@@ -18,7 +18,7 @@ Copyright: GreatBizTools, LLC
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -262,13 +262,12 @@ Notes:
 		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
-		<cfset var includeNodes = "" />
+		<cfset var includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
 		<cfset var temp = StructNew() />
 		<cfset var includeFilePath = "" />
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
 		
-		<cfset includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 
 			<cfset temp = StructNew() />
@@ -342,9 +341,18 @@ Notes:
 		
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
+		<cfset var vendorName = server.ColdFusion.ProductName />
+		<cfset var vendorMajorVersion = ListFirst(server.ColdFusion.ProductVersion) />
+		<cfset var vendorLevel = server.ColdFusion.ProductLevel />
 		
 		<!--- Validate if directed and CF version 7 or higher --->
-		<cfif arguments.validateXml AND ListFirst(server.ColdFusion.ProductVersion) GTE 7>
+		<cfif arguments.validateXml AND (
+					(FindNoCase("ColdFusion", vendorName) AND vendorMajorVersion GTE 7)
+					OR (FindNoCase("BlueDragon", vendorName) AND vendorMajorVersion GTE 1 AND vendorLevel EQ "GPL")
+					OR (FindNoCase("BlueDragon", vendorName) AND vendorMajorVersion GTE 7 AND vendorLevel NEQ "GPL")
+					OR (FindNoCase("Railo", vendorName) AND vendorMajorVersion GTE 3)
+				)>
+			
 			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
 			<cfif NOT FindNoCase("http://", arguments.configDtdPath) AND NOT FileExists(arguments.configDtdPath)>
 				<cfthrow type="MachII.framework.XmlValidationException"
