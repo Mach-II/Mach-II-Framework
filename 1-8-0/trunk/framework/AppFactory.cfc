@@ -132,7 +132,7 @@ Notes:
 
 		<!--- Search for includes in the overrideXml if defined --->
 		<cfif Len(arguments.overrideXml)>
-			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true, arguments.moduleName) />
+			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true, arguments.moduleName, true) />
 		</cfif>
 		
 		<!--- 
@@ -262,11 +262,17 @@ Notes:
 		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
 		
-		<cfset var includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
+		<cfset var includeNodes = XmlSearch(arguments.configXML, "mach-ii/includes/include") />
 		<cfset var temp = StructNew() />
 		<cfset var includeFilePath = "" />
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
+		
+		<cfif NOT arguments.overrideIncludeType>
+			<cfset includeNodes = XmlSearch(arguments.configXML, "mach-ii/includes/include") />
+		<cfelse>
+			<cfset includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
+		</cfif>
 		
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 
