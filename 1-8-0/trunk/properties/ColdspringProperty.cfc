@@ -466,52 +466,48 @@ application.serviceFactory_account variable.
 				<!--- Autowire by defined setters --->
 				<cfset autowireByDefinedSetters(targetObj, targetMetadata) />
 			</cfloop>
-			
-			<!--- Autowire configurale commands --->
-			<cfset targetBase.targets = ArrayNew(1) />
-			
-			<cfset getConfigurableCommands(targetBase) />
-			
-			<!--- Autowire all commands --->
-			<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
-				<!--- Get this iteration target object for easy use --->
-				<cfset targetObj =  targetBase.targets[i] />
-				
-				<!--- Get metadata --->
-				<cfset targetMetadata = GetMetadata(targetObj) />
-				
-				<!--- Autowire by value from bean id method --->
-				<cfset autowireByBeanIdValue(targetObj, targetMetadata) />
-			</cfloop>
 		</cfif>
+		
+		<!--- Autowire configurale commands --->
+		<cfset targetBase.targets = ArrayNew(1) />
+		
+		<cfset getConfigurableCommands(targetBase) />
+		
+		<!--- Autowire all commands --->
+		<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
+			<!--- Get this iteration target object for easy use --->
+			<cfset targetObj =  targetBase.targets[i] />
+			
+			<!--- Get metadata --->
+			<cfset targetMetadata = GetMetadata(targetObj) />
+			
+			<!--- Autowire by value from bean id method --->
+			<cfset autowireByBeanIdValue(targetObj, targetMetadata) />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="resolveDependency" access="public" returntype="void" output="false"
 		hint="Resolves Mach-II dependency by passed object.">
 		<cfargument name="targetObject" type="any" required="true"
 			hint="Target object to resolve dependency." />
-		
-		<cfset var targetMetadata = "" />
-		
-		<!--- Only resolve if dependency resolution is on --->
-		<cfif getParameter("resolveMachIIDependencies", false)>
-		
-			<!--- Look for autowirable collaborators for any setters --->
-			<cfset targetMetadata = GetMetadata(arguments.targetObject) />
-		
-			<!--- If target object is a command --->
-			<cfif StructKeyExists(targetMetadata, "extends") 
-				AND targetMetadata.extends.name EQ "MachII.framework.command">
-				<!--- Autowire by value from bean id method --->
-				<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
-			<cfelse>
+				
+		<!--- Look for autowirable collaborators for any setters --->
+		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
+	
+		<!--- If target object is a command --->
+		<cfif StructKeyExists(targetMetadata, "extends") 
+			AND targetMetadata.extends.name EQ "MachII.framework.Command">
+			<!--- Autowire by value from bean id method --->
+			<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
+		<cfelse>
+			<!--- Only resolve if dependency resolution is on --->
+			<cfif getParameter("resolveMachIIDependencies", false)>
 				<!--- Autowire by dynamic method generation --->
 				<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
 		
 				<!--- Autowire by defined setters --->
 				<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
 			</cfif>
-		
 		</cfif>
 	</cffunction>
 	
