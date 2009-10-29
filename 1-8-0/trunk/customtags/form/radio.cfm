@@ -60,6 +60,8 @@ Notes:
 		default="1" />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#_#createCleanId(attributes.value)#" />
+	
+	<cfset setFirstElementId(attributes.id) />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "radio") />

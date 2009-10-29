@@ -47,12 +47,17 @@ Notes:
 	<cfelse>
 		<cfset setupBind() />
 	</cfif>
+	
+	<!--- Setup the base for the auto focus --->
+	<cfset request._MachIIFormLib.firstElementId = "" />
 
 	<!--- Set defaults --->
 	<cfparam name="attributes.encType" type="string" 
 		default="multipart/form-data" />
 	<cfparam name="attributes.method" type="string" 
 		default="post" />
+	<cfparam name="attributes.autoFocus" type="string"
+		default="" />
 
 	<cfset setAttribute("action", makeUrl("actionEvent", "actionModule", "actionRoute", "actionUrlParams")) />
 	<cfset setAttribute("method") />
@@ -76,8 +81,27 @@ Notes:
 	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
+
+	<cfimport prefix="view" taglib="/MachII/customtags/view" />
+
 	<!--- Clean up bind as this serves as a "check" by other tags to ensure bind is available --->
 	<cfset StructDelete(request, "_MachIIFormLib.bind", false) />
+	<cfset StructDelete(request, "_MachIIFormLib.firstElementId", false) />
+	
 	<cfoutput>#doEndTag()#</cfoutput>
+	<cfif NOT IsBoolean(attributes.autoFocus) OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)>
+		
+		<!--- Figure out which id to auto focus to if there is no id supplied --->
+		<cfif NOT Len(attributes.autoFocus)>
+			<cfset attributes.autoFocus = request._MachIIFormLib.firstElementId />
+		</cfif>
+		
+		<cfoutput><view:script outputType="inline">
+			if (window.MachIIFormLib_autoFocusOccurred !== 'undefined') {
+				document.getElementById('#attributes.autoFocus#').focus();
+				MachIIFormLib_autoFocusOccurred = true;
+			}
+		</view:script></cfoutput>
+	</cfif>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

@@ -72,6 +72,15 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
+<cffunction name="setFirstElementId" access="public" returntype="void" output="false"
+	hint="Sets the first form element id if not already defined.">
+	<cfargument name="id" type="string" required="true" />
+	
+	<cfif NOT Len(request._MachIIFormLib.firstElementId)>
+		<cfset request._MachIIFormLib.firstElementId = arguments.id />
+	</cfif>
+</cffunction>
+
 <cffunction name="ensurePathOrName" access="public" returntype="void" output="false"
 	hint="Ensures a path or name is available in the attributes.">
 	<cfif NOT StructKeyExists(attributes, "path") 

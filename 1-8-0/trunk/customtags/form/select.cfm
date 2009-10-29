@@ -61,6 +61,8 @@ Notes:
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
 	
+	<cfset setFirstElementId(attributes.id) />
+	
 	<!--- Syncronize check value for option tag --->
 	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
 	

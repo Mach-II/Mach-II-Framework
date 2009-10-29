@@ -64,6 +64,8 @@ Notes:
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
 	
+	<cfset setFirstElementId(attributes.id) />
+	
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "password") />
 	<cfset setAttribute("name") />

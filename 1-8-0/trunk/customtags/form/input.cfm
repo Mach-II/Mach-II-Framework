@@ -59,6 +59,8 @@ Notes:
 		default="#attributes.name#" />
 	<cfparam name="attributes.value" type="string" 
 		default="" />
+		
+	<cfset setFirstElementId(attributes.id) />
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "text") />

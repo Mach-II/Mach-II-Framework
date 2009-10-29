@@ -36,7 +36,7 @@ Notes:
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
-
+	<cfset setupTag("input", true) />
 
 	<!--- if there's a src attribute provided and the type is anything other than 
 			submit, throw an error --->
@@ -49,19 +49,19 @@ Notes:
 		<cfelse>
 			<cfset attributes.type = "image" />
 		</cfif>
+		
+		<!--- Translate the src path and append timestamp using the HtmlHelper if available --->
+		<cfif isHtmlHelperAvailable()>
+			<cfset attributes.src = locateHtmlHelper().computeAssetPath("img", attributes.src) />
+		</cfif>
 	</cfif>
-	
-	<cfset setupTag("input", true) />
-	
-	<!--- Ensure certain attributes are defined --->
-	<cfset ensurePathOrName() />
 	
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.value" type="string" 
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
-		<cfset attributes.path = "" />
+		<cfset attributes.path = "submit" />
 	</cfif>
 	
 	<!--- Set defaults --->
@@ -70,9 +70,11 @@ Notes:
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
 	<cfparam name="attributes.value" type="string" 
-		default="" />
+		default="submit" />
 	<cfparam name="attributes.type" type="string" 
 		default="submit" />
+		
+	<cfset setFirstElementId(attributes.id) />
 			
 	<!--- if this is an image input and they don't provide an alt attribute, 
 			use value as alt --->
@@ -96,6 +98,6 @@ Notes:
 	<cfset setEventAttributes() />
 
 <cfelse>	
-	<cfset thisTag.generatedContent =  doStartTag() />
+	<cfset thisTag.generatedContent = doStartTag() />
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

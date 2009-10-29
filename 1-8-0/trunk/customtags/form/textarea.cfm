@@ -50,6 +50,10 @@ Notes:
 	</cfif>
 	<cfparam name="attributes.name" type="string" 
 		default="#attributes.path#" />
+	<cfparam name="attributes.id" type="string" 
+		default="#attributes.name#" />
+	
+	<cfset setFirstElementId(attributes.id) />
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />

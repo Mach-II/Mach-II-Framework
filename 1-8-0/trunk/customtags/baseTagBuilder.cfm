@@ -310,6 +310,24 @@ PUBLIC FUNCTIONS
 <!---
 PUBLIC FUNCTIONS - UTIL
 --->
+<cffunction name="locateHtmlHelper" access="public" returntype="MachII.properties.HtmlHelperProperty" output="false"
+	hint="Locates the HtmlHelperProperty for use by certain view library custom tags.">
+	
+	<cfset var htmlHelper = request.eventContext.getAppManager().getPropertyManager().getProperty("_HTMLHelper", "") />
+	
+	<cfif IsObject(htmlHelper)>
+		<cfreturn htmlHelper />
+	<cfelse>
+		<cfthrow type="MachII.customtags.#getTagLib()#.#getTagType()#.htmlHelperUnavailable"
+			message="The '#getTagType()#' in the '#getTagLib()#' tag library cannot locate an HtmlHelperProperty configured for this application."
+			detail="Do you have an HtmlHelperProperty setup for in this application?" />
+	</cfif>
+</cffunction>
+<cffunction name="isHtmlHelperAvailable" access="public" returntype="boolean" output="false"
+	hint="Checks if the HtemloHelperProperty is available for use.">
+	<cfreturn request.eventContext.getAppManager().getPropertyManager().isPropertyDefined("_HTMLHelper") />
+</cffunction>
+
 <cffunction name="getAttributeCollection" access="public" returntype="struct" output="false"
 	hint="Gets the attribute collection.">
 	<cfreturn variables.attributeCollection />
