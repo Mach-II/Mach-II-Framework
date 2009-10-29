@@ -77,6 +77,6 @@ Notes:
 	<cfset setEventAttributes() />
 
 <cfelse>	
-	<cfset thisTag.generatedContent =  doStartTag() />
+	<cfset thisTag.generatedContent = doStartTag() />
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
