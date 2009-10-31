@@ -30,7 +30,11 @@ Notes:
 
 	<cfset variables.name = "" />
 	<cfset variables.prefix = "" />
-	<cfset variables.fields = ArrayNew(1) />
+	<cfset variables.fieldsWithValues = StructNew() />
+	<cfset variables.beanType = "" />
+	<cfset variables.includeFields = "" />
+	<cfset variables.ignoreFields = "" />
+	<cfset variables.innerBeans = StructNew() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -59,12 +63,75 @@ Notes:
 		<cfreturn variables.prefix />
 	</cffunction>
 	
-	<cffunction name="setFields" access="public" returntype="void" output="false">
-		<cfargument name="fields" type="array" required="true" />
-		<cfset variables.fields = arguments.fields />
+	<cffunction name="setFieldsWithValues" access="public" returntype="void" output="false">
+		<cfargument name="fieldsWithValues" type="struct" required="true" />
+		<cfset variables.fieldsWithValues = arguments.fieldsWithValues />
 	</cffunction>
-	<cffunction name="getFields" access="public" returntype="array" output="false">
-		<cfreturn variables.fields />
+	<cffunction name="getFieldsWithValues" access="public" returntype="struct" output="false">
+		<cfreturn variables.fieldsWithValues />
+	</cffunction>
+	<cffunction name="addFieldWithValue" access="public" returntype="void" output="false">
+		<cfargument name="fieldName" type="string" required="true" />
+		<cfargument name="fieldValue" type="string" required="true" />
+		<cfset variables.fieldsWithValues[arguments.fieldName] = arguments.fieldValue />
+	</cffunction>
+
+	<cffunction name="addInnerBean" access="public" returntype="void" output="false">
+		<cfargument name="innerBean" type="MachII.util.BeanInfo" required="true" />
+		<cfset variables.innerBeans[arguments.innerBean.getName()] = arguments.innerBean />
+	</cffunction>
+	<cffunction name="getInnerBean" access="public" returntype="MachII.util.BeanInfo" output="false">
+		<cfargument name="innerBeanName" type="string" required="true" />
+		<cfif StructKeyExists(variables.innerBeans, arguments.innerBeanName)>
+			<cfreturn variables.innerBeans[arguments.innerBeanName] />
+		<cfelse>
+			<cfthrow type="MachII.util.BeanInfo.InnerBeanNotFound"
+				message="The inner-bean named '#arguments.innerBeanName#' was not found in the configured list." />
+		</cfif>
+	</cffunction>
+	<cffunction name="getInnerBeans" access="public" returntype="struct" output="false">
+		<cfreturn variables.innerBeans />
+	</cffunction>
+	<cffunction name="getInnerBeanNames" access="public" returntype="string" output="false">
+		<cfreturn StructKeyList(variables.innerBeans) />
+	</cffunction>
+	
+	<cffunction name="setBeanType" access="public" returntype="void" output="false">
+		<cfargument name="beanType" type="string" required="true" />
+		<cfset variables.beanType = arguments.beanType />
+	</cffunction>
+	<cffunction name="getBeanType" access="public" returntype="string" output="false">
+		<cfreturn variables.beanType />
+	</cffunction>
+
+	<cffunction name="setIncludeFields" access="public" returntype="void" output="false">
+		<cfargument name="includeFields" type="string" required="true" />
+		<cfset variables.includeFields = arguments.includeFields />
+	</cffunction>
+	<cffunction name="getIncludeFields" access="public" returntype="string" output="false">
+		<cfreturn variables.includeFields />
+	</cffunction>
+	<cffunction name="hasIncludeFields" access="public" returntype="boolean" output="false">
+		<cfreturn Len(variables.includeFields) gt 0 />
+	</cffunction>
+	<cffunction name="addIncludeField" access="public" returntype="void" output="false">
+		<cfargument name="includeFields" type="string" required="true" />
+		<cfset variables.includeFields = ListAppend(variables.includeFields, arguments.includeFields) />
+	</cffunction>
+	
+	<cffunction name="setIgnoreFields" access="public" returntype="void" output="false">
+		<cfargument name="ignoreFields" type="string" required="true" />
+		<cfset variables.ignoreFields = arguments.ignoreFields />
+	</cffunction>
+	<cffunction name="getIgnoreFields" access="public" returntype="string" output="false">
+		<cfreturn variables.ignoreFields />
+	</cffunction>
+	<cffunction name="hasIgnoreFields" access="public" returntype="boolean" output="false">
+		<cfreturn Len(variables.ignoreFields) gt 0 />
+	</cffunction>
+	<cffunction name="addIgnoreField" access="public" returntype="void" output="false">
+		<cfargument name="ignoreField" type="string" required="true" />
+		<cfset variables.ignoreFields = ListAppend(variables.ignoreFields, arguments.ignoreField) />
 	</cffunction>
 
 </cfcomponent>

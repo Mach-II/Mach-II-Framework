@@ -33,13 +33,11 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.commandType = "event-bean" />
-	<cfset variables.beanName = "" />
-	<cfset variables.beanType = "" />
-	<cfset variables.beanFields = "" />
-	<cfset variables.ignoreFields = "" />
 	<cfset variables.reinit = "" />
 	<cfset variables.beanUtil = "" />
-	<cfset variables.innerBeans = StructNew() />
+	<cfset variables.autoPopulate = false />
+	<!--- TODO: refactor EventBeanCommand to use BeanInfo with the new members below --->
+	<cfset variables.beanInfo = CreateObject("component", "MachII.util.BeanInfo").init() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -52,6 +50,7 @@ Notes:
 		<cfargument name="ignoreFields" type="string" required="true" />
 		<cfargument name="reinit" type="boolean" required="true" />
 		<cfargument name="beanUtil" type="MachII.util.BeanUtil" required="true" />
+		<cfargument name="autoPopulate" type="boolean" required="true" />
 		
 		<cfset setBeanName(arguments.beanName) />
 		<cfset setBeanType(arguments.beanType) />
@@ -59,6 +58,11 @@ Notes:
 		<cfset setIgnoreFields(arguments.ignoreFields) />
 		<cfset setReinit(arguments.reinit) />
 		<cfset setBeanUtil(arguments.beanUtil) />
+		<cfset setAutoPopulate(arguments.autoPopulate) />
+		
+		<cfif arguments.autoPopulate>
+			<cfset setupAutoPopulate() />
+		</cfif>
 		
 		<cfreturn this />
 	</cffunction>
@@ -75,15 +79,6 @@ Notes:
 		<cfset var innerBean = "" />
 		<cfset var log = getLog() />
 		<cfset var innerBeanName = "" />
-		<cfset var innerBeanInfo = "" />
-		<cfset var fieldNames = "" />
-		<cfset var fieldName = "" />
-		<cfset var i = 0 />
-		<cfset var fields = "" />
-		<cfset var fieldNamesWithValues = "" />
-		<cfset var fieldValues = "" />
-		<cfset var ignoreFields = "" />
-		<cfset var expEvaluator = getExpressionEvaluator()	/>
 				
 		<!--- If reinit is FALSE, get the bean from the event --->
 		<cfif NOT getReinit() AND arguments.event.isArgDefined(getBeanName()) AND IsObject(arguments.event.getArg(getBeanName()))>
@@ -114,105 +109,166 @@ Notes:
 		</cfif>
 		
 		<!--- populate any inner-beans --->
-		<cfloop list="#StructKeyList(variables.innerBeans)#" index="innerBeanName">
-			<cfset innerBeanInfo = variables.innerBeans[innerBeanName] />
+		<cfloop list="#getBeanInfo().getInnerBeanNames()#" index="innerBeanName">
 			<cfinvoke component="#bean#" method="get#innerBeanName#" returnvariable="innerBean" />
-			
-			<cfset fields = innerBeanInfo.getFields() />
-			<cfset fieldNamesWithValues = StructNew() />
-			<cfset ignoreFields = "" />
-
-			<!--- Handle specific fields for the inner-bean --->
-			<cfloop from="1" to="#ArrayLen(fields)#" index="i">
-				<cfif fields[i].value eq "" AND NOT fields[i].ignore>
-					<cfset fieldNames = ListAppend(fieldNames, fields[i].name) />
-				<cfelseif NOT fields[i].ignore>
-					<cfset fieldNamesWithValues[fields[i].name] = fields[i].value />
-				<cfelse>
-					<cfset ignoreFields = ListAppend(ignoreFields, fields[i].name) />
-				</cfif>
-			</cfloop>
-			<cfif Len(fieldNames) eq 0 AND Len(StructKeyList(fieldNamesWithValues)) eq 0>
-				<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix(), ignoreFields) />
-			<cfelse>
-				<!--- Populate bean with fields which do not have value expression to be evaluated --->
-				<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
-				
-				<!--- TODO: handle expressions which concat fields together (${event.birthmonth}/${birthday}/${birthyear}) in the innerBean fields --->
-				<cfset fieldNames = "" />
-				<cfset fieldValues = StructNew() />
-				<cfloop list="#StructKeyList(fieldNamesWithValues)#" index="fieldName">
-					<cfset fieldNames = ListAppend(fieldNames, fieldName) />
-					<cfif expEvaluator.isExpression(fieldNamesWithValues[fieldName])>
-						<cfset fieldValues[fieldName] = expEvaluator.evaluateExpression(
-							fieldNamesWithValues[fieldName], arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />					
-					<cfelse>
-						<cfset fieldValues[fieldName] = fieldNamesWithValues[fieldName] />	
-					</cfif>		
-				</cfloop>
-				<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, fieldValues, innerBeanInfo.getPrefix()) />				
-			</cfif>
-			
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Inner-bean '#innerBeanInfo.getName()#' with prefix '#innerBeanInfo.getPrefix()#' from event-bean '#getBeanName()#' populated with data.") />
-			</cfif>
+			<cfset processInnerBean(innerBean, getBeanInfo().getInnerBean(innerBeanName), arguments.event) />
 		</cfloop>
 		
 		<cfreturn true />
 	</cffunction>
 	
+	<cffunction name="processInnerBean" access="private" returntype="void" output="false">
+		<cfargument name="innerBean" type="any" required="true" />
+		<cfargument name="innerBeanInfo" type="MachII.util.BeanInfo" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+			
+		<cfset var fieldNames = arguments.innerBeanInfo.getIncludeFields() />
+		<cfset var fieldNamesWithValues = arguments.innerBeanInfo.getFieldsWithValues() />
+		<cfset var ignoreFields = arguments.innerBeanInfo.getIgnoreFields() />
+		<cfset var expEvaluator = getExpressionEvaluator()	/>
+		<cfset var innerBeanName = "" />
+		<cfset var nextInnerBean = 0 />
+
+		<cfif Len(fieldNames) eq 0 AND Len(StructKeyList(fieldNamesWithValues)) eq 0>
+			<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix(), ignoreFields) />
+		<cfelse>
+			<!--- Populate bean with fields which do not have value expression to be evaluated --->
+			<cfset getBeanUtil().setBeanFields(arguments.innerBean, fieldNames, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
+			
+			<cfset fieldNames = "" />
+			<cfset fieldValues = StructNew() />
+			<cfloop list="#StructKeyList(fieldNamesWithValues)#" index="fieldName">
+				<cfset fieldNames = ListAppend(fieldNames, fieldName) />
+				<!--- TODO: handle expressions which concat fields together (${event.birthmonth}/${birthday}/${birthyear}) in the innerBean fields --->
+				<cfif expEvaluator.isExpression(fieldNamesWithValues[fieldName])>
+					<cfset fieldValues[fieldName] = expEvaluator.evaluateExpression(
+						fieldNamesWithValues[fieldName], arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />					
+				<cfelse>
+					<cfset fieldValues[fieldName] = fieldNamesWithValues[fieldName] />	
+				</cfif>		
+			</cfloop>
+			<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, fieldValues, innerBeanInfo.getPrefix()) />				
+		</cfif>
+		
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Inner-bean '#innerBeanInfo.getName()#' with prefix '#innerBeanInfo.getPrefix()#' from event-bean '#getBeanName()#' populated with data.") />
+		</cfif>
+		
+		<!--- Handle innerBeans which have innerBeans --->
+		<cfloop list="#arguments.innerBeanInfo.getInnerBeanNames()#" index="innerBeanName">
+			<cfinvoke component="#arguments.innerBean#" method="get#innerBeanName#" returnvariable="nextInnerBean" />
+			<cfset processInnerBean(nextInnerBean, innerBeanInfo.getInnerBean(innerBeanName), arguments.event) />
+		</cfloop>
+	</cffunction>
+	
 	<cffunction name="addInnerBean" access="public" returntype="void" output="false">
 		<cfargument name="innerBean" type="MachII.util.BeanInfo" required="true" />
-		<cfset variables.innerBeans[arguments.innerBean.getName()] = arguments.innerBean />
+		<cfset variables.beanInfo.addInnerBean(arguments.innerBean) />
+	</cffunction>
+	
+	<!--- 
+	PRIVATE FUNCTIONS 
+	--->
+	<cffunction name="setupAutoPopulate" access="private" returntype="void" output="false">
+		<cfset var bean = getBeanUtil().createBean(getBeanType()) />
+		
+		<cfset autoConfigureBeanInfo(variables.beanInfo, bean) />
+	</cffunction>
+	
+	<cffunction name="autoConfigureBeanInfo" access="private" returntype="void" output="false">
+		<cfargument name="beanInfo" type="MachII.util.BeanInfo" required="true" />
+		<cfargument name="bean" type="any" required="true" />
+		<cfset var field = "" />
+		<cfset var beanInfoStruct = getBeanUtil().describeBean(arguments.bean) />
+		<cfset var innerBean = 0 />
+		
+		<cfloop list="#StructKeyList(beanInfoStruct)#" index="field">
+			<cfif isObject(beanInfoStruct[field])>
+				<cfset innerBean = CreateObject("component", "MachII.util.BeanInfo").init() />
+				<cfset innerBean.setName(field) />
+				<cfif beanInfo.getPrefix() neq "">
+					<cfset innerBean.setPrefix("#beanInfo.getPrefix()#.#field#") />
+				<cfelse>
+					<cfset innerBean.setPrefix(field) />
+				</cfif>
+				<cfset autoConfigureBeanInfo(innerBean, beanInfoStruct[field])>
+				<cfset arguments.beanInfo.addInnerBean(innerBean) />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="getBeanInfo" access="private" returntype="MachII.util.BeanInfo" output="false">
+		<cfreturn variables.beanInfo />
+	</cffunction>
+	
 	<cffunction name="setBeanName" access="private" returntype="void" output="false">
 		<cfargument name="beanName" type="string" required="true" />
-		<cfset variables.beanName = arguments.beanName />
+		<cfset variables.beanInfo.setName(arguments.beanName) />
 	</cffunction>
 	<cffunction name="getBeanName" access="private" returntype="string" output="false">
-		<cfreturn variables.beanName />
+		<cfreturn variables.beanInfo.getName() />
 	</cffunction>
 	
 	<cffunction name="setBeanType" access="private" returntype="void" output="false">
 		<cfargument name="beanType" type="string" required="true" />
-		<cfset variables.beanType = arguments.beanType />
+		<cfset variables.beanInfo.setBeanType(arguments.beanType) />
 	</cffunction>
 	<cffunction name="getBeanType" access="private" returntype="string" output="false">
-		<cfreturn variables.beanType />
+		<cfreturn variables.beanInfo.getBeanType() />
+	</cffunction>
+	
+	<cffunction name="setAutoPopulate" access="private" returntype="void" output="false">
+		<cfargument name="autoPopulate" type="boolean" required="true" />
+		<cfset variables.autoPopulate = arguments.autoPopulate />
+	</cffunction>
+	<cffunction name="getAutoPopulate" access="private" returntype="boolean" output="false">
+		<cfreturn variables.autoPopulate />
 	</cffunction>
 	
 	<cffunction name="setBeanFields" access="private" returntype="void" output="false">
 		<cfargument name="beanFields" type="string" required="true" />
-		<cfset variables.beanFields = arguments.beanFields />
+		<cfset variables.beanInfo.setIncludeFields(arguments.beanFields) />
 	</cffunction>
 	<cffunction name="getBeanFields" access="private" returntype="string" output="false">
-		<cfreturn variables.beanFields />
+		<cfreturn variables.beanInfo.getIncludeFields() />
 	</cffunction>
 	<cffunction name="isBeanFieldsDefined" access="public" returntype="boolean" output="false">
-		<cfreturn Len(variables.beanFields) gt 0 />
+		<cfreturn variables.beanInfo.hasIncludeFields() />
 	</cffunction>
 	<cffunction name="addBeanField" access="public" returntype="void" output="false">
 		<cfargument name="beanField" type="string" required="true" />
-		<cfset variables.beanFields = ListAppend(variables.beanFields, arguments.beanField) />
+		<cfset variables.beanInfo.addIncludeField(arguments.beanField) />
 	</cffunction>
 	
 	<cffunction name="setIgnoreFields" access="private" returntype="void" output="false">
 		<cfargument name="ignoreFields" type="string" required="true" />
-		<cfset variables.ignoreFields = arguments.ignoreFields />
+		<cfset variables.beanInfo.setIgnoreFields(arguments.ignoreFields) />
 	</cffunction>
 	<cffunction name="getIgnoreFields" access="private" returntype="string" output="false">
-		<cfreturn variables.ignoreFields />
+		<cfreturn variables.beanInfo.getIgnoreFields() />
 	</cffunction>
 	<cffunction name="hasIgnoreFields" access="public" returntype="boolean" output="false">
-		<cfreturn Len(variables.ignoreFields) gt 0 />
+		<cfreturn variables.beanInfo.hasIgnoreFields() />
 	</cffunction>
 	<cffunction name="addIgnoreField" access="public" returntype="void" output="false">
 		<cfargument name="ignoreField" type="string" required="true" />
-		<cfset variables.ignoreFields = ListAppend(variables.ignoreFields, arguments.ignoreField) />
+		<cfset variables.beanInfo.addIgnoreField(arguments.ignoreField) />
+	</cffunction>
+	
+	<cffunction name="setFieldsWithValues" access="public" returntype="void" output="false">
+		<cfargument name="fieldsWithValues" type="struct" required="true" />
+		<cfset variables.beanInfo.setFieldsWithValues(arguments.fieldsWithValues) />
+	</cffunction>
+	<cffunction name="getFieldsWithValues" access="public" returntype="struct" output="false">
+		<cfreturn variables.beanInfo.getFieldsWithValues() />
+	</cffunction>
+	<cffunction name="addFieldWithValue" access="public" returntype="void" output="false">
+		<cfargument name="fieldName" type="string" required="true" />
+		<cfargument name="fieldValue" type="string" required="true" />
+		<cfset variables.beanInfo.addFieldWithValue(arguments.fieldName, arguments.fieldValue) />
 	</cffunction>
 	
 	<cffunction name="setReinit" access="private" returntype="void" output="false">

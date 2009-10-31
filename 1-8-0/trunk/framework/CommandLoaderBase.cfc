@@ -478,10 +478,10 @@ Notes:
 		<cfset var innerBeans = ArrayNew(1) />
 		<cfset var innerBean = "" />
 		<cfset var field = "" />
-		<cfset var fields = "" />
 		<cfset var fieldsList = "" />
 		<cfset var fieldItem = "" />
 		<cfset var innerBeanChildren = "" />
+		<cfset var autoPopulate = false />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 		
@@ -489,15 +489,12 @@ Notes:
 			<cfset beanType = arguments.commandNode.xmlAttributes["type"] />
 		</cfif>
 		
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "autopopulate")>
+			<cfset autoPopulate = arguments.commandNode.xmlAttributes["autopopulate"] />
+		</cfif>
+		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "fields")>
 			<cfset beanFields = variables.utils.trimList(arguments.commandNode.xmlAttributes["fields"]) />
-			<!---<cfset fieldsList = variables.utils.trimList(arguments.commandNode.xmlAttributes["fields"]) />
-			<cfloop list="#fieldsList#" index="fieldItem">
-				<cfset field = StructNew()>
-				<cfset field.name = fieldItem />
-				<cfset field.value = "" />
-				<cfset ArrayAppend(beanFields, field) /> 
-			</cfloop>--->	
 		</cfif>
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "ignoreFields")>
@@ -509,7 +506,7 @@ Notes:
 		</cfif>
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(
-			beanName, beanType, beanFields, ignoreFields, reinit, variables.beanUtil) />
+			beanName, beanType, beanFields, ignoreFields, reinit, variables.beanUtil, autoPopulate) />
 		
 		<cfset command.setLog(variables.eventBeanCommandLog) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
@@ -533,65 +530,65 @@ Notes:
 					<cfset innerBean.setPrefix(innerBean.getName()) />
 				</cfif>
 				
-				<cfset fields = ArrayNew(1) />
 				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "fields")>
 					<cfset fieldsList = variables.utils.trimList(arguments.commandNode.xmlChildren[i].xmlAttributes["fields"]) />
-					<cfloop list="#fieldsList#" index="fieldItem">
-						<cfset field = StructNew() />
-						<cfset field.name = fieldItem />
-						<cfset field.value = "" />
-						<cfset ArrayAppend(fields, field) />
-					</cfloop>
+					<cfset innerBean.setIncludeFields(fieldsList) />
 				</cfif>
 				
 				<cfset innerBeanChildren = arguments.commandNode.xmlChildren[i].xmlChildren />
 				<cfif ArrayLen(innerBeanChildren)>
 					<cfloop from="1" to="#ArrayLen(innerBeanChildren)#" index="j">
 						<cfif innerBeanChildren[j].xmlName eq "field">
-							<cfset field = StructNew() />
 							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "name")>
-								<cfset field.name = innerBeanChildren[j].xmlAttributes["name"] />
+								<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "value")>
+									<cfset innerBean.addFieldWithValue(innerBeanChildren[j].xmlAttributes["name"],
+										innerBeanChildren[j].xmlAttributes["value"]) />
+								<cfelse>
+									<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "ignore")>
+										<cfif innerBeanChildren[j].xmlAttributes["ignore"]>
+											<cfset innerBean.addIgnoreField(innerBeanChildren[j].xmlAttributes["name"]) />
+										</cfif>
+									<cfelse>
+										<cfset innerBean.addIncludeField(innerBeanChildren[j].xmlAttributes["name"]) />
+									</cfif>
+								</cfif>
 							<cfelse>
 								<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanFieldNameRequired"
 									message="In event-bean '#beanName#' field names are required for inner-bean '#innerBean.getName()#'" />
 							</cfif>
-							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "value")>
-								<cfset field.value = innerBeanChildren[j].xmlAttributes["value"] />
-							<cfelse>
-								<cfset field.value = "" />
-							</cfif>
-							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "ignore")>
-								<cfset field.ignore = innerBeanChildren[j].xmlAttributes["ignore"] />
-							<cfelse>
-								<cfset field.ignore = false />
-							</cfif>
-							<cfset ArrayAppend(fields, field) />
 						</cfif>
+						<!--- TODO: handle inner-beans that have inner-beans defined --->
 					</cfloop>
 				</cfif>
 				
-				<cfset innerBean.setFields(fields) />
 				<cfset command.addInnerBean(innerBean) />
 			
 			<cfelseif arguments.commandNode.xmlChildren[i].xmlName eq "field">
-			
-				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "ignore")>
-					<cfif arguments.commandNode.xmlChildren[i].xmlAttributes["ignore"]>
-						<!--- Field is marked as one to ignore --->
-						<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")> 
+
+				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")> 
+					<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "ignore")>
+						<cfif arguments.commandNode.xmlChildren[i].xmlAttributes["ignore"]>
 						 	<cfset command.addIgnoreField(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
+						<cfelse>
+							<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "value")> 
+							 	<cfset command.addFieldWithValue(arguments.commandNode.xmlChildren[i].xmlAttributes["name"],
+									arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
+							<cfelse>
+								<cfset command.addIncludeField(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
+							</cfif>
 						</cfif>
 					<cfelse>
-						<!--- Field is marked as ignore = false --->
-						<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")> 
-						 	<cfset command.addBeanField(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
+						<!--- The ignore attribute is not present to include the field --->
+						<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "value")> 
+						 	<cfset command.addFieldWithValue(arguments.commandNode.xmlChildren[i].xmlAttributes["name"],
+								arguments.commandNode.xmlChildren[i].xmlAttributes["value"]) />
+						<cfelse>
+							<cfset command.addIncludeField(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
 						</cfif>
 					</cfif>
 				<cfelse>
-					<!--- The ignore attribute is not present to include the field --->
-					<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")> 
-					 	<cfset command.addBeanField(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
-					</cfif>
+					<cfthrow type="MachII.framework.CommandLoaderBase.FieldNameRequired"
+						message="In event-bean '#beanName#' field names are required for each field tag." />
 				</cfif>
 					
 			</cfif>
