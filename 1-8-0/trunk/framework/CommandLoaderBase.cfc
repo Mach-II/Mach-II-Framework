@@ -477,9 +477,6 @@ Notes:
 		<cfset var reinit = true />
 		<cfset var innerBeans = ArrayNew(1) />
 		<cfset var innerBean = "" />
-		<cfset var field = "" />
-		<cfset var fieldsList = "" />
-		<cfset var fieldItem = "" />
 		<cfset var innerBeanChildren = "" />
 		<cfset var autoPopulate = false />
 		<cfset var i = 0 />
@@ -531,34 +528,12 @@ Notes:
 				</cfif>
 				
 				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "fields")>
-					<cfset fieldsList = variables.utils.trimList(arguments.commandNode.xmlChildren[i].xmlAttributes["fields"]) />
-					<cfset innerBean.setIncludeFields(fieldsList) />
+					<cfset innerBean.setIncludeFields(variables.utils.trimList(arguments.commandNode.xmlChildren[i].xmlAttributes["fields"])) />
 				</cfif>
 				
 				<cfset innerBeanChildren = arguments.commandNode.xmlChildren[i].xmlChildren />
 				<cfif ArrayLen(innerBeanChildren)>
-					<cfloop from="1" to="#ArrayLen(innerBeanChildren)#" index="j">
-						<cfif innerBeanChildren[j].xmlName eq "field">
-							<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "name")>
-								<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "value")>
-									<cfset innerBean.addFieldWithValue(innerBeanChildren[j].xmlAttributes["name"],
-										innerBeanChildren[j].xmlAttributes["value"]) />
-								<cfelse>
-									<cfif StructKeyExists(innerBeanChildren[j].xmlAttributes, "ignore")>
-										<cfif innerBeanChildren[j].xmlAttributes["ignore"]>
-											<cfset innerBean.addIgnoreField(innerBeanChildren[j].xmlAttributes["name"]) />
-										</cfif>
-									<cfelse>
-										<cfset innerBean.addIncludeField(innerBeanChildren[j].xmlAttributes["name"]) />
-									</cfif>
-								</cfif>
-							<cfelse>
-								<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanFieldNameRequired"
-									message="In event-bean '#beanName#' field names are required for inner-bean '#innerBean.getName()#'" />
-							</cfif>
-						</cfif>
-						<!--- TODO: handle inner-beans that have inner-beans defined --->
-					</cfloop>
+					<cfset processInnerBeans(innerBeanChildren, innerBean) />
 				</cfif>
 				
 				<cfset command.addInnerBean(innerBean) />
@@ -595,6 +570,62 @@ Notes:
 		</cfloop>
 
 		<cfreturn command />
+	</cffunction>
+	
+	<cffunction name="processInnerBeans" access="private" returntype="void" output="false">
+		<cfargument name="innerBeanChildren" type="any" required="true" />
+		<cfargument name="innerBean" type="MachII.util.BeanInfo" required="true" />
+		
+		<cfset var j = 0 />
+		<cfset var newInnerBean = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.innerBeanChildren)#" index="j">
+			<cfif arguments.innerBeanChildren[j].xmlName eq "field">
+				<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "name")>
+					<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "value")>
+						<cfset arguments.innerBean.addFieldWithValue(arguments.innerBeanChildren[j].xmlAttributes["name"],
+							arguments.innerBeanChildren[j].xmlAttributes["value"]) />
+					<cfelse>
+						<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "ignore")>
+							<cfif arguments.innerBeanChildren[j].xmlAttributes["ignore"]>
+								<cfset arguments.innerBean.addIgnoreField(arguments.innerBeanChildren[j].xmlAttributes["name"]) />
+							</cfif>
+						<cfelse>
+							<cfset arguments.innerBean.addIncludeField(arguments.innerBeanChildren[j].xmlAttributes["name"]) />
+						</cfif>
+					</cfif>
+				<cfelse>
+					<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanFieldNameRequired"
+						message="In event-bean field names are required for inner-bean '#arguments.innerBean.getName()#'" />
+				</cfif>
+			<cfelseif arguments.innerBeanChildren[j].xmlName eq "inner-bean">
+				<!--- handle inner-beans that have inner-beans defined --->
+				<cfset newInnerBean = CreateObject("component", "MachII.util.BeanInfo").init() />
+				
+				<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "name")>
+					<cfset newInnerBean.setName(arguments.innerBeanChildren[j].xmlAttributes["name"]) />
+				<cfelse>
+					<cfthrow type="MachII.framework.CommandLoaderBase.InnerBeanNameRequired"
+						message="A name is required for the inner-bean that is part of inner-bean." />
+				</cfif>
+				
+				<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "prefix")>
+					<cfset newInnerBean.setPrefix(arguments.innerBeanChildren[j].xmlAttributes["prefix"]) />
+				<cfelse>
+					<cfset newInnerBean.setPrefix("#arguments.innerBean.getName()#.#newInnerBean.getName()#") />
+				</cfif>
+				
+				<cfif StructKeyExists(arguments.innerBeanChildren[j].xmlAttributes, "fields")>
+					<cfset newInnerBean.setIncludeFields(variables.utils.trimList(arguments.innerBeanChildren[j].xmlAttributes["fields"])) />
+				</cfif>
+				
+				<cfif ArrayLen(arguments.innerBeanChildren[j].xmlChildren)>
+					<cfset processInnerBeans(arguments.innerBeanChildren[j].xmlChildren, newInnerBean) />
+				</cfif>
+				
+				<cfset arguments.innerBean.addInnerBean(newInnerBean) />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="setupRedirect" access="private" returntype="MachII.framework.commands.RedirectCommand" output="false"
