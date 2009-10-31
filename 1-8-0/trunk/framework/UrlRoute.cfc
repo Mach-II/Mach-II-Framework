@@ -148,6 +148,13 @@ Notes:
 		<cfdump var="#totalArgCount - totalArgsProcessed + 1#" />
 		<cfabort>
 		--->
+		
+		<!--- Check to ensure all required parameters were present --->
+		<cfif totalArgsProcessed lt requiredParametersCount>
+			<cfthrow type="MachII.framework.UrlRoute.RequiredParametersMissing"
+				message="When attempting to process the route '#getName()#' the total number of url args processed was #totalArgsProcessed# which is less then the required parameters count of #requiredParametersCount#."
+				detail="" />
+		</cfif>
 	
 		<!--- Handle optionalArguments and add in defaults --->	
 		<cfif totalArgsProcessed LT totalArgCount>
