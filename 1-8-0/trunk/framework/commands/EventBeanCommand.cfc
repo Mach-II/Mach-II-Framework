@@ -108,24 +108,55 @@ Notes:
 			<cfset arguments.event.setArg(getBeanName(), bean, getBeanType()) />
 		</cfif>
 		
+		<!--- Populate any fields that have values defined --->
+		<cfset processFieldsWithValues(bean, getBeanInfo(), arguments.event, arguments.eventContext) />
+		
 		<!--- populate any inner-beans --->
 		<cfloop list="#getBeanInfo().getInnerBeanNames()#" index="innerBeanName">
 			<cfinvoke component="#bean#" method="get#innerBeanName#" returnvariable="innerBean" />
-			<cfset processInnerBean(innerBean, getBeanInfo().getInnerBean(innerBeanName), arguments.event) />
+			<cfset processInnerBean(innerBean, getBeanInfo().getInnerBean(innerBeanName), arguments.event, arguments.eventContext) />
 		</cfloop>
 		
 		<cfreturn true />
+	</cffunction>
+	
+	<cffunction name="processFieldsWithValues" access="private" returntype="void" output="false">
+		<cfargument name="bean" type="any" required="true" />
+		<cfargument name="beanInfo" type="MachII.util.BeanInfo" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+		<cfset var fieldNames = "" />
+		<cfset var fieldNamesWithValues = arguments.beanInfo.getFieldsWithValues() />
+		<cfset var fieldValues = "" />
+		<cfset var expEvaluator = getExpressionEvaluator()	/>
+		
+		<cfif Len(StructKeyList(fieldNamesWithValues)) gt 0>
+			<cfset fieldNames = "" />
+			<cfset fieldValues = StructNew() />
+			<cfloop list="#StructKeyList(fieldNamesWithValues)#" index="fieldName">
+				<cfset fieldNames = ListAppend(fieldNames, fieldName) />
+				<!--- handle expressions which concat fields together (${event.birthmonth}/${event.birthday}/${event.birthyear}) --->
+				<cfif expEvaluator.isExpression(fieldNamesWithValues[fieldName])>
+					<cfset fieldValues[fieldName] = expEvaluator.evaluateExpression(
+						fieldNamesWithValues[fieldName], arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />					
+				<cfelse>
+					<cfset fieldValues[fieldName] = fieldNamesWithValues[fieldName] />	
+				</cfif>		
+			</cfloop>
+			<cfset getBeanUtil().setBeanFields(arguments.bean, fieldNames, fieldValues, arguments.beanInfo.getPrefix()) />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="processInnerBean" access="private" returntype="void" output="false">
 		<cfargument name="innerBean" type="any" required="true" />
 		<cfargument name="innerBeanInfo" type="MachII.util.BeanInfo" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 			
 		<cfset var fieldNames = arguments.innerBeanInfo.getIncludeFields() />
 		<cfset var fieldNamesWithValues = arguments.innerBeanInfo.getFieldsWithValues() />
 		<cfset var ignoreFields = arguments.innerBeanInfo.getIgnoreFields() />
-		<cfset var expEvaluator = getExpressionEvaluator()	/>
 		<cfset var innerBeanName = "" />
 		<cfset var nextInnerBean = 0 />
 
@@ -134,20 +165,7 @@ Notes:
 		<cfelse>
 			<!--- Populate bean with fields which do not have value expression to be evaluated --->
 			<cfset getBeanUtil().setBeanFields(arguments.innerBean, fieldNames, arguments.event.getArgs(), innerBeanInfo.getPrefix()) />
-			
-			<cfset fieldNames = "" />
-			<cfset fieldValues = StructNew() />
-			<cfloop list="#StructKeyList(fieldNamesWithValues)#" index="fieldName">
-				<cfset fieldNames = ListAppend(fieldNames, fieldName) />
-				<!--- TODO: handle expressions which concat fields together (${event.birthmonth}/${birthday}/${birthyear}) in the innerBean fields --->
-				<cfif expEvaluator.isExpression(fieldNamesWithValues[fieldName])>
-					<cfset fieldValues[fieldName] = expEvaluator.evaluateExpression(
-						fieldNamesWithValues[fieldName], arguments.event, arguments.eventContext.getAppManager().getPropertyManager()) />					
-				<cfelse>
-					<cfset fieldValues[fieldName] = fieldNamesWithValues[fieldName] />	
-				</cfif>		
-			</cfloop>
-			<cfset getBeanUtil().setBeanFields(innerBean, fieldNames, fieldValues, innerBeanInfo.getPrefix()) />				
+			<cfset processFieldsWithValues(innerBean, innerBeanInfo, arguments.event, arguments.eventContext) />
 		</cfif>
 		
 		<cfif log.isDebugEnabled()>
@@ -157,7 +175,7 @@ Notes:
 		<!--- Handle innerBeans which have innerBeans --->
 		<cfloop list="#arguments.innerBeanInfo.getInnerBeanNames()#" index="innerBeanName">
 			<cfinvoke component="#arguments.innerBean#" method="get#innerBeanName#" returnvariable="nextInnerBean" />
-			<cfset processInnerBean(nextInnerBean, innerBeanInfo.getInnerBean(innerBeanName), arguments.event) />
+			<cfset processInnerBean(nextInnerBean, innerBeanInfo.getInnerBean(innerBeanName), arguments.event, arguments.eventContext) />
 		</cfloop>
 	</cffunction>
 	

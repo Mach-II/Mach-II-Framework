@@ -63,6 +63,64 @@ ${scope.key NEQ scope.key2}
 		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"
 			hint="The PropertyManager of the current EventContext." />
 		
+		<cfset var elements = ArrayNew(1) />
+		<cfset var element = "" />
+		<cfset var result = "" />
+		<cfset var startIndex = 0 />
+		<cfset var endIndex = 0 />
+		<cfset var expressionTemp = arguments.expression />
+		<cfset var i = 0 />
+		
+		<cfif ListLen(expressionTemp, "}") gt 1>
+			<cfloop condition="Len(expressionTemp) gt 0">
+				<cfset startIndex = FindNoCase("${", expressionTemp) />
+				<cfif startIndex gt 1>
+					<cfset element = Mid(expressionTemp, 1, startIndex - 1) />
+					<cfset ArrayAppend(elements, element) />
+					<cfset expressionTemp = Right(expressionTemp, Len(expressionTemp) - Len(element)) />
+					<!--- Assert the startIndex is now 1 --->
+				</cfif>
+				<cfset endIndex = FindNoCase("}", expressionTemp) />
+				<cfif startIndex eq 0 AND endIndex eq 0>
+					<!--- If both start and end are 0 then we have a string (fun) at the end (example: ${exp1} fun) --->
+					<cfset element = expressionTemp />
+				<cfelse>
+					<cfset element = Mid(expressionTemp, 1, endIndex) />
+				</cfif>
+				<cfset ArrayAppend(elements, element) />
+				<cfif Len(expressionTemp) - Len(element) gt 0>
+					<cfset expressionTemp = Right(expressionTemp, Len(expressionTemp) - Len(element)) />
+				<cfelse>
+					<cfset expressionTemp = "" />
+				</cfif>
+				<cfset i = i + 1 />
+			</cfloop>
+				
+			<cfloop from="1" to="#ArrayLen(elements)#" index="i">
+				<cfif isExpression(elements[i])>
+					<cfset result = result & resolveExpressionElement(elements[i], arguments.event, arguments.propertyManager) />
+				<cfelse>
+					<cfset result = result & elements[i] />
+				</cfif>
+			</cfloop>
+			
+			<!---<cfdump var="#expressionTemp#"><br />
+			<cfdump var="#elements#" label="elements"><cfabort>--->
+		<cfelse>
+			<cfset result = resolveExpressionElement(arguments.expression, arguments.event, arguments.propertyManager) />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="resolveExpressionElement" access="private" returntype="any" output="false">
+		<cfargument name="expression" type="string" required="true"
+			hint="A string expression to evaluate including the '${}'." />
+		<cfargument name="event" type="MachII.framework.Event" required="true"
+			hint="The current Event." />
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true"
+			hint="The PropertyManager of the current EventContext." />
+		
 		<cfset var body = "" />
 		<cfset var result = "" />
 		

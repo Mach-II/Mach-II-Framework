@@ -297,7 +297,17 @@ redirectEventInModule() and redirectRoute() methods as well. However,
 you can still us the old syntax so this is completely backwards compatible. 
 
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/406
-{2009-10-07 peterfarrell)
+(2009-10-07 peterfarrell)
+
+* Improved event-bean command 
+Supports inner-beans, autopopulate, and expression language resolution in fields.
+
+This new features works will with the new form tags and their binding support.
+
+Special thanks to Mike Rogers for help testing this feature.
+
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/104
+(2009-11-01 kurtwiersma)
 
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes

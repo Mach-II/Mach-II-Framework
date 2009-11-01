@@ -99,10 +99,14 @@ Notes:
 			reinit=false, beanUtil=CreateObject("component", "MachII.util.BeanUtil").init(), autoPopulate=true) />
 		<cfset command.setLog(getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand")) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.addFieldWithValue("birthdate", "${event.birthmonth}/${event.birthday}/${event.birthyear}") />
 		
 		<cfset event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset event.setArg("firstname", "Kurt") />
 		<cfset event.setArg("lastname", "Wiersma") />
+		<cfset event.setArg("birthMonth", 3) />
+		<cfset event.setArg("birthday", 18) />
+		<cfset event.setArg("birthyear", 1979) />
 		<cfset event.setArg("address.address1", "1234 Main Street") />
 		<cfset event.setArg("address.country.name", "United States") />
 		<cfset event.setArg("address.country.code", "USA") />
@@ -117,6 +121,7 @@ Notes:
 		<cfset assertTrue(user.getFirstName() eq "Kurt", "user.getFirstName() should return 'Kurt'") />
 		<cfset assertTrue(user.getAddress().getAddress1() eq "1234 Main Street", "address1 should be '1234 Main Street'") />
 		<cfset assertTrue(user.getAddress().getCountry().getCode() eq "USA", "country.code should be 'USA'") />
+		<cfset assertTrue(user.getBirthDate() eq "3/18/1979", "user.getBirthdate() should return '3/18/1979'") />
 	</cffunction>
 
 </cfcomponent>

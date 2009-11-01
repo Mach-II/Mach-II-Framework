@@ -154,6 +154,37 @@ Notes:
 		<cfset assertTrue(result, "Result of 'foo' eq event.foo was not true") />
 	</cffunction>
 	
+	<cffunction name="testConcatinatedExpresion" access="public" returntype="void" output="false"
+		hint="Test an expression that contains several expressions combined like ${event.birthMonth}/${event.birthday}/${event.birthyear}.">
+		
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+		
+		<cfset event.setArg("birthMonth", 3) />
+		<cfset event.setArg("birthday", 18) />
+		<cfset event.setArg("birthyear", 1979) />
+
+		<cfset result = getExpressionEvaluator().isExpression("${event.birthMonth}/${event.birthday}/${event.birthyear}") />
+		<cfset assertTrue(result, "The string '${event.birthMonth}/${event.birthday}/${event.birthyear}' was not considered an expression.") />
+		
+		<!--- 3/18/1979 --->
+		<cfset result = getExpressionEvaluator().evaluateExpression("${event.birthMonth}/${event.birthday}/${event.birthyear}", event, propertyManager) />
+		<cfset debug(result) />
+		<cfset assertTrue(result eq "3/18/1979", "The expression did not resolve to '3/18/1979'") />
+		
+		<!--- Birthday: 3/18/1979 --->
+		<cfset result = getExpressionEvaluator().evaluateExpression("Birthday: ${event.birthMonth}/${event.birthday}/${event.birthyear}", event, propertyManager) />
+		<cfset debug(result) />
+		<cfset assertTrue(result eq "Birthday: 3/18/1979", "The expression did not resolve to 'Birthday: 3/18/1979'") />
+		
+		<!--- Birthday: 3/18/1979 fun --->
+		<cfset result = getExpressionEvaluator().evaluateExpression("Birthday: ${event.birthMonth}/${event.birthday}/${event.birthyear} fun", event, propertyManager) />
+		<cfset debug(result) />
+		<cfset assertTrue(result eq "Birthday: 3/18/1979 fun", "The expression did not resolve to 'Birthday: 3/18/1979 fun'") />
+
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNTIONS - UTIL
 	--->
@@ -170,6 +201,10 @@ Notes:
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager) />
 		
 		<cfreturn propertyManager />
+	</cffunction>
+	
+	<cffunction name="getExpressionEvaluator" access="private" returntype="MachII.util.ExpressionEvaluator" output="false">
+		<cfreturn variables.expressionEvaluator />
 	</cffunction>
 
 </cfcomponent>
