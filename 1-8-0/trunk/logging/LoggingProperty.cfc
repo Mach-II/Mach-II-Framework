@@ -312,7 +312,7 @@ will bind to root parameter values.
 		hint="Creates a logger id.">
 		<cfargument name="loggerName" type="string" required="true" />
 		<!--- Some CFML engines don't like logger ids that start with a number --->
-		<cfreturn "_" & Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000)& RandRange(0, 10000)) />
+		<cfreturn "_" & Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
 	</cffunction>
 	
 	<cffunction name="getModuleName" access="private" returntype="string" output="false"
