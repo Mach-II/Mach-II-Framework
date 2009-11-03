@@ -446,6 +446,8 @@ Notes:
 			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
 		</cfif>
 		
+		<cfset pathInfo = UrlDecode(pathInfo) />
+		
 		<cfset setCleanedPathInfo(pathInfo) />
 	</cffunction>
 	
