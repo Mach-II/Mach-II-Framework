@@ -383,7 +383,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 >
 
 <!ELEMENT inner-bean (field)*>
-<!ATTLIST event-bean
+<!ATTLIST inner-bean
 	name CDATA #REQUIRED
 	fields CDATA #IMPLIED
 >

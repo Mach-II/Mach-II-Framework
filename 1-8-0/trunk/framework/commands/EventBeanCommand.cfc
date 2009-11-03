@@ -159,6 +159,7 @@ Notes:
 		<cfset var ignoreFields = arguments.innerBeanInfo.getIgnoreFields() />
 		<cfset var innerBeanName = "" />
 		<cfset var nextInnerBean = 0 />
+		<cfset var log = getLog() />
 
 		<cfif Len(fieldNames) eq 0 AND Len(StructKeyList(fieldNamesWithValues)) eq 0>
 			<cfset getBeanUtil().setBeanAutoFields(innerBean, arguments.event.getArgs(), innerBeanInfo.getPrefix(), ignoreFields) />
@@ -185,7 +186,7 @@ Notes:
 	</cffunction>
 	
 	<!--- 
-	PRIVATE FUNCTIONS 
+	PROTECTED FUNCTIONS 
 	--->
 	<cffunction name="setupAutoPopulate" access="private" returntype="void" output="false">
 		<cfset var bean = getBeanUtil().createBean(getBeanType()) />
