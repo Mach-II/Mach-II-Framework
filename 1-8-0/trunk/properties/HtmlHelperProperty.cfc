@@ -331,7 +331,7 @@ from the parent application.
 	
 	<cffunction name="addAssetPackage" access="public" returntype="string" output="false"
 		hint="Adds files that are defined as an asset packages.">
-		<cfargument name="assetPackageNames" type="any" required="true"
+		<cfargument name="package" type="any" required="true"
 			hint="A list or array of the asset packages names to add." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates tthe output type for the generated HTML code ('head', 'inline')." />
@@ -342,13 +342,13 @@ from the parent application.
 		<cfset var j = 0 />
 		
 		<!--- Explode the list to an array --->
-		<cfif NOT IsArray(arguments.assetPackageNames)>
- 			<cfset arguments.assetPackageNames = ListToArray(getUtils().trimList(arguments.assetPackageNames)) />
+		<cfif NOT IsArray(arguments.package)>
+ 			<cfset arguments.package = ListToArray(getUtils().trimList(arguments.package)) />
 		</cfif>
 		
-		<cfloop from="1" to="#ArrayLen(arguments.assetPackageNames)#" index="i">
+		<cfloop from="1" to="#ArrayLen(arguments.package)#" index="i">
 			
-			<cfset package = getAssetPackageByName(arguments.assetPackageNames[i]) />	
+			<cfset package = getAssetPackageByName(arguments.package[i]) />	
 		
 			<cfloop from="1" to="#ArrayLen(package)#" index="j">
 				<cfif package[j].type EQ "js">
