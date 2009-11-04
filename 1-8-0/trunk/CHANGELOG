@@ -36,12 +36,33 @@ limitations under the License.
 Fixed Defects
 ------------------------------------------------
 
+* Publish command does not bubble exceptions properly
+Publish command does not bubble exceptions properly in multithreaded mode 
+which causes problems when a publish command encountered an exception inside 
+a cache block. The exception event is handled correctly on the first 
+request, but caused the cache handler to erroneously cache data. Subsequent 
+requests were served bad data from the cache in which depending on the usage
+of the cache and nested commands caused a white screen of death.
+
+This defect is an edge case defect that was undiscovered for approximately 
+9 months from the affected releases of Mach-II 1.6.0 and 1.6.1. It has been 
+fixed in the 1.8 release.
+
+Special thanks to Shaun at Net Grow for discovering this defect. 
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/422
+(2009-11-03 peterfarrell)
+
 * Includes loaded in module override XML were loaded incorrectly
 If the same include file is included in the override XML section in two
 or more module, Mach-II would throw an exception saying the include was already
 included. The incorrect RegEx was being used to search for the includes
 in the override XML causing the includes to be picked up by the parent
 non-override include parsing code.
+
+This defect affected Mach-II 1.6.0 and 1.6.1. It has been fixed
+in the 1.8 release.
 
 Special thanks to Jason York at The Lampo Group, Inc. for discovering
 this defect. 
@@ -58,6 +79,9 @@ fixed by setting the value of urlParseSES to true if the property is
 not defined and when the urlDelimiters is set to something other 
 than ?|&|= (i.e. non-query string urls).
 
+This defect affected Mach-II 1.5.0, 1.6.0 and 1.6.1. It has been fixed
+in the 1.8 release.
+
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/417
 (2009-10-27 peterfarrell)
@@ -68,6 +92,9 @@ even though the engine has threading implemented. This ticket
 adds in a check to see if threading is not only implemented, but
 available for use on the target system in which the application is
 deployed.
+
+This defect affected Mach-II 1.6.0 and 1.6.1. It has been fixed
+in the 1.8 release.
 
 Special thanks to Derrick Jackson at the United States Senate - Sergeant
 at Arms for discovering this edge case defect.

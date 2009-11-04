@@ -79,6 +79,7 @@ Notes:
 		<cfset var continue = true />
 		<cfset var log = getLog() />
 		<cfset var key = "" />
+		<cfset var i = 0 />
 		
 		<!--- Don't run if there are nothing subscribed --->
 		<cfif StructCount(subscribers)>
@@ -110,12 +111,16 @@ Notes:
 					<!--- Create an exception --->
 					<cfif ArrayLen(results.errors)>
 						<cfset continue = false />
-						<!--- We can only handle one exception at once so use the first error --->
+						<!--- We can log all the errors, but only throw the first --->
 						<cfif log.isErrorEnabled()>
-							<cfset log.error("#results[results.errors[1]].error.message#", results[results.errors[1]].error) />
-						</cfif>					
-						<cfset exception = arguments.eventContext.getRequestHandler().wrapException(results[results.errors[1]].error) />
-						<cfset arguments.eventContext.handleException(exception, true) />
+							<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
+								<cfset log.error("#results[results.errors[i]].error.message#", results[results.errors[i]].error) />
+							</cfloop>
+						</cfif>
+						<!--- We can only handle one exception at once so use the first error --->
+						<cfthrow type="#results[results.errors[1]].error.type#"
+								message="#results[results.errors[1]].error.message#"
+								detail="#results[results.errors[1]].error.detail#" />
 					</cfif>
 				<!--- Or set thread ids into the event --->
 				<cfelse>
