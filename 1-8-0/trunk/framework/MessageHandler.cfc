@@ -38,6 +38,7 @@ Notes:
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.messageSubscribers = StructNew() />
 	<cfset variables.log = "" />
+	<cfset variables.utils = "" />
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
 	
 	<!---
@@ -118,7 +119,7 @@ Notes:
 							</cfloop>
 						</cfif>
 						<!--- We can only handle one exception at once so use the first error --->
-						<cfthrow type="#results[results.errors[1]].error.type#"
+						<cfthrow type="#getUtils().translateExceptionType(results[results.errors[1]].error.type)#"
 								message="#results[results.errors[1]].error.message#"
 								detail="#results[results.errors[1]].error.detail#" />
 					</cfif>
@@ -217,12 +218,20 @@ Notes:
 		<cfreturn variables.threadingAdapter />
 	</cffunction>
 	
-	<cffunction name="setLog" access="public" returntype="void" output="false"
-		hint="Uses the log factory to create a log.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+	<cffunction name="setUtils" access="public" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
 	</cffunction>
-	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
+		<cfreturn variables.utils />
+	</cffunction>
+	
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Sets the log.">
+		<cfargument name="log" type="MachII.logging.Log" required="true" />
+		<cfset variables.log = arguments.log />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
 		<cfreturn variables.log />
 	</cffunction>

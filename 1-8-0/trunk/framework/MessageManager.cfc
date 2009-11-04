@@ -36,6 +36,7 @@ Notes:
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.parentMessageManager = "" />
+	<cfset variables.messageHandlerlog = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -52,6 +53,9 @@ Notes:
 		<cfelse>
 			<cfset setThreadingAdapter(getAppManager().getUtils().createThreadingAdapter()) />
 		</cfif>
+		
+		<!--- Quick reference for performance reasons --->
+		<cfset variables.messageHandlerlog = getAppManager().getLogFactory().getLog("MachII.framework.MessageHandler") />
 		
 		<cfset super.init() />
 		
@@ -133,6 +137,8 @@ Notes:
 				
 				<!--- Setup the Message Handler --->
 				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageName, messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
+				<cfset messageHandler.setLog(variables.messageHandlerlog) />
+				<cfset messageHandler.setUtils(getAppManager().getUtils()) />
 								
 				<!--- For each message, parse all the parameters --->
 				<cfif StructKeyExists(messageSubscribersNodes[i], "subscribe")>
@@ -157,16 +163,6 @@ Notes:
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered message handlers.">
-
-		<cfset var logFactory = getAppManager().getLogFactory() />
-		<cfset var aMessageHandler = 0 />
-		<cfset var i = 0 />
-
-		<cfloop collection="#variables.messageHandlers#" item="i">
-			<cfset aMessageHandler = variables.messageHandlers[i] />
-			<cfset aMessageHandler.setLog(logFactory) />
-		</cfloop>
-		
 		<cfset super.configure() />
 	</cffunction>
 	

@@ -386,8 +386,18 @@ Notes:
 		<cfargument name="correctTemplatePath" type="string" required="false"
 			hint="Used to correct the reported template path and line number." />
 		
+		<cfthrow type="#translateExceptionType(arguments.caughtException.type)#"
+			message="#arguments.message# See detail for more information."
+			detail="#buildMessageFromCfCatch(arguments.caughtException, arguments.correctTemplatePath)#" />
+	</cffunction>
+	
+	<cffunction name="translateExceptionType" access="public" returntype="string" output="false"
+		hint="Translations exception types into something that can be rethrown.">
+		<cfargument name="type" type="string" required="true"
+			hint="The type to translation." />
+
 		<cfset var illegalExceptionTypes = "security,expression,application,database,template,missingInclude,expression,lock,searchengine,object" />
-		<cfset var exceptionType = arguments.caughtException.type />
+		<cfset var exceptionType = arguments.type />
 		
 		<!---
 			Adobe CF strangely (or more stupidly) disallows you from throwing exception with 
@@ -399,9 +409,7 @@ Notes:
 			<cfset exceptionType = "_" & exceptionType />
 		</cfif>
 		
-		<cfthrow type="#exceptionType#"
-			message="#arguments.message# See detail for more information."
-			detail="#buildMessageFromCfCatch(arguments.caughtException, arguments.correctTemplatePath)#" />
+		<cfreturn exceptionType />
 	</cffunction>
 	
 	<cffunction name="buildMessageFromCfCatch" access="public" returntype="string" output="false"
