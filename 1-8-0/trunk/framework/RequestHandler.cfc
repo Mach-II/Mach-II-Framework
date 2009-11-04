@@ -147,7 +147,8 @@ Notes:
 				<cfthrow type="MachII.framework.EventHandlerNotDefined" 
 					message="Event-handler for event '#result.eventName#' in module '#result.moduleName#' is not defined."
 					detail="Check that the event-handler exists and for misspellings in your links or XML configuration file." />
-			<cfelseif NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
+			<cfelseif getCurrentRouteName() eq "" AND NOT appManager.getEventManager().isEventPublic(result.eventName, false)>
+				<!--- Routes are allowed to trigger events which are private --->
 				<cfthrow type="MachII.framework.EventHandlerNotAccessible" 
 					message="Event-handler for event '#result.eventName#' in module '#result.moduleName#' is marked as private and not accessible via the URL."
 					detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
