@@ -44,6 +44,7 @@ Notes:
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
 		<cfset var requestHandler= "" />
+		<cfset var eventContext = "" />
 		
 		<!--- Setup the AppManager with the required collaborators --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init() />

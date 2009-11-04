@@ -129,6 +129,7 @@ Notes:
 		<cfset var fieldNames = "" />
 		<cfset var fieldNamesWithValues = arguments.beanInfo.getFieldsWithValues() />
 		<cfset var fieldValues = "" />
+		<cfset var fieldName = "" />
 		<cfset var expEvaluator = getExpressionEvaluator()	/>
 		
 		<cfif Len(StructKeyList(fieldNamesWithValues)) gt 0>
