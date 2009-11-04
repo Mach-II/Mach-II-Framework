@@ -95,7 +95,7 @@ Notes:
 		<cfset var user = "" />
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(
-			beanName="user", beanType="m2harness.model.User", beanFields="", ignoreFields="", 
+			beanName="user", beanType="MachII.tests.dummy.User", beanFields="", ignoreFields="", 
 			reinit=false, beanUtil=CreateObject("component", "MachII.util.BeanUtil").init(), autoPopulate=true) />
 		<cfset command.setLog(getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand")) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
