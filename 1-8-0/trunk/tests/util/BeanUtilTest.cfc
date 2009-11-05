@@ -56,7 +56,7 @@ Notes:
 	--->
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">
-		<cfset variables.beanUtil = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 	</cffunction>
 	
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
@@ -167,7 +167,7 @@ Notes:
 		<cfset map = variables.beanUtil.describeBean(bean) />
 		
 		<!--- Assert that the map is correct --->
-		<cfset assertEquals(StructCount(map), 2) />
+		<cfset assertEquals(StructCount(map), 9) /><!--- 8 getters and 1 getMemento() --->
 		<cfset assertSame(map.firstName, "Mach-II") />
 		<cfset assertSame(map.lastName, "Framework") />
 	</cffunction>
