@@ -16,7 +16,7 @@ limitations under the License.
 
 Copyright: GreatBizTools, LLC
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id: EventTest.cfc 888 2008-07-20 19:25:00Z peterfarrell $
+$Id$
 
 Created version: 1.6.0
 Updated version: 1.6.0
