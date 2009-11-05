@@ -336,7 +336,7 @@ from the parent application.
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates tthe output type for the generated HTML code ('head', 'inline')." />
 		
-		<cfset var package = "" />
+		<cfset var p = "" />
 		<cfset var code = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
@@ -348,13 +348,13 @@ from the parent application.
 		
 		<cfloop from="1" to="#ArrayLen(arguments.package)#" index="i">
 			
-			<cfset package = getAssetPackageByName(arguments.package[i]) />	
+			<cfset p = getAssetPackageByName(arguments.package[i]) />	
 		
-			<cfloop from="1" to="#ArrayLen(package)#" index="j">
-				<cfif package[j].type EQ "js">
-					<cfset code = code & addJavascript(package[j].paths, arguments.outputType) & Chr(13) />
-				<cfelseif package[j].type EQ "css">
-					<cfset code = code & addStylesheet(package[j].paths, package[j].attributes, arguments.outputType, package[j].forIEVersion) & Chr(13) />
+			<cfloop from="1" to="#ArrayLen(p)#" index="j">
+				<cfif p[j].type EQ "js">
+					<cfset code = code & addJavascript(p[j].paths, arguments.outputType) & Chr(13) />
+				<cfelseif p[j].type EQ "css">
+					<cfset code = code & addStylesheet(p[j].paths, p[j].attributes, arguments.outputType, p[j].forIEVersion) & Chr(13) />
 				</cfif>
 			</cfloop>
 		</cfloop>
