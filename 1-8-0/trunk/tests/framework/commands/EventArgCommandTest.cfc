@@ -42,14 +42,14 @@ Updated version: 1.8.0
 Notes:
 --->
 <cfcomponent
-	displayname="EventBeanCommandTest"
+	displayname="EventArgCommandTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.framework.commands.EventBeanCommand.">
+	hint="Test cases for MachII.framework.commands.EventArgCommand.">
 	
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.eventBeanCommand = "" />
+	<cfset variables.eventArgCommand = "" />
 	<cfset variables.appManager = "" />
 	<cfset variables.eventContext = "" />
 	
@@ -107,42 +107,48 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testBeanAutoPopulate" access="public" returntype="void" output="false"
-		hint="Tests the event-bean autopopulate attribute.">
-
+	<cffunction name="testArgWithValueWithOverwrite" access="public" returntype="void" output="false"
+		hint="Tests an arg with value with overwrite.">
+			
 		<cfset var command = "" />
 		<cfset var event = "" />
 		<cfset var eventContext = getEventContext() />
-		<cfset var user = "" />
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(
-			beanName="user", beanType="MachII.tests.dummy.User", beanFields="", ignoreFields="", 
-			reinit=false, beanUtil=CreateObject("component", "MachII.util.BeanUtil").init(), autoPopulate=true) />
-		<cfset command.setLog(getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand")) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(
+							"firstName", "Joseph", "", true) />
+		<cfset command.setLog(getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand")) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
-		<cfset command.addFieldWithValue("birthdate", "${event.birthmonth}/${event.birthday}/${event.birthyear}") />
 		
 		<cfset event = CreateObject("component", "MachII.framework.Event").init() />
-		<cfset event.setArg("firstname", "Kurt") />
-		<cfset event.setArg("lastname", "Wiersma") />
-		<cfset event.setArg("birthMonth", 3) />
-		<cfset event.setArg("birthday", 18) />
-		<cfset event.setArg("birthyear", 1979) />
-		<cfset event.setArg("address.address1", "1234 Main Street") />
-		<cfset event.setArg("address.country.name", "United States") />
-		<cfset event.setArg("address.country.code", "USA") />
+		<cfset event.setArg("firstname", "Peter") />
 		
 		<cfset eventContext.setup(getAppManager(), event) />
 		
 		<cfset command.execute(event, eventContext) />
 		
-		<cfset user = event.getArg("user") />
-		<cfset debug(user) />
+		<cfset assertTrue(event.getArg("firstName") eq "Joseph", "event.getArg('firstName') should return 'Joseph'") />
+	</cffunction>
+
+	<cffunction name="testArgWithValueNoOverwrite" access="public" returntype="void" output="false"
+		hint="Tests an arg with value no overwrite.">
+			
+		<cfset var command = "" />
+		<cfset var event = "" />
+		<cfset var eventContext = getEventContext() />
 		
-		<cfset assertTrue(user.getFirstName() eq "Kurt", "user.getFirstName() should return 'Kurt'") />
-		<cfset assertTrue(user.getAddress().getAddress1() eq "1234 Main Street", "address1 should be '1234 Main Street'") />
-		<cfset assertTrue(user.getAddress().getCountry().getCode() eq "USA", "country.code should be 'USA'") />
-		<cfset assertTrue(user.getBirthDate() eq "3/18/1979", "user.getBirthdate() should return '3/18/1979'") />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(
+							"firstName", "Joseph", "", false) />
+		<cfset command.setLog(getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand")) />
+		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		
+		<cfset event = CreateObject("component", "MachII.framework.Event").init() />
+		<cfset event.setArg("firstname", "Peter") />
+		
+		<cfset eventContext.setup(getAppManager(), event) />
+		
+		<cfset command.execute(event, eventContext) />
+		
+		<cfset assertTrue(event.getArg("firstName") eq "Peter", "event.getArg('firstName') should return 'Peter'") />
 	</cffunction>
 
 </cfcomponent>
