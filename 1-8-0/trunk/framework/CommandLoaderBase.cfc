@@ -721,7 +721,6 @@ Notes:
 		<cfset var overwrite = true />
 		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
 		
-		
 		<cfif NOT StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
 			<cfset argValue = variables.utils.recurseComplexValues(arguments.commandNode) />
 		<cfelse>
