@@ -94,7 +94,7 @@ PUBLIC FUNCTIONS
 	hint="Sets the first form element id if not already defined.">
 	<cfargument name="id" type="string" required="true" />
 	
-	<cfif NOT Len(request._MachIIFormLib.firstElementId)>
+	<cfif NOT IsDefined("request._MachIIFormLib.firstElementId") OR NOT Len(request._MachIIFormLib.firstElementId)>
 		<cfset request._MachIIFormLib.firstElementId = arguments.id />
 	</cfif>
 </cffunction>

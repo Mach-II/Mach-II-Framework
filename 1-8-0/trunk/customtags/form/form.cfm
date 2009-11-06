@@ -65,9 +65,6 @@ Notes:
 	<cfelse>
 		<cfset setupBind() />
 	</cfif>
-	
-	<!--- Setup the base for the auto focus --->
-	<cfset request._MachIIFormLib.firstElementId = "" />
 
 	<!--- Set defaults --->
 	<cfparam name="attributes.encType" type="string" 
@@ -99,15 +96,12 @@ Notes:
 	</cfsilent>
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
-
-	<cfimport prefix="view" taglib="/MachII/customtags/view" />
-
-	<!--- Clean up bind as this serves as a "check" by other tags to ensure bind is available --->
-	<cfset StructDelete(request, "_MachIIFormLib.bind", false) />
-	<cfset StructDelete(request, "_MachIIFormLib.firstElementId", false) />
-	
 	<cfoutput>#doEndTag()#</cfoutput>
-	<cfif NOT IsBoolean(attributes.autoFocus) OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)>
+	<cfif NOT IsBoolean(attributes.autoFocus) 
+		OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)
+		AND IsDefined("request._MachIIFormLib.firstElementId")>
+		
+		<cfimport prefix="view" taglib="/MachII/customtags/view" />
 		
 		<!--- Figure out which id to auto focus to if there is no id supplied --->
 		<cfif NOT Len(attributes.autoFocus)>
@@ -121,5 +115,8 @@ Notes:
 			}
 		</view:script></cfoutput>
 	</cfif>
+	
+	<!--- Clean up bind as this serves as a "check" by other tags to ensure bind is available --->
+	<cfset StructDelete(request, "_MachIIFormLib", false) />
 </cfif>
 <cfsetting enablecfoutputonly="false" />
