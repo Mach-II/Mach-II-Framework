@@ -84,6 +84,8 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelKey" type="string"
 		default="label" />
+	<cfparam name="attributes.checkValueCol" type="string"
+		default="value" />
 
 <cfelse>
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
@@ -105,7 +107,7 @@ Notes:
 	<cfset variables.checkValues = "" />
 	
 	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfset variables.checkValues = translateCheckValue(attributes.checkValue) />
+		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol) />
 	</cfif>
 	
 	<!--- doing this here so we can add checked to the attributes 

@@ -66,6 +66,8 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelKey" type="string"
 		default="label" />
+	<cfparam name="attributes.checkValueCol" type="string"
+		default="value" />
 
 <cfelse>
 	<cfset variables.checkValues = "" />
@@ -73,7 +75,7 @@ Notes:
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->	
 	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfset variables.checkValues = translateCheckValue(attributes.checkValue) />
+		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol) />
 	</cfif>
 	
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
