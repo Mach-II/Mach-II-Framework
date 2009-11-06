@@ -97,21 +97,24 @@ Notes:
 	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
 	<cfoutput>#doEndTag()#</cfoutput>
-	<cfif NOT IsBoolean(attributes.autoFocus) 
-		OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)
-		AND IsDefined("request._MachIIFormLib.firstElementId")>
-		
-		<cfimport prefix="view" taglib="/MachII/customtags/view" />
+	<cfif NOT IsBoolean(attributes.autoFocus)
+		OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)>
 		
 		<!--- Figure out which id to auto focus to if there is no id supplied --->
-		<cfif NOT Len(attributes.autoFocus)>
+		<cfif IsDefined("request._MachIIFormLib.firstElementId") 
+			AND (NOT Len(attributes.autoFocus) OR NOT IsBoolean(attributes.autoFocus))>
 			<cfset attributes.autoFocus = request._MachIIFormLib.firstElementId />
 		</cfif>
 		
+		<!---
+			We use the window._MachIIFormLib_autoFocusOccurred so two 
+			forms on a page won't steal an auto-focus
+		--->
+		<cfimport prefix="view" taglib="/MachII/customtags/view" />
 		<cfoutput><view:script outputType="inline">
-			if (window.MachIIFormLib_autoFocusOccurred !== 'undefined') {
+			if (window._MachIIFormLib_autoFocusOccurred !== 'undefined') {
 				document.getElementById('#attributes.autoFocus#').focus();
-				MachIIFormLib_autoFocusOccurred = true;
+				window._MachIIFormLib_autoFocusOccurred = true;
 			}
 		</view:script></cfoutput>
 	</cfif>
