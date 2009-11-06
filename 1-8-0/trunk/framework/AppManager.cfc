@@ -178,7 +178,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(variables.onObjectReloadCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.onObjectReloadCallbacks[i], arguments.callback)>
+			<cfif utils.assertSame(variables.onObjectReloadCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.onObjectReloadCallbacks, i) />
 				<cfbreak />			
 			</cfif>
