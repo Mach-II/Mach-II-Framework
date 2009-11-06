@@ -65,10 +65,13 @@ Notes:
 		default="label" />
 
 <cfelse>
-	<!---
-		In order to keep whitespace down to a minimum, all cfsavecontent  
-		must stay on a single line 
-	--->
+	<cfset variables.checkValues = "" />
+
+	<!--- checkValue can be a list, array, or struct, but ultimately 
+			we'll use a list to do the comparisons as we build the output --->	
+	<cfif StructKeyExists(attributes, "checkValue")>
+		<cfset variables.checkValues = translateCheckValue(attributes.checkValue) />
+	</cfif>
 	
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
@@ -77,6 +80,7 @@ Notes:
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
 			<form:option value="#Trim(i)#" 
+				checkValue="#variables.checkValues#"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
@@ -85,6 +89,7 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
 			<form:option value="#LCase(variables.itemOrder[i])#" 
 				label="#attributes.items[variables.itemOrder[i]]#" 
+				checkValue="#variables.checkValues#"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
@@ -95,6 +100,7 @@ Notes:
 				<!--- this is an array of simple values, proceed as needed --->
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<form:option value="#Trim(attributes.items[i])#" 
+						checkValue="#variables.checkValues#"
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
 				</cfloop>
@@ -104,23 +110,24 @@ Notes:
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 						<form:option value="#attributes.items[i][attributes.valueKey]#" 
 							label="#attributes.items[i][attributes.labelKey]#" 
+							checkValue="#variables.checkValues#"
 							output="true" 
 							outputBuffer="#variables.outputBuffer#" />
 					</cfloop>
 				<cfelse>
 					<!--- either the valueCol or lableCol attributes were not found in the structure, throw an error --->
-					<cfthrow type="MachII.customtags.form.options" 
+					<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype" 
 							message="Missing struct key values" 
 							detail="The options form tag supports an array of struct elements, however the valueKey and labelKey attributes do not match the struct keys contained in the first array element." />
 				</cfif>
 			<cfelse>
-				<cfthrow type="MachII.customtags.form.options" 
+				<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype" 
 						message="Unsupported Data Type in Array" 
 						detail="The options form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
 			<!--- only single dimension arrays are support, throw an exception for the multi-dimensional array passed --->
-			<cfthrow type="MachII.customtags.form.options" 
+			<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype" 
 					message="Unsupported Number of Array Dimensions in Options Tag" 
 					detail="The options form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the items attribute is #attributes.items.getDimension()# dimensions." />
 		</cfif>
@@ -128,6 +135,7 @@ Notes:
 		<cfloop query="attributes.items">
 			<form:option value="#attributes.items[attributes.valueCol][attributes.items.currentRow]#" 
 				label="#attributes.items[attributes.labelCol][attributes.items.currentRow]#" 
+				checkValue="#variables.checkValues#"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>

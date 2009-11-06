@@ -156,4 +156,50 @@ PUBLIC FUNCTIONS
 	<cfreturn value />
 </cffunction>
 
+<cffunction name="translateCheckValue" access="public" returntype="string" output="false"
+	hint="Translates a check value into a usable datatype for certain form tags to use.">
+	<cfargument name="checkValue" type="any" required="true"
+		hint="The check value to translate." />
+
+	<!--- checkValue can be a list, array, or struct, but ultimately 
+			we'll use a list to do the comparisons as we build the output --->
+	<cfset var checkValues = "" />
+	
+	<cfif IsSimpleValue(arguments.checkValue)>
+		<cfset checkValues = arguments.checkValue />
+	<cfelseif IsArray(arguments.checkValue)>
+		<cfif arguments.checkValue.getDimension() eq 1>
+			<cfif IsSimpleValue(arguments.checkValue[1])>
+				<cfloop index="i" from="1" to="#ArrayLen(arguments.checkValue)#">
+					<cfset checkValues = ListAppend(checkValues, arguments.checkValue[i]) />
+				</cfloop>
+			<cfelseif IsStruct(arguments.checkValue[1])>
+				<cfloop index="i" from="1" to="#ArrayLen(arguments.checkValue)#">
+					<cfset checkValues = ListAppend(checkValues, arguments.checkValue[i].value) />
+				</cfloop>
+			<cfelse>
+				<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype" 
+						message="Unsupported Data Type in Array" 
+						detail="The '#getTagType()#' form tag only supports simple values or structs as array elements." />
+			</cfif>
+		<cfelse>
+			<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype" 
+					message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
+					detail="The '#getTagType()#' form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the checkValue attribute is #arguments.checkValue.getDimension()# dimensions." />
+		</cfif>
+	<cfelseif IsStruct(arguments.checkValue)>
+		<cfloop collection="#arguments.checkValue#" item="item">
+			<cfif StructFind(arguments.checkValue, item)>
+				<cfset checkValues = ListAppend(checkValues, item) />
+			</cfif>
+		</cfloop>
+	<cfelse>
+		<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype" 
+				message="Unsupported Data Type for Check Value Attribute" 
+				detail="The '#getTagType()#' form tag only supports lists, one-dimensional arrays, and structs for the check value attribute." />
+	</cfif>
+	
+	<cfreturn checkValues />
+</cffunction>
+
 </cfsilent>

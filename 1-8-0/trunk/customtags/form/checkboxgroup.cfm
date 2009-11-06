@@ -106,50 +106,18 @@ Notes:
 	</cfif>
 	
 	<!--- checkValue can be a list, array, or struct, but ultimately 
-			we'll use a list to do the comparisons as we build the output --->
-	<cfset checkValues = "" />
+			we'll use a list to do the comparisons as we build the output --->	
+	<cfset variables.checkValues = "" />
 	
 	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfif IsSimpleValue(attributes.checkValue)>
-			<cfset checkValues = attributes.checkValue />
-		<cfelseif IsArray(attributes.checkValue)>
-			<cfif attributes.checkValue.getDimension() eq 1>
-				<cfif IsSimpleValue(attributes.checkValue[1])>
-					<cfloop index="i" from="1" to="#ArrayLen(attributes.checkValue)#">
-						<cfset checkValues = ListAppend(checkValues, attributes.checkValue[i]) />
-					</cfloop>
-				<cfelseif IsStruct(attributes.checkValue[1])>
-					<cfloop index="i" from="1" to="#ArrayLen(attributes.checkValue)#">
-						<cfset checkValues = ListAppend(checkValues, attributes.checkValue[i].value) />
-					</cfloop>
-				<cfelse>
-					<cfthrow type="MachII.customtags.form.checkboxgroup" 
-							message="Unsupported Data Type in Array" 
-							detail="The checkbox group form tag only supports simple values or structs as array elements." />
-				</cfif>
-			<cfelse>
-				<cfthrow type="MachII.customtags.form.checkboxgroup" 
-						message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
-						detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the checkValue attribute is #attributes.checkValue.getDimension()# dimensions." />
-			</cfif>
-		<cfelseif IsStruct(attributes.checkValue)>
-			<cfloop collection="#attributes.checkValue#" item="item">
-				<cfif StructFind(attributes.checkValue, item)>
-					<cfset checkValues = ListAppend(checkValues, item) />
-				</cfif>
-			</cfloop>
-		<cfelse>
-			<cfthrow type="MachII.customtags.form.checkboxgroup" 
-					message="Unsupported Data Type for Check Value Attribute" 
-					detail="The checkbox group form tag only supports lists, one-dimensional arrays, and structs for the check value attribute." />
-		</cfif>
+		<cfset variables.checkValues = translateCheckValue(attributes.checkValue) />
 	</cfif>
 	
 	<!--- doing this here so we can add checked to the attributes 
 			being passed to the checkbox custom tag as needed instead 
 			of having to repeat the entire tag in conditionals --->
 	<cfset checkboxAttributes = StructCopy(attributes) />
-	<cfset checkboxAttributes.checkValue = checkValues />
+	<cfset checkboxAttributes.checkValue = variables.checkValues />
 	
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
