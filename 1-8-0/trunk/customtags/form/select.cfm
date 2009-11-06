@@ -1,4 +1,4 @@
-<cfprocessingdirective  suppresswhitespace="true"><cfsetting enablecfoutputonly="true" /><cfsilent>
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 
     Mach-II - A framework for object oriented MVC web applications in CFML
@@ -114,4 +114,4 @@ Notes:
 	
 	<cfset thisTag.GeneratedContent = doStartTag() & doEndTag() />
 </cfif>
-</cfsilent></cfprocessingdirective><cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />

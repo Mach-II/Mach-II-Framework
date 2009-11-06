@@ -51,7 +51,10 @@ Notes:
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("options", true) />
-	
+
+	<!--- Ensure certain attributes are defined --->
+	<cfset ensureByName("items") />
+
 	<!--- Set optional attributes --->
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />

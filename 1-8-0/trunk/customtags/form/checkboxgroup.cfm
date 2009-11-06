@@ -55,6 +55,7 @@ Notes:
 
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
+	<cfset ensureByName("items") />
 
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
@@ -91,12 +92,6 @@ Notes:
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
-	
-	<cfif not StructKeyExists(attributes, "items")>
-		<cfthrow type="MachII.customtags.form.checkboxgroup" 
-					message="Items Attribute Required" 
-					detail="The checkbox group form tag requires an 'items' attribute." />
-	</cfif>
 	
 	<cfif not StructKeyExists(attributes, "labels") 
 			and (IsSimpleValue(attributes.items) 

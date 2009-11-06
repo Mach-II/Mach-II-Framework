@@ -55,6 +55,7 @@ Notes:
 
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
+	<cfset ensureByName("items") />
 	
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
@@ -87,12 +88,6 @@ Notes:
 	<!--- Create a crazy outbuffer struct so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
-	
-	<cfif not StructKeyExists(attributes, "items")>
-		<cfthrow type="MachII.customtags.form.radiogroup" 
-					message="Items Attribute Required" 
-					detail="The radio group form tag requires an 'items' attribute." />
-	</cfif>
 	
 	<cfif not StructKeyExists(attributes, "labels") 
 			and (IsSimpleValue(attributes.items) 
@@ -178,12 +173,12 @@ Notes:
 					<cfoutput>#finalOutput#</cfoutput>
 				</cfloop>
 			<cfelse>
-				<cfthrow type="MachII.customtags.form.radiogroup" 
+				<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
 						message="Unsupported Data Type in Array" 
 						detail="The radio group form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
-			<cfthrow type="MachII.customtags.form.radiogroup" 
+			<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
 					message="Unsupported Number of Array Dimensions in Radio Group Tag" 
 					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
@@ -237,7 +232,7 @@ Notes:
 			<cfoutput>#finalOutput#</cfoutput>
 		</cfloop>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.radiogroup" 
+		<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
 					message="Unsupported Data Type" 
 					detail="The radio group form tag only supports lists, arrays, structs and queries." />
 	</cfif>
