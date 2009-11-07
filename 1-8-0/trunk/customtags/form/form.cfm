@@ -47,7 +47,7 @@ Notes:
 - OPTIONAL ATTRIBUTES
 	actionModule	= name of module to use with the event to process this form
 	actionUrlParams	= name value pairs in pipe (|) list of url params or struct
-	encType			= specifies the encType of the form (defaults to "multipart/form-data")
+	enctype			= specifies the enctype of the form (defaults to "multipart/form-data")
 	method			= specifies the type of form post to make (defaults to "post")
 	bind			= the path to use to bind to process this form (default to event object)
 --->
@@ -67,7 +67,7 @@ Notes:
 	</cfif>
 
 	<!--- Set defaults --->
-	<cfparam name="attributes.encType" type="string" 
+	<cfparam name="attributes.enctype" type="string" 
 		default="multipart/form-data" />
 	<cfparam name="attributes.method" type="string" 
 		default="post" />
@@ -76,7 +76,7 @@ Notes:
 
 	<cfset setAttribute("action", makeUrl("actionEvent", "actionModule", "actionRoute", "actionUrlParams")) />
 	<cfset setAttribute("method") />
-	<cfset setAttribute("encType") />
+	<cfset setAttribute("enctype") />
 	
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("name") />
