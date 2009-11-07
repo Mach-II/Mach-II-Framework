@@ -98,7 +98,7 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 <cfelse>
-	<cfset variables.generatedContent = doStartTag() & '<input name="__#attributes.name#" type="hidden" value="" />' />
+	<cfset variables.generatedContent = doStartTag() & '<input name="_-_#attributes.name#" type="hidden" value="" />' />
 	
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />

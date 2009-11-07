@@ -442,6 +442,7 @@ Notes:
 		<cfset var eventArgs = StructNew() />
 		<cfset var overwriteFormParams = (getParameterPrecedence() EQ "url") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
+		<cfset var key = "" />
 		
 		<!--- Build event args from form/url/SES --->
 		<cfset StructAppend(eventArgs, form) />
@@ -451,6 +452,13 @@ Notes:
 		
 		<!--- Get redirect persist data and overwrite other args if conflct --->
 		<cfset StructAppend(eventArgs, requestManager.readPersistEventData(eventArgs), true) />
+		
+		<!--- Cleanup missing checkboxes which are indicated by incoming event args starting with '_-_keyNameHere' --->
+		<cfloop collection="#eventArgs#" item="key">
+			<cfif key.startsWith("_-_") AND NOT StructKeyExists(eventArgs, Right(key, Len(key) - 3))>
+				<cfset eventArgs[Right(key, Len(key) - 3)] = "" />
+			</cfif>
+		</cfloop>
 		
 		<cfreturn eventArgs />
 	</cffunction>
