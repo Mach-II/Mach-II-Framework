@@ -166,11 +166,13 @@ PUBLIC FUNCTIONS
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->
 	<cfset var checkValues = "" />
+	<cfset var i = "" />
+	<cfset var item = "" />
 	
 	<cfif IsSimpleValue(arguments.checkValue)>
 		<cfset checkValues = arguments.checkValue />
 	<cfelseif IsArray(arguments.checkValue) AND IsSimpleValue(arguments.checkValue[1])>
-		<cfloop index="i" from="1" to="#ArrayLen(arguments.checkValue)#">
+		<cfloop from="1" to="#ArrayLen(arguments.checkValue)#" index="i">
 			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[i]) />
 		</cfloop>
 	<cfelseif IsStruct(arguments.checkValue)>
