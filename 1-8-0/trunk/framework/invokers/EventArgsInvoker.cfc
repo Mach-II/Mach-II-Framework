@@ -112,7 +112,7 @@ Notes:
 						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has returned void but a ResultArg/Key has been defined.",  cfcatch) />
 					</cfif>
 					<cfthrow type="MachII.framework.VoidReturnType"
-							message="A ResultArg/Key has been specified on a notify command method that is returning void. This can also happen if your listener method returns a Java null."
+							message="A ResultArg/Key has been specified on a notify command method that is returning void. This can also happen if your listener method returns a Java null. Return data from your listener or remove the resultArg/Key from your notify command."
 							detail="Listener: '#getMetadata(listener).name#' Method: '#arguments.method#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
