@@ -212,8 +212,8 @@ Notes:
 			<cfoutput>#finalOutput#</cfoutput>
 		</cfloop>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.checkboxgroup" 
-					message="Unsupported Data Type" 
+		<cfthrow type="MachII.customtags.form.checkboxgroup.unsupportedItemsDatatype" 
+					message="Unsupported datatype for the 'items' attribute." 
 					detail="The checkbox group form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
 

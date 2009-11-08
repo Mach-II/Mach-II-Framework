@@ -233,8 +233,8 @@ Notes:
 		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
-					message="Unsupported Data Type" 
-					detail="The radio group form tag only supports lists, arrays, structs and queries." />
+					message="Unsupported datatype for the 'items' attribute." 
+					detail="The radio group form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
 
 	<cfif attributes.output>
