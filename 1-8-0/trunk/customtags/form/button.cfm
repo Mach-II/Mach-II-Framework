@@ -106,9 +106,9 @@ Notes:
 
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("alt") />
-	<cfset setAttributeIfDefined("disabled", "disabled") />
 	<cfset setAttributeIfDefined("src") />
 	<cfset setAttributeIfDefined("type") />
+	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />

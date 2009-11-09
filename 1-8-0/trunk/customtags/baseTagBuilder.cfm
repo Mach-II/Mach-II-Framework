@@ -230,6 +230,18 @@ PUBLIC FUNCTIONS
 	</cfif>
 </cffunction>
 
+<cffunction name="setAttributeIfDefinedAndTrue" access="public" returntype="void" output="false"
+	hint="Adds an attribute by name if defined and true (boolean).">
+	<cfargument name="attributeName" type="string" required="true" />
+	<cfargument name="specialValue" type="string" required="true" />
+	
+	<cfif StructKeyExists(attributes, arguments.attributeName) 
+		AND IsBoolean(attributes[arguments.attributeName]) 
+		AND attributes[arguments.attributeName]>
+		<cfset setAttribute(arguments.attributeName, arguments.specialValue) />
+	</cfif>
+</cffunction>
+
 <cffunction name="setStandardAttributes" access="public" returntype="void" output="false"
 	hint="Adds standard attributes to the tag writer if defined.">
 

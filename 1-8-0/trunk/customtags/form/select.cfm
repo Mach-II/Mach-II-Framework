@@ -89,8 +89,8 @@ Notes:
 
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("size") />
-	<cfset setAttributeIfDefined("multiple", "multiple") />
-	<cfset setAttributeIfDefined("disabled", "disabled") />
+	<cfset setAttributeIfDefinedAndTrue("multiple", "multiple") />
+	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />

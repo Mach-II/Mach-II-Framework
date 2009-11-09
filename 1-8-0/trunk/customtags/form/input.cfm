@@ -88,8 +88,8 @@ Notes:
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("size") />
 	<cfset setAttributeIfDefined("maxLength") />
-	<cfset setAttributeIfDefined("readOnly", "readOnly") />
-	<cfset setAttributeIfDefined("disabled", "disabled") />
+	<cfset setAttributeIfDefinedAndTrue("readOnly", "readOnly") />
+	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />

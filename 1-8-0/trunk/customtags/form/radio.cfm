@@ -90,12 +90,12 @@ Notes:
 	<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ attributes.value>
 		<cfset setAttribute("checked", "checked") />
 	<cfelse>
-		<cfset setAttributeIfDefined("checked", "checked") />
+		<cfset setAttributeIfDefinedAndTrue("checked", "checked") />
 	</cfif>
 
 	<!--- Set optional attributes --->
 	<cfset setAttributeIfDefined("size") />
-	<cfset setAttributeIfDefined("disabled", "disabled") />
+	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />

@@ -72,9 +72,9 @@ Notes:
 	<cfif ListFindNoCase(attributes.checkValue, attributes.value)>
 		<cfset setAttribute("selected", "selected") />
 	<cfelse>
-		<cfset setAttributeIfDefined("selected", "selected") />
+		<cfset setAttributeIfDefinedAndTrue("selected", "selected") />
 	</cfif>
-	<cfset setAttributeIfDefined("disabled", "disabled") />
+	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />
