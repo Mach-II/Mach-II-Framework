@@ -117,7 +117,7 @@ PUBLIC FUNCTIONS
 		<cfreturn resolvePath(argumentCollection=arguments) />
 		<cfcatch type="any">
 			<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
-				message="Unable to bind to path '#arguments.path#'. This could be because the path was incorrect or the target CFC caused an exception. See details for more information."
+				message="Unable to bind to path '#arguments.path#'. This could be because the path was incorrect or the target CFC caused an exception. This could also be caused because the form element is not wrapped inside a Mach-II form custom tag. See details for more information."
 				detail="#cfcatch.message# || #cfcatch.detail#" />
 		</cfcatch>
 	</cftry>	
