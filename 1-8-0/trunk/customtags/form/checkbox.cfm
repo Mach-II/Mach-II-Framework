@@ -98,7 +98,13 @@ Notes:
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 <cfelse>
-	<cfset variables.generatedContent = doStartTag() & '<input name="_-_#attributes.name#" type="hidden" value="" />' />
+	<cfset variables.generatedContent = doStartTag() />
+	
+	<!--- Only write one hidden tag --->
+	<cfif NOT IsDefined("request._MachIIFormLib._checkbox_#attributes.name#")>
+		<cfset variables.generatedContent = variables.generatedContent & '<input name="_-_#attributes.name#" type="hidden" value="" />' />
+		<cfset request._MachIIFormLib["_checkbox_" & attributes.name] = true />
+	</cfif>
 	
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />
