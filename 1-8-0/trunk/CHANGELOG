@@ -91,7 +91,7 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/413
 (2009-10-28 peterfarrell)
 
 * SES Urls fail to be parsed
-SES Urls fail to be parsed when the urlDelimiters properity are set to 
+SES Urls fail to be parsed when the urlDelimiters property are set to 
 non-query string parameters. This is because the urlParseSES is also 
 required to be set to true, but by default is set to false. This was 
 fixed by setting the value of urlParseSES to true if the property is 
