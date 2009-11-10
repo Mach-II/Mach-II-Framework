@@ -197,7 +197,8 @@ PUBLIC FUNCTIONS
 <cffunction name="sortStructByDisplayOrder" access="public" returntype="array" output="false"
 	hint="Sorts an items struct based of the 'displayOrder' attribute.">
 	<cfargument name="items" type="struct" required="true" />
-	<cfargument name="displayOrder" type="string" required="true" />
+	<cfargument name="displayOrder" type="any" required="true"
+		hint="Takes a list or array of display order elements." />
 	
 	<cfset var modifiedItems = StructCopy(arguments.items) />
 	<cfset var sortedKeys = ArrayNew(1) />
@@ -207,7 +208,9 @@ PUBLIC FUNCTIONS
 	<cfset var element = "" />
 	<cfset var i = "" />
 	
-	<cfset arguments.displayOrder = ListToArray(arguments.displayOrder) />
+	<cfif NOT IsArray(arguments.displayOrder)>
+		<cfset arguments.displayOrder = ListToArray(arguments.displayOrder) />
+	</cfif>
 	
 	<cfif ArrayLen(arguments.displayOrder)>
 		
