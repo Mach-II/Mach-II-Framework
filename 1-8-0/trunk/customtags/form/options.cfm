@@ -83,22 +83,41 @@ Notes:
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
+
+	<!---
+		Create an option template because calling the options tag repeatedly 
+		on a huge number of items is exponentially slow
+	--->
+	<form:option value="${output.value}" 
+		label="${output.label}" 
+		checkValue=""
+		output="true" 
+		outputBuffer="#variables.outputBuffer#" />
+	
+	<cfset variables.optionTemplate = variables.outputBuffer.content />
+	<cfset variables.outputBuffer.content = "" />
 	
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
-			<form:option value="#Trim(i)#" 
-				checkValue="#variables.checkValues#"
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", Trim(i), "one") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(Trim(i)), "one") />
+			<cfif ListFindNoCase(variables.checkValues, Trim(i))>
+				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+			</cfif>
+				
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
 		</cfloop>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.itemOrder = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
+
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
-			<form:option value="#LCase(variables.itemOrder[i])#" 
-				label="#attributes.items[variables.itemOrder[i]]#" 
-				checkValue="#variables.checkValues#"
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(variables.itemOrder[i]), "one") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[variables.itemOrder[i]]), "one") />
+			<cfif ListFindNoCase(variables.checkValues, variables.itemOrder[i])>
+				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+			</cfif>
+				
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() EQ 1>
@@ -106,20 +125,25 @@ Notes:
 			<cfif IsSimpleValue(attributes.items[1])>
 				<!--- this is an array of simple values, proceed as needed --->
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<form:option value="#Trim(attributes.items[i])#" 
-						checkValue="#variables.checkValues#"
-						output="true" 
-						outputBuffer="#variables.outputBuffer#" />
+					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(attributes.items[i]), "one") />
+					<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i]), "one") />
+					<cfif ListFindNoCase(variables.checkValues, attributes.items[i])>
+						<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+					</cfif>
+				
+					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
 				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-						<form:option value="#attributes.items[i][attributes.valueKey]#" 
-							label="#attributes.items[i][attributes.labelKey]#" 
-							checkValue="#variables.checkValues#"
-							output="true" 
-							outputBuffer="#variables.outputBuffer#" />
+						<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[i][attributes.valueKey], "one") />
+						<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i][attributes.labelKey]), "one") />
+						<cfif ListFindNoCase(variables.checkValues, attributes.items[i][attributes.valueKey])>
+							<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+						</cfif>
+							
+						<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
 					</cfloop>
 				<cfelse>
 					<!--- either the valueCol or lableCol attributes were not found in the structure, throw an error --->
@@ -140,11 +164,13 @@ Notes:
 		</cfif>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
-			<form:option value="#attributes.items[attributes.valueCol][attributes.items.currentRow]#" 
-				label="#attributes.items[attributes.labelCol][attributes.items.currentRow]#" 
-				checkValue="#variables.checkValues#"
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[attributes.valueCol][attributes.items.currentRow], "one") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
+			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow])>
+				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+			</cfif>
+				
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
 		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.#getTagType()#"
