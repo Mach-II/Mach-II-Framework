@@ -238,24 +238,27 @@ PUBLIC FUNCTIONS
 		--->
 		<cfif hasStar>
 			<cfset sortedKeys = StructSort(modifiedItems, "text") />
-		</cfif>
-	
-		<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
-			<cfif arguments.displayOrder[i] EQ "*">
-				<cfset hasStarOccurred = true />
-			<cfelse>
-				<!--- For elements before "*" --->
-				<cfif NOT hasStarOccurred>
-					<!--- We cannot use ArrayPrepend because the order of the pre "*" would be reversed --->
-					<cfset ArrayInsertAt(sortedKeys, insertAt, arguments.displayOrder[i]) />
-					<cfset insertAt = insertAt + 1 />
-				<!--- For elements after "*" --->
+			<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
+				<cfif arguments.displayOrder[i] EQ "*">
+					<cfset hasStarOccurred = true />
 				<cfelse>
-					<cfset ArrayAppend(sortedKeys, arguments.displayOrder[i])>
+					<!--- For elements before "*" --->
+					<cfif NOT hasStarOccurred>
+						<!--- We cannot use ArrayPrepend because the order of the pre "*" would be reversed --->
+						<cfset ArrayInsertAt(sortedKeys, insertAt, arguments.displayOrder[i]) />
+						<cfset insertAt = insertAt + 1 />
+					<!--- For elements after "*" --->
+					<cfelse>
+						<cfset ArrayAppend(sortedKeys, arguments.displayOrder[i])>
+					</cfif>
 				</cfif>
-			</cfif>
+	
+			</cfloop>
+		<!--- There is no "*" so we can just use the displayOrder array straight up with a twist of lemon (or lime if you prefer) --->
+		<cfelse>
+			<cfset sortedKeys = arguments.displayOrder />
+		</cfif>
 
-		</cfloop>
 	<!--- Use this if no displayOrder is specified --->
 	<cfelse>
 		<cfset sortedKeys = StructSort(items, "text") />
