@@ -59,9 +59,10 @@ N.B. Links to CSS files should use the <style> tag's "src" attribute.
 	<!--- This tag requires one of these attributes: 'src', 'event'or  'route'
 		or an exception will be thrown. ensureOneByList() is not used for performance. --->
 	
-	<!--- If the src is not present, then make an URL using event/module/route --->
-	<cfparam name="attributes.href" type="string"
-		default="#makeUrl()#" />
+	<!--- If the href is not present, then make an URL using event/module/route --->
+	<cfif NOT StructKeyExists(attributes, "href")>
+		<cfset attributes.href = makeUrl() />
+	</cfif>
 	<cfset ensureByName("type") />
 	
 	<!--- Setup optional --->

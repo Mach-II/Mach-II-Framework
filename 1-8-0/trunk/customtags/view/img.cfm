@@ -58,8 +58,9 @@ Notes:
 		or an exception will be thrown. ensureOneByList() is not used for performance. --->
 	
 	<!--- If the src is not present, then make an URL using event/module/route --->
-	<cfparam name="attributes.src" type="string"
-		default="#makeUrl()#" />
+	<cfif NOT StructKeyExists(attributes, "src")>
+		<cfset attributes.src = makeUrl() />
+	</cfif>
 	
 	<!--- Setup optional but requried by the addImage() API --->
 	<cfparam name="attributes.width" type="string" 
