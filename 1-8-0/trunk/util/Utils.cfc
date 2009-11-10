@@ -222,7 +222,6 @@ Notes:
 		<cfif NOT IsObject(threadingAdapter) OR NOT threadingAvailable>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapter").init() />
 		</cfif>
-
 		
 		<cfreturn threadingAdapter />
 	</cffunction>
@@ -383,16 +382,9 @@ Notes:
 		hint="Escapes special characters '<', '>', '""' and '&' except it leaves already escaped entities alone unlike HtmlEditFormat().">
 		<cfargument name="input" type="string" required="true"
 			hint="String to escape." />
-		
-		<cfset var output = arguments.input />
-		
-		<!--- The & is a special case since could be part of an already escaped entity --->
-		<cfset output = REReplaceNoCase(output, "&(?!([a-zA-Z][a-zA-Z0-9]*|(##\d+)){2,6};)", "&amp;", "all") />
-	
-		<!--- Deal with the easy characters --->
-		<cfset output = ReplaceList(output, '<,>,"', "&lt;,&gt;,&quot;") />
-			
-		<cfreturn output />
+		<!--- The & is a special case since could be part of an already escaped entity with the RegEx--->
+		<!--- Deal with the easy characters with the ReplaceList--->
+		<cfreturn ReplaceList(REReplaceNoCase(arguments.input, "&(?!([a-zA-Z][a-zA-Z0-9]*|(##\d+)){2,6};)", "&amp;", "all"), '<,>,"', "&lt;,&gt;,&quot;") />
 	</cffunction>
 	
 	<cffunction name="rebundledException" access="public" returntype="void" output="false"

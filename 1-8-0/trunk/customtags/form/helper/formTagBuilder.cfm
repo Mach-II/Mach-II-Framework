@@ -149,7 +149,7 @@ PUBLIC FUNCTIONS
 	
 	<cfset arguments.path = ListDeleteAt(arguments.path, 1, ".") />
 
-	<cfif ListLen(arguments.path, ".") GT 0>
+	<cfif FindNoCase(".", arguments.path)>
 		<cfset value = resolvePath(arguments.path, value) />
 	</cfif>
 	
