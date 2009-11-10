@@ -840,7 +840,7 @@ from the parent application.
 		hint="Cleans up content text by removing undesireable control characters.">
 		<cfargument name="content" type="string" required="true"
 			hint="The content to clean up." />
-		<cfreturn REReplace(arguments.content, variables.CLEANUP_CONTROL_CHARACTERS_REGEX, "", "ALL") />
+		<cfreturn REReplaceNoCase(arguments.content, variables.CLEANUP_CONTROL_CHARACTERS_REGEX, "", "ALL") />
 	</cffunction>
 
 	<cffunction name="decidedCacheAssetPathsEnabled" access="private" returntype="boolean" output="false"

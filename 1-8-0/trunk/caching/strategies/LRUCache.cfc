@@ -131,7 +131,7 @@ in the application scope.
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
 			<!--- BlueDragon does not like it when the cache starts with numbers --->
-			<cfset setScopeKey("_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+			<cfset setScopeKey("_" & REReplaceNoCase(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		
 		<!--- Setup the cache by running a flush() --->

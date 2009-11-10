@@ -323,7 +323,7 @@ See that file header for configuration of filter criteria.
 			<cfset temp = data.substring(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
-			<cfset temp = REReplace(temp, "<style.*?>", '<style type="text/css">', "one") />
+			<cfset temp = REReplaceNoCase(temp, "<style.*?>", '<style type="text/css">', "one") />
 			
 			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />
@@ -340,7 +340,7 @@ See that file header for configuration of filter criteria.
 			<cfset temp = data.substring(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
-			<cfset temp = REReplace(temp, "<script.*?>", '<script type="text/javascript">', "one") />
+			<cfset temp = REReplaceNoCase(temp, "<script.*?>", '<script type="text/javascript">', "one") />
 			
 			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />

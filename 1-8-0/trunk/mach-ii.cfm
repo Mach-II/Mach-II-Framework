@@ -60,7 +60,7 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
 
 <!--- Clean the AppKey --->
-<cfset MACHII_APP_KEY = REReplace(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
+<cfset MACHII_APP_KEY = REReplaceNoCase(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
 
 <!--- default is request.MachIIConfigMode if it is defined, else use cfparam --->
 <cfif StructKeyExists(request,"MachIIConfigMode")>

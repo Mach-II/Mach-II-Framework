@@ -173,7 +173,7 @@ machinery.
 	--->
 	<cffunction name="createPersistId" access="private" returntype="string" output="false"
 		hint="Creates a persistId for use.">
-		<cfreturn REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
+		<cfreturn REReplaceNoCase(CreateUUID(), "[[:punct:]]", "", "ALL") />
 	</cffunction>
 		
 	<!---

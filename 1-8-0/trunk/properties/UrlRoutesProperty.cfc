@@ -84,7 +84,7 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.rewriteConfigFile = "" />
 	
 	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile" />
-	<cfset variables.OWNER_ID = "_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL") />
+	<cfset variables.OWNER_ID = "_" & REReplaceNoCase(CreateUUID(), "[[:punct:]]", "", "ALL") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION

@@ -154,7 +154,7 @@ via reap() which is run every 3 minutes.
 			<cfset setScopeKey(getParameter("generatedScopeKey")) />
 		<cfelse>
 			<!--- BlueDragon does not like it when the cache starts with numbers --->
-			<cfset setScopeKey("_" & REReplace(CreateUUID(), "[[:punct:]]", "", "ALL")) />
+			<cfset setScopeKey("_" & REReplaceNoCase(CreateUUID(), "[[:punct:]]", "", "ALL")) />
 		</cfif>
 		<cfif isParameterDefined("cleanupIntervalInMinutes")
 			AND getAssert().isTrue(IsNumeric(getParameter("cleanupIntervalInMinutes")) AND getParameter("cleanupIntervalInMinutes") GT 0
