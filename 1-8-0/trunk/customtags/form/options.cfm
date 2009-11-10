@@ -68,6 +68,8 @@ Notes:
 		default="label" />
 	<cfparam name="attributes.checkValueCol" type="string"
 		default="value" />
+	<cfparam name="attributes.displayOrder" type="string"
+		default="" />
 
 <cfelse>
 	<cfset variables.checkValues = "" />
@@ -90,7 +92,7 @@ Notes:
 				outputBuffer="#variables.outputBuffer#" />
 		</cfloop>
 	<cfelseif IsStruct(attributes.items)>
-		<cfset variables.itemOrder = StructSort(attributes.items, "text") />
+		<cfset variables.itemOrder = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
 			<form:option value="#LCase(variables.itemOrder[i])#" 
 				label="#attributes.items[variables.itemOrder[i]]#" 

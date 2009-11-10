@@ -80,6 +80,8 @@ Notes:
 		default="value" />
 	<cfparam name="attributes.labelKey" type="string"
 		default="label" />
+	<cfparam name="attributes.displayOrder" type="string"
+		default="" />
 
 <cfelse>
 	<cfset originalGeneratedContent = thisTag.GeneratedContent />
@@ -183,7 +185,7 @@ Notes:
 					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
-		<cfset sortedKeys = StructSort(attributes.items, "text") />
+		<cfset sortedKeys = <cfset variables.itemOrder = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 		
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(sortedKeys)#">

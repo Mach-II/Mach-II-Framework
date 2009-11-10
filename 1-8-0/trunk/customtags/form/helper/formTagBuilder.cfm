@@ -194,4 +194,71 @@ PUBLIC FUNCTIONS
 	<cfreturn checkValues />
 </cffunction>
 
+<cffunction name="sortStructByDisplayOrder" access="public" returntype="array" output="false"
+	hint="Sorts an items struct based of the 'displayOrder' attribute.">
+	<cfargument name="items" type="struct" required="true" />
+	<cfargument name="displayOrder" type="string" required="true" />
+	
+	<cfset var modifiedItems = StructCopy(arguments.items) />
+	<cfset var sortedKeys = ArrayNew(1) />
+	<cfset var insertAt = 1 />
+	<cfset var hasStar = false />
+	<cfset var hasStarOccurred = false />
+	<cfset var element = "" />
+	<cfset var i = "" />
+	
+	<cfset arguments.displayOrder = ListToArray(arguments.displayOrder) />
+	
+	<cfif ArrayLen(arguments.displayOrder)>
+		
+		<!--- Remove display order keys that do not exist --->
+		<cfloop from="#ArrayLen(arguments.displayOrder)#" to="1" step="-1" index="i">
+			<cfset element = arguments.displayOrder[i] />
+			<cfif element NEQ "*" AND NOT StructKeyExists(arguments.items, element)>
+				<cfset ArrayDeleteAt(arguments.displayOrder, i) />
+			<cfelseif element EQ "*">
+				<cfset hasStar = true />
+			</cfif>
+		</cfloop>
+		
+		<!--- We now of a valid display order list with references to keys that exists in the items --->
+		
+		
+		<!--- Remove keys from modified items --->
+		<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
+			<cfset StructDelete(modifiedItems, arguments.displayOrder[i], false) />
+		</cfloop>
+		
+		<!---
+			Create the sorted keys for the "*" part which doesn't have any other display 
+			order keys because the modified items structs have had those keys removed
+		--->
+		<cfif hasStar>
+			<cfset sortedKeys = StructSort(modifiedItems, "text") />
+		</cfif>
+	
+		<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
+			<cfif arguments.displayOrder[i] EQ "*">
+				<cfset hasStarOccurred = true />
+			<cfelse>
+				<!--- For elements before "*" --->
+				<cfif NOT hasStarOccurred>
+					<!--- We cannot use ArrayPrepend because the order of the pre "*" would be reversed --->
+					<cfset ArrayInsertAt(sortedKeys, insertAt, arguments.displayOrder[i]) />
+					<cfset insertAt = insertAt + 1 />
+				<!--- For elements after "*" --->
+				<cfelse>
+					<cfset ArrayAppend(sortedKeys, arguments.displayOrder[i])>
+				</cfif>
+			</cfif>
+
+		</cfloop>
+	<!--- Use this if no displayOrder is specified --->
+	<cfelse>
+		<cfset sortedKeys = StructSort(items, "text") />
+	</cfif>
+
+	<cfreturn sortedKeys />
+</cffunction>
+
 </cfsilent>
