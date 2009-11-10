@@ -62,7 +62,8 @@ Notes:
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("a", false) />
 	
-	<cfset ensureOneByNameList("href,event,route,useCurrentUrl") />
+	<!--- This tag requires one of these attributes: 'href', 'event', 'route' or 'useCurrentUrl'
+		or an exception will be thrown. ensureOneByList() is not used for performance. --->
 	
 	<!--- If the href is not present, then make an URL using event/module/route --->
 	<cfif StructKeyExists(attributes, "href")>

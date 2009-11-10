@@ -155,7 +155,7 @@ PUBLIC FUNCTIONS
 <cffunction name="replaceSpaces" access="public" returntype="string" output="false"
 	hint="Replaces all spaces with underscores (_).">
 	<cfargument name="value" type="string" required="true" />
-	<cfreturn Replace(arguments.value, " ", "_", "all") />
+	<cfreturn ReplaceNoCase(arguments.value, " ", "_", "all") />
 </cffunction>
 
 <cffunction name="doStartTag" access="public" returntype="string" output="false"

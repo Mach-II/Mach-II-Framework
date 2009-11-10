@@ -54,13 +54,12 @@ Notes:
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("img", true) />
 	
-	<!--- Setup required --->
-	<cfset ensureOneByNameList("src,event,route") />
+	<!--- This tag requires one of these attributes: 'src', 'event'or  'route'
+		or an exception will be thrown. ensureOneByList() is not used for performance. --->
 	
 	<!--- If the src is not present, then make an URL using event/module/route --->
-	<cfif NOT StructKeyExists(attributes, "src")>
-		<cfset attributes.src = makeUrl() />
-	</cfif>
+	<cfparam name="attributes.src" type="string"
+		default="#makeUrl()#" />
 	
 	<!--- Setup optional but requried by the addImage() API --->
 	<cfparam name="attributes.width" type="string" 
