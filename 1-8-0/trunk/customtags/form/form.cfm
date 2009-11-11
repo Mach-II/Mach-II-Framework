@@ -106,17 +106,20 @@ Notes:
 			<cfset attributes.autoFocus = request._MachIIFormLib.firstElementId />
 		</cfif>
 		
-		<!---
-			We use the window._MachIIFormLib_autoFocusOccurred so two 
-			forms on a page won't steal an auto-focus
-		--->
-		<cfimport prefix="view" taglib="/MachII/customtags/view" />
-		<cfoutput><view:script outputType="inline">
-			if (window._MachIIFormLib_autoFocusOccurred !== 'undefined') {
-				document.getElementById('#attributes.autoFocus#').focus();
-				window._MachIIFormLib_autoFocusOccurred = true;
-			}
-		</view:script></cfoutput>
+		<!--- Only focus if we have an id to focus on --->
+		<cfif Len(attributes.autoFocus)>
+			<!---
+				We use the window._MachIIFormLib_autoFocusOccurred so two 
+				forms on a page won't steal an auto-focus
+			--->
+			<cfimport prefix="view" taglib="/MachII/customtags/view" />
+			<cfoutput><view:script outputType="inline">
+				if (window._MachIIFormLib_autoFocusOccurred !== 'undefined') {
+					document.getElementById('#attributes.autoFocus#').focus();
+					window._MachIIFormLib_autoFocusOccurred = true;
+				}
+			</view:script></cfoutput>
+		</cfif>
 	</cfif>
 	
 	<!--- Clean up bind as this serves as a "check" by other tags to ensure bind is available --->
