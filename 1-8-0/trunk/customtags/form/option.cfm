@@ -60,6 +60,8 @@ Notes:
 	<cfset attributes.checkValue = request._MachIIFormLib.selectCheckValue />
 	
 	<!--- Set defaults --->
+	<cfparam name="attributes.value" type="string" 
+		default="" />
 	<cfparam name="attributes.id" type="string"
 		default="#getParentTagAttribute("select", "id")#_#createCleanId(attributes.value)#" />
 	<cfparam name="attributes.label" type="string"  
