@@ -113,17 +113,28 @@ PUBLIC FUNCTIONS
 	<cfargument name="path" type="string" required="true" />
 	<cfargument name="bind" type="any" required="false" />
 	
+	<cfset var result = "" />
+	
 	<cftry>
-		<cfreturn resolvePath(argumentCollection=arguments) />
+		<cfset result = resolvePath(argumentCollection=arguments) />
+
 		<cfcatch type="any">
 			<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
 				message="Unable to bind to path '#arguments.path#'. This could be because the path was incorrect or the target CFC caused an exception. This could also be caused because the form element is not wrapped inside a Mach-II form custom tag. See details for more information."
 				detail="#cfcatch.message# || #cfcatch.detail#" />
 		</cfcatch>
-	</cftry>	
+	</cftry>
+	
+	<cfif NOT IsSimpleValue(result)>
+		<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
+			message="Unable to bind to path '#arguments.path#' since the path resolved to a non-simple value."
+			detail="All resolved paths must be a simple value and the end resolution cannot be a struct, array or component." />	
+	</cfif>
+	
+	<cfreturn result />	
 </cffunction>
 
-<cffunction name="resolvePath" access="private" returntype="any" output="false"
+<cffunction name="resolvePath" access="public" returntype="any" output="false"
 	hint="Resolves a path and returns a value.">
 	<cfargument name="path" type="string" required="true" />
 	<cfargument name="bind" type="any" required="false" default="#request._MachIIFormLib.bind#" />
@@ -149,7 +160,7 @@ PUBLIC FUNCTIONS
 	
 	<cfset arguments.path = ListDeleteAt(arguments.path, 1, ".") />
 
-	<cfif FindNoCase(".", arguments.path)>
+	<cfif ListLen(arguments.path, ".")>
 		<cfset value = resolvePath(arguments.path, value) />
 	</cfif>
 	
