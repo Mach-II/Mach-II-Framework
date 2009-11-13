@@ -76,6 +76,8 @@ Notes:
 	<cfelse>
 		<cfset setAttributeIfDefinedAndTrue("selected", "selected") />
 	</cfif>
+	
+	
 	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
 	
 	<!--- Set standard and event attributes --->
