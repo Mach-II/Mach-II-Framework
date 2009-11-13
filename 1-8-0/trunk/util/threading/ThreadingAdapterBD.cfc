@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -45,7 +45,7 @@ Notes:
 	displayname="ThreadingAdapter"
 	extends="MachII.util.threading.ThreadingAdapter"
 	output="false"
-	hint="Threading adapter for Railo 3+.">
+	hint="Threading adapter for commercial BlueDragon and Open BlueDragon 1.2+.">
 
 	<!---
 	PROPERTIES
@@ -56,7 +56,7 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ThreadingAdapter" output="false"
-		hint="This initializes the adapter for Railo 3+.">
+		hint="This initializes the adapter for commercial BlueDragon and Open BlueDragon 1.2+.">
 		<cfreturn this />
 	</cffunction>
 	
@@ -71,7 +71,7 @@ Notes:
 			hint="Name of method to call on the callback CFC." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="Arguments to pass to the callback method." />
-		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0 if BD has implemented a fix for their limitations." />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.9.0." />
 	</cffunction>
 	
 	<cffunction name="join" access="public" returntype="void" output="false"
@@ -80,7 +80,7 @@ Notes:
 			hint="A list, struct or array of thread ids to join." />
 		<cfargument name="timeout" type="numeric" required="true"
 			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
-		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.8.0 if BD has implemented a fix for their limitations." />
+		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.9.0." />
 	</cffunction>
 
 </cfcomponent>
