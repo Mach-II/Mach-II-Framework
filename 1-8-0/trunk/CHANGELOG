@@ -55,6 +55,20 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* Logging data not restored properly after redirect
+Logging data is not restored properly after a redirect, which means that
+some logging information could be lost. The problem doesn't surface until
+the logging threshold is modified (elevated) to a level such that logging
+data are scarce when a redirect happens.
+
+This defect is an edge case defect that was undiscovered for approximately
+9 months from the affected releases of Mach-II 1.6.0 and 1.6.1. It has been
+fixed in the 1.8 release.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/434
+(2009-11-14 mikerogers)
+
 * Publish command does not bubble exceptions properly
 Publish command does not bubble exceptions properly in multithreaded mode 
 which causes problems when a publish command encountered an exception inside 
