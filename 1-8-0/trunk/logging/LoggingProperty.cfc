@@ -247,6 +247,9 @@ will bind to root parameter values.
 			<!--- Remove log adapter from log factory --->
 			<cfset logFactory.removeLogAdapter(currentLogger.getLogAdapter()) />
 		</cfloop>
+		
+		<!--- Deconfigure all the loggers --->
+		<cfset getLoggerManager().deconfigure()>
 	</cffunction>
 	
 	<!---

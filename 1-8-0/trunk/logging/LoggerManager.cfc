@@ -94,6 +94,17 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures all the loggers.">
+		
+		<cfset var loggers = getLoggers() />
+		<cfset var key = "" />
+		
+		<cfloop collection="#loggers#" item="key">
+			<cfset loggers[key].deconfigure() />
+		</cfloop>
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->

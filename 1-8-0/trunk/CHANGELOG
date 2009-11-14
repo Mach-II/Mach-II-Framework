@@ -209,6 +209,15 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Deconfigure Loggers/Adapters
+All Loggers and Adapters now have a Deconfigure method which is called when the
+Logger should be reloaded, for example during a framework reload. This will help
+Loggers and Adapters maintain their internal states.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/435
+(2009-11-14 mikerogers)
+
 * View-Loaders
 View loaders allow a developers to load views based on convention such as 
 using an ANT-style path matching pattern.

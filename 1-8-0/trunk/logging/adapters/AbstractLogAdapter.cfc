@@ -73,6 +73,11 @@ Notes:
 		<!--- Does nothing. Override to provide custom functionality. --->
 	</cffunction>
 	
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
+		<!--- Does nothing --->
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
