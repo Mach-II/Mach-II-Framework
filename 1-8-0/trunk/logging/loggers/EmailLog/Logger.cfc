@@ -286,7 +286,7 @@ See that file header for configuration of filter criteria.
 
 		<cfset var loggingData = StructNew() />
 		
-		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+		<cfif getLogAdapter().getLoggingEnabled()>
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
 				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />

@@ -220,15 +220,19 @@ Uses the GenericChannelFitler for filtering. See that CFC for information on how
 	<cffunction name="isLoggingDataDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if logging data is defined.">
 
-		<cfset var scope = StructGet(getLoggingScope()) />
-		
-		<cfreturn StructKeyExists(scope, getLoggingPath()) />
+		<!--- Deprecated as of revision 1933 (1.8). Always returns true --->
+		<cfreturn true/>
 	</cffunction>
 	
 	<cffunction name="getLoggingData" access="public" returntype="struct" output="false"
-		hint="Gets logging data. Call isLoggingDataDefined() first to check if defined.">
+		hint="Gets logging data.">
 
 		<cfset var scope = StructGet(getLoggingScope()) />
+		
+		<cfif not StructKeyExists(scope, getLoggingPath())>
+			<cfset scope[getLoggingPath()] = StructNew() />
+			<cfset scope[getLoggingPath()].data = ArrayNew(1) />
+		</cfif>
 		
 		<cfreturn scope[getLoggingPath()] />
 	</cffunction>
