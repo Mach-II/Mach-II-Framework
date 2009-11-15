@@ -58,7 +58,15 @@ not been forgotten and please consider yourself thanked!
 Mach-II Simplicity (1.8.0) is released under the GPL v3.0 license.  You can 
 use Mach-II on any commercial application as long as you abide by the license. 
 For more details, please see the NOTICE, LICENSE and COPYING files that are 
-shipped with the package.
+shipped with the package. More information including FAQs on the license
+can be found here:
+
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/wiki/FAQHowIsMachIILicensed
+
+The software in this package is distributed under the GNU General Public
+License (with a special exception described below).  The term "library"
+is a reference to the entire Mach-II package and all files in which
+the GNU General Public License applies.
 
     Mach-II - A framework for object oriented MVC web applications in CFML
     Copyright (C) 2003-2009 GreatBizTools, LLC
