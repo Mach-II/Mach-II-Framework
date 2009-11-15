@@ -251,6 +251,27 @@ quick access to things such as announcing a new event or getting/setting propert
 
 		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
+	
+	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
+		hint="Adds a HTML head element.">
+		<cfargument name="text" type="string" required="true" />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.text) />
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by name/value.">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="string" required="true" />
+		<cfargument name="charset" type="string" required="false" />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by statusCode/statusText.">
+		<cfargument name="statuscode" type="string" required="true" />
+		<cfargument name="statustext" type="string" required="false" />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
 
 	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
 		hint="Resolves a value by deployed environment name or group (explicit environment names are searched first then groups then default).">
@@ -380,11 +401,6 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
 	</cffunction>
 	
-	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
-		hint="Gets the component name for logging.">
-		<cfreturn variables.componentNameForLogging />
-	</cffunction>
-	
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
@@ -401,6 +417,11 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
 		hint="Gets the Assert component.">
 		<cfreturn getAppManager().getAssert() />
+	</cffunction>
+	
+	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
+		hint="Gets the component name for logging.">
+		<cfreturn variables.componentNameForLogging />
 	</cffunction>
 
 	<!---
