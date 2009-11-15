@@ -150,12 +150,18 @@ Notes:
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 
+		<cfset var oldAppLoader = variables.appManager />
+		
 		<cfset updateLastReloadDatetime() />		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
 				getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 		<cfset getAppManager().setAppLoader(this) />
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 		<cfset setLog(getAppManager().getLogFactory()) />
+		
+		<cfif isObject(oldAppLoader)>
+			<cfset oldAppLoader.deconfigure() />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false"

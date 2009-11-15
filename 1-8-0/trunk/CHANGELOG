@@ -55,6 +55,20 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* AppLoader not deconfigured after framework reload
+The AppLoader is not deconfigured after the framework reloads which could
+leave lower-level components in an inconsistent state. The fix for this
+defect was done such that if there is an error reloading the application
+framework, there will be no deconfiguring of the previous AppLoader's
+components.
+
+This defect affected all versions of Mach-II and has been fixed in the
+1.8 release.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
+(2009-11-14 mikerogers)
+
 * Logging data not restored properly after redirect
 Logging data is not restored properly after a redirect, which means that
 some logging information could be lost. The problem doesn't surface until
