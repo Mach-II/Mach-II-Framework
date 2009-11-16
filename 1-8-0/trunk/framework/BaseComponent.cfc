@@ -272,6 +272,20 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="statustext" type="string" required="false" />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
+	
+	<cffunction name="uploadFile" access="public" returntype="struct" output="false" 
+		hint="Wrapper for CFFILE action=upload to better integrate uploading files">
+		<cfargument name="fileField" type="string" required="true" />
+		<cfargument name="destination" type="string" required="true" />
+		<cfargument name="nameConflict" type="string" required="false" default="error" />
+		<cfargument name="accept" type="string" required="false" default="*" />
+		<cfargument name="mode" type="string" required="false" />
+		<cfargument name="fileAttributes" type="string" required="false" />
+		
+		<cfset arguments.fileField = arguments.fileField & "_-_file_-_" />
+		
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().uploadFile(argumentcollection=arguments) />
+	</cffunction>
 
 	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
 		hint="Resolves a value by deployed environment name or group (explicit environment names are searched first then groups then default).">

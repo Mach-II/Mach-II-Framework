@@ -707,6 +707,42 @@ Notes:
 			</cfif>
 		</cfloop>
 	</cffunction>
+	
+	<cffunction name="uploadFile" access="public" returntype="struct" output="false" 
+		hint="Wrapper for CFFILE action=upload to better integrate uploading files">
+		<cfargument name="fileField" type="string" required="true" />
+		<cfargument name="destination" type="string" required="true" />
+		<cfargument name="nameConflict" type="string" required="false" default="error" />
+		<cfargument name="accept" type="string" required="false" default="*" />
+		<cfargument name="mode" type="string" required="false" />
+		<cfargument name="fileAttributes" type="string" required="false" />
+		
+		<cfset var uploadResult = StructNew() />
+		
+		<!--- mode and attributes are mutually exclusive (mode = *nix only, attributes = Windows only), 
+				but I suppose if someone was writing code that they wanted to have one apply on *nix 
+				and the other on Windows they could potentially provide both, so we better 
+				account for that --->
+		<cfif StructKeyExists(arguments, "mode") and not StructKeyExists(arguments, "fileAttributes")>
+			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#" 
+					nameconflict="#arguments.nameConflict#" accept="#arguments.accept#" mode="#arguments.mode#" 
+					result="uploadResult" />
+		<cfelseif StructKeyExists(arguments, "fileAttributes") and not StructKeyExists(arguments, "mode")>
+			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#" 
+					nameconflict="#arguments.nameConflict#" accept="#arguments.accept#"
+					attributes="#arguments.fileAttributes#" result="uploadResult" />
+		<cfelseif StructKeyExists(arguments, "fileAttributes") and StructKeyExists(arguments, "mode")>
+			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#" 
+					nameconflict="#arguments.nameConflict#" accept="#arguments.accept#"
+					mode="#arguments.mode#" attributes="#arguments.fileAttributes#" 
+					result="uploadResult" />
+		<cfelse>
+			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#" 
+					nameconflict="#arguments.nameConflict#" accept="#arguments.accept#" result="uploadResult" />
+		</cfif>
+		
+		<cfreturn uploadResult />
+	</cffunction>
 
 	<!---
 	ACCESSORS
