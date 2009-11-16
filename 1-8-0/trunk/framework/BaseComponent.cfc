@@ -282,8 +282,6 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="mode" type="string" required="false" />
 		<cfargument name="fileAttributes" type="string" required="false" />
 		
-		<cfset arguments.fileField = arguments.fileField & "_-_file_-_" />
-		
 		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().uploadFile(argumentcollection=arguments) />
 	</cffunction>
 

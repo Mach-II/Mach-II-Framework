@@ -57,9 +57,9 @@ Notes:
 			path can't be used as the value but we'll use it as the name. --->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.name" type="string" 
-			default="#wrapResolvePath(attributes.path)#_-_file_-_" />
+			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
-		<cfset attributes.path = "file_-_file_-_" />
+		<cfset attributes.path = "file" />
 	</cfif>
 	
 	<!--- Set defaults --->
