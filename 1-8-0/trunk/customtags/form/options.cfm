@@ -72,13 +72,9 @@ Notes:
 		default="" />
 
 <cfelse>
-	<cfset variables.checkValues = "" />
-
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->	
-	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol) />
-	</cfif>
+	<cfset variables.checkvalues = request._MachIIFormLib.selectCheckValue />
 	
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
@@ -103,7 +99,7 @@ Notes:
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", Trim(i), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(Trim(i)), "one") />
 			<cfif ListFindNoCase(variables.checkValues, Trim(i))>
-				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+				<cfset variables.option = ReplaceNoCase(variables.option, '">', ' selected="selected">', "one") />
 			</cfif>
 				
 			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
@@ -115,7 +111,7 @@ Notes:
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(variables.itemOrder[i]), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[variables.itemOrder[i]]), "one") />
 			<cfif ListFindNoCase(variables.checkValues, variables.itemOrder[i])>
-				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+				<cfset variables.option = ReplaceNoCase(variables.option, '">', ' selected="selected">', "one") />
 			</cfif>
 				
 			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
@@ -129,7 +125,7 @@ Notes:
 					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(attributes.items[i]), "all") />
 					<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i]), "one") />
 					<cfif ListFindNoCase(variables.checkValues, attributes.items[i])>
-						<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+						<cfset variables.option = ReplaceNoCase(variables.option, '">', ' selected="selected">', "one") />
 					</cfif>
 				
 					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
@@ -141,7 +137,7 @@ Notes:
 						<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[i][attributes.valueKey], "all") />
 						<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i][attributes.labelKey]), "one") />
 						<cfif ListFindNoCase(variables.checkValues, attributes.items[i][attributes.valueKey])>
-							<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+							<cfset variables.option = ReplaceNoCase(variables.option, '">', ' selected="selected">', "one") />
 						</cfif>
 							
 						<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
@@ -168,7 +164,7 @@ Notes:
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[attributes.valueCol][attributes.items.currentRow], "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
 			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow])>
-				<cfset variables.option = ReplaceNoCase(variables.option, "/>", ' selected="selected"/>', "one") />
+				<cfset variables.option = ReplaceNoCase(variables.option, '">', ' selected="selected">', "one") />
 			</cfif>
 				
 			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.option />
