@@ -45,7 +45,7 @@ Notes:
 	value	= [numeric|boolean] value to evaluate against (converts a value of "yes|true" to 1 and "no|false" to 0)
 	items	= [string] a list of items to use when evaluating the value
 --->
-<cfif thisTag.ExecutionMode IS "end">
+<cfif thisTag.ExecutionMode IS "start">
 
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
@@ -54,6 +54,8 @@ Notes:
 	<!--- Setup required --->
 	<cfset ensureByName("value") />
 	<cfset ensureByName("items", "Must be a list or an array.") />
+
+<cfelse>
 
 	<!--- Convert a "string" boolean to a number --->
 	<cfset attributes.value = booleanize(attributes.value, "value") />
