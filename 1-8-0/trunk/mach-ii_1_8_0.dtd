@@ -391,6 +391,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		type - the type of the bean to create
 		[fields] - the fields in the event to set in the bean
 		[reinit] - allows you to reuse and repopulate the bean if it is available in the Event object
+		[autopopulate] - sets up all bean fields and inner-beans to be populated automatically
 -->
 <!ELEMENT event-bean (field|inner-bean)*>
 <!ATTLIST event-bean
@@ -398,23 +399,27 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	type CDATA #REQUIRED
 	fields CDATA #IMPLIED
 	reinit (true|false) "true"
+	autopopulate CDATA #IMPLIED
 >
 
 <!ELEMENT inner-bean (field)*>
 <!ATTLIST inner-bean
 	name CDATA #REQUIRED
 	fields CDATA #IMPLIED
+	prefix CDATA #IMPLIED
 >
 
 <!--
 	"field"
 		name - the name of the field
-		[value] - the value of the field		
+		[value] - the value of the field
+		[ignore] - used to ignore the field if it comes in via an event arg, defaults to false
 -->
 <!ELEMENT field (value?)>
 <!ATTLIST field
 	name CDATA #REQUIRED
 	value CDATA #IMPLIED
+	ignore (true|false) "true"
 >
 
 <!--
