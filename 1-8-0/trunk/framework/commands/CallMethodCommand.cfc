@@ -58,7 +58,7 @@ or
 	displayname="CallMethodCommand" 
 	extends="MachII.framework.Command"
 	output="false"
-	hint="A Command for calling a method on a bean configured from the ColdSpringProperty.">
+	hint="A Command for calling a method on a bean configured and auto-wired in from an IoC container.">
 	
 	<!---
 	PROPERTIES
@@ -116,21 +116,31 @@ or
 				detail="Ensure your IoC property such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
 		</cfif>
 		
-		<cfloop from="1" to="#ArrayLen(args)#" index="i">
-			<cfif args[i].name NEQ "">
-				<cfif args[i].isExpression>
-					<cfset namedArgs[args[i].name] = variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager) />
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(args)#" index="i">
+				<cfif args[i].name NEQ "">
+					<cfif args[i].isExpression>
+						<cfset namedArgs[args[i].name] = variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager) />
+					<cfelse>
+						<cfset namedArgs[args[i].name] = args[i].value />
+					</cfif>
 				<cfelse>
-					<cfset namedArgs[args[i].name] = args[i].value />
+					<cfif args[i].isExpression>
+						<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager)) />
+					<cfelse>
+						<cfset ArrayAppend(argValues, args[i].value) /> 
+					</cfif>
 				</cfif>
-			<cfelse>
-				<cfif args[i].isExpression>
-					<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager)) />
-				<cfelse>
-					<cfset ArrayAppend(argValues, args[i].value) /> 
+			</cfloop>
+			<cfcatch type="any">
+				<cfif getLog().isErrorEnabled()>
+					<cfset log.error("An exception has occurred while trying to evaluate an argument expression in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.",  cfcatch) />
 				</cfif>
-			</cfif>
-		</cfloop>
+				<cfthrow type="MachII.framework.CallMethodCommand.InvalidExpression"
+					message="An exception has occurred while trying to evaluate an argument expression in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
+					detail="#cfcatch.message# || #cfcatch.detail#" />
+			</cfcatch>
+		</cftry>
 
 		<cftry>
 		
@@ -174,30 +184,31 @@ or
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has returned void but a ResultArg has been defined.",  cfcatch) />
+						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' has returned void but a ResultArg has been defined.",  cfcatch) />
 					</cfif>
-					<cfthrow type="MachII.framework.VoidReturnType"
-						message="A ResultArg has been specified on a call-method command method that is returning void. This can also happen if your bean method returns a Java null."
+					<cfthrow type="MachII.framework.CallMethodCommand.VoidReturnType"
+						message="A ResultArg has been specified in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' is returning void. This can also happen if your bean method returns a Java null."
 						detail="Bean: '#getMetadata(getBean).name#' Method: '#getMethod()#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has caused an exception.",  cfcatch) />
+						<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch) />
 					</cfif>
-					<cfrethrow />
+					<cfset getUtils().rebundledException("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch, getMetaData(bean).path) />
 				</cfif>
 			</cfcatch>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' has caused an exception.",  cfcatch) />
+					<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#.",  cfcatch) />
 				</cfif>
-				<cfrethrow />
+				<cfset getUtils().rebundledException("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch, getMetaData(bean).path) />
 			</cfcatch>
 		</cftry>	
 		
 		<cfreturn true />
 	</cffunction>
 	
-	<cffunction name="addArgument" access="public" returntype="void" output="false">
+	<cffunction name="addArgument" access="public" returntype="void" output="false"
+		hint="Adds and argument to an ordered list of arguments to pass to the bean method.">
 		<cfargument name="name" type="string" required="true" />
 		<cfargument name="value" type="any" required="true" />
 		
