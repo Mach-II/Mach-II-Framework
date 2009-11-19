@@ -77,6 +77,8 @@ Notes:
 		default="" />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#_#createCleanId(attributes.value)#" />
+	<cfparam name="attributes.defaultValue" type="string"
+		default="" />
 		
 	<cfset setFirstElementId(attributes.id) />
 	
@@ -102,7 +104,7 @@ Notes:
 	
 	<!--- Only write one hidden tag --->
 	<cfif NOT IsDefined("request._MachIIFormLib._checkbox_#attributes.name#")>
-		<cfset variables.generatedContent = variables.generatedContent & '<input name="_-_#attributes.name#" type="hidden" value="" />' />
+		<cfset variables.generatedContent = variables.generatedContent & '<input name="_-_#attributes.name#" type="hidden" value="#attributes.defaultValue#" />' />
 		<cfset request._MachIIFormLib["_checkbox_" & attributes.name] = true />
 	</cfif>
 	

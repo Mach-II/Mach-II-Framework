@@ -456,7 +456,7 @@ Notes:
 		<!--- Cleanup missing checkboxes which are indicated by incoming event args starting with '_-_keyNameHere' --->
 		<cfloop collection="#eventArgs#" item="key">
 			<cfif key.startsWith("_-_") AND NOT StructKeyExists(eventArgs, Right(key, Len(key) - 3))>
-				<cfset eventArgs[Right(key, Len(key) - 3)] = "" />
+				<cfset eventArgs[Right(key, Len(key) - 3)] = eventArgs[key] />
 			</cfif>
 		</cfloop>
 		
