@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 Stats on a particular cache's performance may be tracked by a Mach-II provided CFC 
@@ -50,6 +50,12 @@ tracked by Mach-II are as follows:
 * Cache active element count
 * Cache total element count
 * Cache evictions - number of elements that the cache removed to make room for new elements 
+
+N.B. CacheStats method is not synchronized and therefore not completely thread-safe. This 
+could lead to "slightly" inaccurate counts due to collision in which a counter is incremented
+or decremented concurrently. We could ensure complete thread-safety of the counters by wrapping
+each method in a cflock, but that would lead to degraded performance. Since CacheStats merely
+gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not warranted.
 --->
 <cfcomponent
 	displayname="CacheStats"
