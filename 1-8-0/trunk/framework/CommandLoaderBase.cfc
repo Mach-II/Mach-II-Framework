@@ -147,7 +147,7 @@ Notes:
 			<cfset command = setupCallMethod(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<!--- default/unrecognized command --->
 		<cfelse>
-			<cfset command = setupDefault(arguments.commandNode) />
+			<cfset command = setupDefault(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		</cfif>
 		
 		<cfreturn command />
@@ -185,6 +185,8 @@ Notes:
 		
 		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, aliases, criteria) />
 		<cfset command.setLog(variables.cacheCommandLog) />
+		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
+		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -268,6 +270,8 @@ Notes:
 			, criteriaCollectionName, criteriaCollection, condition) />
 		<cfset command.setLog(variables.cacheClearCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
+		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
 		
 		<cfreturn command />
 	</cffunction>
@@ -297,6 +301,9 @@ Notes:
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setUtils(variables.utils) />
+		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
+		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
 
 		<!--- support adding arguments tags inside call-method --->
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
@@ -744,10 +751,14 @@ Notes:
 	<cffunction name="setupDefault" access="private" returntype="MachII.framework.Command" output="false"
 		hint="Sets up a default command.">
 		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = CreateObject("component", "MachII.framework.Command").init() />
 		
 		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
+		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
+		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
 		
 		<cfreturn command />
 	</cffunction>

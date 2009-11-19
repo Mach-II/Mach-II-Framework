@@ -53,6 +53,9 @@ Notes:
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.expressionEvaluator = "" />
+	<cfset variables.utils = "" />
+	<cfset variables.parentHandlerType = "" />
+	<cfset variables.parentHandlerName = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -73,7 +76,7 @@ Notes:
 		<cfset var log = getLog() />
 		
 		<cfif log.isInfoEnabled()>
-			<cfset log.info("Executing a default command named '#getParameter("commandName")#'. This is not a concrete command. Check your configuration file.") />
+			<cfset log.info("Executing a default command named '#getParameter("commandName")#' in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.geAppManager().getModuleName()#'. This is not a concrete command. Check your configuration file.") />
 		</cfif>
 		
 		<cfreturn true />
@@ -126,6 +129,29 @@ Notes:
 	</cffunction>
 	<cffunction name="getExpressionEvaluator" access="public" returntype="MachII.util.ExpressionEvaluator" output="false">
 		<cfreturn variables.expressionEvaluator />
+	</cffunction>
+	
+	<cffunction name="setUtils" access="public" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
+	</cffunction>
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
+		<cfreturn variables.utils />
+	</cffunction>
+	
+	<cffunction name="setParentHandlerType" access="public" returntype="void" output="false">
+		<cfargument name="parentHandlerType" type="string" required="true" />
+		<cfset variables.parentHandlerType = arguments.parentHandlerType />
+	</cffunction>
+	<cffunction name="getParentHandlerType" access="public" returntype="string" output="false">
+		<cfreturn variables.parentHandlerType />
+	</cffunction>
+	<cffunction name="setParentHandlerName" access="public" returntype="void" output="false">
+		<cfargument name="parentHandlerName" type="string" required="true" />
+		<cfset variables.parentHandlerName = arguments.parentHandlerName />
+	</cffunction>
+	<cffunction name="getParentHandlerName" access="public" returntype="string" output="false">
+		<cfreturn variables.parentHandlerName />
 	</cffunction>
 
 </cfcomponent>
