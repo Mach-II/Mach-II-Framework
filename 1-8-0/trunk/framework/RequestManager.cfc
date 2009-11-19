@@ -404,8 +404,14 @@ Notes:
 					<cfset params = parseRoute(variables.routeAliases[names[1]], names) />
 				<cfelse>
 					<!--- No route found for this url --->
-					<cfif log.isWarnEnabled()>
-						<cfset getLog().warn("Could not find a configured url route with the url alias of '#names[1]#'. Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl(). Cleaned path_info='#arguments.pathInfo#'") />
+					<cfif getParseSes() AND getUrlExcludeEventParameter()>
+						<!--- The SES url has the event parameter as the first element since the event parameter is excluded so routes are disabled --->
+						<cfset params = parseNonRoute(names) />
+						<cfset getRequestHandler().setCurrentSESParams(params) />
+					<cfelse>
+						<cfif log.isWarnEnabled()>
+							<cfset getLog().warn("Could not find a configured url route with the url alias of '#names[1]#'. Routes can only be announced from the browser url using url alias. Route names are only used when referencing routes from within the framework such as BuildRouteUrl(). Cleaned path_info='#arguments.pathInfo#'") />
+						</cfif>
 					</cfif>
 				</cfif>
 			</cfif>	
