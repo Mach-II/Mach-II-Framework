@@ -135,7 +135,7 @@ Notes:
 			<cfset command = setupRedirect(arguments.commandNode) />
 		<!--- event-arg --->
 		<cfelseif arguments.commandNode.xmlName EQ "event-arg">
-			<cfset command = setupEventArg(arguments.commandNode) />
+			<cfset command = setupEventArg(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<!--- cache --->
 		<cfelseif arguments.commandNode.xmlName EQ "cache">
 			<cfset command = setupCache(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
@@ -721,6 +721,8 @@ Notes:
 	<cffunction name="setupEventArg" access="private" returntype="MachII.framework.commands.EventArgCommand" output="false"
 		hint="Sets up an event-arg command.">
 		<cfargument name="commandNode" type="any" required="true" />
+		<cfargument name="parentHandlerName" type="string" required="false" default="" />
+		<cfargument name="parentHandlerType" type="string" required="false" default="" />
 		
 		<cfset var command = "" />
 		<cfset var argValue = "" />
@@ -744,6 +746,8 @@ Notes:
 		
 		<cfset command.setLog(variables.eventArgCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
+		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
 		
 		<cfreturn command />
 	</cffunction>

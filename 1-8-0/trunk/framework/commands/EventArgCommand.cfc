@@ -91,7 +91,17 @@ Notes:
 			<cfset value = getArgVariableValue() />
 		<cfelseif isArgValueDefined()>
 			<cfif getExpressionEvaluator().isExpression(getArgValue())>
-				<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, propertyManager) />
+				<cftry>
+					<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, propertyManager) />
+					<cfcatch type="any">
+						<cfif log.isErrorEnabled()>
+							<cfset log.error("An exception has occurred while trying to evaluate an value expression '#getArgValue()#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.", cfcatch) />
+						</cfif>
+						<cfthrow type="MachII.framework.commands.InvalidExpression"
+							message="An exception has occurred while trying to evaluate an value expression '#getArgValue()#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
+							detail="#cfcatch.message# || #cfcatch.detail#" />
+					</cfcatch>
+				</cftry>
 			<cfelse>
 				<cfset value = getArgValue() />
 			</cfif>
