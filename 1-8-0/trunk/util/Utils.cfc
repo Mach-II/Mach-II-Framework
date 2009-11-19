@@ -487,6 +487,9 @@ Notes:
 			<cfif StructKeyExists(arguments.caughtException, "where")>
 				<cfset message = message & " || SQL Were: " & arguments.caughtException.where />
 			</cfif>
+			<cfif StructKeyExists(arguments.caughtException, "value")>
+				<cfset message = message & " || Value: " & arguments.caughtException.value />
+			</cfif>
 		</cfif>
 		
 		<cfreturn message />
