@@ -112,8 +112,8 @@ or
 		
 		<cfif NOT IsObject(bean)>
 			<cfthrow type="MachII.framework.commands.NoBean"
-				message="A call-method commands was encountered that did not have a bean named '#getBeanId()#' autowired into it."
-				detail="Ensure your IoC property such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
+				message="A call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#' did not have a bean named '#getBeanId()#' autowired into it."
+				detail="Ensure your IoC container such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
 		</cfif>
 		
 		<cftry>
@@ -133,11 +133,11 @@ or
 				</cfif>
 			</cfloop>
 			<cfcatch type="any">
-				<cfif getLog().isErrorEnabled()>
-					<cfset log.error("An exception has occurred while trying to evaluate an argument expression in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.",  cfcatch) />
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("An exception has occurred while trying to evaluate an argument expression '#args[i].value#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.",  cfcatch) />
 				</cfif>
-				<cfthrow type="MachII.framework.CallMethodCommand.InvalidExpression"
-					message="An exception has occurred while trying to evaluate an argument expression in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
+				<cfthrow type="MachII.framework.commands.InvalidExpression"
+					message="An exception has occurred while trying to evaluate an argument expression '#args[i].value#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
 					detail="#cfcatch.message# || #cfcatch.detail#" />
 			</cfcatch>
 		</cftry>
@@ -186,7 +186,7 @@ or
 					<cfif log.isErrorEnabled()>
 						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' has returned void but a ResultArg has been defined.",  cfcatch) />
 					</cfif>
-					<cfthrow type="MachII.framework.CallMethodCommand.VoidReturnType"
+					<cfthrow type="MachII.framework.commonds.VoidReturnType"
 						message="A ResultArg has been specified in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' is returning void. This can also happen if your bean method returns a Java null."
 						detail="Bean: '#getMetadata(getBean).name#' Method: '#getMethod()#'" />
 				<cfelse>
