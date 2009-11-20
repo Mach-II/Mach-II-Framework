@@ -188,7 +188,7 @@ PUBLIC FUNCTIONS
 		</cfloop>
 	<cfelseif IsStruct(arguments.checkValue)>
 		<cfloop collection="#arguments.checkValue#" item="item">
-			<cfif StructFind(arguments.checkValue, item)>
+			<cfif IsBoolean(arguments.checkValue[item]) AND arguments.checkValue[item]>
 				<cfset checkValues = ListAppend(checkValues, item) />
 			</cfif>
 		</cfloop>
@@ -236,7 +236,6 @@ PUBLIC FUNCTIONS
 		</cfloop>
 		
 		<!--- We now of a valid display order list with references to keys that exists in the items --->
-		
 		
 		<!--- Remove keys from modified items --->
 		<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
