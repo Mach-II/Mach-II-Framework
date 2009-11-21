@@ -303,14 +303,7 @@ application.serviceFactory_account variable.
 		
 		<!--- Set the autowire attribute name --->
 		<cfset setAutowireAttributeName(getParameter("autowireAttributeName", "depends")) />
-		
-		<!--- Setup CFC generation location --->
-		<cfset setCfcGenerationLocation(ExpandPath(getParameter("cfcGenerationLocation"))
-				, GetDirectoryFromPath(GetCurrentTemplatePath())) />
-		
-		<!--- Setup the dot path to the CFC generation location --->
-		<cfset setDotPathToCfcGenerationLocation(getParameter("dotPathTocfcGenerationLocation"), "") />
-		
+				
 		<!--- Get the config file path --->
 		<cfset getAssert().hasLength(getParameter("configFile")
 				, "You must specify a parameter named 'configFile'.") />
@@ -594,6 +587,7 @@ application.serviceFactory_account variable.
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
 		<cfset var autowireBeanNames = "" />
 		<cfset var beanName = "" />
+		<cfset var targets = StructNew() />
 		<cfset var autowireCfc = "" />
 		<cfset var i = 0 />
 
@@ -601,42 +595,36 @@ application.serviceFactory_account variable.
 		<cfif StructKeyExists(arguments.targetObjMetadata, arguments.autowireAttributeName)>
 			
 			<!--- Get all of the bean names to autowire --->
-			<cfset autowireBeanNames = ListToArray(arguments.targetObjMetadata[arguments.autowireAttributeName]) />
+			<cfset autowireBeanNames = ListToArray(getUtils().trimList(arguments.targetObjMetadata[arguments.autowireAttributeName])) />
 			
 			<!--- Generate and instantiate autowire component with the getter/setter methods --->
-			<cfset autowireCfc = createAutowireDynamicMethodsComponent(autowireBeanNames) />
+			<cfset autowireCfc = CreateObject("component", "MachII.properties.ColdSpringProperty_InjectionMethods").init(autowireBeanNames) />
 			
-			<!--- Loop over all the methods --->
-			<cfloop from="1" to="#ArrayLen(autowireBeanNames)#" index="i">
-				
-				<cfset beanName = Trim(autowireBeanNames[i]) />
-				
-				<!--- Inject the _methodInject() so we can get the methods into the variables scope
-					in addition to the this scope of the component --->
-				<cfset arguments.targetObj["_methodInject"] = autowireCfc["_methodInject"] />
-
-				<!--- Only dynamically inject the setter if there isn't a concrete getter --->
-				<cfif NOT StructKeyExists(arguments.targetObj, "get" & beanName)>
-					<cfset arguments.targetObj._methodInject("get" & beanName, autowireCfc["get" & beanName]) />
-				</cfif>
-				
-				<!--- Only dynamically inject the setter if there isn't a concrete setter --->
-				<cfif NOT StructKeyExists(arguments.targetObj, "set" & beanName)>
-					<cfset arguments.targetObj._methodInject("set" & beanName, autowireCfc["set" & beanName]) />
-				</cfif>
-									
-				<!--- Inject appropriate bean if the factory has a bean by that name --->
-				<cfif getAssert().isTrue(beanFactory.containsBean(beanName)
-						, "Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
-						, "Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.")>
-					<cfinvoke component="#arguments.targetObj#" method="set#beanName#">
-						<cfinvokeargument name="#beanName#" value="#beanFactory.getBean(beanName)#" />
-					</cfinvoke>
-				</cfif>
-				
-				<!--- Delete the _methodInject() from the target --->
-				<cfset StructDelete(arguments.targetObj, "_methodInject") />
-			</cfloop>
+			<!--- Build all the targets --->
+			<cftry>
+				<cfloop from="1" to="#ArrayLen(autowireBeanNames)#" index="i">
+					<cfset beanName = autowireBeanNames[i] />
+												
+					<!--- Add appropriate bean if the factory has a bean by that name --->
+					<cfset targets[beanName] = beanFactory.getBean(beanName) />
+				</cfloop>
+				<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factor --->
+				<cfcatch type="any">
+					<cfthrow type="MachII.properties.ColdSpringProperty.NoBean"
+						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
+				</cfcatch>
+			</cftry>
+			
+			<!--- Inject the _methodInject() so we can get the methods into the variables scope
+				in addition to the this scope of the component --->
+			<cfset arguments.targetObj["_injectMethods"] = autowireCfc["_injectMethods"] />
+			
+			<!--- Now inject everything into the target --->
+			<cfset arguments.targetObj._injectMethods(autowireCfc, targets) />
+	
+			<!--- Delete the _methodInject() from the target --->
+			<cfset StructDelete(arguments.targetObj, "_injectMethods") />
 		</cfif>	
 	</cffunction>
 	
@@ -778,69 +766,6 @@ application.serviceFactory_account variable.
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="createAutowireDynamicMethodsComponent"access="private" returntype="any" output="false"
-		hint="Create a component with the neccessary methods to dynamically inject into targets.">
-		<cfargument name="autowireBeanNames" type="array" required="true" />
-		
-		<cfset var beanName = "" />
-		<cfset var cfcData = CreateObject("java", "java.lang.StringBuffer") />
-		<cfset var cfcName = "" />
-		<cfset var cfcDirectory = getCfcGenerationLocation() />
-		<cfset var autowireCfc = "" />
-		<cfset var i = "" />
-		
-		<!--- Add the opening cfcomponent tag and _methodInject method --->		
-		<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
-		<cfset cfcData.append('<cfcomponent><cffunction name="_methodInject" access="public" returntype="void" output="false"><cfargument name="methodName" type="string" required="true" /><cfargument name="method" type="any" required="true" /><cfset this[arguments.methodName] = arguments.method /><cfset variables[arguments.methodName] = arguments.method /></' & 'cffunction>') />
-				
-		<!--- Create the getter/setter methods for each beanName --->
-		<cfloop from="1" to="#ArrayLen(arguments.autowireBeanNames)#" index="i">
-			<!--- Clean any spaces from the bean name --->
-			<cfset beanName = Trim(arguments.autowireBeanNames[i]) />
-
-			<!--- Used string concatenation otherwise CFEclipse marks this as bad code --->
-			<cfset cfcData.append('<cffunction name="set' & beanName & '" access="public" returntype="void" output="false"><cfargument name="' & beanName & '" type="any" required="true" /><cfset variables.' & beanName & ' = arguments.' & beanName & ' /></' & 'cffunction><cffunction name="get' & beanName & '" access="public" returntype="any" output="false"><cfreturn variables.' & beanName & ' /></' & 'cffunction>') />
-		</cfloop>
-
-		<!--- Add the closing cfcomponent tag --->
-		<cfset cfcData.append('</cfcomponent>') />
-		
-		<!--- Create a name for the CFC using Hash() since that is faster than creating a UUID --->
-		<cfset cfcName = Hash(getTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
-		
-		<!--- Write the cfc data to a temp file --->
-		<cftry>
-			<cffile action="write" 
-				output="#cfcData.toString()#" 
-				file="#cfcDirectory#/#cfcName#.cfc" />
-			<cfcatch type="any">
-				<cfthrow type="MachII.properties.ColdspringProperty.CFCWritePermissions"
-					message="Cannot write temporary CFC for autowiring to '#cfcDirectory#'. Does your CFML engine have write permissions to this directory?"
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
-			</cfcatch>
-		</cftry>
-		
-		<!--- Instantiate the component --->
-		<cftry>
-			<cfset autowireCfc = CreateObject("component", getDotPathToCfcGenerationLocation() & cfcName) />
-			<cfcatch type="any">
-				<cfif StructKeyExists(cfcatch, "missingFileName")>
-					<cfthrow type="MachII.properties.ColdspringProperty.CannotFindCFC"
-						message="Cannot find a temporary CFC at '#getDotPathToCfcGenerationLocation() & cfcName#'."
-						detail="Please check that the dot path location '#getDotPathToCfcGenerationLocation() & cfcName#' and cfcGenerationLocation '#cfcDirectory#' point to the same directory." />
-				<cfelse>
-					<cfrethrow />
-				</cfif>						
-			</cfcatch>
-		</cftry>
-		
-		<!--- Delete the temp cfc --->
-		<cffile action="delete" 
-			file="#cfcDirectory#/#cfcName#.cfc" />
-		
-		<cfreturn autowireCfc />
-	</cffunction>
-	
 	<cffunction name="referenceBeansToMachIIProperties" access="private" returntype="void" output="false"
 		hint="Places references to ColdSpring managed beans into the Mach-II properties.">
 		<cfargument name="beansToProperties" type="struct" required="true" />
@@ -881,28 +806,6 @@ application.serviceFactory_account variable.
 	</cffunction>
 	<cffunction name="getLastReloadDatetime" access="public" returntype="date" output="false">
 		<cfreturn variables.instance.lastReloadDatetime />
-	</cffunction>
-	
-	<cffunction name="setCfcGenerationLocation" access="private" returntype="void" output="false">
-		<cfargument name="cfcGenerationLocation" type="string" required="true" />
-		<cfset variables.instance.cfcGenerationLocation = arguments.cfcGenerationLocation />
-	</cffunction>
-	<cffunction name="getCfcGenerationLocation" access="public" returntype="string" output="false">
-		<cfreturn variables.instance.cfcGenerationLocation />
-	</cffunction>
-	
-	<cffunction name="setDotPathToCfcGenerationLocation" access="private" returntype="void" output="false">
-		<cfargument name="dotPathToCfcGenerationLocation" type="string" required="true" />
-		
-		<!--- Add a trailing dot of the path exists --->
-		<cfif Len(dotPathToCfcGenerationLocation)>
-			<cfset arguments.dotPathToCfcGenerationLocation = arguments.dotPathToCfcGenerationLocation & "." />
-		</cfif>
-		
-		<cfset variables.instance.dotPathToCfcGenerationLocation = arguments.dotPathToCfcGenerationLocation />
-	</cffunction>
-	<cffunction name="getDotPathToCfcGenerationLocation" access="public" returntype="string" output="false">
-		<cfreturn variables.instance.dotPathToCfcGenerationLocation />
 	</cffunction>
 	
 	<cffunction name="setConfigFilePaths" access="private" returntype="void" output="false">

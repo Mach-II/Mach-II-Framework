@@ -39,7 +39,7 @@ using a  bleeding edge release (BER) of the framework.
     executable, regardless of the license terms of these independent
     modules, and to copy and distribute the resulting executable under
     terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
+-    independent module, the terms and conditions of the license of that
     module.  An independent module is a module which is not derived from
     or based on this library.  If you modify this library, you may extend
     this exception to your version of the library, but you are not
@@ -395,6 +395,26 @@ http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/104
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+
+* Remove generation of cfcs for method injection for ColdSpring "depends" integration
+Remove the need to generate cfcs and write them to disk for method injection for 
+ColdSpring depends integration. This is typically a slow process because in order 
+into instantiate the CFC we must write it to the disk, instantiate into memory 
+and then delete it.
+
+Side by side comparison of generating a CFC, writing it to disk, instantiating it and 
+then deleting from disk compared to this new solution is about 9,500% faster. A test 
+case for this sub section of code (1000 iterations each) is 2359ms for 
+generate/write/instantiate/delete process (10 tests averaged) to 25ms for the new 
+instantiate generic bean process (10 tests averaged).
+
+Special thanks to Dave Shuck's mention of a difficulty with autowire with depends
+on Google App Engine due to no disk write access. This lead this a lightbulb
+moment on a workaround that did not involve writing to disk.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/456
+(2009-11-21 peterfarrell)
 
 * Trace Plugin reports that is has been deprecated in the trace output
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/277
