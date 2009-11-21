@@ -89,7 +89,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="handleCache" access="public" returntype="boolean"
+	<cffunction name="handleCache" access="public" returntype="boolean" output="true"
 		hint="Handles a cache.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />

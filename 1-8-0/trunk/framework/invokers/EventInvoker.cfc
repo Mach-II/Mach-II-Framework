@@ -58,7 +58,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="invokeListener" access="public" returntype="void"
+	<cffunction name="invokeListener" access="public" returntype="void" output="true"
 		hint="Invokes the Listener.">
 		<cfargument name="event" type="MachII.framework.Event" required="true"
 			hint="The Event triggering the invocation." />

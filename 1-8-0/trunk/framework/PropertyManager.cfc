@@ -276,7 +276,7 @@ Notes:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Prepares the configurable properties for use.">
 
 		<cfset var appManager = getAppManager() />
@@ -292,7 +292,7 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="deconfigure" access="public" returntype="void"
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Performs deconfiguration logic.">
 		
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />

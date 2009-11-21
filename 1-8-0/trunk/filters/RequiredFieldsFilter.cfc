@@ -89,7 +89,7 @@ Event-Handler Usage:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="filterEvent" access="public" returntype="boolean"
+	<cffunction name="filterEvent" access="public" returntype="boolean" output="false"
 		hint="Runs the filter event.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />

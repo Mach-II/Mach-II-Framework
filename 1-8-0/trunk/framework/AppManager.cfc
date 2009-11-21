@@ -103,7 +103,7 @@ Notes:
 		<cfreturn this />
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Calls configure() on each of the manager instances.">
 		
 		<!--- In order in which the managers are called is important
@@ -128,7 +128,7 @@ Notes:
 		<cfset setLoading(false) />
 	</cffunction>
 	
-	<cffunction name="deconfigure" access="public" returntype="void"
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Calls deconfigure() on each of the manager instances.">
 
 		<!--- In order in which the managers are called is important
@@ -304,11 +304,19 @@ Notes:
 	<cffunction name="setAppLoader" access="public" returntype="void" output="false"
 		hint="Sets the AppLoader instance.">
 		<cfargument name="appLoader" type="MachII.framework.AppLoader" required="true" />
-		<cfset variables.appLoader = arguments.appLoader />
+		<cfif NOT inModule()>
+			<cfset application[getAppKey()].appLoader = arguments.appLoader />
+		<cfelse>
+			<cfset application[getAppKey()]["appLoader_" &getModuleName()] = arguments.appLoader  />
+		</cfif>
 	</cffunction>
 	<cffunction name="getAppLoader" access="public" returntype="MachII.framework.AppLoader" output="false"
 		hint="Returns the AppLoader instance.">
-		<cfreturn variables.appLoader />
+		<cfif NOT inModule()>
+			<cfreturn application[getAppKey()].appLoader />
+		<cfelse>
+			<cfreturn application[getAppKey()]["appLoader_" &getModuleName()] />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="setEventManager" access="public" returntype="void" output="false">

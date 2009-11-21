@@ -94,7 +94,7 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="filterEvent" access="public" returntype="boolean"
+	<cffunction name="filterEvent" access="public" returntype="boolean" output="false"
 		hint="DEPRECATED. Runs the filter event.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />

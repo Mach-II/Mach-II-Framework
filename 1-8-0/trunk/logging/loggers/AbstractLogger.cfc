@@ -90,10 +90,8 @@ only executes methods that have been implemented in order to increase performanc
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="onRequestEnd" access="public" returntype="void" 
+	<cffunction name="onRequestEnd" access="public" returntype="void" output="true"
 		hint="On request end logic for this logger. Override to provide custom on request end logic.">
-		<!--- Note that leaving off the 'output' attribute requires all output to be
-			surrounded by cfoutput tags --->
 		<cfabort showerror="This method is abstract and must be overrided if onRequestEnd functionality is required." />
 	</cffunction>
 	

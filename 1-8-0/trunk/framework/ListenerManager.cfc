@@ -215,7 +215,7 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configure" access="public" returntype="void"
+	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered listeners and its' invoker.">
 
 		<cfset var appManager = getAppManager() />
@@ -230,7 +230,7 @@ Notes:
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="deconfigure" access="public" returntype="void"
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Performs deconfigure logic.">
 
 		<cfset var aListener = 0 />

@@ -138,11 +138,8 @@ See that file header for configuration of filter criteria.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="onRequestEnd" access="public" returntype="void"
+	<cffunction name="onRequestEnd" access="public" returntype="void" output="true"
 		hint="Displays output for this logger.">
-		
-		<!--- Note that leaving off the 'output' attribute requires all output to be
-			surrounded by cfoutput tags --->
 		
 		<cfset var data = ArrayNew(1) />
 		<cfset var local = StructNew() />
