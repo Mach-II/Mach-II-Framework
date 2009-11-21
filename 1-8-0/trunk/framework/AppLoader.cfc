@@ -150,7 +150,7 @@ Notes:
 		<cfargument name="parentAppManager" type="any" required="false" default=""
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 
-		<cfset var oldAppLoader = variables.appManager />
+		<cfset var oldAppManager = variables.appManager />
 		
 		<cfset updateLastReloadDatetime() />		
 		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(), 
@@ -159,8 +159,8 @@ Notes:
 		<cfset setLastReloadHash(getConfigFileReloadHash()) />
 		<cfset setLog(getAppManager().getLogFactory()) />
 		
-		<cfif isObject(oldAppLoader)>
-			<cfset oldAppLoader.deconfigure() />
+		<cfif IsObject(oldAppManager)>
+			<cfset oldAppManager.deconfigure() />
 		</cfif>
 	</cffunction>
 	
