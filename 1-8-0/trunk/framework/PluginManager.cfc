@@ -269,8 +269,12 @@ Notes:
 				<cfif StructKeyExists(variables, pointName & "Plugins")>
 					<cfif ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)>
 						<cfset variables[pointName & "Plugins"][ListFindNoCase(variables[pointName & "PluginsPosition"], arguments.pluginName)] = arguments.plugin />
-					<cfelse>					
-						<cfset ArrayInsertAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName], arguments.plugin) />
+					<cfelse>
+						<cfif ArrayLen(variables[pointName & "Plugins"]) GTE variables.pluginArrayPosition[arguments.pluginName]>
+							<cfset ArrayInsertAt(variables[pointName & "Plugins"], variables.pluginArrayPosition[arguments.pluginName], arguments.plugin) />
+						<cfelse>
+							<cfset ArrayAppend(variables[pointName & "Plugins"], arguments.plugin) />
+						</cfif>
 						<cfif ListLen(variables[pointName & "PluginsPosition"]) GT 1>
 							<cfset variables[pointName & "PluginsPosition"] = ListInsertAt(variables[pointName & "PluginsPosition"], variables.pluginArrayPosition[arguments.pluginName], arguments.pluginName) />
 						<cfelse>
@@ -280,7 +284,7 @@ Notes:
 					<cfset temp = ListAppend(temp, pointName) />
 				</cfif>
 			</cfloop>
-
+		
 			<!--- delete any references from the old plugin for each registered point not in new plugin --->
 			<cfloop from="1" to="#ArrayLen(variables.pluginPointArray)#" index="i">
 				<cfset pointName = variables.pluginPointArray[i] />
