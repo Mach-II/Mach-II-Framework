@@ -107,13 +107,15 @@ Notes:
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
 
+		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var utils = getAppManager().getUtils() />
 		<cfset var baseProxy = "" />
+		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
 		<!--- Set runParent attribute if this is a child PluginManager --->
-		<cfif IsObject(getParent())>
+		<cfif hasParent>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins") />
 			<cfif ArrayLen(pluginNodes) gt 0 AND StructKeyExists(pluginNodes[1].xmlAttributes, "runParent")>
 				<cfset setRunParent(pluginNodes[1].xmlAttributes["runParent"]) />
@@ -132,52 +134,71 @@ Notes:
 		
 		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
 			<cfset pluginName = pluginNodes[i].XmlAttributes["name"] />
-			<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
-
-			<!--- Set the Plugin's parameters. --->
-			<cfset pluginParams = StructNew() />
-
-			<!--- For each plugin, parse all the parameters --->
-			<cfif StructKeyExists(pluginNodes[i], "parameters")>
-				<cfset paramNodes = pluginNodes[i].parameters.xmlChildren />
-				<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
-					<cfset paramName = paramNodes[j].XmlAttributes["name"] />
-					<cftry>
-						<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
-						<cfcatch type="any">
-							<cfthrow type="MachII.framework.InvalidParameterXml"
-								message="Xml parsing error for the parameter named '#paramName#' for plugin '#pluginName#' in module '#getAppManager().getModuleName()#'." />
-						</cfcatch>
-					</cftry>
-					<cfset pluginParams[paramName] = paramValue />
-				</cfloop>
-			</cfif>
-
-			<cftry>
-				<!--- Do not method chain the init() on the instantiation
-					or objects that have their init() overridden will
-					cause the variable the object is assigned to will 
-					be deleted if init() returns void --->
-				<cfset plugin = CreateObject("component", pluginType) />
-				<cfset plugin.init(getAppManager(), pluginParams) />
-
-				<cfcatch type="any">
-					<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ pluginType>
-						<cfthrow type="MachII.framework.CannotFindPlugin"
-							message="Cannot find a CFC with the type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
-							detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file." />
-					<cfelse>
-						<cfthrow type="MachII.framework.PluginSyntaxException"
-							message="Mach-II could not register a plugin with type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
-							detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
-					</cfif>
-				</cfcatch>
-			</cftry>
 			
-			<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(plugin, pluginType, pluginParams) />
-			<cfset plugin.setProxy(baseProxy) />
-
-			<cfset addPlugin(pluginName, plugin, arguments.override) />
+			<!--- Override XML for Modules --->
+			<cfif hasParent AND arguments.override AND StructKeyExists(pluginNodes[i].xmlAttributes, "overrideAction")>
+				<!--- Check for a mapping --->
+				<cfif StructKeyExists(pluginNodes[i].xmlAttributes, "mapping")>
+					<cfset mapping = pluginNodes[i].xmlAttributes["mapping"] />
+				<cfelse>
+					<cfset mapping = pluginName />
+				</cfif>
+				
+				<!--- Check if parent has event handler with the mapping name --->
+				<cfif NOT getParent().isPluginDefined(mapping)>
+					<cfthrow type="MachII.framework.overridePluginNotDefined"
+						message="An plugin named '#mapping#' cannot be found in the parent plugin manager for the override named '#pluginName#' in module '#getAppManager().getModuleName()#'." />
+				</cfif>
+				
+				<cfset addPlugin(pluginName, getParent().getPlugin(mapping), arguments.override) />			
+			<!--- General XML setup --->
+			<cfelse>
+				<!--- Set the Plugin's type and parameters. --->
+				<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
+				<cfset pluginParams = StructNew() />
+				
+				<!--- For each plugin, parse all the parameters --->
+				<cfif StructKeyExists(pluginNodes[i], "parameters")>
+					<cfset paramNodes = pluginNodes[i].parameters.xmlChildren />
+					<cfloop from="1" to="#ArrayLen(paramNodes)#" index="j">
+						<cfset paramName = paramNodes[j].XmlAttributes["name"] />
+						<cftry>
+							<cfset paramValue = utils.recurseComplexValues(paramNodes[j]) />
+							<cfcatch type="any">
+								<cfthrow type="MachII.framework.InvalidParameterXml"
+									message="Xml parsing error for the parameter named '#paramName#' for plugin '#pluginName#' in module '#getAppManager().getModuleName()#'." />
+							</cfcatch>
+						</cftry>
+						<cfset pluginParams[paramName] = paramValue />
+					</cfloop>
+				</cfif>
+	
+				<cftry>
+					<!--- Do not method chain the init() on the instantiation
+						or objects that have their init() overridden will
+						cause the variable the object is assigned to will 
+						be deleted if init() returns void --->
+					<cfset plugin = CreateObject("component", pluginType) />
+					<cfset plugin.init(getAppManager(), pluginParams) />
+	
+					<cfcatch type="any">
+						<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ pluginType>
+							<cfthrow type="MachII.framework.CannotFindPlugin"
+								message="Cannot find a CFC with the type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+								detail="Please check that a plugin exists and that there is not a misconfiguration in the XML configuration file." />
+						<cfelse>
+							<cfthrow type="MachII.framework.PluginSyntaxException"
+								message="Mach-II could not register a plugin with type of '#pluginType#' for the plugin named '#pluginName#' in module named '#getAppManager().getModuleName()#'."
+								detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+						</cfif>
+					</cfcatch>
+				</cftry>
+				
+				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(plugin, pluginType, pluginParams) />
+				<cfset plugin.setProxy(baseProxy) />
+	
+				<cfset addPlugin(pluginName, plugin, arguments.override) />
+			</cfif>
 		</cfloop>
 	</cffunction>
 
