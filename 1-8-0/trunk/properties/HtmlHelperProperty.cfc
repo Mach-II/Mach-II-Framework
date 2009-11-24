@@ -117,7 +117,8 @@ from the parent application.
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.assetPathsCache = StructNew() />
 	
-	<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
+	<!--- Some hosts (such as GAE) do not support java.awt.* package --->
+	<cfset variables.AWT_TOOLKIT = "" />
 
 	<!--- Do not use these locators as they may change in future versions --->
 	<cfset variables.HTML_HELPER_PROPERTY_NAME = "_HTMLHelper" />
@@ -134,6 +135,16 @@ from the parent application.
 		
 		<cfset var cacheAssetPaths = StructNew() />
 		<cfset var webrootBasePath  = "" />
+		
+		<!--- Configure auto-dimensions for addImage() --->
+		<cftry>
+			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
+			<cfcatch type="any">
+				<!--- Some hosts (such as GAE) do not support java.awt.* package so replace with mock function --->
+				<cfset variables.getImageDimentions = variables.mock_getImageDimensions />
+				<cfset this.getImageDimentions = this.mock_getImageDimensions />
+			</cfcatch>
+		</cftry>
 		
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
@@ -834,6 +845,17 @@ from the parent application.
 		</cftry>
 		
 		<cfreturn dimensions />
+	</cffunction>
+	
+	<cffunction name="mock_getImageDimensions" access="private" returntype="struct" output="false"
+		hint="This mock function returns a struct with no image dimensions. This is used to dynamically replace getImageDimension() when the java.awt.* package is not supported by the host syste.">
+		
+		<cfset var dimensions = StructNew() />
+		
+		<cfset dimensions.width = "" />
+		<cfset dimensions.height = "" />
+		
+		<cfreturn dimensions />	
 	</cffunction>
 	
 	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
