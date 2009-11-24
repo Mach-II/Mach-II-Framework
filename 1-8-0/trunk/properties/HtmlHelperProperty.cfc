@@ -141,8 +141,8 @@ from the parent application.
 			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
 			<cfcatch type="any">
 				<!--- Some hosts (such as GAE) do not support java.awt.* package so replace with mock function --->
-				<cfset variables.getImageDimentions = variables.mock_getImageDimensions />
-				<cfset this.getImageDimentions = this.mock_getImageDimensions />
+				<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
+				<cfset this.getImageDimensions = this.mock_getImageDimensions />
 			</cfcatch>
 		</cftry>
 		
