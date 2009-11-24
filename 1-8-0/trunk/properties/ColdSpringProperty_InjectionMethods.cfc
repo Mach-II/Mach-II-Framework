@@ -113,7 +113,7 @@ Updated version: 1.8.0
 		<cfset variables[variables._MachIIBeansToMethods["3"]] = arguments.object />
 	</cffunction>
 	<cffunction name="get3" access="public" returntype="any" output="false">
-		<cfreturn variables[variables._MachIIBeansToMethods["4"]] />
+		<cfreturn variables[variables._MachIIBeansToMethods["3"]] />
 	</cffunction>
 	
 	<cffunction name="set4" access="public" returntype="void" output="false">
