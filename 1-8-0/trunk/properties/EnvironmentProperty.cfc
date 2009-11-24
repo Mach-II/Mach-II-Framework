@@ -228,13 +228,15 @@ properties struct can take complex datatypes like structs and arrays.
 			<cfset loadPropertiesByEnvironmentName(environmentName) />
 		<!--- Fail back to default environment if no environment match is found --->
 		<cfelse>
-			<!--- Do some checks --->
-			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved() AND environmentNameInherited
+			<!--- Do some checks if allowed --->
+			<cfif NOT getThrowIfEnvironmentUnresolved()>
+				<cfset getAssert().isTrue(NOT environmentNameInherited
 						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module."
 						, "Please define a default environment for this module or add defined an environment with the name of '#environmentName#'.") />
-			<cfset getAssert().isTrue(NOT getThrowIfEnvironmentUnresolved() AND NOT environmentNameInherited
+				<cfset getAssert().isTrue(Len(getDefaultEnvironment())
 						, "No environment can be resolved for server named '#cgi.SERVER_NAME#' and no default environment has been defined."
 						, "Please define a default environment to use or add this server to a defined environment.") />
+			</cfif>
 			
 			<cfset loadPropertiesByEnvironmentName(getDefaultEnvironment()) />
 		</cfif>
