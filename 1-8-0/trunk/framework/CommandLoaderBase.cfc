@@ -59,6 +59,7 @@ Notes:
 	<cfset variables.eventArgCommandLog = "" />
 	<cfset variables.eventBeanCommandLog = "" />
 	<cfset variables.redirectCommandlog = "" />
+	<cfset variables.defaultCommandlog = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -77,6 +78,7 @@ Notes:
 		<cfset variables.eventArgCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand") />
 		<cfset variables.eventBeanCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand") />
 		<cfset variables.redirectCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.RedirectCommand") />
+		<cfset variables.defaultCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.DefaultCommand") />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -763,6 +765,7 @@ Notes:
 		<cfset command.setParameter("commandName", arguments.commandNode.xmlName) />
 		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
 		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
+		<cfset command.setLog(variables.defaultCommandLog) />
 		
 		<cfreturn command />
 	</cffunction>

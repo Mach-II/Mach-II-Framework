@@ -76,7 +76,7 @@ Notes:
 		<cfset var log = getLog() />
 		
 		<cfif log.isInfoEnabled()>
-			<cfset log.info("Executing a default command named '#getParameter("commandName")#' in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.geAppManager().getModuleName()#'. This is not a concrete command. Check your configuration file.") />
+			<cfset log.info("Executing a default command named '#getParameter("commandName")#' in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. This is not a concrete command. Check your configuration file.") />
 		</cfif>
 		
 		<cfreturn true />
