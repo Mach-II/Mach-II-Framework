@@ -757,9 +757,10 @@ from the parent application.
 			hint="An unresolved asset path to resolve to a full web-root path." />
 		
 		<cfset var path = arguments.assetPath />
+		<cfset var urlBase = getProperty("urlBase") />
 		
 		<!--- Don't do resolution on assets that are dynamically served --->
-		<cfif NOT path.startsWith(getProperty("urlBase"))>
+		<cfif NOT path.startsWith(urlBase) OR NOT Len(urlBase)>
 			<!--- Get path if the asset path is not a full path from webroot --->
 			<cfif NOT path.startsWith("/")>
 				<cfif arguments.assetType EQ "js">
