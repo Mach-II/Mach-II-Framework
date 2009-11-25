@@ -228,7 +228,7 @@ properties struct can take complex datatypes like structs and arrays.
 			<cfset loadPropertiesByEnvironmentName(environmentName) />
 		<!--- Fail back to default environment if no environment match is found --->
 		<cfelse>
-			<!--- Do some checks if allowed --->
+			<!--- Do some checks --->
 			<cfif NOT getThrowIfEnvironmentUnresolved()>
 				<cfset getAssert().isTrue(NOT environmentNameInherited
 						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module."
@@ -237,7 +237,7 @@ properties struct can take complex datatypes like structs and arrays.
 						, "No environment can be resolved for server named '#cgi.SERVER_NAME#' and no default environment has been defined."
 						, "Please define a default environment to use or add this server to a defined environment.") />
 			</cfif>
-			
+				
 			<cfset loadPropertiesByEnvironmentName(getDefaultEnvironment()) />
 		</cfif>
 	</cffunction>
@@ -334,8 +334,6 @@ properties struct can take complex datatypes like structs and arrays.
 			<cfloop from="1" to="#ArrayLen(environmentGroupServerMap)#" index="j">
 				<cfif variables.matcher.match(environmentGroupServerMap[j].server, thisServer)>
 					<cfset environmentName = environmentGroupServerMap[j].environmentName />
-					<cfset getAppManager().setEnvironmentName(environmentName) />
-					<cfset getAppManager().setEnvironmentGroup(i) />
 					<cfset resolvedEnvironment = true />
 					<cfbreak />
 				</cfif>
@@ -353,7 +351,8 @@ properties struct can take complex datatypes like structs and arrays.
 		hint="Loads environment properties by environment name. Does not check if the environment is available so be sure the isEnvironmentDefined() is true.">
 		<cfargument name="environmentName" type="string" required="true" />
 		
-		<cfset var properties = variables.environments[environmentName].properties />
+		<cfset var environment = variables.environments[environmentName] />
+		<cfset var properties = environment.properties />
 		<cfset var key = "" />
 
 		<!--- Load properties by environment --->
@@ -363,6 +362,9 @@ properties struct can take complex datatypes like structs and arrays.
 	
 		<!--- Set the server name to the property --->
 		<cfset setProperty(getServerPropertyName(), cgi.SERVER_NAME) />
+		
+		<cfset getAppManager().setEnvironmentName(environmentName) />
+		<cfset getAppManager().setEnvironmentGroup(environment.environmentGroup) />
 	</cffunction>
 	
 	<cffunction name="setEnvironmentByName" access="private" returntype="void" output="false"
