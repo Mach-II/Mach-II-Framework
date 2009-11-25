@@ -853,8 +853,8 @@ from the parent application.
 		
 		<cfset var dimensions = StructNew() />
 		
-		<cfset dimensions.width = "" />
-		<cfset dimensions.height = "" />
+		<cfset dimensions.width = -1 />
+		<cfset dimensions.height = -1 />
 		
 		<cfreturn dimensions />	
 	</cffunction>
