@@ -112,20 +112,23 @@ Notes:
 							detail="Listener: '#getMetadata(listener).name#' Method: '#arguments.method#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception.",  cfcatch) />
+						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception. " 
+								& arguments.listener.getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(arguments.listener).path)
+								,  cfcatch) />
 					</cfif>
-					<cfset arguments.listener.getUtils().rebundledException("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception."
-								, cfcatch
-								, getMetadata(arguments.listener).path) />
+					<cfrethrow />
 				</cfif>
 			</cfcatch>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
 					<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception.",  cfcatch) />
 				</cfif>
-				<cfset arguments.listener.getUtils().rebundledException("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception."
-							, cfcatch
-							, getMetadata(arguments.listener).path) />
+					<cfif log.isErrorEnabled()>
+						<cfset log.error("Listener '#componentNameForLogging#' method '#arguments.method#' has caused an exception. " 
+								& arguments.listener.getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(arguments.listener).path)
+								,  cfcatch) />
+					</cfif>
+					<cfrethrow />
 			</cfcatch>
 		</cftry>
 	</cffunction>

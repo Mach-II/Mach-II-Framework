@@ -96,12 +96,12 @@ Notes:
 				<cfinvokeargument name="paramArgs" value="#paramArgs#" />
 			</cfinvoke><cfsetting enablecfoutputonly="true" />
 			<cfcatch type="any">
-				<cfset filter.getUtils().rebundledException("Event-filter '#filter.getComponentNameForLogging()#' has caused an exception."
-							, cfcatch
-							, getMetadata(filter).path) />
-				<cfthrow type="#cfcatch.type#"
-					message=""
-					detail="#filter.getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(filter).path)#" />
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("Event-filter '#filter.getComponentNameForLogging()#' has caused an exception. " 
+							& filter.getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(filter).path)
+							, cfcatch) />
+				</cfif>
+				<cfrethrow />
 			</cfcatch>
 		</cftry>
 

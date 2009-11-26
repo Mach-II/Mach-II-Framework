@@ -191,16 +191,18 @@ or
 						detail="Bean: '#getMetadata(getBean).name#' Method: '#getMethod()#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
-						<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch) />
+						<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'. "
+								& getUtils().buildMessageFromCfCatch(cfcatch),  cfcatch) />
 					</cfif>
-					<cfset getUtils().rebundledException("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch, getMetaData(bean).path) />
+					<cfrethrow />
 				</cfif>
 			</cfcatch>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#.",  cfcatch) />
+					<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'. "
+							& getUtils().buildMessageFromCfCatch(cfcatch),  cfcatch) />
 				</cfif>
-				<cfset getUtils().rebundledException("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'.",  cfcatch, getMetaData(bean).path) />
+				<cfrethrow/>
 			</cfcatch>
 		</cftry>	
 		
