@@ -387,20 +387,6 @@ Notes:
 		<cfreturn ReplaceList(REReplaceNoCase(arguments.input, "&(?!([a-zA-Z][a-zA-Z0-9]*|(##\d+)){2,6};)", "&amp;", "all"), '<,>,"', "&lt;,&gt;,&quot;") />
 	</cffunction>
 	
-	<cffunction name="rebundledException" access="public" returntype="void" output="false"
-		hint="Rebundles an exception and rethrows.">
-		<cfargument name="message" type="string" required="true"
-			hint="The message value for the exception being thrown." />
-		<cfargument name="caughtException" type="any" required="true"
-			hint="A cfcatch to build a message with." />
-		<cfargument name="correctTemplatePath" type="string" required="false"
-			hint="Used to correct the reported template path and line number." />
-		
-		<cfthrow type="#translateExceptionType(arguments.caughtException.type)#"
-			message="#arguments.message# See detail for more information."
-			detail="#buildMessageFromCfCatch(arguments.caughtException, arguments.correctTemplatePath)#" />
-	</cffunction>
-	
 	<cffunction name="translateExceptionType" access="public" returntype="string" output="false"
 		hint="Translations exception types into something that can be rethrown.">
 		<cfargument name="type" type="string" required="true"
