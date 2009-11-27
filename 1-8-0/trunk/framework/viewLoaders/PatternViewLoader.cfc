@@ -192,7 +192,7 @@ Wildcards for patterns:
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#pageViewPaths#'." />
+				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#ArrayLen(pageViewPaths)#'." />
 		</cfif>
 		
 		<cfreturn results />
