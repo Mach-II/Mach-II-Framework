@@ -153,17 +153,24 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 		
 		<cfset var field = 0 />
 		<cfset var map = describeBean(arguments.bean) />
-		
+		<!---<cftrace text="bean name: #getMetaData(bean).fullname#" />--->
+
 		<cfloop collection="#map#" item="field">
 			<cfif arguments.prefix neq "">
 				<cfif NOT ListFindNoCase(arguments.skipFieldsList, field) 
 					AND StructKeyExists(arguments.fieldCollection, "#prefix#.#field#")>
 					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection["#prefix#.#field#"]) />
+					<!---<cftrace text="setBeanField(arguments.bean, field, arguments.fieldCollection[prefix.field]) =
+						setBeanField(arguments.bean, #field#, arguments.fieldCollection['#prefix#.#field#']) : 
+						'#arguments.fieldCollection['#prefix#.#field#']#'" />--->
 				</cfif>
 			<cfelse>
 				<cfif NOT ListFindNoCase(arguments.skipFieldsList, field) 
 					AND StructKeyExists(arguments.fieldCollection, field)>
 					<cfset setBeanField(arguments.bean, field, arguments.fieldCollection[field]) />
+					<!---<cftrace text="setBeanField(arguments.bean, field, arguments.fieldCollection[field]) = 
+						setBeanField(arguments.bean, #field#, arguments.fieldCollection[#field#]) : 
+						'#arguments.fieldCollection[field]#'" />--->
 				</cfif>
 			</cfif>
 		</cfloop>
@@ -214,6 +221,12 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 		
 		<cfloop from="1" to="#ArrayLen(metaFunctions)#" index="i">
 			<cfset metaFunction = metaFunctions[i] />
+			
+			<!--- CF 9 does not seem to provide the "access" attribute when auto getters/setters are used --->			
+			<cfif NOT structKeyExists(metaFunction, "access")>
+				<cfset metaFunction.access = "public" />
+			</cfif>
+			
 			<cfif metaFunction.name.toLowerCase().startsWith("get")
 				AND metaFunction.access.equalsIgnoreCase("public")
 				AND NOT ArrayLen(metaFunction.parameters)>
