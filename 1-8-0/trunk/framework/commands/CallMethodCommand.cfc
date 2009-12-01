@@ -186,9 +186,9 @@ or
 					<cfif log.isErrorEnabled()>
 						<cfset log.error("Bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' has returned void but a ResultArg has been defined.",  cfcatch) />
 					</cfif>
-					<cfthrow type="MachII.framework.commonds.VoidReturnType"
+					<cfthrow type="MachII.framework.commands.VoidReturnType"
 						message="A ResultArg has been specified in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' is returning void. This can also happen if your bean method returns a Java null."
-						detail="Bean: '#getMetadata(getBean).name#' Method: '#getMethod()#'" />
+						detail="Bean: '#getBeanId()#' Method: '#getMethod()#'" />
 				<cfelse>
 					<cfif log.isErrorEnabled()>
 						<cfset log.error("An exception has occurred in bean '#getBeanId()#' invoking method '#getMethod()#' in a call-method command in #getParentHandlerType()# named '#getParentHandlerName()#'. "
