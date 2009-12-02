@@ -398,7 +398,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'preProcess' point in plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preProcessPlugins[i]).path)
 							, cfcatch) />
@@ -435,7 +435,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'preEvent' point in plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preEventPlugins[i]).path)
 							, cfcatch) />
@@ -472,7 +472,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'postEvent' point in plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postEventPlugins[i]).path)
 							, cfcatch) />
@@ -509,7 +509,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'preView' point in plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preViewPlugins[i]).path)
 							, cfcatch) />
@@ -546,7 +546,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'postView' point in plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postViewPlugins[i]).path)
 							, cfcatch) />
@@ -584,7 +584,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'postProcess' point in plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postProcessPlugins[i]).path)
 							, cfcatch) />
@@ -614,7 +614,7 @@ Notes:
 				<cfset variables.onSessionStartPlugins[i].onSessionStart() />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'onSessionStart' point in plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionStartPlugins[i]).path)
 							, cfcatch) />
@@ -642,7 +642,7 @@ Notes:
 				<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'onSessionEnd' point in plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionEndPlugins[i]).path)
 							, cfcatch) />
@@ -678,7 +678,7 @@ Notes:
 				<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 			</cfloop>
 			<cfcatch type="any">
-				<cfif log.isErrorDefined()>
+				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occured in the 'handleException' point in plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.handleExceptionPlugins[i]).path)
 							, cfcatch) />
