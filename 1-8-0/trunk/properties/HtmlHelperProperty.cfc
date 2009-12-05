@@ -135,16 +135,16 @@ from the parent application.
 		
 		<cfset var cacheAssetPaths = StructNew() />
 		<cfset var webrootBasePath  = "" />
+		<cfset var serverInfo = server.coldfusion />
 		
 		<!--- Configure auto-dimensions for addImage() --->
-		<cftry>
+		<cfif StructKeyExists(serverInfo, "productLevel") AND serverInfo.productLevel NEQ "Google App Engine">
 			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
-			<cfcatch type="any">
-				<!--- Some hosts (such as GAE) do not support java.awt.* package so replace with mock function --->
-				<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
-				<cfset this.getImageDimensions = this.mock_getImageDimensions />
-			</cfcatch>
-		</cftry>
+		<cfelse>
+			<!--- Some hosts (such as GAE) do not support java.awt.* package so replace with mock function --->
+			<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
+			<cfset this.getImageDimensions = this.mock_getImageDimensions />
+		</cfif>
 		
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
