@@ -119,6 +119,21 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="getAllStats" access="public" returntype="struct" output="false"
+		hint="Gets all the standard caching stats.">
+		
+		<cfset var stats = StructNew() />
+		
+		<cfset stats.cacheHits = getCacheHits() />
+		<cfset stats.cacheMisses = getCacheMisses() />
+		<cfset stats.activeElements = getActiveElements() />
+		<cfset stats.totalElements = getTotalElements() />
+		<cfset stats.evictions = getEvictions() />
+		<cfset stats.statsActiveSince = getStatsActiveSince() />
+	
+		<cfreturn stats />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
