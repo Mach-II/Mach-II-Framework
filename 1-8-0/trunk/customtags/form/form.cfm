@@ -67,18 +67,25 @@ Notes:
 	</cfif>
 
 	<!--- Set defaults --->
-	<cfparam name="attributes.enctype" type="string" 
-		default="multipart/form-data" />
-	<cfparam name="attributes.method" type="string" 
-		default="post" />
 	<cfparam name="attributes.autoFocus" type="string"
 		default="" />
-
-	<cfset setAttribute("action", makeUrl("actionEvent", "actionModule", "actionRoute", "actionUrlParams")) />
-	<cfset setAttribute("method") />
-	<cfset setAttribute("enctype") />
+	
+	<cfif StructKeyExists(attributes, "actionEvent") OR StructKeyExists(attributes, "actionRoute")>
+		<cfset attributes.action = makeUrl("actionEvent", "actionModule", "actionRoute", "actionUrlParams") />
+	</cfif>
+	
+	<!--- Set defaults only if action is defined --->
+	<cfif StructKeyExists(attributes, "action")>
+		<cfparam name="attributes.enctype" type="string" 
+			default="multipart/form-data" />
+		<cfparam name="attributes.method" type="string" 
+			default="post" />	
+	</cfif>
 	
 	<!--- Set optional attributes --->
+	<cfset setAttributeIfDefined("action") />
+	<cfset setAttributeIfDefined("method") />
+	<cfset setAttributeIfDefined("enctype") />
 	<cfset setAttributeIfDefined("name") />
 	<cfset setAttributeIfDefined("target") />
 	<cfset setAttributeIfDefined("accept") />
