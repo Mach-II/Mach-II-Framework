@@ -441,7 +441,7 @@ PUBLIC FUNCTIONS - UTIL
 	<!--- Build url parameters --->
 	<cfset var urlParameters = normalizeStructByNamespace("p") />
 	<cfset var queryStringParameters = "" />
-	<cfset var url = "" />
+	<cfset var builtUrl = "" />
 	
 	<!--- Convert and merge the "string" version of the URL parameters into a struct --->
 	<cfif StructKeyExists(attributes, arguments.attributeNameForUrlParameters)>
@@ -456,9 +456,9 @@ PUBLIC FUNCTIONS - UTIL
 	<!--- Set required attributes--->
 	<cfif StructKeyExists(attributes, arguments.attributeNameForEvent)>
 		<cfif StructKeyExists(attributes, arguments.attributeNameForModule)>
-			<cfset url = request.eventContext.getAppManager().getRequestManager().buildUrl(attributes[arguments.attributeNameForModule], attributes[attributeNameForEvent], urlParameters) />
+			<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildUrl(attributes[arguments.attributeNameForModule], attributes[attributeNameForEvent], urlParameters) />
 		<cfelse>
-			<cfset url = request.eventContext.getAppManager().getRequestManager().buildUrl(request.eventContext.getAppManager().getModuleName(), attributes[arguments.attributeNameForEvent], urlParameters) />
+			<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildUrl(request.eventContext.getAppManager().getModuleName(), attributes[arguments.attributeNameForEvent], urlParameters) />
 		</cfif>
 	<cfelseif StructKeyExists(attributes, arguments.attributeNameForRoute)>
 		<!--- Build query string parameters --->
@@ -474,11 +474,11 @@ PUBLIC FUNCTIONS - UTIL
 			<cfset evaluateExpressionStruct(queryStringParameters) />
 		</cfif>
 
-		<cfset url = request.eventContext.getAppManager().getRequestManager().buildRouteUrl(attributes[arguments.attributeNameForRoute], urlParameters, queryStringParameters) />
+		<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildRouteUrl(attributes[arguments.attributeNameForRoute], urlParameters, queryStringParameters) />
 	<cfelse>
 		<cfif getTagLib() EQ "view" AND getTagType() EQ "a">
 			<cfif StructKeyExists(attributes, "useCurrentUrl")>
-				<cfset url = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(urlParameters) />
+				<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(urlParameters) />
 			<cfelse>
 				<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrlAttribute"
 					message="The 'a' tag must have an attribute named 'event', 'route' or 'useCurrentUrl'." />
@@ -489,7 +489,7 @@ PUBLIC FUNCTIONS - UTIL
 		</cfif>
 	</cfif>
 	
-	<cfreturn variables.utils.escapeHtml(url) />
+	<cfreturn variables.utils.escapeHtml(builtUrl) />
 </cffunction>
 
 <cffunction name="booleanize" access="public" returntype="numeric" output="false"
