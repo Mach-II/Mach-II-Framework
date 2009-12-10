@@ -94,7 +94,7 @@ any inline javascript code.
 		<cfset variables.js = doStartTag() & doEndTag() />
 
 		<cfif attributes.outputType EQ "head">
-			<cfset caller.this.addHTMLHeadElement(variables.js) />
+			<cfset request.eventContext.addHTMLHeadElement(variables.js) />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.js />
 		</cfif>

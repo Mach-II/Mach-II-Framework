@@ -118,7 +118,7 @@ Notes:
 		</cfif>
 
 		<cfif attributes.outputType EQ "head">
-			<cfset caller.this.addHTMLHeadElement(variables.styles) />
+			<cfset request.eventContext.addHTMLHeadElement(variables.styles) />
 			<cfset thisTag.GeneratedContent = "" />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.styles />
