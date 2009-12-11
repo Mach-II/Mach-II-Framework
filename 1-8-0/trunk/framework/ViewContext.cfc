@@ -263,11 +263,16 @@ Notes:
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
-	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
+	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
 		hint="Adds a HTML head element.">
 		<cfargument name="text" type="string" required="true"
 			hint="Text to add to the HTML head section." />
-		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.text) />
+		<cfargument name="blockDuplicate" type="boolean" required="false"
+			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
+		<cfargument name="blockDuplicateCheckString" type="string" required="false"
+			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
+
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
 	</cffunction>
 	
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"

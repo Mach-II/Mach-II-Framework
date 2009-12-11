@@ -245,6 +245,8 @@ Notes:
 	--->
 	<cffunction name="observeHTMLHeadElement" access="public" returntype="void" output="false"
 		hint="Observes a HTML head element.">
+
+		<!--- Individual arguments are not passed in so we just observe the argument collection --->
 		
 		<cfif NOT IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTMLHeadElements")>
 			<cfset request["_MachIICacheHandler_#getHandlerId()#_HTMLHeadElements"] = ArrayNew(1) />
@@ -255,6 +257,8 @@ Notes:
 	
 	<cffunction name="observeHTTPHeader" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+
+		<!--- Individual arguments are not passed in so we just observe the argument collection --->
 		
 		<cfif NOT IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTTPHeaders")>
 			<cfset request["_MachIICacheHandler_#getHandlerId()#_HTTPHeaders"] = ArrayNew(1) />

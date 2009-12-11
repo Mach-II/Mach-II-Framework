@@ -251,11 +251,17 @@ quick access to things such as announcing a new event or getting/setting propert
 
 		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
-	
-	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
-		hint="Adds a HTML head element.">
-		<cfargument name="text" type="string" required="true" />
-		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.text) />
+
+	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
+		hint="Adds a HTML head element. Returns a boolean if the element was appened to head (always returns true unless you allow duplicates).">
+		<cfargument name="text" type="string" required="true"
+			hint="Text to add to the HTML head section." />
+		<cfargument name="blockDuplicate" type="boolean" required="false"
+			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
+		<cfargument name="blockDuplicateCheckString" type="string" required="false"
+			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
+
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"

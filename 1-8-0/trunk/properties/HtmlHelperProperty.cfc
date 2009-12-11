@@ -339,7 +339,12 @@ from the parent application.
 
 		<cfset var code = '<meta http-equiv="content-type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
 
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfif arguments.outputType EQ "inline">
+			<cfreturn code />	
+		<cfelse>
+			<cfset appendToHtmlArea(arguments.outputType, code) />
+			<cfreturn "" />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="addDocType" access="public" returntype="string" output="false"
@@ -381,14 +386,12 @@ from the parent application.
 		
 			<cfloop from="1" to="#ArrayLen(p)#" index="j">
 				<cfif p[j].type EQ "js">
-					<cfset code = code & addJavascript(p[j].paths, arguments.outputType) & Chr(13) />
+					<cfset code = code & addJavascript(p[j].paths, arguments.outputType) />
 				<cfelseif p[j].type EQ "css">
-					<cfset code = code & addStylesheet(p[j].paths, p[j].attributes, arguments.outputType, p[j].forIEVersion) & Chr(13) />
+					<cfset code = code & addStylesheet(p[j].paths, p[j].attributes, arguments.outputType, p[j].forIEVersion) />
 				</cfif>
 			</cfloop>
 		</cfloop>
-		
-		<cfset code = code & Chr(13) />
 		
 		<cfreturn code />
 	</cffunction>
@@ -403,6 +406,7 @@ from the parent application.
 		<cfset var code = "" />
 		<cfset var i = 0 />
 		<cfset var assetPath = "" />
+		<cfset var temp = "" />
 		
 		<!--- Explode the list to an array --->
 		<cfif NOT IsArray(arguments.src)>
@@ -411,13 +415,16 @@ from the parent application.
 
 		<cfloop from="1" to="#ArrayLen(arguments.src)#" index="i">
 			<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
-			<cfif arguments.outputType EQ "inline" OR
-				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
-				<cfset code = code & '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
+			<cfset temp = '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
+			
+			<cfif arguments.outputType EQ "inline">
+				<cfset code = code & temp />
+			<cfelse>
+				<cfset appendToHtmlArea(arguments.outputType, temp, true) />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfreturn code />
 	</cffunction>
 	
 	<cffunction name="addStylesheet" access="public" returntype="string" output="false"
@@ -436,6 +443,7 @@ from the parent application.
 		<cfset var i = 0 />
 		<cfset var key = "" />
 		<cfset var assetPath = "" />
+		<cfset var temp = "" />
 		
 		<!--- Explode the list to an array --->
 		<cfif NOT IsArray(arguments.href)>
@@ -452,18 +460,21 @@ from the parent application.
 
 		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
 			<cfset assetPath = computeAssetPath("css", arguments.href[i]) />
-			<cfif arguments.outputType EQ "inline" OR
-				(arguments.outputType EQ "head" AND NOT isAssetPathInWatchList(assetPath))>
-				<cfset code = code & '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
+			<cfset temp = '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
+
+			<!--- Enclose in an IE conditional comment if available --->
+			<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
+				<cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
+			</cfif>
+			
+			<cfif arguments.outputType EQ "inline">
+				<cfset code = code & temp />
+			<cfelse>
+				<cfset appendToHtmlArea(arguments.outputType, temp, true) />
 			</cfif>
 		</cfloop>
 		
-		<!--- Enclose in an IE conditional comment if available --->
-		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
-			<cfset code = wrapIEConditionalComment(arguments.forIEVersion, code) />
-		</cfif>
-		
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfreturn code />
 	</cffunction>
 	
 	<cffunction name="addImage" access="public" returntype="string" output="false"
@@ -545,7 +556,12 @@ from the parent application.
 		
 		<cfset code = code & ' />' & Chr(13) />
 		
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfif arguments.outputType EQ "inline">
+			<cfreturn code />	
+		<cfelse>
+			<cfset appendToHtmlArea(arguments.outputType, code) />
+			<cfreturn "" />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="addMeta" access="public" returntype="string" output="false"
@@ -570,7 +586,12 @@ from the parent application.
 			</cfif>
 		</cfif>
 		
-		<cfreturn renderOrAppendToHead(code, arguments.outputType) />
+		<cfif arguments.outputType EQ "inline">
+			<cfreturn code />	
+		<cfelse>
+			<cfset appendToHtmlArea(arguments.outputType, code) />
+			<cfreturn "" />
+		</cfif>
 	</cffunction>
 	
 	<!---
@@ -638,19 +659,20 @@ from the parent application.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="renderOrAppendToHead" access="private" returntype="string" output="false"
-		hint="Renders the code or append to head.">
+	<cffunction name="appendToHtmlArea" access="private" returntype="boolean" output="false"
+		hint="Appends to head and in the future body. Returns boolean on whether a duplicate was blocked.">
+		<cfargument name="outputType" type="string" required="true"
+			hint="The output type ('head')." />
 		<cfargument name="code" type="string" required="true"
 			hint="The code to append to head or return to output inline." />
-		<cfargument name="outputType" type="string" required="true"
-			hint="The output type ('inline', 'head')." />
+		<cfargument name="blockDuplicate" type="boolean" required="false" default="false"
+			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
+		<cfargument name="blockDuplicateCheckString" type="string" default="#arguments.code#"
+			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.code' if not defined" />
 
 		<!--- Output the code inline or append to HTML head --->
-		<cfif arguments.outputType EQ "inline">
-			<cfreturn arguments.code />
-		<cfelse>
-			<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code) />
-			<cfreturn "" />
+		<cfif arguments.outputType EQ "head">
+			<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
 		</cfif>
 	</cffunction>
 	
@@ -684,26 +706,6 @@ from the parent application.
 		<cfset comment = comment & arguments.code & Chr(13) & "<![endif]-->" & Chr(13) />
 
 		<cfreturn comment />
-	</cffunction>
-	
-	<cffunction name="isAssetPathInWatchList" access="private" returntype="boolean" output="false"
-		hint="Checks if a resolved asset path is in the watch list. Returns true if the asset is already on watch list and false if it is not on list.">
-		<cfargument name="resolvedPath" type="string" required="true"
-			hint="Resolved path to the asset." />
-		
-		<!--- Most file systems are case sensitive so the path should not be UCase first --->
-		<cfset var assetPathHash = Hash(arguments.resolvedPath) />
-		
-		<cfif NOT StructKeyExists(request, "_MachIIHTMLHelper_HTMLHeadElementPaths")>
-			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths = StructNew() />
-		</cfif>
-		
-		<cfif StructKeyExists(request._MachIIHTMLHelper_HTMLHeadElementPaths, assetPathHash)>
-			<cfreturn true />
-		<cfelse>
-			<cfset request._MachIIHTMLHelper_HTMLHeadElementPaths[assetPathHash] = arguments.resolvedPath />
-			<cfreturn false />
-		</cfif>
 	</cffunction>
 	
 	<cffunction name="resolveMimeTypeAndGetData" access="private" returntype="struct" output="false"

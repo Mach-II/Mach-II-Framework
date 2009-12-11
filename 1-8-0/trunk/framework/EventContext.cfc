@@ -58,6 +58,7 @@ Notes:
 	<cfset variables.mappings = StructNew() />
 	<cfset variables.exceptionEventName = "" />
 	<cfset variables.HTMLHeadElementCallbacks = ArrayNew(1) />
+	<cfset variables.HTMLHeadElementDuplicateMap = StructNew() />
 	<cfset variables.HTTPHeaderCallbacks = ArrayNew(1) />
 	<cfset variables.log = "" />
 	
@@ -532,20 +533,44 @@ Notes:
 		</cftry>
 	</cffunction>
 	
-	<cffunction name="addHTMLHeadElement" access="public" returntype="void" output="false"
-		hint="Adds a HTML head element.">
-		<cfargument name="text" type="string" required="true" />
+	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
+		hint="Adds a HTML head element. Returns a boolean if the element was appened to head (always returns true unless you allow duplicates).">
+		<cfargument name="text" type="string" required="true"
+			hint="Complete text to add to head." />
+		<cfargument name="blockDuplicate" type="boolean" required="false" default="false"
+			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
+		<cfargument name="blockDuplicateCheckString" type="string" required="false" default="#arguments.text#"
+			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
 		
 		<cfset var i = 0 />
+		<cfset var checkStringHash = "" />
+
+		<cfset arguments.addToHead = true />
 		
-		<cfhtmlhead text="#arguments.text#" />
+		<!--- Check for duplicate if requested --->
+		<cfif arguments.blockDuplicate>
+			<cfset checkStringHash = Hash(arguments.blockDuplicateCheckString) />
+			
+			<cfif StructKeyExists(variables.HTMLHeadElementDuplicateMap, checkStringHash)>
+				<cfset arguments.addToHead = false />
+			<cfelse>
+				<cfset variables.HTMLHeadElementDuplicateMap[checkStringHash] = arguments.blockDuplicateCheckString />
+			</cfif>
+		</cfif>
 		
-		<!--- Notify any registered observers --->
+		<cfif arguments.addToHead>
+			<cfhtmlhead text="#arguments.text#" />
+		</cfif>
+		
+		<!--- Notify any registered observers even if blocked (check "addToHead" to see if it was really appended to head)--->
 		<cfloop from="1" to="#ArrayLen(variables.HTMLHeadElementCallbacks)#" index="i">
 			<cfinvoke component="#variables.HTMLHeadElementCallbacks[i].callback#"
 				method="#variables.HTMLHeadElementCallbacks[i].method#" 
 				argumentcollection="#arguments#" />
+				<!--- Expects "text", "addToHead", "blockDuplicates" and "blockDuplicateCheckString" --->
 		</cfloop>
+		
+		<cfreturn arguments.addToHead />
 	</cffunction>
 	
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
