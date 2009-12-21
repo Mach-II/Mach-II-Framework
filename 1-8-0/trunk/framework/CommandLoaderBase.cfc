@@ -292,7 +292,11 @@ Notes:
 		<cfset var i = "" />
 		<cfset var namedArgCount = 0 />
 		<cfset var argValue = "" />
-		
+		<cfset var overwrite = true />
+
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "overwrite")>
+			<cfset overwrite = arguments.commandNode.xmlAttributes["overwrite"] />
+		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultArg")>
 			<cfset resultArg = arguments.commandNode.xmlAttributes["resultArg"] />	
 		</cfif>	
@@ -300,7 +304,7 @@ Notes:
 			<cfset args = arguments.commandNode.xmlAttributes["args"] />	
 		</cfif>		
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg, overwrite) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
 		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
 		<cfset command.setUtils(variables.utils) />

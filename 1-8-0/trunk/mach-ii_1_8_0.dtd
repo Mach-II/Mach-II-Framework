@@ -527,6 +527,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	method CDATA #REQUIRED
 	args CDATA #IMPLIED
 	resultArg CDATA #IMPLIED
+	overwrite CDATA #IMPLIED
 >
 
 <!--

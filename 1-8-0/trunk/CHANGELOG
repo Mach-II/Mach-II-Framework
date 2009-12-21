@@ -223,6 +223,16 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* 'Overwrite' for Call-Method
+The Call-Method command now has an 'overwrite' boolean attribute which will
+test to see whether the resultArg already exists in the event object; if
+so and overwrite is set to 'false' the resultArg will not be added to the
+event object.
+
+For more information see:
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/474
+(2009-12-20 mikerogers)
+
 * Deconfigure Loggers/Adapters
 All Loggers and Adapters now have a Deconfigure method which is called when the
 Logger should be reloaded, for example during a framework reload. This will help

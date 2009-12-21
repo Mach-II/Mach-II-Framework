@@ -70,6 +70,7 @@ or
 	<cfset variables.resultArg = "" />
 	<cfset variables.args = ArrayNew(1) />
 	<cfset variables.argumentList = "" />
+	<cfset variables.overwrite = "">
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -80,12 +81,14 @@ or
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="args" type="string" required="true" />
 		<cfargument name="resultArg" type="string" required="true" />
+		<cfargument name="overwrite" type="boolean" required="true">
 		
 		<!--- Run setters --->
 		<cfset setBeanId(arguments.beanId) />
 		<cfset setMethod(arguments.method) />
 		<cfset setArgumentList(arguments.args) />
 		<cfset setResultArg(arguments.resultArg) />
+		<cfset setOverwrite(arguments.overwrite) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -175,9 +178,15 @@ or
 			</cfif>
 			
 			<cfif Len(getResultArg())>
-				<cfset arguments.event.setArg(getResultArg(), resultValue) />
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
+				<cfif arguments.event.isArgDefined(getResultArg()) and not getOverwrite()>
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' did not return data in event-arg '#getResultArg()#' as data was already present and 'overwrite' is 'false'.")/>
+					</cfif>
+				<cfelse>
+					<cfset arguments.event.setArg(getResultArg(), resultValue) />
+					<cfif log.isDebugEnabled()>
+						<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
+					</cfif>
 				</cfif>
 			</cfif>
 			
@@ -317,6 +326,17 @@ or
 	</cffunction>
 	<cffunction name="hasResultArg" access="private" returntype="boolean" output="false">
 		<cfreturn Len(variables.resultArg) />
+	</cffunction>
+	
+	<cffunction name="setOverwrite" access="private" returntype="void" output="false">
+		<cfargument name="arg" type="boolean" required="true" />
+		<cfset variables.overwrite = arguments.arg />
+	</cffunction>
+	<cffunction name="getOverwrite" access="private" returntype="boolean" output="false">
+		<cfreturn variables.overwrite />
+	</cffunction>
+	<cffunction name="hasOverwrite" access="private" returntype="boolean" output="false">
+		<cfreturn Len(variables.overwrite) />
 	</cffunction>
 
 </cfcomponent>
