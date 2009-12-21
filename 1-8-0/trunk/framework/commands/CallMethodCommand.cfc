@@ -70,7 +70,7 @@ or
 	<cfset variables.resultArg = "" />
 	<cfset variables.args = ArrayNew(1) />
 	<cfset variables.argumentList = "" />
-	<cfset variables.overwrite = "">
+	<cfset variables.overwrite = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -81,7 +81,7 @@ or
 		<cfargument name="method" type="string" required="true" />
 		<cfargument name="args" type="string" required="true" />
 		<cfargument name="resultArg" type="string" required="true" />
-		<cfargument name="overwrite" type="boolean" required="true">
+		<cfargument name="overwrite" type="boolean" required="true" />
 		
 		<!--- Run setters --->
 		<cfset setBeanId(arguments.beanId) />
@@ -117,6 +117,19 @@ or
 			<cfthrow type="MachII.framework.commands.NoBean"
 				message="A call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#' did not have a bean named '#getBeanId()#' autowired into it."
 				detail="Ensure your IoC container such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
+		</cfif>
+		
+		<!---
+			Typically we prefer to not short-circuit in a middle of a method, but we want to save 
+			some clock cycles by not making the method call of the arg is defined in the event and 
+			overwrite is false
+		--->
+		<cfif arguments.event.isArgDefined(getResultArg()) AND NOT getOverwrite()>
+			<cfif log.isDebugEnabled()>
+				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' did not return data in event-arg '#getResultArg()#' as data was already present and 'overwrite' is 'false'.")/>
+			</cfif>
+
+			<cfreturn true />
 		</cfif>
 		
 		<cftry>
@@ -178,15 +191,9 @@ or
 			</cfif>
 			
 			<cfif Len(getResultArg())>
-				<cfif arguments.event.isArgDefined(getResultArg()) and not getOverwrite()>
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' did not return data in event-arg '#getResultArg()#' as data was already present and 'overwrite' is 'false'.")/>
-					</cfif>
-				<cfelse>
-					<cfset arguments.event.setArg(getResultArg(), resultValue) />
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
-					</cfif>
+				<cfset arguments.event.setArg(getResultArg(), resultValue) />
+				<cfif log.isDebugEnabled()>
+					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
 				</cfif>
 			</cfif>
 			
@@ -334,9 +341,6 @@ or
 	</cffunction>
 	<cffunction name="getOverwrite" access="private" returntype="boolean" output="false">
 		<cfreturn variables.overwrite />
-	</cffunction>
-	<cffunction name="hasOverwrite" access="private" returntype="boolean" output="false">
-		<cfreturn Len(variables.overwrite) />
 	</cffunction>
 
 </cfcomponent>
