@@ -58,6 +58,8 @@ any inline javascript code.
 	<!--- Setup defaults --->
 	<cfparam name="attributes.outputType" type="string" 
 		default="head" />
+	<cfparam name="attributes.forIEVersion" type="string" 
+		default="" />
 		
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "text/javascript") />
@@ -81,9 +83,9 @@ any inline javascript code.
 	<!--- For external files --->
 	<cfif StructKeyExists(attributes, "src")>
 		<cfif attributes.outputType EQ "head">
-			<cfset locateHtmlHelper().addJavascript(attributes.src, attributes.outputType) />
+			<cfset locateHtmlHelper().addJavascript(attributes.src, attributes.outputType, attributes.forIEVersion) />
 		<cfelse>
-			<cfset thisTag.GeneratedContent = locateHtmlHelper().addJavascript(attributes.src, attributes.outputType) />
+			<cfset thisTag.GeneratedContent = locateHtmlHelper().addJavascript(attributes.src, attributes.outputType, attributes.forIEVersion) />
 		</cfif>
 	</cfif>
 	
@@ -92,6 +94,11 @@ any inline javascript code.
 		<cfset setContent(Chr(13) & '//<![CDATA[' & Chr(13) & variables.bodyContent & Chr(13) & '//]]>' & Chr(13)) />
 		
 		<cfset variables.js = doStartTag() & doEndTag() />
+		
+		<!--- Wrap in an IE conditional if defined --->
+		<cfif Len(attributes.forIEVersion)>
+			<cfset variables.js = wrapIEConditionalComment(attributes.forIEVersion, variables.js) />
+		</cfif>
 
 		<cfif attributes.outputType EQ "head">
 			<cfset request.eventContext.addHTMLHeadElement(variables.js) />

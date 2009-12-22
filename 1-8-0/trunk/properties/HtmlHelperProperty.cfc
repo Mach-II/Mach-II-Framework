@@ -402,6 +402,8 @@ from the parent application.
 			hint="A single string, comma-delimited list or array of web accessible hrefs to .js files." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates the output type for the generated HTML code (head, inline)." />
+		<cfargument name="forIEVersion" type="string" required="false"
+			hint="Indicates if the javascript should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
 		<cfset var code = "" />
 		<cfset var i = 0 />
@@ -416,6 +418,11 @@ from the parent application.
 		<cfloop from="1" to="#ArrayLen(arguments.src)#" index="i">
 			<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
 			<cfset temp = '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
+			
+			<!--- Enclose in an IE conditional comment if available --->
+			<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
+				<cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
+			</cfif>
 			
 			<cfif arguments.outputType EQ "inline">
 				<cfset code = code & temp />
