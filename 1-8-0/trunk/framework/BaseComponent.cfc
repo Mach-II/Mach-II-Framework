@@ -183,9 +183,9 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 	
 	<cffunction name="redirectUrl" access="public" returntype="void" output="false"
-		hint="Triggers a server side redirect to a specific url.">
+		hint="Triggers a server side redirect to a specific url. This method acts as a wrapper for a cflocation with optional http status type.">
 		<cfargument name="redirectUrl" type="string" required="true"
-			hint="The url to redirect to. Should be in the form of 'http://www.google.com'." />
+			hint="The full url to redirect to. Should be in the form of 'http://www.mach-ii.com'." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectUrl(
