@@ -63,8 +63,7 @@ Notes:
 	</cfif>
 	
 	<!--- Set defaults --->
-	<cfparam name="attributes.name" type="string" 
-		default="#attributes.path#" />
+	<cfset attributes.name = resolveName() />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
 		

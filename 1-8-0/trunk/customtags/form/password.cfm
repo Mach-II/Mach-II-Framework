@@ -75,8 +75,7 @@ Notes:
 	</cfif>
 	
 	<!--- Set defaults --->
-	<cfparam name="attributes.name" type="string" 
-		default="#attributes.path#" />
+	<cfset attributes.name = resolveName() />
 	<cfparam name="attributes.value" type="string" 
 		default="" />
 	<cfparam name="attributes.id" type="string" 

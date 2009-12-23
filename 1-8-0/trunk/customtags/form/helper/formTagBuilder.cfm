@@ -172,6 +172,28 @@ PUBLIC FUNCTIONS
 	<cfreturn value />
 </cffunction>
 
+<cffunction name="resolveName" access="public" returntype="string" output="false"
+	hint="Resolves a name with option prefix as well.">
+	
+	<cfset var name = "" />
+	<cfset var prefix = "" />
+	
+	<!--- Resolve the prefix --->
+	<cfif StructKeyExists(attributes, "prefix")>
+		<cfset prefix = attributes.prefix />
+	<cfelseif IsDefined("request._MachIIFormLib.prefix")>
+		<cfset prefix = request._MachIIFormLib.prefix />
+	</cfif>
+	
+	<cfif StructKeyExists(attributes, "name")>
+		<cfset name = prefix & attributes.name />
+	<cfelse>
+		<cfset name = prefix & attributes.path />
+	</cfif>
+	
+	<cfreturn name />
+</cffunction>
+
 <cffunction name="translateCheckValue" access="public" returntype="string" output="false"
 	hint="Translates a check value into a usable datatype for certain form tags to use.">
 	<cfargument name="checkValue" type="any" required="true"

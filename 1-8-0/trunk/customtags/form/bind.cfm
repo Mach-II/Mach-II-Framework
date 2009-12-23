@@ -57,16 +57,34 @@ Notes:
 		<cfset variables.originalBind = request._MachIIFormLib.bind />
 	</cfif>
 	
+	<!--- Store a reference to the original prefix if available --->
+	<cfif IsDefined("request._MachIIFormLib.prefix")>
+		<cfset variables.originalPrefix = request._MachIIFormLib.prefix />
+	</cfif>
+	
 	<!--- Setup the bind --->
 	<cfif StructKeyExists(attributes, "target")>
-		<cfset setupBind(attributes.target) />
-	<cfelse>
-		<cfset setupBind() />
+		<cfif Len(attributes.target)>
+			<cfset setupBind(attributes.target) />
+		<cfelse>
+			<cfset setupBind() />
+		</cfif>
+	</cfif>
+	
+	<!--- Setup prefix --->
+	<cfif StructKeyExists(attributes, "prefix")>
+		<cfset request._MachIIFormLib.prefix = attributes.prefix />
 	</cfif>
 <cfelse>
 	<!--- Restore the original bind --->
 	<cfif StructKeyExists(variables, "originalBind")>
 		<cfset request._MachIIFormLib.bind = variables.originalBind />
+	</cfif>
+	
+	<cfif StructKeyExists(variables, "originalPrefix")>
+		<cfset request._MachIIFormLib.prefix = variables.originalPrefix />
+	<cfelse>
+		<cfset request._MachIIFormLib.prefix = "" />
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

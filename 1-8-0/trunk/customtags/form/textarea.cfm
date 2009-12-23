@@ -59,15 +59,16 @@ Notes:
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
 	
-	<!--- Set defaults --->
+	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.value" type="string" 
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
 	</cfif>
-	<cfparam name="attributes.name" type="string" 
-		default="#attributes.path#" />
+
+	<!--- Set defaults --->
+	<cfset attributes.name = resolveName() />
 	<cfparam name="attributes.id" type="string" 
 		default="#attributes.name#" />
 	
