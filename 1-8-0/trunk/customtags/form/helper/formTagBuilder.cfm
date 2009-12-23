@@ -147,6 +147,11 @@ PUBLIC FUNCTIONS
 			<cfinvoke component="#arguments.bind#"
 				method="get#key#"
 				returnvariable="value" />
+			<!--- Adobe CF 9's ORM returns nulls when a property isn't populated with a default so
+				we need to return a empty string for the form field value in that case. --->
+			<cfif NOT isDefined("value")>
+				<cfset value = "" />
+			</cfif>
 		<cfelse>
 			<cfinvoke component="#arguments.bind#"
 				method="getArg"
