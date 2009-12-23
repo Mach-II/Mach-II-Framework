@@ -229,12 +229,12 @@ properties struct can take complex datatypes like structs and arrays.
 		<!--- Fail back to default environment if no environment match is found --->
 		<cfelse>
 			<!--- Do some checks --->
-			<cfif NOT getThrowIfEnvironmentUnresolved()>
+			<cfif getThrowIfEnvironmentUnresolved()>
 				<cfset getAssert().isTrue(NOT environmentNameInherited
-						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module."
+						, "The environment name of '#environmentName#' was inherited from the base application environment property. No environment with that name is available in this module named '#getAppManager().getModuleName()#'."
 						, "Please define a default environment for this module or add defined an environment with the name of '#environmentName#'.") />
 				<cfset getAssert().isTrue(Len(getDefaultEnvironment())
-						, "No environment can be resolved for server named '#cgi.SERVER_NAME#' and no default environment has been defined."
+						, "No environment can be resolved for server named '#cgi.SERVER_NAME#' and no default environment has been defined in this module named '#getAppManager().getModuleName()#'."
 						, "Please define a default environment to use or add this server to a defined environment.") />
 			</cfif>
 				
@@ -351,7 +351,7 @@ properties struct can take complex datatypes like structs and arrays.
 		hint="Loads environment properties by environment name. Does not check if the environment is available so be sure the isEnvironmentDefined() is true.">
 		<cfargument name="environmentName" type="string" required="true" />
 		
-		<cfset var environment = variables.environments[environmentName] />
+		<cfset var environment = variables.environments[arguments.environmentName] />
 		<cfset var properties = environment.properties />
 		<cfset var key = "" />
 
