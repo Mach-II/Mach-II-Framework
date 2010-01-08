@@ -128,7 +128,7 @@ Spring Framework (http://www.springframework.org)
 				<cfreturn true />
 			</cfif>
 			
-			<cfset nextAsteriskLoc = arguments.pattern.indexOf("*", firstAsteriskLoc + 1) />
+			<cfset nextAsteriskLoc = arguments.pattern.indexOf(JavaCast("string", "*"), JavaCast("int", firstAsteriskLoc + 1)) />
 
 			<cfif nextAsteriskLoc EQ -1>
 				<cfreturn arguments.text.endsWith(arguments.pattern.substring(1)) />
@@ -142,7 +142,7 @@ Spring Framework (http://www.springframework.org)
 					<cfreturn true />
 				</cfif>
 				
-				<cfset partIndex = arguments.text.indexOf(part, partIndex + 1) />
+				<cfset partIndex = arguments.text.indexOf(JavaCast("string", part),  JavaCast("int", partIndex + 1)) />
 			</cfloop>
 			
 			<cfreturn false />	
