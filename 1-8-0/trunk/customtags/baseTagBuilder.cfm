@@ -340,10 +340,32 @@ PUBLIC FUNCTIONS
 <!---
 PUBLIC FUNCTIONS - UTIL
 --->
+<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
+	hint="Gets the AppManager.">
+	<cfreturn request.eventContext.getAppManager() />
+</cffunction>
+
+<cffunction name="setProperty" access="public" returntype="void" output="false"
+	hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
+	<cfargument name="propertyName" type="string" required="true"
+		hint="The name of the property to set."/>
+	<cfargument name="propertyValue" type="any" required="true" 
+		hint="The value to store in the property." />
+	<cfset request.eventContext.getAppManager().getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
+</cffunction>
+<cffunction name="getProperty" access="public" returntype="any" output="false"
+	hint="Gets the specified property - this is just a shortcut for getPropertyManager().getProperty()">
+	<cfargument name="propertyName" type="string" required="true"
+		hint="The name of the property to return."/>
+	<cfargument name="defaultValue" type="any" required="false" default=""
+		hint="The default value to use if the requested property is not defined." />
+	<cfreturn request.eventContext.getAppManager().getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
+</cffunction>
+
 <cffunction name="locateHtmlHelper" access="public" returntype="MachII.properties.HtmlHelperProperty" output="false"
 	hint="Locates the HtmlHelperProperty for use by certain view library custom tags.">
 	
-	<cfset var htmlHelper = request.eventContext.getAppManager().getPropertyManager().getProperty("_HTMLHelper", "") />
+	<cfset var htmlHelper = getProperty("_HTMLHelper", "") />
 	
 	<cfif IsObject(htmlHelper)>
 		<cfreturn htmlHelper />
