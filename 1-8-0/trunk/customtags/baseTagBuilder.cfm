@@ -500,7 +500,11 @@ PUBLIC FUNCTIONS - UTIL
 	<cfelse>
 		<cfif getTagLib() EQ "view" AND getTagType() EQ "a">
 			<cfif StructKeyExists(attributes, "useCurrentUrl")>
-				<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(urlParameters) />
+				<cfif StructKeyExists(attributes, arguments.attributeNameForModule)>
+					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(attributes[arguments.attributeNameForModule], urlParameters) />
+				<cfelse>
+					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(getAppManager().getModuleName(), urlParameters) />
+				</cfif>
 			<cfelse>
 				<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrlAttribute"
 					message="The 'a' tag must have an attribute named 'event', 'route' or 'useCurrentUrl'." />
