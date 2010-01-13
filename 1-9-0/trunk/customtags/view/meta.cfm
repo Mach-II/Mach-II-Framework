@@ -38,14 +38,14 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - REQUIRED ATTRIBUTES
 	type		= The type of the meta tag (this method auto-selects if value is a meta type of 'http-equiv' or 'name').
 	content		= The content of the meta tag.
 - OPTIONAL ATTRIBUTES
-	outputType	= Indicates the output type for the generated HTML code ('head', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution.
+	outputType	= Indicates the output type for the generated HTML code ('head', 'body', inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution.
 --->
 <cfif thisTag.ExecutionMode IS "start">
 	

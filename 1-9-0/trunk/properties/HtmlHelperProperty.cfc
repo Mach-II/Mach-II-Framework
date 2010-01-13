@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 Provides HTML helper functionality and enables you to easily make
@@ -353,7 +353,7 @@ from the parent application.
 		<cfargument name="charset" type="string" required="false" default="utf-8"
 			hint="Sets the document charset. Defaults to utf-8." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates tthe output type for the generated HTML code (head, inline)." />
+			hint="Indicates tthe output type for the generated HTML code ('head', 'body', 'inline')." />
 
 		<cfset var code = '<meta http-equiv="content-type" content="text/html; charset=' & arguments.charset & '" />' & Chr(13) />
 
@@ -386,7 +386,7 @@ from the parent application.
 		<cfargument name="package" type="any" required="true"
 			hint="A list or array of the asset packages names to add." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates tthe output type for the generated HTML code ('head', 'inline')." />
+			hint="Indicates tthe output type for the generated HTML code ('head', 'body', 'inline')." />
 		
 		<cfset var p = "" />
 		<cfset var code = "" />
@@ -419,7 +419,7 @@ from the parent application.
 		<cfargument name="src" type="any" required="true"
 			hint="A single string, comma-delimited list or array of web accessible hrefs to .js files." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code (head, inline)." />
+			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
 		<cfargument name="forIEVersion" type="string" required="false"
 			hint="Indicates if the javascript should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
@@ -459,7 +459,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code ('head', 'inline')." />
+			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
 		<cfargument name="forIEVersion" type="string" required="false"
 			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 		
@@ -566,7 +566,7 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates to output type for the generated HTML code ('head', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
+			hint="Indicates to output type for the generated HTML code ('head', 'body', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
 		<cfset var code = '<link href="' & arguments.href & '"' />
@@ -596,7 +596,7 @@ from the parent application.
 		<cfargument name="content" type="string" required="true"
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
-			hint="Indicates the output type for the generated HTML code ('head', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
+			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var code = "" />
 		<cfset var key = "" />
@@ -687,9 +687,9 @@ from the parent application.
 	<cffunction name="appendToHtmlArea" access="private" returntype="boolean" output="false"
 		hint="Appends to head and in the future body. Returns boolean on whether a duplicate was blocked.">
 		<cfargument name="outputType" type="string" required="true"
-			hint="The output type ('head')." />
+			hint="The output type ('head', 'body')." />
 		<cfargument name="code" type="string" required="true"
-			hint="The code to append to head or return to output inline." />
+			hint="The code to append to head or body." />
 		<cfargument name="blockDuplicate" type="boolean" required="false" default="false"
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" default="#arguments.code#"
@@ -698,6 +698,8 @@ from the parent application.
 		<!--- Output the code inline or append to HTML head --->
 		<cfif arguments.outputType EQ "head">
 			<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
+		<cfelseif arguments.outputType EQ "body">
+			<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
 		</cfif>
 	</cffunction>
 	

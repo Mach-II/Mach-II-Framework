@@ -38,12 +38,13 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - OPTIONAL ATTRIBUTES
-	src			= [string|list|array] A single string, comma-delimited list or array of web accessible hrefs to .js files.
-	outputType	= [string] Indicates the output type for the generated HTML code (head, inline).
+	src				= [string|list|array] A single string, comma-delimited list or array of web accessible hrefs to .js files.
+	outputType		= [string] Indicates the output type for the generated HTML code ('head', 'body', 'inline').
+	forIEVersion	= [string] wraps an IE conditional comment around the incoming code
 	
 External files are *always* outputted inline first or appended to the head first before
 any inline javascript code.
@@ -82,7 +83,7 @@ any inline javascript code.
 
 	<!--- For external files --->
 	<cfif StructKeyExists(attributes, "src")>
-		<cfif attributes.outputType EQ "head">
+		<cfif attributes.outputType NEQ "inline">
 			<cfset locateHtmlHelper().addJavascript(attributes.src, attributes.outputType, attributes.forIEVersion) />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = locateHtmlHelper().addJavascript(attributes.src, attributes.outputType, attributes.forIEVersion) />
@@ -102,6 +103,8 @@ any inline javascript code.
 
 		<cfif attributes.outputType EQ "head">
 			<cfset request.eventContext.addHTMLHeadElement(variables.js) />
+		<cfelseif attributes.outputType EQ "body">
+			<cfset request.eventContext.addHTMLBodyElement(variables.js) />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.js />
 		</cfif>

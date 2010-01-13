@@ -38,14 +38,14 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - REQUIRED ATTRIBUTES
 	type		= The type of link. Supports type shortcuts 'icon', 'rss', 'atom' and 'html', otherwise a complete MIME type is required.
 	href		= The href of the link tag.
 - OPTIONAL ATTRIBUTES
-	outputType	= Indicates the output type for the generated HTML code ('head', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution.
+	outputType	= Indicates the output type for the generated HTML code ('head', 'body', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution.
 	
 N.B. Links to CSS files should use the <style> tag's "src" attribute.
 --->

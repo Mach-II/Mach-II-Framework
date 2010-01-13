@@ -38,13 +38,14 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - OPTIONAL ATTRIBUTES
-	outputType	= [string] outputs the code to "head" or "inline"
-	media = [string] specifies styles for different media types
-	forIEVersion = [string] wraps an IE conditional comment around the incoming code
+	href			= [string|list|array] A single string, comma-delimited list or array of web accessible hrefs to .css files.
+	outputType		= [string] Indicates the output type for the generated HTML code ('head', 'body', 'inline').
+	media 			= [string] specifies styles for different media types
+	forIEVersion 	= [string] wraps an IE conditional comment around the incoming code
 --->
 <cfif thisTag.ExecutionMode IS "start">
 
@@ -99,7 +100,7 @@ Notes:
 		<cfset StructDelete(variables.additionalAttributes, "p", "false") />
 		<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 
-		<cfif attributes.outputType EQ "head">
+		<cfif attributes.outputType NEQ "inline">
 			<cfset locateHtmlHelper().addStylesheet(attributes.href, variables.additionalAttributes, attributes.outputType, attributes.forIEVersion) />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = locateHtmlHelper().addStylesheet(attributes.href, variables.additionalAttributes, attributes.outputType, attributes.forIEVersion) />
@@ -119,7 +120,8 @@ Notes:
 
 		<cfif attributes.outputType EQ "head">
 			<cfset request.eventContext.addHTMLHeadElement(variables.styles) />
-			<cfset thisTag.GeneratedContent = "" />
+		<cfelseif attributes.outputType EQ "body">
+			<cfset request.eventContext.addHTMLBodyElement(variables.styles) />
 		<cfelse>
 			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.styles />
 		</cfif>	

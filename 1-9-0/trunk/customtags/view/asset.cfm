@@ -38,12 +38,12 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - OPTIONAL ATTRIBUTES
 	package		= A list or array of the asset packages names to add.
-	outputType	= Indicates tthe output type for the generated HTML code (head, inline). Defaults to "head".
+	outputType	= Indicates tthe output type for the generated HTML code ('head', 'body', 'inline'). Defaults to "head".
 --->
 <cfif thisTag.ExecutionMode IS "start">
 	<!--- Setup the tag --->
