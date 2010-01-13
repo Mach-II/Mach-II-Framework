@@ -56,7 +56,7 @@ Notes:
 	<cfset variables.majorVersion = "1.9.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES,urlExcludeEventParameter" />
+		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -207,6 +207,9 @@ Notes:
 		<cfif NOT hasParent>
 			<cfif NOT isPropertyDefined("defaultEvent")>
 				<cfset setProperty("defaultEvent", "defaultEvent") />
+			</cfif>
+			<cfif NOT isPropertyDefined("defaultModule")>
+				<cfset setProperty("defaultModule", "") />
 			</cfif>
 			<cfif NOT isPropertyDefined("exceptionEvent")>
 				<cfset setProperty("exceptionEvent", "exceptionEvent") />

@@ -155,9 +155,24 @@ Notes:
 			
 			<!--- Get default event	if no event listed --->
 			<cfif NOT Len(result.eventName)>
+				<!--- If the current module is not the default module then switch the context --->
+				<cfif result.moduleName NEQ appManager.getPropertyManager().getProperty("defaultModule")>
+					<cftry>
+						<cfset appManager = appManager.getModuleManager().getModule(appManager.getPropertyManager().getProperty("defaultModule")).getModuleAppManager() />
+						<cfcatch>
+							<cfthrow type="MachII.framework.ModuleNotDefined"  	
+								message="Cound not announce default event because module '#appManager.getPropertyManager().getProperty("defaultModule")#' is not defined." />
+						</cfcatch>
+					</cftry>
+	
+					<!--- Syncronize with new module name --->
+					<cfset setRequestModuleName(result.moduleName) />
+					<cfset result.moduleName = appManager.getPropertyManager().getProperty("defaultModule") />
+				</cfif>
+
 				<cfset result.eventName = appManager.getPropertyManager().getProperty("defaultEvent") />
-				<!--- Syncronize with new name --->
-				<cfset setRequestEventName(result.eventName) />
+				<!--- Syncronize with new event name --->
+				<cfset setRequestEventName(result.eventName) />	
 			</cfif>
 			
 			<!--- Check if the event exists and is publically accessible --->
