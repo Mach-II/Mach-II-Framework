@@ -37,7 +37,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -59,6 +59,8 @@ Notes:
 	<cfset variables.exceptionEventName = "" />
 	<cfset variables.HTMLHeadElementCallbacks = ArrayNew(1) />
 	<cfset variables.HTMLHeadElementDuplicateMap = StructNew() />
+	<cfset variables.HTMLBodyElementCallbacks = ArrayNew(1) />
+	<cfset variables.HTMLBodyElementDuplicateMap = StructNew() />
 	<cfset variables.HTTPHeaderCallbacks = ArrayNew(1) />
 	<cfset variables.log = "" />
 	
@@ -573,6 +575,52 @@ Notes:
 		
 		<cfreturn arguments.addToHead />
 	</cffunction>
+
+	<cffunction name="addHTMLBodyElement" access="public" returntype="boolean" output="false"
+		hint="Adds a HTML body element. Returns a boolean if the element was appened to body (always returns true unless you allow duplicates).">
+		<cfargument name="text" type="string" required="true"
+			hint="Complete text to add to body." />
+		<cfargument name="blockDuplicate" type="boolean" required="false" default="false"
+			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
+		<cfargument name="blockDuplicateCheckString" type="string" required="false" default="#arguments.text#"
+			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
+		
+		<cfset var i = 0 />
+		<cfset var checkStringHash = "" />
+
+		<cfset arguments.addToBody = true />
+		
+		<!--- Check for duplicate if requested --->
+		<cfif arguments.blockDuplicate>
+			<cfset checkStringHash = Hash(arguments.blockDuplicateCheckString) />
+			
+			<cfif StructKeyExists(variables.HTMLBodyElementDuplicateMap, checkStringHash)>
+				<cfset arguments.addToBody = false />
+			<cfelse>
+				<cfset variables.HTMLBodyElementDuplicateMap[checkStringHash] = arguments.blockDuplicateCheckString />
+			</cfif>
+		</cfif>
+		
+		<cfif arguments.addToBody>
+			<cftry>
+				<cfhtmlbody text="#arguments.text#" />
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.unsupportedCFMLEngineFeature"
+						message="The tag 'cfhtmlbodyelement' is not supported on this engine." />
+				</cfcatch>
+			</cftry>
+		</cfif>
+		
+		<!--- Notify any registered observers even if blocked (check "addToBody" to see if it was really appended to head)--->
+		<cfloop from="1" to="#ArrayLen(variables.HTMLBodyElementCallbacks)#" index="i">
+			<cfinvoke component="#variables.HTMLBodyElementCallbacks[i].callback#"
+				method="#variables.HTMLBodyElementCallbacks[i].method#" 
+				argumentcollection="#arguments#" />
+				<!--- Expects "text", "addToBody", "blockDuplicates" and "blockDuplicateCheckString" --->
+		</cfloop>
+		
+		<cfreturn arguments.addToBody />
+	</cffunction>
 	
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
@@ -708,6 +756,27 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.HTMLHeadElementCallbacks)#" index="i">
 			<cfif utils.assertSame(variables.HTMLHeadElementCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.HTMLHeadElementCallbacks, i) />
+				<cfbreak />
+			</cfif>
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="addHTMLBodyElementCallback" access="public" returntype="void" output="false"
+		hint="Adds callback to notify when addHTMLBodyElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+		<cfset ArrayAppend(variables.HTMLBodyElementCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeHTMLBodyElementCallback" access="public" returntype="void" output="false"
+		hint="Removes callback to notify when addHTMLBodyElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(variables.HTMLBodyElementCallbacks)#" index="i">
+			<cfif utils.assertSame(variables.HTMLBodyElementCallbacks[i].callback, arguments.callback)>
+				<cfset ArrayDeleteAt(variables.HTMLBodyElementCallbacks, i) />
 				<cfbreak />
 			</cfif>
 		</cfloop>

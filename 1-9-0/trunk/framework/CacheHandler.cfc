@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id: CacheHandler.cfc 595 2007-12-17 02:39:01Z kurtwiersma $
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -119,6 +119,7 @@ Notes:
 					
 					<!--- Register observers for HTMLHeadElement and HTTPHeader --->
 					<cfset arguments.eventContext.addHTMLHeadElementCallback(this, "observeHTMLHeadElement") />
+					<cfset arguments.eventContext.addHTMLBodyElementCallback(this, "observeHTMLBodyElement") />
 					<cfset arguments.eventContext.addHTTPHeaderCallback(this, "observeHTTPHeader") />
 			
 					<!--- Run commands and save output --->
@@ -127,6 +128,7 @@ Notes:
 						<cfcatch type="any">
 							<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 							<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
+							<cfset arguments.eventContext.removeHTMLBodyElementCallback(this) />
 							<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
 							
 							<!--- Should not be counted as a miss if the cache block unencounters an exception --->
@@ -140,12 +142,14 @@ Notes:
 				
 					<!--- Unregister observers for HTMLHeadElement and HTTPHeader --->
 					<cfset arguments.eventContext.removeHTMLHeadElementCallback(this) />
+					<cfset arguments.eventContext.removeHTMLBodyElementCallback(this) />
 					<cfset arguments.eventContext.removeHTTPHeaderCallback(this) />
 	
 					<!--- Build the data to cache structure up  --->
 					<cfset dataToCache.output = commandResult.output />
 					<cfset dataToCache.data = computeDataToCache(preCommandEventDataSnapshot, arguments.event.getArgs()) />
 					<cfset dataToCache.HTMLHeadElements = getObservedHTMLHeadElements() />
+					<cfset dataToCache.HTMLBodyElements = getObservedHTMLBodyElements() />
 					<cfset dataToCache.HTTPHeaders = getObservedHTTPHeaders() />
 	
 					<!--- Cache the data and output --->
@@ -159,6 +163,7 @@ Notes:
 					</cfif>
 					<cfif log.isTraceEnabled()>
 						<cfset log.trace("Cached #ArrayLen(dataToCache.HTMLHeadElements)# HTML head elements.") />
+						<cfset log.trace("Cached #ArrayLen(dataToCache.HTMLBodyElements)# HTML body elements.") />
 						<cfset log.trace("Cached #ArrayLen(dataToCache.HTTPHeaders)# HTTP headers.") />
 					</cfif>
 				</cflock>
@@ -170,6 +175,7 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfoutput>#dataFromCache.output#</cfoutput><cfsetting enablecfoutputonly="true" />
 				<cfset arguments.event.setArgs(dataFromCache.data) />
 				<cfset replayHTMLHeadElements(dataFromCache.HTMLHeadElements, arguments.eventContext) />
+				<cfset replayHTMLBodyElements(dataFromCache.HTMLBodyElements, arguments.eventContext) />
 				<cfset replayHTTPHeaders(dataFromCache.HTTPHeaders, arguments.eventContext) />
 				
 				<!--- Log messages --->
@@ -179,6 +185,7 @@ Notes:
 				</cfif>
 				<cfif log.isTraceEnabled()>
 					<cfset log.trace("Replayed #ArrayLen(dataFromCache.HTMLHeadElements)# cached HTML head elements.") />
+					<cfset log.trace("Replayed #ArrayLen(dataFromCache.HTMLBodyElements)# cached HTML body elements.") />
 					<cfset log.trace("Replayed #ArrayLen(dataFromCache.HTTPHeaders)# cached HTTP headers.") />
 				</cfif>
 				
@@ -253,6 +260,18 @@ Notes:
 		</cfif>
 		
 		<cfset ArrayAppend(request["_MachIICacheHandler_#getHandlerId()#_HTMLHeadElements"], arguments) />
+	</cffunction>
+	
+	<cffunction name="observeHTMLBodyElement" access="public" returntype="void" output="false"
+		hint="Observes a HTML body element.">
+
+		<!--- Individual arguments are not passed in so we just observe the argument collection --->
+		
+		<cfif NOT IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTMLBodyElements")>
+			<cfset request["_MachIICacheHandler_#getHandlerId()#_HTMLBodyElements"] = ArrayNew(1) />
+		</cfif>
+		
+		<cfset ArrayAppend(request["_MachIICacheHandler_#getHandlerId()#_HTMLBodyElements"], arguments) />
 	</cffunction>
 	
 	<cffunction name="observeHTTPHeader" access="public" returntype="void" output="false"
@@ -436,6 +455,26 @@ Notes:
 		
 		<cfloop from="1" to="#ArrayLen(arguments.HTMLHeadElements)#" index="i">
 			<cfset arguments.eventContext.addHTMLHeadElement(argumentcollection=arguments.HTMLHeadElements[i]) />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="getObservedHTMLBodyElements" access="private" returntype="array" output="false"
+		hint="Gets observed HTML body elements.">		
+		<cfif IsDefined("request._MachIICacheHandler_#getHandlerId()#_HTMLBodyElements")>
+			<cfreturn request["_MachIICacheHandler_#getHandlerId()#_HTMLBodyElements"] />
+		<cfelse>
+			<cfreturn ArrayNew(1) />
+		</cfif>
+	</cffunction>
+	<cffunction name="replayHTMLBodyElements" access="private" returntype="void" output="false"
+		hint="Replays cached HTML body elements.">
+		<cfargument name="HTMLBodyElements" type="array" required="true" />
+		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.HTMLBodyElements)#" index="i">
+			<cfset arguments.eventContext.addHTMLBodyElement(argumentcollection=arguments.HTMLBodyElements[i]) />
 		</cfloop>
 	</cffunction>
 
