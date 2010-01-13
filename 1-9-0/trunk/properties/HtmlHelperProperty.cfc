@@ -51,14 +51,28 @@ Configuration Usage:
 <property name="html" type="MachII.properties.HtmlHelperProperty">
 	<parameters>
 		<parameter name="metaTitleSuffix" value=" - Mach-II" />
+		<parameter name="useAssetHosts" value="false" />
+		<!-- OR using environments -->
+		<parameter name="useAssetHosts">
+			<struct>
+				<key name="group:development,staging,qualityAssurance" value="false" />
+				<key name="prod" value="true" />
+			</struct>
+		</parameter>
+		<parameter name="assetHosts">
+			<struct>
+				<key name="assets0.example.com" value="*" />
+				<key name="assets1.example.com" value="*" />
+				<key name="assets2.example.com" value="*" />
+				<key name="assets3.example.com" value="*" />
+			</struct>
+		</parameter>
 		<parameter name="cacheAssetPaths" value="false" />
 		<!-- OR using environments -->
 		<parameter name="cacheAssetPaths">
 			<struct>
-				<key name="development" value="false" />
-				<key name="staging" value="false" />
-				<key name="qualityAssurance" value="false" />
-				<key name="production" value="true" />
+				<key name="group:development,staging,qualityAssurance" value="false" />
+				<key name="prod" value="true" />
 			</struct>
 		</parameter>
 		<!-- Defaults to ExpandPath(".") -->
@@ -107,6 +121,8 @@ from the parent application.
 	PROPERTIES
 	--->
 	<cfset variables.metaTitleSuffix = "" />
+	<cfset variables.useAssetHosts = false />
+	<cfset variables.assetHosts = StructNew() />
 	<cfset variables.cacheAssetPaths = false />
 	<cfset variables.webrootBasePath = ExpandPath(".") />
 	<cfset variables.jsBasePath = "/js" />
@@ -117,7 +133,7 @@ from the parent application.
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.assetPathsCache = StructNew() />
 	
-	<!--- Some hosts (such as GAE) do not support java.awt.* package --->
+	<!--- Some CFML engines such as OpenBD on GAE do not support java.awt.* package --->
 	<cfset variables.AWT_TOOLKIT = "" />
 
 	<!--- Do not use these locators as they may change in future versions --->
@@ -148,6 +164,8 @@ from the parent application.
 		
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
+		
+		<!--- TODO: Load up asset hosts --->
 		
 		<cfset setCacheAssetPaths(getParameter("cacheAssetPaths", "false")) />
 		<cfset setWebrootBasePath(ExpandPath(getParameter("webrootBasePath", "."))) />
@@ -867,6 +885,21 @@ from the parent application.
 		
 		<cfreturn dimensions />	
 	</cffunction>
+	
+	 <cffunction name="computeTotalAscStringValue" access="private" returntype="numeric" output="false"
+	 	hint="Returns the total numerical value of a string using the ASCII number for the characters.">
+		 <cfargument name="inputString" type="string" required="true" />
+		 
+		 <cfset var charArr = arguments.inputString.toCharArray() />
+		 <cfset var result = 0 />
+		 <cfset var i = 0 />
+		 
+		 <cfloop from="1" to="#ArrayLen(charArr)#" index="i">
+			 <cfset result = result + Asc(charArr[i]) />
+		 </cfloop>
+		 
+		 <cfreturn result />
+	 </cffunction>
 	
 	<cffunction name="cleanupContent" access="private" returntype="string" output="false"
 		hint="Cleans up content text by removing undesireable control characters.">
