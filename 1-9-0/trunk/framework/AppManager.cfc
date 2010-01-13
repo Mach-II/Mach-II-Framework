@@ -163,6 +163,50 @@ Notes:
 		hint="Returns a boolean on whether or not this AppManager is a module AppManager.">
 		<cfreturn IsObject(getParent()) />
 	</cffunction>
+	
+	<cffunction name="inEnvironmentGroup" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment group matches the passed list/array of groups.">
+		<cfargument name="environmentGroup" type="any" required="true"
+			hint="A comma-delimited list or array of groups to use for matching." />
+		
+		<cfset var result = false />
+		
+		<!---
+			Convert arrays to a list since not all CFML engines support 
+			ArrayContainsNoCase() like OpenBD and Railo
+		--->
+		<cfif IsArray(arguments.environmentGroup)>
+			<cfset arguments.environmentGroup = ArrayToList(arguments.environmentGroup) />
+		</cfif>
+		
+		<cfif ListFindNoCase(arguments.environmentGroup, getEnvironmentGroup())>
+			<cfset result = true />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+
+	<cffunction name="inEnvironmentName" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment name matches the passed list/array of names.">
+		<cfargument name="environmentName" type="any" required="true"
+			hint="A comma-delimited list or array of names to use for matching." />
+		
+		<cfset var result = false />
+		
+		<!---
+			Convert arrays to a list since not all CFML engines support 
+			ArrayContainsNoCase() like OpenBD and Railo
+		--->
+		<cfif IsArray(arguments.environmentName)>
+			<cfset arguments.environmentName = ArrayToList(arguments.environmentName) />
+		</cfif>
+		
+		<cfif ListFindNoCase(arguments.environmentName, getEnvironmentName())>
+			<cfset result = true />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
 
 	<cffunction name="addOnObjectReloadCallback" access="public" returntype="void" output="false"
 		hint="Registers on object reload callback.">

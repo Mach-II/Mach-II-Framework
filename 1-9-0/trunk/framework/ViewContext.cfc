@@ -276,6 +276,20 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
+	
+	<cffunction name="inEnvironmentGroup" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment group matches the passed list/array of groups.">
+		<cfargument name="environmentGroup" type="any" required="true"
+			hint="A comma-delimited list or array of groups to use for matching." />		
+		<cfreturn getAppManager().inEnvironmentGroup(arguments.environmentGroup) />
+	</cffunction>
+
+	<cffunction name="inEnvironmentName" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment name matches the passed list/array of names.">
+		<cfargument name="environmentName" type="any" required="true"
+			hint="A comma-delimited list or array of names to use for matching." />
+		<cfreturn getAppManager().inEnvironmentName(arguments.environmentName) />
+	</cffunction>
 
 	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
 		hint="Adds a HTML head element.">
