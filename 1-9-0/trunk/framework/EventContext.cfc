@@ -603,10 +603,11 @@ Notes:
 		
 		<cfif arguments.addToBody>
 			<cftry>
+				<!--- Use the function or Adobe ColdFusion will freak out --->
 				<cfset htmlBody(arguments.text) />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.unsupportedCFMLEngineFeature"
-						message="The tag 'cfhtmlbodyelement' is not supported on this engine." />
+						message="The 'htmlBody()' method is not supported on this engine. You cannot use adding elements to the HTML body on this engine." />
 				</cfcatch>
 			</cftry>
 		</cfif>
