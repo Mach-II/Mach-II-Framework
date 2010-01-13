@@ -603,7 +603,7 @@ Notes:
 		
 		<cfif arguments.addToBody>
 			<cftry>
-				<cfhtmlbody text="#arguments.text#" />
+				<cfset htmlBody(arguments.text) />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.unsupportedCFMLEngineFeature"
 						message="The tag 'cfhtmlbodyelement' is not supported on this engine." />
