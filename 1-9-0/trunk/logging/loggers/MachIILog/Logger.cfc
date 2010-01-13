@@ -133,6 +133,33 @@ See that file header for configuration of filter criteria.
 				, "The value of 'suppressDebugArg' cannot be empty.")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
+		
+		<cfset setOutputType(decideOutputType()) />
+	</cffunction>
+	
+	<cffunction name="decideOutputType" access="private" returntype="string" output="false"
+		hint="Decides what kind of output type to use.">
+		
+		<cfset var serverName = server.coldfusion.productname />
+		<cfset var serverProductLevel = server.coldfusion.productLevel />
+
+		<!--- Just try if cfhtmlbody is available otherwise use direct output --->
+		<cftry>
+			<!--- Use the function or Adobe ColdFusion will freak out --->
+			<cfset htmlBody("") />
+
+			<cfreturn "cfhtmlbody" />
+			<cfcatch type="any">
+				<!--- Do nothing --->
+			</cfcatch>
+		</cftry>
+		
+		<!--- Adobe ColdFusion 8+ --->
+		<cfif FindNoCase("ColdFusion", serverName)>
+			<cfreturn "buffer" />
+		<cfelse>
+			<cfreturn "direct" />
+		</cfif>
 	</cffunction>
 	
 	<!---
@@ -158,28 +185,37 @@ See that file header for configuration of filter criteria.
 			
 			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
 			<cfsavecontent variable="output"><cfinclude template="#getDisplayOutputTemplateFile()#" /></cfsavecontent>
-			
-			<!--- Get the buffer which differs on Adobe CF --->
-			<cftry>
-				<cfset buffer = out.getBuffer().toString() />
-				<cfcatch type="any">
-					<!--- Do nothing --->
-				</cfcatch>
-			</cftry>
 
 			<!--- Put head element items if defined --->
 			<cfif StructKeyExists(local, "headElement")>
 				<cfhtmlhead text="#local.headElement#" />
 			</cfif>
-				
-			<!--- Inserting output before the body tag only works on Adobe CF --->
-			<cfset count = FindNoCase("</body>", buffer) />
-			<cfif count>
-				<cfset output = Insert(output, buffer, count - 1) />
-				<cfset out.clearBuffer() />
-			</cfif>
 			
-			<cfoutput>#output#</cfoutput>
+			<!--- Output depends on the CFML engine --->
+			<cfif getOutputType() EQ "buffer">
+				<!--- Get the buffer which differs on Adobe CF --->
+				<cftry>
+					<cfset buffer = out.getBuffer().toString() />
+					<cfcatch type="any">
+						<!--- Do nothing --->
+					</cfcatch>
+				</cftry>
+	
+					
+				<!--- Inserting output before the body tag only works on Adobe CF --->
+				<cfset count = FindNoCase("</body>", buffer) />
+				<cfif count>
+					<cfset output = Insert(output, buffer, count - 1) />
+					<cfset out.clearBuffer() />
+				</cfif>			
+
+				<cfoutput>#output#</cfoutput>
+			<cfelseif getOutputType() EQ "cfhtmlbody">
+				<!--- Use the function or Adobe ColdFusion will freak out --->
+				<cfset htmlBody(output) />
+			<cfelse>
+				<cfoutput>#output#</cfoutput>
+			</cfif>
 		</cfif>
 	</cffunction>
 	
@@ -344,7 +380,7 @@ See that file header for configuration of filter criteria.
 		</cfif>
 		
 		<!--- Remainder is the data --->
-		<cfset results.data = data.toString() />
+		<cfset results.data = Trim(data.toString()) />
 
 		<cfreturn results />
 	</cffunction>
@@ -380,6 +416,16 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getSuppressDebugArg" access="public" returntype="string" output="false"
 		hint="Gets the event-arg the suppresses debug output if it is present.">
 		<cfreturn variables.instance.suppressDebugArg />
+	</cffunction>
+	
+	<cffunction name="setOutputType" access="private" returntype="void" output="false"
+		hint="Sets what the output type to use.">
+		<cfargument name="outputType" type="string" required="true" />
+		<cfset variables.instance.outputType = arguments.outputType />
+	</cffunction>
+	<cffunction name="getOutputType" access="public" returntype="string" output="false"
+		hint="Gets what the output type to use.">
+		<cfreturn variables.instance.outputType />
 	</cffunction>
 	
 </cfcomponent>
