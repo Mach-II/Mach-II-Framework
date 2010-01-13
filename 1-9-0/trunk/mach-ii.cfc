@@ -86,6 +86,8 @@ framework to be loaded as they interact with framework components:
 	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_0.dtd')#" />	
 	<!--- Set the request timeout for loading of the framework. Defaults to 240 --->
 	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
+	<!--- Set the handle on missing template. Defaults to false for backward compatibility --->
+	<cfparam name="MACHII_HANDLE_ONMISSINGTEMPLATE" type="boolean" default="false" />
 
 	<!---
 	APPLICATION SPECIFIC EVENTS
@@ -111,6 +113,24 @@ framework to be loaded as they interact with framework components:
 		<!--- Handle Mach-II request --->
 		<cfif FindNoCase("index.cfm", arguments.targetPage)>
 			<cfset handleRequest() />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="onMissingTemplate" access="public" returntype="boolean" output="true"
+		hint="Handles missing templates and routes them through the framework. Override to provide custom functionality.">
+		<cfargument name="targetPage" type="string" required="true" />
+		
+		<cfif MACHII_HANDLE_ONMISSINGTEMPLATE>
+			<cfset handleOnMissingTemplate(arguments.targetPage) />
+			
+			<cfreturn true />
+		<!---
+			If the framework is not handling the missing template, then return 
+			false to get a standard CFML exception output which is the default
+			behavior if onMissingTemplate was not defined in the first place.
+		--->
+		<cfelse>
+			<cfreturn false />
 		</cfif>
 	</cffunction>
 	
@@ -143,9 +163,9 @@ framework to be loaded as they interact with framework components:
 		<cfset application[appKey].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, AppKey, MACHII_VALIDATE_XML) />
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
-
-	<cffunction name="handleRequest" access="public" returntype="void" output="true"
-		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
+	
+	<cffunction name="ensureLoadedFramework" access="public" returntype="void" output="false"
+		hint="Ensures the framework is loaded and checks if it needs to be reloaded.">
 
 		<cfset var appKey = getAppKey() />
 		
@@ -186,13 +206,34 @@ framework to be loaded as they interact with framework components:
 				<cfset application[appKey].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		</cfif>
+	</cffunction>
+
+	<cffunction name="handleRequest" access="public" returntype="void" output="true"
+		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
+
+		<cfset ensureLoadedFramework() />
 
 		<!---
-			Handle the request and suppress whitespace. Enableoutputonly may be false 
+			Handle the request and suppress whitespace. EnableOutputOnly may be false 
 			so turn it back on for trailing whitespace. All these tags must be on the
 			same line or additional whitespace may be introduced.
 		--->
 		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+	</cffunction>
+	
+	<cffunction name="handleOnMissingTemplate" access="public" returntype="void" output="true"
+		hint="Handles an onMissingTemplate exception and passes it to the framework. Recommend to call in onMissingTemplate() event.">
+		<cfargument name="targetPage" type="string" required="true"
+			hint="The target page is the path to the missing template." />
+
+		<cfset ensureLoadedFramework() />
+
+		<!---
+			Handle the onMissingTemplate and suppress whitespace. EnableOutputOnly may be false 
+			so turn it back on for trailing whitespace. All these tags must be on the
+			same line or additional whitespace may be introduced.
+		--->
+		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleOnMissingTemplate(arguments.targetPage) /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
 	</cffunction>
 
 	<!---

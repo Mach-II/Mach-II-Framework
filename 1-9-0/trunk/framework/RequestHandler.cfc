@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -214,6 +214,16 @@ Notes:
 		
 		<!--- Start the event processing --->
 		<cfset processEvents() />
+	</cffunction>
+	
+	<cffunction name="handleOnMissingTemplate" access="public" returntype="void" output="true"
+		hint="Handles an onMissingTemplate exception and passes it to the framework.">
+		<cfargument name="targetPage" type="string" required="true"
+			hint="The target page is the path to the missing template." />
+		
+		<!--- TODO: Stub --->
+		<cfthrow message="This needs to be implemented." />
+		
 	</cffunction>
 	
 	<cffunction name="createException" access="public" returntype="MachII.util.Exception" output="false"
