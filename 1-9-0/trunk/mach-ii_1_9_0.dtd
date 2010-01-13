@@ -37,7 +37,7 @@
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 The DTD for the Mach-II Application Configuration File, Version 1.8.0.
@@ -46,14 +46,14 @@ To support validation of the configuration file, include one of the
 following DOCTYPE elements at the beginning (after the "xml" declaration):
 
 <!DOCTYPE mach-ii PUBLIC
-	"-//Mach-II//DTD Mach-II Configuration 1.8.0//EN"
-	"http://www.mach-ii.com/dtds/mach-ii_1_8_0.dtd">
+	"-//Mach-II//DTD Mach-II Configuration 1.9.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_9_0.dtd">
 
 <!DOCTYPE mach-ii SYSTEM
-	"http://localhost:8500/MachII/mach-ii_1_8_0.dtd">
+	"http://localhost:8500/MachII/mach-ii_1_9_0.dtd">
 	
 <!DOCTYPE mach-ii SYSTEM
-	"http://pathToMachII/mach-ii_1_8_0.dtd">
+	"http://pathToMachII/mach-ii_1_9_0.dtd">
 -->
 
 <!--
@@ -361,7 +361,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the view being referenced
 		[contentKey] - the key to store the content produced in (instead of outputting directly)
 		[contentArg] - the event arg to store the content produced in (instead of outputting directly)
-		[append] - whether to append content to the content key (or overwrite it)
+		[append] - whether to append content to the content key/arg (or overwrite it)
+		[prepend] - whether to prepend content to the content key/arg (or overwrite it)
 -->
 <!ELEMENT view-page EMPTY>
 <!ATTLIST view-page 
@@ -369,6 +370,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	contentKey CDATA #IMPLIED
 	contentArg CDATA #IMPLIED
 	append (true|false) "false"
+	prepend (true|false) "false"
 >
 
 <!--

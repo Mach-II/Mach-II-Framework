@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -361,6 +361,7 @@ Notes:
 		<cfset var contentKey = "" />
 		<cfset var contentArg = "" />
 		<cfset var appendContent = "" />
+		<cfset var prependContent = "" />
 		
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "contentKey")>
 			<cfset contentKey = commandNode.xmlAttributes["contentKey"] />
@@ -371,8 +372,11 @@ Notes:
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "append")>
 			<cfset appendContent = arguments.commandNode.xmlAttributes["append"] />
 		</cfif>
+		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "prepend")>
+			<cfset prependContent = arguments.commandNode.xmlAttributes["prepend"] />
+		</cfif>
 		
-		<cfset command = CreateObject("component", "MachII.framework.commands.ViewPageCommand").init(viewName, contentKey, contentArg, appendContent) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.ViewPageCommand").init(viewName, contentKey, contentArg, appendContent, prependContent) />
 		
 		<cfreturn command />
 	</cffunction>

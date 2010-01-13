@@ -37,7 +37,7 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -79,8 +79,10 @@ Notes:
 			hint="The contentKey name if defined." />
 		<cfargument name="contentArg" type="string" required="false" default=""
 			hint="The contentArg name if defined." />
-		<cfargument name="append" type="boolean" required="false" default="false"
-			hint="Directive to append event." />	
+		<cfargument name="append" type="any" required="false"
+			hint="Directive to append the view to an event arg." />
+		<cfargument name="prepend" type="any" required="false"
+			hint="Directive to prepend the view to an event arg." />
 		
 		<cfset var viewPath = getFullPath(arguments.viewName) />
 		<cfset var viewContent = "" />
@@ -89,10 +91,10 @@ Notes:
 		
 		<cfif log.isDebugEnabled()>
 			<cfif Len(arguments.contentKey)>
-				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'.") />
+				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
 			</cfif>
 			<cfif Len(arguments.contentArg)>
-				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'.") />
+				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentArg '#arguments.contentArg#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
 			</cfif>
 			<cfif NOT Len(arguments.contentKey) AND NOT Len(arguments.ContentArg)>
 				<cfset log.debug("Rendering view '#arguments.viewName#'.") />
@@ -129,6 +131,12 @@ Notes:
 							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
 							, "Ensure that the contentKey is of a simple data type.") />
 				<cfset viewContent = resolvedContentData & viewContent />
+			<cfelseif arguments.prepend AND IsDefined(arguments.contentKey)>
+				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
+				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
+							, "Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							, "Ensure that the contentKey is of a simple data type.") />
+				<cfset viewContent = viewContent & resolvedContentData />
 			</cfif>
 			<cfset SetVariable(arguments.contentKey, viewContent) />
 		</cfif>
@@ -140,6 +148,12 @@ Notes:
 							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'."
 							, "Ensure that the contentArg is of a simple data type.") />
 				<cfset viewContent = resolvedContentData & viewContent />
+			<cfelseif arguments.prepend>
+				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
+				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
+							, "Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'."
+							, "Ensure that the contentArg is of a simple data type.") />
+				<cfset viewContent = viewContent & resolvedContentData />
 			</cfif>
 			<cfset arguments.event.setArg(arguments.contentArg, viewContent) />
 		</cfif>

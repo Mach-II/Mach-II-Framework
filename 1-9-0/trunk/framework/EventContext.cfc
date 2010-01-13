@@ -461,11 +461,12 @@ Notes:
 		<cfargument name="contentKey" type="string" required="false" default="" />
 		<cfargument name="contentArg" type="string" required="false" default="" />
 		<cfargument name="append" type="boolean" required="false" default="false" />
+		<cfargument name="prepend" type="boolean" required="false" default="false" />
 		
 		<!--- Pre-Invoke. --->
 		<cfset getAppManager().getPluginManager().preView(this) />
 		
-		<cfset getViewContext().displayView(arguments.event, arguments.viewName, arguments.contentKey, arguments.contentArg, arguments.append) />
+		<cfset getViewContext().displayView(arguments.event, arguments.viewName, arguments.contentKey, arguments.contentArg, arguments.append, arguments.prepend) />
 		
 		<!--- Post-Invoke. --->
 		<cfset getAppManager().getPluginManager().postView(this) />
