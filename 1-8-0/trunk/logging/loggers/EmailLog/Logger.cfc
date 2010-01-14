@@ -289,7 +289,8 @@ See that file header for configuration of filter criteria.
 		<cfif getLogAdapter().getLoggingEnabled()>
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
-				<cfset loggingData.data = arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
+				<!--- OpenBD/Railo has ArrayConcat so we need to use "this" to call the local function --->
+				<cfset loggingData.data = this.arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
 					<!--- Do nothing as the configuration may have changed between start of
 					the redirect and now --->
