@@ -42,6 +42,61 @@ Updated version: 1.9.0
 
 Notes:
 --->
-</cfsilent>
-<cfoutput>
-</cfoutput>
+</cfsilent><cfoutput><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="refresh" content="10" />
+	
+	<title>Application Loading</title>
+	
+	<style type="text/css">
+		* {
+		margin: 0;
+		padding: 0;		
+		}
+		
+		html {
+		font-size: 100.1%; /* IE hack */
+		}
+		
+		body {
+		font: 100.1%/1.125em Arial, Tahoma, Verdana, Helvetica, sans-serif; /* the font size in EM */
+		color: ##000;
+		text-align: center;
+		background-color: ##D0D0D0;
+		}
+		
+		h1 { font-size: 155%; margin:0.25em 0 0.25em 0; padding: 0.5em 0 0.5em 0; }
+		
+		p { margin: 0; padding: 0.5em 0 0.5em 0; }
+		
+		##container {
+		text-align: left;
+		margin: 0 auto 0 auto;
+		padding: 0;
+		width: 600px;
+		}
+		
+		##notice {
+		position: absolute;
+		top: 40%;
+		width: 600px;
+		text-align: center;
+		background-color: ##FFF;
+		border: 3px solid ##999;
+		padding: 0.5em;
+		-moz-border-radius:	12px;
+		-webkit-border-radius:	12px;
+		}
+	</style>
+</head>
+<body>
+	<div id="container">
+		<div id="notice">
+			<h1>Please Wait...</h1>
+			<p>The application is loading. We will retry your request again in 10 seconds.</p>
+		</div>
+	</div>
+</body>
+</html></cfoutput>

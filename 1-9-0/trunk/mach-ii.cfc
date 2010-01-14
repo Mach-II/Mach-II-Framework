@@ -86,6 +86,10 @@ framework to be loaded as they interact with framework components:
 	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_0.dtd')#" />	
 	<!--- Set the request timeout for loading of the framework. Defaults to 240 --->
 	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
+	<!--- Set if the framework should serve a "loading" template --->
+	<cfparam name="MACHII_HANDLE_ONLOAD" type="boolean" default="true" />
+	<!--- Set the template to show for loading of the framework. Defaults to Mach-II default template. --->
+	<cfparam name="MACHII_ONLOAD_TEMPLATE" type="string" default="/MachII/bootstrapper/defaultLoadingTemplate.cfm" />
 	<!--- Set the handle on missing template. Defaults to false for backward compatibility --->
 	<cfparam name="MACHII_HANDLE_ONMISSINGTEMPLATE" type="boolean" default="false" />
 
@@ -160,7 +164,18 @@ framework to be loaded as they interact with framework components:
 		
 		<!--- Create the AppLoader. No locking requires if called during the onApplicationStart() event. --->
 		<cfset application[appKey] = StructNew() />
-		<cfset application[appKey].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, AppKey, MACHII_VALIDATE_XML) />
+		<cfset application[appKey].loading = true />
+
+		<cftry>
+			<cfset application[appKey].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, AppKey, MACHII_VALIDATE_XML) />
+
+			<cfcatch type="any">
+				<cfset application[appKey].loading = false />
+				<cfrethrow />
+			</cfcatch>
+		</cftry>
+
+		<cfset application[appKey].loading = false />
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
 	
@@ -177,6 +192,8 @@ framework to be loaded as they interact with framework components:
 		<cfif StructKeyExists(request, "MachIIConfigMode")>
 			<cfset variables.MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
+		
+		<cfset handleOnLoadTemplate() />
 		
 		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
 		<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
@@ -234,6 +251,17 @@ framework to be loaded as they interact with framework components:
 			same line or additional whitespace may be introduced.
 		--->
 		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleOnMissingTemplate(arguments.targetPage) /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+	</cffunction>
+	
+	<cffunction name="handleOnLoadTemplate" access="public" returntype="void" output="true"
+		hint="Handles on load template serving.">
+		
+		<cfset var appKey = getAppKey() />
+		
+		<cfif MACHII_HANDLE_ONLOAD AND IsDefined("application.#appKey#.loading") AND application[appKey].loading>
+			<cfinclude template="#MACHII_ONLOAD_TEMPLATE#" />
+			<cfabort />
+		</cfif>
 	</cffunction>
 
 	<!---
