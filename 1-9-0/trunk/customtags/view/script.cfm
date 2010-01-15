@@ -92,22 +92,11 @@ any inline javascript code.
 	
 	<!--- For body content --->
 	<cfif Len(variables.bodyContent)>
-		<cfset setContent(Chr(13) & '//<![CDATA[' & Chr(13) & variables.bodyContent & Chr(13) & '//]]>' & Chr(13)) />
-		
-		<cfset variables.js = doStartTag() & doEndTag() />
-		
-		<!--- Wrap in an IE conditional if defined --->
-		<cfif Len(attributes.forIEVersion)>
-			<cfset variables.js = wrapIEConditionalComment(attributes.forIEVersion, variables.js) />
-		</cfif>
-
-		<cfif attributes.outputType EQ "head">
-			<cfset request.eventContext.addHTMLHeadElement(variables.js) />
-		<cfelseif attributes.outputType EQ "body">
-			<cfset request.eventContext.addHTMLBodyElement(variables.js) />
-		<cfelse>
-			<cfset thisTag.GeneratedContent = thisTag.GeneratedContent & variables.js />
-		</cfif>
+    <cfif attributes.outputType NEQ "inline">
+      <cfset locateHtmlHelper().addJavascriptBody(variables.bodyContent, attributes.outputType, attributes.forIEVersion) />
+    <cfelse>
+      <cfset thisTag.GeneratedContent = thisTag.GeneratedContent & locateHtmlHelper().addJavascriptBody(variables.bodyContent, attributes.outputType, attributes.forIEVersion) />
+    </cfif>
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
