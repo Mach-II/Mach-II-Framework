@@ -147,7 +147,7 @@ Notes:
 			<cfif Len(result.moduleName)>
 				<cfif NOT moduleManager.isModuleDefined(result.moduleName)>
 					<cfthrow type="MachII.framework.ModuleNotDefined"  	
-						message="Cound not announce event '#result.eventName#' because module '#result.moduleName#' is not defined." />
+						message="Could not announce event '#result.eventName#' because module '#result.moduleName#' is not defined." />
 				<cfelse>
 					<cfset appManager = appManager.getModuleManager().getModule(result.moduleName).getModuleAppManager() />
 				</cfif>
