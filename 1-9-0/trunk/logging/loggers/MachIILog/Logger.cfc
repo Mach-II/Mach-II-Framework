@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 <property name="Logging" type="MachII.logging.LoggingProperty">
@@ -76,19 +76,21 @@ Notes:
 						<element value="criteria" />
 					</array>
 				</key>
-        <!-- Optional and defaults to not being used
-          Can provide a list of absolute IPs such as "127.0.0.1,127.0.0.2,127.0.0.3,127.0.0.5"
-          or may use range notation, "127.0.0.[1-3,5]" -->
-        <key name="debugIPs" value="list,of,ip,addresses" />
-        - OR -
-        <key name="debugIPs">
-          <array>
-            <element value="array" />
-            <element value="of" />
-            <element value="ip" />
-            <element value="addresses" />
-          </array>
-        </key>
+				<!--
+					Optional and defaults to not being used
+					Can provide a list of absolute IPs such as "127.0.0.1,127.0.0.2,127.0.0.3,127.0.0.5"
+					or may use range notation, "127.0.0.[1-3,5]"
+				-->
+				<key name="debugIPs" value="list,of,ip,addresses" />
+				- OR -
+				<key name="debugIPs">
+					<array>
+						<element value="array" />
+						<element value="of" />
+						<element value="ip" />
+						<element value="addresses" />
+					</array>
+				</key>
 			</struct>
 		</parameter>
 	</parameters>
@@ -148,11 +150,11 @@ See that file header for configuration of filter criteria.
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
     
-    <cfif isParameterDefined("debugIPs")
-      AND getAssert().isTrue(IsSimpleValue(getParameter("debugIPs")) OR IsArray(getParameter("debugIPs"))
-        , "The value of 'debugIPs' must be an array or string.")>
-      <cfset setDebugIPs(getParameter("debugIPs")) />
-    </cfif>
+		<cfif isParameterDefined("debugIPs")
+			AND getAssert().isTrue(IsSimpleValue(getParameter("debugIPs")) OR IsArray(getParameter("debugIPs"))
+					, "The value of 'debugIPs' must be an array or string.")>
+			<cfset setDebugIPs(getParameter("debugIPs")) />
+		</cfif>
 		
 		<cfset setOutputType(decideOutputType()) />
 	</cffunction>
@@ -200,7 +202,7 @@ See that file header for configuration of filter criteria.
 			AND getLogAdapter().isLoggingDataDefined()
 			AND ((getDebugModeOnly() AND IsDebugMode()) OR NOT getDebugModeOnly())
 			AND NOT arguments.event.isArgDefined(getSuppressDebugArg())
-      AND ((ArrayLen(getDebugIPs()) AND isDebugIP()) OR NOT ArrayLen(getDebugIPs()))>
+			AND ((ArrayLen(getDebugIPs()) AND isDebugIP()) OR NOT ArrayLen(getDebugIPs()))>
 
 			<cfset data = getLogAdapter().getLoggingData().data />
 			
@@ -282,10 +284,10 @@ See that file header for configuration of filter criteria.
 		<cfset data["Supress Debug Arg"] = getSuppressDebugArg() />
 		<cfset data["Display Output Template"] = getDisplayOutputTemplateFile() />
 		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
-    <cfset data["Debug IP Enabled"] = YesNoFormat(ArrayLen(getDebugIPs())) />
-    <cfif ArrayLen(getDebugIPs())>
-      <cfset data["Debug IPs"] = ArrayToList(getDebugIPs()) />
-    </cfif>
+		<cfset data["Debug IP Enabled"] = YesNoFormat(ArrayLen(getDebugIPs())) />
+		<cfif ArrayLen(getDebugIPs())>
+			<cfset data["Debug IPs"] = ArrayToList(getDebugIPs()) />
+		</cfif>
 		
 		<cfreturn data />
 	</cffunction>
@@ -354,8 +356,7 @@ See that file header for configuration of filter criteria.
 	</cffunction>
 	
 	<cffunction name="processCfdump" access="private" returntype="struct" output="false"
-		hint="Processes a cfdump and returns a struct with data and head elements. 
-		Also, cleans up invalid HTML syntax so debugging output will not mess up HTML validators.">
+		hint="Processes a cfdump and returns a struct with data and head elements. Also, cleans up invalid HTML syntax so debugging output will not mess up HTML validators.">
 		<cfargument name="dataToDump" type="any" required="true" />
 		
 		<cfset var data = CreateObject("java", "java.lang.StringBuffer") />
@@ -411,64 +412,64 @@ See that file header for configuration of filter criteria.
 		<cfreturn results />
 	</cffunction>
   
-  <cffunction name="isDebugIP" access="private" returntype="boolean" output="false"
-    hint="Returns true if the current cgi.remote_addr exists within the provided list.">
+	<cffunction name="isDebugIP" access="private" returntype="boolean" output="false"
+		hint="Returns true if the current cgi.remote_addr exists within the provided list.">
     
-    <cfset var debugIPs = getDebugIPs() />
-    <cfset var i = 0 />
-    
-    <!--- Loop through the provided debug IPs to see if they equate the cgi.remote_addr value --->
-    <cfloop from="1" to="#ArrayLen(debugIPs)#" index="i">
-      <cfif isIPInRange(cgi.remote_addr, debugIPs[i])>
-        <!--- Found the IP --->
-        <cfreturn true />
-      </cfif>
-    </cfloop>
+		<cfset var debugIPs = getDebugIPs() />
+		<cfset var i = 0 />
+	    
+		<!--- Loop through the provided debug IPs to see if they equate the cgi.remote_addr value --->
+		<cfloop from="1" to="#ArrayLen(debugIPs)#" index="i">
+			<cfif isIPInRange(cgi.remote_addr, debugIPs[i])>
+				<!--- Found the IP --->
+				<cfreturn true />
+			</cfif>
+		</cfloop>
 
-    <cfreturn false />
-  </cffunction>
+		<cfreturn false />
+	</cffunction>
   
-  <cffunction name="isIPInRange" access="private" returntype="boolean" output="false"
-    hint="Helper function to determine if the IP in question is in the range provided.">
-    <cfargument name="ip" type="string" required="true" />
-    <cfargument name="ipRange" type="string" required="true" />
-    
-    <cfset var inRange = true />
-    <cfset var i = 0 />
-    <cfset var j = 0 />
-    <cfset var temp = '' />
-    
-    <!--- Convert values to arrays - for speed --->
-    <cfset arguments.ip = ListToArray(arguments.ip, ".") />
-    <cfset arguments.ipRange = ListToArray(arguments.ipRange, ".") />
-    
-    <!--- Determine if the IPs have a length of 4 --->
-    <cfif NOT (ArrayLen(arguments.ip) eq 4 AND ArrayLen(arguments.ipRange) eq 4)>
-      <cfreturn false />
-    </cfif>
-    
-    <!--- Loop through ip numbers --->
-    <cfloop from="1" to="4" index="i">
-      <cfset temp = ListToArray(arguments.ipRange[i], ",[]") />
-      <cfset inRange = false /><!--- guilty until proven innocent --->
-      
-      <cfloop from="1" to="#ArrayLen(temp)#" index="j">
-        <!--- Determine if this is a range, or a simple value --->
-        <cfif (ListLen(temp[j], "-") eq 2 AND arguments.ip[i] gte ListFirst(temp[j], "-") AND arguments.ip[i] lte ListLast(temp[j], "-"))
-          OR (IsNumeric(temp[j]) AND arguments.ip[i] eq temp[j])>
-          <cfset inRange = true />
-          <cfbreak />
-        </cfif>
-      </cfloop>
-      
-      <!--- Check if still false - meaning couldn't find the specified ip value --->
-      <cfif NOT inRange>
-        <cfreturn false />
-      </cfif>
-    </cfloop>
-
-    <cfreturn inRange />
-  </cffunction>
+	<cffunction name="isIPInRange" access="private" returntype="boolean" output="false"
+		hint="Helper function to determine if the IP in question is in the range provided.">
+		<cfargument name="ip" type="string" required="true" />
+		<cfargument name="ipRange" type="string" required="true" />
+		
+		<cfset var inRange = true />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
+		<cfset var temp = '' />
+		
+		<!--- Convert values to arrays - for speed --->
+		<cfset arguments.ip = ListToArray(arguments.ip, ".") />
+		<cfset arguments.ipRange = ListToArray(arguments.ipRange, ".") />
+		
+		<!--- Determine if the IPs have a length of 4 --->
+		<cfif NOT (ArrayLen(arguments.ip) eq 4 AND ArrayLen(arguments.ipRange) eq 4)>
+			<cfreturn false />
+		</cfif>
+		
+		<!--- Loop through ip numbers --->
+		<cfloop from="1" to="4" index="i">
+			<cfset temp = ListToArray(arguments.ipRange[i], ",[]") />
+			<cfset inRange = false /><!--- guilty until proven innocent --->
+		  
+			<cfloop from="1" to="#ArrayLen(temp)#" index="j">
+				<!--- Determine if this is a range, or a simple value --->
+				<cfif (ListLen(temp[j], "-") eq 2 AND arguments.ip[i] gte ListFirst(temp[j], "-") AND arguments.ip[i] lte ListLast(temp[j], "-"))
+				OR (IsNumeric(temp[j]) AND arguments.ip[i] eq temp[j])>
+		 			<cfset inRange = true />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		  
+			<!--- Check if still false - meaning couldn't find the specified ip value --->
+			<cfif NOT inRange>
+				<cfreturn false />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn inRange />
+	</cffunction>
 		
 	<!---
 	ACCESSORS
@@ -513,18 +514,19 @@ See that file header for configuration of filter criteria.
 		<cfreturn variables.instance.outputType />
 	</cffunction>
   
-  <cffunction name="setDebugIPs" access="private" returntype="void" output="false"
-    hint="Sets the debug IPs to use.">
-    <cfargument name="debugIPs" type="any" required="true" />
-    <cfif IsSimpleValue(arguments.debugIPs)>
-      <cfset variables.instance.debugIPs = ListToArray(arguments.debugIPs, ",") />
-    <cfelse>
-      <cfset variables.instance.debugIPs = arguments.debugIPs />
-    </cfif>
-  </cffunction>
-  <cffunction name="getDebugIPs" access="public" returntype="array" output="false"
-    hint="Gets the debug IPs to use.">
-    <cfreturn variables.instance.debugIPs />
-  </cffunction>
+	<cffunction name="setDebugIPs" access="private" returntype="void" output="false"
+		hint="Sets the debug IPs to use.">
+		<cfargument name="debugIPs" type="any" required="true" />
+		
+		<cfif IsSimpleValue(arguments.debugIPs)>
+			<cfset variables.instance.debugIPs = ListToArray(arguments.debugIPs, ",") />
+		<cfelse>
+			<cfset variables.instance.debugIPs = arguments.debugIPs />
+		</cfif>
+	</cffunction>
+	<cffunction name="getDebugIPs" access="public" returntype="array" output="false"
+		hint="Gets the debug IPs to use.">
+		<cfreturn variables.instance.debugIPs />
+	</cffunction>
 	
 </cfcomponent>
