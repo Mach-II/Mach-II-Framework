@@ -116,8 +116,9 @@ Notes:
 		<cfset var requiredParameters = getRequiredParameters() />
 		<cfset var requiredParametersCount = ArrayLen(requiredParameters) />
 		<cfset var optionalParameters = getOptionalParameters() />
-		<cfset var totalArgCount = ArrayLen(requiredParameters) + ArrayLen(optionalParameters) />
-		<cfset var totalArgsProcessed = 0 />
+		<cfset var optionalParametersCount = ArrayLen(optionalParameters) />
+		<cfset var totalRequiredParametersProcessed = 0 />
+		<cfset var totalOptionalParametersProcessed = 0 />
 		<cfset var element = "" />
 		<cfset var i = 0 />
 		
@@ -137,46 +138,32 @@ Notes:
 				<!--- Builds all the required parameters from the known URL elements --->
 				<cfif requiredParametersCount GTE i>
 					<cfset params[ListGetAt(requiredParameters[i], 1, ":")] = arguments.urlElements[i] />
-				
+					<cfset totalRequiredParametersProcessed = totalRequiredParametersProcessed + 1 />
 				<!--- Continues to build with optional parameters from the remaining known URL elements --->
-				<cfelseif ArrayLen(optionalParameters) GTE i - requiredParametersCount>
-					<!--- <cftrace text="element #i#, ArraLen(requiredParameters) = #requiredParametersCount#" /> --->
+				<cfelseif optionalParametersCount GTE (i - requiredParametersCount)>
 					<cfset params[ListGetAt(optionalParameters[i - requiredParametersCount], 1, ":")] = arguments.urlElements[i] />
+					<cfset totalOptionalParametersProcessed = totalOptionalParametersProcessed + 1 />
 				</cfif>
 				
 				<!--- <cftrace text="i = #i#"> --->
 			</cfloop>
-			
-			<!--- Hold total number of url args processed not counting the route name --->
-			<cfset totalArgsProcessed = i />
-	
 			<!---
 			Debugging code: Please do not uncomment
-			<cftrace text="totalArgsProcessed = #totalArgsProcessed#, totalArgCount = #totalArgCount#"/>
+			<cftrace text="totalRequiredParametersProcessed = #totalRequiredParametersProcessed#, requiredParametersCount = #requiredParametersCount#"/>
+			<cftrace text="totalOptionalParametersProcessed = #totalOptionalParametersProcessed#, optionalParametersCount = #optionalParametersCount#"/>
 			--->
 		</cfif>
 	
-		<!---
-		Debugging code: Please do not uncomment
-		Total Processed Args:
-		<cfdump var="#totalArgsProcessed#">
-		Total Arg Count:
-		<cfdump var="#totalArgCount#">
-		Loop:
-		<cfdump var="#totalArgCount - totalArgsProcessed + 1#" />
-		<cfabort>
-		--->
-		
 		<!--- Check to ensure all required parameters were present --->
-		<cfif totalArgsProcessed lt requiredParametersCount>
+		<cfif totalRequiredParametersProcessed lt requiredParametersCount>
 			<cfthrow type="MachII.framework.UrlRoute.RequiredParametersMissing"
-				message="When attempting to process the route '#getName()#' the total number of url args processed was #totalArgsProcessed# which is less then the required parameters count of #requiredParametersCount#."
+				message="When attempting to process the route '#getName()#' the total number of url args processed was #totalRequiredParametersProcessed# which is less then the required parameters count of #requiredParametersCount#."
 				detail="" />
 		</cfif>
 	
 		<!--- Handle optionalArguments and add in defaults --->	
-		<cfif totalArgsProcessed LT totalArgCount>
-			<cfloop from="#totalArgCount - totalArgsProcessed#" to="#ArrayLen(optionalParameters)#" index="i">
+		<cfif totalOptionalParametersProcessed LT optionalParametersCount>
+			<cfloop from="#totalOptionalParametersProcessed + 1#" to="#optionalParametersCount#" index="i">
 				<cfset element = optionalParameters[i] />
 				<cfif ListGetAt(element, 2, ":") EQ "''">
 					<cfset params[ListGetAt(element, 1, ":")] = "" />
@@ -191,7 +178,7 @@ Notes:
 		<cfdump var="#params#" />
 		<cfabort />
 		--->
-		
+
 		<cfreturn params />
 	</cffunction>
 	
