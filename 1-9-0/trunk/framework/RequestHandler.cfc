@@ -161,7 +161,7 @@ Notes:
 						<cfset appManager = appManager.getModuleManager().getModule(appManager.getPropertyManager().getProperty("defaultModule")).getModuleAppManager() />
 						<cfcatch>
 							<cfthrow type="MachII.framework.ModuleNotDefined"  	
-								message="Cound not announce default event because module '#appManager.getPropertyManager().getProperty("defaultModule")#' is not defined." />
+								message="Could not announce default event because module '#appManager.getPropertyManager().getProperty("defaultModule")#' is not defined." />
 						</cfcatch>
 					</cftry>
 	
