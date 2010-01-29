@@ -404,7 +404,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	autopopulate CDATA #IMPLIED
 >
 
-<!ELEMENT inner-bean (field)*>
+<!ELEMENT inner-bean (field|inner-bean)*>
 <!ATTLIST inner-bean
 	name CDATA #REQUIRED
 	fields CDATA #IMPLIED
