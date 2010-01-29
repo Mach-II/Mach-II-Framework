@@ -434,7 +434,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
 		[route] - the url route to redirect to
 -->
-<!ELEMENT redirect (arg|persistArg)*>
+<!ELEMENT redirect (arg|persist-arg)*>
 <!ATTLIST redirect
 	event CDATA #IMPLIED
 	module CDATA #IMPLIED
@@ -452,8 +452,8 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		name - the name of the argument
 		value - the value of the argument		
 -->
-<!ELEMENT persistArg (value?, struct?, array?)>
-<!ATTLIST persistArg
+<!ELEMENT persist-arg (value?, struct?, array?)>
+<!ATTLIST persist-arg
 	name CDATA #IMPLIED
 	value CDATA #IMPLIED
 >
