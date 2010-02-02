@@ -546,46 +546,47 @@ from the parent application.
 		
 		<cfreturn code />
 	</cffunction>
-  
-  <cffunction name="addStylesheetBody" access="public" returntype="string" output="false"
-    hint="Add stylesheet content (not files) for inline use or in the HTML head.">
-    <cfargument name="body" type="string" required="true"
-      hint="String stylesheet content to be appended to the head, body, or to be displayed inline." />
-    <cfargument name="attributes" type="any" required="false" default="#StructNew()#"
-      hint="A struct or string (param1=value1|param2=value2) of attributes." />
-    <cfargument name="outputType" type="string" required="false" default="head"
-      hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
-    <cfargument name="forIEVersion" type="string" required="false"
-      hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
+	
+	<cffunction name="addStylesheetBody" access="public" returntype="string" output="false"
+		hint="Add stylesheet content (not files) for inline use or in the HTML head.">
+		<cfargument name="body" type="string" required="true"
+			hint="String stylesheet content to be appended to the head, body, or to be displayed inline." />
+		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
+			hint="A struct or string (param1=value1|param2=value2) of attributes." />
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
+		<cfargument name="forIEVersion" type="string" required="false"
+			hint="Indicates if the stylesheet should be enclosed in IE conditional comment (ex. 'lt 7')." />
 
-    <cfset var code = "" />
-    <cfset var attributesCode = "" />
-    <cfset var temp = "" />
-    
-    <!--- Explode attributes to struct --->
-    <cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
-    
-    <!--- Build attributes code section --->
-    <cfloop collection="#arguments.attributes#" item="key">
-      <cfset attributesCode = attributesCode & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
-    </cfloop>
-    
-    <!--- Construct the style tag --->
-    <cfset temp = '<style type="text/css" ' & attributesCode & '>' & Chr(13) & '/*<![CDATA[*/' & Chr(13) & arguments.body & Chr(13) & '/*]]>*/' & Chr(13) & '</style>' & Chr(13) />
-    
-    <!--- Enclose in an IE conditional comment if available --->
-    <cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
-      <cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
-    </cfif>
-    
-    <cfif arguments.outputType EQ "inline">
-      <cfset code = code & temp />
-    <cfelse>
-      <cfset appendToHtmlArea(arguments.outputType, temp, false) />
-    </cfif>
+		<cfset var code = "" />
+		<cfset var attributesCode = "" />
+		<cfset var temp = "" />
+		<cfset var key = "" />
+		
+		<!--- Explode attributes to struct --->
+		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
+		
+		<!--- Build attributes code section --->
+		<cfloop collection="#arguments.attributes#" item="key">
+			<cfset attributesCode = attributesCode & ' ' & LCase(key) & '="' & arguments.attributes[key] & '"' />
+		</cfloop>
+		
+		<!--- Construct the style tag --->
+		<cfset temp = '<style type="text/css" ' & attributesCode & '>' & Chr(13) & '/*<![CDATA[*/' & Chr(13) & arguments.body & Chr(13) & '/*]]>*/' & Chr(13) & '</style>' & Chr(13) />
+		
+		<!--- Enclose in an IE conditional comment if available --->
+		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
+			<cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
+		</cfif>
+		
+		<cfif arguments.outputType EQ "inline">
+			<cfset code = code & temp />
+		<cfelse>
+			<cfset appendToHtmlArea(arguments.outputType, temp, false) />
+		</cfif>
 
-    <cfreturn code />
-  </cffunction>
+		<cfreturn code />
+	</cffunction>
 	
 	<cffunction name="addImage" access="public" returntype="string" output="false"
 		hint="Adds code for an img tag for inline use.">
@@ -617,10 +618,10 @@ from the parent application.
 		</cfif>
 
 		<cfif arguments.height NEQ -1>
-			<cfset code = code & ' height="' & arguments.height  & '"' />
+			<cfset code = code & ' height="' & arguments.height & '"' />
 		</cfif>
 		<cfif arguments.width NEQ -1>
-			<cfset code = code & ' width="' & arguments.width  & '"' />
+			<cfset code = code & ' width="' & arguments.width & '"' />
 		</cfif>
 		
 		<!--- The 'alt' attribute is required by the W3C specification --->
