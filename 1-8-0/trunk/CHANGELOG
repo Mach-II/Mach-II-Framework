@@ -223,6 +223,15 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/264
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Support for multiple M2 EL expressions in bindable properties and parameters
+
+Special thanks to Brian Memmelaar at Curaspan Health Group, Inc. for providing
+feedback on bindable properties and parameters in which this ticket addresses.
+
+For more information see: 
+http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/495
+(2010-02-01 peterfarrell)
+
 * 'Overwrite' for Call-Method
 The Call-Method command now has an 'overwrite' boolean attribute which will
 test to see whether the resultArg already exists in the event object; if
