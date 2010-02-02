@@ -468,13 +468,9 @@ quick access to things such as announcing a new event or getting/setting propert
 			--->
 			<cfif getAppManager().isLoading()>
 				<!--- Disallow event scope during framework load --->
-				<cfif value.toLowerCase().startsWith("${event.")>
+				<cfif FindNoCase("${event.", value)>
 					<cfthrow type="MachII.framework.BindToParameterInvalidScope" 
 						message="Cannot bind to a parameter named '#arguments.parameterName#' for '#getComponentNameForLogging()#' because the 'event.' scope is not available for use during on framework load." />
-				
-				<!--- Add in properties scope if missing --->
-				<cfelseif NOT value.toLowerCase().startsWith("${properties.")>
-					<cfset value = Insert("properties.", value, 2) />
 				</cfif>
 				
 				<!--- Create a dummy event object to pass in --->
@@ -483,6 +479,9 @@ quick access to things such as announcing a new event or getting/setting propert
 				<cfset event = getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
 			</cfif>
 			
+			<!--- Add in properties scope if missing and the expression is not scoped (for BC since the "properties." was not required)--->
+			<cfset REReplaceNoCase(value, "\$\{(?!properties\.|event\.)", "${properties.", "all") />
+						
 			<cftry>
 				<cfset value = expressionEvaluator.evaluateExpression(value, event, getPropertyManager()) />
 				

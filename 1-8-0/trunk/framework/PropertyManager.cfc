@@ -324,7 +324,10 @@ Notes:
 			<!--- If configurable property, then return object --->
 			<cfif IsObject(propertyValue) AND StructKeyExists(propertyValue, "getObject")>
 				<cfset propertyValue = propertyValue.getObject() />
+			<cfelseif IsSimpleValue(propertyValue) AND getAppManager().getExpressionEvaluator().isExpression(propertyValue)>
+				<cfset propertyValue = getAppManager().getExpressionEvaluator().evaluateExpression(propertyValue, CreateObject("component", "MachII.framework.Event").init(), this) />
 			</cfif>
+
 			<cfreturn propertyValue />
 		<cfelseif IsObject(getParent()) AND getParent().isPropertyDefined(arguments.propertyName)>
 			<cfreturn getParent().getProperty(arguments.propertyName)>
