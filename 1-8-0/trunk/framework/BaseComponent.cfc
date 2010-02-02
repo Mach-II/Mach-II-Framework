@@ -480,7 +480,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			</cfif>
 			
 			<!--- Add in properties scope if missing and the expression is not scoped (for BC since the "properties." was not required)--->
-			<cfset REReplaceNoCase(value, "\$\{(?!properties\.|event\.)", "${properties.", "all") />
+			<cfset value = REReplaceNoCase(value, "\$\{(?!properties\.|event\.)", "${properties.", "all") />
 						
 			<cftry>
 				<cfset value = expressionEvaluator.evaluateExpression(value, event, getPropertyManager()) />

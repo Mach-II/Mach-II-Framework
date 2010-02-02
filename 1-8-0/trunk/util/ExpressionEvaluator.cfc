@@ -89,7 +89,7 @@ ${scope.key NEQ scope.key2}
 		<cfset var expressionTemp = arguments.expression />
 		<cfset var i = 0 />
 		
-		<cfif ListLen(expressionTemp, "}") gte 1 AND NOT expressionTemp.startsWith("${")>
+		<cfif (NOT expressionTemp.startsWith("${") AND NOT expressionTemp.endsWith("}")) OR ListLen(expressionTemp, "}") GT 1>
 			<cfloop condition="Len(expressionTemp) gt 0">
 				<cfset startIndex = FindNoCase("${", expressionTemp) />
 				<cfif startIndex gt 1>
