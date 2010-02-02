@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.6.0
+Updated version: 1.8.0
 
 Notes:
 --->
@@ -201,6 +201,24 @@ Notes:
 		<cfset debug(result) />
 		<cfset assertTrue(result eq "Birthday: 3/18/1979 fun", "The expression did not resolve to 'Birthday: 3/18/1979 fun'") />
 
+	</cffunction>
+	
+	<cffunction name="testMixedExpressions" access="public" returntype="void" output="false"
+		hint="Test an expression that contains mixed expressions.">
+		
+		<cfset var result = "" />
+		<cfset var event = getEvent() />
+		<cfset var propertyManager = getPropertyManager() />
+		
+		<cfset event.setArg("temp", "***temp***") />
+		<cfset propertyManager.setProperty("temp", "***temp***") />
+
+		<cfset result = getExpressionEvaluator().isExpression("this should exist - ${event.temp} - ${properties.temp}") />
+		<cfset assertTrue(result, "The string 'this should exist - ${event.temp} - ${properties.temp}' was not considered an expression.") />
+		
+		<cfset result = getExpressionEvaluator().evaluateExpression("this should exist - ${event.temp} - ${properties.temp}", event, propertyManager) />
+		<cfset debug(result) />
+		<cfset assertTrue(result eq "this should exist - ***temp*** - ***temp***", "The expression did not resolve to 'this should exist - ***temp*** - ***temp***'") />
 	</cffunction>
 	
 	<!---
