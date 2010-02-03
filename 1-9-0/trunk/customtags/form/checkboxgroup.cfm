@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 
     Mach-II - A framework for object oriented MVC web applications in CFML
@@ -38,7 +38,7 @@ Author: Matt Woodward (matt@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - REQUIRED ATTRIBUTES
@@ -117,106 +117,89 @@ Notes:
 	<cfset checkboxAttributes = StructCopy(attributes) />
 	<cfset checkboxAttributes.checkValue = variables.checkValues />
 	
+	<!---
+		Create an option template because calling the options tag repeatedly 
+		on a huge number of items is exponentially slow
+	--->	
+	<form:checkbox attributeCollection="#checkboxAttributes#" 
+		value="${output.value}"
+		id="${output.id}"
+		output="true" 
+		outputBuffer="#variables.outputBuffer#" />
+		
+	<cfset variables.checkboxTemplate = variables.outputBuffer.content />
+	<cfset variables.hiddenCheckboxTemplate = REReplace(variables.checkboxTemplate, "<input.*?/>", "", "one") />
+	<cfset variables.checkboxTemplate = ReplaceNoCase(variables.checkboxTemplate, variables.hiddenCheckboxTemplate, "", "one") />
+	<cfset variables.outputBuffer.content = "" />
+	
 	<cfif IsSimpleValue(attributes.items)>
-		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
-			<cfset checkboxAttributes.value = ListGetAt(attributes.items, i, attributes.delimiter) />
+		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">		
+			<cfset variables.finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.checkboxTemplate) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", ListGetAt(attributes.items, i, attributes.delimiter)) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter)) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter)), "all") />
 			
-			<form:checkbox attributeCollection="#checkboxAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() eq 1>
 			<cfif IsSimpleValue(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset checkboxAttributes.value = attributes.items[i] />
+					<cfset variables.finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.checkboxTemplate) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", attributes.items[i]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.labels[i]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
 					
-					<form:checkbox attributeCollection="#checkboxAttributes#" 
-						output="true" 
-						outputBuffer="#variables.outputBuffer#" />
-					
-					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.labels[i]) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
-					
-					<cfset variables.outputBuffer.content = "" />
-					
-					<cfoutput>#finalOutput#</cfoutput>
+					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset checkboxAttributes.value = attributes.items[i][attributes.valueKey] />
-					
-					<form:checkbox attributeCollection="#checkboxAttributes#" 
-						output="true" 
-						outputBuffer="#variables.outputBuffer#" />
-
-					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i].value)) />
-					
-					<cfset variables.outputBuffer.content = "" />
-					
-					<cfoutput>#finalOutput#</cfoutput>
+					<cfset variables.finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.checkboxTemplate) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", attributes.items[i][attributes.valueKey]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+			
+					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput />
 				</cfloop>
 				<cfelse>
 					<cfthrow type="MachII.customtags.form.checkboxgroup" 
-							message="Unsupported Data Type in Array" 
-							detail="The checkbox group form tag only supports simple values or structs as array elements." />
+						message="Unsupported Data Type in Array" 
+						detail="The checkbox group form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.customtags.form.checkboxgroup" 
-					message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
-					detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
+				message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
+				detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 		
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(sortedKeys)#">
-			<cfset checkboxAttributes.value = sortedKeys[i] />
-			
-			<form:checkbox attributeCollection="#checkboxAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.checkboxTemplate) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", sortedKeys[i]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
+						
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput />
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
-			<cfset checkboxAttributes.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
+			<cfset variables.finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.checkboxTemplate) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", attributes.items[attributes.valueCol][attributes.items.CurrentRow]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
 			
-			<form:checkbox attributeCollection="#checkboxAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.checkbox}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput />
 		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.checkboxgroup.unsupportedItemsDatatype" 
-					message="Unsupported datatype for the 'items' attribute." 
-					detail="The checkbox group form tag only supports lists, arrays, structs, and queries." />
+			message="Unsupported datatype for the 'items' attribute." 
+			detail="The checkbox group form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
+	
+	<!--- Add in the hidden element --->
+	<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.hiddenCheckboxTemplate />
 
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />
@@ -225,4 +208,4 @@ Notes:
 		<cfset thisTag.GeneratedContent = variables.outputBuffer.content />
 	</cfif>
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />
