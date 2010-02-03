@@ -175,6 +175,17 @@ Notes:
 			detail="The 'items' attribute only supports lists, structs, queries and arrays." />
 	</cfif>
 	
+	<!--- Wrap with an optgroup if defined --->
+	<cfif StructKeyExists(attributes, "optgroup")>
+		<cfset variables.optGroupContent = variables.outputBuffer.content />
+		<!--- Reset the outputBuffer for the optgroup tag wrapping --->
+		<cfset variables.outputBuffer.content = "" />
+		<form:optgroup label="#attributes.optgroup#" 
+			content="#variables.optGroupContent#"
+			output="true" 
+			outputBuffer="#variables.outputBuffer#" />
+	</cfif>
+	
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />
 		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content, attributes.outputBuffer) />
