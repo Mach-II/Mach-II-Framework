@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -55,6 +55,7 @@ Notes:
 	<cfset variables.cacheManager = "" />
 	<cfset variables.eventManager = "" />
 	<cfset variables.filterManager = "" />
+	<cfset variables.globalizationManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.messageManager = "" />
 	<cfset variables.moduleManager = "" />
@@ -377,6 +378,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getFilterManager" access="public" returntype="MachII.framework.EventFilterManager" output="false">
 		<cfreturn variables.filterManager />
+	</cffunction>
+	
+	<cffunction name="setGlobalizationManager" access="public" returntype="void" output="false">
+		<cfargument name="globalizationManager" type="MachII.framework.GlobalizationManager" required="true" />
+		<cfset variables.globalizationManager = arguments.globalizationManager />
+	</cffunction>
+	<cffunction name="getGlobalizationManager" access="public" returntype="MachII.framework.GlobalizationManager" output="false">
+		<cfreturn variables.globalizationManager />
 	</cffunction>
 
 	<cffunction name="setListenerManager" access="public" returntype="void" output="false">

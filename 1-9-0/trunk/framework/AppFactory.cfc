@@ -36,7 +36,7 @@
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -157,7 +157,7 @@ Notes:
 		Create the Framework Managers and set them in the AppManager
 		Creation order is important (do not change!):
 		cacheManager, propertyManager, requestManager, listenerManager, messageManager, filterManager, 
-		subroutineManager, eventManager, viewManager, pluginManager and then moduleManager
+		subroutineManager, eventManager, viewManager, pluginManager, globalizationManager and then moduleManager
 		--->
 		<!--- The cacheManager does load in any xml. The cache commands are loaded in by the 
 			eventManager and the subroutineManager when looks through its commands. Needs to be loaded
@@ -248,6 +248,11 @@ Notes:
 			<cfset pluginManager.loadXml(arguments.overrideXml, true) />
 		</cfif>
 		<cfset appManager.setPluginManager(pluginManager) />
+		
+		<!--- The globalizationManager doesn't load any xml; all configuration information is taken from
+			the globalizationConfigProperty --->
+		<cfset globalizationManager = CreateObject("component", "MachII.framework.GlobalizationManager").init(appManager) />
+		<cfset appManager.setGlobalizationManager(globalizationManager) />
 		
 		<!--- ModuleManager is a singleton across the application --->
 		<cfif NOT appManager.inModule()>
