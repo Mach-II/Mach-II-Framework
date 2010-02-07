@@ -54,7 +54,8 @@ Notes:
 	</cfif>
 	
 	<cfparam name="attributes.argumentSeparator" default="," type="string"/>
-	<cfparam name="attributes.defaultString" default="" type="string"/>
+	<cfparam name="attributes.text" default="" type="string"/>
+	<cfparam name="attributes.var" default="" type="string"/>
 	
 	<cfif StructKeyExists(attributes, "arguments")>
 		<cfset variables.arguments = ListToArray(attributes.arguments, attributes.argumentSeparator)/>
@@ -62,12 +63,19 @@ Notes:
 		<cfset variables.arguments = ArrayNew(1)/>
 	</cfif>
 	
-	<cfset variables.defaultString = attributes.defaultString/>
+	<cfset variables.text = attributes.text/>
 	<cfset variables.key = attributes.key/>
+	<cfset variables.var = attributes.var/>
 	
 <cfelse>
-	<!--- Output the label message --->
-	<cfset ThisTag.GeneratedContent = request.eventContext.getAppManager().getGlobalizationManager().getString(variables.key, getPageContext().getRequest().getLocale(), variables.arguments, variables.defaultString)/>
+	<cfset variables.output = request.eventContext.getAppManager().getGlobalizationManager().getString(variables.key, getPageContext().getRequest().getLocale(), variables.arguments, variables.text)>
+	<cfif variables.var NEQ "">
+		<!--- store the output to whatever variable 'var' is pointing to --->
+		<cfset SetVariable(variables.var, variables.output)/>
+	<cfelse>
+		<!--- Output the label message --->
+		<cfset ThisTag.GeneratedContent = variables.output/>
+	</cfif>
 </cfif>
 
 </cfsilent><cfsetting enablecfoutputonly="false" />
