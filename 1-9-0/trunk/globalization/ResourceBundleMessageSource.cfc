@@ -45,6 +45,9 @@ Created version: 1.9.0
 	extends="MachII.globalization.BaseMessageSource"
 	hint="">
 	
+	<!---
+	PROPERTIES
+	--->
 	<!--- An array containing the basenames of the project bundles (or 'families')--->
 	<cfset variables.basenames = ArrayNew(1)/>
 	
@@ -106,7 +109,8 @@ Created version: 1.9.0
 		<cfargument name="basename" type="string" required="true"/>
 		<cfargument name="locale" type="any" required="true"/>
 
-		<cfset localeStruct = ""/>
+		<cfset var localeStruct = "" />
+		<cfset var bundle = "" />
 
 		<cflock name="cachedResourceBundles" timeout="30">
 
@@ -142,9 +146,10 @@ Created version: 1.9.0
 		<cfargument name="code" type="string" required="true"/>
 		<cfargument name="locale" type="any" required="true"/>
 		
-		<cfset codeStruct = ""/>
-		<cfset localeStruct = ""/>
-		<cfset message = ""/>
+		<cfset var codeStruct = "" />
+		<cfset var localeStruct = "" />
+		<cfset var message = "" />
+		<cfset var messageFormat = "" />
 	
 		<cflock name="cachedMessageFormats" timeout="30">
 			<cfset codeStruct = variables.cachedMessageFormats.get(arguments.resourceBundle)/>

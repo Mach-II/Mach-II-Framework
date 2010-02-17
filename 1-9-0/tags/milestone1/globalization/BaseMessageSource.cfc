@@ -91,7 +91,7 @@ Created version: 1.9.0
 
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset getLog().trace("No locale given, creating default locale")/>
-			<cfset locale = CreateObject("java", "java.util.Locale").getDefault()/>
+			<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault()/>
 		</cfif>
 		
 		<!--- If the arguments array is empty, assume there is no messageFormat necessary --->

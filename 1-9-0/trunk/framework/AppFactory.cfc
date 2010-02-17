@@ -89,6 +89,7 @@ Notes:
 		<cfset var eventManager = "" />
 		<cfset var viewManager = "" />
 		<cfset var pluginManager = "" />
+		<cfset var globalizationManager = "" />
 		<cfset var moduleManager = "" />
 		<cfset var cacheManager = "" />
 		<cfset var configXml = "" />
