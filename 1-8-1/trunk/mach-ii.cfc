@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.1.1
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - Compatible only with Adobe ColdFusion MX 7+, NewAtlanta BlueDragon 7+
@@ -83,7 +83,7 @@ framework to be loaded as they interact with framework components:
 	<!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 	<cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 	<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_8_0.dtd. --->
-	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_0.dtd')#" />	
+	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_1.dtd')#" />	
 	<!--- Set the request timeout for loading of the framework. Defaults to 240 --->
 	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
 

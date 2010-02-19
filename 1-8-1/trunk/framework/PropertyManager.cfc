@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 --->
@@ -53,7 +53,7 @@ Notes:
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurablePropertyNames = ArrayNew(1) />
 	<cfset variables.parentPropertyManager = "">
-	<cfset variables.majorVersion = "1.8.0" />
+	<cfset variables.majorVersion = "1.8.1" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
 		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES,urlExcludeEventParameter" />

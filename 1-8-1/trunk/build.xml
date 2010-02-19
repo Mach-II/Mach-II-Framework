@@ -60,11 +60,11 @@ in your user.properties to hold the spassword.
 DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 -->
 <project
-	name="Mach-II Framework 1.8.0"
+	name="Mach-II Framework 1.8.1"
 	default="usage"
 	basedir=".">
 	
-	<description>Mach-II Framework 1.8.0</description>
+	<description>Mach-II Framework 1.8.1</description>
 	
 	<!--
 	PROPERTIES
@@ -74,7 +74,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 	
 	<property name="dest" location="./dest"/>
 	<property name="zip" location="./zip"/>
-	<property name="majorVersion" value="1-8-0"/>
+	<property name="majorVersion" value="1-8-1"/>
 	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	

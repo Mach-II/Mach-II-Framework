@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version: 1.8.0.@minorVersion@ (Simplicity)
+Version: 1.8.1.@minorVersion@ (Simplicity)
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -57,7 +57,7 @@ not been forgotten and please consider yourself thanked!
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
 ------------------------------------------------
-Mach-II Simplicity (1.8.0) is released under the GPL v3.0 license.  You can 
+Mach-II Simplicity (1.8.1) is released under the GPL v3.0 license.  You can 
 use Mach-II on any commercial application as long as you abide by the license. 
 For more details, please see the NOTICE, LICENSE and COPYING files that are 
 shipped with the package. More information including FAQs on the license
