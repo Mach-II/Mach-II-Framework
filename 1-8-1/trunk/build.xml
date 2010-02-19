@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2009 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+ 
+    As a special exception, the copyright holders of this library give you
+    permission to link this library with independent modules to produce an
+    executable, regardless of the license terms of these independent
+    modules, and to copy and distribute the resulting executable under
+    terms of your choice, provided that you also meet, for each linked
+    independent module, the terms and conditions of the license of that
+    module.  An independent module is a module which is not derived from
+    or based on this library.  If you modify this library, you may extend
+    this exception to your version of the library, but you are not
+    obligated to do so.  If you do not wish to do so, delete this
+    exception statement from your version.
+
+Author: Peter J. Farrell (peter@mach-ii.com)
+$Id: build.xml 6362 2007-09-07 03:06:02Z pfarrell $
+
+Requirements:
+- ANT 1.5+
+- MXUnit from http://www.mxunit.org
+- VarScoper from http://varscoper.riaforge.com
+
+Bundled task jars:
+- Apache Net-Commons for FTP
+- SVNAnt Task for SVN
+- JTools ANT Classloader Task
+
+Usage Notes:
+MXUnit should be located at http://localhost:8080/mxunit/
+VarScoper should be located at http://localhost:8080/varscoper/
+
+You may need to change the properties to set the server / port for 
+these resources which should be located in /build/user.properties.
+This file is SVN ignored so it will not be version controlled.
+
+You can set a property named ftp.password and autoUpdate.password
+in your user.properties to hold the spassword.
+DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
+-->
+<project
+	name="Mach-II Framework 1.8.0"
+	default="usage"
+	basedir=".">
+	
+	<description>Mach-II Framework 1.8.0</description>
+	
+	<!--
+	PROPERTIES
+	-->
+	<!-- Add user properties in this file to override defaults below -->
+	<property file="${basedir}/build/user.properties"/>
+	
+	<property name="dest" location="./dest"/>
+	<property name="zip" location="./zip"/>
+	<property name="majorVersion" value="1-8-0"/>
+	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
+	<property name="debug" value="false"/>
+	
+	<property name="ftp.server" value="mach-ii.com"/>
+	<property name="ftp.user" value="machii"/>
+	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
+	
+	<property name="mxunit.server" value="localhost"/>
+	<property name="mxunit.port" value="8080"/>
+	<property name="mxunit.output" value="${basedir}/tests/mxunitoutput"/>
+	<property name="mxunit.antClassPathUrl" value="http://${mxunit.server}:${mxunit.port}/mxunit/ant/lib/mxunit-ant.jar"/>
+	
+	<property name="tasks.classpath" value="${basedir}/build"/>
+
+	<property name="varscoper.server" value="localhost"/>
+	<property name="varscoper.port" value="8080"/>
+	<property name="varscoper.output" value="${basedir}/tests/varscoperoutput"/>
+	
+	<!--
+	TASK DEFINITIONS
+	-->
+	<taskdef resource="net/jtools/classloadertask/antlib.xml" 
+		classpath="${tasks.classpath}/ant-classloadertask.jar"/>
+	<taskdef resource="org/tigris/subversion/svnant/svnantlib.xml">
+		<classpath>
+			<pathelement location="${tasks.classpath}/ganymed.jar"/>
+			<pathelement location="${tasks.classpath}/svnant.jar"/>
+			<pathelement location="${tasks.classpath}/svnClientAdapter.jar"/>
+			<pathelement location="${tasks.classpath}/svnjavahl.jar"/>
+			<pathelement location="${tasks.classpath}/svnkit.jar"/>
+		</classpath>
+	</taskdef>
+	<classloader loader="project" classpath="${tasks.classpath}/commons-net-1.4.1.jar"/>
+	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>
+	
+	<!--
+	TARGETS
+	-->
+	<target name="usage" description="Tells how to use the build file.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Help - Mach-II Framework Build File"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="PUBLIC TARGETS"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Build"/>
+		<echo message=" - Creates a build of the framework"/>
+		<echo message="BuildDuckTyped"/>
+		<echo message=" - Creates a duck-typed version build of the framework"/>
+		<echo message="Zip"/>
+		<echo message=" - Creates a zipped build of the framework"/>
+		<echo message="ZipDuckTyped"/>
+		<echo message=" - Creates a duck-typed zipped build of the framework"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Remaing targets are private targets that other targets depend on or are for use by Team Mach-II."/>
+	</target>
+	
+	<target name="clean">
+		<echo message="---------------------------------------------"/>
+		<echo message="Cleaning"/>
+		<echo message="---------------------------------------------"/>
+		<delete dir="${dest}"/>
+		<delete dir="${zip}"/>
+		<delete dir="${mxunit.output}"/>
+		<delete dir="${varscoper.output}"/>
+	</target>
+
+	<target name="build" depends="clean,lastCommitRevision" description="Creates a build in the 'dest' directory.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Creating a build"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${dest}"/>
+		<tstamp>
+			<format property="buildDatetime" pattern="yyyy-MM-dd HH:mm:ss"/>
+		</tstamp>
+		<echo message="Copying files to dest"/>
+		<copy todir="${dest}/MachII/"
+			verbose="${debug}"
+			preservelastmodified="true">
+			<fileset dir="${basedir}">
+				<exclude name="dest/"/>
+				<exclude name="zip/"/>
+				<exclude name="tests/output/"/>
+				<exclude name="uml/"/>
+				<exclude name="build/"/>
+				<exclude name=".project"/>
+				<exclude name=".settings/"/>
+			</fileset>
+			<filterset begintoken="@" endtoken="@">
+				<filter token="minorVersion" value="${buildVersion}"/>
+				<filter token="buildDatetime" value="${buildDatetime}"/>
+			</filterset>
+		</copy>
+		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and READMEs to .txt files for windows"/>
+		<copy file="${dest}/MachII/CHANGELOG"
+			tofile="${dest}/MachII/CHANGELOG.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/LICENSE"
+			tofile="${dest}/MachII/LICENSE.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/NOTICE"
+			tofile="${dest}/MachII/NOTICE.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/README"
+			tofile="${dest}/MachII/README.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/tests/README"
+			tofile="${dest}/MachII/tests/README.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<echo message="Built as version '${buildVersion}'"/>
+		<antcall target="testReport"/>
+		<antcall target="varScopeCheck"/>
+	</target>
+	
+	<target name="buildNightly">
+		<svn>
+			<update dir="${basedir}" revision="HEAD" />
+		</svn>
+		<antcall target="build"/>
+	</target>
+	
+	<target name="buildDuckTyped" depends="build" description="Creates a duck-typed build in the 'dest' directory.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Duck typing the build"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Regexing 'returntype' attribute from cffunctions"/>
+		<replaceregexp match="(cffunction.*?)([ ]?returntype)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
+			replace="\1 "
+			flags="igm">
+			<fileset dir="${dest}/MachII/"
+				includes="**/*.cfc"/>
+		</replaceregexp>
+		<echo message="Regexing 'required' attribute from cfarguments"/>
+		<replaceregexp match="(cfargument.*?)([ ]?required)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
+		   replace="\1 "
+			flags="igm">
+		   	<fileset dir="${dest}/MachII/"
+	   			includes="**/*.cfc"/>
+		</replaceregexp>
+		<echo message="Regexing 'type' attribute from cfarguments"/>
+		<replaceregexp match="(cfargument.*?)([ ]?type)[ ]*?=[ ]*?(.)(.*?)\3[ ]?"
+			replace="\1 "
+			flags="igm">
+	      	<fileset dir="${dest}/MachII/"
+	      		includes="**/*.cfc"/>
+		</replaceregexp>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created duck typed build located in '${dest}'"/>
+		<echo message="---------------------------------------------"/>
+	</target>
+	
+	<target name="lastCommitRevision" unless="buildVersion">
+		<echo message="---------------------------------------------"/>
+		<echo message="Gettting last commit revision number"/>
+		<echo message="---------------------------------------------"/>
+		<svn>
+			<status path="${basedir}" lastChangedRevisionProperty="buildVersion"/>
+		</svn>
+		<echo message="Last commit revision number #${buildVersion}"/>
+	</target>
+	
+	<target name="test">
+		<classloader loader="project">
+			<classpath>
+				<urlpathelement path="${mxunit.antClassPathUrl}"/>
+			</classpath>
+		</classloader>
+		<taskdef name="mxunit" classname="org.mxunit.ant.MXUnitAntTask"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Testing the framework"/>
+		<echo message="---------------------------------------------"/>
+		<delete dir="${mxunit.output}"/>
+		<mkdir dir="${mxunit.output}"/>
+		<mxunit server="${mxunit.server}"
+			port="${mxunit.port}"
+			outputdir="${mxunit.output}"
+			verbose="${debug}"
+			failureproperty="mxunit.failure"
+			errorproperty="mxunit.error">
+			<directory path="${basedir}/tests" recurse="true" componentpath="MachII.tests" /> 
+		</mxunit>
+	</target>
+
+	<target name="testReport" depends="test">
+		<echo message="---------------------------------------------"/>
+		<echo message="Building a test report"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${mxunit.output}/junit"/>
+		<junitreport todir="${mxunit.output}/junit">
+			<fileset dir="${mxunit.output}">
+			   <include name="*.xml"/>
+			</fileset>
+			<report format="noframes" todir="${mxunit.output}/report" />
+		</junitreport>
+		<delete dir="${mxunit.output}/junit" />
+		<echo message="---------------------------------------------"/>
+		<echo message="Report available at: file:///${mxunit.output}/report/junit-noframes.html"/>
+		<echo message="---------------------------------------------"/>
+		<fail message="Test failure. See report.">
+			<condition>
+				<isset property="mxunit.failure"/>
+			</condition>
+		</fail>
+		<fail message="Test error. See report.">
+			<condition>
+				<isset property="mxunit.error"/>
+			</condition>
+		</fail>
+	</target>
+	
+	<target name="varScopeCheck">
+		<echo message="---------------------------------------------"/> 
+		<echo message="Checking the framework for unscoped variables"/>
+		<echo message="---------------------------------------------"/>
+	   
+		<mkdir dir="${varscoper.output}"/>
+		
+		<get dest="${varscoper.output}/results.csv" 
+			src="http://${varscoper.server}:${varscoper.port}/varscoper/varScoper.cfm?filePath=${dest}/MachII&amp;submitbutton=start&amp;displayFormat=csv&amp;showDuplicates=true&amp;recursiveDirectory=true"/>
+	  
+		<!-- check csv file for any violations -->
+		<loadfile srcfile="${varscoper.output}/results.csv" property="varscoper.results">  
+			<filterchain>
+				<headfilter skip="1"/>
+				<trim/>
+			</filterchain>
+		</loadfile>
+	  
+		<!-- will be set if violations found else variable will be unset -->
+		<echo message="${varscoper.results}"/>
+	  
+		<fail message="Var scope violation is found.">
+			<condition>
+				<isset property="varscoper.results"/>
+			</condition>
+		</fail>
+		<echo message="---------------------------------------------"/>
+		<echo message="Successful check for unscoped variables"/>
+		<echo message="---------------------------------------------"/>
+	 </target>
+	
+	<target name="zip-init">
+		<echo message="Gettting last commit revision number"/>
+		<svn>
+			<status path="${basedir}" lastChangedRevisionProperty="svnBuildVersion"/>
+		</svn>
+		<input addProperty="buildVersion"
+			message="Input a build number or minor version level (0=BER, 1=Alpha, 2=Beta, 3=RC1, 4=RC2, 5=RC3, 6=RC4, 7=RC5, 8=Stable, 9=StableDuck) (defaults to SVN build number):"
+			defaultvalue="${svnBuildVersion}"/>
+	</target>
+	
+	<target name="zip" depends="zip-init,build" description="Creates a build zip in the 'zip' directory.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Zipping the build"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${zip}"/>
+		<zip destfile="${zip}/MachII_${majorVersion}.zip"
+			basedir="${dest}"/>
+		<echo message="Creating MD5 checksum for zip"/>
+		<checksum file="${zip}/MachII_${majorVersion}.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}.zip'"/>
+		<echo message="---------------------------------------------"/>
+	</target>
+	
+	<target name="zipDuckTyped" depends="zip-init,buildDuckTyped" description="Creates a duck-typed build zip in the 'zip' directory">
+		<echo message="---------------------------------------------"/>
+		<echo message="Zipping the duck typed build"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${zip}"/>
+		<zip destfile="${zip}/MachII_${majorVersion}_ducktyped.zip"
+			basedir="${dest}"/>
+		<echo message="Creating MD5 checksum for zip"/>
+		<checksum file="${zip}/MachII_${majorVersion}_ducktyped.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}_ducktyped.zip'"/>
+		<echo message="---------------------------------------------"/>
+	</target>
+	
+	<target name="zipNightly" depends="lastCommitRevision,buildNightly" description="Creates a nightly build zip in the 'zip' directory.">
+		<echo message="---------------------------------------------"/>
+		<echo message="Building nightly zip"/>
+		<echo message="---------------------------------------------"/>
+		<mkdir dir="${zip}"/>
+		<mkdir dir="${zip}/older/"/>
+		<tstamp>
+			<format property="formattedDatetime" pattern="yyyy-MM-dd_HH-mm-ss"/>
+		</tstamp>
+		<zip destfile="${zip}/older/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"
+			basedir="${dest}"/>
+		<checksum file="${zip}/older/MachII_${majorVersion}_nightly_${formattedDatetime}.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created zip located at'${zip}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip'"/>
+		<echo message="---------------------------------------------"/>
+		<zip destfile="${zip}/MachII_${majorVersion}_nightly.zip"
+					basedir="${dest}"/>
+		<checksum file="${zip}/MachII_${majorVersion}_nightly.zip"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Created generically named zip located at'${zip}/MachII_${majorVersion}_nightly.zip'"/>
+		<echo message="---------------------------------------------"/>
+	</target>
+	
+	<target name="ftp-init" description="Provides initialization for ftp targets.">
+		<input addProperty="ftp.password"
+			message="Please enter the password for FTP user named '${ftp.user}':"/>
+		<fail unless="ftp.password">You must set the ftp.password property for ftp as command line arg (e.g. -Dftp.password=YOURPWD) or input the password if you have manually run this target.</fail>
+		<input addProperty="autoUpdate.password"
+			message="Please enter the password for auto updater:"/>
+		<fail unless="autoUpdate.password">You must set the autoUpdate.password property as command line arg (e.g. -DautoUpdate.password=YOURPWD) or input the password if you have manually run this target.</fail>
+	</target>
+	
+	<target name="ftp-zipNightly" depends="ftp-init,zipNightly" description="Creates a nightly build zip and uploads it to nightly directory on mach-ii.com">
+		<echo message="---------------------------------------------"/>
+		<echo message="FTP-ing nightly build" />
+		<echo message="---------------------------------------------"/>
+		<ftp server="${ftp.server}"
+			userid="${ftp.user}"
+			password="${ftp.password}"
+			action="put"
+			remotedir="${ftp.webroot}/nightly/"
+			verbose="${debug}">
+			<fileset dir="${zip}">
+				<include name="*.zip"/>
+				<include name="*.zip.MD5"/>
+			</fileset>
+		</ftp>
+		<ftp server="${ftp.server}"
+			userid="${ftp.user}"
+			password="${ftp.password}"
+			action="put"
+			remotedir="${ftp.webroot}/nightly/older/${majorVersion}/"
+			verbose="${debug}">
+			<fileset dir="${zip}/older/">
+				<include name="*.zip"/>
+				<include name="*.zip.MD5"/>
+			</fileset>
+		</ftp>
+		<ftp server="${ftp.server}"
+			userid="${ftp.user}"
+			password="${ftp.password}"
+			action="put"
+			remotedir="${ftp.webroot}/dtds/"
+			verbose="${debug}" >
+			<fileset dir="${dest}/MachII/">
+				<include name="*.dtd"/>
+			</fileset>
+		</ftp>
+		<tempfile property="tempFile" suffix=".tmp" destdir="${dest}"/>
+		<get dest="${tempFile}" src="http://www.mach-ii.com/index.cfm?go=admin.updatePackage&amp;package=framework&amp;versionNumber=1.8.0.${buildVersion}&amp;fileLocation=http://www.mach-ii.com/nightly/older/${majorVersion}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip&amp;password=${autoUpdate.password}"/>
+	</target>
+	
+	<target name="svnLogin">
+		<input addproperty="svn.usr"
+			message="SVN Username:"/>
+		<input addproperty="svn.pwd"
+			message="SVN password:"/>		
+	</target>
+	
+</project>
