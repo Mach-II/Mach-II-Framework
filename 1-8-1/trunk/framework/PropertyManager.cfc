@@ -325,10 +325,7 @@ Notes:
 			<cfif IsObject(propertyValue) AND StructKeyExists(propertyValue, "getObject")>
 				<cfset propertyValue = propertyValue.getObject() />
 			<cfelseif IsSimpleValue(propertyValue) AND getAppManager().getExpressionEvaluator().isExpression(propertyValue)>
-				<cfdump var="#propertyValue#">
 				<cfset propertyValue = getAppManager().getExpressionEvaluator().evaluateExpression(propertyValue, CreateObject("component", "MachII.framework.Event").init(), this) />
-				<cfdump var="#propertyValue#">
-				<cfabort>
 			</cfif>
 
 			<cfreturn propertyValue />
