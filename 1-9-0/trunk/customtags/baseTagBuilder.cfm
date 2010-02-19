@@ -377,7 +377,7 @@ PUBLIC FUNCTIONS - UTIL
 </cffunction>
 <cffunction name="isHtmlHelperAvailable" access="public" returntype="boolean" output="false"
 	hint="Checks if the HtemloHelperProperty is available for use.">
-	<cfreturn request.eventContext.getAppManager().getPropertyManager().isPropertyDefined("_HTMLHelper") />
+	<cfreturn IsObject(getProperty("_HTMLHelper", "")) />
 </cffunction>
 
 <cffunction name="getAttributeCollection" access="public" returntype="struct" output="false"
