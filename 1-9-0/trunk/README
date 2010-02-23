@@ -22,11 +22,17 @@ maintenance.  Mach-II was the first object-oriented framework for CFML
 and continues to mature as a strong and viable framework choice for developers.
 
 Team Mach-II would like to send a special thanks to the following individuals
-that helped us produce Mach-II Simplicity by providing feedback, testing 
+that helped us produce Mach-II Integrity by providing feedback, testing 
 nightly / release candidate builds, test cases / application or finding 
 defects (in no particular order):
 
-* Insert names here
+* Names here
+
+A special thanks for people who have contributed to documentation on our wiki:
+
+* Jermey Shearer
+* Michael Votaw (University of Missouri - St. Louis)
+* Brian Hendel (Splice Digital)
 
 This list is by no means a complete list of people Team Mach-II would like to
 thank.  If you participated by filing a defect, patch, enhancement and have been 
