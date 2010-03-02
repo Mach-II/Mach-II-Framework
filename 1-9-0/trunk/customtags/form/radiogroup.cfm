@@ -1,4 +1,4 @@
-<cfsetting enablecfoutputonly="true" />
+<cfsetting enablecfoutputonly="true" /><cfsilent>
 <!---
 
     Mach-II - A framework for object oriented MVC web applications in CFML
@@ -224,4 +224,4 @@ Notes:
 		<cfset thisTag.GeneratedContent = variables.outputBuffer.content />
 	</cfif>
 </cfif>
-<cfsetting enablecfoutputonly="false" />
+</cfsilent><cfsetting enablecfoutputonly="false" />
