@@ -59,14 +59,24 @@ Fixed Defects
 Improvements / Enhancements
 ------------------------------------------------
 
+* Added the optgroup form tag for HTML selects
+
+See for more information on the HTML optgroup tag:
+http://www.w3schools.com/tags/tag_optgroup.asp
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/527
+(2010-03-02 peterfarrell)
+
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
 
-* Reduced generated whitespace and improved performance of checkboxgroup form tag
-We have reduced the amount of whitespace the custom tag generates. We have improved
-the performance of the tag by approximately 1,100%.
+* Reduced generated whitespace and improved performance of checkboxgroup and radiogroup 
+form tags. We have reduced the amount of whitespace the custom tag generates and improved
+the performance of the tag by approximately 1,100% - 1,500% in our test cases.
 
 For more information see:
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/529
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/529
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/530
 (2010-02-02 peterfarrell)
