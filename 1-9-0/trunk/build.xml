@@ -237,6 +237,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<svn>
 			<status path="${basedir}" lastChangedRevisionProperty="buildVersion"/>
 		</svn>
+		<echo message="Target directory: ${basedir}"/>
 		<echo message="Last commit revision number #${buildVersion}"/>
 	</target>
 	
