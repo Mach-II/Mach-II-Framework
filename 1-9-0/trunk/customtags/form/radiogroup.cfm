@@ -38,7 +38,7 @@ Author: Matt Woodward (matt@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 - REQUIRED ATTRIBUTES
@@ -83,7 +83,8 @@ Notes:
 		default="" />
 
 <cfelse>
-	<cfset originalGeneratedContent = thisTag.GeneratedContent />
+	<!--- Trim is used to control additional whitespace --->
+	<cfset variables.originalGeneratedContent = Trim(thisTag.GeneratedContent) />
 	<cfset thisTag.GeneratedContent = "" />
 
 	<!--- Create a crazy outbuffer struct so we can pass by reference --->
@@ -97,81 +98,71 @@ Notes:
 		<cfset attributes.labels = attributes.items />
 	</cfif>
 	
-	<!--- doing this here so we can add checked to the attributes 
-			being passed to the radio custom tag as needed instead 
-			of having to repeat the entire tag in conditionals --->
-	<cfset radioAttributes = StructCopy(attributes) />
+	<!---
+		Create an option template because calling the options tag repeatedly 
+		on a huge number of items is exponentially slow
+	--->	
+	<form:radio attributeCollection="#attributes#" 
+		value="${output.value}"
+		id="${output.id}"
+		output="true" 
+		outputBuffer="#variables.outputBuffer#" />
+		
+	<cfset variables.radioTemplate = variables.outputBuffer.content />
+	<cfset variables.outputBuffer.content = "" />
 	
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
-			<cfif StructKeyExists(attributes, "checkValue") and 
-					attributes.checkValue eq ListGetAt(attributes.items, i, attributes.delimiter)>
-				<cfset radioAttributes.checked = true />
+			<cfset variables.value = ListGetAt(attributes.items, i, attributes.delimiter) />
+			
+			<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
+				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
-				<cfset StructDelete(radioAttributes, "checked", false) />
+				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
 			
-			<cfset radioAttributes.value = ListGetAt(attributes.items, i, attributes.delimiter) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
 			
-			<form:radio attributeCollection="#radioAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
-		<cfif attributes.items.getDimension() eq 1>
+		<cfif attributes.items.getDimension() EQ 1>
 			<cfif IsSimpleValue(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfif StructKeyExists(attributes, "checkValue") and 
-							attributes.checkValue eq attributes.items[i]>
-						<cfset radioAttributes.checked = true />
+					<cfset variables.value = attributes.items[i] />
+					
+					<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
+						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
-						<cfset StructDelete(radioAttributes, "checked", false) />
+						<cfset variables.finalOutput = variables.radioTemplate />
 					</cfif>
 					
-					<cfset radioAttributes.value = attributes.items[i] />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.labels[i]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
 					
-					<form:radio attributeCollection="#radioAttributes#" 
-						output="true" 
-						outputBuffer="#variables.outputBuffer#" />
-					
-					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.labels[i]) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i])) />
-					
-					<cfset variables.outputBuffer.content = "" />
-					
-					<cfoutput>#finalOutput#</cfoutput>
+					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfif StructKeyExists(attributes, "checkValue") and 
-							attributes.checkValue eq attributes.items[i][attributes.valueKey]>
-						<cfset radioAttributes.checked = true />
-					<cfelse>
-						<cfset StructDelete(radioAttributes, "checked", false) />
-					</cfif>
-					
 					<cfset radioAttributes.value = attributes.items[i][attributes.valueKey] />
-					
-					<form:radio attributeCollection="#radioAttributes#" 
-						output="true" 
-						outputBuffer="#variables.outputBuffer#" />
 
-					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+					<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
+						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
+					<cfelse>
+						<cfset variables.finalOutput = variables.radioTemplate />
+					</cfif>
+
+					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
 					
-					<cfset variables.outputBuffer.content = "" />
-					
-					<cfoutput>#finalOutput#</cfoutput>
+					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
 				</cfloop>
 			<cfelse>
 				<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
@@ -184,53 +175,41 @@ Notes:
 					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
-		<cfset sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
+		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 		
 		<!--- struct key is value, struct value is label --->
-		<cfloop index="i" from="1" to="#ArrayLen(sortedKeys)#">
-			<cfif StructKeyExists(attributes, "checkValue") 
-					and attributes.checkValue eq sortedKeys[i]>
-				<cfset radioAttributes.checked = true />
+		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
+			<cfset variables.value = variables.sortedKeys[i] />
+
+			<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
+				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
-				<cfset StructDelete(radioAttributes, "checked", false) />
+				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
 			
-			<cfset radioAttributes.value = sortedKeys[i] />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value)) />
 			
-			<form:radio attributeCollection="#radioAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
-			<cfif StructKeyExists(attributes, "checkValue") 
-					and attributes.checkValue eq attributes.items[attributes.valueCol][attributes.items.CurrentRow]>
-				<cfset radioAttributes.checked = true />
+			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
+
+			<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
+				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
-				<cfset StructDelete(radioAttributes, "checked", false) />
+				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
+						
+			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalContent) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value)) />
 			
-			<cfset radioAttributes.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
-			
-			<form:radio attributeCollection="#radioAttributes#" 
-				output="true" 
-				outputBuffer="#variables.outputBuffer#" />
-			
-			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
-			
-			<cfset variables.outputBuffer.content = "" />
-			
-			<cfoutput>#finalOutput#</cfoutput>
+			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
 		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
