@@ -128,7 +128,7 @@ Notes:
 			<cfthrow type="MachII.caching.CacheStrategyAlreadyDefined"
 				message="A Cache Strategy with name '#arguments.cacheStrategyName#' is already registered." />
 		<cfelse>
-			<cfset variables.cacheStrategies[arguments.cacheStrategyName] = cacheStrategy />
+			<cfset variables.cacheStrategies[arguments.cacheStrategyName] = arguments.cacheStrategy />
 		</cfif>
 	</cffunction>
 
