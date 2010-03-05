@@ -141,6 +141,42 @@ Notes:
 		hint="Returns a comma delimited list of parameter names.">
 		<cfreturn StructKeyList(variables.parameters) />
 	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="isMethodDefined" access="private" returntype="boolean" output="false"
+		hint="Checks if an abstract function was overridden in the concrete class. This method is recursive and will walk the inheritance tree.">
+		<cfargument name="methodName" type="string" required="true"
+			hint="Method name to look for in metadata" />
+		<cfargument name="metadata" type="any" required="false" default="#GetMetadata(this)#"
+			hint="Metadata to search for method name." />
+
+		<cfset var methods = ArrayNew(1) />
+		<cfset var i = 0 />
+		<cfset var result = false />
+		
+		<!--- "functions" key only exists when there at least one defined method --->
+		<cfif StructKeyExists(arguments.metadata, "functions")>
+			<cfset methods = arguments.metadata.functions />
+			
+			<!--- Find if the method exists --->
+			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
+				<cfif methods[i].name EQ arguments.methodName>
+					<!--- Typically, we don't shortcircuit returns but it is easier in recursive functions --->
+					<cfreturn true />
+				</cfif>
+			</cfloop>
+		</cfif>
+		
+		<!--- Method is not at this level so walk inheritance tree if possible --->
+		<cfif StructKeyExists(arguments.metadata, "extends") 
+			AND arguments.metadata.extends.name NEQ "MachII.endpoints.impl.AbstractEndpoint">
+			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
+		<cfelse>
+			<cfreturn false />
+		</cfif>	
+	</cffunction>
 
 	<!---
 	ACCESSORS
