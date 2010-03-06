@@ -110,7 +110,12 @@ Notes:
 			DO NOT CHANGE ORDER OF METHOD CALLS --->
 		<cfset getPropertyManager().configure() />
 		<cfset getCacheManager().configure() />
-		<cfset getRequestManager().configure() />
+		
+		<!--- RequestManager is a singleton only call if this is the parent AppManager --->
+		<cfif NOT inModule()>
+			<cfset getRequestManager().configure() />
+		</cfif>
+		
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
 		<cfset getMessageManager().configure() />
@@ -119,7 +124,7 @@ Notes:
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
 		
-		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
+		<!--- ModuleManager is a singleton only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
 			<cfset getModuleManager().configure() />
 		</cfif>

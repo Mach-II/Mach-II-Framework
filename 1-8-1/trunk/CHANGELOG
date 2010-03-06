@@ -55,6 +55,19 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* Configure() method the RequestManager called too many times
+The configure() method in the RequestManager is being called by each module 
+and it should only be called once when the framework loads because this 
+manager is a singleton.  This is a superficial defect and only affected
+start up performance of the framework when multiple modules are employed. 
+
+The defect affected Mach-II 1.5.0, 1.6.0, 1.6.1 and 1.8.0 and has been
+fixed in the 1.8.1 release.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/549
+(2010-03-06 peterfarrell)
+
 * Form/view tag library incorrect says that HTML helper is not available
 Form/view tag library incorrect says that HTML helper is not available when 
 the request is in a module, but the HTML helper is only defined in the parent 
@@ -63,7 +76,7 @@ base application.
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/541
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/541
 (2010-02-18 peterfarrell)
 
 * Property manager dumps and aborts when a property is an M2 EL expression 
@@ -71,7 +84,7 @@ http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/541
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-http://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
 (2010-02-18 peterfarrell)
 
 ------------------------------------------------
