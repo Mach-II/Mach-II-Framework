@@ -90,8 +90,6 @@ framework to be loaded as they interact with framework components:
 	<cfparam name="MACHII_HANDLE_ONLOAD" type="boolean" default="true" />
 	<!--- Set the template to show for loading of the framework. Defaults to Mach-II default template. --->
 	<cfparam name="MACHII_ONLOAD_TEMPLATE" type="string" default="/MachII/bootstrapper/defaultLoadingTemplate.cfm" />
-	<!--- Set the handle on missing template. Defaults to false for backward compatibility --->
-	<cfparam name="MACHII_HANDLE_ONMISSINGTEMPLATE" type="boolean" default="false" />
 
 	<!---
 	APPLICATION SPECIFIC EVENTS
@@ -117,24 +115,6 @@ framework to be loaded as they interact with framework components:
 		<!--- Handle Mach-II request --->
 		<cfif FindNoCase("index.cfm", arguments.targetPage)>
 			<cfset handleRequest() />
-		</cfif>
-	</cffunction>
-	
-	<cffunction name="onMissingTemplate" access="public" returntype="boolean" output="true"
-		hint="Handles missing templates and routes them through the framework. Override to provide custom functionality.">
-		<cfargument name="targetPage" type="string" required="true" />
-		
-		<cfif MACHII_HANDLE_ONMISSINGTEMPLATE>
-			<cfset handleOnMissingTemplate(arguments.targetPage) />
-			
-			<cfreturn true />
-		<!---
-			If the framework is not handling the missing template, then return 
-			false to get a standard CFML exception output which is the default
-			behavior if onMissingTemplate was not defined in the first place.
-		--->
-		<cfelse>
-			<cfreturn false />
 		</cfif>
 	</cffunction>
 	
@@ -236,21 +216,6 @@ framework to be loaded as they interact with framework components:
 			same line or additional whitespace may be introduced.
 		--->
 		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
-	</cffunction>
-	
-	<cffunction name="handleOnMissingTemplate" access="public" returntype="void" output="true"
-		hint="Handles an onMissingTemplate exception and passes it to the framework. Recommend to call in onMissingTemplate() event.">
-		<cfargument name="targetPage" type="string" required="true"
-			hint="The target page is the path to the missing template." />
-
-		<cfset ensureLoadedFramework() />
-
-		<!---
-			Handle the onMissingTemplate and suppress whitespace. EnableOutputOnly may be false 
-			so turn it back on for trailing whitespace. All these tags must be on the
-			same line or additional whitespace may be introduced.
-		--->
-		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleOnMissingTemplate(arguments.targetPage) /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
 	</cffunction>
 	
 	<cffunction name="handleOnLoadTemplate" access="public" returntype="void" output="true"
