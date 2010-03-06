@@ -49,8 +49,8 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.parentGlobalizationManager = ""/>
-	<cfset variables.globalizationConfigProperty = ""/>
+	<cfset variables.parentGlobalizationManager = "" />
+	<cfset variables.globalizationConfigProperty = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -68,43 +68,53 @@ Notes:
 		<cfreturn this />
 	</cffunction>
 	
+	<cffunction name="configure" access="public" returntype="void" output="false"
+		hint="Configures the manager.">
+		<!--- DOES NOTHING --->
+	</cffunction>
+
+	<cffunction name="deconfigure" access="public" returntype="void" output="false"
+		hint="Deconfigures the manager.">
+		<!--- DOES NOTHING --->
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="getString" access="public" returntype="string" output="false">
-		<cfargument name="code" type="string" required="true"/>
-		<cfargument name="locale" type="any" required="true"/>
-		<cfargument name="args" type="array" required="true"/>
-		<cfargument name="defaultString" type="string" required="true"/>
+		<cfargument name="code" type="string" required="true" />
+		<cfargument name="locale" type="any" required="true" />
+		<cfargument name="args" type="array" required="true" />
+		<cfargument name="defaultString" type="string" required="true" />
 		
-		<cfreturn getGlobalizationConfigProperty().getMessageSource().getMessage(arguments.code, arguments.args, arguments.locale, arguments.defaultString)/>
+		<cfreturn getGlobalizationConfigProperty().getMessageSource().getMessage(arguments.code, arguments.args, arguments.locale, arguments.defaultString) />
 	</cffunction>
 	
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setAppManager" access="public" returntype="void" output="false">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"/>
-		<cfset variables.appManager = arguments.appManager/>
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
-		<cfreturn variables.appManager/>
+		<cfreturn variables.appManager />
 	</cffunction>
 	
 	<cffunction name="setParent" access="public" returntype="void" output="false">
-		<cfargument name="parentManager" type="MachII.framework.GlobalizationManager" required="true"/>
-		<cfset variables.parentGlobalizationManager = arguments.parentManager/>
+		<cfargument name="parentManager" type="MachII.framework.GlobalizationManager" required="true" />
+		<cfset variables.parentGlobalizationManager = arguments.parentManager />
 	</cffunction>
 	<cffunction name="getParent" access="public" returntype="MachII.framework.AppManager" output="false">
-		<cfreturn variables.parentGlobalizationManager/>
+		<cfreturn variables.parentGlobalizationManager />
 	</cffunction>
 	
 	<cffunction name="setGlobalizationConfigProperty" access="public" returntype="void" output="false">
-		<cfargument name="globalizationConfigProperty" type="MachII.properties.GlobalizationConfigProperty" required="true"/>
-		<cfset variables.globalizationConfigProperty = arguments.globalizationConfigProperty/>
+		<cfargument name="globalizationConfigProperty" type="MachII.properties.GlobalizationConfigProperty" required="true" />
+		<cfset variables.globalizationConfigProperty = arguments.globalizationConfigProperty />
 	</cffunction>
 	<cffunction name="getGlobalizationConfigProperty" access="public" returntype="MachII.properties.GlobalizationConfigProperty" output="true">
-		<cfreturn variables.globalizationConfigProperty/>
+		<cfreturn variables.globalizationConfigProperty />
 	</cffunction>
 	
 </cfcomponent>
