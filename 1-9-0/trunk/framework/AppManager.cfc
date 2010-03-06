@@ -54,7 +54,8 @@ Notes:
 	<cfset variables.parentAppManager = "" />
 	<cfset variables.cacheManager = "" />
 	<cfset variables.eventManager = "" />
-	<cfset variables.filterManager = "" />
+	<cfset variables.endpointManager = "" />
+	<cfset variables.eventFilterManager = "" />
 	<cfset variables.globalizationManager = "" />
 	<cfset variables.listenerManager = "" />
 	<cfset variables.messageManager = "" />
@@ -107,11 +108,19 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Calls configure() on each of the manager instances.">
 		
-		<!--- In order in which the managers are called is important
-			DO NOT CHANGE ORDER OF METHOD CALLS --->
+		<!---
+			In order in which the managers are called is important
+			DO NOT CHANGE ORDER OF METHOD CALLS
+		--->
+			
 		<cfset getPropertyManager().configure() />
 		<cfset getCacheManager().configure() />
-		<cfset getRequestManager().configure() />
+		
+		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
+		<cfif NOT inModule()>
+			<cfset getRequestManager().configure() />
+		</cfif>
+		
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
 		<cfset getMessageManager().configure() />
@@ -120,8 +129,10 @@ Notes:
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
 		
-		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
+		<!--- These managers are singletons and only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
+			<cfset getGlobalizationManager().configure() />
+			<cfset getEndpointManager().configure() />
 			<cfset getModuleManager().configure() />
 		</cfif>
 		
@@ -132,8 +143,10 @@ Notes:
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Calls deconfigure() on each of the manager instances.">
 
-		<!--- In order in which the managers are called is important
-			DO NOT CHANGE ORDER OF METHOD CALLS --->
+		<!---
+			The order in which the managers are called is important
+			DO NOT CHANGE ORDER OF METHOD CALLS
+		--->
 		<cfset getPropertyManager().deconfigure() />
 		<cfset getCacheManager().deconfigure() />
 		<cfset getPluginManager().deconfigure() />
@@ -143,6 +156,8 @@ Notes:
 		
 		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
+			<cfset getGlobalizationManager().deconfigure() />
+			<cfset getEndpointManager().deconfigure() />
 			<cfset getModuleManager().deconfigure() />
 		</cfif>
 	</cffunction>
@@ -372,12 +387,28 @@ Notes:
 		<cfreturn variables.cacheManager />
 	</cffunction>
 	
+	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
+		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
+		<cfset variables.endpointManager = arguments.endpointManager />
+	</cffunction>
+	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
+		<cfreturn variables.endpointManager />
+	</cffunction>
+	
 	<cffunction name="setFilterManager" access="public" returntype="void" output="false">
 		<cfargument name="filterManager" type="MachII.framework.EventFilterManager" required="true" />
-		<cfset variables.filterManager = arguments.filterManager />
+		<cfset setEventFilterManager(arguments.filterManager) />
 	</cffunction>
 	<cffunction name="getFilterManager" access="public" returntype="MachII.framework.EventFilterManager" output="false">
-		<cfreturn variables.filterManager />
+		<cfreturn getEventFilterManager() />
+	</cffunction>
+	
+	<cffunction name="setEventFilterManager" access="public" returntype="void" output="false">
+		<cfargument name="eventFilterManager" type="MachII.framework.EventFilterManager" required="true" />
+		<cfset variables.eventFilterManager = arguments.eventFilterManager />
+	</cffunction>
+	<cffunction name="getEventFilterManager" access="public" returntype="MachII.framework.EventFilterManager" output="false">
+		<cfreturn variables.eventFilterManager />
 	</cffunction>
 	
 	<cffunction name="setGlobalizationManager" access="public" returntype="void" output="false">

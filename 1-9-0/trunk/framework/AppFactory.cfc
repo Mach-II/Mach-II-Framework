@@ -90,8 +90,10 @@ Notes:
 		<cfset var viewManager = "" />
 		<cfset var pluginManager = "" />
 		<cfset var globalizationManager = "" />
+		<cfset var endpointManager = "" />
 		<cfset var moduleManager = "" />
 		<cfset var cacheManager = "" />
+		
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -155,107 +157,47 @@ Notes:
 		</cfif>
 		
 		<!--- 
-		Create the Framework Managers and set them in the AppManager
-		Creation order is important (do not change!):
-		cacheManager, propertyManager, requestManager, listenerManager, messageManager, filterManager, 
-		subroutineManager, eventManager, viewManager, pluginManager, globalizationManager and then moduleManager
+			Create the Framework Managers and set them in the AppManager
+			Creation order is important so do not change:
+			* CacheManager (must be loaded first due to the cache commands loaded by Events and Subroutines)
+			* PropertyManager
+			* RequestManager (singleton)
+			* ListenerManager
+			* MessageManager
+			* FilterManager
+			* SubroutineManager
+			* EventManager
+			* ViewManager
+			* PluginManager
+			* GlobalizationManager
+			* EndpointManager (singleton)
+			* ModuleManager (singleton)
 		--->
-		<!--- The cacheManager does load in any xml. The cache commands are loaded in by the 
-			eventManager and the subroutineManager when looks through its commands. Needs to be loaded
-			before the property manager so its cache strategies can get loaded in. --->
-		<cfset cacheManager = CreateObject("component", "MachII.framework.CacheManager").init(appManager) />
-		<cfset appManager.setCacheManager(cacheManager) />
-		
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset propertyManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset propertyManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setPropertyManager(propertyManager) />
-		
-		<!--- RequestManager is a singleton --->
-		<cfif IsObject(arguments.parentAppManager)>
-			<cfset requestManager = arguments.parentAppManager.getRequestManager() />
-		<cfelse>
-			<cfset requestManager = CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
-		</cfif>
-		<cfif appManager.inModule()>
-			<cfset appManager.setRequestManager(appManager.getParent().getRequestManager()) />
-		<cfelse>
-			<cfset appManager.setRequestManager(requestManager) />
-		</cfif>
 
-		<cfset listenerManager = CreateObject("component", "MachII.framework.ListenerManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset listenerManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset listenerManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setListenerManager(listenerManager) />
-
-		<cfset messageManager = CreateObject("component", "MachII.framework.MessageManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset messageManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset messageManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setMessageManager(messageManager) />
+		<!--- CacheManager is not a singleton and loads no XML --->
+		<cfset loadManager(appManager, "MachII.framework.CacheManager", false) />
 		
-		<cfset filterManager = CreateObject("component", "MachII.framework.EventFilterManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset filterManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset filterManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setFilterManager(filterManager) />
-
-		<cfset subroutineManager = CreateObject("component", "MachII.framework.SubroutineManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset subroutineManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset subroutineManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setSubroutineManager(subroutineManager) />
+		<!--- PropertyManager is not a singleton and loads XML --->
+		<cfset loadManager(appManager, "MachII.framework.PropertyManager", false, configXmls, arguments.overrideXml) />
+		
+		<!--- RequestManager is a singleton and loads no XML --->
+		<cfset loadManager(appManager, "MachII.framework.RequestManager", true) />
+		
+		<!--- These managers are not singletons and loads XML --->
+		<cfset loadManager(appManager, "MachII.framework.ListenerManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.MessageManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.EventFilterManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.SubroutineManager", false, configXmls, arguments.overrideXml) />		
+		<cfset loadManager(appManager, "MachII.framework.EventManager", false, configXmls, arguments.overrideXml) />				
+		<cfset loadManager(appManager, "MachII.framework.ViewManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.PluginManager", false, configXmls, arguments.overrideXml) />
+		
+		<!--- GlobalizationManager is not a singleton and loads no XML --->
+		<cfset loadManager(appManager, "MachII.framework.GlobalizationManager", false) />
 				
-		<cfset eventManager = CreateObject("component", "MachII.framework.EventManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset eventManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset eventManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setEventManager(eventManager) />
-		
-		<cfset viewManager = CreateObject("component", "MachII.framework.ViewManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset viewManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset viewManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setViewManager(viewManager) />
-		
-		<cfset pluginManager = CreateObject("component", "MachII.framework.PluginManager").init(appManager) />
-		<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-			<cfset pluginManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
-		</cfloop>
-		<cfif Len(arguments.overrideXml)>
-			<cfset pluginManager.loadXml(arguments.overrideXml, true) />
-		</cfif>
-		<cfset appManager.setPluginManager(pluginManager) />
-		
-		<!--- The globalizationManager doesn't load any xml; all configuration information is taken from
-			the globalizationConfigProperty --->
-		<cfset globalizationManager = CreateObject("component", "MachII.framework.GlobalizationManager").init(appManager) />
-		<cfset appManager.setGlobalizationManager(globalizationManager) />
-		
-		<!--- ModuleManager is a singleton across the application --->
+		<!--- These managers are singletons and loads no XML --->
+		<cfset loadManager(appManager, "MachII.framework.EndpointManager", true) />
+
 		<cfif NOT appManager.inModule()>
 			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, GetDirectoryFromPath(arguments.configXmlPath), arguments.configDtdPath, arguments.validateXML) />
 			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
@@ -275,6 +217,51 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="loadManager" access="private" returntype="void" output="false"
+		hint="Loads a manager in the AppManager.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager for this base or module." />
+		<cfargument name="managerType" type="string" required="true"
+			hint="The CFC dot path type of the manager to load." />
+		<cfargument name="singleton" type="boolean" required="true"
+			hint="Defines is the manager is a singleton." />
+		<cfargument name="configXmls" type="array" required="false"
+			hint="An array of XML config files to load. Does not load any XML config files if not passed." />
+		<cfargument name="overrideXml" type="string" required="false"
+			hint="The override XML to set. Does not load any override XML if not passed" />
+
+		<cfset var manager =  "" />
+		<cfset var managerName = ListLast(arguments.managerType, ".") />
+		<cfset var i = 0 />
+
+		<!--- Get the parent manager if we are in a module and the manager is a singleton --->
+		<cfif arguments.singleton AND arguments.appManager.inModule()>
+			<cfinvoke component="#arguments.appManager.getParent()#"
+				method="get#managerName#"
+				returnvariable="manager" />
+		<cfelse>
+			<cfset manager = CreateObject("component", arguments.managerType).init(arguments.appManager) />
+	
+			<!--- Load in all the XML config files if defined --->
+			<cfif StructKeyExists(arguments, "configXmls")>
+				<cfloop from="1" to="#ArrayLen(arguments.configXmls)#" index="i">
+					<cfset manager.loadXml(arguments.configXmls[i].configXml, arguments.configXmls[i].override) />
+				</cfloop>
+			</cfif>
+			
+			<!--- Load in the override XML if defined --->
+			<cfif StructKeyExists(arguments, "overrideXml") AND Len(arguments.overrideXml)>
+				<cfset manager.loadXml(arguments.overrideXml, true) />
+			</cfif>
+		</cfif>
+		
+		<!--- Load the manager in the AppManager --->
+		<cfinvoke component="#arguments.appmanager#"
+			method="set#managerName#">
+			<cfinvokeargument name="#managerName#" value="#manager#" />
+		</cfinvoke>
+	</cffunction>
+	
 	<cffunction name="loadIncludes" access="private" returntype="array" output="false"
 		hint="Loads files to be included into the config xml array.">
 		<cfargument name="configFiles" type="array" required="true" />
