@@ -69,7 +69,7 @@ Notes:
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#strategies#" item="key">
+		<cfloop collection="#endpoints#" item="key">
 			<cfset endpoints[key].configure() />
 		</cfloop>
 	</cffunction>
@@ -80,7 +80,7 @@ Notes:
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 		
-		<cfloop collection="#strategies#" item="key">
+		<cfloop collection="#endpoints#" item="key">
 			<cfset endpoints[key].deconfigure() />
 		</cfloop>
 	</cffunction>
@@ -170,7 +170,7 @@ Notes:
 		
 		<!--- Create the endpoint --->
 		<cftry>
-			<cfset endpoint = CreateObject("component", arguments.endpointType).init(arguments.endpointParameters) />
+			<cfset endpoint = CreateObject("component", arguments.endpointType).init(this, arguments.endpointParameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.endpointType>

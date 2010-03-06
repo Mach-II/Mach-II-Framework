@@ -60,8 +60,6 @@ Notes:
 		hint="Initializes the endpoint. Do not override.">
 		<cfargument nam="endpointManager" type="MachII.endpoints.EndpointManager" required="true"
 			hint="A reference to the EndpointManager." />
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
-			hint="A reference to the AppManager from the base app or module this endpoint was registered from." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
 		
@@ -181,6 +179,8 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	
+	
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
