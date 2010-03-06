@@ -68,7 +68,7 @@ Pattern matches are not case sensitive.
 	PROPERTIES
 	--->
 	<cfset variables.filterChannels = ArrayNew(1) />
-	<cfset variables.matcher = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
+	<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
 	<cfset variables.instance.filterTypeName = "Channel" />
 	
 	<!---

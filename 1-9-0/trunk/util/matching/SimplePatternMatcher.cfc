@@ -91,7 +91,7 @@ Spring Framework (http://www.springframework.org)
 			<!--- No matches against any patterns found --->
 			<cfreturn false />
 		<cfelse>
-			<cfthrow type="MachII.util.SimplePatternMatcher.invalidArgument"
+			<cfthrow type="MachII.util.matching.SimplePatternMatcher.invalidArgument"
 				message="The passed 'pattern' argument must be a string or array." />
 		</cfif>
 	</cffunction>

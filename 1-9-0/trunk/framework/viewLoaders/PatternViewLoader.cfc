@@ -95,7 +95,7 @@ Wildcards for patterns:
 	<cfset variables.nameDelimiter = "" />
 	<cfset variables.exclude = ArrayNew(1) />
 	<cfset variables.throwIfNoMatches = "" />
-	<cfset variables.pathMatcher = CreateObject("component", "MachII.util.AntPathMatcher").init() />
+	<cfset variables.pathMatcher = CreateObject("component", "MachII.util.matching.AntPathMatcher").init() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION

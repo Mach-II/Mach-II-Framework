@@ -46,7 +46,7 @@ Spring Framework (http://www.springframework.org)
 <cfcomponent
 	displayname="SimplePatternMatcherTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.util.SimplePatternMatcher.">
+	hint="Test cases for MachII.util.matching.SimplePatternMatcher.">
 	
 	<!---
 	PROPERTIES
@@ -58,7 +58,7 @@ Spring Framework (http://www.springframework.org)
 	--->
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">		
-		<cfset variables.pm = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
+		<cfset variables.pm = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
 	</cffunction>
 	
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
