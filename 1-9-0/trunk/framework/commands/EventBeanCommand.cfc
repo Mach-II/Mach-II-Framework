@@ -109,7 +109,7 @@ Notes:
 			<cfif isBeanFieldsDefined()>
 				<cfset getBeanUtil().setBeanFields(bean, getBeanFields(), arguments.event.getArgs()) />
 			<cfelse>
-				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs(), getIgnoreFields()) />
+				<cfset getBeanUtil().setBeanAutoFields(bean, arguments.event.getArgs(), "", getIgnoreFields()) />
 			</cfif>
 		<cfelse>
 			<cfif log.isDebugEnabled()>

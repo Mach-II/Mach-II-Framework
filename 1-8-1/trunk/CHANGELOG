@@ -55,6 +55,16 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* Event bean error when using ignore field
+When using ignore field (<field name="xx" ignore="true" />) with event-bean 
+it does not set any value in the bean.
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/551
+(2010-03-06 peterfarrell)
+
 * Configure() method the RequestManager called too many times
 The configure() method in the RequestManager is being called by each module 
 and it should only be called once when the framework loads because this 
