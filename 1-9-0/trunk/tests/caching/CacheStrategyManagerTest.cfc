@@ -42,9 +42,9 @@ Updated version: 1.8.0
 Notes:
 --->
 <cfcomponent
-	displayname="CacheStatsTest"
+	displayname="CacheStrategyManagerTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.caching.CacheStats.">
+	hint="Test cases for MachII.caching.CacheStrategyManager.">
 	
 	<!---
 	PROPERTIES
