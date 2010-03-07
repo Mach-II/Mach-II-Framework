@@ -201,82 +201,6 @@ Notes:
 				</cfif>
 			</cfif>
 		</cfloop>
-		
-		<!--- Make sure required properties are set if this is the base application: 
-			defaultEvent, exceptionEvent, applicationRoot, eventParameter, parameterPrecedence, maxEvents and redirectPersistParameter. --->
-		<cfif NOT hasParent>
-			<cfif NOT isPropertyDefined("defaultEvent")>
-				<cfset setProperty("defaultEvent", "defaultEvent") />
-			</cfif>
-			<cfif NOT isPropertyDefined("defaultModule")>
-				<cfset setProperty("defaultModule", "") />
-			</cfif>
-			<cfif NOT isPropertyDefined("exceptionEvent")>
-				<cfset setProperty("exceptionEvent", "exceptionEvent") />
-			</cfif>
-			<cfif NOT isPropertyDefined("applicationRoot")>
-				<cfset setProperty("applicationRoot", "") />
-			</cfif>
-			<cfif NOT isPropertyDefined("eventParameter")>
-				<cfset setProperty("eventParameter", "event") />
-			</cfif>
-			<cfif NOT isPropertyDefined("parameterPrecedence")>
-				<cfset setProperty("parameterPrecedence", "form") />
-			<cfelseif NOT ListFindNoCase("form|url", getProperty("parameterPrecedence"), "|")>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'parameterPrecedence' property must have a the value of 'form' or 'url'." />
-			</cfif>
-			<cfif NOT isPropertyDefined("maxEvents")>
-				<cfset setProperty("maxEvents", 10) />
-			<cfelseif NOT IsNumeric(getProperty("maxEvents"))>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'maxEvents' property must be an integer." />
-			</cfif>
-			<cfif NOT isPropertyDefined("redirectPersistParameter")>
-				<cfset setProperty("redirectPersistParameter", "persistId") />
-			</cfif>
-			<cfif NOT isPropertyDefined("redirectPersistScope")>
-				<cfset setProperty("redirectPersistScope", "session") />
-			</cfif>
-			<cfif NOT isPropertyDefined("redirectPersistParameterLocation")>
-				<cfset setProperty("redirectPersistParameterLocation", "url") />
-			<cfelseif NOT ListFindNoCase("cookie,url", getProperty("redirectPersistParameterLocation"))>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'redirectPersistParameterLocation' property must be an 'url' or 'cookie'." />
-			</cfif>
-			<cfif NOT isPropertyDefined("urlBase")>
-				<cfset setProperty("urlBase", "index.cfm") />
-			</cfif>
-			<cfif NOT isPropertyDefined("urlDelimiters")>
-				<cfset setProperty("urlDelimiters", "?|&|=") />
-			<cfelseif ListLen(getProperty("urlDelimiters"), "|") NEQ 3>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'urlDelimiters' property must have a list length of 3 with a delimiter of a '|'." />
-			</cfif>
-			<cfif NOT isPropertyDefined("urlParseSES")>
-				<!---
-					Automatically parse for SES urls if the delimiters are not set to query 
-					string and no urlParseSES is defined
-				--->
-				<cfif getProperty("urlDelimiters") NEQ "?|&|=">
-					<cfset setProperty("urlParseSES", true) />
-				<cfelse>
-					<cfset setProperty("urlParseSES", false) />
-				</cfif>
-			<cfelseif NOT IsBoolean(getProperty("urlParseSES"))>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'urlParseSES' property must be a boolean." />
-			</cfif>
-			<cfif NOT isPropertyDefined("moduleDelimiter")>
-				<cfset setProperty("moduleDelimiter", ":") />
-			</cfif>
-			<cfif NOT isPropertyDefined("urlExcludeEventParameter")>
-				<cfset setProperty("urlExcludeEventParameter", false) />
-			<cfelseif NOT IsBoolean(getProperty("urlExcludeEventParameter"))>
-				<cfthrow type="MachII.framework.invalidPropertyValue"
-					message="The 'urlExcludeEventParameter' property must be a boolean." />
-			</cfif>
-		</cfif>
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -286,6 +210,9 @@ Notes:
 		<cfset var configurablePropertyNames = getConfigurablePropertyNames() />
 		<cfset var aConfigurableProperty = "" />
 		<cfset var i = 0 />
+		
+		<!--- Ensure base application properties defaults --->
+		<cfset ensureBasePropertyDefaults() />
 		
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
@@ -474,6 +401,85 @@ Notes:
 		
 		<!--- Add the Property to the manager --->
 		<cfset setProperty(arguments.propertyName, newProperty) />
+	</cffunction>
+	
+	<cffunction name="ensureBasePropertyDefaults" access="public" returntype="void" output="false"
+		hint="Ensures that base property defaults have been set.">
+
+		<!--- Make sure required properties are set if this the base application --->
+		<cfif NOT IsObject(getParent())>
+			<cfif NOT isPropertyDefined("defaultEvent")>
+				<cfset setProperty("defaultEvent", "defaultEvent") />
+			</cfif>
+			<cfif NOT isPropertyDefined("defaultModule")>
+				<cfset setProperty("defaultModule", "") />
+			</cfif>
+			<cfif NOT isPropertyDefined("exceptionEvent")>
+				<cfset setProperty("exceptionEvent", "exceptionEvent") />
+			</cfif>
+			<cfif NOT isPropertyDefined("applicationRoot")>
+				<cfset setProperty("applicationRoot", "") />
+			</cfif>
+			<cfif NOT isPropertyDefined("eventParameter")>
+				<cfset setProperty("eventParameter", "event") />
+			</cfif>
+			<cfif NOT isPropertyDefined("parameterPrecedence")>
+				<cfset setProperty("parameterPrecedence", "form") />
+			<cfelseif NOT ListFindNoCase("form|url", getProperty("parameterPrecedence"), "|")>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'parameterPrecedence' property must have a the value of 'form' or 'url'." />
+			</cfif>
+			<cfif NOT isPropertyDefined("maxEvents")>
+				<cfset setProperty("maxEvents", 10) />
+			<cfelseif NOT IsNumeric(getProperty("maxEvents"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'maxEvents' property must be an integer." />
+			</cfif>
+			<cfif NOT isPropertyDefined("redirectPersistParameter")>
+				<cfset setProperty("redirectPersistParameter", "persistId") />
+			</cfif>
+			<cfif NOT isPropertyDefined("redirectPersistScope")>
+				<cfset setProperty("redirectPersistScope", "session") />
+			</cfif>
+			<cfif NOT isPropertyDefined("redirectPersistParameterLocation")>
+				<cfset setProperty("redirectPersistParameterLocation", "url") />
+			<cfelseif NOT ListFindNoCase("cookie,url", getProperty("redirectPersistParameterLocation"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'redirectPersistParameterLocation' property must be an 'url' or 'cookie'." />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlBase")>
+				<cfset setProperty("urlBase", "index.cfm") />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlDelimiters")>
+				<cfset setProperty("urlDelimiters", "?|&|=") />
+			<cfelseif ListLen(getProperty("urlDelimiters"), "|") NEQ 3>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlDelimiters' property must have a list length of 3 with a delimiter of a '|'." />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlParseSES")>
+				<!---
+					Automatically parse for SES urls if the delimiters are not set to query 
+					string and no urlParseSES is defined
+				--->
+				<cfif getProperty("urlDelimiters") NEQ "?|&|=">
+					<cfset setProperty("urlParseSES", true) />
+				<cfelse>
+					<cfset setProperty("urlParseSES", false) />
+				</cfif>
+			<cfelseif NOT IsBoolean(getProperty("urlParseSES"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlParseSES' property must be a boolean." />
+			</cfif>
+			<cfif NOT isPropertyDefined("moduleDelimiter")>
+				<cfset setProperty("moduleDelimiter", ":") />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlExcludeEventParameter")>
+				<cfset setProperty("urlExcludeEventParameter", false) />
+			<cfelseif NOT IsBoolean(getProperty("urlExcludeEventParameter"))>
+				<cfthrow type="MachII.framework.invalidPropertyValue"
+					message="The 'urlExcludeEventParameter' property must be a boolean." />
+			</cfif>
+		</cfif>
 	</cffunction>
 	
 	<!---
