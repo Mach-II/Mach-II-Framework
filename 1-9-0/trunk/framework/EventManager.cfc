@@ -77,9 +77,38 @@ Notes:
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 		
-		<cfset var eventNodes = ArrayNew(1) />
+		<cfset var baseEventNodes = ArrayNew(1) />
+		<cfset var baseSecureDefault = "" />
+		<cfset var i = 0 />
+
+		<!--- Search for event handlers --->
+		<cfif NOT arguments.override>
+			<cfset baseEventNodes = XMLSearch(arguments.configXML, "mach-ii/event-handlers") />
+		<cfelse>
+			<cfset baseEventNodes = XMLSearch(arguments.configXML, ".//event-handlers") />
+		</cfif>
+		
+		<!--- Setup each event handler --->
+		<cfloop from="1" to="#ArrayLen(baseEventNodes)#" index="i">
+			<cfif StructKeyExists(baseEventNodes[i].xmlAttributes, "secureDefault")>
+				<cfset baseSecureDefault = baseEventNodes[i].xmlAttributes["secureDefault"] />
+			<cfelse>
+				<cfset baseSecureDefault = "none" />
+			</cfif>
+			
+			<cfset loadEventHandlersXml(baseEventNodes[i].xmlChildren, baseSecureDefault, arguments.override) />
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="loadEventHandlersXml" access="private" returntype="void" output="false"
+		hint="Loads event-handlers xml for the manager.">
+		<cfargument name="eventNodes" type="array" required="true" />
+		<cfargument name="baseSecureDefault" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="true" />
+		
 		<cfset var eventHandler = "" />
 		<cfset var eventAccess = "" />
+		<cfset var eventSecure = "" />
 		<cfset var eventName = "" />
 		
 		<cfset var commandNode = "" />
@@ -89,26 +118,19 @@ Notes:
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-
-		<!--- Search for event handlers --->
-		<cfif NOT arguments.override>
-			<cfset eventNodes = XMLSearch(arguments.configXML, "mach-ii/event-handlers/event-handler") />
-		<cfelse>
-			<cfset eventNodes = XMLSearch(arguments.configXML, ".//event-handlers/event-handler") />
-		</cfif>
 		
 		<!--- Setup each event handler --->
-		<cfloop from="1" to="#ArrayLen(eventNodes)#" index="i">
-			<cfset eventName = eventNodes[i].xmlAttributes["event"] />
+		<cfloop from="1" to="#ArrayLen(arguments.eventNodes)#" index="i">
+			<cfset eventName = arguments.eventNodes[i].xmlAttributes["event"] />
 			
 			<!--- Override XML for Modules --->
-			<cfif hasParent AND arguments.override AND StructKeyExists(eventNodes[i].xmlAttributes, "overrideAction")>
-				<cfif eventNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
+			<cfif hasParent AND arguments.override AND StructKeyExists(arguments.eventNodes[i].xmlAttributes, "overrideAction")>
+				<cfif arguments.eventNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
 					<cfset removeEvent(eventName) />
-				<cfelseif eventNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
+				<cfelseif arguments.eventNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
 					<!--- Check for a mapping --->
-					<cfif StructKeyExists(eventNodes[i].xmlAttributes, "mapping")>
-						<cfset mapping = eventNodes[i].xmlAttributes["mapping"] />
+					<cfif StructKeyExists(arguments.eventNodes[i].xmlAttributes, "mapping")>
+						<cfset mapping = arguments.eventNodes[i].xmlAttributes["mapping"] />
 					<cfelse>
 						<cfset mapping = eventName />
 					</cfif>
@@ -123,16 +145,22 @@ Notes:
 				</cfif>
 			<!--- General XML setup --->
 			<cfelse>
-				<cfif StructKeyExists(eventNodes[i].xmlAttributes, "access")>
-					<cfset eventAccess = eventNodes[i].xmlAttributes["access"] />
+				<cfif StructKeyExists(arguments.eventNodes[i].xmlAttributes, "access")>
+					<cfset eventAccess = arguments.eventNodes[i].xmlAttributes["access"] />
 				<cfelse>
 					<cfset eventAccess = "public" />
 				</cfif>
 				
-				<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess) />
+				<cfif StructKeyExists(arguments.eventNodes[i].xmlAttributes, "secure")>
+					<cfset eventSecure = arguments.eventNodes[i].xmlAttributes["secure"]>
+				<cfelse>
+					<cfset eventSecure = arguments.baseSecureDefault />
+				</cfif>
+				
+				<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess, eventSecure) />
 		  
-				<cfloop from="1" to="#ArrayLen(eventNodes[i].XMLChildren)#" index="j">
-				    <cfset commandNode = eventNodes[i].XMLChildren[j] />
+				<cfloop from="1" to="#ArrayLen(arguments.eventNodes[i].XMLChildren)#" index="j">
+				    <cfset commandNode = arguments.eventNodes[i].XMLChildren[j] />
 					<cfset command = createCommand(commandNode, eventName, "event", arguments.override) />
 					<cfset eventHandler.addCommand(command) />
 				</cfloop>
@@ -315,6 +343,25 @@ Notes:
 		</cfif>
 		
 		<cfreturn eventHandler.getAccess() EQ "public" />
+	</cffunction>
+	
+	<cffunction name="getEventSecureType" access="public" returntype="boolean" output="false"
+		hint="Check the secure type of the EventHandler for the named Event.">
+		<cfargument name="eventName" type="string" required="true" />
+		<cfargument name="checkParent" type="boolean" required="false" default="false" />
+		
+		<cfset var eventHandler = "" />
+		
+		<cfif isEventDefined(arguments.eventName)>
+			<cfset eventHandler = getEventHandler(arguments.eventName) />
+		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+			<cfset eventHandler = getParent().getEventHandler(arguments.eventName) />
+		<cfelse>
+			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
+				message="EventHandler for event '#arguments.eventName#' is not defined." />
+		</cfif>
+		
+		<cfreturn eventHandler.getSecure() />
 	</cffunction>
 	
 	<!---

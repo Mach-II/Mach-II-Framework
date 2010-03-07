@@ -210,6 +210,9 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	Event-handlers are referenced by the event property (target event name).	
 -->
 <!ELEMENT event-handlers (event-handler*)>
+<!ATTLIST event-handlers
+	secureDefault (secure|unsecure|none) "none"
+>
 <!--
 	"event-handler"
 		event - the name of the event to handle
@@ -223,6 +226,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	access (public|private) "public"
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
+	secure (secure|unsecure|none) "none"
 >
 
 <!--
