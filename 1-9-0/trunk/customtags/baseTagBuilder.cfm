@@ -199,7 +199,7 @@ PUBLIC FUNCTIONS
 </cffunction>
 
 <cffunction name="setAttribute" access="public" returntype="void" output="false"
-	hint="Adds an attribute by name if defined.">
+	hint="Adds an attribute by name if defined to the tag collection.">
 	<cfargument name="attributeName" type="string" required="true" />
 	<cfargument name="value" type="string" required="false" />
 	
@@ -211,7 +211,7 @@ PUBLIC FUNCTIONS
 </cffunction>
 
 <cffunction name="setAttributes" access="public" returntype="void" output="false"
-	hint="Adds attributes.">
+	hint="Adds attributes to the tag collection.">
 	<cfargument name="attributes" type="struct" required="true" />
 	<cfset StructAppend(variables.attributeCollection, arguments.attributes, true) />
 </cffunction>
