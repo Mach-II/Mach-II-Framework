@@ -43,13 +43,13 @@ Created version: 1.9.0
 	displayname="ResourceBundleMessageSource"
 	output="false"
 	extends="MachII.globalization.BaseMessageSource"
-	hint="">
+	hint="Implementation of the resource bundle message source.">
 	
 	<!---
 	PROPERTIES
 	--->
 	<!--- An array containing the basenames of the project bundles (or 'families')--->
-	<cfset variables.basenames = ArrayNew(1)/>
+	<cfset variables.basenames = ArrayNew(1) />
 	
 	<!---
 		Cache to hold loaded resourceBundles.
@@ -57,7 +57,7 @@ Created version: 1.9.0
 		returns a struct that is keyed with the locale, which
 		returns a resource bundle.
 	--->
-	<cfset variables.cachedResourceBundles = StructNew()/>
+	<cfset variables.cachedResourceBundles = StructNew() />
 	
 	<!---
 		Cache to hold already generated messageFormats.
@@ -66,79 +66,88 @@ Created version: 1.9.0
 		returns a struct that is keyed with the locale, which
 		returns a generated messageFormat.
 	--->
-	<cfset variables.cachedMessageFormats = CreateObject("java", "java.util.HashMap").init()/>
+	<cfset variables.cachedMessageFormats = CreateObject("java", "java.util.HashMap").init() />
 	
 	<!---
 	INITIALIZATION/CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="ResourceBundleMessageSource" output="false">
-		<cfargument name="basenames" type="Array" required="true"/>
+	<cffunction name="init" access="public" returntype="ResourceBundleMessageSource" output="false"
+		hint="Initializes the message source.">
+		<cfargument name="basenames" type="array" required="true"
+			hint="An array of base names to use for this message source." />
 		
-		<cfset setBasenames(arguments.basenames)/>
+		<cfset setBasenames(arguments.basenames) />
 		
-		<cfreturn this/>
+		<cfreturn this />
 	</cffunction>
 	
 	<!---
 	PRIVATE FUNCTIONS
 	--->
-	<cffunction name="resolveCode" access="private" returntype="any" output="false">
-		<cfargument name="code" type="string" required="true"/>
-		<cfargument name="locale" type="any" required="true"/>
+	<cffunction name="resolveCode" access="private" returntype="any" output="false"
+		hint="Resolves a message code by code name and locale.">
+		<cfargument name="code" type="string" required="true"
+			hint="Name of message code to resolve." />
+		<cfargument name="locale" type="any" required="true"
+			hint="The locale to use for the resolution." />
 		
-		<cfset var i = 0/>
-		<cfset var resourceBundle = ""/>
-		<cfset var messageFormat = ""/>
+		<cfset var i = 0 />
+		<cfset var resourceBundle = "" />
+		<cfset var messageFormat = "" />
 		
-		<cfset getLog().trace("Resolving code for #ArrayLen(getBasenames())# basenames", getBasenames())/>
+		<cfset getLog().trace("Resolving code for #ArrayLen(getBasenames())# basenames", getBasenames()) />
 		
 		<cfloop from="1" to="#ArrayLen(variables.basenames)#" index="i">
-			<cfset resourceBundle = getResourceBundle(variables.basenames[i], locale)/>
-			<cfif isObject(resourceBundle)>
-				<cfset messageFormat = getMessageFormat(resourceBundle, code, locale)/>
+			<cfset resourceBundle = getResourceBundle(variables.basenames[i], locale) />
+			<cfif IsObject(resourceBundle)>
+				<cfset messageFormat = getMessageFormat(resourceBundle, code, locale) />
 				<cfif IsObject(messageFormat)>
-					<cfreturn messageFormat/>
+					<cfreturn messageFormat />
 				</cfif>
 			</cfif>
 		</cfloop>
 		
-		<cfreturn ""/>
+		<cfreturn "" />
 	</cffunction>
 	
-	<cffunction name="getResourceBundle" access="private" returntype="any" output="false">
-		<cfargument name="basename" type="string" required="true"/>
-		<cfargument name="locale" type="any" required="true"/>
+	<cffunction name="getResourceBundle" access="private" returntype="any" output="false"
+		hint="Gets a resource bundle by base name and locale.">
+		<cfargument name="basename" type="string" required="true"
+			hint="The base name of the resource bundle." />
+		<cfargument name="locale" type="any" required="true"
+			hint="The locale to use to get the resource bundle." />
 
 		<cfset var localeStruct = "" />
 		<cfset var bundle = "" />
 
-		<cflock name="cachedResourceBundles" timeout="30">
+		<cflock name="_MachIIResourceBundleMessageSource_cachedResourceBundles_#variables.uniqueId#" type="readonly" timeout="30">
 
 			<cfif StructKeyExists(variables.cachedResourceBundles, arguments.basename)>
-				<cfset localeStruct = variables.cachedResourceBundles[arguments.basename]/>
+				<cfset localeStruct = variables.cachedResourceBundles[arguments.basename] />
 				<cfif StructKeyExists(variables.cachedResourceBundles[arguments.basename], arguments.locale.toString())>
-					<cfset getLog().trace("Cache hit, returning preconfigured resource bundle")/>
-					<cfreturn variables.cachedResourceBundles[arguments.basename][arguments.locale.toString()]/>
+					<cfset getLog().trace("Cache hit, returning preconfigured resource bundle") />
+					<cfreturn variables.cachedResourceBundles[arguments.basename][arguments.locale.toString()] />
 				</cfif>
 			</cfif>
 		
 			<cftry>
-				<cfset getLog().trace("Cache not hit; creating and caching new resource bundle for #arguments.basename#")/>
-				<cfset bundle = doGetBundle(arguments.basename, arguments.locale)/>
-				<cfif not IsStruct(localeStruct)>
-					<cfset localeStruct = StructNew()/>
-					<cfset variables.cachedResourceBundles[arguments.basename] = localeStruct/>
+				<cfset getLog().trace("Cache not hit; creating and caching new resource bundle for #arguments.basename#") />
+				<cfset bundle = doGetBundle(arguments.basename, arguments.locale) />
+				<cfif NOT IsStruct(localeStruct)>
+					<cfset localeStruct = StructNew() />
+					<cfset variables.cachedResourceBundles[arguments.basename] = localeStruct />
 				</cfif>
-				<cfset localeStruct[arguments.locale.toString()] = bundle/>
-				<cfreturn bundle/>
+				<cfset localeStruct[arguments.locale.toString()] = bundle />
+
+				<cfreturn bundle />
 				
 				<cfcatch type="any">
-					<cfset getLog().warn("ResourceBundle #arguments.basename# not found. Please check that you have the correct basename.")/>
+					<cfset getLog().warn("ResourceBundle #arguments.basename# not found. Please check that you have the correct basename.", cfcatch) />
 				</cfcatch>
 			</cftry>
 		</cflock>
 		
-		<cfreturn ""/>
+		<cfreturn "" />
 	</cffunction>
 	
 	<cffunction name="getMessageFormat" access="private" returntye="any" output="false">
@@ -165,11 +174,12 @@ Created version: 1.9.0
 			</cfif>
 			
 			<cfset message = getStringOrEmpty(arguments.resourceBundle, arguments.code)/>
-			<cfif message NEQ "">
-				<cfset getLog().trace("Cache not hit; creating and caching new messageFormat object")/>>
+
+			<cfif Len(message)>
+				<cfset getLog().trace("Cache not hit; creating and caching new messageFormat object") />
 				<cfif not IsDefined("codeStruct")>
 					<cfset codeStruct = StructNew()/>
-					<cfset variables.cachedMessageFormats.put(arguments.resourceBundle, codeStruct)/>
+					<cfset variables.cachedMessageFormats.put(arguments.resourceBundle, codeStruct) />
 				</cfif>
 				<cfif not IsStruct(localeStruct)>
 					<cfset localeStruct = StructNew()/>
