@@ -112,7 +112,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
-  <cfset variables.instance.debugIPs = ArrayNew(1) />
+	<cfset variables.instance.debugIPs = ArrayNew(1) />
 	
 	<!---	
 	INITIALIZATION / CONFIGURATION
