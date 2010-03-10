@@ -86,3 +86,12 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/530
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/554
 (2010-03-10 peterfarrell)
+
+* Refactored how cache strategies are wired into cache handlers
+This change resulted in a 3.8% performance improvement on a test application.
+Performance improvement is directly related to the number of cache handlers
+that are implemented in an application.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/555
+(2010-03-10 peterfarrell) 

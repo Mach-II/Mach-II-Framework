@@ -228,8 +228,19 @@ Notes:
 	</cffunction>
 
 	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
-		hint="Gets all registered cache strategies for this manager. Does NOT get strategies from a parent manager.">
-		<cfreturn variables.cacheStrategies />
+		hint="Gets all registered cache strategies for this manager. Does NOT get strategies from a parent manager unless requested and available.">
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Get checks the parent if available and merges with child strategies taking precendence." />
+		
+		<cfset var strategies = StructNew() />
+		
+		<cfif arguments.checkParent AND IsObject(getParent())>
+			<!--- Append the local strategies to an empty struct so we do not pollute the local strategies with the parent --->
+			<cfset StructAppend(strategies, variables.cacheStrategies) />
+			<cfset StructAppend(strategies, getParent().getCacheStrategies(), "false") />
+		<cfelse>
+			<cfreturn variables.cacheStrategies />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false"

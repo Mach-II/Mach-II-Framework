@@ -158,6 +158,7 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var strategyName = "" />
 		<cfset var cacheStrategyManager = getCacheStrategyManager() />
+		<cfset var cacheStrategies = cacheStrategyManager.getCacheStrategies() />
 		
 		<!--- Configure all loaded cache strategies --->
 		<cfset cacheStrategyManager.configure() />
@@ -182,18 +183,26 @@ Notes:
 		
 		<!--- Associates the cache handlers with the right cache strategy now that all the cache strategies 
 			have been loaded up by the PropertyManger. --->
-		<cfloop collection="#variables.handlers#" item="handlerId">
-			<cfset strategyName = variables.handlers[handlerId].getStrategyName() />
-			
-			<!--- Check if we need to use the default cache strategy name --->
-			<cfif NOT Len(strategyName)>
-				<cfset strategyName = getDefaultCacheName() />
-			</cfif>
-			
-			<!--- Load the strategy into the handler --->
-			<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName, true) />
-			<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategy) />
-		</cfloop>
+		<cftry>
+			<cfloop collection="#variables.handlers#" item="handlerId">
+				<cfset strategyName = variables.handlers[handlerId].getStrategyName() />
+				
+				<!--- Check if we need to use the default cache strategy name --->
+				<cfif NOT Len(strategyName)>
+					<cfset strategyName = getDefaultCacheName() />
+				</cfif>
+				<cfset variables.handlers[handlerId].setCacheStrategy(cacheStrategies[strategyName]) />
+			</cfloop>
+			<cfcatch type="any">
+				<!--- Check if the exception is because the cache strategy does not exist --->
+				<cfif NOT StructKeyExists(cacheStrategies, strategyName)>
+					<cfthrow type="MachII.caching.CacheStrategyNotDefined" 
+						message="Cache strategy with name '#arguments.cacheStrategyName#' is not defined for a &lt;cache&gt; in #variables.handlers[handlerId].getParentHandlerType()# named '#variables.handlers[handlerId].getParentHandlerName()#' in module '#variables.moduleName#'." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 		
 		<cfset super.configure() />
 	</cffunction>
