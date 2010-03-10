@@ -60,6 +60,7 @@ Notes:
 	<cfset variables.handlersBySubroutineName = StructNew() />
 	<cfset variables.cacheEnabled = true />
 	<cfset variables.cacheHandlerlog = "" />
+	<cfset variables.moduleName = "" />
 	<cfset variables.log = "" />
 	
 	<!---
@@ -77,6 +78,9 @@ Notes:
 			<cfset setParent(getAppManager().getParent().getCacheManager()) />
 			<cfset getCacheStrategyManager().setParent(getParent().getCacheStrategyManager()) />
 		</cfif>
+		
+		<!--- Get module name for logging --->
+		<cfset variables.moduleName = getAppManager().getModuleName() />
 		
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory()) />
@@ -139,7 +143,7 @@ Notes:
 			<cfset addCacheHandler(cacheHandler, arguments.override) />
 			<cfcatch type="any">
 				<cfthrow type="#cfcatch.type#"
-					message="An exception occurred in #arguments.parentHandlerType# named '#arguments.parentHandlerName#'." 
+					message="An exception occurred loading a cache-handler in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' in module '#variables.moduleName#'." 
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
@@ -171,7 +175,7 @@ Notes:
 				OR (IsObject(getParent()) AND NOT cacheStrategyManager.containsCacheStrategies() 
 					AND NOT cacheStrategyManager.getParent().containsCacheStrategies())>
 				<cfthrow type="MachII.caching.NoCacheStrategiesDefined" 
-					message="A &lt;cache&gt; command was encountered and there are no cache strategies defined."
+					message="A &lt;cache&gt; command was encountered in module '#variables.moduleName#' and there are no cache strategies defined."
 					detail="Please add the 'MachII.caching.CachingProperty' to your configuration file or define strategies in the CachingProperty if you wish to use the caching features." />
 			</cfif>
 		</cfif>
@@ -222,8 +226,8 @@ Notes:
 				<cfset StructInsert(variables.handlers, handlerId, arguments.cacheHandler, false) />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.CacheHandlerAlreadyDefined"
-						message="A cache handler with the id '#handlerId#' is already registered."
-						detail="The cache handler id must be unique." />
+						message="A cache handler with the id '#handlerId#' in #arguments.cacheHandler.getParentHandlerType()# named '#arguments.cacheHandler.getParentHandlerName()#' in module '#variables.moduleName#' is already registered in this application."
+						detail="The cache handler ids must be unique in all modules and base application." />
 				</cfcatch>
 			</cftry>
 			
@@ -256,7 +260,7 @@ Notes:
 			<cfreturn getParent().getCacheHandler(arguments.handlerId) />
 		<cfelse>
 			<cfthrow type="MachII.framework.CacheHandlerNotDefined" 
-				message="CacheHandler for cache '#arguments.handlerId#' is not defined." />
+				message="CacheHandler for cache '#arguments.handlerId#' is not defined in either the base application or module if applicable." />
 		</cfif>
 	</cffunction>
 	
@@ -329,8 +333,8 @@ Notes:
 		
 		<cfset var log = getLog() />
 		
-		<cfif log.isTraceEnabled()>
-			<cfset log.trace("CacheManager clear cache for id '#arguments.id#', " &
+		<cfif variables.log.isTraceEnabled()>
+			<cfset variables.log.trace("Clear cache handler id '#arguments.id#' located in CacheManager in module '#variables.moduleName#'. " &
 					"exists: #StructKeyExists(variables.handlers, arguments.id)#, handler keys:",
 					StructKeyArray(variables.handlers)) />
 		</cfif>
@@ -352,8 +356,8 @@ Notes:
 		<cfset var cacheHandlers = StructNew() />
 		<cfset var key = "" />
 		
-		<cfif log.isTraceEnabled()>
-			<cfset log.trace("CacheManager clear cache for alias '#arguments.alias#', " &
+		<cfif variables.log.isTraceEnabled()>
+			<cfset variables.log.trace("Clear clear handlers with alias '#arguments.alias#' located in CacheManager in module '#variables.moduleName#'. " &
 					"exists: #StructKeyExists(variables.handlersByAliases, getKeyHash(arguments.alias))#, " &
 					"criteria: #arguments.criteria#") />
 		</cfif>
@@ -377,8 +381,8 @@ Notes:
 		<!--- Also checks parent --->
 		<cfset var cacheStrategy = getCacheStrategyManager().getCacheStrategyByName(arguments.cacheName, true) />
 		
-		<cfif log.isTraceEnabled()>
-			<cfset log.trace("CacheManager clear cache by strategy name '#arguments.cacheName#'") />
+		<cfif variables.log.isTraceEnabled()>
+			<cfset variables.log.trace("Clearing entire cache by strategy name '#arguments.cacheName#' in module '#variables.moduleName#'.") />
 		</cfif>
 		
 		<cfset cacheStrategy.flush() />
@@ -476,8 +480,8 @@ Notes:
 			since those are not replayed when the event is cached. --->
 		<cfif ListFindNoCase("announce,event-mapping,redirect", arguments.commandNode.xmlName)>
 			<cfthrow type="MachII.framework.InvalidNestedCommand"
-					message="The #arguments.commandNode.xmlName# command in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' is not valid inside a cache command."
-					detail="The commands announce, event-mapping and redirect are now allowed inside a cache command since they cannot be replayed." />
+					message="The '#arguments.commandNode.xmlName#' command in #arguments.parentHandlerType# named '#arguments.parentHandlerName#' in module named '#variables.moduleName#' is not valid inside a cache command."
+					detail="The commands 'announce', 'event-mapping' and 'redirect' are now allowed inside a cache command since they cannot be replayed." />
 		</cfif>
 		
 		<cfreturn super.createCommand(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType) />

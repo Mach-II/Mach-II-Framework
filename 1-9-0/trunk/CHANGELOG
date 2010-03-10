@@ -80,3 +80,9 @@ For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/529
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/530
 (2010-02-02 peterfarrell)
+
+* Improved logging messages in CacheManager
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/554
+(2010-03-10 peterfarrell)
