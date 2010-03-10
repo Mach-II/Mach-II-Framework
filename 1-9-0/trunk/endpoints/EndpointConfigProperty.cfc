@@ -39,13 +39,24 @@ $Id$
 Created version: 1.9.0
 
 Notes:
+<property name="Endpoints" type="MachII.endpoints.EndpointConfigProperty">
+      <parameters>
+            <parameter name="nameOfEndpoint">
+                  <struct>
+                        <key name="type" value="MachII.endpoints.impl.AbstractEndpoint" />
+                        <key name="param1" value="a" />
+                        <key name="param2" value="b" />
+                  </struct>
+            </parameter>
+      </parameters>
+</property>
 
 --->
 <cfcomponent
 	displayname="EndpointConfigProperty"
 	extends="MachII.framework.Property"
 	output="false"
-	hint="Loads endpoints configurations for the EndpointManager.">
+	hint="Loads endpoint configurations for the EndpointManager.">
 
 	<!---
 	PROPERTIES
@@ -56,10 +67,49 @@ Notes:
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Initializes the property.">
+		
+		<cfset var params = getParameters() />
+		<cfset var key = "" />
+		
+		<!--- Load defined cache strategies --->
+		<cfloop collection="#params#" item="key">
+			<cfif IsStruct(params[key])>
+				<cfset configureEndpoint(key, getParameter(key)) />
+			</cfif>
+		</cfloop>
 	</cffunction>
 	
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="configureEndpoint" access="private" returntype="void" output="false"
+		hint="Configures an endpoint.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of the endpoint." />
+		<cfargument name="parameters" type="struct" required="true"
+			hint="Parameters for this endpoint." />
+
+		<cfset var endpointManager = getAppManager().getEndpointManager() />
+		<cfset var moduleName = getAppManager().getModuleName() />
+		<cfset var key = "" />
+		
+		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
+		<cfif NOT StructKeyExists(arguments.parameters, "type")>
+			<cfthrow type="MachII.endpoints.MissingEndpointType"
+				message="You must specify a parameter named 'type' for endpoint named '#arguments.endpointName#' in module named '#moduleName#'." />
+		</cfif>
+		
+		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
+		<cfloop collection="#arguments.parameters#" item="key">
+			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
+		</cfloop>
+				
+		<!--- Load the strategy  --->
+		<cfset endpointManager.loadEndpoint(arguments.endpointName, arguments.parameters.type, arguments.parameters) />
+	</cffunction>
 
 </cfcomponent>

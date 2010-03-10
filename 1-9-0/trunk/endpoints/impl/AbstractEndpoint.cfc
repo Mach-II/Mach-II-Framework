@@ -58,7 +58,7 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="AbstractEndpoint" output="false"
 		hint="Initializes the endpoint. Do not override.">
-		<cfargument nam="endpointManager" type="MachII.endpoints.EndpointManager" required="true"
+		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true"
 			hint="A reference to the EndpointManager." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
