@@ -43,7 +43,7 @@ A Mach-II property that provides easy configuration for Internationalization
 and Resource Bundle management
 
 Usage:
-<property name="globalizationConfigProperty" type="MachII.properties.GlobalizationConfigProperty">
+<property name="globalizationConfigProperty" type="MachII.globalization.GlobalizationConfigProperty">
 	<parameters>
 		<!-- Configures a string that will be output before any rendered message format -->
 		<parameter name="debugPrefix" value="string"/>
@@ -72,38 +72,38 @@ is en_US.
 	displayname="GlobalizationConfigProperty"
 	extends="MachII.framework.Property"
 	output="false"
-	hint="Sets up property configurations for the GlobalizationManager">
+	hint="Sets up property configurations for the GlobalizationManager.">
 
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.debugMode = false/>
-	<cfset variables.debugPrefix = "**"/>
-	<cfset variables.debugSuffix = "**"/>
+	<cfset variables.debugMode = false />
+	<cfset variables.debugPrefix = "**" />
+	<cfset variables.debugSuffix = "**" />
 
-	<cfset variables.messageSource = ""/>
+	<cfset variables.messageSource = "" />
 	
 	<!---
 	INITIALIZATION/CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" output="false" returntype="void"
-		hint="Initializes the property.">
+		hint="Configures the property.">
 		
-		<cfset var bundles = getParameter("bundles", ArrayNew(1))/>
-		<cfset var i = 0/>
+		<cfset var bundles = getParameter("bundles", ArrayNew(1)) />
+		<cfset var i = 0 />
 
-		<cfset setDebugEnabled(getParameter("debugEnabled", "false"))/>
-		<cfset setDebugPrefix(getParameter("debugPrefix", "**"))/>
-		<cfset setDebugSuffix(getParameter("debugSuffix", "**"))/>
+		<cfset setDebugEnabled(getParameter("debugEnabled", "false")) />
+		<cfset setDebugPrefix(getParameter("debugPrefix", "**")) />
+		<cfset setDebugSuffix(getParameter("debugSuffix", "**")) />
 		
 		<cfif IsSimpleValue(bundles)>
-			<cfset bundles = ListToArray(bundles)/>
+			<cfset bundles = ListToArray(bundles) />
 		</cfif>
 		
-		<cfset variables.messageSource = createobject("component", "MachII.globalization.ResourceBundleMessageSource").init(bundles)/>
-		<cfset variables.messageSource.setLog(getAppManager().getLogFactory())/>
+		<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(bundles) />
+		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
 		
-		<cfset getAppManager().getGlobalizationManager().setGlobalizationConfigProperty(this)/>
+		<cfset getAppManager().getGlobalizationManager().setGlobalizationConfigProperty(this) />
 	</cffunction>
 	
 	<!---
@@ -139,7 +139,7 @@ is en_US.
 			</cfif>
 
 			<cfcatch type="MachII.util.IllegalArgument">
-				<cfthrow type="MachII.properties.ResourceBundleLoaderProperty.invalidEnvironmentConfiguration"
+				<cfthrow type="MachII.globalization.GlobalizationConfigProperty.invalidEnvironmentConfiguration"
 					message="This misconfiguration error is defined in the property-wide 'debugEnabled' parameter in the 'ResourceLoaderProperty' in module named '#getModuleName()#'."
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
