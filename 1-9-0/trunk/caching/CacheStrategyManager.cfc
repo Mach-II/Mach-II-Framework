@@ -239,8 +239,10 @@ Notes:
 			<cfset StructAppend(strategies, variables.cacheStrategies) />
 			<cfset StructAppend(strategies, getParent().getCacheStrategies(), "false") />
 		<cfelse>
-			<cfreturn variables.cacheStrategies />
+			<cfset strategies = variables.cacheStrategies />
 		</cfif>
+		
+		<cfreturn strategies />
 	</cffunction>
 
 	<cffunction name="getCacheStrategyNames" access="public" returntype="array" output="false"
