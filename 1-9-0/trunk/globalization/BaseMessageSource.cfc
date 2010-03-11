@@ -47,8 +47,8 @@ Created version: 1.9.0
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.log = ""/>
-	<cfset variables.uniqueId = createId() />
+	<cfset variables.log = "" />
+	<cfset variables.uniqueId = createRandomKey() />
 	
 	
 	<!---
@@ -56,7 +56,7 @@ Created version: 1.9.0
 	--->
 	<cffunction name="init" access="public" returntype="BaseMessageSource" output="false"
 		hint="Initializes the base class for message sources.">
-		<cfreturn this/>
+		<cfreturn this />
 	</cffunction>
 	
 	<!---
@@ -86,16 +86,13 @@ Created version: 1.9.0
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS - UTILS
+	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="createId" access="private" returntype="string" output="false"
-		hint="Creates a random id. Does not use UUID for performance reasons.">
+	<cffunction name="createRandomKey" access="private" returntype="string" output="false"
+		hint="Creates a random key.">
 		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	</cffunction>
 	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
 	<cffunction name="getInternalMessage" access="private" returntype="string" output="false"
 		hint="Gets an internal message.">
 		<cfargument name="code" type="string" required="true"

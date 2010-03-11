@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id: CacheStats.cfc 701 2008-03-22 22:07:01Z peterfarrell $
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
