@@ -376,15 +376,15 @@ from the parent application.
 		<cfargument name="type" type="string" required="false" default="xhtml-1.0-strict" 
 			hint="The doc type to render. Accepted values are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
 		
-		<cfset var docTypes = getDocTypeReferenceMap() />
-		
-		<cfif NOT StructKeyExists(docTypes, arguments.type)>
-			<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
-				message="The 'addDocType' method in the 'HtmlHelperProperty' does not accept the type of '#arguments.type#'."
-				detail="Allowed values for 'type' are 'xhtml-1.0-strict', 'xhtml-1.0-trans', 'xhtml-1.0-frame', 'xhtml-1.1', 'html-4.0-strict', 'html-4.0-trans', 'html-4.0-frame' and 'html-5.0'." />
-		</cfif>
-
-		<cfreturn docTypes[arguments.type] />
+		<!--- It's faster to just return the type and catch if there is a missing key than to test with StructKeyExists() --->
+		<cftry>
+			<cfreturn variables.docTypeReferenceMap[arguments.type] />
+			<cfcatch type="any">
+				<cfthrow type="MachII.properties.HTMLHelperProperty.InvalidArgument"
+					message="The 'addDocType' method in the 'HtmlHelperProperty' does not accept the type of '#arguments.type#'."
+					detail="Allowed values for 'type' are '#StructKeyList(variables.docTypeReferenceMap)#'." />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<cffunction name="addAssetPackage" access="public" returntype="string" output="false"
@@ -409,21 +409,21 @@ from the parent application.
 			<cfset p = getAssetPackageByName(arguments.package[i]) />	
 		
 			<cfloop from="1" to="#ArrayLen(p)#" index="j">
-        <cfif StructKeyExists(p[j], "paths")>
-          <!--- Adding javascript/stylesheet by path --->
-          <cfif p[j].type EQ "js">
-	          <cfset code = code & addJavascript(p[j].paths, arguments.outputType, p[j].forIEVersion) />
-	        <cfelseif p[j].type EQ "css">
-	          <cfset code = code & addStylesheet(p[j].paths, p[j].attributes, arguments.outputType, p[j].forIEVersion) />
-	        </cfif>
-        <cfelseif StructKeyExists(p[j], "inline")>
-          <!--- Adding javascript/stylesheet by inline content --->
-          <cfif p[j].type EQ "js">
-            <cfset code = code & addJavascriptBody(p[j].inline, arguments.outputType, p[j].forIEVersion) />
-          <cfelseif p[j].type EQ "css">
-            <cfset code = code & addStylesheetBody(p[j].inline, p[j].attributes, arguments.outputType, p[j].forIEVersion) />
-          </cfif>
-        </cfif>
+				<cfif StructKeyExists(p[j], "paths")>
+					<!--- Adding javascript/stylesheet by path --->
+					<cfif p[j].type EQ "js">
+						<cfset code = code & addJavascript(p[j].paths, arguments.outputType, p[j].forIEVersion) />
+					<cfelseif p[j].type EQ "css">
+						<cfset code = code & addStylesheet(p[j].paths, p[j].attributes, arguments.outputType, p[j].forIEVersion) />
+					</cfif>
+				<cfelseif StructKeyExists(p[j], "inline")>
+					<!--- Adding javascript/stylesheet by inline content --->
+					<cfif p[j].type EQ "js">
+						<cfset code = code & addJavascriptBody(p[j].inline, arguments.outputType, p[j].forIEVersion) />
+					<cfelseif p[j].type EQ "css">
+						<cfset code = code & addStylesheetBody(p[j].inline, p[j].attributes, arguments.outputType, p[j].forIEVersion) />
+					</cfif>
+				</cfif>
 			</cfloop>
 		</cfloop>
 		
@@ -468,34 +468,34 @@ from the parent application.
 		<cfreturn code />
 	</cffunction>
   
-  <cffunction name="addJavascriptBody" access="public" returntype="string" output="false"
-    hint="Add javascript content (not files) for inline use or in the HTML head.">
-    <cfargument name="body" type="string" required="true"
-      hint="String javascript content to be appended to the head, body, or to be displayed inline." />
-    <cfargument name="outputType" type="string" required="false" default="head"
-      hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
-    <cfargument name="forIEVersion" type="string" required="false"
-      hint="Indicates if the javascript should be enclosed in IE conditional comment (ex. 'lt 7')." />
+	<cffunction name="addJavascriptBody" access="public" returntype="string" output="false"
+		hint="Add javascript content (not files) for inline use or in the HTML head.">
+		<cfargument name="body" type="string" required="true"
+			hint="String javascript content to be appended to the head, body, or to be displayed inline." />
+		<cfargument name="outputType" type="string" required="false" default="head"
+			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline')." />
+		<cfargument name="forIEVersion" type="string" required="false"
+			hint="Indicates if the javascript should be enclosed in IE conditional comment (ex. 'lt 7')." />
 
-    <cfset var code = "" />
-    <cfset var temp = "" />
+		<cfset var code = "" />
+		<cfset var temp = "" />
     
-    <!--- Construct the script tag --->
-    <cfset temp = '<script type="text/javascript">' & Chr(13) & '//<![CDATA[' & Chr(13) & arguments.body & Chr(13) & '//]]>' & Chr(13) & '</script>' & Chr(13) />
+		<!--- Construct the script tag --->
+		<cfset temp = '<script type="text/javascript">' & Chr(13) & '//<![CDATA[' & Chr(13) & arguments.body & Chr(13) & '//]]>' & Chr(13) & '</script>' & Chr(13) />
     
-    <!--- Enclose in an IE conditional comment if available --->
-    <cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
-      <cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
-    </cfif>
-    
-    <cfif arguments.outputType EQ "inline">
-      <cfset code = code & temp />
-    <cfelse>
-      <cfset appendToHtmlArea(arguments.outputType, temp, false) />
-    </cfif>
+		<!--- Enclose in an IE conditional comment if available --->
+		<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
+			<cfset temp = wrapIEConditionalComment(arguments.forIEVersion, temp) />
+		</cfif>
+		
+		<cfif arguments.outputType EQ "inline">
+			<cfset code = code & temp />
+		<cfelse>
+			<cfset appendToHtmlArea(arguments.outputType, temp, false) />
+		</cfif>
 
-    <cfreturn code />
-  </cffunction>
+		<cfreturn code />
+	</cffunction>
 	
 	<cffunction name="addStylesheet" access="public" returntype="string" output="false"
 		hint="Adds css stylesheet code for inline use or in the HTML head. Does not duplicate file paths when adding to the HTML head.">
@@ -689,12 +689,10 @@ from the parent application.
 		
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & getUtils().escapeHtml(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
+		<cfelseif StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
+			<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		<cfelse>
-			<cfif StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
-				<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
-			<cfelse>
-				<cfset code = '<meta name="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
-			</cfif>
+			<cfset code = '<meta name="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		</cfif>
 		
 		<cfif arguments.outputType EQ "inline">
