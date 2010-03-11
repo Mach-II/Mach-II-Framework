@@ -194,11 +194,8 @@ Notes:
 					</cftry>
 				</cfif>
 				
-				<!--- Set the property --->
-				<cfif (hasParent AND NOT listFindNoCase(propsNotAllowInModule, propertyName)) 
-						OR NOT hasParent>
-					<cfset setProperty(propertyName, propertyValue) />
-				</cfif>
+				<!--- Set the property (allowable property names ared checked by setProperty() method so no check needed here)--->
+				<cfset setProperty(propertyName, propertyValue) />
 			</cfif>
 		</cfloop>
 	</cffunction>

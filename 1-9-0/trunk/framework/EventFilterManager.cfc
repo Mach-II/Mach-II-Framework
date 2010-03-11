@@ -221,7 +221,7 @@ Notes:
 		
 		<cfif isFilterDefined(arguments.filterName)>
 			<cfreturn variables.filterProxies[arguments.filterName].getObject() />
-		<cfelseif IsObject(getParent()) AND getParent().isFilterDefined(arguments.filterName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getFilter(arguments.filterName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.FilterNotDefined" 

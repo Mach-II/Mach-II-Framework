@@ -193,12 +193,11 @@ Notes:
 		
 		<cfif isMessageHandlerDefined(arguments.messageName)>
 			<cfreturn variables.messageHandlers[arguments.messageName] />
-		<cfelseif IsObject(getParent()) AND getParent().isMessageHandlerDefined(arguments.messageName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getMessageHandler(arguments.messageName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.MessageHandlerNotDefined" 
-				message="A message-subscriber with name '#arguments.messageName#' is not defined."
-				detail="Available Messages: '#ArrayToList(getMessageHandlerNames())#'" />
+				message="A message-subscriber with name '#arguments.messageName#' is not defined." />
 		</cfif>
 	</cffunction>
 	

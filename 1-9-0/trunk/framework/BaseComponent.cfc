@@ -55,6 +55,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.baseProxy = "" />
+	<cfset variables.componentNameFull = "" />
 	<cfset variables.componentNameForLogging = "" />
 	
 	<!---
@@ -71,8 +72,10 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
 
-		<!--- Compute the compoent name that will be used for logging --->
-		<cfset variables.componentNameForLogging = ListLast(getMetaData(this).name, ".") />
+		<!--- Compute the full and short component name that will be used for logging --->
+		
+		<cfset variables.componentNameFull = getMetaData(this).name />
+		<cfset variables.componentNameForLogging = ListLast(variables.componentNameFull, ".") />
 		
 		<cfset setLog(getAppManager().getLogFactory()) />
 	</cffunction>
@@ -80,7 +83,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cffunction name="setLog" access="public" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+		<cfset variables.log = arguments.logFactory.getLog(variables.componentNameFull) />
 	</cffunction>
 	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">

@@ -169,7 +169,7 @@ Notes:
 		
 		<cfif isSubroutineDefined(arguments.subroutineName)>
 			<cfreturn variables.handlers[arguments.subroutineName] />
-		<cfelseif IsObject(getParent()) AND getParent().isSubroutineDefined(arguments.subroutineName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getSubroutineHandler(arguments.subroutineName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.SubroutineHandlerNotDefined" 

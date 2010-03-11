@@ -144,7 +144,11 @@ Wildcards for patterns:
 			<cfset searchPath = appRootPath & "/" & extractSearchPathBaseFromPattern(pattern) />
 		</cfif>
 		
-		<!--- Get all the possible page views --->
+		<!---
+			Get all the possible page views
+			This would be a place to optimize to use "type" attribute when all engines 
+			support it and then remove EQ "file" condition in next block.
+		--->
 		<cfdirectory name="pageViewQuery" 
 			action="list" 
 			directory="#searchPath#" 
@@ -156,7 +160,7 @@ Wildcards for patterns:
 		--->
 		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
 			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, ReplaceNoCase(cleanPath(pageViewQuery.directory[i]), appRootPath, "", "one") & "/" & pageViewQuery.name[i]) />
+				<cfset ArrayAppend(pageViewPaths, ReplaceNoCase(Replace(pageViewQuery.directory[i], "\", "/", "all"), appRootPath, "", "one") & "/" & pageViewQuery.name[i]) />
 			</cfif>
 		</cfloop>
 		
@@ -164,18 +168,20 @@ Wildcards for patterns:
 		
 		<!--- Remove page view paths that match exclude paths or patterns 
 			(except go in reverse because we may delete from the array)--->
-		<cfloop from="#ArrayLen(pageViewPaths)#" to="1" index="i" step="-1">
-			<cfloop from="1" to="#ArrayLen(exclude)#" index="j">
-				<!--- If pattern and pattern matches or if exact path --->
-				<cfif exclude[j] EQ pageViewPaths[i]
-					OR (variables.pathMatcher.isPattern(exclude[j]) 
-					AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))>
-					<!--- If a pattern is found, delete and break out of the inner loop (short-circuit) --->
-					<cfset ArrayDeleteAt(pageViewPaths, i) />
-					<cfbreak />
-				</cfif>
+		<cfif ArrayLen(exclude)>
+			<cfloop from="#ArrayLen(pageViewPaths)#" to="1" index="i" step="-1">
+				<cfloop from="1" to="#ArrayLen(exclude)#" index="j">
+					<!--- If pattern and pattern matches or if exact path --->
+					<cfif exclude[j] EQ pageViewPaths[i]
+						OR (variables.pathMatcher.isPattern(exclude[j]) 
+						AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))>
+						<!--- If a pattern is found, delete and break out of the inner loop (short-circuit) --->
+						<cfset ArrayDeleteAt(pageViewPaths, i) />
+						<cfbreak />
+					</cfif>
+				</cfloop>
 			</cfloop>
-		</cfloop>
+		</cfif>
 		
 		<!--- Build page-views that match patterns --->
 		<cfloop from="1" to="#ArrayLen(pageViewPaths)#" index="i">

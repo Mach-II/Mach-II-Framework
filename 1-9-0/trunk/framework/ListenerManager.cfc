@@ -252,7 +252,7 @@ Notes:
 		
 		<cfif isListenerDefined(arguments.listenerName)>
 			<cfreturn variables.listenerProxies[arguments.listenerName].getObject() />
-		<cfelseif IsObject(getParent()) AND getParent().isListenerDefined(arguments.listenerName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getListener(arguments.listenerName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ListenerNotDefined" 

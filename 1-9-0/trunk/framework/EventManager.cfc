@@ -273,7 +273,7 @@ Notes:
 			<cfreturn moduleEventManager.getEventHandler(arguments.eventName) />
 		<cfelseif isEventDefined(arguments.eventName)>
 			<cfreturn variables.handlers[arguments.eventName] />
-		<cfelseif IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getEventHandler(arguments.eventName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.EventHandlerNotDefined" 

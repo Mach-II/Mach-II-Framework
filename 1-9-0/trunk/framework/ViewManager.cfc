@@ -278,7 +278,7 @@ Notes:
 		
 		<cfif isViewDefined(arguments.viewName)>
 			<cfreturn variables.viewData[arguments.viewName] />
-		<cfelseif IsObject(getParent()) AND getParent().isViewDefined(arguments.viewName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getView(arguments.viewName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.ViewNotDefined" 
@@ -302,7 +302,6 @@ Notes:
 		hint="Gets all view loader for this context.">
 		<cfreturn variables.viewLoaders />
 	</cffunction>
-	
 	
 	<!---
 	ACCESSORS

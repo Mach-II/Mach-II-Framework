@@ -237,7 +237,7 @@ Notes:
 
 		<cfif isPluginDefined(arguments.pluginName)>
 			<cfreturn variables.pluginProxies[arguments.pluginName].getObject() />
-		<cfelseif IsObject(getParent()) AND getParent().isPluginDefined(arguments.pluginName)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getPlugin(arguments.pluginName) />
 		<cfelse>
 			<cfthrow type="MachII.framework.PluginNotDefined"

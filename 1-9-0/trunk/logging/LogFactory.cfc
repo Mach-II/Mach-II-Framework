@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.1
+Updated version: 1.9.0
 
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
@@ -84,22 +84,14 @@ first [Hash(UCase(arguments.channell))]
 		<cfargument name="channel" type="string" required="true"
 			hint="Channel to log. Typically 'getMetadata(this).name'" />
 		
-		<cfset var log = "" />
-
-		<cfif hasInCache(arguments.channel)>
-			<cfset log = getFromCache(arguments.channel) />
-		<cfelse>
-			<cflock name="_MachIILogFactory.logFactory_#variables.uniqueId#.channel_#createChannelHash(arguments.channel)#" type="exclusive" timeout="10" throwontimeout="true">			
-				<cfif hasInCache(arguments.channel)>
-					<cfset log = getFromCache(arguments.channel) />
-				<cfelse>
-					<cfset log = CreateObject("component", "MachII.logging.Log").init(arguments.channel, getLogAdapters()) />
-					<cfset putToCache(arguments.channel, log) />
-				</cfif>
-			</cflock>
+		<cfset var channelHash = Hash(UCase(arguments.channel)) />
+		
+		<!--- It is not necessary to lock since a few extra logs will not hurt memory as much as a lock hurts performance --->
+		<cfif NOT StructKeyExists(variables.logCache, channelHash)>
+			<cfset variables.logCache[channelHash] = CreateObject("component", "MachII.logging.Log").init(arguments.channel, variables.logAdapters) />
 		</cfif>
 		
-		<cfreturn log />
+		<cfreturn variables.logCache[channelHash] />
 	</cffunction>
 	
 	<cffunction name="addLogAdapter" access="public" returntype="void" output="false"
@@ -148,39 +140,7 @@ first [Hash(UCase(arguments.channell))]
 	
 	<!---
 	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="hasInCache" access="private" returntype="boolean" output="false"
-		hint="Checks to see if a log is already in the cache.">
-		<cfargument name="channel" type="string" required="true" />
-		
-		<cfset var result = false />
-		
-		<cfif StructKeyExists(variables.logCache, createChannelHash(arguments.channel))>
-			<cfset result = true />
-		</cfif>
-		
-		<cfreturn result />
-	</cffunction>
-	
-	<cffunction name="putToCache" access="private" returntype="void" output="false"
-		hint="Puts a log into the cache.">
-		<cfargument name="channel" type="string" required="true" />
-		<cfargument name="log" type="MachII.logging.Log" required="true" />
-		<cfset variables.logCache[createChannelHash(arguments.channel)] = arguments.log />
-	</cffunction>
-	
-	<cffunction name="getFromCache" access="private" returntype="MachII.logging.Log" output="false"
-		hint="Gets a log from the cache.">
-		<cfargument name="channel" type="string" required="true" />
-		<cfreturn variables.logCache[createChannelHash(arguments.channel)] />
-	</cffunction>
-	
-	<cffunction name="createChannelHash" access="private" returntype="string" output="false"
-		hint="Creates a channel hash.">
-		<cfargument name="channel" type="string" required="true" />
-		<cfreturn Hash(UCase(arguments.channel)) />
-	</cffunction>
-	
+	--->	
 	<cffunction name="createRandomKey" access="private" returntype="string" output="false"
 		hint="Creates a random key.">
 		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />

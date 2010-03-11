@@ -265,7 +265,7 @@ Notes:
 
 		<cfif isCacheHandlerDefined(arguments.handlerId)>
 			<cfreturn variables.handlers[arguments.handlerId] />
-		<cfelseif IsObject(getParent()) AND getParent().isCacheHandlerDefined(arguments.handlerId)>
+		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getCacheHandler(arguments.handlerId) />
 		<cfelse>
 			<cfthrow type="MachII.framework.CacheHandlerNotDefined" 
