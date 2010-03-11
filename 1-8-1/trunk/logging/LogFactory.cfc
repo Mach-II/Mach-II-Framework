@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 Mach-II Logging is heavily based on Apache Commons Logging interface but is more flexible as
@@ -63,6 +63,7 @@ first [Hash(UCase(arguments.channell))]
 	<cfset variables.logAdapters = StructNew() />
 	<cfset variables.logCache = StructNew() />
 	<cfset variables.utils = "" />
+	<cfset variables.uniqueId = createRandomKey() />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -84,17 +85,19 @@ first [Hash(UCase(arguments.channell))]
 			hint="Channel to log. Typically 'getMetadata(this).name'" />
 		
 		<cfset var log = "" />
-		<cfset var channelHash = createChannelHash(arguments.channel) />
-		
-		<!--- Single thread this since we want to keep the log cache from overwritting an entry --->
-		<cflock name="_MachIILogFactory.channel_#channelHash#" type="exclusive" timeout="10" throwontimeout="true">
-			<cfif hasInCache(arguments.channel)>
-				<cfset log = getFromCache(arguments.channel) />
-			<cfelse>
-				<cfset log = CreateObject("component", "MachII.logging.Log").init(arguments.channel, getLogAdapters()) />
-				<cfset putToCache(arguments.channel, log) />
-			</cfif>
-		</cflock>
+
+		<cfif hasInCache(arguments.channel)>
+			<cfset log = getFromCache(arguments.channel) />
+		<cfelse>
+			<cflock name="_MachIILogFactory.logFactory_#variables.uniqueId#.channel_#createChannelHash(arguments.channel)#" type="exclusive" timeout="10" throwontimeout="true">			
+				<cfif hasInCache(arguments.channel)>
+					<cfset log = getFromCache(arguments.channel) />
+				<cfelse>
+					<cfset log = CreateObject("component", "MachII.logging.Log").init(arguments.channel, getLogAdapters()) />
+					<cfset putToCache(arguments.channel, log) />
+				</cfif>
+			</cflock>
+		</cfif>
 		
 		<cfreturn log />
 	</cffunction>
