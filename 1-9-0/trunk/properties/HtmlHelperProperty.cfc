@@ -181,7 +181,12 @@ from the parent application.
 			<cfset setImgBasePath(getParameter("imgBasePath")) />
 		</cfif>
     
-		<cfset setAssetPackages(configureAssetPackages(getParameter("assetPackages", StructNew()))) />
+		<!--- Create a place for asset packages --->
+		<cfif NOT isPropertyDefined(variables.ASSET_PACKAGES_PROPERTY_NAME)>
+			<cfset setProperty(variables.ASSET_PACKAGES_PROPERTY_NAME, StructNew()) />
+		</cfif>
+	
+		<cfset configureAssetPackages(getParameter("assetPackages", StructNew())) />
 		
 		<!--- Build reference data --->
 		<cfset buildMimeShortcutMap() />
@@ -192,91 +197,16 @@ from the parent application.
 		<cfset setProperty(variables.HTML_HELPER_PROPERTY_NAME, this) />
 	</cffunction>
 		
-	<cffunction name="configureAssetPackages" access="private" returntype="struct" output="false"
+	<cffunction name="configureAssetPackages" access="private" returntype="void" output="false"
 		hint="Configures asset packages from the 'package' parameter.">
 		<cfargument name="rawPackages" type="struct" required="true"
 			hint="The raw data from the 'assetPackages' parameter." />
 		
-		<cfset var packages = StructNew() />
-		<cfset var packageElements = ArrayNew(1) />
-		<cfset var temp = "" />
-		<cfset var element = "" />
 		<cfset var key = "" />
-		<cfset var i = 0 />
-		<cfset var k = 0 />
-    
-		<cfloop collection="#arguments.rawPackages#" item="key">
-			<cfset packageElements = ArrayNew(1) />
-			
-			<cfloop from="1" to="#ArrayLen(arguments.rawPackages[key])#" index="i">
-				<cfset temp = arguments.rawPackages[key][i] />
-				<cfset element = StructNew() />				
-				
-				<cfif IsSimpleValue(temp)>
-					<cfif NOT IsArray(temp)>
-						<cfset element.paths = ListToArray(getUtils().trimList(temp)) />
-					<cfelse>
-						<cfset element.paths = temp />
-					</cfif>
-					<cfset element.type = ensureAndDetectAssetPackageType(element.paths) />
-					
-					<cfif element.type EQ "">
-						<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
-							message="Unable to determine asset types for asset package named '#key#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
-							detail="Asset paths: '#ArrayToList(element.paths)#" />
-					</cfif>
-
-					<cfset element.attributes = "" />
-					<cfset element.forIEVersion = "" />
-				<cfelseif IsStruct(temp)>
-					<cfset getAssert().isTrue(StructKeyExists(temp, "paths") OR StructKeyExists(temp, "inline")
-						, "A key named 'paths' or 'inline' must exist for an element in position '#i#' of a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
-          <cfset getAssert().isTrue(NOT (StructKeyExists(temp, "paths") AND StructKeyExists(temp, "inline"))
-            , "Only one of 'paths' or 'inline' may be defined for element in position '#i#' of a package named '#key#' in module '#getAppManager().getModuleName()#'.") />
-				
-					<cfif StructKeyExists(temp, "paths")>
-	          <!--- Explode the list to an array --->
-						<cfif NOT IsArray(temp.paths)>
-				 			<cfset element.paths = ListToArray(getUtils().trimList(temp.paths)) />
-				 		<cfelse>
-							<cfset element.paths = temp.paths />
-						</cfif>
-          <cfelseif StructKeyExists(temp, "inline")>
-            <cfset element.inline = Trim(temp.inline) />
-          </cfif>
-					
-					<cfif NOT StructKeyExists(temp,  "type")>
-						<cfset element.type = ensureAndDetectAssetPackageType(temp.paths) />
-						
-						<cfif element.type EQ "">
-							<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
-							message="Unable to determine asset types for asset package named '#key#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
-							detail="Asset paths: '#ArrayToList(element.paths)#" />
-						</cfif>
-					<cfelse>
-						<cfset element.type = temp.type />
-					</cfif>
-					
-					<cfif NOT StructKeyExists(temp, "attributes")>
-						<cfset element.attributes = "" />
-					<cfelse>
-						<cfset element.attributes = temp.attributes />
-					</cfif>
-					
-					<cfif NOT StructKeyExists(temp, "forIEVersion")>
-						<cfset element.forIEVersion = "" />
-					<cfelse>
-						<cfset element.forIEVersion = temp.forIEVersion />
-					</cfif>
-				</cfif>
-				
-				<cfset ArrayAppend(packageElements, element) />
-			</cfloop>
-			
-			<cfset packages[key] = packageElements />
-		</cfloop>
 		
-		<cfreturn packages />
+		<cfloop collection="#arguments.rawPackages#" item="key">
+			<cfset loadAssetPackage(key, arguments.rawPackages[key]) />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="buildMimeShortcutMap" access="private" returntype="void" output="false"
@@ -765,6 +695,87 @@ from the parent application.
 		</cfif>	
 	</cffunction>
 	
+	<cffunction name="loadAssetPackage" access="public" returntype="void" output="false"
+		hint="Configures asset packages from the 'package' parameter.">
+		<cfargument name="assetPackageName" type="string" required="true"
+			hint="The name of the asset package name." />
+		<cfargument name="assetPackageParameters" type="array" required="true"
+			hint="The asset package parameter array." />
+		
+		<cfset var packageElements = ArrayNew(1) />
+		<cfset var temp = "" />
+		<cfset var element = "" />
+		<cfset var i = 0 />
+			
+		<cfloop from="1" to="#ArrayLen(arguments.assetPackageParameters)#" index="i">
+			<cfset temp = arguments.assetPackageParameters[i] />
+			<cfset element = StructNew() />				
+			
+			<cfif IsSimpleValue(temp)>
+				<cfif NOT IsArray(temp)>
+					<cfset element.paths = ListToArray(getUtils().trimList(temp)) />
+				<cfelse>
+					<cfset element.paths = temp />
+				</cfif>
+				<cfset element.type = ensureAndDetectAssetPackageType(element.paths) />
+				
+				<cfif element.type EQ "">
+					<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
+						message="Unable to determine asset types for asset package named '#arguments.assetPackageName#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
+						detail="Asset paths: '#ArrayToList(element.paths)#" />
+				</cfif>
+
+				<cfset element.attributes = "" />
+				<cfset element.forIEVersion = "" />
+			<cfelseif IsStruct(temp)>
+				<cfset getAssert().isTrue(StructKeyExists(temp, "paths") OR StructKeyExists(temp, "inline")
+					, "A key named 'paths' or 'inline' must exist for an element in position '#i#' of a package named '#arguments.assetPackageName#' in module '#getAppManager().getModuleName()#'.") />
+				<cfset getAssert().isTrue(NOT (StructKeyExists(temp, "paths") AND StructKeyExists(temp, "inline"))
+					, "Only one of 'paths' or 'inline' may be defined for element in position '#i#' of a package named '#arguments.assetPackageName#' in module '#getAppManager().getModuleName()#'.") />
+			
+				<cfif StructKeyExists(temp, "paths")>
+					<!--- Explode the list to an array --->
+					<cfif NOT IsArray(temp.paths)>
+			 			<cfset element.paths = ListToArray(getUtils().trimList(temp.paths)) />
+			 		<cfelse>
+						<cfset element.paths = temp.paths />
+					</cfif>
+				<cfelseif StructKeyExists(temp, "inline")>
+	           		<cfset element.inline = Trim(temp.inline) />
+				</cfif>
+				
+				<cfif NOT StructKeyExists(temp,  "type")>
+					<cfset element.type = ensureAndDetectAssetPackageType(temp.paths) />
+					
+					<cfif element.type EQ "">
+						<cfthrow type="MachII.properties.HtmlHelperProperty.MixedAssetTypes"
+						message="Unable to determine asset types for asset package named '#arguments.assetPackageName#' due to mixed asset types or ambigous file extensions. You need to use verbose syntax if using simple syntax when defining these assets or explicitly define an asset 'type'."
+						detail="Asset paths: '#ArrayToList(element.paths)#" />
+					</cfif>
+				<cfelse>
+					<cfset element.type = temp.type />
+				</cfif>
+				
+				<cfif NOT StructKeyExists(temp, "attributes")>
+					<cfset element.attributes = "" />
+				<cfelse>
+					<cfset element.attributes = temp.attributes />
+				</cfif>
+				
+				<cfif NOT StructKeyExists(temp, "forIEVersion")>
+					<cfset element.forIEVersion = "" />
+				<cfelse>
+					<cfset element.forIEVersion = temp.forIEVersion />
+				</cfif>
+			</cfif>
+			
+			<cfset ArrayAppend(packageElements, element) />
+		</cfloop>
+
+		<!--- Append the asset package --->		
+		<cfset appendAssetPackage(arguments.assetPackageName, packageElements) />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -1148,6 +1159,15 @@ from the parent application.
 		<cfreturn variables.docTypeReferenceMap />
 	</cffunction>
 	
+	<cffunction name="appendAssetPackage" access="private" returntype="void" output="false"
+		hint="Append an asset package into asset packages.">
+		<cfargument name="assetPackageName" type="string" required="true" />
+		<cfargument name="assetPackageParameters" type="array" required="true" />
+		
+		<cfset var assetPackages = getAssetPackages() />
+		
+		<cfset assetPackages[arguments.assetPackageName] = arguments.assetPackageParameters />
+	</cffunction>
 	<cffunction name="setAssetPackages" access="private" returntype="void" output="false"
 		hint="Sets the asset packages into the property manager.">
 		<cfargument name="assetPackages" type="struct" required="true" />
