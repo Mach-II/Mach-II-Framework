@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 Simple configuration that uses the timespan strategy with its' default parameters
@@ -147,10 +147,7 @@ See individual caching strategies for more information on configuration.
 		<cfset getAppManager().getCacheManager().enableCaching() />
 	</cffunction>
 	
-	<!---
-	PROTECTED FUNCTIONS
-	--->
-	<cffunction name="configureStrategy" access="private" returntype="void" output="false"
+	<cffunction name="configureStrategy" access="public" returntype="void" output="false"
 		hint="Configures a strategy.">
 		<cfargument name="cacheName" type="string" required="true"
 			hint="Name of the cache strategy." />
@@ -197,6 +194,9 @@ See individual caching strategies for more information on configuration.
 		<cfset cacheStrategyManager.loadStrategy(arguments.cacheName, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
 	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
 	<cffunction name="decidedCachingEnabled" access="private" returntype="boolean" output="false"
 		hint="Decides if the caching is enabled.">
 		<cfargument name="cachingEnabled" type="any" required="true" />
