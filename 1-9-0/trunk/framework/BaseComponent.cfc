@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.0.10
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 The BaseComponent extended by Listener, EventFilter, Plugin and Property components and gives
@@ -430,6 +430,12 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="defaultValue" type="any" required="false" default=""
 			hint="The default value to use if the requested property is not defined." />
 		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
+	</cffunction>
+	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if property name is defined in the properties - this is just a shortcutfor getPropertyManager().isPropertyDefined(). Does NOT check a parent.">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The named of the property to check if it is defined." />
+		<cfreturn getPropertyManager().isPropertyDefined(arguments.propertyName) />
 	</cffunction>
 	
 	<!---
