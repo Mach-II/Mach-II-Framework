@@ -86,7 +86,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - REQUEST HANDLING
 	--->
 	<cffunction name="handleRequest" access="public" returntype="void" output="false"
 		hint="Handles an endpoint request.">
@@ -95,13 +95,27 @@ Notes:
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#"
 			hint="Any runtime parameter args are needed to complete the request." />
 		
-		<cfabort showerror="This method has not been implemented yet." />
+		<cfset var endpoint = "" />
 		
-		<!--- Run order is preProcess if defined, handleRequest and postProcess if defined --->
+		<cftry>
+			<cfset endpoint = getEndpointByName(arguments.endpointName) />
 			
-		<!--- We need some sort of exception handling --->
+			
+					
+			<cfcatch type="MachII.endpoints.EndpointNotDefined">
+				<!--- Debating which statuscode to send? --->
+				<cfheader statuscode="404" statustext="Not Found" />
+				<cfheader name="rest.error" value="Enpoint named '#arguments.endpointName#' not available." />
+			</cfcatch>
+			<cfcatch type="any">
+				
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
+	<!---
+	PUBLIC FUNCTIONS - GENERAL
+	--->
 	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.impl.AbstractEndpoint" output="false"
 		hint="Gets a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
@@ -136,17 +150,8 @@ Notes:
 	<cffunction name="isEndpointDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a endpoint is registered with the specified name. Does NOT check parent.">
 		<cfargument name="endpointName" type="string" required="true"
-			hint="Name of endpoint to check." />
-		<cfargument name="checkParent" type="boolean" required="false" default="false"
-			hint="Flag to check parent strategy manager." />
-		
-		<cfif StructKeyExists(variables.endpoints, arguments.endpointName)>
-			<cfreturn true />
-		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEndpointDefined(arguments.endpointName)>
-			<cfreturn true />
-		<cfelse>
-			<cfreturn false />
-		</cfif>
+			hint="Name of endpoint to check." />		
+		<cfreturn StructKeyExists(variables.endpoints, arguments.endpointName) />
 	</cffunction>
 	
 	<!---
@@ -154,6 +159,8 @@ Notes:
 	--->
 	<cffunction name="loadEndpoint" access="public" returntype="void" output="false"
 		hint="Loads an endpoint and adds the endpoint to the manager.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager the endpoint was loaded from." />
 		<cfargument name="endpointName" type="string" required="true"
 			hint="Name of endpoint." />
 		<cfargument name="endpointType" type="string" required="true"
@@ -170,7 +177,7 @@ Notes:
 		
 		<!--- Create the endpoint --->
 		<cftry>
-			<cfset endpoint = CreateObject("component", arguments.endpointType).init(this, arguments.endpointParameters) />
+			<cfset endpoint = CreateObject("component", arguments.endpointType).init(arguments.appManager, this, arguments.endpointParameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.endpointType>

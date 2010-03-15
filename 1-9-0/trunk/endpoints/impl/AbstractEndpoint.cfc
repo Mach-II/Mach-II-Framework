@@ -49,7 +49,11 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.appManager = "" />
+	<cfset variables.endpointManager = "" />
 	<cfset variables.instance = StructNew() />
+	<cfset variables.instance.endpointConfig = StructNew() />
+	<cfset variables.instance.endpointConfig.parameterPrecedence = "form" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	
@@ -58,12 +62,20 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="AbstractEndpoint" output="false"
 		hint="Initializes the endpoint. Do not override.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="A reference to the AppManager this endpoint was loaded from." />
 		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true"
 			hint="A reference to the EndpointManager." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
 		
+		<!--- Run setters --->
+		<cfset setAppManager(arguments.appManager) />
+		<cfset setEndpointManager(arguments.endpointManager) />
 		<cfset setParameters(arguments.parameters) />
+		
+		<!--- Setup additional --->
+		<cfset setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -102,6 +114,18 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
+	<cffunction name="getRequestEventArgs" access="public" returntype="struct" output="false"
+		hint="Builds a struct of incoming event args.">
+		
+		<cfset var eventArgs = StructNew() />
+		<cfset var overwriteFormParams = (variables.instance.endpointConfig.parameterPrecedence EQ "url") />
+		
+		<!--- Build event args from form/url/SES --->
+		<cfset StructAppend(eventArgs, form) />
+		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
+		
+		<cfreturn eventArgs />
+	</cffunction>
 	
 	<!--- TODO: Implement method that introspects if 
 		preProcess / postProcess methods have been implemented 
@@ -179,7 +203,21 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setAppManager" access="public" returntype="void" output="false">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
+		<cfreturn variables.appManager />
+	</cffunction>
 	
+	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
+		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
+		<cfset variables.endpointManager = arguments.endpointManager />
+	</cffunction>
+	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
+		<cfreturn variables.endpointManager />
+	</cffunction>
 	
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
