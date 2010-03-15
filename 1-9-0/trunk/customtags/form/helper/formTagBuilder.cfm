@@ -200,6 +200,8 @@ PUBLIC FUNCTIONS
 		hint="The check value to translate." />
 	<cfargument name="checkValueCol" type="any" required="false"
 		hint="The column name of use with the checkValue is query." />
+	<cfargument name="checkValueDelimiter" type="any" required="false" default=","
+		hint="The delimiter to use when translating the checkValue into a list." />
 
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->
@@ -211,17 +213,17 @@ PUBLIC FUNCTIONS
 		<cfset checkValues = arguments.checkValue />
 	<cfelseif IsArray(arguments.checkValue) AND IsSimpleValue(arguments.checkValue[1])>
 		<cfloop from="1" to="#ArrayLen(arguments.checkValue)#" index="i">
-			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[i]) />
+			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[i], arguments.checkValueDelimiter) />
 		</cfloop>
 	<cfelseif IsStruct(arguments.checkValue)>
 		<cfloop collection="#arguments.checkValue#" item="item">
 			<cfif IsBoolean(arguments.checkValue[item]) AND arguments.checkValue[item]>
-				<cfset checkValues = ListAppend(checkValues, item) />
+				<cfset checkValues = ListAppend(checkValues, item, arguments.checkValueDelimiter) />
 			</cfif>
 		</cfloop>
 	<cfelseif IsQuery(arguments.checkValue)>
 		<cfloop query="arguments.checkValue">
-			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[arguments.checkValueCol]) />
+			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[arguments.checkValueCol], arguments.checkValueDelimiter) />
 		</cfloop>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype" 

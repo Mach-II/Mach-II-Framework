@@ -105,11 +105,7 @@ Notes:
 	
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->	
-	<cfset variables.checkValues = "" />
-	
-	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol) />
-	</cfif>
+	<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol, attributes.delimiter) />
 	
 	<!--- doing this here so we can add checked to the attributes 
 			being passed to the checkbox custom tag as needed instead 

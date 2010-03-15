@@ -57,7 +57,8 @@ Notes:
 	<cfset setupTag("option", false) />	
 
 	<!--- Set data --->
-	<cfset attributes.checkValue = request._MachIIFormLib.selectCheckValue />
+	<cfset variables.checkValue = request._MachIIFormLib.selectCheckValue />
+	<cfset variables.checkValueDelimiter = request._MachIIFormLib.selectCheckValueDelimiter />
 	
 	<!--- Set defaults --->
 	<cfparam name="attributes.value" type="string" 
@@ -71,7 +72,7 @@ Notes:
 	<cfset setAttribute("value") />
 
 	<!--- Set optional attributes --->
-	<cfif ListFindNoCase(attributes.checkValue, attributes.value)>
+	<cfif ListFindNoCase(variables.checkValue, attributes.value, variables.checkValueDelimiter)>
 		<cfset setAttribute("selected", "selected") />
 	<cfelse>
 		<cfset setAttributeIfDefinedAndTrue("selected", "selected") />

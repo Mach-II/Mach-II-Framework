@@ -109,7 +109,7 @@ Notes:
 	<cfset variables.checkValues = "" />
 	
 	<cfif StructKeyExists(attributes, "checkValue")>
-		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol) />
+		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol, attributes.delimiter) />
 	</cfif>
 	
 	<!---
@@ -131,7 +131,7 @@ Notes:
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
 			<cfset variables.value = ListGetAt(attributes.items, i, attributes.delimiter) />
 			
-			<cfif ListFindNoCase(variables.checkValues, variables.value)>
+			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />
@@ -150,7 +150,7 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
 			
-					<cfif ListFindNoCase(variables.checkValues, variables.value)>
+					<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.checkboxTemplate />
@@ -167,7 +167,7 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i][attributes.valueKey] />
 			
-					<cfif ListFindNoCase(variables.checkValues, variables.value)>
+					<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.checkboxTemplate />
@@ -197,7 +197,7 @@ Notes:
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
 			<cfset variables.value = variables.sortedKeys[i] />
 	
-			<cfif ListFindNoCase(variables.checkValues, variables.value)>
+			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />
@@ -214,7 +214,7 @@ Notes:
 		<cfloop query="attributes.items">
 			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
 	
-			<cfif ListFindNoCase(variables.checkValues, variables.value)>
+			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />

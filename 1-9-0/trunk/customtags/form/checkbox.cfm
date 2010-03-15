@@ -78,6 +78,8 @@ Notes:
 		default="#attributes.name#_#createCleanId(attributes.value)#" />
 	<cfparam name="attributes.defaultValue" type="string"
 		default="" />
+	<cfparam name="attributes.delimiter" type="string"
+		default="," />
 		
 	<cfset setFirstElementId(attributes.id) />
 	
@@ -87,7 +89,7 @@ Notes:
 	<cfset setAttribute("value") />
 
 	<!--- Set optional attributes --->
-	<cfif ListFindNoCase(attributes.checkValue, attributes.value)>
+	<cfif ListFindNoCase(attributes.checkValue, attributes.value, attributes.delimiter)>
 		<cfset setAttribute("checked", "checked") />
 	<cfelse>
 		<cfset setAttributeIfDefinedAndTrue("checked", "checked") />

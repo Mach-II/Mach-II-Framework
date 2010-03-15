@@ -38,7 +38,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - REQUIRED ATTRIBUTES
@@ -74,7 +74,8 @@ Notes:
 <cfelse>
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->	
-	<cfset variables.checkvalues = request._MachIIFormLib.selectCheckValue />
+	<cfset variables.checkValues = request._MachIIFormLib.selectCheckValue />
+	<cfset variables.checkValueDelimiter = request._MachIIFormLib.selectCheckValueDelimiter />
 	
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
@@ -98,7 +99,7 @@ Notes:
 		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", Trim(i), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(Trim(i)), "one") />
-			<cfif ListFindNoCase(variables.checkValues, Trim(i))>
+			<cfif ListFindNoCase(variables.checkValues, Trim(i), variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 			</cfif>
 				
@@ -110,7 +111,7 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(variables.itemOrder[i]), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[variables.itemOrder[i]]), "one") />
-			<cfif ListFindNoCase(variables.checkValues, variables.itemOrder[i])>
+			<cfif ListFindNoCase(variables.checkValues, variables.itemOrder[i], variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 			</cfif>
 				
@@ -124,7 +125,7 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(attributes.items[i]), "all") />
 					<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i]), "one") />
-					<cfif ListFindNoCase(variables.checkValues, attributes.items[i])>
+					<cfif ListFindNoCase(variables.checkValues, attributes.items[i], variables.checkValueDelimiter)>
 						<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 					</cfif>
 				
@@ -136,7 +137,7 @@ Notes:
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 						<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[i][attributes.valueKey], "all") />
 						<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i][attributes.labelKey]), "one") />
-						<cfif ListFindNoCase(variables.checkValues, attributes.items[i][attributes.valueKey])>
+						<cfif ListFindNoCase(variables.checkValues, attributes.items[i][attributes.valueKey], variables.checkValueDelimiter)>
 							<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 						</cfif>
 							
@@ -163,7 +164,7 @@ Notes:
 		<cfloop query="attributes.items">
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[attributes.valueCol][attributes.items.currentRow], "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
-			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow])>
+			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow], variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 			</cfif>
 				

@@ -38,7 +38,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - REQUIRED ATTRIBUTES
@@ -77,11 +77,16 @@ Notes:
 		default="#attributes.name#" />
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
+	<cfparam name="attributes.checkValueCol" type="string"
+		default="value" />
 	
 	<cfset setFirstElementId(attributes.id) />
 	
-	<!--- Syncronize check value for option tag --->
-	<cfset request._MachIIFormLib.selectCheckValue = attributes.checkValue />
+	<!--- Syncronize check value for option/options tag --->
+	<!--- checkValue can be a list, array, or struct, but ultimately 
+			we'll use a list to do the comparisons as we build the output --->	
+	<cfset request._MachIIFormLib.selectCheckValue = translateCheckValue(attributes.checkValue, attributes.checkValueCol, attributes.delimiter) />
+	<cfset request._MachIIFormLib.selectCheckValueDelimiter = attributes.delimiter />
 	
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
