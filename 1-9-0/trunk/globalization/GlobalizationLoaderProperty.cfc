@@ -43,7 +43,7 @@ A Mach-II property that provides easy configuration for Internationalization
 and Resource Bundle management
 
 Usage:
-<property name="globalizationConfigProperty" type="MachII.globalization.GlobalizationConfigProperty">
+<property name="globalizationLoaderProperty" type="MachII.globalization.GlobalizationLoaderProperty">
 	<parameters>
 		<!-- Configures a string that will be output before any rendered message format -->
 		<parameter name="debugPrefix" value="string"/>
@@ -69,7 +69,7 @@ is en_US.
 
 --->
 <cfcomponent
-	displayname="GlobalizationConfigProperty"
+	displayname="GlobalizationLoaderProperty"
 	extends="MachII.framework.Property"
 	output="false"
 	hint="Sets up property configurations for the GlobalizationManager.">
