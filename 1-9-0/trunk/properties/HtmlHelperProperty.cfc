@@ -585,8 +585,14 @@ from the parent application.
 			hint="Indicates to output type for the generated HTML code ('head', 'body', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
 		
 		<cfset var mimeTypeData = resolveMimeTypeAndGetData(arguments.type) />
-		<cfset var code = '<link href="' & arguments.href & '"' />
+		<cfset var code = "" />
 		<cfset var key = "" />
+
+		<cfif arguments.type EQ "icon">
+			<cfset code = '<link href="' & computeAssetPath("img", arguments.href) & '"' />
+		<cfelse>
+			<cfset code = '<link href="' & arguments.href & '"' />
+		</cfif>
 		
 		<cfset arguments.attributes = getUtils().parseAttributesIntoStruct(arguments.attributes) />
 		<cfset StructAppend(arguments.attributes, mimeTypeData, false) />

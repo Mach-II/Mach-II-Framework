@@ -55,6 +55,12 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* HtmlHelper method AddLink() with type of icon does not compute asset path
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/565
+(2010-03-18 peterfarrell)
+
 * The cflock name in LogFactory needs to be more unique
 
 For more information see:
