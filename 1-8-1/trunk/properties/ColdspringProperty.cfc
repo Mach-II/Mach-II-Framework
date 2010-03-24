@@ -37,7 +37,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Original license from the ColdSpring project (http://www.coldspringframework.org):
 ------------------------------------------------------------------------------------------
@@ -569,13 +569,16 @@ application.serviceFactory_account variable.
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
 		<cfset var beanName = arguments.targetObj.getBeanId() />
 		
-		<cfif getAssert().isTrue(beanFactory.containsBean(beanName)
-				, "Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
-				, "Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory.")>
+		<cftry>
 			<cfinvoke component="#arguments.targetObj#" method="setBean">
 				<cfinvokeargument name="bean" value="#beanFactory.getBean(beanName)#" />
 			</cfinvoke>
-		</cfif>
+			<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factory --->
+			<cfcatch type="all">
+				<cfthrow message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+					detail="Original Exception: #getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="autowireByDynamicMethodGeneration" access="private" returntype="void" output="false"
@@ -608,11 +611,11 @@ application.serviceFactory_account variable.
 					<!--- Add appropriate bean if the factory has a bean by that name --->
 					<cfset targets[beanName] = beanFactory.getBean(beanName) />
 				</cfloop>
-				<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factor --->
+				<!--- Faster to fast fail and handle a missing bean exception than to check if the bean exists in the factory --->
 				<cfcatch type="any">
 					<cfthrow type="MachII.properties.ColdSpringProperty.NoBean"
-						message="Cannot find bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
-						detail="Check that there is a bean named '#beanName#' defined in your ColdSpring bean factory." />
+						message="Cannot load bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+						detail="Original Exception: #getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfcatch>
 			</cftry>
 			
@@ -670,10 +673,17 @@ application.serviceFactory_account variable.
 										
 					<!--- If we found a bean, put the bean by calling the target object's setter --->
 					<cfif Len(beanName)>
-						<cfinvoke component="#arguments.targetObj#" method="set#setterName#">
-							<cfinvokeargument name="#functionMetadata.parameters[1].name#" value="#beanFactory.getBean(beanName)#" />
-						</cfinvoke>	
-					</cfif>			  
+						<cftry>
+							<cfinvoke component="#arguments.targetObj#" method="set#setterName#">
+								<cfinvokeargument name="#functionMetadata.parameters[1].name#" value="#beanFactory.getBean(beanName)#" />
+							</cfinvoke>	
+							<cfcatch type="any">
+								<cfthrow type="MachII.properties.ColdSpringProperty.NoBean"
+									message="Cannot load bean named '#beanName#' to autowire by method injection in a '#ListLast(targetObjMetadata.extends.name, '.')#' of type '#targetObjMetadata.name#' in module '#getAppManager().getModuleName()#'."
+									detail="Original Exception: #getUtils().buildMessageFromCfCatch(cfcatch)#" />
+							</cfcatch>
+						</cftry>
+					</cfif>	  
 				</cfif>
 			</cfloop>
 		</cfif>

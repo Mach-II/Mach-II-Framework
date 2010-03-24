@@ -54,8 +54,17 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Improved exception messages in ColdSpringProperty
+The exception messages in the ColdSpringProperty were sometimes misleading
+We have added the original exception to the thrown exception for more detail.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/593
+(2010-03-24 peterfarrell)
 
 * HtmlHelper method AddLink() with type of icon does not compute asset path
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/565
