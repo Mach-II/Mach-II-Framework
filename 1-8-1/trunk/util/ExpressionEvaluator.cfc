@@ -307,8 +307,10 @@ ${scope.key NEQ scope.key2}
 			
 			<cfswitch expression="#scope#">
 				<cfcase value="event">
-					<cfif key eq "getArgs()">
-						<cfset result = arguments.event.getArgs() />
+					<cfif key.endsWith("()")>
+						<cfinvoke returnvariable="result" 
+							component="#arguments.event#" 
+							method="#Left(key, Len(key) - 2)#" />
 					<cfelse>
 						<cfif arguments.event.isArgDefined(key)>
 							<cfset result = arguments.event.getArg(key) />
