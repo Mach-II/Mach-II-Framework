@@ -2,7 +2,7 @@
 <!---
 
     Mach-II - A framework for object oriented MVC web applications in CFML
-    Copyright (C) 2003-2010 GreatBizTools, LLC
+    Copyright (C) 2003-2009 GreatBizTools, LLC
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - REQUIRED ATTRIBUTES
@@ -74,7 +74,7 @@ Notes:
 <cfelse>
 	<!--- checkValue can be a list, array, or struct, but ultimately 
 			we'll use a list to do the comparisons as we build the output --->	
-	<cfset variables.checkvalues = request._MachIIFormLib.selectCheckValue />
+	<cfset variables.checkValues = request._MachIIFormLib.selectCheckValue />
 	<cfset variables.checkValueDelimiter = request._MachIIFormLib.selectCheckValueDelimiter />
 	
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
@@ -87,7 +87,7 @@ Notes:
 	--->
 	<form:option value="${output.value}" 
 		label="${output.label}" 
-		id="#getParentTagAttribute("select", "id")#_${output.value}"
+		id="#getParentTagAttribute("select", "id")#_${output.id}"
 		checkValue=""
 		output="true" 
 		outputBuffer="#variables.outputBuffer#" />
@@ -96,10 +96,17 @@ Notes:
 	<cfset variables.outputBuffer.content = "" />
 	
 	<cfif IsSimpleValue(attributes.items)>
-		<cfloop list="#attributes.items#" index="i" delimiters="#attributes.delimiter#">
-			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", Trim(i), "all") />
-			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(Trim(i)), "one") />
-			<cfif ListFindNoCase(variables.checkValues, Trim(i), variables.checkValueDelimiter)>
+		<cfif NOT StructKeyExists(attributes, "labels")>
+			<cfset attributes.labels = attributes.items />
+		</cfif>
+	
+		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
+			<cfset variables.value = LCase(Trim(ListGetAt(attributes.items, i, attributes.delimiter))) />
+			
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(Trim(ListGetAt(attributes.labels, i, attributes.delimiter))), "one") />
+			<cfif ListFindNoCase(variables.checkValues, variables.value, variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
 			</cfif>
 				
@@ -109,7 +116,10 @@ Notes:
 		<cfset variables.itemOrder = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 
 		<cfloop from="1" to="#ArrayLen(variables.itemOrder)#" index="i">
-			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(variables.itemOrder[i]), "all") />
+			<cfset variables.value = LCase(variables.itemOrder[i]) />
+			
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[variables.itemOrder[i]]), "one") />
 			<cfif ListFindNoCase(variables.checkValues, variables.itemOrder[i], variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
@@ -123,7 +133,10 @@ Notes:
 			<cfif IsSimpleValue(attributes.items[1])>
 				<!--- this is an array of simple values, proceed as needed --->
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", LCase(attributes.items[i]), "all") />
+					<cfset variables.value = LCase(attributes.items[i]) />
+					
+					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+					<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
 					<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i]), "one") />
 					<cfif ListFindNoCase(variables.checkValues, attributes.items[i], variables.checkValueDelimiter)>
 						<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
@@ -135,7 +148,10 @@ Notes:
 				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
 				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-						<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[i][attributes.valueKey], "all") />
+						<cfset variables.value = attributes.items[i][attributes.valueKey] />
+						
+						<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+						<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
 						<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[i][attributes.labelKey]), "one") />
 						<cfif ListFindNoCase(variables.checkValues, attributes.items[i][attributes.valueKey], variables.checkValueDelimiter)>
 							<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
@@ -162,7 +178,10 @@ Notes:
 		</cfif>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
-			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", attributes.items[attributes.valueCol][attributes.items.currentRow], "all") />
+			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.currentRow] />
+			
+			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+			<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
 			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow], variables.checkValueDelimiter)>
 				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
@@ -174,17 +193,6 @@ Notes:
 		<cfthrow type="MachII.customtags.form.#getTagType()#"
 			message="The 'items' attribute for #getTagType()# custom tag does not support the passed datatype."
 			detail="The 'items' attribute only supports lists, structs, queries and arrays." />
-	</cfif>
-	
-	<!--- Wrap with an optgroup if defined --->
-	<cfif StructKeyExists(attributes, "optgroup")>
-		<cfset variables.optGroupContent = variables.outputBuffer.content />
-		<!--- Reset the outputBuffer for the optgroup tag wrapping --->
-		<cfset variables.outputBuffer.content = "" />
-		<form:optgroup label="#attributes.optgroup#" 
-			content="#variables.optGroupContent#"
-			output="true" 
-			outputBuffer="#variables.outputBuffer#" />
 	</cfif>
 	
 	<cfif attributes.output>

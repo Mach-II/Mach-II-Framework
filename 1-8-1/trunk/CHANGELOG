@@ -54,19 +54,15 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
-* ExpressionEvaluator does not support method calls
+* Updates to the form library options tag
+Added support to option tag for "labels" attribute for list data 
+types and create a "clean" id.
 
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/594
-(2010-03-24 peterfarrell)
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
-* Improved exception messages in ColdSpringProperty
-The exception messages in the ColdSpringProperty were sometimes misleading
-We have added the original exception to the thrown exception for more detail.
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/593
-(2010-03-24 peterfarrell)
+For more informations see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/598
+(2010-03-20 peterfarrell)
 
 * HtmlHelper method AddLink() with type of icon does not compute asset path
 
@@ -75,12 +71,6 @@ This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 For more information see:
 https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/565
 (2010-03-18 peterfarrell)
-
-* The cflock name in LogFactory needs to be more unique
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/556
-(2010-03-10 peterfarrell)
 
 * Event bean error when using ignore field
 When using ignore field (<field name="xx" ignore="true" />) with event-bean 
@@ -127,7 +117,25 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Fixed ExpressionEvaluator to support method calls on event object
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/594
+(2010-03-24 peterfarrell)
+
+* Improved exception messages in ColdSpringProperty
+The exception messages in the ColdSpringProperty were sometimes misleading
+We have added the original exception to the thrown exception for more detail.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/593
+(2010-03-24 peterfarrell)
 
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* The cflock name in LogFactory needs to be more unique
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/556
+(2010-03-10 peterfarrell)

@@ -70,6 +70,12 @@ Notes:
 		<!--- Setup the PropertyManager with the required collaboration data --->
 		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager) />
 		<cfset variables.appManager.setPropertyManager(propertyManager) />
+
+		<!--- Insert properties if needed here --->
+		<cfset propertyManager.setProperty("urlExcludeEventParameter", false) />
+		<cfset propertyManager.setProperty("urlDelimiters", "?|&|=") />
+		<cfset propertyManager.setProperty("redirectPersistScope", "application") />
+		<cfset propertyManager.setProperty("maxEvents", 10) />
 		
 		<!--- Setup the RequestManager --->
 		<cfset requestManager =  CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
