@@ -398,17 +398,25 @@ Notes:
 
 	<cffunction name="setProperty" access="public" returntype="void" output="false"
 		hint="Sets the specified property - this is just a shortcut for getAppManager().getPropertyManager().setProperty()">
-		<cfargument name="propertyName" type="string" required="yes"
+		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to set." />
-		<cfargument name="propertyValue" type="any" required="yes" 
+		<cfargument name="propertyValue" type="any" required="true" 
 			hint="The value to store in the property." />
 		<cfset getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
 	</cffunction>	
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Gets the specified property - this is just a shortcut for getAppManager().getPropertyManager().getProperty()">
-		<cfargument name="propertyName" type="string" required="yes"
+		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to return." />
-		<cfreturn getPropertyManager().getProperty(arguments.propertyName) />
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to use if the requested property is not defined." />
+		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
+	</cffunction>
+	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if property name is defined in the properties. Does NOT check a parent.">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The named of the property to check if it is defined." />
+		<cfreturn getPropertyManager().isPropertyDefined(arguments.propertyName) />
 	</cffunction>
 	
 	<cffunction name="setLog" access="public" returntype="void" output="false"

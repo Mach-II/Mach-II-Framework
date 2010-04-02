@@ -54,6 +54,14 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Fixed missing support for getProperty() default property value in ViewContext
+The getProperty() method in the ViewContext did not support a default value. Added
+in support for isPropertyDefined() shortcut method.
+
+For more informations see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/605
+(2010-04-02 peterfarrell)
+
 * Updates to the form library options tag
 Added support to option tag for "labels" attribute for list data 
 types and create a "clean" id.
