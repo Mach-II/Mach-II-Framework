@@ -78,7 +78,7 @@ any inline javascript code.
 	<!--- If the src is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "src")
 		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
-		<cfset attributes.src = makeUrl() />
+		<cfset attributes.src = "external:" & makeUrl() />
 	</cfif>
 
 	<!--- For external files --->

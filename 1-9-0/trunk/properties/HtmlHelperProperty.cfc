@@ -380,7 +380,12 @@ from the parent application.
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(arguments.src)#" index="i">
-			<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
+			<cfif NOT arguments.src[i].startsWith("external:")>
+				<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
+			<cfelse>
+				<cfset assetPath = Replace(arguments.src[i], "external:", "", "one") />
+			</cfif>
+			
 			<cfset temp = '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
 			
 			<!--- Enclose in an IE conditional comment if available --->
@@ -459,7 +464,12 @@ from the parent application.
 		</cfloop>
 
 		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
-			<cfset assetPath = computeAssetPath("css", arguments.href[i]) />
+			<cfif NOT arguments.href[i].startsWith("external:")>
+				<cfset assetPath = computeAssetPath("css", arguments.href[i]) />
+			<cfelse>
+				<cfset assetPath = Replace(arguments.href[i], "external:", "", "one") />
+			</cfif>
+			
 			<cfset temp = '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
 
 			<!--- Enclose in an IE conditional comment if available --->
@@ -531,9 +541,17 @@ from the parent application.
 		<cfargument name="attributes" type="any" required="false" default="#StructNew()#"
 			hint="A struct or string (param1=value1|param2=value2) of attributes." />
 		
-		<cfset var code = '<img src="' & computeAssetPath("img", arguments.src) & '"' />
+		<cfset var code = "" />
 		<cfset var dimensions = "" />
 		<cfset var key = "" />
+	
+		<cfif NOT arguments.src.startsWith("external:")>
+			<cfset assetPath = computeAssetPath("img", arguments.src) />
+		<cfelse>
+			<cfset assetPath = Replace(arguments.src, "external:", "", "one") />
+		</cfif>
+
+		<cfset code = '<img src="' & assetPath & '"' />
 	
 		<!--- Set auto dimensions --->
 		<cfif NOT Len(arguments.width) OR NOT Len(arguments.height)>

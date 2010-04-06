@@ -38,7 +38,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - OPTIONAL ATTRIBUTES
@@ -80,7 +80,7 @@ Notes:
 	<!--- If the href is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "href")
 		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
-		<cfset attributes.href = makeUrl() />
+		<cfset attributes.href = "external:" & makeUrl() />
 	</cfif>
 	
 	<!--- For external files --->

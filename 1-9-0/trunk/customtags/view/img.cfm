@@ -59,7 +59,7 @@ Notes:
 	
 	<!--- If the src is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "src")>
-		<cfset attributes.src = makeUrl() />
+		<cfset attributes.src = "external:" & makeUrl() />
 	</cfif>
 	
 	<!--- Setup optional but requried by the addImage() API --->

@@ -38,7 +38,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 - OPTIONAL ATTRIBUTES
@@ -77,7 +77,7 @@ any inline javascript code.
 	<!--- If the src is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "src")
 		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
-		<cfset attributes.src = makeUrl() />
+		<cfset attributes.src = "external:" & makeUrl() />
 	</cfif>
 
 	<!--- For external files --->

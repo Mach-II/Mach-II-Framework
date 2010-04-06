@@ -81,7 +81,7 @@ Notes:
 	<!--- If the href is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "href")
 		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
-		<cfset attributes.href = makeUrl() />
+		<cfset attributes.href = "external:" & makeUrl() />
 	</cfif>
   
   <!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
