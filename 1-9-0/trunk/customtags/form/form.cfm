@@ -119,13 +119,12 @@ Notes:
 				We use the window._MachIIFormLib_autoFocusOccurred so two 
 				forms on a page won't steal an auto-focus
 			--->
-			<cfimport prefix="view" taglib="/MachII/customtags/view" />
-			<cfoutput><view:script outputType="inline">
+			<cfoutput><script type="text/javascript">
 				if (window._MachIIFormLib_autoFocusOccurred !== 'undefined') {
 					document.getElementById('#attributes.autoFocus#').focus();
 					window._MachIIFormLib_autoFocusOccurred = true;
 				}
-			</view:script></cfoutput>
+			</script></cfoutput>
 		</cfif>
 	</cfif>
 	
