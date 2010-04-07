@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 
@@ -122,7 +122,6 @@ via reap() which is run every 3 minutes.
 	<cfset variables.instance.cleanupInterval = createBigInteger("180000") /><!--- Default to 3 minutes --->
 	
 	<cfset variables.currentTickCount = "" />
-	<cfset variables.lastCleanup = getCurrentTickCount() />
 	<cfset variables.threadingAdapter = "" />
 	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	
@@ -185,11 +184,11 @@ via reap() which is run every 3 minutes.
 		<cfset var cacheUntilTimestamp = computeCacheUntilTimestamp() />
 		
 		<!--- Only increment if the element did not previous exist in the cache --->
-		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
+		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfset getCacheStats().incrementTotalElements(1) />
 			<cfset getCacheStats().incrementActiveElements(1) />
 		<cfelse>
-			<cfif dataStorage[hashedKey].isStale>
+			<cfif dataStorage.data[hashedKey].isStale>
 				<cfset getCacheStats().incrementActiveElements(1) />
 			</cfif>
 		</cfif>
@@ -199,7 +198,7 @@ via reap() which is run every 3 minutes.
 		<cfset cacheElement.isStale = false />
 		<cfset cacheElement.timestamp = cacheUntilTimestamp />
 		
-		<cfset dataStorage[hashedKey] = cacheElement />
+		<cfset dataStorage.data[hashedKey] = cacheElement />
 	</cffunction>
 	
 	<cffunction name="get" access="public" returntype="any" output="false"
@@ -214,7 +213,7 @@ via reap() which is run every 3 minutes.
 		<cfset shouldCleanup() />
 		
 		<cfif keyExists(arguments.key)>
-			<cfset cacheElement = dataStorage[hashedKey]>
+			<cfset cacheElement = dataStorage.data[hashedKey]>
 
 			<cfif NOT cacheElement.isStale>
 				<cfset getCacheStats().incrementCacheHits(1) />
@@ -232,8 +231,10 @@ via reap() which is run every 3 minutes.
 		
 		<cfset var dataStorage = getStorage() />
 		
-		<cfset StructClear(dataStorage) />	
-		<cfset getCacheStats().reset() />	
+		<cfset dataStorage.data = StructNew() />
+		<cfset dataStorage.lastCleanup = getCurrentTickCount() />
+
+		<cfset getCacheStats().reset() />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="any" output="false"
@@ -245,10 +246,10 @@ via reap() which is run every 3 minutes.
 		<cfset var hashedKey = hashKey(arguments.key) />
 		<cfset var cacheElement = "" />
 
-		<cfif NOT StructKeyExists(dataStorage, hashedKey)>
+		<cfif NOT StructKeyExists(dataStorage.data, hashedKey)>
 			<cfreturn false />
 		<cfelse>
-			<cfset cacheElement = dataStorage[hashedKey] />
+			<cfset cacheElement = dataStorage.data[hashedKey] />
 			
 			<cfif cacheElement.isStale>
 				<cfreturn false />
@@ -283,14 +284,14 @@ via reap() which is run every 3 minutes.
 			throwontimeout="false">
 			
 			<!--- Reset the timestamp of the last cleanup --->
-			<cfset variables.lastCleanup = currentTick />
+			<cfset dataStorage.lastCleanup = currentTick />
 			
-			<cfset keyArray = StructKeyArray(dataStorage) />
+			<cfset keyArray = StructKeyArray(dataStorage.data) />
 			
 			<!--- Cleanup --->
 			<cfloop from="1" to="#ArrayLen(keyArray)#" index="i">
 				<cftry>
-					<cfif currentTick.compareTo(dataStorage[keyArray[i]].timestamp) GT 0>
+					<cfif currentTick.compareTo(dataStorage.data[keyArray[i]].timestamp) GT 0>
 						<cfset removeByHashedKey(keyArray[i]) />
 					</cfif>
 					<cfcatch type="any">
@@ -330,11 +331,11 @@ via reap() which is run every 3 minutes.
 		<cfset var cacheElement = "" />
 		<cfset var elementExists = "" />
 
-		<cfif StructKeyExists(dataStorage, arguments.hashedKey)>
-			<cfset cacheElement = dataStorage[arguments.hashedKey] />
+		<cfif StructKeyExists(dataStorage.data, arguments.hashedKey)>
+			<cfset cacheElement = dataStorage.data[arguments.hashedKey] />
 			
  			<cfif cacheElement.isStale>
-				<cfset elementExists = StructDelete(dataStorage, arguments.hashedKey, true) />
+				<cfset elementExists = StructDelete(dataStorage.data, arguments.hashedKey, true) />
 
 				<!--- Only update the cache stats if the element still existed (due to a possible race condition) --->
 				<cfif elementExists>
@@ -352,13 +353,14 @@ via reap() which is run every 3 minutes.
 		hint="Cleanups the data storage.">
 		
 		<cfset var diffTimestamp = getCurrentTickCount() />
+		<cfset var dataStorage = getStorage() />		
 		
 		<!--- No point in running periodic cleanups if the cache lasts "forever" --->
 		<cfif getTimespanString() NEQ "forever">
 		
 			<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
 			
-			<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
+			<cfif diffTimestamp.compareTo(dataStorage.lastCleanup) GT 0>
 				<!---
 				Don't wait because an exclusive lock that has already been obtained
 				indicates that a clean is in progress and we should not wait for the
@@ -369,13 +371,13 @@ via reap() which is run every 3 minutes.
 						type="exclusive" 
 						timeout="1" 
 						throwontimeout="false">
-					<cfif diffTimestamp.compareTo(variables.lastCleanup) GT 0>
+					<cfif diffTimestamp.compareTo(dataStorage.lastCleanup) GT 0>
 						<cfif getThreadingAdapter().allowThreading()>
 							<!---
 							We have to set last cleanup here because execlusive
 							threads locks in cfthread are not shared in the parent thread
 							--->
-							<cfset variables.lastCleanup = getCurrentTickCount() />
+							<cfset dataStorage._lastCleanup = getCurrentTickCount() />
 							<cfset getThreadingAdapter().run(this, "reap") />
 						<cfelse>
 							<cfset reap() />
