@@ -837,7 +837,7 @@ from the parent application.
 		<cfargument name="resolvedPath" type="string" required="true"
 			hint="This is the full resolved asset path from the webroot." />
 		
-		<cfset var fullPath = getWebrootBasePath() & "/" & arguments.resolvedPath />
+		<cfset var fullPath =  Replace(getWebrootBasePath() & "/" & arguments.resolvedPath, "//", "/", "all") />
 		<cfset var directoryResults = "" />
 		
 		<cfdirectory name="directoryResults"
