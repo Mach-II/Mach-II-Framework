@@ -54,6 +54,12 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* TimeSpanCache does not properly reap when storage scope is session
+
+For more informations see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/606
+(2010-04-07 peterfarrell)
+
 * HtmlHelper erroneously appends file extensions when link is external and urlBase is ""
 
 Use the new "external:" prepended to the href/src when passing URI to the the HtmlHelper. 
