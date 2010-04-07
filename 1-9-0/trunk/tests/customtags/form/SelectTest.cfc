@@ -193,7 +193,7 @@ Notes:
 		<cfset var output = "" />
 		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
 		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
-		<cfset var colorsSimple = ArrayNew(1) />
+		<cfset var colors = ArrayNew(1) />
 		
 		<!--- Add data to the the bean and set to the event so we can do binding --->		
 		<cfset bean.setFavoriteColor("Big Red") />

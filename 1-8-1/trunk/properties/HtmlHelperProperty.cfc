@@ -510,6 +510,7 @@ from the parent application.
 		<cfset var code = "" />
 		<cfset var dimensions = "" />
 		<cfset var key = "" />
+		<cfset var assetPath = "" />
 	
 		<cfif NOT arguments.src.startsWith("external:")>
 			<cfset assetPath = computeAssetPath("img", arguments.src) />
