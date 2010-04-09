@@ -364,7 +364,7 @@ via reap() which is run every 3 minutes.
 			<cfset diffTimestamp = diffTimestamp.subtract(getCleanupInterval()) />
 			
 			<!--- Ensure that the lastCleanup is available --->
-			<cfset StructInsert(dataStorage, "_lastCleanup", getCurrentTickCount(), false) />
+			<cfparam name="dataStorage._lastCleanup" default="#getCurrentTickCount()#" />
 			
 			<cfif diffTimestamp.compareTo(dataStorage._lastCleanup) GT 0>
 				<!---
