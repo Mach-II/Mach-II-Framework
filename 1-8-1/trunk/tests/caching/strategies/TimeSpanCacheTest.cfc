@@ -1,7 +1,7 @@
 <!---
 
     Mach-II - A framework for object oriented MVC web applications in CFML
-    Copyright (C) 2003-2009 GreatBizTools, LLC
+    Copyright (C) 2003-2010 GreatBizTools, LLC
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.1
+Updated version: 1.6.0
 
 Notes:
 --->
@@ -49,7 +49,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.cache = "" />
+	<cfset variables.cache_application = "" />
+	<cfset variables.cache_session = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -62,8 +63,14 @@ Notes:
 		<cfset parameters.timespan = "0,1,0,0" />
 		<cfset parameters.scope = "application" />
 
-		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
-		<cfset variables.cache.configure() />
+		<cfset variables.cache_application = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
+		<cfset variables.cache_application.configure() />
+
+		<cfset parameters.timespan = "0,1,0,0" />
+		<cfset parameters.scope = "session" />
+
+		<cfset variables.cache_session = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
+		<cfset variables.cache_session.configure() />
 	</cffunction>
 	
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
@@ -76,81 +83,29 @@ Notes:
 	--->
 	<cffunction name="testPutExistsGet" access="public" returntype="void"
 		hint="Tests put, exist and getting a piece of data from the cache.">
-
-		<cfset var testKey = "productID=1" />
-		
-		<cfset variables.cache.put(testkey, "testing") />
-		
-		<cfset assertTrue(variables.cache.keyExists(testkey)) />
-		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
+		<cfset _testPutExistsGet(variables.cache_application) />
+		<cfset _testPutExistsGet(variables.cache_session) />
 	</cffunction>
 	
 	<cffunction name="testFlush" access="public" returntype="void"
 		hint="Tests flushing the cache.">
-		
-		<cfset var testKey = "productID=1" />
-
-		<cfset variables.cache.put(testkey, "testing") />
-		<cfset assertTrue(variables.cache.keyExists(testkey)) />
-		
-		<cfset variables.cache.flush() />
-		<cfset assertFalse(variables.cache.keyExists(testkey)) />
+		<cfset _testFlush(variables.cache_application) />
+		<cfset _testFlush(variables.cache_session) />
 	</cffunction>
 	
 	<cffunction name="testRemove" access="public" returntype="void"
 		hint="Tests removing cached data by key.">
-		
-		<cfset var testKey = "productID=1" />
-
-		<cfset variables.cache.put(testkey, "testing") />
-		<cfset assertTrue(variables.cache.keyExists(testkey)) />
-		
-		<cfset variables.cache.remove(testkey) />
-		<cfset assertFalse(variables.cache.keyExists(testkey)) />
+		<cfset _testRemove(variables.cache_application) />
+		<cfset _testRemove(variables.cache_session) />
 	</cffunction>
 	
 	<cffunction name="testReap" access="public" returntype="void"
 		hint="Tests removing cached data by key.">
-		
-		<cfset var i = 0 />
-		<cfset var timestamp = "" />
-		<cfset var interval = "" />
-		
-		<!--- Load the cache --->
-		<cfloop from="1" to="2" index="i">
-			<cfset variables.cache.put("productID=#i#", "testing #i#") />
-		</cfloop>
-		
-		<!--- "Fake" 55 minutes passing of time and force a reap  --->
-		<cfset timestamp = CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
-		<cfset interval = CreateObject("java", "java.math.BigInteger").init("3300000") />
-		<cfset timestamp = timestamp.add(interval) />
-		<cfset variables.cache.setCurrentTickCount(timestamp.toString()) />
-		<cfset variables.cache.reap() />
-		<cfset variables.cache.setCurrentTickCount("") />
-		
-		<!--- Check for elements should still be cached --->
-		<cfset assertTrue(variables.cache.keyExists("productID=1"), 
-			"Check for elements should still be cached (productID=1)") />
-		<cfset assertTrue(variables.cache.keyExists("productID=2"), 
-			"Check for elements should still be cached (productID=2)") />
-
-		<!--- "Fake" 2 hours passing of time that exceeds cache element timestamps and force a reap --->
-		<cfset timestamp = CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
-		<cfset interval = CreateObject("java", "java.math.BigInteger").init("72000000")>
-		<cfset timestamp = timestamp.add(interval) />
-		<cfset variables.cache.setCurrentTickCount(timestamp.toString()) />
-		<cfset variables.cache.reap() />
-		<cfset variables.cache.setCurrentTickCount("") />
-		
-		<!--- Check for elements that should have been reaped --->
-		<cfset assertFalse(variables.cache.keyExists("productID=1"), 
-			"Check for elements that should have been reaped (productID=1)") />
-		<cfset assertFalse(variables.cache.keyExists("productID=2"), 
-			"Check for elements that should have been reaped (productID=2)") />
+		<cfset _testReap(variables.cache_application) />
+		<cfset _testReap(variables.cache_session) />
 	</cffunction>
-	
-	<cffunction name="checkNestedExclusiveLock" access="public" returntype="void" output="false"
+
+	<cffunction name="testNestedExclusiveLock" access="public" returntype="void" output="false"
 		hint="Check compatibility on this CFML engine for nested exclusive named locks.">
 	
 		<cfset var tickCount = getTickCount() />
@@ -161,14 +116,14 @@ Notes:
 			timeout="1" 
 			throwontimeout="true">
 				
-			<cfset sleep(250) />
+			<cfset sleep(50) />
 
 				<cflock name="_checkNestedExclusiveLock_#tickCount#" 
 					type="exclusive" 
 					timeout="1" 
 					throwontimeout="true">
 
-					<cfset sleep(250) />
+					<cfset sleep(50) />
 					<cfset result = true />
 				</cflock>	
 		</cflock>
@@ -176,4 +131,87 @@ Notes:
 		<cfset assertTrue(result, "Nested exclusive named locks are not compatible on this engine.") />
 	</cffunction>
 
+	<!---
+	PROTECTED - HELPER TEST METHODS
+	--->
+	<cffunction name="_testPutExistsGet" access="private" returntype="void" output="false"
+		hint="Tests put, exist and getting a piece of data from the cache.">
+		<cfargument name="cache" type="MachII.caching.strategies.TimeSpanCache" required="true" />
+
+		<cfset var testKey = "productID=1" />
+		
+		<cfset arguments.cache.put(testkey, "testing") />
+		
+		<cfset assertTrue(arguments.cache.keyExists(testkey)) />
+		<cfset assertTrue(arguments.cache.get(testkey) eq "testing") />
+	</cffunction>
+	
+	<cffunction name="_testFlush" access="private" returntype="void" output="false"
+		hint="Tests flushing the cache.">
+		<cfargument name="cache" type="MachII.caching.strategies.TimeSpanCache" required="true" />
+		
+		<cfset var testKey = "productID=1" />
+
+		<cfset arguments.cache.put(testkey, "testing") />
+		<cfset assertTrue(arguments.cache.keyExists(testkey)) />
+		
+		<cfset arguments.cache.flush() />
+		<cfset assertFalse(arguments.cache.keyExists(testkey)) />
+	</cffunction>
+	
+	<cffunction name="_testRemove" access="private" returntype="void" output="false"
+		hint="Tests removing cached data by key.">
+		<cfargument name="cache" type="MachII.caching.strategies.TimeSpanCache" required="true" />
+		
+		<cfset var testKey = "productID=1" />
+
+		<cfset arguments.cache.put(testkey, "testing") />
+		<cfset assertTrue(arguments.cache.keyExists(testkey)) />
+		
+		<cfset arguments.cache.remove(testkey) />
+		<cfset assertFalse(arguments.cache.keyExists(testkey)) />
+	</cffunction>
+	
+	<cffunction name="_testReap" access="private" returntype="void" output="false"
+		hint="Tests removing cached data by key.">
+		<cfargument name="cache" type="MachII.caching.strategies.TimeSpanCache" required="true" />
+		
+		<cfset var i = 0 />
+		<cfset var timestamp = "" />
+		<cfset var interval = "" />
+		
+		<!--- Load the cache --->
+		<cfloop from="1" to="2" index="i">
+			<cfset arguments.cache.put("productID=#i#", "testing #i#") />
+		</cfloop>
+		
+		<!--- "Fake" 55 minutes passing of time and force a reap  --->
+		<cfset timestamp = CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
+		<cfset interval = CreateObject("java", "java.math.BigInteger").init("3300000") />
+		<cfset timestamp = timestamp.add(interval) />
+		<cfset arguments.cache.setCurrentTickCount(timestamp.toString()) />
+		<cfset arguments.cache.reap() />
+		<cfset arguments.cache.setCurrentTickCount("") />
+		
+		<!--- Check for elements should still be cached --->
+		<cfset assertTrue(arguments.cache.keyExists("productID=1"), 
+			"Check for elements should still be cached (productID=1)") />
+		<cfset assertTrue(arguments.cache.keyExists("productID=2"), 
+			"Check for elements should still be cached (productID=2)") />
+
+		<!--- "Fake" 2 hours passing of time that exceeds cache element timestamps and force a reap --->
+		<cfset timestamp = CreateObject("java", "java.math.BigInteger").init(getTickCount()) />
+		<cfset interval = CreateObject("java", "java.math.BigInteger").init("72000000")>
+		<cfset timestamp = timestamp.add(interval) />
+		<cfset arguments.cache.setCurrentTickCount(timestamp.toString()) />
+		<cfset arguments.cache.reap() />
+		<cfset arguments.cache.setCurrentTickCount("") />
+		
+		<!--- Check for elements that should have been reaped --->
+		<cfset assertFalse(arguments.cache.keyExists("productID=1"), 
+			"Check for elements that should have been reaped (productID=1)") />
+		<cfset assertFalse(arguments.cache.keyExists("productID=2"), 
+			"Check for elements that should have been reaped (productID=2)") />
+	</cffunction>
+	
 </cfcomponent>
