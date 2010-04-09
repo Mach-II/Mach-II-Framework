@@ -149,5 +149,31 @@ Notes:
 		<cfset assertFalse(variables.cache.keyExists("productID=2"), 
 			"Check for elements that should have been reaped (productID=2)") />
 	</cffunction>
+	
+	<cffunction name="checkNestedExclusiveLock" access="public" returntype="void" output="false"
+		hint="Check compatibility on this CFML engine for nested exclusive named locks.">
+	
+		<cfset var tickCount = getTickCount() />
+		<cfset var result = false />
+		
+		<cflock name="_checkNestedExclusiveLock_#tickCount#" 
+			type="exclusive" 
+			timeout="1" 
+			throwontimeout="true">
+				
+			<cfset sleep(250) />
+
+				<cflock name="_checkNestedExclusiveLock_#tickCount#" 
+					type="exclusive" 
+					timeout="1" 
+					throwontimeout="true">
+
+					<cfset sleep(250) />
+					<cfset result = true />
+				</cflock>	
+		</cflock>
+		
+		<cfset assertTrue(result, "Nested exclusive named locks are not compatible on this engine.") />
+	</cffunction>
 
 </cfcomponent>
