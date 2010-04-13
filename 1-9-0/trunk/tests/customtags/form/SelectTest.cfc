@@ -126,7 +126,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" id="favoriteColor_Red" selected="selected">Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Red</option>', output), "I did not find that 'red' was the selected option.") />
 		
 		<cfsavecontent variable="output">
 			<form:form actionEvent="something" bind="${event.user}">
@@ -138,7 +138,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" id="favoriteColor_Red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 
 		<cfsavecontent variable="output">
 			<form:form actionEvent="something" bind="${event.user}">
@@ -154,7 +154,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" selected="selected" id="favoriteColor_Red">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 	</cffunction>
 
 	<cffunction name="testSelectWithStructs" access="public" returntype="void" output="false"
@@ -184,7 +184,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" id="favoriteColor_red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 	</cffunction>
 
 	<cffunction name="testSelectWithArrays" access="public" returntype="void" output="false"
@@ -214,7 +214,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="big red" id="favoriteColor_big_red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_big_red" value="big red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 		
 		<!--- Test with array of structs --->
 		<cfset colors[1] = StructNew() />
@@ -243,7 +243,7 @@ Notes:
 		
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" id="favoriteColor_red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 	</cffunction>
 	
 	<cffunction name="testSelectWithQueries" access="public" returntype="void" output="false"
@@ -275,7 +275,7 @@ Notes:
 		<cfset debug(colors) />
 		<cfset debug(output) />
 		
-		<cfset assertTrue(FindNoCase('<option value="red" id="favoriteColor_red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
+		<cfset assertTrue(FindNoCase('<option id="favoriteColor_red" value="red" selected="selected">Big Red</option>', output), "I did not find that 'red' was the selected option.") />
 	</cffunction>
 
 </cfcomponent>
