@@ -37,7 +37,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.8.0
-Updated version: 1.8.0
+Updated version: 1.8.1
 
 Notes:
 
@@ -48,6 +48,7 @@ Usage:
 	<parameter name="rewriteConfigFile">
 		<!-- Creates file with Apache Rewrite rules for the routes so you can exclude index.cfm -->
 		<struct>
+			<key name="rewriteFileOn" value="true|false" />
 			<key name="filePath" value=".htaccess" />
 		</struct>
 	</parameter>
