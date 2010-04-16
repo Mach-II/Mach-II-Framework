@@ -54,6 +54,12 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Exception handling type differs on CFML engines for getProperty() etc in bootstrapper
+
+For more informations see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/631
+(2010-04-16 peterfarrell)
+
 * TimeSpanCache does not properly reap when storage scope is session
 
 For more informations see:
