@@ -15,12 +15,12 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
+
     As a special exception, the copyright holders of this library give you
     permission to link this library with independent modules to produce an
     executable, regardless of the license terms of these independent
@@ -34,7 +34,7 @@
     exception statement from your version.
 
 Author: Doug Smith (doug.smith@daveramsey.com)
-$Id: $
+$Id$
 
 Created version: 1.9.0
 Updated version: 1.9.0
@@ -42,18 +42,18 @@ Updated version: 1.9.0
 Notes:
 Class to introspect components and functions, primarily to find annotations that
 are used to declare Mach-II functionality without requiring separate definitions
-in an XML config file. 
+in an XML config file.
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="Introspector"
 	output="false"
 	hint="Class to introspect definitions of components and functions, primarily to find annotations.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -61,52 +61,53 @@ in an XML config file.
 		hint="Constructor for the Introspector.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
-	--->	
+	--->
 	<cffunction name="findFunctionsWithAnnotations" access="public" returntype="Array" output="false"
 		hint="Returns the definition of all of the functions in the input Component instance that have an annotation with the input namespace. An annotation attribute has a namespace and a colon delimiter, like 'rest:uri'. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in reverse order.">
 		<cfargument name="object" type="Component" required="true"
-				hint="The component to introspect for its definition." />
+			hint="The component to introspect for its definition." />
 		<cfargument name="namespace" type="String" required="true"
-				hint="The namespace of the annotations. Searches for '<namespace>:' in function attributes." />
+			hint="The namespace of the annotations. Searches for '<namespace>:' in function attributes." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
-				hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
+			hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
 		<cfargument name="walkTreeStopClass" type="string" required="false" default=""
-				hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
+			hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
 
 		<cfset var searchPattern = arguments.namespace & ":*"/>
-		<cfset var definitions = this.getFunctionDefinitions(object:arguments.object,
+		<cfset var definitions = getFunctionDefinitions(object:arguments.object,
 										searchPattern:searchPattern,
 										walkTree:arguments.walkTree,
-										walkTreeStopClass:arguments.walkTreeStopClass) />		
+										walkTreeStopClass:arguments.walkTreeStopClass) />
+
 		<cfreturn definitions />
 	</cffunction>
-	
+
 	<cffunction name="getFunctionDefinitions" access="public" returntype="Array" output="false"
 		hint="Returns the definition of all of the functions in the input Component instance. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in order. The key of the struct is the fully qualified path name of the component.">
 		<cfargument name="object" type="Component" required="true"
-				hint="The component to introspect for its definition." />
+			hint="The component to introspect for its definition." />
 		<cfargument name="searchPattern" type="String" required="false" default=""
-				hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
+			hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
-				hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
+			hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
 		<cfargument name="walkTreeStopClass" type="string" required="false" default=""
-				hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
+			hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
 
 		<cfset var definitions = ArrayNew(1) />
 		<cfset var metadata = GetMetadata(object) />
 		<cfset var currDefinition = getThisComponentFunctionDefinitions(metadata:metadata, searchPattern:arguments.searchPattern) />
-		
-		<!--- Append the definition of the input object first --->		
+
+		<!--- Append the definition of the input object first --->
 		<cfif NOT StructIsEmpty(currDefinition)>
 			<cfset ArrayAppend(definitions, currDefinition) />
 		</cfif>
-		
+
 		<cfif arguments.walkTree EQ true >
 			<!--- Walk up the object hierarchy and retrieve function definitions from any superclasses --->
-			<cfloop condition="#IsDefined("metadata.extends")#">
+			<cfloop condition="#StructKeyExists(metadata, "extends")#">
 				<cfset metadata = metadata.extends />
 				<cfset currDefinition = getThisComponentFunctionDefinitions(metadata:metadata, searchPattern:arguments.searchPattern) />
 				<cfif NOT StructIsEmpty(currDefinition)>
@@ -118,29 +119,29 @@ in an XML config file.
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<cfreturn definitions />
 	</cffunction>
-	
+
 	<cffunction name="getComponentDefinition" access="public" returntype="Array" output="false"
 		hint="Returns the definition of the input component instance. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in order. (When walkTree is false, only one Struct will be in the Array.)">
 		<cfargument name="object" type="Component" required="true"
-				hint="The component to introspect for its definition." />
+			hint="The component to introspect for its definition." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
-				hint="When true, search for component definitions up the inheritance hierarchy of the input object." />
+			hint="When true, search for component definitions up the inheritance hierarchy of the input object." />
 		<cfargument name="walkTreeStopClass" type="string" required="false" default=""
-				hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
+			hint="When walkTree is true, optionally pass in the full CFC dot path of the superclass to stop the search. If not included, searches until there are no more superclasses." />
 
 		<cfset var definitions = ArrayNew(1) />
 		<cfset var metadata = GetMetadata(object) />
 		<cfset var currDefinition = getThisComponentDefinition(metadata) />
-		
-		<!--- Append the definition of the input object first --->		
+
+		<!--- Append the definition of the input object first --->
 		<cfset ArrayAppend(definitions, currDefinition) />
-		
-		<cfif arguments.walkTree EQ true >
+
+		<cfif arguments.walkTree>
 			<!--- Walk up the object hierarchy and retrieve superclass definitions --->
-			<cfloop condition="#IsDefined("metadata.extends")#">
+			<cfloop condition="#StructKeyExists(metadata, "extends")#">
 				<cfset metadata = metadata.extends />
 				<cfset currDefinition = getThisComponentDefinition(metadata) />
 				<cfset ArrayAppend(definitions, currDefinition) />
@@ -149,73 +150,83 @@ in an XML config file.
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<cfreturn definitions />
 	</cffunction>
-		
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="getThisComponentDefinition" access="private" returntype="Struct" output="false"
 		hint="Returns the definition for the input component metadata. Returned struct just includes data directly related to the component, not the functions or any superclasses.">
 		<cfargument name="metadata" type="Struct" required="true"
-				hint="The component to introspect for its definition." />
+			hint="The component to introspect for its definition." />
 
 		<cfset var definition = StructNew() />
 		<cfset var keys = StructKeyArray(arguments.metadata) />
 		<cfset var currKey = "" />
-		
-		<cfloop array="#keys#" index="currKey">
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(keys)#" index="i">
+			<cfset currKey = keys[i] />
+
 			<!--- We don't need the extends or functions structs in this context --->
 			<cfif NOT ListFindNoCase("extends,functions", currKey)>
-				<cfset StructInsert(definition, currKey, arguments.metadata[currKey]) />
+				<cfset definition[currKey] = arguments.metadata[currKey] />
 			</cfif>
 		</cfloop>
 
 		<!--- Add the fully qualified path name of the superclass to the definition --->
-		<cfif IsDefined("arguments.metadata.extends")>
-			<cfset StructInsert(definition, "superclass", arguments.metadata.extends.fullname) />
+		<cfif StructKeyExists(arguments.metadata, "extends")>
+			<cfset definition.superclass = arguments.metadata.extends.name />
 		</cfif>
 		<!--- Add alias of fullname called "component" to make API consistent --->
-		<cfset StructInsert(definition, "component", arguments.metadata.fullname) />
+		<cfset definition.component = arguments.metadata.name />
+
 		<cfreturn definition />
 	</cffunction>
-	
+
 	<cffunction name="getThisComponentFunctionDefinitions" access="private" returntype="Struct" output="false"
 		hint="Returns the definition of the functions for the input component metadata. The returned struct has the fully qualified path name of the component as the key, and an array of function definition structs as the value.">
 		<cfargument name="metadata" type="Struct" required="true"
-				hint="The component to introspect for its function definitions." />
+			hint="The component to introspect for its function definitions." />
 		<cfargument name="searchPattern" type="String" required="false" default=""
-				hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
+			hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
 
 		<cfset var definition = StructNew() />
 		<cfset var matchedFunctions = "" />
 		<cfset var currFunction = "" />
 		<cfset var currKey = "" />
+		<cfset var i = 0 />
+		<cfset var j = 0 />
 
-		<cfif IsDefined("metadata.fullname") AND IsDefined("metadata.functions")>
+		<cfif StructKeyExists(arguments.metadata, "name") AND StructKeyExists(arguments.metadata, "functions")>
 			<cfif Len(arguments.searchPattern) GT 0>
 				<cfset matchedFunctions = ArrayNew(1) />
-				<cfloop array="#metadata.functions#" index="currFunction">
+
+				<cfloop from="1" to="#ArrayLen(arguments.metadata.functions)#" index="i">
+					<cfset currFunction = arguments.metadata.functions[i] />
+
 					<!--- Loop through each function attribute, and if any match, then add the function to the returned array and break. --->
-					<cfloop array="#StructKeyArray(currFunction)#" index="currKey">
-						<cfif matcher.match(arguments.searchPattern, currKey)>
+					<cfloop collection="#currFunction#" item="currKey">
+						<cfif variables.matcher.match(arguments.searchPattern, currKey)>
 							<cfset ArrayAppend(matchedFunctions, currFunction) />
 							<cfbreak />
 						</cfif>
 					</cfloop>
 				</cfloop>
 			<cfelse>
-				<cfset matchedFunctions = metadata.functions />
+				<cfset matchedFunctions = arguments.metadata.functions />
 			</cfif>
 		</cfif>
-		
+
 		<!--- Only add data if we have functions --->
 		<cfif IsArray(matchedFunctions) AND ArrayLen(matchedFunctions) GT 0>
-			<cfset StructInsert(definition, "component", metadata.fullname) />
-			<cfset StructInsert(definition, "functions", matchedFunctions) />
+			<cfset definition.component = arguments.metadata.name />
+			<cfset definition.functions = matchedFunctions />
 		</cfif>
+
 		<cfreturn definition />
 	</cffunction>
-	
+
 </cfcomponent>
