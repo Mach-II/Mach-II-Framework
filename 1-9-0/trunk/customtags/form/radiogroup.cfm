@@ -16,12 +16,12 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
+
     As a special exception, the copyright holders of this library give you
     permission to link this library with independent modules to produce an
     executable, regardless of the license terms of these independent
@@ -56,17 +56,17 @@ Notes:
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
 	<cfset ensureByName("items") />
-	
+
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfparam name="attributes.checkValue" type="string" 
+		<cfparam name="attributes.checkValue" type="string"
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
-		<cfparam name="attributes.checkValue" type="string" 
+		<cfparam name="attributes.checkValue" type="string"
 			default="" />
 	</cfif>
-	
+
 	<!--- Set optional attributes --->
 	<cfset attributes.name = resolveName() />
 	<cfparam name="attributes.delimiter" type="string"
@@ -90,62 +90,63 @@ Notes:
 	<!--- Create a crazy outbuffer struct so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
-	
-	<cfif not StructKeyExists(attributes, "labels") 
-			and (IsSimpleValue(attributes.items) 
-				or (IsArray(attributes.items) 
+
+	<cfif not StructKeyExists(attributes, "labels")
+			and (IsSimpleValue(attributes.items)
+				or (IsArray(attributes.items)
 					and IsSimpleValue(attributes.items[1])))>
 		<cfset attributes.labels = attributes.items />
 	</cfif>
-	
+
 	<!---
-		Create an option template because calling the options tag repeatedly 
+		Create an option template because calling the options tag repeatedly
 		on a huge number of items is exponentially slow
-	--->	
-	<form:radio attributeCollection="#attributes#" 
+	--->
+	<form:radio attributeCollection="#attributes#"
 		value="${output.value}"
 		id="${output.id}"
-		output="true" 
+		output="true"
 		outputBuffer="#variables.outputBuffer#" />
-		
-	<cfset variables.radioTemplate = variables.outputBuffer.content />
-	<cfset variables.outputBuffer.content = "" />
-	
+
+	<!--- The line break is put here as to not reproduce it on each iteration therefore saving a small amount of clock cycles --->
+	<cfset variables.radioTemplate = variables.outputBuffer.content & Chr(13) />
+	<cfset variables.outputBuffer.content = CreateObject("java", "java.lang.StringBuffer").init() />
+
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
 			<cfset variables.value = ListGetAt(attributes.items, i, attributes.delimiter) />
-			
+
 			<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
-			
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter)), "all") />
-			
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() EQ 1>
 			<cfif IsSimpleValue(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
-					
+
 					<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.radioTemplate />
 					</cfif>
-					
+
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.labels[i]) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i]), "all") />
-					
-					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
@@ -161,22 +162,22 @@ Notes:
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey]), "all") />
-					
-					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelse>
-				<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
-						message="Unsupported Data Type in Array" 
+				<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype"
+						message="Unsupported Data Type in Array"
 						detail="The radio group form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
-			<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
-					message="Unsupported Number of Array Dimensions in Radio Group Tag" 
+			<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype"
+					message="Unsupported Number of Array Dimensions in Radio Group Tag"
 					detail="The radio group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
-		
+
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
 			<cfset variables.value = variables.sortedKeys[i] />
@@ -186,13 +187,13 @@ Notes:
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
-			
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
-			
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
@@ -203,25 +204,25 @@ Notes:
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
-						
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalContent) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
-			
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype" 
-					message="Unsupported datatype for the 'items' attribute." 
+		<cfthrow type="MachII.customtags.form.radiogroup.unsupportedItemsDatatype"
+					message="Unsupported datatype for the 'items' attribute."
 					detail="The radio group form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
 
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />
-		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content, attributes.outputBuffer) />
+		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content.toString(), attributes.outputBuffer) />
 	<cfelse>
-		<cfset thisTag.GeneratedContent = variables.outputBuffer.content />
+		<cfset thisTag.GeneratedContent = variables.outputBuffer.content.toString() />
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

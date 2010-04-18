@@ -16,12 +16,12 @@
 
     You should have received a copy of the GNU General Public Licenses
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
+
     As a special exception, the copyright holders of this library give you
     permission to link this library with independent modules to produce an
     executable, regardless of the license terms of these independent
@@ -59,18 +59,18 @@ Notes:
 
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfparam name="attributes.checkValue" type="string" 
+		<cfparam name="attributes.checkValue" type="string"
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
-		<!--- setting this to type="any" because on OpenBD at least, 
-				if you do pass in a checkValue attribute and it isn't a 
-				string, this blows up with an "attributes.checkValue is 
+		<!--- setting this to type="any" because on OpenBD at least,
+				if you do pass in a checkValue attribute and it isn't a
+				string, this blows up with an "attributes.checkValue is
 				not of type String" error --->
-		<cfparam name="attributes.checkValue" type="any" 
+		<cfparam name="attributes.checkValue" type="any"
 			default="" />
 	</cfif>
-	
+
 	<!--- Set optional attributes --->
 	<cfset attributes.name = resolveName() />
 	<cfparam name="attributes.delimiter" type="string"
@@ -96,77 +96,78 @@ Notes:
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
 	<cfset variables.outputBuffer = StructNew() />
 	<cfset variables.outputBuffer.content = "" />
-	
-	<cfif not StructKeyExists(attributes, "labels") 
-			and (IsSimpleValue(attributes.items) 
-				or (IsArray(attributes.items) 
+
+	<cfif not StructKeyExists(attributes, "labels")
+			and (IsSimpleValue(attributes.items)
+				or (IsArray(attributes.items)
 					and IsSimpleValue(attributes.items[1])))>
 		<cfset attributes.labels = attributes.items />
 	</cfif>
-	
-	<!--- checkValue can be a list, array, or struct, but ultimately 
-			we'll use a list to do the comparisons as we build the output --->	
+
+	<!--- checkValue can be a list, array, or struct, but ultimately
+			we'll use a list to do the comparisons as we build the output --->
 	<cfset variables.checkValues = "" />
-	
+
 	<cfif StructKeyExists(attributes, "checkValue")>
 		<cfset variables.checkValues = translateCheckValue(attributes.checkValue, attributes.checkValueCol, attributes.delimiter) />
 	</cfif>
-	
+
 	<!---
-		Create an option template because calling the options tag repeatedly 
+		Create an option template because calling the options tag repeatedly
 		on a huge number of items is exponentially slow
-	--->	
-	<form:checkbox attributeCollection="#attributes#" 
+	--->
+	<form:checkbox attributeCollection="#attributes#"
 		value="${output.value}"
 		id="${output.id}"
-		output="true" 
+		output="true"
 		outputBuffer="#variables.outputBuffer#" />
-		
-	<cfset variables.checkboxTemplate = variables.outputBuffer.content />
+
+	<!--- The line break is put here as to not reproduce it on each iteration therefore saving a small amount of clock cycles --->
+	<cfset variables.checkboxTemplate = variables.outputBuffer.content & Chr(13) />
 	<cfset variables.hiddenCheckboxTemplate = REReplace(variables.checkboxTemplate, "<input.*?/>", "", "one") />
 	<cfset variables.checkboxTemplate = ReplaceNoCase(variables.checkboxTemplate, variables.hiddenCheckboxTemplate, "", "one") />
-	<cfset variables.outputBuffer.content = "" />
-	
+	<cfset variables.outputBuffer.content = CreateObject("java", "java.lang.StringBuffer").init() />
+
 	<cfif IsSimpleValue(attributes.items)>
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
 			<cfset variables.value = ListGetAt(attributes.items, i, attributes.delimiter) />
-			
+
 			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />
 			</cfif>
-			
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter)) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter)), "all") />
-			
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() eq 1>
 			<cfif IsSimpleValue(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
-			
+
 					<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.checkboxTemplate />
 					</cfif>
-					
+
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.labels[i]) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i]), "all") />
-					
-					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i][attributes.valueKey] />
-			
+
 					<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
@@ -177,26 +178,26 @@ Notes:
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey]), "all") />
-			
-					<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelse>
-				<cfthrow type="MachII.customtags.form.checkboxgroup" 
-					message="Unsupported Data Type in Array" 
+				<cfthrow type="MachII.customtags.form.checkboxgroup"
+					message="Unsupported Data Type in Array"
 					detail="The checkbox group form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
-			<cfthrow type="MachII.customtags.form.checkboxgroup" 
-				message="Unsupported Number of Array Dimensions in Checkbox Group Tag" 
+			<cfthrow type="MachII.customtags.form.checkboxgroup"
+				message="Unsupported Number of Array Dimensions in Checkbox Group Tag"
 				detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
-		
+
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
 			<cfset variables.value = variables.sortedKeys[i] />
-	
+
 			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
@@ -207,13 +208,13 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
-						
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
 		<cfloop query="attributes.items">
 			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
-	
+
 			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
@@ -224,23 +225,23 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow]), "all") />
-			
-			<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.finalOutput & Chr(13) />
+
+			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.checkboxgroup.unsupportedItemsDatatype" 
-			message="Unsupported datatype for the 'items' attribute." 
+		<cfthrow type="MachII.customtags.form.checkboxgroup.unsupportedItemsDatatype"
+			message="Unsupported datatype for the 'items' attribute."
 			detail="The checkbox group form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
-	
+
 	<!--- Add in the hidden element --->
-	<cfset variables.outputBuffer.content = variables.outputBuffer.content & variables.hiddenCheckboxTemplate />
+	<cfset variables.outputBuffer.content.append(variables.hiddenCheckboxTemplate) />
 
 	<cfif attributes.output>
 		<cfset thisTag.GeneratedContent = "" />
-		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content, attributes.outputBuffer) />
+		<cfset appendGeneratedContentToBuffer(variables.outputBuffer.content.toString(), attributes.outputBuffer) />
 	<cfelse>
-		<cfset thisTag.GeneratedContent = variables.outputBuffer.content />
+		<cfset thisTag.GeneratedContent = variables.outputBuffer.content.toString() />
 	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
