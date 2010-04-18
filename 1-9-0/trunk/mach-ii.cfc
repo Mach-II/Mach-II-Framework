@@ -266,6 +266,30 @@ framework to be loaded as they interact with framework components:
 		</cftry>
 	</cffunction>
 
+	<cffunction name="reloadConfig" access="public" returntype="void" output="false"
+		hint="Dynamically reloads the entire appliation. Not available until loadFramework has been called.">
+
+		<cfset var appKey = getAppKey() />
+
+		<cftry>
+			<cfset application[appKey].loading = true />
+			<cfset application[appKey].appLoader.reloadConfig() />
+			<cfset application[appKey].loading = false />
+
+			<cfcatch type="any">
+				<cfset application[appKey].loading = false />
+
+				<cfif NOT IsDefined("application.#appKey#.appLoader")>
+					<cfthrow type="MachII.framework.AppLoderNotAvailable"
+						message="Calls to reloadConfig() in your Application.cfc cannot be made until after loadFramework has completed processing."
+						detail="This indicates a premature call to this method in your Application.cfc before the framework has completely loaded. Please check your code." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
+	</cffunction>
+
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Returns if the config should be dynamically reloaded. Not available until loadFramework has been called.">
 		<cftry>
