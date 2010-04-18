@@ -15,12 +15,12 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
+
     As a special exception, the copyright holders of this library give you
     permission to link this library with independent modules to produce an
     executable, regardless of the license terms of these independent
@@ -47,13 +47,13 @@ Notes:
 
 N.B.
 Do not implement the handleRequest() in onRequest() application event if you
-want to utilitze any CFCs that implement AJAX requests, web services, Flash 
+want to utilitze any CFCs that implement AJAX requests, web services, Flash
 Remoting or event gateway requests.
 
-ColdFusion MX will not execute these types of requests if you implement 
+ColdFusion MX will not execute these types of requests if you implement
 the handleRequest() method in the onRequest() application event.
 
-Certain methods are not available for use until after loadFramework() has 
+Certain methods are not available for use until after loadFramework() has
 completed execution.  This is because the following method require the
 framework to be loaded as they interact with framework components:
 
@@ -67,7 +67,7 @@ framework to be loaded as they interact with framework components:
 	displayname="mach-ii"
 	output="false"
 	hint="Bootstrapper for Application.cfc integration">
-	
+
 	<!---
 	PROPERTIES - DEFAULTS
 	--->
@@ -83,7 +83,7 @@ framework to be loaded as they interact with framework components:
 	<!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 	<cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
 	<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_8_0.dtd. --->
-	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_1.dtd')#" />	
+	<cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_8_1.dtd')#" />
 	<!--- Set the request timeout for loading of the framework. Defaults to 240 --->
 	<cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
 
@@ -94,16 +94,16 @@ framework to be loaded as they interact with framework components:
 		hint="Handles the application start event. Override to provide customized functionality.">
 		<!--- Load up the framework --->
 		<cfset LoadFramework() />
-		
+
 		<cfreturn TRUE />
 	</cffunction>
-	
+
 	<cffunction name="onApplicationEnd" access="public" returntype="void" output="false"
 		hint="Handles the application start event. Override to provide customized functionality.">
 		<cfargument name="applicationScope" type="struct" required="true">
 		<cfset getAppManager().onApplicationEnd() />
 	</cffunction>
-	
+
 	<cffunction name="onRequestStart" access="public" returntype="void" output="true"
 		hint="Handles Mach-II requests. Output must be set to true. Override to provide custom functionality.">
 		<cfargument name="targetPage" type="string" required="true" />
@@ -113,17 +113,17 @@ framework to be loaded as they interact with framework components:
 			<cfset handleRequest() />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
 		hint="Handles on session start event if sessions are enabled for this application.">
 		<cfset getAppManager().onSessionStart() />
 	</cffunction>
-	
+
 	<cffunction name="onSessionEnd" access="public" returntype="void" output="false"
 		hint="Handles on session end event if sessions are enabled for this application.">
 		<cfargument name="sessionScope" type="struct" required="true" />
 		<cfargument name="applicationScope" type="struct" required="true" />
-		<!--- Access to the application and session scopes are passed in --->	
+		<!--- Access to the application and session scopes are passed in --->
 		<cfset arguments.applicationScope[getAppKey()].appLoader.getAppManager().onSessionEnd(arguments.sessionScope) />
 	</cffunction>
 
@@ -131,13 +131,13 @@ framework to be loaded as they interact with framework components:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="loadFramework" access="public" returntype="void" output="false"
-		hint="Loads the framework. Only call in onApplicationStart() event.">
-		
+		hint="Loads the framework. Only call in onApplicationStart() event. If you need to reload">
+
 		<cfset var appKey = getAppKey() />
-		
+
 		<!--- Set the timeout --->
 		<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
-		
+
 		<!--- Create the AppLoader. No locking requires if called during the onApplicationStart() event. --->
 		<cfset application[appKey] = StructNew() />
 		<cfset application[appKey].appLoader = CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, AppKey, MACHII_VALIDATE_XML) />
@@ -148,7 +148,7 @@ framework to be loaded as they interact with framework components:
 		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
 
 		<cfset var appKey = getAppKey() />
-		
+
 		<!---
 		Default is request.MachIIConfigMode if it is defined temporarily override the config mode
 		DO NOT USE THIS LEGACY CODE
@@ -157,7 +157,7 @@ framework to be loaded as they interact with framework components:
 		<cfif StructKeyExists(request, "MachIIConfigMode")>
 			<cfset variables.MACHII_CONFIG_MODE = request.MachIIConfigMode />
 		</cfif>
-		
+
 		<!--- Check if AppLoader is available. Double check required for proper multi-threading. --->
 		<cfif NOT IsDefined("application.#appKey#.appLoader") OR NOT IsObject(application[appKey].appLoader)>
 			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
@@ -188,7 +188,7 @@ framework to be loaded as they interact with framework components:
 		</cfif>
 
 		<!---
-			Handle the request and suppress whitespace. Enableoutputonly may be false 
+			Handle the request and suppress whitespace. Enableoutputonly may be false
 			so turn it back on for trailing whitespace. All these tags must be on the
 			same line or additional whitespace may be introduced.
 		--->
@@ -215,7 +215,7 @@ framework to be loaded as they interact with framework components:
 		<cfargument name="propertyName" type="string" required="true"/>
 		<cfreturn getAppManager().getPropertyManager().isPropertyDefined(arguments.propertyName) />
 	</cffunction>
-	
+
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Get the Mach-II AppManager. Not available until loadFramework has been called.">
 		<cftry>
@@ -231,21 +231,23 @@ framework to be loaded as they interact with framework components:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false"
 		hint="Returns if the config should be dynamically reloaded. Not available until loadFramework has been called.">
 		<cftry>
 			<cfreturn application[getAppKey()].appLoader.shouldReloadConfig() />
 			<cfcatch type="any">
-				<cfdump var="#cfcatch#">
-				<cfabort>
-				<cfthrow type="MachII.framework.AppLoderNotAvailable"
-					message="Calls to shouldReloadConfig() in your Application.cfc cannot be made until after loadFramework has completed processing."
-					detail="This indicates a premature call to this method in your Application.cfc before the framework has completely loaded. Please check your code." />
+				<cfif NOT IsDefined("application.#getAppKey()#.appLoader")>
+					<cfthrow type="MachII.framework.AppLoderNotAvailable"
+						message="Calls to shouldReloadConfig() in your Application.cfc cannot be made until after loadFramework has completed processing."
+						detail="This indicates a premature call to this method in your Application.cfc before the framework has completely loaded. Please check your code." />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<cffunction name="getAppKey" access="public" returntype="string" output="false"
 		hint="Returns a clean AppKey.">
 		<cfreturn REReplaceNoCase(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
