@@ -235,6 +235,9 @@ framework to be loaded as they interact with framework components:
 	<cffunction name="reloadConfig" access="public" returntype="void" output="false"
 		hint="Dynamically reloads the entire appliation. Not available until loadFramework has been called.">
 		<cftry>
+			<!--- Set the timeout --->
+			<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
+
 			<cfset application[getAppKey()].appLoader.reloadConfig() />
 			<cfcatch type="any">
 				<cfif NOT IsDefined("application.#getAppKey()#.appLoader")>

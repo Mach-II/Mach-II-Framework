@@ -272,6 +272,9 @@ framework to be loaded as they interact with framework components:
 		<cfset var appKey = getAppKey() />
 
 		<cftry>
+			<!--- Set the timeout --->
+			<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
+
 			<cfset application[appKey].loading = true />
 			<cfset application[appKey].appLoader.reloadConfig() />
 			<cfset application[appKey].loading = false />
