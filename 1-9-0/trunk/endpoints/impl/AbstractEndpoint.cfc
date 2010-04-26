@@ -51,10 +51,9 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.endpointManager = "" />
-	<cfset variables.instance = StructNew() />
-	<cfset variables.instance.endpointConfig = StructNew() />
-	<cfset variables.instance.endpointConfig.parameterPrecedence = "form" />
 	<cfset variables.parameters = StructNew() />
+	<cfset variables.parameterPrecedence = "form" />
+	<cfset variables.targetPage = "" />
 	<cfset variables.log = "" />
 	
 	<!---

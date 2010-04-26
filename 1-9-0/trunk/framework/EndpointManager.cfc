@@ -50,6 +50,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.endpoints = StructNew() />
+	<cfset variables.endpointTargetPageMap = StructNew() />
 
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
 	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
@@ -85,10 +86,29 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
+	<cffunction name="buildEndpointTargetPageMap" access="private" returntype="void" output="false"
+		hint="Builds a map of target pages and endpoint names.">
+		
+		<cfset var endpointTargetPageMap = StructNew() />
+		<cfset var endpoints = getEndpoints() />
+		<cfset var key = "" />
+		<cfset var targetPage = "" />
+		
+		<cfloop collection="#endpoints#" item="key">
+			<cfset targetPage = endpoints[key].getParameter("targetPage")>
+
+			<cfif Len(targetPage)>
+				<cfset endpointTargetPageMap[targetPage] = key />
+			</cfif>
+		</cfloop>
+		
+		<cfset setEndpointTargetPageMap(endpointTargetPageMap) />
+	</cffunction>
+	
 	<!---
 	PUBLIC FUNCTIONS - REQUEST HANDLING
 	--->
-	<cffunction name="handleRequest" access="public" returntype="void" output="false"
+	<cffunction name="handleEndpointRequest" access="public" returntype="void" output="true"
 		hint="Handles an endpoint request.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint for this request." />
@@ -103,12 +123,13 @@ Notes:
 			
 					
 			<cfcatch type="MachII.endpoints.EndpointNotDefined">
-				<!--- Debating which statuscode to send? --->
+				<!--- No endpoint so send a 404 --->
 				<cfheader statuscode="404" statustext="Not Found" />
-				<cfheader name="rest.error" value="Enpoint named '#arguments.endpointName#' not available." />
+				<cfheader name="machii.endpoint.error" value="Enpoint named '#arguments.endpointName#' not available." />
 			</cfcatch>
 			<cfcatch type="any">
-				
+				<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
+				<cfheader statuscode="500" statustext="Error" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -116,6 +137,12 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - GENERAL
 	--->
+	<cffunction name="isTargetPageEndpoint" access="public" returntype="boolean" output="false"
+		hint="Checks if the target page should be handled by the endpoint.">
+		<cfargument name="targetPage" type="string" required="true" />
+		<cfreturn StructKeyExists(variables.endpointTargetPageMap, arguments.targetPage) />
+	</cffunction>
+	
 	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.impl.AbstractEndpoint" output="false"
 		hint="Gets a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
@@ -223,5 +250,12 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setEndpointTargetPageMap" access="private" returntype="void" output="false">
+		<cfargument name="endpointTargetPageMap" type="struct" required="true" />
+		<cfset variables.endpointTargetPageMap = arguments.endpointTargetPageMap />
+	</cffunction>
+	<cffunction name="getEndpointTargetPageMap" access="public" returntype="struct" output="false">
+		<cfreturn variables.endpointTargetPageMap />
+	</cffunction>
 	
 </cfcomponent>

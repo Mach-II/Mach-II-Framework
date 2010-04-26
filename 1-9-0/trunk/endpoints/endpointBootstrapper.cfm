@@ -41,4 +41,7 @@ Created version: 1.9.0
 Notes:
 
 --->
+<cfparam name="MACHII_ENDPOINT_NAME" type="string"
+	default="#ListFirst(GetFilefromPath(getCurrentTemplatePath()), ".")#" />
 
+<cfset request.endpoint = MACHII_ENDPOINT_NAME />
