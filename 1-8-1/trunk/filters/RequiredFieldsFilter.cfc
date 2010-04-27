@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -41,15 +48,15 @@ Updated version: 1.1.0
 
 RequiredFieldsFilter
 	This event-filter tests an event for required fields specified.
-	If the required fields are not present (or are blank) then event 
+	If the required fields are not present (or are blank) then event
 	processing is aborted and a specified event is announced.
-	
-	If the required fields aren't defined then 'message' and 'missingFields' 
+
+	If the required fields aren't defined then 'message' and 'missingFields'
 	are set in the event.
-	
+
 Configuration Usage:
 	No configuration parameters.
-	
+
 	<event-filters>
 		<event-filter name="RequiredFields" type="MachII.filters.RequiredFieldsFilter" />
 	</event-filters>
@@ -57,7 +64,7 @@ Configuration Usage:
 Event-Handler Usage:
 	- "requiredFields" - a comma delimited list of fields required
 	- "invalidEvent" - the event to announce if all required fields are not in the event
-	
+
 	<event-handler name="someImportantEvent" access="public">
 		<filter name="RequiredFields">
 			<parameter name="requiredFields" value="list,of,important,args" />
@@ -66,18 +73,18 @@ Event-Handler Usage:
 	</event-handler>
 
 --->
-<cfcomponent 
-	displayname="RequiredFieldsFilter" 
+<cfcomponent
+	displayname="RequiredFieldsFilter"
 	extends="MachII.framework.EventFilter"
 	output="false"
 	hint="An EventFilter for testing that an event's args contain a list of required fields.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset this.REQUIRED_FIELDS_PARAM = "requiredFields" />
 	<cfset this.INVALID_EVENT_PARAM = "invalidEvent" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -94,19 +101,19 @@ Event-Handler Usage:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />
-		
+
 		<cfset var isContinue = true />
 		<cfset var missingFields = '' />
 		<cfset var requiredFields = '' />
 		<cfset var invalidEvent = '' />
 		<cfset var field = 0 />
 		<cfset var newEventArgs = 0 />
-		
-		<cfif StructKeyExists(arguments.paramArgs,this.REQUIRED_FIELDS_PARAM) 
+
+		<cfif StructKeyExists(arguments.paramArgs,this.REQUIRED_FIELDS_PARAM)
 				AND StructKeyExists(arguments.paramArgs,this.INVALID_EVENT_PARAM)>
 			<cfset requiredFields = arguments.paramArgs[this.REQUIRED_FIELDS_PARAM] />
 			<cfset invalidEvent = arguments.paramArgs[this.INVALID_EVENT_PARAM] />
-			
+
 			<cfloop index="field" list="#requiredFields#" delimiters=",">
 				<cfif (NOT event.isArgDefined(field)) OR (event.getArg(field,'') EQ '')>
 					<cfset missingFields = ListAppend(missingFields, field, ',') />
@@ -116,7 +123,7 @@ Event-Handler Usage:
 		<cfelse>
 			<cfset throwUsageException() />
 		</cfif>
-		
+
 		<cfif isContinue>
 			<cfreturn true />
 		<cfelse>
@@ -124,11 +131,11 @@ Event-Handler Usage:
 			<cfset newEventArgs['message'] = "Please provide all required fields. Missing fields: " & ReplaceNoCase(missingFields,',',', ','all') & "." />
 			<cfset newEventArgs['missingFields'] = missingFields />
 			<cfset arguments.eventContext.announceEvent(invalidEvent, newEventArgs) />
-			
+
 			<cfreturn false />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -137,5 +144,5 @@ Event-Handler Usage:
 		<cfset var throwMsg = "RequiredFieldsFilter requires the following usage parameters: " & this.REQUIRED_FIELDS_PARAM & ", " & this.INVALID_EVENT_PARAM & "." />
 		<cfthrow message="#throwMsg#" />
 	</cffunction>
-	
+
 </cfcomponent>

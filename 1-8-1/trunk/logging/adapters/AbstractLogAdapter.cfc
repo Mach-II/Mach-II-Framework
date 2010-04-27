@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -45,16 +52,16 @@ Notes:
 	displayname="AbstractLogAdapter"
 	output="false"
 	hint="A logging adapter. This is abstract and must be extend by a concrete adapter implementation.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.instance = StructNew() />
 	<cfset variables.instance.loggingEnabled = true />
-	
+
 	<cfset variables.filter = "" />
 	<cfset variables.parameters = StructNew() />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -62,22 +69,22 @@ Notes:
 		hint="Initializes the logging adapter. Do not override.">
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
-		
+
 		<cfset setParameters(arguments.parameters) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the adapter. Override to provide custom functionality.">
 		<!--- Does nothing. Override to provide custom functionality. --->
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -88,7 +95,7 @@ Notes:
 		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="error" access="public" returntype="void" output="false"
 		hint="Logs a message with error log level.">
 		<cfargument name="channel" type="string" required="true" />
@@ -96,7 +103,7 @@ Notes:
 		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="fatal" access="public" returntype="void" output="false"
 		hint="Logs a message with fatal log level.">
 		<cfargument name="channel" type="string" required="true" />
@@ -120,7 +127,7 @@ Notes:
 		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="warn" access="public" returntype="void" output="false"
 		hint="Logs a message with warn log level.">
 		<cfargument name="channel" type="string" required="true" />
@@ -128,46 +135,46 @@ Notes:
 		<cfargument name="additionalInformation" type="any" required="false" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isDebugEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if debug level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isErrorEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if error level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isFatalEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if fatal level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isInfoEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if info level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isTraceEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if trace level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="isWarnEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if warn level logging is enabled.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets the configuration data for this logging adapter.">
-		<!--- TODO: Consider pulling in filter configuration data --->		
+		<!--- TODO: Consider pulling in filter configuration data --->
 		<cfreturn variables.instance />
 	</cffunction>
-	
+
 	<cffunction name="isFilterDefined" access="public" returntype="boolean" output="false"
 		hint="Checks if a filter has been defined for this adapter.">
 		<cfreturn IsObject(variables.filter) />
@@ -178,7 +185,7 @@ Notes:
 		<cfargument name="level" type="numeric" required="true" />
 
 		<cfset var loggingLevelName = "" />
-		
+
 		<cfif arguments.level EQ 1>
 			<cfset loggingLevelName = "trace" />
 		<cfelseif  arguments.level EQ 2>
@@ -199,17 +206,17 @@ Notes:
 			<cfthrow message="The argument named 'level' accepts a number in the range of 1 through 7."
 				detail="Passed value: '#arguments.level#'" />
 		</cfif>
-		
+
 		<cfreturn loggingLevelName />
 	</cffunction>
-	
+
 	<cffunction name="translateNameToLevel" access="public" returntype="string" output="false"
 		hint="Translate a human readable string to a numerical logging level.">
 		<cfargument name="name" type="string" required="true"
 			hint="The leave" />
-		
+
 		<cfset var level = "" />
-		
+
 		<cfif arguments.name EQ "trace">
 			<cfset level = 1 />
 		<cfelseif  arguments.name EQ "debug">
@@ -233,7 +240,7 @@ Notes:
 
 		<cfreturn level />
 	</cffunction>
-	
+
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -260,7 +267,7 @@ Notes:
 			hint="The parameter name." />
 		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -274,7 +281,7 @@ Notes:
 		hint="Returns the logging level by name. Required for Dashboard integration.">
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
 		hint="Sets the logging enabled.">
 		<cfargument name="loggingEnabled" type="boolean" required="true" />
@@ -284,7 +291,7 @@ Notes:
 		hint="Gets the logging enabled.">
 		<cfreturn variables.instance.loggingEnabled />
 	</cffunction>
-	
+
 	<cffunction name="setFilter" access="public" returntype="void" output="false"
 		hint="Sets the filter.">
 		<cfargument name="filter" type="MachII.logging.filters.AbstractFilter" required="true" />
@@ -294,13 +301,13 @@ Notes:
 		hint="Gets the filter.">
 		<cfreturn variables.filter />
 	</cffunction>
-	
+
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
-		
+
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, arguments.parameters[key]) />
 		</cfloop>
@@ -309,5 +316,5 @@ Notes:
 		hint="Gets the full set of configuration parameters for the component.">
 		<cfreturn variables.parameters />
 	</cffunction>
-	
+
 </cfcomponent>

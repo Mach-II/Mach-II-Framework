@@ -16,23 +16,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -45,7 +52,7 @@ Notes:
 	name		= AUTOMATIC|[string]
 	value		= AUTOMATIC|[string]
 	type		= hidden
-- OPTIONAL ATTRIBUTES 
+- OPTIONAL ATTRIBUTES
 	none
 - STANDARD TAG ATTRIBUTES
 - EVENT ATTRIBUTES
@@ -53,27 +60,27 @@ Notes:
 <cfif thisTag.executionMode IS "start">
 
 	<!--- Setup the tag --->
-	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />		
+	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("input", true) />
-	
+
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensurePathOrName() />
-	
+
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfparam name="attributes.value" type="string" 
+		<cfparam name="attributes.value" type="string"
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "" />
 	</cfif>
-	
+
 	<!--- Set defaults --->
 	<cfset attributes.name = resolveName() />
-	<cfparam name="attributes.value" type="string" 
+	<cfparam name="attributes.value" type="string"
 		default="" />
-	<cfparam name="attributes.id" type="string" 
+	<cfparam name="attributes.id" type="string"
 		default="#attributes.name#" />
-	
+
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "hidden") />
 	<cfset setAttribute("name") />
@@ -81,7 +88,7 @@ Notes:
 
 	<!--- Set optional attributes --->
 	<!--- none --->
-	
+
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />

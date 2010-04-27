@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -58,7 +65,7 @@ Usage:
 	</parameters>
 </plugin>
 
-The {traceMode} value must be either "display", "file", "both" or "none" or a reference 
+The {traceMode} value must be either "display", "file", "both" or "none" or a reference
 to a variable in the Mach-II properties.
 
 If the parameter is not defined, the trace mode value will default to "display".
@@ -67,7 +74,7 @@ If the parameter is not defined, the trace mode value will default to "display".
 - "Both" mode will display the trace information on screen and logs it to a file.
 - "None" will not perform a trace. No trace information will be gathered.
 
-The {displayComemented} value is boolean or a reference to a variable in the 
+The {displayComemented} value is boolean or a reference to a variable in the
 Mach-II properties.
 
 If the parameter is not defined, the display commented value will default to FALSE.
@@ -79,7 +86,7 @@ Use the view source option in your browser to see the trace information.
 The {highlightLongTimings} value must be numeric. If the parameter is not
 defined, the highlight long timings will default "250" ms.
 - Numeric integers above 0 will highlight any timings that exceed the
-highlight long timings threshold. 
+highlight long timings threshold.
 - "0" will disable the highlighting of long running trace timings.
 
 The {fileName} value must be a name without a file extension.  If the
@@ -97,16 +104,16 @@ Log files are created using <cflog> in the standard ColdFusion log directory
 (WEB-INF/cfusion/logs/).  For more details, see Macromedia's livedocs about
 <cflog>'s logging mechanism.
 
-The plugin uses the request.tracePluginScope as a data bus to store per-request 
+The plugin uses the request.tracePluginScope as a data bus to store per-request
 trace information.
 
-The display mode outputs a div with an id of "MachIITraceDisplay".  You can 
-easily reformat the appearence of the display output with CSS or extend this 
+The display mode outputs a div with an id of "MachIITraceDisplay".  You can
+easily reformat the appearence of the display output with CSS or extend this
 plugin and override the displayTraceInfo() method with your customized display.
 
 This version is only compatible with Mach-II 1.1.1 or higher.
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="tracePlugin"
 	extends="MachII.framework.Plugin"
 	output="false"
@@ -130,7 +137,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		hint="DEPRECATED. Configures the plugin.">
 
 		<!--- Check and set the plugin parameters --->
-		<cfif isParameterDefined("traceMode")>			
+		<cfif isParameterDefined("traceMode")>
 			<!--- Check and set --->
 			<cfif NOT ListFindNoCase("display,file,both,none", getParameter("traceMode"))>
 				<cfset throwUsageException("The TracePlugin {traceMode} parameter must be display, file, both or none.", "traceMode=#getParameter("traceMode")#") />
@@ -138,7 +145,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				<cfset setTraceMode(getParameter("traceMode")) />
 			</cfif>
 		</cfif>
-		<cfif isParameterDefined("displayCommented")>		
+		<cfif isParameterDefined("displayCommented")>
 			<cfif NOT IsBoolean(getParameter("displayCommented"))>
 				<cfset throwUsageException("The TracePlugin {displayCommented} parameter must be a boolean value.", "displayCommented=#getParameter("displayCommented")#") />
 			<cfelse>
@@ -181,21 +188,21 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="DEPRECATED. Starts the trace if mode is not none.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getNextEvent() />
 		<cfset var log = getLog() />
-		
+
 		<cfif log.isWarnEnabled()>
 			<cfset log.warn("DEPRECATED: TracePlugin is deprecated. Please use the new logging functionality.") />
 		</cfif>
-		
+
 		<!--- Set the if we should trace this request or temporarily suppress it --->
 		<cfif NOT getTraceMode() IS "none" AND ((getDebugModeOnly() AND isDebugMode()) OR NOT getDebugModeOnly())>
 			<cfset setTraceRequest(TRUE) />
 		<cfelse>
 			<cfset setTraceRequest(FALSE) />
 		</cfif>
-		
+
 		<!--- Perform trace for preProcess --->
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset setIsInitialTrace(TRUE) />
@@ -208,53 +215,53 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	<cffunction name="preEvent" access="public" returntype="void" output="false"
 		hint="DEPRECATED. Runs the trace for the preEvent plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
-		
+
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("preEvent", arguments.eventContext) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="postEvent" access="public" returntype="void" output="false"
 		hint="DEPRECATED. Runs the trace for the postEvent plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
-		
+
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postEvent", arguments.eventContext) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="preView" access="public" returntype="void" output="false"
 		hint="DEPRECATED. Runs the trace for the preView plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
-		
+
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("preView", arguments.eventContext) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="postView" access="public" returntype="void" output="false"
 		hint="DEPRECATED. Runs the trace for the postView plugin point.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
-		
+
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postView", arguments.eventContext) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="postProcess" access="public" returntype="void" output="true"
 		hint="DEPRECATED. Ends the trace if the trace mode is not none and displays trace on screen if applicable.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var event = arguments.eventContext.getCurrentEvent() />
-		
+
 		<cfif shouldTrace(event.isArgDefined(getSuppressTraceArg()))>
 			<cfset trace("postProcess", arguments.eventContext) />
 			<!--- Compute total since preProcess --->
@@ -271,7 +278,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
 		<cfset var methodTraceInfo = structNew() />
-		
+
 		<cfset var event = "" />
 
 		<!--- If no isInitialTrace exists, do not do trace as an exception occur before the preProcess point --->
@@ -289,7 +296,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 
 	<!---
 	PROTECTED FUNCTIONS
-	--->	
+	--->
 	<cffunction name="trace" access="private" returntype="void" output="false"
 		hint="DEPRECATED. Runs a trace for the passed point and eventContext.">
 		<cfargument name="point" type="string" required="true" />
@@ -312,7 +319,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfreturn "Core Process" />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="computeModuleName" access="private" returntype="string" output="false"
 		hint="DEPRECATED. Computes the module name for this trace.">
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
@@ -342,7 +349,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 
 		<cfreturn timing />
 	</cffunction>
-	
+
 	<cffunction name="appendTrace" access="private" returntype="void" output="false"
 		hint="DEPRECATED. Appends a trace to the trace information array or to the log file.">
 		<cfargument name="event" type="string" required="true"
@@ -519,12 +526,12 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		<!--- Replace leading 4 tabs in the trace information with nothing so it appears correctly in the HTML --->
 		<cfreturn replace(sc, chr(9) & chr(9) & chr(9) & chr(9), "", "ALL") />
 	</cffunction>
-	
+
 	<cffunction name="getMachIIVersion" access="private" returntype="string" output="false"
 		hint="DEPRECATED. Gets a nice version number istead of just numbers.">
 		<cfset var version = getPropertyManager().getVersion() />
 		<cfset var release = "" />
-		
+
 		<cfswitch expression="#ListLast(version, ".")#">
 			<cfcase value="0">
 				<cfset release = "Bleeding Edge Release - Unknown build" />
@@ -560,10 +567,10 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 				<cfset release = "Bleeding Edge Release - Build " & ListLast(version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
-		
+
 		<cfreturn Left(version, Len(version) - Len(ListLast(version, ".")) - 1) & " " & release />
 	</cffunction>
-	
+
 	<cffunction name="shouldTrace" access="private" returntype="boolean" output="false"
 		hint="DEPRECATED. Checks if we should trace">
 		<cfargument name="suppressTrace" type="boolean" required="true" />
@@ -572,7 +579,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 			<cfsetting showdebugoutput="false" />
 			<cfset setTraceRequest(FALSE) />
 		</cfif>
-		
+
 		<cfreturn getTraceRequest() />
 	</cffunction>
 
@@ -594,7 +601,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 
 	<!---
 	ACCESSORS
-	--->	
+	--->
 	<cffunction name="setTraceMode" access="private" returntype="void" output="false">
 		<cfargument name="traceMode" type="string" required="true" />
 		<cfset variables.instance.traceMode = arguments.traceMode />
@@ -602,7 +609,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	<cffunction name="getTraceMode" access="private" returntype="string" output="false">
 		<cfreturn variables.instance.traceMode />
 	</cffunction>
-	
+
 	<cffunction name="setDebugModeOnly" access="private" returntype="void" output="false">
 		<cfargument name="debugModeOnly" type="string" required="true" />
 		<cfset variables.instance.debugModeOnly = arguments.debugModeOnly />
@@ -634,7 +641,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	<cffunction name="getFileName" access="private" returntype="string" output="false">
 		<cfreturn variables.instance.fileName />
 	</cffunction>
-	
+
 	<cffunction name="setSuppressTraceArg" access="private" returntype="void" output="false">
 		<cfargument name="suppressTraceArg" type="string" required="true" />
 		<cfset variables.instance.suppressTraceArg = arguments.suppressTraceArg />
@@ -650,7 +657,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 	</cffunction>
 	<cffunction name="getTraceRequest" access="private" returntype="boolean" output="false"
 		hint="DEPRECATED. Gets the trace request from the request._MachIITracePlugin.">
-		
+
 		<cftry>
 			<cfreturn request._MachIITracePlugin.traceRequest />
 			<cfcatch type="expression">
@@ -693,7 +700,7 @@ This version is only compatible with Mach-II 1.1.1 or higher.
 		hint="Sets the tick start in the request._MachIITracePlugin.">
 		<cfargument name="tickStart" type="numeric" required="true" />
 		<cfset request._MachIITracePlugin.tickStart = arguments.tickStart />
-	</cffunction>	
+	</cffunction>
 	<cffunction name="getTickStart" access="private" returntype="numeric" output="false"
 		hint="Gets the tick start from the request._MachIITracePlugin.">
 		<cftry>

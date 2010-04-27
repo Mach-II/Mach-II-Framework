@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 $Id$
 
@@ -39,7 +46,7 @@ Created version: 1.0.1
 Updated version: 1.8.1
 
 Notes:
-This bootstrapper is DEPRECATED since Mach-II no longer officially 
+This bootstrapper is DEPRECATED since Mach-II no longer officially
 supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 --->
 
@@ -77,15 +84,15 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 </cfif>
 
 <!--- Create the AppLoader if necessary. Double check required for proper multi-threading. --->
-<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader") 
+<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader")
 		AND IsObject(application[MACHII_APP_KEY].appLoader))>
 	<cflock name="application_#MACHII_APP_KEY#_apploader" type="exclusive" timeout="120">
-		<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader") 
+		<cfif NOT (StructKeyExists(application[MACHII_APP_KEY], "appLoader")
 				AND IsObject(application[MACHII_APP_KEY].appLoader))>
 			<!--- Set the timeout --->
 			<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 
-			<cfset application[MACHII_APP_KEY].appLoader = 
+			<cfset application[MACHII_APP_KEY].appLoader =
 					 CreateObject("component", "MachII.framework.AppLoader").init(MACHII_CONFIG_PATH, MACHII_DTD_PATH, MACHII_APP_KEY, MACHII_VALIDATE_XML) />
 		</cfif>
 	</cflock>
@@ -116,7 +123,7 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <cfset application[MACHII_APP_KEY].appLoader.getLog().warn("DEPRECATED: The mach-ii.cfm bootstrapper is deprecated. Please use the mach-ii.cfc bootstrapper for Application.cfc.") />
 
 <!---
-	Handle the request and suppress whitespace. Enableoutputonly may be false 
+	Handle the request and suppress whitespace. Enableoutputonly may be false
 	so turn it back on for trailing whitespace. All these tags must be on the
 	same line or additional whitespace may be introduced.
 --->

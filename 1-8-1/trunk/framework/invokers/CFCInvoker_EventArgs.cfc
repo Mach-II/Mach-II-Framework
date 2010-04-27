@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -44,12 +51,12 @@ Notes:
 This invoker is DEPRECATED and may not be included with future versions of Mach-II.
 Please use EventArgsInvoker.cfc instead.
 --->
-<cfcomponent 
-	displayname="CFCInvoker_EventArgs" 
+<cfcomponent
+	displayname="CFCInvoker_EventArgs"
 	output="false"
 	extends="MachII.framework.ListenerInvoker"
 	hint="DEPRECATED. ListenerInvoker that invokes a Listener's method passing the Event's args as an argument collection.">
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -57,7 +64,7 @@ Please use EventArgsInvoker.cfc instead.
 		hint="DEPRECATED. Used by the framework for initialization. Do not override.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -73,28 +80,28 @@ Please use EventArgsInvoker.cfc instead.
 			hint="The variable to set the result in." />
 		<cfargument name="resultArg" type="string" required="false" default=""
 			hint="Not supported." />
-		
+
 		<cfset var resultValue = "" />
 		<cfset var log = arguments.listener.getLog() />
-		
+
 		<cftry>
 			<!--- Enable output and invoke listener method --->
-			<cfsetting enablecfoutputonly="false" /><cfinvoke 
-				component="#arguments.listener#" 
-				method="#arguments.method#" 
-				argumentcollection="#arguments.event.getArgs()#" 
+			<cfsetting enablecfoutputonly="false" /><cfinvoke
+				component="#arguments.listener#"
+				method="#arguments.method#"
+				argumentcollection="#arguments.event.getArgs()#"
 				returnvariable="resultValue" /><cfsetting enablecfoutputonly="true" />
-			
+
 			<!--- resultKey --->
 			<cfif arguments.resultKey NEQ ''>
 				<cfset "#arguments.resultKey#" = resultValue />
 			</cfif>
 			<!--- resultArg not supported. --->
-			
+
 			<cfif log.isWarnEnabled()>
 				<cfset log.warn("DEPRECATED: Listener '#arguments.listener.getComponentNameForLogging()#' is using the CFCInvoker_Event which has been deprecated. Please use the EventInvoker.") />
 			</cfif>
-			
+
 			<cfcatch type="Any">
 				<cfrethrow />
 			</cfcatch>

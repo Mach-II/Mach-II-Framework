@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -47,7 +54,7 @@ Notes:
 				<key name="type" value="MachII.logging.loggers.MachIILog.Logger" />
 				<!-- Optional and defaults to true -->
 				<key name="loggingEnabled" value="true|false" />
-				- OR - 
+				- OR -
 	            <key name="loggingEnabled">
 	            	<struct>
 	            		<key name="development" value="false"/>
@@ -89,7 +96,7 @@ See that file header for configuration of filter criteria.
 	extends="MachII.logging.loggers.AbstractLogger"
 	output="false"
 	hint="A logger for Mach-II.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -97,57 +104,57 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.displayOutputTemplateFile = "defaultOutputTemplate.cfm" />
 	<cfset variables.instance.debugModeOnly = false />
 	<cfset variables.instance.suppressDebugArg = "suppressDebug" />
-	
-	<!---	
+
+	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the logger.">
-		
+
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", "")) />
 		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.ScopeAdapter").init(getParameters()) />
-		
+
 		<!--- For better peformance, only set the filter to the adapter only we have something to filter --->
 		<cfif ArrayLen(filter.getFilterChannels())>
 			<cfset adapter.setFilter(filter) />
 		</cfif>
-		
+
 		<!--- Configure and set the adapter --->
 		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
-		
+
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("displayOutputTemplateFile")
 			AND getAssert().hasText(getParameter("displayOutputTemplateFile")
 				, "The value of 'displayOutputTemplateFile' cannot be empty.")>
 		</cfif>
-		
+
 		<cfif isParameterDefined("debugModeOnly")
 			AND getAssert().isTrue(IsBoolean(getParameter("debugModeOnly"))
 				, "The value of 'debugModeOnly' must be boolean.")>
 			<cfset setDebugModeOnly(getParameter("debugModeOnly")) />
 		</cfif>
-		
+
 		<cfif isParameterDefined("suppressDebugArg")
 			AND getAssert().hasText(getParameter("suppressDebugArg")
 				, "The value of 'suppressDebugArg' cannot be empty.")>
 			<cfset setSuppressDebugArg(getParameter("suppressDebugArg")) />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="onRequestEnd" access="public" returntype="void" output="true"
 		hint="Displays output for this logger.">
-		
+
 		<cfset var data = ArrayNew(1) />
 		<cfset var local = StructNew() />
 		<cfset var out = getPageContext().getOut() />
 		<cfset var buffer = "" />
 		<cfset var count = 0 />
 		<cfset var output = "" />
-		
+
 		<!--- Only display output if logging is enabled --->
 		<cfif getLogAdapter().getLoggingEnabled()
 			AND getLogAdapter().isLoggingDataDefined()
@@ -155,10 +162,10 @@ See that file header for configuration of filter criteria.
 			AND NOT arguments.event.isArgDefined(getSuppressDebugArg())>
 
 			<cfset data = getLogAdapter().getLoggingData().data />
-			
+
 			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
 			<cfsavecontent variable="output"><cfinclude template="#getDisplayOutputTemplateFile()#" /></cfsavecontent>
-			
+
 			<!--- Get the buffer which differs on Adobe CF --->
 			<cftry>
 				<cfset buffer = out.getBuffer().toString() />
@@ -171,23 +178,23 @@ See that file header for configuration of filter criteria.
 			<cfif StructKeyExists(local, "headElement")>
 				<cfhtmlhead text="#local.headElement#" />
 			</cfif>
-				
+
 			<!--- Inserting output before the body tag only works on Adobe CF --->
 			<cfset count = FindNoCase("</body>", buffer) />
 			<cfif count>
 				<cfset output = Insert(output, buffer, count - 1) />
 				<cfset out.clearBuffer() />
 			</cfif>
-			
+
 			<cfoutput>#output#</cfoutput>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="preRedirect" access="public" returntype="void" output="false"
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-		
+
 		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
@@ -199,7 +206,7 @@ See that file header for configuration of filter criteria.
 			hint="Redirect persist data struct." />
 
 		<cfset var loggingData = StructNew() />
-		
+
 		<cfif getLogAdapter().getLoggingEnabled()>
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
@@ -212,23 +219,23 @@ See that file header for configuration of filter criteria.
 			</cftry>
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets the configuration data for this logger including adapter and filter.">
-		
+
 		<cfset var data = StructNew() />
-		
+
 		<cfset data["Debug Mode Only"] = getDebugModeOnly() />
 		<cfset data["Supress Debug Arg"] = getSuppressDebugArg() />
 		<cfset data["Display Output Template"] = getDisplayOutputTemplateFile() />
 		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
-		
+
 		<cfreturn data />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -237,7 +244,7 @@ See that file header for configuration of filter criteria.
 		<cfargument name="version" type="string" required="true" />
 
 		<cfset var release = "" />
-		
+
 		<cfswitch expression="#ListLast(arguments.version, ".")#">
 			<cfcase value="0">
 				<cfset release = "BER - Unknown build" />
@@ -273,46 +280,46 @@ See that file header for configuration of filter criteria.
 				<cfset release = "BER - Build " & ListLast(arguments.version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
-		
+
 		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
 	</cffunction>
-	
+
 	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
 		<cfargument name="array2" type="array" required="true" />
-		
+
 		<cfset var result = arguments.array1 />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(arguments.array2)#" index="i">
 			<cfset ArrayAppend(result, arguments.array2[i]) />
 		</cfloop>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<cffunction name="processCfdump" access="private" returntype="struct" output="false"
-		hint="Processes a cfdump and returns a struct with data and head elements. 
+		hint="Processes a cfdump and returns a struct with data and head elements.
 		Also, cleans up invalid HTML syntax so debugging output will not mess up HTML validators.">
 		<cfargument name="dataToDump" type="any" required="true" />
-		
+
 		<cfset var data = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var results = StructNew() />
 		<cfset var reFindResults = "" />
 		<cfset var temp = "" />
-		
+
 		<!--- Get the dump data into a variable --->
 		<cfsavecontent variable="temp"><cfdump var="#arguments.dataToDump#" expand="false" /></cfsavecontent>
 		<cfset data.init(temp) />
-		
+
 		<!--- Build results struct --->
 		<cfset results.data = "" />
 		<cfset results.headElement = "" />
-		
+
 		<!--- Find the style element --->
 		<cfset reFindResults = REFindNoCase("(<style.*</style>)", data.toString(), 1, true) />
-		
+
 		<cfif reFindResults.pos[1] NEQ 0>
 			<!---
 			Java substrings start with 0 not 1 like in CFML
@@ -322,34 +329,34 @@ See that file header for configuration of filter criteria.
 
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
 			<cfset temp = REReplaceNoCase(temp, "<style.*?>", '<style type="text/css">', "one") />
-			
+
 			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
-		
+
 		<!--- Find the script element --->
 		<cfset reFindResults = REFindNoCase("(<script.*</script>)", data.toString(), 1, true) />
-		
+
 		<cfif reFindResults.pos[1] NEQ 0>
 			<!---
 			Java substrings start with 0 not 1 like in CFML
 			Must use Javacast for CF7 compatibility
 			--->
 			<cfset temp = data.substring(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
-			
+
 			<!--- Fix Adobe CF's bad syntax that does not validate --->
 			<cfset temp = REReplaceNoCase(temp, "<script.*?>", '<script type="text/javascript">', "one") />
-			
+
 			<cfset data.delete(Javacast("int", reFindResults.pos[1] - 1), Javacast("int", reFindResults.len[1] + reFindResults.pos[1] - 1)) />
 			<cfset results.headElement = results.headElement & temp & Chr(13) />
 		</cfif>
-		
+
 		<!--- Remainder is the data --->
 		<cfset results.data = data.toString() />
 
 		<cfreturn results />
 	</cffunction>
-		
+
 	<!---
 	ACCESSORS
 	--->
@@ -372,7 +379,7 @@ See that file header for configuration of filter criteria.
 		hint="Gets if the output is shown only if CFML engine's debug mode is enabled.">
 		<cfreturn variables.instance.debugModeOnly />
 	</cffunction>
-	
+
 	<cffunction name="setSuppressDebugArg" access="private" returntype="void" output="false"
 		hint="Sets the event-arg the suppresses debug output if it is present.">
 		<cfargument name="suppressDebugArg" type="string" required="true" />
@@ -382,5 +389,5 @@ See that file header for configuration of filter criteria.
 		hint="Gets the event-arg the suppresses debug output if it is present.">
 		<cfreturn variables.instance.suppressDebugArg />
 	</cffunction>
-	
+
 </cfcomponent>

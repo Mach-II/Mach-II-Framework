@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -42,7 +49,7 @@ Updated version: 1.8.0
 Notes:
 When implementing a logger, do not implement onRequestEnd, onRedirectStart
 and onRedirectEnd method unless required. Mach-II introspecs your logger and
-only executes methods that have been implemented in order to increase performance. 
+only executes methods that have been implemented in order to increase performance.
 --->
 <cfcomponent
 	displayname="AbstractLogger"
@@ -58,7 +65,7 @@ only executes methods that have been implemented in order to increase performanc
 	<cfset variables.logAdapter = "" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.assert = "" />
-	
+
 	<!---
 	INITIAlIZATION / CONFIGURATION
 	--->
@@ -68,25 +75,25 @@ only executes methods that have been implemented in order to increase performanc
 			hint="The unique id for this logger." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
-		
+
 		<!--- Run setters --->
 		<cfset setLoggerId(arguments.loggerId) />
 		<cfset setParameters(arguments.parameters) />
 		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Override to provide custom configuration logic. Called after init().">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -94,7 +101,7 @@ only executes methods that have been implemented in order to increase performanc
 		hint="On request end logic for this logger. Override to provide custom on request end logic.">
 		<cfabort showerror="This method is abstract and must be overrided if onRequestEnd functionality is required." />
 	</cffunction>
-	
+
 	<cffunction name="preRedirect" access="public" returntype="void" output="false"
 		hint="Pre-redirect logic for this logger. Override to provide custom pre-redirect logic. Must be overriden in unison with postRedirect.">
 		<cfargument name="data" type="struct" required="true"
@@ -111,43 +118,43 @@ only executes methods that have been implemented in order to increase performanc
 
 	<!---
 	PUBLIC FUNCTIONS
-	--->	
+	--->
 	<cffunction name="isOnRequestEndAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if on request end method is available.">
 		<cfreturn isMethodDefined("onRequestEnd") />
 	</cffunction>
-	
+
 	<cffunction name="isPrePostRedirectAvailable" access="public" returntype="boolean" output="false"
 		hint="Checks if pre/post-redirect methods are available.">
-		
+
 		<cfset var preRedirectResult = isMethodDefined("preRedirect") />
 		<cfset var postRedirectResult = isMethodDefined("postRedirect") />
 		<cfset var result = false />
-		
+
 		<cfif preRedirectResult AND postRedirectResult>
 			<cfset result = true />
 		<cfelseif preRedirectResult + postRedirectResult EQ 1>
-			<cfthrow type="MachII.logging.loggers.bothPrePostRedirectMethodsRequired" 
-				message="Both PreRedirect and PostRedirect methods must be implemented in '#getLoggerId()#'." 
+			<cfthrow type="MachII.logging.loggers.bothPrePostRedirectMethodsRequired"
+				message="Both PreRedirect and PostRedirect methods must be implemented in '#getLoggerId()#'."
 				detail="Available Methods: preRedirectResult=#preRedirectResult#, postRedirectResult=#postRedirectResult#" />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets pretty configuration data for this logger. Override for better Dashboard integration data.">
-		
+
 		<cfset var data = variables.instance />
-		
+
 		<cfset data.adapter = getLogAdapter().getConfigurationData() />
-		
+
 		<cfreturn data />
 	</cffunction>
-	
+
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -178,7 +185,7 @@ only executes methods that have been implemented in order to increase performanc
 		hint="Returns a comma delimited list of parameter names.">
 		<cfreturn StructKeyList(variables.parameters) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -192,11 +199,11 @@ only executes methods that have been implemented in order to increase performanc
 		<cfset var methods = ArrayNew(1) />
 		<cfset var i = 0 />
 		<cfset var result = false />
-		
+
 		<!--- "functions" key only exists when there at least one defined method --->
 		<cfif StructKeyExists(arguments.metadata, "functions")>
 			<cfset methods = arguments.metadata.functions />
-			
+
 			<!--- Find if the method exists --->
 			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
 				<cfif methods[i].name EQ arguments.methodName>
@@ -205,16 +212,16 @@ only executes methods that have been implemented in order to increase performanc
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<!--- Method is not at this level so walk inheritance tree if possible --->
-		<cfif StructKeyExists(arguments.metadata, "extends") 
+		<cfif StructKeyExists(arguments.metadata, "extends")
 			AND arguments.metadata.extends.name NEQ "MachII.logging.loggers.AbstractLogger">
 			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
 		<cfelse>
 			<cfreturn false />
-		</cfif>	
+		</cfif>
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -228,7 +235,7 @@ only executes methods that have been implemented in order to increase performanc
 		hint="Returns the logging level by name.">
 		<cfreturn getLogAdapter().getLoggingLevel() />
 	</cffunction>
-	
+
 	<cffunction name="setLoggingEnabled" access="public" returntype="void" output="false"
 		hint="Sets logging. Convenience method for dashboard.">
 		<cfargument name="loggingEnabled" type="boolean" required="true" />
@@ -257,7 +264,7 @@ only executes methods that have been implemented in order to increase performanc
 		hint="Returns the id of the logger. Used for preRedirect/postRedirect id.">
 		<cfreturn variables.instance.loggerId />
 	</cffunction>
-	
+
 	<cffunction name="setLogAdapter" access="private" returntype="void" output="false"
 		hint="Sets the log adapter for this logger.">
 		<cfargument name="logAdapter" type="MachII.logging.adapters.AbstractLogAdapter" required="true" />
@@ -267,7 +274,7 @@ only executes methods that have been implemented in order to increase performanc
 		hint="Gets the log adapter for this logger.">
 		<cfreturn variables.logAdapter />
 	</cffunction>
-	
+
 	<cffunction name="setAssert" access="private" returntype="void" output="false"
 		hint="Sets the assert utility.">
 		<cfargument name="assert" type="MachII.util.Assert" required="true" />
@@ -277,13 +284,13 @@ only executes methods that have been implemented in order to increase performanc
 		hint="Gets the assert utility.">
 		<cfreturn variables.assert />
 	</cffunction>
-	
+
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
-		
+
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, arguments.parameters[key]) />
 		</cfloop>
