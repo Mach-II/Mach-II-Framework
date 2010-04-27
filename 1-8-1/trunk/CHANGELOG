@@ -145,6 +145,15 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* SES URLs now supports using all slash delimiters including module delimiter
+
+Special to Doug Smith at the The Lampo Group, Inc. for providing a patch
+that fixes this prior limitation.
+
+For more information see:
+https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/659
+(2010-04-26 peterfarrell)
+
 * Fixed ExpressionEvaluator to support method calls on event object
 
 For more information see:
