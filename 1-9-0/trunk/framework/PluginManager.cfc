@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -131,10 +138,10 @@ Notes:
 		<cfelse>
 			<cfset pluginNodes = XMLSearch(arguments.configXML, ".//plugins/plugin") />
 		</cfif>
-		
+
 		<cfloop index="i" from="1" to="#ArrayLen(pluginNodes)#">
 			<cfset pluginName = pluginNodes[i].XmlAttributes["name"] />
-			
+
 			<!--- Override XML for Modules --->
 			<cfif hasParent AND arguments.override AND StructKeyExists(pluginNodes[i].xmlAttributes, "overrideAction")>
 				<!--- Check for a mapping --->
@@ -143,20 +150,20 @@ Notes:
 				<cfelse>
 					<cfset mapping = pluginName />
 				</cfif>
-				
+
 				<!--- Check if parent has event handler with the mapping name --->
 				<cfif NOT getParent().isPluginDefined(mapping)>
 					<cfthrow type="MachII.framework.overridePluginNotDefined"
 						message="An plugin named '#mapping#' cannot be found in the parent plugin manager for the override named '#pluginName#' in module '#getAppManager().getModuleName()#'." />
 				</cfif>
-				
-				<cfset addPlugin(pluginName, getParent().getPlugin(mapping), arguments.override) />			
+
+				<cfset addPlugin(pluginName, getParent().getPlugin(mapping), arguments.override) />
 			<!--- General XML setup --->
 			<cfelse>
 				<!--- Set the Plugin's type and parameters. --->
 				<cfset pluginType = pluginNodes[i].XmlAttributes["type"] />
 				<cfset pluginParams = StructNew() />
-				
+
 				<!--- For each plugin, parse all the parameters --->
 				<cfif StructKeyExists(pluginNodes[i], "parameters")>
 					<cfset paramNodes = pluginNodes[i].parameters.xmlChildren />
@@ -172,15 +179,15 @@ Notes:
 						<cfset pluginParams[paramName] = paramValue />
 					</cfloop>
 				</cfif>
-	
+
 				<cftry>
 					<!--- Do not method chain the init() on the instantiation
 						or objects that have their init() overridden will
-						cause the variable the object is assigned to will 
+						cause the variable the object is assigned to will
 						be deleted if init() returns void --->
 					<cfset plugin = CreateObject("component", pluginType) />
 					<cfset plugin.init(getAppManager(), pluginParams) />
-	
+
 					<cfcatch type="any">
 						<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ pluginType>
 							<cfthrow type="MachII.framework.CannotFindPlugin"
@@ -193,10 +200,10 @@ Notes:
 						</cfif>
 					</cfcatch>
 				</cftry>
-				
+
 				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(plugin, pluginType, pluginParams) />
 				<cfset plugin.setProxy(baseProxy) />
-	
+
 				<cfset addPlugin(pluginName, plugin, arguments.override) />
 			</cfif>
 		</cfloop>
@@ -284,7 +291,7 @@ Notes:
 					<cfset temp = ListAppend(temp, pointName) />
 				</cfif>
 			</cfloop>
-		
+
 			<!--- delete any references from the old plugin for each registered point not in new plugin --->
 			<cfloop from="1" to="#ArrayLen(variables.pluginPointArray)#" index="i">
 				<cfset pointName = variables.pluginPointArray[i] />
@@ -324,20 +331,20 @@ Notes:
 		hint="Returns an array of plugin names.">
 		<cfreturn StructKeyArray(variables.pluginProxies) />
 	</cffunction>
-	
+
 	<cffunction name="reloadPlugin" access="public" returntype="void" output="false"
 		hint="Reloads a plugin.">
 		<cfargument name="pluginName" type="string" required="true" />
-		
+
 		<cfset var newPlugin = "" />
 		<cfset var currentPlugin = getPlugin(arguments.PluginName) />
 		<cfset var baseProxy = currentPlugin.getProxy() />
-		
+
 		<!--- Setup the Plugin --->
 		<cftry>
 			<!--- Do not method chain the init() on the instantiation
 				or objects that have their init() overridden will
-				cause the variable the object is assigned to will 
+				cause the variable the object is assigned to will
 				be deleted if init() returns void --->
 			<cfset newPlugin = CreateObject("component", baseProxy.getType()) />
 			<cfset newPlugin.init(getAppManager(), baseProxy.getOriginalParameters()) />
@@ -354,16 +361,16 @@ Notes:
 				</cfif>
 			</cfcatch>
 		</cftry>
-		
-		<!--- Run deconfigure in the current Plugin 
+
+		<!--- Run deconfigure in the current Plugin
 			which must take place before configure is
 			run in the new Plugin --->
 		<cfset currentPlugin.deconfigure() />
-		
+
 		<!--- Continue setup on the Plugin --->
 		<cfset baseProxy.setObject(newPlugin) />
 		<cfset newPlugin.setProxy(baseProxy) />
-		
+
 		<!--- Configure the Plugin --->
 		<cfset getAppManager().onObjectReload(newPlugin) />
 		<cfset newPlugin.configure() />
@@ -391,7 +398,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
 				<cfset log = variables.preProcessPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
 				</cfif>
@@ -399,7 +406,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'preProcess' point in plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'preProcess' point in plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preProcessPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -428,7 +435,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
 				<cfset log = variables.preEventPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
 				</cfif>
@@ -436,7 +443,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'preEvent' point in plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'preEvent' point in plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preEventPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -465,7 +472,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
 				<cfset log = variables.postEventPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-event point.") />
 				</cfif>
@@ -473,7 +480,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'postEvent' point in plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'postEvent' point in plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postEventPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -502,7 +509,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
 				<cfset log = variables.preViewPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
 				</cfif>
@@ -510,7 +517,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'preView' point in plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'preView' point in plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.preViewPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -539,7 +546,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
 				<cfset log = variables.postViewPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-view point.") />
 				</cfif>
@@ -547,7 +554,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'postView' point in plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'postView' point in plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postViewPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -577,7 +584,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
 				<cfset log = variables.postProcessPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-process point.") />
 				</cfif>
@@ -585,7 +592,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'postProcess' point in plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'postProcess' point in plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.postProcessPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -607,7 +614,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
 				<cfset log = variables.onSessionStartPlugins[i].getLog() />
-			
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
 				</cfif>
@@ -615,7 +622,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'onSessionStart' point in plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'onSessionStart' point in plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionStartPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -628,14 +635,14 @@ Notes:
 		hint="onSessionEnd() is called at the end of a session. All onSessionEnd() points are invoked regardless of the module so no run parent is needed.">
 		<cfargument name="sessionScope" type="struct" required="true"
 			hint="The session scope is passed in since direct access is not allowed during the on session end application event." />
-		
+
 		<cfset var log = "" />
 		<cfset var i = 0 />
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
 				<cfset log = variables.onSessionEndPlugins[i].getLog() />
-			
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
 				</cfif>
@@ -643,7 +650,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'onSessionEnd' point in plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'onSessionEnd' point in plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.onSessionEndPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -671,7 +678,7 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
 				<cfset log = variables.handleExceptionPlugins[i].getLog() />
-				
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
 				</cfif>
@@ -679,7 +686,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
-					<cfset log.error("An exception occured in the 'handleException' point in plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. " 
+					<cfset log.error("An exception occured in the 'handleException' point in plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#'. "
 							& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getMetadata(variables.handleExceptionPlugins[i]).path)
 							, cfcatch) />
 				</cfif>
@@ -721,7 +728,7 @@ Notes:
 			</cfloop>
 		</cfif>
 
-		<cfif StructKeyExists(arguments.metadata, "extends") 
+		<cfif StructKeyExists(arguments.metadata, "extends")
 			AND arguments.metadata.extends.name NEQ "MachII.framework.Plugin">
 			<cfset gatherPluginMetaData(arguments.metadata.extends, arguments.points) />
 		</cfif>
@@ -739,7 +746,7 @@ Notes:
 		hint="Returns the AppManager instance this PluginManager belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 	<cffunction name="setRunParent" access="public" returntype="void" output="false">
 		<cfargument name="runParent" type="string" required="true" />
 		<cfset variables.runParent = arguments.runParent />

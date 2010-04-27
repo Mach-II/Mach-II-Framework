@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id: Log.cfc 584 2007-12-15 08:44:43Z peterfarrell $
@@ -44,7 +51,7 @@ Notes:
 Configuring for Mach-II logger only:
 <property name="Logging" type="MachII.logging.LoggingProperty" />
 
-This will turn on the MachIILog logger and display the log message 
+This will turn on the MachIILog logger and display the log message
 in the request output.
 
 Configuring multiple logging adapters:
@@ -56,7 +63,7 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.CFLog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
-				- OR - 
+				- OR -
 	            <key name="loggingEnabled">
 	            	<struct>
 	            		<key name="development" value="false"/>
@@ -83,7 +90,7 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
-				- OR - 
+				- OR -
 	            <key name="loggingEnabled">
 	            	<struct>
 	            		<key name="development" value="false"/>
@@ -113,7 +120,7 @@ Configuring multiple logging adapters:
 			<struct>
 				<key name="type" value="MachII.logging.loggers.MachIILog.Logger" />
 				<key name="loggingEnabled" value="true|false" />
-				- OR - 
+				- OR -
 	            <key name="loggingEnabled">
 	            	<struct>
 	            		<key name="development" value="false"/>
@@ -150,7 +157,7 @@ will bind to root parameter values.
 	extends="MachII.framework.Property"
 	output="false"
 	hint="Allows you to configure the Mach-II logging features.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -158,15 +165,15 @@ will bind to root parameter values.
 	<cfset variables.defaultLoggerType = "MachII.logging.loggers.MachIILog.Logger" />
 	<cfset variables.loggerManager = "" />
 	<cfset variables.loggingEnabled = true />
-	
+
 	<cfset variables.LOGGER_MANAGER_PROPERTY_NAME = "_LoggingProperty.loggerManager" />
-	
+
 	<!---
 	INITALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
-		
+
 		<cfset var parentLoggerManager = "" />
 		<cfset var params = getParameters() />
 		<cfset var defaultLoggerParameters = StructNew() />
@@ -174,67 +181,67 @@ will bind to root parameter values.
 		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var key = "" />
-		
+
 		<!--- Setup a manager for all of the loggers --->
 		<cfif getAppManager().inModule()>
 			<cfset parentLoggerManager = getPropertyManager().getParent().getProperty(variables.LOGGER_MANAGER_PROPERTY_NAME, "") />
 		</cfif>
-		
+
 		<cfif IsObject(parentLoggerManager)>
 			<cfset variables.loggerManager = CreateObject("component", "MachII.logging.LoggerManager").init(getAppManager().getLogFactory(), parentLoggerManager) />
 		<cfelse>
 			<cfset variables.loggerManager = CreateObject("component", "MachII.logging.LoggerManager").init(getAppManager().getLogFactory()) />
 		</cfif>
-		
+
 		<!--- Get basic parameters --->
 		<cfset setLoggingEnabled(getParameter("loggingEnabled", true)) />
-		
+
 		<!--- Load loggers --->
 		<cfloop collection="#params#" item="key">
 			<cfif key NEQ "loggingEnabled" AND IsStruct(params[key])>
 				<cfset configureLogger(key, getParameter(key)) />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- Configure the default logger since no loggers are registered --->
 		<cfif NOT StructCount(getLoggerManager().getLoggers())>
 			<cfset defaultLoggerParameters.type = variables.defaultLoggerType />
 			<cfset defaultLoggerParameters.loggingLevel = "trace" />
 			<cfset configureLogger(variables.defaultLoggerName, defaultLoggerParameters) />
-		</cfif>	
-		
+		</cfif>
+
 		<!--- Configure the loggers --->
 		<cfset getLoggerManager().configure() />
 		<cfset loggers = getLoggerManager().getLoggers() />
-		
+
 		<cfloop collection="#loggers#" item="key">
 			<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 			<cfif loggers[key].isOnRequestEndAvailable()>
 				<cfset requestManager.addOnRequestEndCallback(loggers[key], "onRequestEnd") />
 			</cfif>
-			
+
 			<!--- Add a callbacks to the RequestManager if there is pre/postRedirect methods --->
 			<cfif loggers[key].isPrePostRedirectAvailable()>
 				<cfset requestManager.addPreRedirectCallback(loggers[key], "preRedirect") />
 				<cfset requestManager.addPostRedirectCallback(loggers[key], "postRedirect") />
 			</cfif>
 		</cfloop>
-				
+
 		<!--- Set logging enabled/disabled --->
 		<cfif NOT isLoggingEnabled()>
 			<cfset getLoggerManager().getLogFactory().disableLogging() />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Unregisters some log adapters and callbacks.">
-		
+
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var logFactory = getLoggerManager().getLogFactory() />
 		<cfset var thisInstanceLoggers = getLoggers() />
 		<cfset var key = "" />
 		<cfset var currentLogger = "" />
-		
+
 		<!--- Cleanup this property's' loggers --->
 		<cfloop collection="#thisInstanceLoggers#" item="key">
 			<cfset currentLogger = thisInstanceLoggers[key] />
@@ -243,15 +250,15 @@ will bind to root parameter values.
 			<cfset requestManager.removeOnRequestEndCallback(currentLogger) />
 			<cfset requestManager.removePreRedirectCallback(currentLogger) />
 			<cfset requestManager.removePostRedirectCallback(currentLogger) />
-			
+
 			<!--- Remove log adapter from log factory --->
 			<cfset logFactory.removeLogAdapter(currentLogger.getLogAdapter()) />
 		</cfloop>
-		
+
 		<!--- Deconfigure all the loggers --->
 		<cfset getLoggerManager().deconfigure()>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -263,7 +270,7 @@ will bind to root parameter values.
 		hint="Enables logging.">
 		<cfset getAppManager().getLogFactory().enableLogging() />
 	</cffunction>
-	
+
 	<cffunction name="getLoggerByName" access="public" returntype="MachII.logging.loggers.AbstractLogger" output="false"
 		hint="Helper method to get a logger by name from the logger manager.">
 		<cfargument name="loggerName" type="string" required="true" />
@@ -282,7 +289,7 @@ will bind to root parameter values.
 		hint="Gets all the registered loggers from the logger manager.">
 		<cfreturn getLoggerManager().getLoggers() />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -292,24 +299,24 @@ will bind to root parameter values.
 			hint="Name of the logger." />
 		<cfargument name="parameters" type="struct" required="true"
 			hint="Parameters for this logger.">
-		
+
 		<cfset var type = "" />
 		<cfset var logger = "" />
 		<cfset var loggerId = createLoggerId(arguments.loggerName) />
 		<cfset var moduleName = getModuleName() />
-		<cfset var key = "" />		
-		
+		<cfset var key = "" />
+
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
 			<cfthrow type="MachII.properties.LoggingProperty"
 				message="You must specify a 'type' for log adapter named '#arguments.loggerName#'." />
 		</cfif>
-		
+
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
-		
+
 		<!--- Decide the logging enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "loggingEnabled")>
 			<cftry>
@@ -324,39 +331,39 @@ will bind to root parameter values.
 				</cfcatch>
 			</cftry>
 		</cfif>
-		
+
 		<!--- Load the logger  --->
 		<cfset getLoggerManager().loadLogger(arguments.loggerName, loggerId, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
-	
+
 	<cffunction name="createLoggerId" access="private" returntype="string" output="false"
 		hint="Creates a logger id.">
 		<cfargument name="loggerName" type="string" required="true" />
 		<!--- Some CFML engines don't like logger ids that start with a number --->
 		<cfreturn "_" & Hash(arguments.loggerName & getModuleName() & GetTickCount() & RandRange(0, 10000) & RandRange(0, 10000)) />
 	</cffunction>
-	
+
 	<cffunction name="getModuleName" access="private" returntype="string" output="false"
 		hint="Gets the module name.">
 
 		<cfset var moduleName = getAppManager().getModuleName() />
-		
+
 		<cfif NOT Len(moduleName)>
 			<cfset moduleName = "_base_" />
 		</cfif>
 
 		<cfreturn moduleName />
 	</cffunction>
-	
+
 	<cffunction name="decidedLoggingEnabled" access="private" returntype="boolean" output="false"
 		hint="Decides if the logging is enabled.">
 		<cfargument name="loggingEnabled" type="any" required="true" />
-		
+
 		<cfset var result = true />
-		
+
 		<cfset getAssert().isTrue(IsBoolean(arguments.loggingEnabled) OR IsStruct(arguments.loggingEnabled)
 				, "The 'loggingEnabled' parameter in 'LoggingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
-		
+
 		<!--- Load logging enabled by simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.loggingEnabled)>
 			<cfset result = arguments.loggingEnabled />
@@ -364,17 +371,17 @@ will bind to root parameter values.
 		<cfelse>
 			<cfset result = resolveValueByEnvironment(arguments.loggingEnabled, true) />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setLoggingEnabled" access="private" returntype="void" output="false"
 		hint="Sets the logging enabled status and decides by environment if struct.">
 		<cfargument name="loggingEnabled" type="any" required="true" />
-		
+
 		<cftry>
 			<cfset variables.loggingEnabled = decidedLoggingEnabled(arguments.loggingEnabled) />
 			<cfcatch type="MachII.util.IllegalArgument">
@@ -384,14 +391,14 @@ will bind to root parameter values.
 			</cfcatch>
 			<cfcatch type="any">
 				<cfrethrow />
-			</cfcatch>			
+			</cfcatch>
 		</cftry>
 	</cffunction>
 	<cffunction name="isLoggingEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if logging is enabled.">
 		<cfreturn variables.loggingEnabled />
 	</cffunction>
-	
+
 	<cffunction name="setLoggerManager" access="private" returntype="void" output="false">
 		<cfargument name="loggerManager" type="MachII.logging.LoggerManager" required="true" />
 		<cfset variables.loggerManager =  arguments.loggerManager />

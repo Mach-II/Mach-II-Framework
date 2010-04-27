@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -54,13 +61,13 @@ Logging levels in order of least severe to most severe:
 	displayname="Log"
 	output="false"
 	hint="A simple logging API.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.channel = "" />
 	<cfset variables.logAdapters = StructNew() />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -73,10 +80,10 @@ Logging levels in order of least severe to most severe:
 
 		<cfset setChannel(arguments.channel) />
 		<cfset setLogAdapters(arguments.logAdapters) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -92,7 +99,7 @@ Logging levels in order of least severe to most severe:
 
 		<!---
 		The result of the StructKeyExists evaluation will not change after the first evaluation.
-		Having two loops saves on multiple StructKeyExist calls over the lifetime 
+		Having two loops saves on multiple StructKeyExist calls over the lifetime
 		of the request instead of an internally nested conditional statement.
 		--->
 		<cfif StructKeyExists(arguments, "additionalInformation")>
@@ -105,7 +112,7 @@ Logging levels in order of least severe to most severe:
 			</cfloop>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="error" access="public" returntype="void" output="false"
 		hint="Logs a message with error log level.">
 		<cfargument name="message" type="string" required="true"
@@ -115,7 +122,7 @@ Logging levels in order of least severe to most severe:
 
 		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
+
 		<cfif StructKeyExists(arguments, "additionalInformation")>
 			<cfloop collection="#variables.logAdapters#" item="key">
 				<cfset variables.logAdapters[key].error(channel, arguments.message, arguments.additionalInformation) />
@@ -126,7 +133,7 @@ Logging levels in order of least severe to most severe:
 			</cfloop>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="fatal" access="public" returntype="void" output="false"
 		hint="Logs a message with fatal log level.">
 		<cfargument name="message" type="string" required="true"
@@ -136,7 +143,7 @@ Logging levels in order of least severe to most severe:
 
 		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
+
 		<cfif StructKeyExists(arguments, "additionalInformation")>
 			<cfloop collection="#variables.logAdapters#" item="key">
 				<cfset variables.logAdapters[key].fatal(channel, arguments.message, arguments.additionalInformation) />
@@ -157,7 +164,7 @@ Logging levels in order of least severe to most severe:
 
 		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
+
 		<cfif StructKeyExists(arguments, "additionalInformation")>
 			<cfloop collection="#variables.logAdapters#" item="key">
 				<cfset variables.logAdapters[key].info(channel, arguments.message, arguments.additionalInformation) />
@@ -178,7 +185,7 @@ Logging levels in order of least severe to most severe:
 
 		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
+
 		<cfif StructKeyExists(arguments, "additionalInformation")>
 			<cfloop collection="#variables.logAdapters#" item="key">
 				<cfset variables.logAdapters[key].trace(channel, arguments.message, arguments.additionalInformation) />
@@ -189,7 +196,7 @@ Logging levels in order of least severe to most severe:
 			</cfloop>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="warn" access="public" returntype="void" output="false"
 		hint="Logs a message with warn log level.">
 		<cfargument name="message" type="string" required="true"
@@ -199,7 +206,7 @@ Logging levels in order of least severe to most severe:
 
 		<cfset var channel = getChannel() />
 		<cfset var key = "" />
-		
+
 		<cfif StructKeyExists(arguments, "additionalInformation")>
 			<cfloop collection="#variables.logAdapters#" item="key">
 				<cfset variables.logAdapters[key].warn(channel, arguments.message, arguments.additionalInformation) />
@@ -210,88 +217,88 @@ Logging levels in order of least severe to most severe:
 			</cfloop>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="isDebugEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if debug level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isDebugEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="isErrorEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if error level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isErrorEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="isFatalEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if fatal level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isFatalEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="isInfoEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if info level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isInfoEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="isTraceEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if trace level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isTraceEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="isWarnEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if warn level logging is enabled.">
 
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#variables.logAdapters#" item="key">
 			<cfif variables.logAdapters[key].isWarnEnabled()>
 				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
 
@@ -307,7 +314,7 @@ Logging levels in order of least severe to most severe:
 		hint="Returns the channel.">
 		<cfreturn variables.channel />
 	</cffunction>
-	
+
 	<cffunction name="setLogAdapters" access="private" returntype="void" output="false"
 		hint="Sets the log adapters.">
 		<cfargument name="logAdapters" type="struct" required="true" />

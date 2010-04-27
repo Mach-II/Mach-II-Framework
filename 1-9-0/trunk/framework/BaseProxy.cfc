@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -41,7 +48,7 @@ Updated version: 1.8.0
 
 Notes:
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="BaseProxy"
 	output="false"
 	hint="Acts as proxy (holder) for all user extendable components so we reload them while maintaining a reference.">
@@ -53,13 +60,13 @@ Notes:
 	<cfset variables.type = "" />
 	<cfset variables.targetObjectPaths = ArrayNew(1) />
 	<cfset variables.originalParameters = StructNew() />
-	
+
 	<cfset variables.BASE_OBJECT_TYPES = StructNew() />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.EventFilter"] = "" />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Listener"] = "" />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Plugin"] = "" />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Property"] = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -71,37 +78,37 @@ Notes:
 			hint="The dot path type to the target object." />
 		<cfargument name="originalParameters" type="struct" required="false" default="#StructNew()#"
 			hint="The original set of parameters."/>
-		
+
 		<!--- Run setters --->
 		<cfset setObject(arguments.object) />
 		<cfset setType(arguments.type) />
 		<cfset setOriginalParameters(arguments.originalParameters) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="shouldReloadObject" access="public" returntype="boolean" output="false"
 		hint="Determines if target object should be reloaded.">
-		
+
 		<cfset var result = false />
-		
+
 		<cfif CompareNoCase(getLastReloadHash(), computeObjectReloadHash()) NEQ 0>
 			<cfset result = true />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<cffunction name="computeObjectReloadHash" access="public" returntype="string" output="false"
 		hint="Computes the current reload hash of the target object.">
 
 		<cfset var directoryResults = "" />
 		<cfset var stringToHash = "" />
 		<cfset var i = 0 />
-		
+
 		<!--- Ensure we have paths to compute reload hash off of --->
 		<cfif NOT ArrayLen(variables.targetObjectPaths)>
 			<cfset buildTargetObjectPaths() />
@@ -109,16 +116,16 @@ Notes:
 
 		<!--- The hash needs to be based off entire target object path hierarchy --->
 		<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
-			<cfdirectory action="LIST" 
-				directory="#GetDirectoryFromPath(variables.targetObjectPaths[i])#" 
-				name="directoryResults" 
+			<cfdirectory action="LIST"
+				directory="#GetDirectoryFromPath(variables.targetObjectPaths[i])#"
+				name="directoryResults"
 				filter="#GetFileFromPath(variables.targetObjectPaths[i])#" />
 			<cfset stringToHash = stringToHash & directoryResults.dateLastModified & directoryResults.size />
 		</cfloop>
 
 		<cfreturn Hash(stringToHash) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -135,7 +142,7 @@ Notes:
 		<cfloop condition="true">
 			<cfif StructKeyExists(targetObjectMetadata, "extends")>
 				<cfset targetObjectMetadata = targetObjectMetadata.extends />
-				
+
 				<cfif NOT StructKeyExists(variables.BASE_OBJECT_TYPES, targetObjectMetadata.name)>
 					<cfset ArrayAppend(variables.targetObjectPaths, targetObjectMetadata.path) />
 				<cfelse>
@@ -145,10 +152,10 @@ Notes:
 				<cfbreak />
 			</cfif>
 		</cfloop>
-		
+
 		<cfset setLastReloadHash(computeObjectReloadHash()) />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -168,7 +175,7 @@ Notes:
 	<cffunction name="getType" access="public" returntype="string" output="false">
 		<cfreturn variables.type />
 	</cffunction>
-	
+
 	<cffunction name="setOriginalParameters" access="public" returntype="void" output="false">
 		<cfargument name="originalParameters" type="struct" required="true" />
 		<cfset variables.originalParameters = arguments.originalParameters />
@@ -176,7 +183,7 @@ Notes:
 	<cffunction name="getOriginalParameters" access="public" returntype="struct" output="false">
 		<cfreturn variables.originalParameters />
 	</cffunction>
-	
+
 	<cffunction name="setLastReloadHash" access="private" returntype="void" output="false">
 		<cfargument name="lastReloadHash" type="string" required="true" />
 		<cfset variables.lastReloadHash = arguments.lastReloadHash />

@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -47,7 +54,7 @@ Notes:
 				<key name="type" value="MachII.logging.loggers.EmailLog.Logger" />
 				<!-- Optional and defaults to true -->
 				<key name="loggingEnabled" value="true|false" />
-				- OR - 
+				- OR -
 	            <key name="loggingEnabled">
 	            	<struct>
 	            		<key name="development" value="false"/>
@@ -106,7 +113,7 @@ See that file header for configuration of filter criteria.
 	extends="MachII.logging.loggers.AbstractLogger"
 	output="false"
 	hint="A logger for sending emails of logs.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -124,25 +131,25 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.charset = "utf-8" />
 	<cfset variables.instance.spoolEnable = true />
 	<cfset variables.instance.timeout = 60 />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the logger.">
-		
+
 		<cfset var filter = CreateObject("component", "MachII.logging.filters.GenericChannelFilter").init(getParameter("filter", "")) />
 		<cfset var adapter = CreateObject("component", "MachII.logging.adapters.ScopeAdapter").init(getParameters()) />
-		
+
 		<!---For better peformance, set the filter to the adapter only we have something to filter --->
 		<cfif ArrayLen(filter.getFilterChannels())>
 			<cfset adapter.setFilter(filter) />
 		</cfif>
-		
+
 		<!--- Configure and set the adapter --->
 		<cfset adapter.configure() />
 		<cfset setLogAdapter(adapter) />
-		
+
 		<!--- Configure the remaining parameters --->
 		<cfif isParameterDefined("emailTemplateFile")
 			AND getAssert().hasText(getParameter("emailTemplateFile")
@@ -152,39 +159,39 @@ See that file header for configuration of filter criteria.
 		</cfif>
 
 		<cfset setLoggingLevelEmailTrigger(getParameter("loggingLevelEmailTrigger", "fatal")) />
-		
+
 		<cfif getAssert().hasText(getParameter("to")
 			, "A parameter named 'to' is required."
 			, "A list of email address(es) to send a log report to.")>
 			<cfset setTo(getParameter("to")) />
 		</cfif>
-		
+
 		<cfif getAssert().hasText(getParameter("from")
 			, "A parameter named 'from' is required."
 			, "This indicates the email address to send a log report from.")>
 			<cfset setFrom(getParameter("from")) />
 		</cfif>
-		
+
 		<cfset setSubject(getParameter("subject", "Application Log")) />
 		<cfset setServers(getParameter("servers", "")) />
 		<cfset setMailType(getParameter("mailType", "text/html")) />
 		<cfset setUsername(getParameter("username", "")) />
 		<cfset setPassword(getParameter("password", "")) />
-		
+
 		<cfif isParameterDefined("charset")
 			AND getAssert().hasLength(getParameter("charset")
 				, "A parameter named 'charset' cannot be blank if defined."
 				, "This indicates the charset to be used when sending mail.")>
 			<cfset setCharset(getParameter("charset", "utf-8")) />
 		</cfif>
-		
+
 		<cfif isParameterDefined("spoolEnabled")
 			AND getAssert().isTrue(IsBoolean(getParameter("spoolenable"))
 				, "A parameter named 'spoolEnabled' must be boolean if defined."
 				, "This indicates if your CFML should spool mail for delivery.")>
 			<cfset setSpoolEnable(getParameter("spoolenable")) />
 		</cfif>
-		
+
 		<cfif isParameterDefined("timeout")
 			AND getAssert().isNumber(getParameter("timeout")
 				, "A parameter named 'timeout' must be numeric if defined."
@@ -192,40 +199,40 @@ See that file header for configuration of filter criteria.
 			<cfset setTimeout(getParameter("timeout")) />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="onRequestEnd" access="public" returntype="void" output="false"
 		hint="Sends an email for this logger.">
-		
+
 		<cfset var body = "" />
 		<cfset var data = ArrayNew(1) />
 		<cfset var local = StructNew() />
-		
+
 		<!--- Only display output if logging is enabled --->
-		<cfif getLogAdapter().getLoggingEnabled() 
+		<cfif getLogAdapter().getLoggingEnabled()
 			AND getLogAdapter().isLoggingDataDefined()
 			AND hasReachedLoggingLevelEmailTrigger()>
-			
+
 			<!---
 			This variable is used by the email template file which is included
 			and therefore needs to remain as a var'ed local variable.
 			--->
 			<cfset data = getLogAdapter().getLoggingData().data />
-			
+
 			<!--- Save the body of the email --->
 			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
 			<cfsavecontent variable="body"><cfinclude template="#getEmailTemplateFile()#" /></cfsavecontent>
 
 			<!--- Send the email --->
 			<cfif Len(getServers())>
-				
+
 				<cfif hasSpecifiedAuthCredentials()>
-					<cfmail from="#getFrom()#" 
+					<cfmail from="#getFrom()#"
 						to="#getTo()#"
 						subject="#getSubject()#"
-						type="#getMailType()#" 
+						type="#getMailType()#"
 						server="#getServers()#"
 						username="#getUsername()#"
 						password="#getPassword()#"
@@ -233,10 +240,10 @@ See that file header for configuration of filter criteria.
 						spoolenable="#getSpoolEnable()#"
 						timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
 				<cfelse>
-					<cfmail from="#getFrom()#" 
+					<cfmail from="#getFrom()#"
 						to="#getTo()#"
 						subject="#getSubject()#"
-						type="#getMailType()#" 
+						type="#getMailType()#"
 						server="#getServers()#"
 						charset="#getCharset()#"
 						spoolenable="#getSpoolEnable()#"
@@ -246,7 +253,7 @@ See that file header for configuration of filter criteria.
 			<cfelse><!--- User has not defined custom servers in the xml config --->
 
 				<cfif hasSpecifiedAuthCredentials()>
-					<cfmail from="#getFrom()#" 
+					<cfmail from="#getFrom()#"
 						to="#getTo()#"
 						subject="#getSubject()#"
 						type="#getMailType()#"
@@ -256,7 +263,7 @@ See that file header for configuration of filter criteria.
 						spoolenable="#getSpoolEnable()#"
 						timeout="#getTimeout()#"><cfoutput>#body#</cfoutput></cfmail>
 				<cfelse>
-					<cfmail from="#getFrom()#" 
+					<cfmail from="#getFrom()#"
 						to="#getTo()#"
 						subject="#getSubject()#"
 						type="#getMailType()#"
@@ -273,7 +280,7 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
-		
+
 		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
 			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 		</cfif>
@@ -285,7 +292,7 @@ See that file header for configuration of filter criteria.
 			hint="Redirect persist data struct." />
 
 		<cfset var loggingData = StructNew() />
-		
+
 		<cfif getLogAdapter().getLoggingEnabled()>
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
@@ -304,9 +311,9 @@ See that file header for configuration of filter criteria.
 	--->
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets the configuration data for this logger including adapter and filter.">
-		
+
 		<cfset var data = StructNew() />
-		
+
 		<cfset data["To Email"] = getTo() />
 		<cfset data["From Email"] = getFrom() />
 		<cfset data["Subject"] = getSubject() />
@@ -319,7 +326,7 @@ See that file header for configuration of filter criteria.
 		<cfset data["Timeout"] = getTimeout() />
 		<cfset data["Logging Enabled"] = YesNoFormat(isLoggingEnabled()) />
 		<cfset data["Logging Level for Email Trigger"] = getLoggingLevelEmailTrigger() />
-		
+
 		<cfreturn data />
 	</cffunction>
 
@@ -331,7 +338,7 @@ See that file header for configuration of filter criteria.
 		<cfargument name="version" type="string" required="true" />
 
 		<cfset var release = "" />
-		
+
 		<cfswitch expression="#ListLast(arguments.version, ".")#">
 			<cfcase value="0">
 				<cfset release = "BER - Unknown build" />
@@ -367,46 +374,46 @@ See that file header for configuration of filter criteria.
 				<cfset release = "BER - Build " & ListLast(arguments.version, ".") />
 			</cfdefaultcase>
 		</cfswitch>
-		
+
 		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
 	</cffunction>
-	
+
 	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
 		<cfargument name="array2" type="array" required="true" />
-		
+
 		<cfset var result = arguments.array1 />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(arguments.array2)#" index="i">
 			<cfset ArrayAppend(result, arguments.array2[i]) />
 		</cfloop>
-		
+
 		<cfreturn result />
 	</cffunction>
 
 	<cffunction name="hasReachedLoggingLevelEmailTrigger" access="private" returntype="boolean" output="false"
 		hint="Determines if the current logging data has reached the logging level defined to trigger an email.">
-		
+
 		<cfset var data = getLogAdapter().getLoggingData().data />
 		<cfset var triggerLevel = getLevelEmailTrigger() />
 		<cfset var i = 0 />
 		<cfset var result = false />
-		
+
 		<cfloop from="1" to="#ArrayLen(data)#" index="i">
 			<cfif data[i].logLevel GTE triggerLevel>
 				<cfset result = true />
 				<cfbreak />
 			</cfif>
 		</cfloop>
-	
-		<cfreturn result />	
+
+		<cfreturn result />
 	</cffunction>
 
 	<cffunction name="hasSpecifiedAuthCredentials" access="private" returntype="boolean" output="false"
 		hint="Determines if user correctly specified a username and password in the loggers xml configuration file">
-		
+
 		<cfset var result = false />
 
 		<cfif Len(getUsername()) AND Len(getPassword())>
@@ -431,7 +438,7 @@ See that file header for configuration of filter criteria.
 		hint="Gets the email template location.">
 		<cfreturn variables.instance.emailTemplateFile />
 	</cffunction>
-	
+
 	<cffunction name="setTo" access="private" returntype="void" output="false">
 		<cfargument name="to" type="string" required="true" />
 		<cfset variables.instance.to = arguments.to />
@@ -447,7 +454,7 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getFrom" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.from />
 	</cffunction>
-	
+
 	<cffunction name="setLoggingLevelEmailTrigger" access="private" returntype="void" output="false"
 		hint="Sets the human readable logging level name which is translated to ">
 		<cfargument name="loggingLevelEmailTrigger" type="string" required="true" />
@@ -457,7 +464,7 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getLoggingLevelEmailTrigger" access="public" returntype="string" output="false">
 		<cfreturn getLogAdapter().translateLevelToName(getLevelEmailTrigger()) />
 	</cffunction>
-	
+
 	<cffunction name="setLevelEmailTrigger" access="private" returntype="void" output="false">
 		<cfargument name="levelEmailTrigger" type="numeric" required="true" />
 		<cfset variables.instance.levelEmailTrigger = arguments.levelEmailTrigger />
@@ -521,7 +528,7 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getTimeout" access="public" returntype="numeric" output="false">
 		<cfreturn variables.instance.timeout />
 	</cffunction>
-	
+
 	<cffunction name="setMailType" access="private" returntype="void" output="false">
 		<cfargument name="mailType" type="string" required="true" />
 		<cfset variables.instance.mailType = arguments.mailType />
@@ -529,5 +536,5 @@ See that file header for configuration of filter criteria.
 	<cffunction name="getMailType" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.mailType />
 	</cffunction>
-	
+
 </cfcomponent>

@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -41,31 +48,31 @@ Updated version: 1.9.0
 
 Notes:
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="ViewContext"
 	output="false"
 	hint="Handles view display for an EventContext.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.propertyManager = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ViewContext" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		
+
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setPropertyManager(getAppManager().getPropertyManager()) />
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.ViewContext")) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -83,12 +90,12 @@ Notes:
 			hint="Directive to append the view to an event arg." />
 		<cfargument name="prepend" type="any" required="false"
 			hint="Directive to prepend the view to an event arg." />
-		
+
 		<cfset var viewPath = getFullPath(arguments.viewName) />
 		<cfset var viewContent = "" />
 		<cfset var resolvedContentData = "" />
 		<cfset var log = getLog() />
-		
+
 		<cfif log.isDebugEnabled()>
 			<cfif Len(arguments.contentKey)>
 				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
@@ -100,7 +107,7 @@ Notes:
 				<cfset log.debug("Rendering view '#arguments.viewName#'.") />
 			</cfif>
 		</cfif>
-		
+
 		<!--- This has been left in for BC --->
 		<cfset request.event = arguments.event />
 
@@ -124,7 +131,7 @@ Notes:
 			<cfif log.isWarnEnabled()>
 				<cfset log.warn("DEPRECATED: The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
 			</cfif>
-			
+
 			<cfif arguments.append AND IsDefined(arguments.contentKey)>
 				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
 				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
@@ -140,7 +147,7 @@ Notes:
 			</cfif>
 			<cfset SetVariable(arguments.contentKey, viewContent) />
 		</cfif>
-		
+
 		<cfif arguments.contentArg NEQ ''>
 			<cfif arguments.append>
 				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
@@ -157,12 +164,12 @@ Notes:
 			</cfif>
 			<cfset arguments.event.setArg(arguments.contentArg, viewContent) />
 		</cfif>
-		
+
 		<cfif arguments.contentKey EQ '' AND arguments.contentArg EQ ''>
 			<cfoutput>#viewContent#</cfoutput>
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
@@ -177,34 +184,34 @@ Notes:
 
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
-		
+
 		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
 	</cffunction>
-	
+
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
 		<cfargument name="urlParametersToRemove" type="string" required="false" default=""
 			hint="Comma delimited list of url parameter names of items to remove from the current url" />
-		
+
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 
 		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
 	</cffunction>
-	
+
 	<cffunction name="buildUnescapedCurrentUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url that does not escape entities for html display.">
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
-		
+
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 
 		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
-	
+
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url and automatically escapes entities for html display.">
 		<cfargument name="routeName" type="string" required="true"
@@ -214,8 +221,8 @@ Notes:
 		<cfargument name="queryStringParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
-			hint="Base of the url. Defaults to the value of the urlBase property." />		
-		
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+
 		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
 
@@ -232,10 +239,10 @@ Notes:
 
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
-		
+
 		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
 	</cffunction>
-	
+
 	<cffunction name="buildUnescapedUrl" access="public" returntype="string" output="false"
 		hint="Builds an unescaped framework specific url and does not escape entities.">
 		<cfargument name="eventName" type="string" required="true"
@@ -247,10 +254,10 @@ Notes:
 
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
-		
+
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
-	
+
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url with module name and automatically escapes entities for html display.">
 		<cfargument name="moduleName" type="string" required="true"
@@ -276,11 +283,11 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
-	
+
 	<cffunction name="inEnvironmentGroup" access="public" returntype="boolean" output="false"
 		hint="Checks if the current environment group matches the passed list/array of groups.">
 		<cfargument name="environmentGroup" type="any" required="true"
-			hint="A comma-delimited list or array of groups to use for matching." />		
+			hint="A comma-delimited list or array of groups to use for matching." />
 		<cfreturn getAppManager().inEnvironmentGroup(arguments.environmentGroup) />
 	</cffunction>
 
@@ -342,7 +349,7 @@ Notes:
 			hint="The text for the statuscode for the HTTP header. Defaults to the correct text if the statuscode matches a standard statuscode." />
 		<cfset addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
-	
+
 	<cffunction name="copyToScope" access="public" returntype="void" output="false"
 		hint="Copies an evaluation string to a scope.">
 		<cfargument name="evaluationString" type="string" required="true"
@@ -351,7 +358,7 @@ Notes:
 			hint="A reference to the scope to to place the copies into. Defaults to the variables scope." />
 		<cfset getAppManager().getUtils().copyToScope(arguments.evaluationString, arguments.scopeReference, getAppManager()) />
 	</cffunction>
-	
+
 	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
 		hint="Gets the basic assertion utility.">
 		<cfreturn getAppManager().getAssert() />
@@ -365,13 +372,13 @@ Notes:
 		<cfargument name="viewName" type="string" required="true" />
 		<cfreturn getAppManager().getViewManager().getViewPath(arguments.viewName) />
 	</cffunction>
-	
+
 	<cffunction name="getUnresolvedPath" access="private" returntype="string" output="false"
 		hint="Gets the full path of a view by view name from the view manager.">
 		<cfargument name="viewName" type="string" required="true" />
 		<cfreturn getAppManager().getViewManager().getUnresolvedViewPath(arguments.viewName) />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -394,16 +401,16 @@ Notes:
 	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
 		hint="Gets the components PropertyManager instance.">
 		<cfreturn variables.propertyManager />
-	</cffunction>	
+	</cffunction>
 
 	<cffunction name="setProperty" access="public" returntype="void" output="false"
 		hint="Sets the specified property - this is just a shortcut for getAppManager().getPropertyManager().setProperty()">
 		<cfargument name="propertyName" type="string" required="true"
 			hint="The name of the property to set." />
-		<cfargument name="propertyValue" type="any" required="true" 
+		<cfargument name="propertyValue" type="any" required="true"
 			hint="The value to store in the property." />
 		<cfset getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
-	</cffunction>	
+	</cffunction>
 	<cffunction name="getProperty" access="public" returntype="any" output="false"
 		hint="Gets the specified property - this is just a shortcut for getAppManager().getPropertyManager().getProperty()">
 		<cfargument name="propertyName" type="string" required="true"
@@ -418,7 +425,7 @@ Notes:
 			hint="The named of the property to check if it is defined." />
 		<cfreturn getPropertyManager().isPropertyDefined(arguments.propertyName) />
 	</cffunction>
-	
+
 	<cffunction name="setLog" access="public" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="log" type="MachII.logging.Log" required="true" />

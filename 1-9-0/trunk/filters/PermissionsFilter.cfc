@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -43,25 +50,25 @@ PermissionsFilter
 	This event-filter tests an event for required permissions specified.
 	If the required permissions are not possessed by the user then event
 	processing is aborted and a specified event is announced.
-	
+
 Configuration Parameters:
 	["requiredPermissions"] - default comma delimited list of permission keys required to process the event
 	["invalidEvent"] - default event to announce if all required permissions are not possessed by the user
-	["invalidMessage"] - default message to provide if the all required permissions are not possessed by the user 
+	["invalidMessage"] - default message to provide if the all required permissions are not possessed by the user
 	["clearEventQueue"] - whether or not to clear the event queue if the permissions are invalid (defaults to true)
-	
+
 Event-Handler Parameters:
 	"requiredPermissions" - a comma delimited list of permission keys required to process the event
 	"invalidEvent" - the event to announce if all required permissions are not possessed by the user
-	["invalidMessage"] - the message to provide if the all required permissions are not possessed by the user 
+	["invalidMessage"] - the message to provide if the all required permissions are not possessed by the user
 	["clearEventQueue"] - whether or not to clear the event queue if the permissions are invalid (defaults to true)
 --->
-<cfcomponent 
-	displayname="PermissionsFilter" 
+<cfcomponent
+	displayname="PermissionsFilter"
 	extends="MachII.framework.EventFilter"
 	output="false"
 	hint="A robust EventFilter for testing that a user has the proper permissions to execute and event.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -86,7 +93,7 @@ Event-Handler Parameters:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />
-		
+
 		<cfset var isContinue = true />
 		<cfset var requiredPermissions = '' />
 		<cfset var invalidEvent = '' />
@@ -94,7 +101,7 @@ Event-Handler Parameters:
 		<cfset var clearEventQueue = '' />
 		<cfset var userPermissions = '' />
 		<cfset var newEventArgs = 0 />
-				
+
 		<!--- requiredPermissions --->
 		<cfif StructKeyExists(arguments.paramArgs,this.REQUIRED_PERMISSIONS_PARAM)>
 			<cfset requiredPermissions = paramArgs[this.REQUIRED_PERMISSIONS_PARAM] />
@@ -119,7 +126,7 @@ Event-Handler Parameters:
 		<cfelse>
 			<cfset clearEventQueue = getParameter(this.CLEAR_EVENT_QUEUE_PARAM,true) />
 		</cfif>
-		
+
 		<!--- Ensure required parameters are specified. --->
 		<cfif NOT (requiredPermissions EQ '' OR invalidEvent EQ '')>
 			<cfset userPermissions = getUserPermissions() />
@@ -127,7 +134,7 @@ Event-Handler Parameters:
 		<cfelse>
 			<cfset throwUsageException() />
 		</cfif>
-		
+
 		<cfif isContinue>
 			<!--- If the permissions are acceptable then return true to continue processing the current event. --->
 			<cfreturn true />
@@ -144,7 +151,7 @@ Event-Handler Parameters:
 			<cfreturn false />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="getUserPermissions" access="public" returntype="any"
 		hint="Checks if user permissions is defined.">
 		<!--- Overwrite to specifiy where to find the user's permissions. --->
@@ -155,24 +162,24 @@ Event-Handler Parameters:
 			<cfreturn '' />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="validatePermissions" access="public" returntype="boolean"
 		hint="Validates if required permissions exists in the user's permissions.">
 		<cfargument name="requiredPermissions" type="string" required="true" />
 		<cfargument name="userPermissions" type="string" required="true" />
-		
+
 		<cfset var isValidated = true />
 		<cfset var permission = 0 />
-		
+
 		<cfloop index="permission" list="#requiredPermissions#" delimiters=",">
 			<cfif NOT ListContainsNoCase(arguments.userPermissions,permission)>
 				<cfset isValidated = false />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn isValidated />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -181,5 +188,5 @@ Event-Handler Parameters:
 		<cfset var throwMsg = "PermissionsFilter requires the following usage parameters: " & this.REQUIRED_PERMISSIONS_PARAM & ", " & this.INVALID_EVENT_PARAM & "." />
 		<cfthrow message="#throwMsg#" />
 	</cffunction>
-	
+
 </cfcomponent>

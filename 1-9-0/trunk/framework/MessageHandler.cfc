@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -41,7 +48,7 @@ Updated version: 1.8.0
 
 Notes:
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="MessageHandler"
 	output="false"
 	hint="Handles processing of message subscribers from publish commands.">
@@ -58,7 +65,7 @@ Notes:
 	<cfset variables.log = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -79,7 +86,7 @@ Notes:
 
 		<cfreturn this />
  	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -87,7 +94,7 @@ Notes:
 		hint="Handles the message.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
-		
+
 		<cfset var subscribers = getMessageSubscribers() />
 		<cfset var threadingAdapter = getThreadingAdapter() />
 		<cfset var threadIds = StructNew() />
@@ -99,34 +106,34 @@ Notes:
 		<cfset var log = getLog() />
 		<cfset var key = "" />
 		<cfset var i = 0 />
-		
+
 		<!--- Don't run if there are nothing subscribed --->
 		<cfif StructCount(subscribers)>
-			
+
 			<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
 			<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
-			
+
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
 				</cfif>
-				
+
 				<!--- Setup parameters --->
 				<cfset parameters.event = arguments.event />
 				<cfset parameters.eventContext = arguments.eventContext />
-				
+
 				<!--- Run all the threads --->
 				<cfloop collection="#subscribers#" item="key">
 					<cfset threadIds[threadingAdapter.run(subscribers[key], "execute", parameters)] = key />
 				</cfloop>
-				
+
 				<!--- Wait and join --->
 				<cfif getWaitForThreads()>
 					<cfif log.isDebugEnabled()>
 						<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
 					</cfif>
-	
+
 					<cfset results = threadingAdapter.join(threadIds, getTimeout()) />
-					
+
 					<!--- Create an exception --->
 					<cfif ArrayLen(results.errors)>
 						<cfset continue = false />
@@ -154,35 +161,35 @@ Notes:
 				<cfif log.isDebugEnabled()>
 					<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
 				</cfif>
-	
+
 				<cfloop collection="#subscribers#" item="key">
 					<cfset subscribers[key].execute(arguments.event, arguments.eventContext) />
 				</cfloop>
 			</cfif>
-		
+
 		<cfelse>
 			<cfif log.isWarnEnabled()>
 				<cfset log.warn("There are no listeners or beans that have subscribed to a message named '#getMessageName()#'. Please check your configuration.") />
 			</cfif>
 		</cfif>
-		
+
 		<cfreturn continue />
 	</cffunction>
-	
+
 	<cffunction name="addMessageSubscriber" access="public" returntype="void" output="false"
 		hint="Registers a subscriber (notify / call-method command) to this message.">
 		<cfargument name="messageSubscriber" type="MachII.framework.Command" required="true" />
-		
+
 		<cfset var key = variables.system.identityHashCode(arguments.messageSubscriber) />
-		
+
 		<cfset variables.messageSubscribers[key] = arguments.messageSubscriber />
 	</cffunction>
-	
+
 	<cffunction name="getMessageSubscribers" access="public" returntype="struct" output="false"
 		hint="Gets all message subscribers.">
 		<cfreturn variables.messageSubscribers />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
@@ -190,7 +197,7 @@ Notes:
 		hint="Gets an array of message subscriber invoker names.">
 		<cfreturn StructKeyArray(variables.messageSubscribers) />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -201,7 +208,7 @@ Notes:
 	<cffunction name="getMessageName" access="public" returntype="string" output="false">
 		<cfreturn variables.messageName />
 	</cffunction>
-	
+
 	<cffunction name="setMultithreaded" access="private" returntype="void" output="false">
 		<cfargument name="multithreaded" type="boolean" required="true" />
 		<cfset variables.multithreaded = arguments.multithreaded />
@@ -235,7 +242,7 @@ Notes:
 		hint="Gets a threading adapter.">
 		<cfreturn variables.threadingAdapter />
 	</cffunction>
-	
+
 	<cffunction name="setUtils" access="public" returntype="void" output="false">
 		<cfargument name="utils" type="MachII.util.Utils" required="true" />
 		<cfset variables.utils = arguments.utils />
@@ -243,7 +250,7 @@ Notes:
 	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false">
 		<cfreturn variables.utils />
 	</cffunction>
-	
+
 	<cffunction name="setLog" access="public" returntype="void" output="false"
 		hint="Sets the log.">
 		<cfargument name="log" type="MachII.logging.Log" required="true" />

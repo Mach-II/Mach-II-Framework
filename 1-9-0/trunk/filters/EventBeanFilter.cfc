@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -43,23 +50,23 @@ Deprecated version 1.5.0
 EventBeanFilter
 	This event-filter creates beans in an event and populates the beans
 	using event-args.
-	
+
 	Beans are expected to follow the standard Java bean pattern of having
-	a no argument constuctor (an init() function with no required arguments) 
-	and setter functions with name setXXX() (with a single argument named XXX) 
+	a no argument constuctor (an init() function with no required arguments)
+	and setter functions with name setXXX() (with a single argument named XXX)
 	for field XXX.
-	
-	If the "fields" parameter is not specified for the filter, then the 
-	entire event-args struct will be passed to the bean's init() function 
+
+	If the "fields" parameter is not specified for the filter, then the
+	entire event-args struct will be passed to the bean's init() function
 	as an argument collection.
-	
+
 Configuration Parameters:
 	["name"] - The name of the bean to create (in the event-args).
 	["type"] - The type of the bean to create.
 	["fields"] - The fields from the event-args to set in the bean.
-	
+
 Event-Handler Parameters:
-	These parameters will override configuration parameters specified with 
+	These parameters will override configuration parameters specified with
 		the same name.
 	"name" - The name of the bean to create (in the event-args).
 	"type" - The type of the bean to create.
@@ -68,21 +75,21 @@ Event-Handler Parameters:
 Notes:
 This filter has been DEPRECATED in Mach-II 1.5.0.
 --->
-<cfcomponent 
-	displayname="EventBeanFilter" 
+<cfcomponent
+	displayname="EventBeanFilter"
 	extends="MachII.framework.EventFilter"
 	output="false"
 	hint="DEPRECATED. A robust EventFilter for creating and populating beans in events.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset this.BEAN_NAME_PARAM = "name" />
 	<cfset this.BEAN_TYPE_PARAM = "type" />
 	<cfset this.BEAN_FIELDS_PARAM = "fields" />
-	
+
 	<cfset variables.beanUtil = "" />
-	
+
 	<!---
 	INITALIZATION / CONFIGURATION
 	--->
@@ -90,7 +97,7 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 		hint="DEPRECATED. Configures the filter.">
 		<cfset setBeanUtil( CreateObject('component','MachII.util.BeanUtil') ) />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -99,32 +106,32 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#" />
-		
+
 		<cfset var bean = "" />
 		<cfset var beanName = "" />
 		<cfset var beanType = "" />
 		<cfset var beanFields = "" />
 		<cfset var isFieldsDefined = false />
 		<cfset var log = getLog() />
-		
+
 		<cfif log.isWarnEnabled()>
 			<cfset log.warn("DEPRECATED: Filter '#getComponentNameForLogging()#' has been deprecated. Use the <event-bean> command.") />
 		</cfif>
-		
+
 		<!--- beanName --->
 		<cfif StructKeyExists(arguments.paramArgs, this.BEAN_NAME_PARAM)>
 			<cfset beanName = paramArgs[this.BEAN_NAME_PARAM] />
 		<cfelseif isParameterDefined(this.BEAN_NAME_PARAM)>
 			<cfset beanName = getParameter(this.BEAN_NAME_PARAM) />
 		</cfif>
-		
+
 		<!--- beanType --->
 		<cfif StructKeyExists(arguments.paramArgs, this.BEAN_TYPE_PARAM)>
 			<cfset beanType = paramArgs[this.BEAN_TYPE_PARAM] />
 		<cfelseif isParameterDefined(this.BEAN_TYPE_PARAM)>
 			<cfset beanType = getParameter(this.BEAN_TYPE_PARAM) />
 		</cfif>
-		
+
 		<!--- beanFields --->
 		<cfif StructKeyExists(arguments.paramArgs, this.BEAN_FIELDS_PARAM)>
 			<cfset beanFields = paramArgs[this.BEAN_FIELDS_PARAM] />
@@ -135,12 +142,12 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 		<cfelse>
 			<cfset isFieldsDefined = false />
 		</cfif>
-		
+
 		<!--- Check for required parameters. --->
 		<cfif beanName EQ '' OR beanType EQ ''>
 			<cfset throwUsageException() />
 		</cfif>
-		
+
 		<!--- Create the bean and populate it using either setters or init(). --->
 		<cfif isFieldsDefined>
 			<cfset bean = getBeanUtil().createBean(beanType) />
@@ -148,10 +155,10 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 		<cfelse>
 			<cfset bean = getBeanUtil().createBean(beanType, arguments.event.getArgs()) />
 		</cfif>
-		
+
 		<!--- Set the bean in the event-args. --->
 		<cfset arguments.event.setArg(beanName, bean, beanType) />
-		
+
 		<cfreturn true />
 	</cffunction>
 
@@ -173,5 +180,5 @@ This filter has been DEPRECATED in Mach-II 1.5.0.
 	<cffunction name="getBeanUtil" access="private" returntype="MachII.util.BeanUtil" output="false">
 		<cfreturn variables.beanUtil />
 	</cffunction>
-	
+
 </cfcomponent>
