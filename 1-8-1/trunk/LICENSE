@@ -1,17 +1,17 @@
-The software in this package is distributed under the GNU General Public
-License (with a special exception described below).  The term "library"
-is a reference to the entire Mach-II package and all files in which
-the GNU General Public License applies.
+	The software in this package is distributed under the GNU General Public
+	License (with a special exception described below).  The term "library"
+	is a reference to the entire Mach-II package and all files in which
+	the GNU General Public License applies.
 
-A copy of GNU General Public License (GPL) is included in this distribution,
-in the file COPYING.  If you do not have the source code, it is available at:
+	A copy of GNU General Public License (GPL) is included in this distribution,
+	in the file COPYING.  If you do not have the source code, it is available at:
 
-    http://www.mach-ii.com
+    	http://www.mach-ii.com
 
-  Linking this library statically or dynamically with other modules is
-  making a combined work based on this library.  Thus, the terms and
-  conditions of the GNU General Public License cover the whole
-  combination.
+	Linking this library statically or dynamically with other modules is
+	making a combined work based on this library.  Thus, the terms and
+	conditions of the GNU General Public License cover the whole
+	combination.
  
 	As a special exception, the copyright holders of this library give you 
 	permission to link this library with independent modules to produce an 
