@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -40,32 +47,32 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
-Parts of these tests has been kindly ported from the 
+Parts of these tests has been kindly ported from the
 Spring Framework (http://www.springframework.org)
 --->
 <cfcomponent
 	displayname="SimplePatternMatcherTest"
 	extends="mxunit.framework.TestCase"
 	hint="Test cases for MachII.util.SimplePatternMatcher.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.pm = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="setup" access="public" returntype="void" output="false"
-		hint="Logic to run to setup before each test case method.">		
+		hint="Logic to run to setup before each test case method.">
 		<cfset variables.pm = CreateObject("component", "MachII.util.SimplePatternMatcher").init() />
 	</cffunction>
-	
+
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
 		hint="Logic to run to tear down after each test case method.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
@@ -76,7 +83,7 @@ Spring Framework (http://www.springframework.org)
 		<cfset doTest("*", "123", true) />
 		<cfset doTest("123", "123", true) />
 	</cffunction>
-	
+
 	<cffunction name="testStartsWith" access="public" returntype="void" output="false"
 		hint="Tests matches based on startsWith.">
 		<cfset doTest("get*", "getMe", true) />
@@ -88,7 +95,7 @@ Spring Framework (http://www.springframework.org)
 		<cfset doTest("*Test", "getMeTest", true) />
 		<cfset doTest("*Test", "setMe", false) />
 	</cffunction>
-	
+
 	<cffunction name="testBetween" access="public" returntype="void" output="false"
 		hint="Tests matches based on patterns *XYZ*.">
 		<cfset doTest("*stuff*", "getMeTest", false) />
@@ -105,7 +112,7 @@ Spring Framework (http://www.springframework.org)
 		<cfset doTest("on*Event", "onEvent", true) />
 		<cfset doTest("on*Event", "onMyEvent", true) />
 	</cffunction>
-	
+
 	<cffunction name="testStartsEndsBetween" access="public" returntype="void" output="false"
 		hint="Tests matches based on patterns with a double *'s in the middle.">
 		<cfset doTest("12*45*78", "12345678", true) />
@@ -134,7 +141,7 @@ Spring Framework (http://www.springframework.org)
 		<cfargument name="pattern" type="any" required="true" />
 		<cfargument name="text" type="string" required="true" />
 		<cfargument name="shouldMatch" type="boolean" required="true" />
-		
+
 		<cfif arguments.shouldMatch>
 			<cfset assertTrue(variables.pm.match(arguments.pattern, arguments.text), "Failed with pattern '#arguments.pattern#' and text '#arguments.text#'.") />
 		<cfelse>
