@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -52,12 +52,12 @@ Notes:
 	displayname="LRUCacheTest"
 	extends="mxunit.framework.TestCase"
 	hint="Test cases for MachII.caching.strategies.LRUCache.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.cache = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -72,73 +72,73 @@ Notes:
 		<cfset variables.cache = CreateObject("component", "MachII.caching.strategies.LRUCache").init(parameters) />
 		<cfset variables.cache.configure() />
 	</cffunction>
-	
+
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
 		hint="Logic to run to tear down after each test case method.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testPutExistsGet" access="public" returntype="void"
+	<cffunction name="testPutExistsGet" access="public" returntype="void" output="false"
 		hint="Tests put, exist and getting a piece of data from the cache.">
 
 		<cfset var testKey = "productID=1" />
-		
+
 		<cfset variables.cache.put(testkey, "testing") />
-		
+
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 	</cffunction>
-	
-	<cffunction name="testPutGetGet" access="public" returntype="void"
+
+	<cffunction name="testPutGetGet" access="public" returntype="void" output="false"
 		hint="Tests put, exist and getting a piece of data from the cache.">
 
 		<cfset var testKey = "productID=1" />
-		
+
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 		<cfset assertTrue(variables.cache.get(testkey) eq "testing") />
 	</cffunction>
-	
-	<cffunction name="testFlush" access="public" returntype="void"
+
+	<cffunction name="testFlush" access="public" returntype="void" output="false"
 		hint="Tests flushing the cache.">
-		
+
 		<cfset var testKey = "productID=1" />
-		
+
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
-		
+
 		<cfset variables.cache.flush() />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 	</cffunction>
-	
-	<cffunction name="testRemove" access="public" returntype="void"
+
+	<cffunction name="testRemove" access="public" returntype="void" output="false"
 		hint="Tests removing cached data by key.">
-		
+
 		<cfset var testKey = "productID=1" />
 
 		<cfset variables.cache.put(testkey, "testing") />
 		<cfset assertTrue(variables.cache.keyExists(testkey)) />
-		
+
 		<cfset variables.cache.remove(testkey) />
 		<cfset assertFalse(variables.cache.keyExists(testkey)) />
 	</cffunction>
-	
-	<cffunction name="testReap" access="public" returntype="void"
+
+	<cffunction name="testReap" access="public" returntype="void" output="false"
 		hint="Tests reap by simulating load on LRU.">
-		
+
 		<cfset var i = 0 />
 		<cfset var thread = CreateObject("java", "java.lang.Thread") />
-		
+
 		<cfloop from="1" to="10" index="i">
 			<cfset variables.cache.put("productID=#i#", "testing #i#") />
 			<cfset thread.sleep(50) />
 		</cfloop>
-		
+
 		<cfset debug(variables.cache.getStorage()) />
-		
+
 		<cfset assertFalse(variables.cache.keyExists("productID=1")) />
 		<cfset assertTrue(variables.cache.keyExists("productID=10")) />
 	</cffunction>

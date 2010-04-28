@@ -152,7 +152,7 @@ Event-Handler Parameters:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="getUserPermissions" access="public" returntype="any"
+	<cffunction name="getUserPermissions" access="public" returntype="any" output="false"
 		hint="Checks if user permissions is defined.">
 		<!--- Overwrite to specifiy where to find the user's permissions. --->
 		<!--- Defaults to session.permissions. --->
@@ -163,7 +163,7 @@ Event-Handler Parameters:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="validatePermissions" access="public" returntype="boolean"
+	<cffunction name="validatePermissions" access="public" returntype="boolean" output="false"
 		hint="Validates if required permissions exists in the user's permissions.">
 		<cfargument name="requiredPermissions" type="string" required="true" />
 		<cfargument name="userPermissions" type="string" required="true" />

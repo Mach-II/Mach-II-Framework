@@ -67,8 +67,7 @@ Notes:
 	PUBLIC METHODS
 	--->
 
-	<cffunction name="myParentAnnotatedMethod"
-		access="public" returntype="String" output="false"
+	<cffunction name="myParentAnnotatedMethod" access="public" returntype="String" output="false"
 		rest:uri="/parent/go"
 		rest:accepts="GET">
 		<cfreturn "myParentAnnotatedMethod was called" />

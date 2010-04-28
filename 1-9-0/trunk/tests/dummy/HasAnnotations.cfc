@@ -68,8 +68,7 @@ Notes:
 	PUBLIC METHODS
 	--->
 
-	<cffunction name="myLocalAnnotatedMethod"
-		access="public" returntype="String" output="false"
+	<cffunction name="myLocalAnnotatedMethod" access="public" returntype="String" output="false"
 		rest:uri="/test/me"
 		rest:accepts="GET">
 		<cfreturn "myLocalAnnotatedMethod was called." />

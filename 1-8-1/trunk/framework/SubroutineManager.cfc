@@ -169,7 +169,7 @@ Notes:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="getSubroutineHandler" access="public" returntype="MachII.framework.SubroutineHandler"
+	<cffunction name="getSubroutineHandler" access="public" returntype="MachII.framework.SubroutineHandler" output="false"
 		hint="Returns the SubroutineHandler for the named Subroutine. Checks parent.">
 		<cfargument name="subroutineName" type="string" required="true"
 			hint="The name of the Subroutine to handle." />
