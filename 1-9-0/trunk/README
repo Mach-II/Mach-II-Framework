@@ -111,9 +111,11 @@ the GNU General Public License applies.
 	- MachII.logging.loggers.AbstractLogger
 	- MachII.properties.*
 	- MachII.util.threading.ThreadingAdapter
+	- MachII.util.Exception
 	- MachII.util.Queue
 	- MachII.util.SizedQueue
 	- MachII.util.UtilityConnector
+	- MachII.util.XmlValidationException
 	- Any Mach-II custom tag that is extended through <cfinclude>
 
 Mach-II's documentation and logos are *not* licensed under the GPL v3.0 license:
