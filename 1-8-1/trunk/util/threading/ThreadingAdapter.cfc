@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -50,7 +57,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.allowThreading = FALSE />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -58,7 +65,7 @@ Notes:
 		hint="This is the base class. Please instantiate a concrete adapter.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -72,7 +79,7 @@ Notes:
 			hint="Arguments to pass to the callback method." />
 		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
 	</cffunction>
-	
+
 	<cffunction name="join" access="public" returntype="void" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="any" required="true"
@@ -81,7 +88,7 @@ Notes:
 			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
 		<cfabort showerror="This is the base class. Please instantiate a concrete adapter." />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTIL
 	--->
@@ -89,29 +96,29 @@ Notes:
 		hint="Returns a boolean if threading is allowed. Does not actually test if threading works, but a boolean of if threading is implemented in the target CFML engine in general.">
 		<cfreturn variables.allowThreading />
 	</cffunction>
-	
+
 	<cffunction name="testIfThreadingAvailable" access="public" returntype="boolean" output="false"
 		hint="Tests if threading is available because some configurations disable threading in the security sandbox.">
-		
+
 		<cfset var available = true />
-		
+
 		<cftry>
 			<cfset run(this, "dummyTestMethod") />
-			
+
 			<!--- If any error occurs, then threading has been disabled --->
 			<cfcatch type="any">
 				<cfset available = false />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfreturn available />
 	</cffunction>
-	
+
 	<cffunction name="dummyTestMethod" access="public" returntype="boolean" output="false"
 		hint="This is just a dummy method for the testIfThreadingAvailable() method to call. DO NOT CALL THIS METHOD.">
 		<cfreturn true />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->

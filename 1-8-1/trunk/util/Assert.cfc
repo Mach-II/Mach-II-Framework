@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
@@ -40,7 +47,7 @@ Created version: 1.8.0
 Updated version: 1.8.0
 
 Notes:
-Loosely based off the same class from the Spring Framework 
+Loosely based off the same class from the Spring Framework
 (http://www.springframework.org)
 
 All assertions must return 'true' because returning is like returning
@@ -57,7 +64,7 @@ Example of null pointer if 'true' is not returned:
 
 The second conditional in the state returns as null and thus the exception.
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="Assert"
 	output="false"
 	hint="Provides assertion utility methods to aid in the validation of arguments.">
@@ -66,7 +73,7 @@ The second conditional in the state returns as null and thus the exception.
 	PROPERTIES
 	--->
 	<cfset variables.CHARACTER = CreateObject("java", "java.lang.Character") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -74,7 +81,7 @@ The second conditional in the state returns as null and thus the exception.
 		hint="Initializes the utility.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -89,11 +96,11 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-				
+
 		<cfif FindNoCase(arguments.substring, arguments.text)>
 			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
 
@@ -106,14 +113,14 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-				
+
 		<cfif NOT Len(arguments.text)>
 			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<cffunction name="hasText" access="public" returntype="boolean" output="false"
 		hint="Assert that the given string has valid text content; it must not be a zero length string and must contain at least one non-whitespace character.">
 		<cfargument name="text" type="string" required="true"
@@ -123,14 +130,14 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-		
+
 		<cfif NOT checkValidTextContent(arguments.text)>
 			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<cffunction name="isNumber" access="public" returntype="boolean" output="false"
 		hint="Assert that the given text is a number.">
 		<cfargument name="text" type="string" required="true"
@@ -140,14 +147,14 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-		
+
 		<cfif NOT IsNumeric(arguments.text)>
 			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<cffunction name="isTrue" access="public" returntype="boolean" output="false"
 		hint="Assert that the given expression is true.">
 		<cfargument name="expression" type="boolean" required="true"
@@ -157,14 +164,14 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-		
+
 		<cfif NOT arguments.expression>
 			<cfset doThrow(arguments.message, arguments.detail) />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<cffunction name="notEmpty" access="public" returntype="boolean" output="false"
 		hint="Assert that the passed query, struct or array is not empty.">
 		<cfargument name="object" type="any" required="true"
@@ -174,13 +181,13 @@ The second conditional in the state returns as null and thus the exception.
 			hint="The message to throw if the assertion fails." />
 		<cfargument name="detail" type="string" required="false" default=""
 			hint="The detail to throw if the assertion fails." />
-				
+
 		<cfif IsArray(arguments.object)>
 			<cfif NOT ArrayLen(arguments.object)>
 				<cfif NOT StructKeyExists(arguments, "message")>
 					<cfset arguments.message = "[Assertion failed] - this array must not be empty; it must contain at least one element." />
 				</cfif>
-				
+
 				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsStruct(arguments.object)>
@@ -188,7 +195,7 @@ The second conditional in the state returns as null and thus the exception.
 				<cfif NOT StructKeyExists(arguments, "message")>
 					<cfset arguments.message = "[Assertion failed] - this struct must not be empty; it must contain at least one key." />
 				</cfif>
-				
+
 				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelseif IsQuery(arguments.object)>
@@ -196,17 +203,17 @@ The second conditional in the state returns as null and thus the exception.
 				<cfif NOT StructKeyExists(arguments, "message")>
 					<cfset arguments.message = "[Assertion failed] - this query must not be empty; it must contain at least one row." />
 				</cfif>
-				
+
 				<cfset doThrow(arguments.message, arguments.detail) />
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.util.IllegalDatatype"
 				message="The passed argument is not of datatype 'struct', 'array' or 'query' and therefore an assertion cannot be performed." />
 		</cfif>
-		
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -216,38 +223,38 @@ The second conditional in the state returns as null and thus the exception.
 			hint="Message to use in the thrown exception." />
 		<cfargument name="detail" type="string" required="true"
 			hint="Detail to use in the thrown exception" />
-		
+
 		<cfthrow type="MachII.util.IllegalArgument"
 			message="#arguments.message#"
 			detail="#arguments.detail#" />
 	</cffunction>
-	
+
 	<cffunction name="checkValidTextContent" access="private" returntype="boolean" output="false"
 		hint="Checks if valid text content; it must not be a zero length string and must contain at least one non-whitespace character.">
 		<cfargument name="text" type="string" required="true"
 			hint="The text to check the length." />
-		
+
 		<cfset var textCharArray =  "" />
 		<cfset var i = 0 />
-		
+
 		<!--- Check for length --->
 		<cfif NOT Len(arguments.text)>
 			<cfreturn false />
 		</cfif>
-		
+
 		<!--- Length of input text needs to be checked first or a null pointer will occur --->
 		<cfset textCharArray = arguments.text.toCharArray() />
-		
+
 		<!---
-		Check for at least one non-whitespace character 
+		Check for at least one non-whitespace character
 		and short-circuit to true if a non-whitespace character is found
 		--->
 		<cfloop from="1" to="#ArrayLen(textCharArray)#" index="i">
 			<cfif NOT variables.CHARACTER.isWhitespace(textCharArray[i])>
-				<cfreturn true />	
+				<cfreturn true />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn false />
 	</cffunction>
 

@@ -15,23 +15,30 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent
-    modules, and to copy and distribute the resulting executable under
-    terms of your choice, provided that you also meet, for each linked
-    independent module, the terms and conditions of the license of that
-    module.  An independent module is a module which is not derived from
-    or based on this library.  If you modify this library, you may extend
-    this exception to your version of the library, but you are not
-    obligated to do so.  If you do not wish to do so, delete this
-    exception statement from your version.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
@@ -44,7 +51,7 @@ Notes:
 <cfcomponent displayname="Exception"
 	output="false"
 	hint="Encapsulates exception information.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -55,7 +62,7 @@ Notes:
 	<cfset variables.extendedInfo = "" />
 	<cfset variables.tagContext = ArrayNew(1) />
 	<cfset variables.caughtException = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -67,22 +74,22 @@ Notes:
 		<cfargument name="detail" type="string" required="false" default="" />
 		<cfargument name="extendedInfo" type="string" required="false" default="" />
 		<cfargument name="tagContext" type="array" required="false" default="#ArrayNew(1)#" />
-	
+
 		<cfset setType(arguments.type) />
 		<cfset setMessage(arguments.message) />
 		<cfset setErrorCode(arguments.errorCode) />
 		<cfset setDetail(arguments.detail) />
 		<cfset setExtendedInfo(arguments.extendedInfo) />
 		<cfset setTagContext(arguments.tagContext) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="wrapException" access="public" returntype="Exception" output="false"
 		hint="Wraps and sets caughtException (cfcatch).">
 		<cfargument name="caughtException" type="any" required="true"
 			hint="The cfcatch." />
-		
+
 		<cfset setType(arguments.caughtException.type) />
 		<cfset setMessage(arguments.caughtException.message) />
 		<cfset setErrorCode(arguments.caughtException.errorCode) />
@@ -90,10 +97,10 @@ Notes:
 		<cfset setExtendedInfo(arguments.caughtException.extendedInfo) />
 		<cfset setTagContext(arguments.caughtException.TagContext) />
 		<cfset setCaughtException(arguments.caughtException) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -104,7 +111,7 @@ Notes:
 	<cffunction name="getType" access="public" returntype="string" output="false">
 		<cfreturn variables.type />
 	</cffunction>
-	
+
 	<cffunction name="setMessage" access="public" returntype="void" output="false">
 		<cfargument name="message" type="string" required="false" />
 		<cfset variables.message = arguments.message />
@@ -112,7 +119,7 @@ Notes:
 	<cffunction name="getMessage" access="public" returntype="string" output="false">
 		<cfreturn variables.message />
 	</cffunction>
-	
+
 	<cffunction name="setErrorCode" access="public" returntype="void" output="false">
 		<cfargument name="errorCode" type="string" required="false" />
 		<cfset variables.errorCode = arguments.errorCode />
@@ -120,7 +127,7 @@ Notes:
 	<cffunction name="getErrorCode" access="public" returntype="string" output="false">
 		<cfreturn variables.errorCode />
 	</cffunction>
-	
+
 	<cffunction name="setDetail" access="public" returntype="void" output="false">
 		<cfargument name="detail" type="string" required="false" />
 		<cfset variables.detail = arguments.detail />
@@ -128,7 +135,7 @@ Notes:
 	<cffunction name="getDetail" access="public" returntype="string" output="false">
 		<cfreturn variables.detail />
 	</cffunction>
-	
+
 	<cffunction name="setExtendedInfo" access="public" returntype="void" output="false">
 		<cfargument name="extendedInfo" type="string" required="false" />
 		<cfset variables.extendedInfo = arguments.extendedInfo />
@@ -136,7 +143,7 @@ Notes:
 	<cffunction name="getExtendedInfo" access="public" returntype="string" output="false">
 		<cfreturn variables.extendedInfo />
 	</cffunction>
-	
+
 	<cffunction name="setTagContext" access="public" returntype="void" output="false">
 		<cfargument name="extendedInfo" type="array" required="false" />
 		<cfset variables.tagContext = arguments.extendedInfo />
@@ -144,7 +151,7 @@ Notes:
 	<cffunction name="getTagContext" access="public" returntype="array" output="false">
 		<cfreturn variables.tagContext />
 	</cffunction>
-	
+
 	<cffunction name="setCaughtException" access="public" returntype="void" output="false">
 		<cfargument name="caughtException" type="any" required="true" />
 		<cfset variables.caughtException = arguments.caughtException />
@@ -153,5 +160,5 @@ Notes:
 		hint="Gets caughtException (cfcatch) that was collected at the point of the exception.">
 		<cfreturn variables.caughtException />
 	</cffunction>
-	
+
 </cfcomponent>
