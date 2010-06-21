@@ -52,7 +52,7 @@ Notes:
 	displayname="AbstractEndpoint"
 	extends="MachII.framework.BaseComponent"
 	output="false"
-	hint="">
+	hint="An endpoint. This is abstract and must be extended by a concrete strategy implementation.">
 
 	<!---
 	PROPERTIES

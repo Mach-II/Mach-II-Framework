@@ -104,8 +104,8 @@ to return good responses and response codes, use of format (.json), etc.
 	CONSTANTS
 	--->
 	<!--- Constants for the annotations we allow in RestEndpoint sub-classes --->
-	<cfparam name="ANNOTATION_REST_URI" type="string" default="REST:URI" />
-	<cfparam name="ANNOTATION_REST_METHOD" type="string" default="REST:METHOD" />
+	<cfset variables.ANNOTATION_REST_URI = "REST:URI" />
+	<cfset variables.ANNOTATION_REST_METHOD = "REST:METHOD" />
 
 	<!---
 	PROPERTIES
@@ -130,26 +130,28 @@ to return good responses and response codes, use of format (.json), etc.
 
 		<cfset variables.restUris = CreateObject("component", "MachII.endpoints.impl.RestUriCollection").init() />
 
-		<cfif ArrayLen(restMethodMetadata) GT 0>
+		<cfif ArrayLen(restMethodMetadata)>
 			<!--- TODO: Limiting to the base component for now, not following whole object hierarchy yet. --->
 			<cfset currMetadata = restMethodMetadata[1] />
+
 			<cfif StructKeyExists(currMetadata, "functions")>
 				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
 					<!--- Iterate through found methods and look for required REST:URI annotation --->
 					<cfset currFunction = currMetadata.functions[i] />
 					<cfif StructKeyExists(currFunction, ANNOTATION_REST_URI)>
 						<!--- Default to GET method --->
-						<cfset currHttpMethod = "GET" />
 						<cfif StructKeyExists(currFunction, ANNOTATION_REST_METHOD)>
 							<cfset currHttpMethod = currFunction[ANNOTATION_REST_METHOD]>
+						<cfelse>
+							<cfset currHttpMethod = "GET" />
 						</cfif>
 						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
 						<cfset currRestUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
-									uriPattern = currFunction[ANNOTATION_REST_URI],
-									httpMethod = currHttpMethod,
-									functionName = currFunction.name,
-									endpointName = getParameter("name")
-								) />
+								currFunction[ANNOTATION_REST_URI]
+								, currHttpMethod
+								, currFunction.name
+								, getParameter("name")
+							) />
 						<cfset variables.restUris.addRestUri(currRestUri) />
 					</cfif>
 				</cfloop>
@@ -176,6 +178,7 @@ to return good responses and response codes, use of format (.json), etc.
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var restResponseBody = callEndpointFunction(event) />
+
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
@@ -193,11 +196,11 @@ to return good responses and response codes, use of format (.json), etc.
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var responseBody = "" />
-		<cfset var restUri      = event.getArg("restUri") />
-		<cfset var pathInfo     = event.getArg("pathInfo") />
-		<cfset var endpoint     = getEndpointManager().getEndpointByName(restUri.getEndpointName()) />
-		<cfset var urlTokens    = restUri.getTokensFromUri(pathInfo) />
-		<cfset var currToken    = "" />
+		<cfset var restUri = event.getArg("restUri") />
+		<cfset var pathInfo = event.getArg("pathInfo") />
+		<cfset var endpoint = getEndpointManager().getEndpointByName(restUri.getEndpointName()) />
+		<cfset var urlTokens = restUri.getTokensFromUri(pathInfo) />
+		<cfset var currToken = "" />
 
 		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there. --->
 		<cfloop collection="#urlTokens#" item="currToken">

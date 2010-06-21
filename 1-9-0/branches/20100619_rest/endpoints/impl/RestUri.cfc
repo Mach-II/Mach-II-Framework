@@ -64,9 +64,9 @@ For example, a uriPattern like "/service/doit/{value}"
 	CONSTANTS
 	--->
 	<!--- The ONE_TOKEN_REGEX is what will be used to match an individual token in the URL. Used when generating the full uriRegex value. --->
-	<cfparam name="ONE_TOKEN_REGEX" type="string" default="([^\/\?&\.]+)" />
+	<cfset variables.ONE_TOKEN_REGEX ="([^\/\?&\.]+)" />
 	<!--- HTTP_METHODS is the list of supported HTTP request methods. --->
-	<cfparam name="HTTP_METHODS" type="String" default="GET,POST,PUT,DELETE" />
+	<cfset variables.HTTP_METHODS = "GET,POST,PUT,DELETE" />
 
 	<!---
 	PROPERTIES
@@ -84,45 +84,50 @@ For example, a uriPattern like "/service/doit/{value}"
 	--->
 	<cffunction name="init" access="public" returntype="RestUri" output="false"
 		hint="Initializes the RestUri.">
-		<cfargument name="uriPattern" type="String" required="false" default="" />
-		<cfargument name="httpMethod" type="String" required="false" default="" />
-		<cfargument name="functionName" type="String" required="false" default="" />
-		<cfargument name="endpointName" type="String" required="false" default="" />
+		<cfargument name="uriPattern" type="String" required="false" default=""
+			hint="The URI pattern to be used for this endpoint route." />
+		<cfargument name="httpMethod" type="String" required="false" default=""
+			hint="The HTTP method to be used for this endpoint route." />
+		<cfargument name="functionName" type="String" required="false" default=""
+			hint="The name of the function to call when this endpoint route is invoked" />
+		<cfargument name="endpointName" type="String" required="false" default=""
+			hint="The name of this endpoint." />
+
 		<cfset setUriPattern(arguments.uriPattern) />
 		<cfset setHttpMethod(arguments.httpMethod) />
 		<cfset setFunctionName(arguments.functionName) />
 		<cfset setEndpointName(arguments.endpointName) />
+
 		<cfreturn this />
 	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="getTokensFromUri" access="public" returntype="Struct" output="false"
+	<cffunction name="getTokensFromUri" access="public" returntype="struct" output="false"
 		hint="Returns a struct with the token names and values from the input PATH_INFO. Returns empty struct on no match.">
-		<cfargument name="pathInfo" type="String" required="true" />
+		<cfargument name="pathInfo" type="string" required="true"
+			hint="The current path info to parse for tokens." />
 
 		<cfset var stcTokens = StructNew() />
 		<cfset var stcMatches = REFind(variables.uriRegex, arguments.pathInfo, 1, true) />
 		<cfset var intMatchCount = ArrayLen(stcMatches.LEN) />
 		<cfset var i = 0 />
 
-		<cfif stcMatches.LEN[1] GT 0>
-			<!--- The pathInfo matches --->
-			<cfif ArrayLen(variables.uriTokenNames) GT 0>
-				<!--- There are possible tokens, get them and put them in stcTokens --->
-				<cfif intMatchCount GT 2 AND stcMatches.LEN[2] GT 0>
-					<!---
-					There are only tokens if the REFind matches struct has more than
-					two items in the LEN array, since the first element in the LEN array
-					is the length of the entire string, and the last element is any format,
-					which we capture later.
-					 --->
-					<cfloop from="1" to="#intMatchCount-2#" index="i">
-						<cfset stcTokens[variables.uriTokenNames[i]] = Mid(arguments.pathInfo, stcMatches.POS[i+1], stcMatches.LEN[i+1]) />
-					</cfloop>
-				</cfif>
+		<cfif stcMatches.LEN[1]>
+			<!--- If there are possible tokens in the path info, parse for the tokens and put them in stcTokens --->
+			<cfif ArrayLen(variables.uriTokenNames) AND intMatchCount GT 2 AND stcMatches.LEN[2]>
+				<!---
+				There are only tokens if the REFind matches struct has more than
+				two items in the LEN array, since the first element in the LEN array
+				is the length of the entire string, and the last element is any format,
+				which we capture later.
+				 --->
+				<cfloop from="1" to="#intMatchCount-2#" index="i">
+					<cfset stcTokens[variables.uriTokenNames[i]] = Mid(arguments.pathInfo, stcMatches.POS[i+1], stcMatches.LEN[i+1]) />
+				</cfloop>
 			</cfif>
+
 			<!--- Add format as a token, since it is variable (it is always the last element) --->
 			<cfif stcMatches.LEN[intMatchCount] GT 1>
 				<cfset stcTokens["format"] = Mid(arguments.pathInfo, stcMatches.POS[intMatchCount]+1, stcMatches.LEN[intMatchCount]) />
@@ -130,23 +135,24 @@ For example, a uriPattern like "/service/doit/{value}"
 				<cfset stcTokens["format"] = "" />
 			</cfif>
 		</cfif>
+
 		<cfreturn stcTokens />
 	</cffunction>
 
 	<cffunction name="matchUri" access="public" returntype="boolean" output="false"
 		hint="Returns true if the input pathInfo matches the uriPattern of this RestUri, false otherwise.">
-		<cfargument name="pathInfo" type="String" required="true" />
-		<cfset var intMatchPosition = REFind(variables.uriRegex, arguments.pathInfo, 1, false) />
-		<cfreturn intMatchPosition GT 0>
+		<cfargument name="pathInfo" type="string" required="true" />
+		<cfreturn REFind(variables.uriRegex, arguments.pathInfo, 1, false) />
 	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="makeUriPatternIntoRegex" access="private" output="false" returntype="void"
-				hint="Take an input REST URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
-		<cfargument name="uriPattern" type="String" required="true"
-					hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
+	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="void" output="false"
+		hint="Take an input REST URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
+		<cfargument name="uriPattern" type="string" required="true"
+			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
+
 		<!--- Going to turn a uriPattern like "/service/doit/{value}" into "^/service/doit/([^\/\?&]+)" --->
 		<cfset var stcOutput = StructNew() />
 		<cfset var urlElements = ListToArray(arguments.uriPattern, "/", false) />
@@ -159,7 +165,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfloop from="1" to="#ArrayLen(urlElements)#" index="i">
 			<cfset currElement = urlElements[i] />
 			<cfset stcMatches = REFind("^{([^}]+)}$", currElement, 1, true) />
-			<cfif ArrayLen(stcMatches.LEN) GT 1 AND stcMatches.LEN[2] GT 0>
+			<cfif ArrayLen(stcMatches.LEN) GT 1 AND stcMatches.LEN[2]>
 				<!--- This is a token, store it in the tokens, and replace this element with the regex to search --->
 				<cfset ArrayAppend(variables.uriTokenNames, Mid(currElement, stcMatches.POS[2], stcMatches.LEN[2])) />
 				<cfset urlElements[i] = ONE_TOKEN_REGEX />
@@ -168,7 +174,6 @@ For example, a uriPattern like "/service/doit/{value}"
 
 		<!--- Set instance variables --->
 		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?$" />
-
 	</cffunction>
 	<!---
 	ACCESSORS
@@ -180,6 +185,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getEndpointName" access="public" returntype="string" output="false">
 		<cfreturn variables.endpointName />
 	</cffunction>
+
 	<cffunction name="setFunctionName" access="public" returntype="void" output="false">
 		<cfargument name="functionName" type="string" required="true" />
 		<cfset variables.functionName = arguments.functionName />
@@ -187,16 +193,17 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getFunctionName" access="public" returntype="string" output="false">
 		<cfreturn variables.functionName />
 	</cffunction>
+
 	<cffunction name="setUriPattern" access="public" returntype="void" output="false"
-				hint="Calculates & sets uriRegex based on the input uriPattern.">
+		hint="Calculates & sets uriRegex based on the input uriPattern.">
 		<cfargument name="uriPattern" type="string" required="true" />
 
 		<!--- Require an appropriate URI pattern (pretty loose validation, just require initial slash and almost anything following) --->
 		<cfset arguments.uriPattern = Trim(arguments.uriPattern) />
 		<cfif REFind("^\/([^\/\?&]+)", arguments.uriPattern, 1, false) EQ 0>
 			<cfthrow type="MachII.endpoints.rest.InvalidRestUriPattern"
-					message="Invalid uriPattern for RestUri."
-					detail="The uriPattern must start with a slash and be an slash-delimited string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
+				message="Invalid uriPattern for RestUri."
+				detail="The uriPattern must start with a slash and be an slash-delimited string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
 		</cfif>
 		<cfset variables.uriPattern = arguments.uriPattern />
 		<cfset makeUriPatternIntoRegex(variables.uriPattern) />
@@ -204,17 +211,19 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getUriPattern" access="public" returntype="string" output="false">
 		<cfreturn variables.uriPattern />
 	</cffunction>
+
 	<cffunction name="setHttpMethod" access="public" returntype="void" output="false">
 		<cfargument name="httpMethod" type="String" required="true" />
 		<!--- Validation --->
-		<cfif ListFindNoCase(HTTP_METHODS, arguments.httpMethod) GT 0>
+		<cfif ListFindNoCase(HTTP_METHODS, arguments.httpMethod)>
 			<cfset variables.httpMethod = UCase(arguments.httpMethod) />
 		<cfelse>
 			<cfthrow type="MachII.endpoints.UnsupportedHttpMethod"
 					message="The input HTTP method #arguments.httpMethod# is not currently supported.">
 		</cfif>
 	</cffunction>
-	<cffunction name="getHttpMethod" access="public" returntype="String" output="false">
+
+	<cffunction name="getHttpMethod" access="public" returntype="string" output="false">
 		<cfreturn variables.httpMethod />
 	</cffunction>
 	<cffunction name="getUriRegex" access="public" returntype="string" output="false">

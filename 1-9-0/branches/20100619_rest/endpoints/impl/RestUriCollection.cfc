@@ -77,8 +77,8 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 	--->
 	<cffunction name="findRestUri" access="public" returntype="any" output="false"
 		hint="Tries to find a RestUri that matches the incoming pathInfo and HttpMethod. Returns it if found, otherwise returns empty string.">
-		<cfargument name="pathInfo" type="String" required="true" />
-		<cfargument name="httpMethod" type="String" required="true" />
+		<cfargument name="pathInfo" type="string" required="true" />
+		<cfargument name="httpMethod" type="string" required="true" />
 
 		<cfset var restUri = "" />
 		<cfset var currRestUriGroup = "" />
@@ -111,11 +111,10 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 			<!--- Add currRestUri to restUris structure, with uriRegex as the key, if not duplicate --->
 			<cfset StructInsert(variables.restUris[arguments.restUri.getHttpMethod()], arguments.restUri.getUriRegex(), arguments.restUri) />
 		<cfelse>
-			<cfdump var="#variables.restUris#"><cfabort>
 			<!--- Throw exception if this restUri is already defined here. --->
 			<cfthrow type="MachII.endpoints.rest.DuplicateRestUri"
-					message="The URI Pattern for this Rest Endpoint method has already been defined."
-					detail="REST URIs patterns must be unique. You entered: #arguments.restUri.getUriPattern()#"  />
+					message="The URI Pattern '#arguments.restUri.getUriPattern()#' for this Rest Endpoint method has already been defined. REST URIs patterns must be unique."
+					detail="Currently defined patterns: '#StructKeyList(variables.restUris)#'"  />
 		</cfif>
 	</cffunction>
 
@@ -141,7 +140,7 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getRestUris" access="public" returntype="Struct" output="false">
+	<cffunction name="getRestUris" access="public" returntype="struct" output="false">
 		<cfreturn variables.restUris />
 	</cffunction>
 
