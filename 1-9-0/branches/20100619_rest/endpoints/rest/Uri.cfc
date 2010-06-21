@@ -82,7 +82,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="RestUri" output="false"
+	<cffunction name="init" access="public" returntype="Uri" output="false"
 		hint="Initializes the RestUri.">
 		<cfargument name="uriPattern" type="String" required="false" default=""
 			hint="The URI pattern to be used for this endpoint route." />

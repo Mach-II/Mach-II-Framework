@@ -54,9 +54,9 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 
 --->
 <cfcomponent
-	displayname="RestUriCollection"
+	displayname="UriCollection"
 	output="false"
-	hint="Represents a collection of RestUris, organized by HTTP method and regex.">
+	hint="Represents a collection of REST URIs which are organized by HTTP method and regex.">
 
 	<!---
 	PROPERTIES
@@ -67,7 +67,7 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="RestUriCollection" output="false"
+	<cffunction name="init" access="public" returntype="UriCollection" output="false"
 		hint="Initializes the RestUriCollection.">
 		<cfreturn this />
 	</cffunction>
@@ -100,7 +100,7 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 
 	<cffunction name="addRestUri" access="public" returntype="void" output="false"
 				hint="Adds a RestUri to the collection, throwing exception for duplicates or unsupported HTTP methods.">
-		<cfargument name="restUri" type="MachII.endpoints.impl.RestUri" required="true" />
+		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
 
 		<cfif NOT StructKeyExists(variables.restUris, arguments.restUri.getHttpMethod())>
 			<!--- Create new inner struct for httpMethod if not present --->
@@ -118,11 +118,15 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 		</cfif>
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
 	<cffunction name="appendRestUriCollection" access="public" returntype="void" output="false"
-				hint="Appends the RestUris in the input RestUriCollection to this RestUriCollection. Throws exception on any duplicates.">
-		<cfargument name="restUriColl" type="MachII.endpoints.impl.RestUriCollection" required="true" />
+		hint="Appends the RestUris in the input RestUriCollection to this RestUriCollection. Throws exception on any duplicates.">
+		<cfargument name="restUriCollection" type="MachII.endpoints.rest.UriCollection" required="true"
+			hint="The REST Uri Collection to merge with this collection." />
 
-		<cfset var inRestUris = arguments.restUriColl.getRestUris() />
+		<cfset var inRestUris = arguments.restUriCollection.getRestUris() />
 		<cfset var currHttpMethod = "" />
 		<cfset var currRestUriGroup = "" />
 		<cfset var currUriRegex = "" />
@@ -135,6 +139,10 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 				<cfset this.addRestUri(currRestUriGroup[currUriRegex]) />
 			</cfloop>
 		</cfloop>
+	</cffunction>
+
+	<cffunction name="resetRestUris" access="public" returntype="void" output="false">
+		<cfset variables.restUris = StructNew() />
 	</cffunction>
 
 	<!---

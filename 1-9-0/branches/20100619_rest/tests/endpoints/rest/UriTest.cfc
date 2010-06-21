@@ -50,7 +50,7 @@ Notes:
 <cfcomponent
 	displayname="RestUriTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for MachII.endpoints.impl.RestUri.">
+	hint="Test cases for MachII.endpoints.rest.Uri.">
 
 	<!---
 	PROPERTIES
@@ -77,7 +77,7 @@ Notes:
 		hint="Tests the URI matching code against URLs with no tokens.">
 
 		<cfscript>
-			var restUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
+			var restUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
 				uriPattern = "/content/item",
 				httpMethod="GET",
 				functionName="getContent",
@@ -100,21 +100,26 @@ Notes:
 		hint="Tests the URI matching code against URLs with one token.">
 
 		<cfscript>
-			var restUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
+			var restUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
 				uriPattern = "/content/item/{key}",
 				httpMethod="GET",
 				functionName="getContent",
 				endpoint=variables.testEndpoint
 				);
+			var tokens = "";
+
 			// Match, no format
 			assertTrue(restUri.matchUri('/content/item/my-item'), 'Should match /content/item/my-item.');
-			var tokens = restUri.getTokensFromUri('/content/item/my-item');
-			assertTrue(tokens.format == '', 'Should not have format included.');
-			assertTrue(tokens.key == 'my-item', 'Should have a key token match of my-item.');
+
+			tokens = restUri.getTokensFromUri('/content/item/my-item');
+			assertTrue(tokens.format EQ '', 'Should not have format included.');
+			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+
 			// Match, w/format
 			tokens = restUri.getTokensFromUri('/content/item/my-item.json');
-			assertTrue(tokens.key == 'my-item', 'Should have a key token match of my-item.');
-			assertTrue(tokens.format == 'json', 'Should have json format.');
+			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+			assertTrue(tokens.format EQ 'json', 'Should have json format.');
+
 			// No match
 			assertFalse(restUri.matchUri('/content/item'), 'Should not match /content/item');
 			assertFalse(restUri.matchUri('/content/item.xml'), 'Should not match /content/item.xml');
@@ -127,23 +132,28 @@ Notes:
 		hint="Tests the URI matching code against URLs with two tokens.">
 
 		<cfscript>
-			var restUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
+			var restUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
 				uriPattern = "/content/item/{key}/{category}",
 				httpMethod="GET",
 				functionName="getContent",
 				endpoint=variables.testEndpoint
 				);
+			var tokens = "";
+
 			// Match, no format
 			assertTrue(restUri.matchUri('/content/item/my-item/my-cat'), 'Should match /content/item/my-item/my-cat.');
-			var tokens = restUri.getTokensFromUri('/content/item/my-item/my-cat');
-			assertTrue(tokens.format == '', 'Should not have format included.');
-			assertTrue(tokens.key == 'my-item', 'Should have a key token match of my-item.');
-			assertTrue(tokens.category == 'my-cat', 'Should have a category token match of my-cat.');
+
+			tokens = restUri.getTokensFromUri('/content/item/my-item/my-cat');
+			assertTrue(tokens.format EQ '', 'Should not have format included.');
+			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
+
 			// Match, w/format
 			tokens = restUri.getTokensFromUri('/content/item/my-item/my-cat.json');
-			assertTrue(tokens.key == 'my-item', 'Should have a key token match of my-item.');
-			assertTrue(tokens.category == 'my-cat', 'Should have a category token match of my-cat.');
-			assertTrue(tokens.format == 'json', 'Should have json format.');
+			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
+			assertTrue(tokens.format EQ 'json', 'Should have json format.');
+
 			// No match
 			assertFalse(restUri.matchUri('/content/item'), 'Should not match /content/item');
 			assertFalse(restUri.matchUri('/content/item.xml'), 'Should not match /content/item.xml');
@@ -157,7 +167,8 @@ Notes:
 	--->
 	<cffunction name="commonInvalidMatches" access="private" returntype="void" output="false"
 		hint="Tests the URI matching code against URLs with two tokens.">
-		<cfargument name="restUri" type="MachII.endpoints.impl.RestUri" required="true" />
+		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
+
 		<cfscript>
 			assertFalse(restUri.matchUri('/content/item/'), 'Should not match /content/item/');
 			assertFalse(restUri.matchUri('/content'), 'Should not match /content');
@@ -166,7 +177,6 @@ Notes:
 			assertFalse(restUri.matchUri('/not/even/close/to/matching'), 'Should not match /not/even/close/to/matching');
 			assertFalse(restUri.matchUri('lakjsdlajsdlkj'), 'Should not match lakjsdlajsdlkj');
 		</cfscript>
-
 	</cffunction>
 
 </cfcomponent>

@@ -96,16 +96,17 @@ to return good responses and response codes, use of format (.json), etc.
 --->
 <cfcomponent
 	displayname="RestEndpoint"
-	extends="MachII.endpoints.impl.AbstractEndpoint"
+	extends="MachII.endpoints.AbstractEndpoint"
 	output="false"
-	hint="Base component for all RESTful endpoints to be exposed directly by Mach-II.">
+	hint="Base endpoint for all RESTful endpoints to be exposed directly by Mach-II.">
 
 	<!---
 	CONSTANTS
 	--->
 	<!--- Constants for the annotations we allow in RestEndpoint sub-classes --->
-	<cfset variables.ANNOTATION_REST_URI = "REST:URI" />
-	<cfset variables.ANNOTATION_REST_METHOD = "REST:METHOD" />
+	<cfset variables.ANNOTATION_REST_BASE = "REST" />
+	<cfset variables.ANNOTATION_REST_URI = variables.ANNOTATION_REST_BASE & ":URI" />
+	<cfset variables.ANNOTATION_REST_METHOD = variables.ANNOTATION_REST_BASE & ":METHOD" />
 
 	<!---
 	PROPERTIES
@@ -114,6 +115,7 @@ to return good responses and response codes, use of format (.json), etc.
 	<cfset variables.restUris = "" />
 	<!--- Introspector looks for REST:* annotations in child classes to find REST-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector") />
+	<cfset variables.restUris = CreateObject("component", "MachII.endpoints.rest.UriCollection").init() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -121,14 +123,12 @@ to return good responses and response codes, use of format (.json), etc.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Child endpoints must call this configure method to setup the RESTful methods correctly.">
 
-		<cfset var restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:this, namespace:"REST") />
-		<cfset var i = 0 />
+		<cfset var restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_REST_BASE) />
 		<cfset var currMetadata = "" />
 		<cfset var currFunction = "" />
 		<cfset var currRestUri = "" />
 		<cfset var currHttpMethod = "" />
-
-		<cfset variables.restUris = CreateObject("component", "MachII.endpoints.impl.RestUriCollection").init() />
+		<cfset var i = 0 />
 
 		<cfif ArrayLen(restMethodMetadata)>
 			<!--- TODO: Limiting to the base component for now, not following whole object hierarchy yet. --->
@@ -138,16 +138,16 @@ to return good responses and response codes, use of format (.json), etc.
 				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
 					<!--- Iterate through found methods and look for required REST:URI annotation --->
 					<cfset currFunction = currMetadata.functions[i] />
-					<cfif StructKeyExists(currFunction, ANNOTATION_REST_URI)>
+					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
 						<!--- Default to GET method --->
 						<cfif StructKeyExists(currFunction, ANNOTATION_REST_METHOD)>
-							<cfset currHttpMethod = currFunction[ANNOTATION_REST_METHOD]>
+							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
 						<cfelse>
 							<cfset currHttpMethod = "GET" />
 						</cfif>
 						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
 						<cfset currRestUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
-								currFunction[ANNOTATION_REST_URI]
+								currFunction[variables.ANNOTATION_REST_URI]
 								, currHttpMethod
 								, currFunction.name
 								, getParameter("name")
@@ -161,7 +161,7 @@ to return good responses and response codes, use of format (.json), etc.
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Reset the endpoint to a default state.">
-		<cfset variables.restUris = StructNew() />
+		<cfset variables.restUris.resetRestUris() />
 	</cffunction>
 
 	<!---

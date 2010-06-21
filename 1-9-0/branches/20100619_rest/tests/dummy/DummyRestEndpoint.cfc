@@ -49,7 +49,7 @@ Updated version: 1.9.0
 Notes:
 --->
 <cfcomponent displayname="TestRestEndpoint"
-	extends="MachII.endpoints.impl.RestEndpoint"
+	extends="MachII.endpoints.rest.BaseEndpoint"
 	hint="Test Rest Endpoint."
 	output="false">
 
