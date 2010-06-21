@@ -41,16 +41,16 @@
 	interfaces).
 
 Author: Doug Smith (doug.smith@daveramsey.com)
-$Id$
+$Id: HasAnnotations.cfc 2204 2010-04-27 07:36:11Z peterfarrell $
 
 Created version: 1.9.0
 Updated version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="HasAnnotations"
-	extends="HasAnnotationsParent"
-	hint="Test class for Introspector."
+<cfcomponent displayname="TestRestEndpoint"
+	extends="MachII.endpoints.impl.RestEndpoint"
+	hint="Test Rest Endpoint."
 	output="false">
 
 	<!---
@@ -68,11 +68,38 @@ Notes:
 	PUBLIC METHODS
 	--->
 
-	<cffunction name="myLocalAnnotatedMethod"
-		access="public" returntype="String" output="false"
-		rest:uri="/test/me"
-		rest:method="GET">
-		<cfreturn "myLocalAnnotatedMethod was called." />
+	<cffunction name="testGetContent"
+				access="public" returntype="String" output="false"
+				rest:uri="/content/item/{key}"
+				rest:method="GET"
+				hint="Test GET method with variable {key} token.">
+
+		<cfset var key = event.getArg("key", "") />
+		<cfset var addHtml = event.getArg("addHtml", false) />
+		<cfset var format = event.getArg("format", "html") />
+		<cfset var version = event.getArg("version", "approved") />
+		<cfset var contentItemBean = "" />
+
+		<cftry>
+
+			<cfif key EQ 'notfound'>
+				<!--- Test fake 404. --->
+				<cfthrow type="contentitem.load.failed" />
+			</cfif>
+
+			<cfif format EQ "json">
+				<cfreturn '{key: #key#, value: "I''m a test of the REST endpoint in JSON format."}' />
+			<cfelse>
+				<!--- Defaults to HTML format --->
+				<cfreturn '<p>I''m test content rendered in HTML format with key: ''#key#''.</p>' />
+			</cfif>
+			<cfcatch type="contentitem.load.failed">
+				<cfheader statuscode="404" statustext="Not Found" />
+				<cfheader name="machii.endpoint.error.notfound" value="Content item named '#key#' not available." />
+				<cfreturn "" />
+			</cfcatch>
+		</cftry>
+
 	</cffunction>
 
 </cfcomponent>

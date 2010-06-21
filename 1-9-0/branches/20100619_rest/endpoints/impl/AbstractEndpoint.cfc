@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -50,9 +50,10 @@ Notes:
 --->
 <cfcomponent
 	displayname="AbstractEndpoint"
+	extends="MachII.framework.BaseComponent"
 	output="false"
 	hint="">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -62,7 +63,7 @@ Notes:
 	<cfset variables.parameterPrecedence = "form" />
 	<cfset variables.targetPage = "" />
 	<cfset variables.log = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -74,18 +75,18 @@ Notes:
 			hint="A reference to the EndpointManager." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
-		
+
 		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEndpointManager(arguments.endpointManager) />
 		<cfset setParameters(arguments.parameters) />
-		
+
 		<!--- Setup additional --->
 		<cfset setLog(getAppManager().getLogFactory()) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the endpoint. Override to provide custom functionality.">
 		<!--- Does nothing. Override to provide custom functionality. --->
@@ -95,7 +96,7 @@ Notes:
 		hint="Deconfigures the endpoint. Override to provide custom functionality.">
 		<!--- Does nothing. Override to provide custom functionality. --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -104,8 +105,8 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
-	<cffunction name="handleRequest" access="public" returntype="void" output="false"
+
+	<cffunction name="handleRequest" access="public" returntype="String" output="true"
 		hint="Handles endpoint request. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
@@ -116,29 +117,29 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
 	<cffunction name="getRequestEventArgs" access="public" returntype="struct" output="false"
 		hint="Builds a struct of incoming event args.">
-		
+
 		<cfset var eventArgs = StructNew() />
 		<cfset var overwriteFormParams = (variables.instance.endpointConfig.parameterPrecedence EQ "url") />
-		
+
 		<!--- Build event args from form/url/SES --->
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
-		
+
 		<cfreturn eventArgs />
 	</cffunction>
-	
-	<!--- TODO: Implement method that introspects if 
-		preProcess / postProcess methods have been implemented 
+
+	<!--- TODO: Implement method that introspects if
+		preProcess / postProcess methods have been implemented
 		in the endpoint because we shouldn't invoke those methods if they are not implemented --->
-	
+
 	<!--- TODO: Implement get/setProperty --->
-	
+
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
 		hint="Sets a configuration parameter.">
 		<cfargument name="name" type="string" required="true"
@@ -169,7 +170,7 @@ Notes:
 		hint="Returns a comma delimited list of parameter names.">
 		<cfreturn StructKeyList(variables.parameters) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -183,11 +184,11 @@ Notes:
 		<cfset var methods = ArrayNew(1) />
 		<cfset var i = 0 />
 		<cfset var result = false />
-		
+
 		<!--- "functions" key only exists when there at least one defined method --->
 		<cfif StructKeyExists(arguments.metadata, "functions")>
 			<cfset methods = arguments.metadata.functions />
-			
+
 			<!--- Find if the method exists --->
 			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
 				<cfif methods[i].name EQ arguments.methodName>
@@ -196,14 +197,14 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<!--- Method is not at this level so walk inheritance tree if possible --->
-		<cfif StructKeyExists(arguments.metadata, "extends") 
+		<cfif StructKeyExists(arguments.metadata, "extends")
 			AND arguments.metadata.extends.name NEQ "MachII.endpoints.impl.AbstractEndpoint">
 			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
 		<cfelse>
 			<cfreturn false />
-		</cfif>	
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -216,7 +217,7 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
 		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
 		<cfset variables.endpointManager = arguments.endpointManager />
@@ -224,13 +225,13 @@ Notes:
 	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
 		<cfreturn variables.endpointManager />
 	</cffunction>
-	
+
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true" />
-		
+
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset setParameter(key, arguments.parameters[key]) />
 		</cfloop>
@@ -239,7 +240,7 @@ Notes:
 		hint="Gets the full set of configuration parameters for the component.">
 		<cfreturn variables.parameters />
 	</cffunction>
-	
+
 	<cffunction name="setLog" access="public" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />

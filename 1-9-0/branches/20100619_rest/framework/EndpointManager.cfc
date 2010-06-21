@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -59,48 +59,61 @@ Notes:
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointTargetPageMap = StructNew() />
 
+	<!--- RestUriCollection of REST endpoint URIs. Constructed when first RestUri is added. --->
+	<cfset variables.restEndpointUris = "" />
+
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
 	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
-	
+
 	<!---
 	INITIALIZATION/CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="EndpointManager" output="false"
 		hint="Initializes the manager.">
-			
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures all the endpoints.">
-		
+
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#endpoints#" item="key">
 			<cfset endpoints[key].configure() />
+			<!--- If RestEndpoint append the RestUri to the restEndpointUris struct. --->
+			<cfif StructKeyExists(endpoints[key], "getRestUris")>
+				<cfif NOT IsObject(variables.restEndpointUris)>
+					<!--- When first restUri found, construct a new RestUriCollection. --->
+					<cfset variables.restEndpointUris = CreateObject("component", "MachII.endpoints.impl.RestUriCollection") />
+				</cfif>
+				<cfset variables.restEndpointUris.appendRestUriCollection(endpoints[key].getRestUris()) />
+			</cfif>
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures all the endpoints.">
-		
+
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#endpoints#" item="key">
 			<cfset endpoints[key].deconfigure() />
 		</cfloop>
+
+		<cfset variables.restEndpointUris = "" />
 	</cffunction>
-	
+
 	<cffunction name="buildEndpointTargetPageMap" access="private" returntype="void" output="false"
 		hint="Builds a map of target pages and endpoint names.">
-		
+
 		<cfset var endpointTargetPageMap = StructNew() />
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 		<cfset var targetPage = "" />
-		
+
 		<cfloop collection="#endpoints#" item="key">
 			<cfset targetPage = endpoints[key].getParameter("targetPage")>
 
@@ -108,31 +121,66 @@ Notes:
 				<cfset endpointTargetPageMap[targetPage] = key />
 			</cfif>
 		</cfloop>
-		
+
 		<cfset setEndpointTargetPageMap(endpointTargetPageMap) />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - REQUEST HANDLING
 	--->
+
+	<cffunction name="handleRestEndpointRequest" access="public" returntype="boolean" output="true"
+		hint="Handles a REST endpoint request. Attempts to find REST endpoint matching the incoming pathInfo. Returns true if a match was found and request was handled, false otherwise. ">
+		<cfargument name="pathInfo" type="string" required="true"
+			hint="The incoming pathInfo." />
+
+		<cfset var httpMethod = CGI.REQUEST_METHOD />
+		<cfset var restUri = "" />
+
+		<!--- paramArgs are construct if incoming URI will be handled by REST endpoint --->
+		<cfset var paramArgs = "" />
+
+		<cfif IsObject(variables.restEndpointUris)>
+			<!--- There are REST endpoints defined, try to find a matching RestUri --->
+			<cfset restUri = variables.restEndpointUris.findRestUri(arguments.pathInfo, httpMethod) />
+			<!--- restUri is an object if found with findRestUri, otherwise remains empty string. --->
+			<cfif IsObject(restUri)>
+				<!--- Construct & store paramArgs  --->
+				<cfset paramArgs = StructNew() />
+				<cfset paramArgs["pathInfo"] = arguments.pathInfo />
+				<cfset paramArgs["httpMethod"] = httpMethod />
+				<cfset StructAppend(paramArgs, FORM) />
+				<!--- URL params stomp FORM params for now. --->
+				<cfset StructAppend(paramArgs, URL) />
+				<cfset paramArgs["restUri"] = restUri />
+				<!--- Handle the endpoint request through normal flow --->
+				<cfset handleEndpointRequest(restUri.getEndpointName(), paramArgs) />
+				<!--- Return true to the caller so it knows the endpoint handled the request --->
+				<cfreturn true />
+			</cfif>
+		</cfif>
+		<cfreturn false />
+	</cffunction>
+
 	<cffunction name="handleEndpointRequest" access="public" returntype="void" output="true"
 		hint="Handles an endpoint request.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint for this request." />
 		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#"
 			hint="Any runtime parameter args are needed to complete the request." />
-		
+
+		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset var endpoint = "" />
-		
+		<cfset event.setArgs(arguments.paramArgs) />
+
 		<cftry>
 			<cfset endpoint = getEndpointByName(arguments.endpointName) />
-			
-			
-					
+			<cfset endpoint.handleRequest(event) />
+
 			<cfcatch type="MachII.endpoints.EndpointNotDefined">
 				<!--- No endpoint so send a 404 --->
 				<cfheader statuscode="404" statustext="Not Found" />
-				<cfheader name="machii.endpoint.error" value="Enpoint named '#arguments.endpointName#' not available." />
+				<cfheader name="machii.endpoint.error" value="Endpoint named '#arguments.endpointName#' not available." />
 			</cfcatch>
 			<cfcatch type="any">
 				<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
@@ -140,7 +188,7 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - GENERAL
 	--->
@@ -149,16 +197,16 @@ Notes:
 		<cfargument name="targetPage" type="string" required="true" />
 		<cfreturn StructKeyExists(variables.endpointTargetPageMap, arguments.targetPage) />
 	</cffunction>
-	
+
 	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.impl.AbstractEndpoint" output="false"
 		hint="Gets a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint to get." />
-		
+
 		<cfif isEndpointDefined(arguments.endpointName)>
 			<cfreturn variables.endpoints[arguments.endpointName] />
 		<cfelse>
-			<cfthrow type="MachII.endpoints.EndpointNotDefined" 
+			<cfthrow type="MachII.endpoints.EndpointNotDefined"
 				message="Endpoints with name '#arguments.endpointName#' is not defined."
 				detail="Available endpoints: '#ArrayToList(getEndpointNames())#'" />
 		</cfif>
@@ -172,7 +220,7 @@ Notes:
 			hint="A reference to the endpoint." />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
 			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />
-		
+
 		<cfif NOT arguments.overrideCheck AND isEndpointDefined(arguments.endpointName)>
 			<cfthrow type="MachII.endpoints.EndpointAlreadyDefined"
 				message="An endpoint with name '#arguments.endpointName#' is already registered." />
@@ -184,10 +232,10 @@ Notes:
 	<cffunction name="isEndpointDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a endpoint is registered with the specified name. Does NOT check parent.">
 		<cfargument name="endpointName" type="string" required="true"
-			hint="Name of endpoint to check." />		
+			hint="Name of endpoint to check." />
 		<cfreturn StructKeyExists(variables.endpoints, arguments.endpointName) />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
@@ -201,14 +249,15 @@ Notes:
 			hint="Dot path to the endpoint." />
 		<cfargument name="endpointParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Configuration parameters for the endpoint." />
-		
+
 		<cfset var endpoint = "" />
-		
+
 		<!--- Resolve if a shortcut --->
 		<cfset arguments.endpointType = resolveEndTypeShortcut(arguments.endpointType) />
 		<!--- Ensure type is correct in parameters (where it is duplicated) --->
 		<cfset arguments.endpointParameters.type = arguments.endpointType />
-		
+		<cfset arguments.endpointParameters.name = arguments.endpointName />
+
 		<!--- Create the endpoint --->
 		<cftry>
 			<cfset endpoint = CreateObject("component", arguments.endpointType).init(arguments.appManager, this, arguments.endpointParameters) />
@@ -226,19 +275,19 @@ Notes:
 
 		<cfset addEndpoint(arguments.endpointName, endpoint) />
 	</cffunction>
-	
+
 	<cffunction name="resolveEndTypeShortcut" access="public" returntype="string" output="false"
 		hint="Resolves an endpoint type shorcut and returns the passed value if no match is found.">
 		<cfargument name="endpointType" type="string" required="true"
 			hint="Dot path to the endpoint." />
-		
+
 		<cfif StructKeyExists(variables.ENDPOINT_SHORTCUTS, arguments.endpointType)>
 			<cfreturn variables.ENDPOINT_SHORTCUTS[arguments.endpointType] />
 		<cfelse>
 			<cfreturn arguments.endpointType />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="getEndpoints" access="public" returntype="struct" output="false"
 		hint="Gets all registered endpoints for this manager.">
 		<cfreturn variables.endpoints />
@@ -248,12 +297,12 @@ Notes:
 		hint="Returns an array of endpoint names.">
 		<cfreturn StructKeyArray(variables.endpoints) />
 	</cffunction>
-	
+
 	<cffunction name="containsEndpoints" access="public" returntype="boolean" output="false"
 		hint="Returns a boolean of on whether or not there are any registered endpoints.">
-		<cfreturn StructCount(variables.endpoints) />
+		<cfreturn StructCount(variables.endpoints) GT 0 />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -264,5 +313,5 @@ Notes:
 	<cffunction name="getEndpointTargetPageMap" access="public" returntype="struct" output="false">
 		<cfreturn variables.endpointTargetPageMap />
 	</cffunction>
-	
+
 </cfcomponent>
