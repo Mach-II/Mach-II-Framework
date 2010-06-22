@@ -50,7 +50,7 @@ Notes:
       <parameters>
             <parameter name="nameOfEndpoint">
                   <struct>
-                        <key name="type" value="MachII.endpoints.impl.AbstractEndpoint" />
+                        <key name="type" value="MachII.endpoints.AbstractEndpoint" />
                         <key name="param1" value="a" />
                         <key name="param2" value="b" />
                   </struct>

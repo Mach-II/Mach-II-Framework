@@ -200,7 +200,7 @@ Notes:
 
 		<!--- Method is not at this level so walk inheritance tree if possible --->
 		<cfif StructKeyExists(arguments.metadata, "extends")
-			AND arguments.metadata.extends.name NEQ "MachII.endpoints.impl.AbstractEndpoint">
+			AND arguments.metadata.extends.name NEQ "MachII.endpoints.AbstractEndpoint">
 			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
 		<cfelse>
 			<cfreturn false />

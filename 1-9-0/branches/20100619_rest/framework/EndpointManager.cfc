@@ -63,7 +63,7 @@ Notes:
 	<cfset variables.restEndpointUris = "" />
 
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
-	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
+	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.NameOfEndpoint" />
 
 	<!---
 	INITIALIZATION/CONFIGURATION
@@ -86,7 +86,7 @@ Notes:
 			<cfif StructKeyExists(endpoints[key], "getRestUris")>
 				<cfif NOT IsObject(variables.restEndpointUris)>
 					<!--- When first restUri found, construct a new RestUriCollection. --->
-					<cfset variables.restEndpointUris = CreateObject("component", "MachII.endpoints.impl.RestUriCollection") />
+					<cfset variables.restEndpointUris = CreateObject("component", "MachII.endpoints.rest.UriCollection") />
 				</cfif>
 				<cfset variables.restEndpointUris.appendRestUriCollection(endpoints[key].getRestUris()) />
 			</cfif>
@@ -198,7 +198,7 @@ Notes:
 		<cfreturn StructKeyExists(variables.endpointTargetPageMap, arguments.targetPage) />
 	</cffunction>
 
-	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.impl.AbstractEndpoint" output="false"
+	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.AbstractEndpoint" output="false"
 		hint="Gets a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint to get." />
@@ -216,7 +216,7 @@ Notes:
 		hint="Registers a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint to add." />
-		<cfargument name="endpoint" type="MachII.endpoints.impl.AbstractEndpoint" required="true"
+		<cfargument name="endpoint" type="MachII.endpoints.AbstractEndpoint" required="true"
 			hint="A reference to the endpoint." />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
 			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />

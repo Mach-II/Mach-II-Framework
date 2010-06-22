@@ -146,7 +146,7 @@ to return good responses and response codes, use of format (.json), etc.
 							<cfset currHttpMethod = "GET" />
 						</cfif>
 						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
-						<cfset currRestUri = CreateObject("component", "MachII.endpoints.impl.RestUri").init(
+						<cfset currRestUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
 								currFunction[variables.ANNOTATION_REST_URI]
 								, currHttpMethod
 								, currFunction.name
