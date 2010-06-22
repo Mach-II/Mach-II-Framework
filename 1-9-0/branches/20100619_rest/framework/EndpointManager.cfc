@@ -57,20 +57,16 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.endpoints = StructNew() />
-	<cfset variables.endpointTargetPageMap = StructNew() />
-
-	<!--- RestUriCollection of REST endpoint URIs. Constructed when first RestUri is added. --->
-	<cfset variables.restEndpointUris = "" />
+	<cfset variables.endpointContextPathMap = StructNew() />
 
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
-	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.NameOfEndpoint" />
+	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
 
 	<!---
 	INITIALIZATION/CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="EndpointManager" output="false"
 		hint="Initializes the manager.">
-
 		<cfreturn this />
 	</cffunction>
 
@@ -82,15 +78,9 @@ Notes:
 
 		<cfloop collection="#endpoints#" item="key">
 			<cfset endpoints[key].configure() />
-			<!--- If RestEndpoint append the RestUri to the restEndpointUris struct. --->
-			<cfif StructKeyExists(endpoints[key], "getRestUris")>
-				<cfif NOT IsObject(variables.restEndpointUris)>
-					<!--- When first restUri found, construct a new RestUriCollection. --->
-					<cfset variables.restEndpointUris = CreateObject("component", "MachII.endpoints.rest.UriCollection") />
-				</cfif>
-				<cfset variables.restEndpointUris.appendRestUriCollection(endpoints[key].getRestUris()) />
-			</cfif>
 		</cfloop>
+
+		<cfset buildEndpointContextPathMap() />
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
@@ -103,79 +93,63 @@ Notes:
 			<cfset endpoints[key].deconfigure() />
 		</cfloop>
 
-		<cfset variables.restEndpointUris = "" />
+		<cfset variables.endpointContextPathMap = StructNew() />
 	</cffunction>
 
-	<cffunction name="buildEndpointTargetPageMap" access="private" returntype="void" output="false"
-		hint="Builds a map of target pages and endpoint names.">
+	<cffunction name="buildEndpointContextPathMap" access="private" returntype="void" output="false"
+		hint="Builds a map of context paths and endpoint names.">
 
-		<cfset var endpointTargetPageMap = StructNew() />
+		<cfset var endpointContextPathMap = StructNew() />
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 		<cfset var targetPage = "" />
 
 		<cfloop collection="#endpoints#" item="key">
-			<cfset targetPage = endpoints[key].getParameter("targetPage")>
+			<cfset contextPath = endpoints[key].getParameter("contextPath")>
 
-			<cfif Len(targetPage)>
-				<cfset endpointTargetPageMap[targetPage] = key />
+			<cfif Len(contextPath)>
+				<cfset endpointContextPathMap[contextPath] = key />
 			</cfif>
 		</cfloop>
 
-		<cfset setEndpointTargetPageMap(endpointTargetPageMap) />
+		<cfset setEndpointContextPathMap(endpointContextPathMap) />
 	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - REQUEST HANDLING
 	--->
+	<cffunction name="isEndpointRequest" access="package" returntype="boolean" output="true"
+		hint="Checks if the current request is an endpoint request.">
+		<cfargument name="scriptName"  type="string" required="true"
+			hint="The current script name to match against the endpoint context paths." />
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The incoming event args.">
 
-	<cffunction name="handleRestEndpointRequest" access="public" returntype="boolean" output="true"
-		hint="Handles a REST endpoint request. Attempts to find REST endpoint matching the incoming pathInfo. Returns true if a match was found and request was handled, false otherwise. ">
-		<cfargument name="pathInfo" type="string" required="true"
-			hint="The incoming pathInfo." />
-
-		<cfset var httpMethod = CGI.REQUEST_METHOD />
-		<cfset var restUri = "" />
-
-		<!--- paramArgs are construct if incoming URI will be handled by REST endpoint --->
-		<cfset var paramArgs = "" />
-
-		<cfif IsObject(variables.restEndpointUris)>
-			<!--- There are REST endpoints defined, try to find a matching RestUri --->
-			<cfset restUri = variables.restEndpointUris.findRestUri(arguments.pathInfo, httpMethod) />
-			<!--- restUri is an object if found with findRestUri, otherwise remains empty string. --->
-			<cfif IsObject(restUri)>
-				<!--- Construct & store paramArgs  --->
-				<cfset paramArgs = StructNew() />
-				<cfset paramArgs["pathInfo"] = arguments.pathInfo />
-				<cfset paramArgs["httpMethod"] = httpMethod />
-				<cfset StructAppend(paramArgs, FORM) />
-				<!--- URL params stomp FORM params for now. --->
-				<cfset StructAppend(paramArgs, URL) />
-				<cfset paramArgs["restUri"] = restUri />
-				<!--- Handle the endpoint request through normal flow --->
-				<cfset handleEndpointRequest(restUri.getEndpointName(), paramArgs) />
-				<!--- Return true to the caller so it knows the endpoint handled the request --->
-				<cfreturn true />
-			</cfif>
+		<cfif StructKeyExists(variables.endpointContextPathMap, arguments.scriptName)>
+			<cfset eventArgs["endpoint"] = variables.endpointContextPathMap[arguments.scriptName] />
+			<cfreturn true />
+		<cfelseif StructKeyExists(arguments.eventArgs, "endpoint")>
+			<cfreturn true />
+		<cfelse>
+			<cfreturn false />
 		</cfif>
-		<cfreturn false />
 	</cffunction>
 
 	<cffunction name="handleEndpointRequest" access="public" returntype="void" output="true"
 		hint="Handles an endpoint request.">
-		<cfargument name="endpointName" type="string" required="true"
-			hint="The name of the endpoint for this request." />
-		<cfargument name="paramArgs" type="struct" required="false" default="#StructNew()#"
-			hint="Any runtime parameter args are needed to complete the request." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
+			hint="The events args needed to complete the request." />
+		<cfargument name="pathInfo" type="string" required="true"
+			hint="The incoming pathInfo." />
 
 		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset var endpoint = "" />
-		<cfset event.setArgs(arguments.paramArgs) />
+
+		<cfset event.setArgs(arguments.eventArgs) />
 
 		<cftry>
-			<cfset endpoint = getEndpointByName(arguments.endpointName) />
-			<cfset endpoint.handleRequest(event) />
+			<cfset endpoint = getEndpointByName(event.getArg("endpoint")) />
+			<cfset endpoint.handleRequest(event, arguments.pathInfo) />
 
 			<cfcatch type="MachII.endpoints.EndpointNotDefined">
 				<!--- No endpoint so send a 404 --->
@@ -183,6 +157,7 @@ Notes:
 				<cfheader name="machii.endpoint.error" value="Endpoint named '#arguments.endpointName#' not available." />
 			</cfcatch>
 			<cfcatch type="any">
+				<cfdump var="#cfcatch#">
 				<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
 				<cfheader statuscode="500" statustext="Error" />
 			</cfcatch>
@@ -254,9 +229,15 @@ Notes:
 
 		<!--- Resolve if a shortcut --->
 		<cfset arguments.endpointType = resolveEndTypeShortcut(arguments.endpointType) />
+
 		<!--- Ensure type is correct in parameters (where it is duplicated) --->
 		<cfset arguments.endpointParameters.type = arguments.endpointType />
 		<cfset arguments.endpointParameters.name = arguments.endpointName />
+
+		<!--- Create a context path if not defined --->
+		<cfif NOT StructKeyExists(arguments.endpointParameters, "contextPath")>
+			<cfset arguments.endpointParameters.contextPath = "/" & arguments.endpointName & "/index.cfm" />
+		</cfif>
 
 		<!--- Create the endpoint --->
 		<cftry>
@@ -306,12 +287,12 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setEndpointTargetPageMap" access="private" returntype="void" output="false">
-		<cfargument name="endpointTargetPageMap" type="struct" required="true" />
-		<cfset variables.endpointTargetPageMap = arguments.endpointTargetPageMap />
+	<cffunction name="setEndpointContextPathMap" access="private" returntype="void" output="false">
+		<cfargument name="endpointContextPathMap" type="struct" required="true" />
+		<cfset variables.endpointContextPathMap = arguments.endpointContextPathMap />
 	</cffunction>
-	<cffunction name="getEndpointTargetPageMap" access="public" returntype="struct" output="false">
-		<cfreturn variables.endpointTargetPageMap />
+	<cffunction name="getEndpointContextPathMap" access="public" returntype="struct" output="false">
+		<cfreturn variables.endpointContextPathMap />
 	</cffunction>
 
 </cfcomponent>

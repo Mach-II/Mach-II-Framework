@@ -105,6 +105,9 @@ Notes:
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
 
+		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
+		<cfset cleanPathInfo() />
+
 		<cfreturn this />
 	</cffunction>
 
@@ -116,21 +119,33 @@ Notes:
 		hint="Handles all requests made to the framework. Checks for endpoint match first, and if no endpoint then go through handleEventRequest.">
 
 		<cfset var endpointManager = getAppManager().getEndpointManager() />
+		<cfset var scriptName = cgi.SCRIPT_NAME />
+		<cfset var eventArgs = StructNew() />
+		<cfset var log = getLog() />
 
-		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-		<cfset cleanPathInfo() />
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Begin processing request.") />
+		</cfif>
 
-		<cfif NOT endpointManager.handleRestEndpointRequest(getCleanedPathInfo())>
-			<!--- There was no REST endpoint configured to handle the request, so default to normal Event request. --->
-			<cfset handleEventRequest() />
+		<cfset eventArgs = getRequestEventArgs() />
+
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Incoming event arguments:", eventArgs) />
+		</cfif>
+
+		<cfif endpointManager.isEndpointRequest(scriptName, eventArgs)>
+			<cfset endpointManager.handleEndpointRequest(eventArgs, getCleanedPathInfo()) />
+		<cfelse>
+			<cfset handleEventRequest(eventArgs) />
 		</cfif>
 
 	</cffunction>
 
 	<cffunction name="handleEventRequest" access="private" returntype="void" output="true"
 		hint="Handles a normal module/event or route request made to the framework.">
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The parsed event args." />
 
-		<cfset var eventArgs = StructNew() />
 		<cfset var result = StructNew() />
 		<cfset var appManager = getAppManager() />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
@@ -147,16 +162,7 @@ Notes:
 		<cfset result.moduleName = "" />
 
 		<cftry>
-			<cfif log.isInfoEnabled()>
-				<cfset log.info("Begin processing request.") />
-			</cfif>
-
-			<cfset eventArgs = getRequestEventArgs() />
-			<cfset result = parseEventParameter(eventArgs) />
-
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Incoming event arguments:", eventArgs) />
-			</cfif>
+			<cfset result = parseEventParameter(arguments.eventArgs) />
 
 			<!--- Set the module and name for now (in case module not found we need the original event name) --->
 			<cfset setRequestEventName(result.eventName) />

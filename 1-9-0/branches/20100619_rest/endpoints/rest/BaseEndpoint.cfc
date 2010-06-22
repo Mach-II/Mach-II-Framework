@@ -176,8 +176,29 @@ to return good responses and response codes, use of format (.json), etc.
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Calls the defined REST Endpoint function and renders the response.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="pathInfo" type="string" required="true"
+			hint="The incoming pathInfo." />
 
-		<cfset var restResponseBody = callEndpointFunction(event) />
+		<cfset var httpMethod = CGI.REQUEST_METHOD />
+		<cfset var restUri = variables.restUris.findRestUri(arguments.pathInfo, httpMethod) />
+		<cfset var restResponseBody = "" />
+
+		<!--- <cfdump var="#arguments#">
+		<cfdump var="#variables.restUris.getRestUris()#">
+		<cfdump var="#restUri#" />
+		<cfabort> --->
+
+		<cfif IsObject(restUri)>
+			<cfset arguments.event.setArg("pathInfo", arguments.pathInfo) />
+			<cfset arguments.event.setArg("httpMethod", httpMethod) />
+
+			<cfset restResponseBody = callEndpointFunction(restUri, event) />
+		<cfelse>
+			<!--- TODO: Exception handling needs to be worked on here --->
+			<h1>No REST endpoint</h1>
+			<cfdump var='#restUri#'>
+			<cfabort/>
+		</cfif>
 
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
@@ -193,13 +214,12 @@ to return good responses and response codes, use of format (.json), etc.
 	--->
 	<cffunction name="callEndpointFunction" access="public" returntype="String" output="true"
 		hint="Calls the endpoint function linked to the input RestUri (in event arg), passing the parsed URI tokens as arguments to the function.">
+		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var responseBody = "" />
-		<cfset var restUri = event.getArg("restUri") />
 		<cfset var pathInfo = event.getArg("pathInfo") />
-		<cfset var endpoint = getEndpointManager().getEndpointByName(restUri.getEndpointName()) />
-		<cfset var urlTokens = restUri.getTokensFromUri(pathInfo) />
+		<cfset var urlTokens = arguments.restUri.getTokensFromUri(pathInfo) />
 		<cfset var currToken = "" />
 
 		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there. --->
@@ -215,10 +235,11 @@ to return good responses and response codes, use of format (.json), etc.
 		<cfif restUri.matchUri(pathInfo)>
 			<!--- Call the function --->
 			<cfinvoke
-				component="#endpoint#"
+				component="#this#"
 				method="#restUri.getFunctionName()#"
-				returnVariable="responseBody"
-				event="#event#" />
+				returnVariable="responseBody">
+				<cfinvokeargument name="event" value="#arguments.event#" />
+			</cfinvoke>
 		</cfif>
 
 		<cfreturn responseBody />

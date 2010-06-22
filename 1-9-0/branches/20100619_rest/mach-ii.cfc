@@ -120,7 +120,7 @@ framework to be loaded as they interact with framework components:
 		<cfargument name="targetPage" type="string" required="true" />
 
 		<!--- Handle Mach-II request --->
-		<cfif FindNoCase("index.cfm", arguments.targetPage)>
+		<cfif FindNoCase("/index.cfm", arguments.targetPage)>
 			<cfset handleRequest() />
 		</cfif>
 	</cffunction>
