@@ -209,6 +209,9 @@ to return good responses and response codes, use of format (.json), etc.
 			</cfif>
 		</cfloop>
 
+		<!--- Add the Raw HTTP Request Content body --->
+		<cfset event.setArg("rawContent", GetHttpRequestData().content) />
+
 		<cfif restUri.matchUri(pathInfo)>
 			<!--- Call the function --->
 			<cfinvoke
