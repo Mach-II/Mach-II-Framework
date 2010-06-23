@@ -157,24 +157,95 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfset var stcOutput = StructNew() />
 		<cfset var urlElements = ListToArray(arguments.uriPattern, "/", false) />
 		<cfset var currElement = "" />
+		<cfset var currElementStack = ArrayNew(1) />
+		<cfset var currPosition = 1 />
+		<cfset var newElement = "" />
 		<cfset var stcMatches = "" />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
+
 		<cfset variables.uriTokenNames = ArrayNew(1) />
 
 		<!--- Iterate through the elements in the URI, replacing the tokens with a regex for the match. --->
 		<cfloop from="1" to="#ArrayLen(urlElements)#" index="i">
 			<cfset currElement = urlElements[i] />
-			<cfset stcMatches = REFind("^{([^}]+)}$", currElement, 1, true) />
-			<cfif ArrayLen(stcMatches.LEN) GT 1 AND stcMatches.LEN[2]>
-				<!--- This is a token, store it in the tokens, and replace this element with the regex to search --->
-				<cfset ArrayAppend(variables.uriTokenNames, Mid(currElement, stcMatches.POS[2], stcMatches.LEN[2])) />
-				<cfset urlElements[i] = ONE_TOKEN_REGEX />
+			<cfset newElement = "" />
+
+			<cfset stcMatches = reFindAll("({.*?[^}]})+", currElement) />
+
+			<cfif stcMatches.POS[1] NEQ 0>
+				<!--- If first token is not at position 1, then prepend and escape the "pre-text" --->
+				<cfif stcMatches.POS[j] GT 1>
+					<cfset newElement = newElement & escapeRegexControlCharacters(Mid(currElement, 1 stcMatches.POS[j] - 1)) />
+				</cfif>
+
+				<!--- Loop over the found tokens --->
+				<cfloop from="1" to="#ArrayLen(stcMatches.POS)#" index="j">
+					<cfset ArrayAppend(variables.uriTokenNames, Mid(currElement, stcMatches.POS[j] + 1, stcMatches.LEN[j] - 2)) />
+					<cfset newElement = newElement & variables.ONE_TOKEN_REGEX />
+
+					<!--- Append the text between multiple tokens --->
+					<cfif j LT ArrayLen(stcMatches.POS)>
+						<cfset newElement = newElement & escapeRegexControlCharacters(Mid(currElement, stcMatches.POS[j] + stcMatches.LEN[j], stcMatches.POS[j + 1] - (stcMatches.POS[j] + stcMatches.LEN[j]))) />
+					</cfif>
+				</cfloop>
+
+				<cfset urlElements[i] = newElement />
 			</cfif>
 		</cfloop>
 
 		<!--- Set instance variables --->
 		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?$" />
 	</cffunction>
+
+	<cffunction name="escapeRegexControlCharacters" access="private" returntype="string" output="false"
+		hint="Escapes all regex control characters.">
+		<cfargument name="unescapedText" type="string" required="true" />
+		<cfreturn ReplaceList(arguments.unescapedText, ".,+,-", "\.,\+,\-") />
+	</cffunction>
+
+	<cffunction name="reFindAll" access="private" returntype="struct" output="false"
+		hint="Finds all regex matches and returns the position / length of each match.">
+		<cfargument name="regex" type="string" required="true"
+			hint="The regex pattern to use." />
+		<cfargument name="input" type="string" required="true"
+			hint="The text to search and apply the regex pattern to." />
+
+		<cfset var results = StructNew() />
+		<cfset var start = 1 />
+		<cfset var match = "" />
+
+		<!--- Setup results --->
+		<cfset results.len = ArrayNew(1) />
+		<cfset results.pos = ArrayNew(1) />
+
+		<!--- Loop through input text for matches --->
+		<cfloop condition="true">
+
+			<!--- Perform search --->
+			<cfset match = REFind(arguments.regex, arguments.input, start, TRUE) />
+
+			<!--- Break if nothing matched --->
+			<cfif NOT match.len[1]>
+				<cfbreak />
+			</cfif>
+
+			<cfset ArrayAppend(results.len, match.len[1]) />
+			<cfset ArrayAppend(results.pos, match.pos[1]) />
+
+			<!--- Reposition start point --->
+			<cfset start = match.pos[1] + match.len[1] />
+		</cfloop>
+
+		<!--- If no matches, add 0 to both arrays --->
+		<cfif NOT ArrayLen(results.len)>
+			<cfset results.len[1] = 0 />
+			<cfset results.pos[1] = 0 />
+		</cfif>
+
+		<cfreturn results  />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
