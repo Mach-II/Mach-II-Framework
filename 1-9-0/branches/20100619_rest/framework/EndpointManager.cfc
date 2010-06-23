@@ -117,7 +117,7 @@ Notes:
 		<cfset var contextPath = "" />
 
 		<cfloop collection="#endpoints#" item="key">
-			<cfset contextPath = endpoints[key].getParameter("contextPath")>
+			<cfset contextPath = endpoints[key].getParameter("contextPath") />
 
 			<cfif Len(contextPath)>
 				<cfset endpointContextPathMap[contextPath] = key />
