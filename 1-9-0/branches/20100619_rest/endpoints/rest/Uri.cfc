@@ -175,8 +175,8 @@ For example, a uriPattern like "/service/doit/{value}"
 
 			<cfif stcMatches.POS[1] NEQ 0>
 				<!--- If first token is not at position 1, then prepend and escape the "pre-text" --->
-				<cfif stcMatches.POS[j] GT 1>
-					<cfset newElement = newElement & escapeRegexControlCharacters(Mid(currElement, 1 stcMatches.POS[j] - 1)) />
+				<cfif stcMatches.POS[1] GT 1>
+					<cfset newElement = newElement & reEscape(Mid(currElement, 1, stcMatches.POS[j] - 1)) />
 				</cfif>
 
 				<!--- Loop over the found tokens --->
@@ -186,7 +186,7 @@ For example, a uriPattern like "/service/doit/{value}"
 
 					<!--- Append the text between multiple tokens --->
 					<cfif j LT ArrayLen(stcMatches.POS)>
-						<cfset newElement = newElement & escapeRegexControlCharacters(Mid(currElement, stcMatches.POS[j] + stcMatches.LEN[j], stcMatches.POS[j + 1] - (stcMatches.POS[j] + stcMatches.LEN[j]))) />
+						<cfset newElement = newElement & reEscape(Mid(currElement, stcMatches.POS[j] + stcMatches.LEN[j], stcMatches.POS[j + 1] - (stcMatches.POS[j] + stcMatches.LEN[j]))) />
 					</cfif>
 				</cfloop>
 
@@ -198,10 +198,10 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?$" />
 	</cffunction>
 
-	<cffunction name="escapeRegexControlCharacters" access="private" returntype="string" output="false"
+	<cffunction name="reEscape" access="private" returntype="string" output="false"
 		hint="Escapes all regex control characters.">
 		<cfargument name="unescapedText" type="string" required="true" />
-		<cfreturn ReplaceList(arguments.unescapedText, ".,+,-", "\.,\+,\-") />
+		<cfreturn ReplaceList(arguments.unescapedText, "\,+,*,?,.,[,],^,$,(,),{,},|,-", "\\,\+,\*,\?,\.,\[,\],\^,\$,\(,\),\{,\},\|,\-") />
 	</cffunction>
 
 	<cffunction name="reFindAll" access="private" returntype="struct" output="false"
@@ -211,6 +211,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfargument name="input" type="string" required="true"
 			hint="The text to search and apply the regex pattern to." />
 
+		<!--- Based on a version of ReFindAll() on cflib.org by Ben Forta --->
 		<cfset var results = StructNew() />
 		<cfset var start = 1 />
 		<cfset var match = "" />
