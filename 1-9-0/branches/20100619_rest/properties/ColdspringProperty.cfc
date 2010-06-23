@@ -470,6 +470,7 @@ application.serviceFactory_account variable.
 			<cfset getFilters(targetBase) />
 			<cfset getPlugins(targetBase) />
 			<cfset getConfigurableProperties(targetBase) />
+			<cfset getEndpoints(targetBase) />
 
 			<cfloop from="1" to="#ArrayLen(targetBase.targets)#" index="i">
 				<!--- Get this iteration target object for easy use --->
@@ -751,6 +752,20 @@ application.serviceFactory_account variable.
 		<!--- Append each retrieved configurable properties to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(configurablePropertyNames)#" index="i">
 			<cfset ArrayAppend(arguments.targetBase.targets, propertyManager.getProperty(configurablePropertyNames[i])) />
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="getEndpoints" access="private" returntype="void" output="false"
+		hint="Get the configurable endpoints targets.">
+		<cfargument name="targetBase" type="struct" required="true" />
+
+		<cfset var endpointManager = getAppManager().getEndpointsManager() />
+		<cfset var endpointNames = endpointManager.getEndpointNames() />
+		<cfset var i = 0 />
+
+		<!--- Append each retrieved configurable properties to the targets array (in struct) --->
+		<cfloop from="1" to="#ArrayLen(endpointNames)#" index="i">
+			<cfset ArrayAppend(arguments.targetBase.targets, endpointManager.getEndpoint(endpointNames[i])) />
 		</cfloop>
 	</cffunction>
 

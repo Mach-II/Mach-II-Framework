@@ -81,11 +81,15 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures all the endpoints.">
 
+		<cfset var appManager = getAppManager() />
 		<cfset var endpoints = getEndpoints() />
+		<cfset var anEndpoint = "" />
 		<cfset var key = "" />
 
 		<cfloop collection="#endpoints#" item="key">
-			<cfset endpoints[key].configure() />
+			<cfset anEndpoint = endpoints[key] />
+			<cfset appManager.onObjectReload(anEndpoint) />
+			<cfset anEndpoint.configure() />
 		</cfloop>
 
 		<cfset buildEndpointContextPathMap() />
