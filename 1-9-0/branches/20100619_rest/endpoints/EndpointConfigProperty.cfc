@@ -76,12 +76,12 @@ Notes:
 		hint="Initializes the property.">
 
 		<cfset var params = getParameters() />
-		<cfset var key = "" />
+		<cfset var paramName = "" />
 
 		<!--- Load defined endpoints --->
-		<cfloop collection="#params#" item="key">
-			<cfif IsStruct(params[key])>
-				<cfset configureEndpoint(key, getParameter(key)) />
+		<cfloop collection="#params#" item="paramName">
+			<cfif IsStruct(params[paramName])>
+				<cfset configureEndpoint(paramName, getParameter(paramName)) />
 			</cfif>
 		</cfloop>
 	</cffunction>

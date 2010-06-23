@@ -58,6 +58,7 @@ Notes:
 	--->
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
 	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
@@ -67,6 +68,13 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="EndpointManager" output="false"
 		hint="Initializes the manager.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="Sets the base AppManager." />
+
+		<cfset setAppManager(arguments.appManager) />
+		<cfset setLog(arguments.appManager.getLogFactory()) />
+		<cfset setEndpointParameter(arguments.appManager.getPropertyManager().getProperty("endpointParameter")) />
+
 		<cfreturn this />
 	</cffunction>
 
@@ -102,7 +110,7 @@ Notes:
 		<cfset var endpointContextPathMap = StructNew() />
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
-		<cfset var targetPage = "" />
+		<cfset var contextPath = "" />
 
 		<cfloop collection="#endpoints#" item="key">
 			<cfset contextPath = endpoints[key].getParameter("contextPath")>
@@ -118,17 +126,15 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - REQUEST HANDLING
 	--->
-	<cffunction name="isEndpointRequest" access="package" returntype="boolean" output="true"
+	<cffunction name="isEndpointRequest" access="package" returntype="boolean" output="false"
 		hint="Checks if the current request is an endpoint request.">
-		<cfargument name="scriptName"  type="string" required="true"
-			hint="The current script name to match against the endpoint context paths." />
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="The incoming event args.">
 
-		<cfif StructKeyExists(variables.endpointContextPathMap, arguments.scriptName)>
-			<cfset eventArgs["endpoint"] = variables.endpointContextPathMap[arguments.scriptName] />
+		<cfif StructKeyExists(variables.endpointContextPathMap, cgi.SCRIPT_NAME)>
+			<cfset arguments.eventArgs[getEndpointParameter()] = variables.endpointContextPathMap[cgi.SCRIPT_NAME] />
 			<cfreturn true />
-		<cfelseif StructKeyExists(arguments.eventArgs, "endpoint")>
+		<cfelseif StructKeyExists(arguments.eventArgs, getEndpointParameter())>
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />
@@ -139,27 +145,39 @@ Notes:
 		hint="Handles an endpoint request.">
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="The events args needed to complete the request." />
-		<cfargument name="pathInfo" type="string" required="true"
-			hint="The incoming pathInfo." />
 
 		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset var endpoint = "" />
-
+		<cfset var endpointLog = "" />
 		<cfset event.setArgs(arguments.eventArgs) />
 
 		<cftry>
-			<cfset endpoint = getEndpointByName(event.getArg("endpoint")) />
-			<cfset endpoint.handleRequest(event, arguments.pathInfo) />
+			<cfset endpoint = getEndpointByName(event.getArg(getEndpointParameter())) />
+			<cfset endpointLog = endpoint.getLog() />
+
+			<cfif endpoint.isPreProcessDefined()>
+				<cfset endpoint.preProcess(event) />
+			</cfif>
+
+			<cfset endpoint.handleRequest(event) />
+
+			<cfif endpoint.isPostProcessDefined()>
+				<cfset endpoint.postProcess(event) />
+			</cfif>
+
+			<!--- TODO: Still need to figure in onException handling --->
 
 			<cfcatch type="MachII.endpoints.EndpointNotDefined">
 				<!--- No endpoint so send a 404 --->
 				<cfheader statuscode="404" statustext="Not Found" />
-				<cfheader name="machii.endpoint.error" value="Endpoint named '#arguments.endpointName#' not available." />
+				<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' not available." />
+				<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' not available.</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 			<cfcatch type="any">
-				<cfdump var="#cfcatch#">
 				<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
 				<cfheader statuscode="500" statustext="Error" />
+				<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhanled exception." />
+				<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhanled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -254,6 +272,10 @@ Notes:
 			</cfcatch>
 		</cftry>
 
+		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
+		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
+		<cfset endpoint.setIsOnExceptionDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onException"', true, "MachII.endpoints.AbstractEndpoint"))) />
+
 		<cfset addEndpoint(arguments.endpointName, endpoint) />
 	</cffunction>
 
@@ -287,12 +309,38 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setAppManager" access="private" returntype="void" output="false">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+		<cfset variables.appManager = arguments.appManager />
+	</cffunction>
+	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
+		<cfreturn variables.appManager />
+	</cffunction>
+
 	<cffunction name="setEndpointContextPathMap" access="private" returntype="void" output="false">
 		<cfargument name="endpointContextPathMap" type="struct" required="true" />
 		<cfset variables.endpointContextPathMap = arguments.endpointContextPathMap />
 	</cffunction>
 	<cffunction name="getEndpointContextPathMap" access="public" returntype="struct" output="false">
 		<cfreturn variables.endpointContextPathMap />
+	</cffunction>
+
+	<cffunction name="setEndpointParameter" access="private" returntype="void" output="false">
+		<cfargument name="endpointParameter" type="string" required="true" />
+		<cfset variables.endpointParameter = arguments.endpointParameter />
+	</cffunction>
+	<cffunction name="getEndpointParameter" access="public" returntype="string" output="false">
+		<cfreturn variables.endpointParameter />
+	</cffunction>
+
+	<cffunction name="setLog" access="private" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog("MachII.framework.EndpointManager") />
+	</cffunction>
+	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

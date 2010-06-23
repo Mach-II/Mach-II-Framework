@@ -119,7 +119,6 @@ Notes:
 		hint="Handles all requests made to the framework. Checks for endpoint match first, and if no endpoint then go through handleEventRequest.">
 
 		<cfset var endpointManager = getAppManager().getEndpointManager() />
-		<cfset var scriptName = cgi.SCRIPT_NAME />
 		<cfset var eventArgs = StructNew() />
 		<cfset var log = getLog() />
 
@@ -133,8 +132,8 @@ Notes:
 			<cfset log.debug("Incoming event arguments:", eventArgs) />
 		</cfif>
 
-		<cfif endpointManager.isEndpointRequest(scriptName, eventArgs)>
-			<cfset endpointManager.handleEndpointRequest(eventArgs, getCleanedPathInfo()) />
+		<cfif endpointManager.isEndpointRequest(eventArgs)>
+			<cfset endpointManager.handleEndpointRequest(eventArgs) />
 		<cfelse>
 			<cfset handleEventRequest(eventArgs) />
 		</cfif>

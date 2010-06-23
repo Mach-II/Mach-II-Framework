@@ -61,7 +61,9 @@ Notes:
 	<cfset variables.endpointManager = "" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.parameterPrecedence = "form" />
-	<cfset variables.targetPage = "" />
+	<cfset variables.isPreProcessDefined = false />
+	<cfset variables.isPostProcessDefined = false />
+	<cfset variables.onExceptionDefined = false />
 	<cfset variables.log = "" />
 
 	<!---
@@ -118,21 +120,15 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overrided." />
 	</cffunction>
 
+	<cffunction name="onException" access="public" returntype="void" output="false"
+		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfabort showerror="This method is abstract and must be overrided." />
+	</cffunction>
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="getRequestEventArgs" access="public" returntype="struct" output="false"
-		hint="Builds a struct of incoming event args.">
-
-		<cfset var eventArgs = StructNew() />
-		<cfset var overwriteFormParams = (variables.instance.endpointConfig.parameterPrecedence EQ "url") />
-
-		<!--- Build event args from form/url/SES --->
-		<cfset StructAppend(eventArgs, form) />
-		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
-
-		<cfreturn eventArgs />
-	</cffunction>
 
 	<!--- TODO: Implement method that introspects if
 		preProcess / postProcess methods have been implemented
@@ -174,38 +170,7 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="isMethodDefined" access="private" returntype="boolean" output="false"
-		hint="Checks if an abstract function was overridden in the concrete class. This method is recursive and will walk the inheritance tree.">
-		<cfargument name="methodName" type="string" required="true"
-			hint="Method name to look for in metadata" />
-		<cfargument name="metadata" type="any" required="false" default="#GetMetadata(this)#"
-			hint="Metadata to search for method name." />
 
-		<cfset var methods = ArrayNew(1) />
-		<cfset var i = 0 />
-		<cfset var result = false />
-
-		<!--- "functions" key only exists when there at least one defined method --->
-		<cfif StructKeyExists(arguments.metadata, "functions")>
-			<cfset methods = arguments.metadata.functions />
-
-			<!--- Find if the method exists --->
-			<cfloop from="1" to="#ArrayLen(methods)#" index="i">
-				<cfif methods[i].name EQ arguments.methodName>
-					<!--- Typically, we don't shortcircuit returns but it is easier in recursive functions --->
-					<cfreturn true />
-				</cfif>
-			</cfloop>
-		</cfif>
-
-		<!--- Method is not at this level so walk inheritance tree if possible --->
-		<cfif StructKeyExists(arguments.metadata, "extends")
-			AND arguments.metadata.extends.name NEQ "MachII.endpoints.AbstractEndpoint">
-			<cfreturn isMethodDefined(arguments.methodName, arguments.metadata.extends) />
-		<cfelse>
-			<cfreturn false />
-		</cfif>
-	</cffunction>
 
 	<!---
 	ACCESSORS
@@ -239,6 +204,30 @@ Notes:
 	<cffunction name="getParameters" access="public" returntype="struct" output="false"
 		hint="Gets the full set of configuration parameters for the component.">
 		<cfreturn variables.parameters />
+	</cffunction>
+
+	<cffunction name="setIsPreProcessDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="isPreProcessDefined" type="boolean" required="true" />
+		<cfset variables.isPreProcessDefined = arguments.isPreProcessDefined />
+	</cffunction>
+	<cffunction name="isPreProcessDefined" access="public" returntype="boolean" output="false">
+		<cfreturn variables.isPreProcessDefined />
+	</cffunction>
+
+	<cffunction name="setIsPostProcessDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="isPostProcessDefined" type="boolean" required="true" />
+		<cfset variables.isPostProcessDefined = arguments.isPostProcessDefined />
+	</cffunction>
+	<cffunction name="isPostProcessDefined" access="public" returntype="boolean" output="false">
+		<cfreturn variables.isPostProcessDefined />
+	</cffunction>
+
+	<cffunction name="setIsOnExceptionDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="isOnExceptionDefined" type="boolean" required="true" />
+		<cfset variables.isOnExceptionDefined = arguments.isOnExceptionDefined />
+	</cffunction>
+	<cffunction name="isOnExceptionDefined" access="public" returntype="boolean" output="false">
+		<cfreturn variables.isOnExceptionDefined />
 	</cffunction>
 
 	<cffunction name="setLog" access="public" returntype="void" output="false"

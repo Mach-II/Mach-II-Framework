@@ -114,7 +114,7 @@ to return good responses and response codes, use of format (.json), etc.
 	<!--- RestUriCollection of URLs that match in this endpoint. --->
 	<cfset variables.restUris = "" />
 	<!--- Introspector looks for REST:* annotations in child classes to find REST-enabled methods. --->
-	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector") />
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.restUris = CreateObject("component", "MachII.endpoints.rest.UriCollection").init() />
 
 	<!---
@@ -170,67 +170,50 @@ to return good responses and response codes, use of format (.json), etc.
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overridden." />
+
+		<cfset arguments.event.setArg("pathInfo", cleanPathInfo()) />
+		<cfset arguments.event.setArg("httpMethod", CGI.REQUEST_METHOD) />
+		<cfset arguments.event.setArg("rawContent", GetHttpRequestData().content) />
 	</cffunction>
 
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Calls the defined REST Endpoint function and renders the response.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfargument name="pathInfo" type="string" required="true"
-			hint="The incoming pathInfo." />
 
-		<cfset var httpMethod = CGI.REQUEST_METHOD />
-		<cfset var restUri = variables.restUris.findRestUri(arguments.pathInfo, httpMethod) />
+		<cfset var restUri = variables.restUris.findRestUri(arguments.event.getArg("pathInfo"), arguments.event.getArg("httpMethod")) />
 		<cfset var restResponseBody = "" />
 
-		<!--- <cfdump var="#arguments#">
-		<cfdump var="#variables.restUris.getRestUris()#">
-		<cfdump var="#restUri#" />
-		<cfabort> --->
-
 		<cfif IsObject(restUri)>
-			<cfset arguments.event.setArg("pathInfo", arguments.pathInfo) />
-			<cfset arguments.event.setArg("httpMethod", httpMethod) />
-
 			<cfset restResponseBody = callEndpointFunction(restUri, event) />
 		<cfelse>
 			<!--- TODO: Exception handling needs to be worked on here --->
 			<h1>No REST endpoint</h1>
-			<cfdump var='#restUri#'>
+			<cfdump var='#event.getArgs()#'>
 			<cfabort/>
 		</cfif>
 
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
-	<cffunction name="postProcess" access="public" returntype="void" output="false"
-		hint="Runs when an endpoint request end. Override to provide custom functionality.">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overridden." />
-	</cffunction>
-
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="callEndpointFunction" access="public" returntype="String" output="true"
+	<cffunction name="callEndpointFunction" access="public" returntype="string" output="false"
 		hint="Calls the endpoint function linked to the input RestUri (in event arg), passing the parsed URI tokens as arguments to the function.">
 		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var responseBody = "" />
-		<cfset var pathInfo = event.getArg("pathInfo") />
+		<cfset var pathInfo = arguments.event.getArg("pathInfo") />
 		<cfset var urlTokens = arguments.restUri.getTokensFromUri(pathInfo) />
 		<cfset var currToken = "" />
 
-		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there. --->
+		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there --->
 		<cfloop collection="#urlTokens#" item="currToken">
 			<cfif NOT event.isArgDefined(currToken)>
 				<cfset event.setArg(currToken, urlTokens[currToken]) />
 			</cfif>
 		</cfloop>
-
-		<!--- Add the Raw HTTP Request Content body --->
-		<cfset event.setArg("rawContent", GetHttpRequestData().content) />
 
 		<cfif restUri.matchUri(pathInfo)>
 			<!--- Call the function --->
@@ -266,6 +249,19 @@ to return good responses and response codes, use of format (.json), etc.
 				<cfheader name="Content-Type" value="text/html" />
 			</cfdefaultcase>
 		</cfswitch>
+	</cffunction>
+
+	<cffunction name="cleanPathInfo" access="private" returntype="string" output="false"
+		hint="Cleans the path info to an usable string (IIS6 breaks the RFC specification by inserting the script name into the path info).">
+
+		<cfset var pathInfo = cgi.PATH_INFO />
+		<cfset var scriptName = cgi.SCRIPT_NAME />
+
+		<cfif pathInfo.toLowerCase().startsWith(scriptName.toLowerCase())>
+			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
+		</cfif>
+
+		<cfreturn UrlDecode(pathInfo) />
 	</cffunction>
 
 	<!---
