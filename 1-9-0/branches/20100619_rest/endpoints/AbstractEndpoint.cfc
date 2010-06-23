@@ -105,25 +105,25 @@ Notes:
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
 	<cffunction name="handleRequest" access="public" returntype="String" output="true"
 		hint="Handles endpoint request. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
 	<cffunction name="postProcess" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint request end. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
 	<cffunction name="onException" access="public" returntype="void" output="false"
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
 	<!---
@@ -206,7 +206,7 @@ Notes:
 		<cfreturn variables.parameters />
 	</cffunction>
 
-	<cffunction name="setIsPreProcessDefined" access="public" returntype="boolean" output="false">
+	<cffunction name="setIsPreProcessDefined" access="public" returntype="void" output="false">
 		<cfargument name="isPreProcessDefined" type="boolean" required="true" />
 		<cfset variables.isPreProcessDefined = arguments.isPreProcessDefined />
 	</cffunction>
@@ -214,7 +214,7 @@ Notes:
 		<cfreturn variables.isPreProcessDefined />
 	</cffunction>
 
-	<cffunction name="setIsPostProcessDefined" access="public" returntype="boolean" output="false">
+	<cffunction name="setIsPostProcessDefined" access="public" returntype="void" output="false">
 		<cfargument name="isPostProcessDefined" type="boolean" required="true" />
 		<cfset variables.isPostProcessDefined = arguments.isPostProcessDefined />
 	</cffunction>
@@ -222,7 +222,7 @@ Notes:
 		<cfreturn variables.isPostProcessDefined />
 	</cffunction>
 
-	<cffunction name="setIsOnExceptionDefined" access="public" returntype="boolean" output="false">
+	<cffunction name="setIsOnExceptionDefined" access="public" returntype="void" output="false">
 		<cfargument name="isOnExceptionDefined" type="boolean" required="true" />
 		<cfset variables.isOnExceptionDefined = arguments.isOnExceptionDefined />
 	</cffunction>
