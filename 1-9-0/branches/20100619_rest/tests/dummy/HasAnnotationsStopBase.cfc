@@ -41,16 +41,15 @@
 	interfaces).
 
 Author: Doug Smith (doug.smith@daveramsey.com)
-$Id$
+$Id: HasAnnotationsParent.cfc 2231 2010-06-21 20:39:10Z doug_smith $
 
 Created version: 1.9.0
 Updated version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="HasAnnotationsParent"
-	extends="HasAnnotationsStopBase"
-	hint="Test Superclass for Introspector."
+<cfcomponent displayname="HasAnnotationsStopBase"
+	hint="Test stop class for Introspector."
 	output="false">
 
 	<!---
@@ -72,7 +71,7 @@ Notes:
 		access="public" returntype="String" output="false"
 		rest:uri="/parent/go"
 		rest:method="GET">
-		<cfreturn "myParentAnnotatedMethod was called" />
+		<cfreturn "myBaseAnnotatedMethod was called" />
 	</cffunction>
 
 </cfcomponent>

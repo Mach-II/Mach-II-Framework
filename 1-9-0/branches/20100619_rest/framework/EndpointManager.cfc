@@ -73,7 +73,6 @@ Notes:
 
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
-		<cfset setEndpointParameter(arguments.appManager.getPropertyManager().getProperty("endpointParameter")) />
 
 		<cfreturn this />
 	</cffunction>
@@ -85,6 +84,8 @@ Notes:
 		<cfset var endpoints = getEndpoints() />
 		<cfset var anEndpoint = "" />
 		<cfset var key = "" />
+
+		<cfset setEndpointParameter(appManager.getPropertyManager().getProperty("endpointParameter")) />
 
 		<cfloop collection="#endpoints#" item="key">
 			<cfset anEndpoint = endpoints[key] />
@@ -135,10 +136,18 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="The incoming event args.">
 
-		<cfif StructKeyExists(variables.endpointContextPathMap, cgi.SCRIPT_NAME)>
-			<cfset arguments.eventArgs[getEndpointParameter()] = variables.endpointContextPathMap[cgi.SCRIPT_NAME] />
+		<cfset var firstUrlItem = ListFirst(cgi.PATH_INFO, "/") />
+
+		<cfif StructKeyExists(variables.endpointContextPathMap, cgi.PATH_INFO)>
+			<!--- The entire path info matched one of the endpoint contextPath parameters. --->
+			<cfset arguments.eventArgs[getEndpointParameter()] = variables.endpointContextPathMap[cgi.PATH_INFO] />
+			<cfreturn true />
+		<cfelseif StructKeyExists(variables.endpoints, firstUrlItem)>
+			<!--- The first part of the URI matched an endpoint name. --->
+			<cfset arguments.eventArgs[getEndpointParameter()] = firstUrlItem />
 			<cfreturn true />
 		<cfelseif StructKeyExists(arguments.eventArgs, getEndpointParameter())>
+			<!--- The URL contains the endpoint parameter. --->
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />

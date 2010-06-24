@@ -93,10 +93,10 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfargument name="endpointName" type="String" required="false" default=""
 			hint="The name of this endpoint." />
 
-		<cfset setUriPattern(arguments.uriPattern) />
 		<cfset setHttpMethod(arguments.httpMethod) />
 		<cfset setFunctionName(arguments.functionName) />
 		<cfset setEndpointName(arguments.endpointName) />
+		<cfset setUriPattern(arguments.uriPattern) />
 
 		<cfreturn this />
 	</cffunction>
@@ -131,8 +131,6 @@ For example, a uriPattern like "/service/doit/{value}"
 			<!--- Add format as a token, since it is variable (it is always the last element) --->
 			<cfif stcMatches.LEN[intMatchCount] GT 1>
 				<cfset stcTokens["format"] = Mid(arguments.pathInfo, stcMatches.POS[intMatchCount]+1, stcMatches.LEN[intMatchCount]) />
-			<cfelse>
-				<cfset stcTokens["format"] = "" />
 			</cfif>
 		</cfif>
 
@@ -153,7 +151,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfargument name="uriPattern" type="string" required="true"
 			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
 
-		<!--- Going to turn a uriPattern like "/service/doit/{value}" into "^/service/doit/([^\/\?&]+)" --->
+		<!--- Going to turn a uriPattern like "/service/doit/{value}" into "^/service/doit/([^\/\?&]+)(\.[^\.\?]+)?$" --->
 		<cfset var stcOutput = StructNew() />
 		<cfset var urlElements = ListToArray(arguments.uriPattern, "/", false) />
 		<cfset var currElement = "" />
@@ -193,6 +191,12 @@ For example, a uriPattern like "/service/doit/{value}"
 				<cfset urlElements[i] = newElement />
 			</cfif>
 		</cfloop>
+
+		<!--- If first element in URI isn't the endpoint name, add it --->
+		<cfif NOT urlElements[1] EQ variables.endpointName>
+			<cflog text="urlElements[1]=#urlElements[1]#, variables.endpointName=#variables.endpointName#">
+			<cfset ArrayInsertAt(urlElements, 1, variables.endpointName) />
+		</cfif>
 
 		<!--- Set instance variables --->
 		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?$" />
@@ -272,10 +276,10 @@ For example, a uriPattern like "/service/doit/{value}"
 
 		<!--- Require an appropriate URI pattern (pretty loose validation, just require initial slash and almost anything following) --->
 		<cfset arguments.uriPattern = Trim(arguments.uriPattern) />
-		<cfif REFind("^\/([^\/\?&]+)", arguments.uriPattern, 1, false) EQ 0>
+		<cfif REFind("^([\/]*)([^\/\?&]+)", arguments.uriPattern, 1, false) EQ 0>
 			<cfthrow type="MachII.endpoints.rest.InvalidRestUriPattern"
 				message="Invalid uriPattern for RestUri."
-				detail="The uriPattern must start with a slash and be an slash-delimited string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
+				detail="The uriPattern must be an slash-delimited, valid URL string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
 		</cfif>
 		<cfset variables.uriPattern = arguments.uriPattern />
 		<cfset makeUriPatternIntoRegex(variables.uriPattern) />

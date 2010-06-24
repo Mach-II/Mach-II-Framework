@@ -96,7 +96,7 @@ Notes:
 
 		<cfset debug(definition) />
 
-		<cfset assertEquals(2, ArrayLen(definition), "There should be two items in the array when we walk the object hierarchy.") />
+		<cfset assertEquals(3, ArrayLen(definition), "There should be three items in the array when we walk the object hierarchy.") />
 		<cfset assertEquals(1, ArrayLen(definition[2].functions), "There should only be one function that includes REST annotations.") />
 		<cfset assertEquals('/parent/go', definition[2].functions[1]["REST:URI"]) />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotations", definition[1].component) />
@@ -132,12 +132,12 @@ Notes:
 
 		<cfset debug(definition) />
 
-		<cfset assertEquals(2, ArrayLen(definition), "There should be two items in the array when we walk the object hierarchy.") />
+		<cfset assertEquals(3, ArrayLen(definition), "There should be three items in the array when we walk the object hierarchy.") />
 		<cfset assertEquals(2, ArrayLen(definition[2].functions), "There should be two functions in the parent component definition.") />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotations", definition[1].component) />
 
 		<!--- Test stopping at first superclass - same results currently since there are no functions in the Component parent class. --->
-		<cfset definition = variables.introspector.getFunctionDefinitions(object:variables.dummy, walkTree:true, walkTreeStopClass:"MachII.tests.dummy.HasAnnotationsParent") />
+		<cfset definition = variables.introspector.getFunctionDefinitions(object:variables.dummy, walkTree:true, walkTreeStopClass:"MachII.tests.dummy.HasAnnotationsStopBase") />
 		<cfset assertEquals(2, ArrayLen(definition), "There should be two items in the array when we walk the object hierarchy.") />
 		<cfset assertEquals(2, ArrayLen(definition[2].functions), "There should be two functions in the parent component definition.") />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotations", definition[1].component) />
@@ -162,11 +162,11 @@ Notes:
 		<cfset debug(definition) />
 
 		<!--- Test whole tree --->
-		<cfset assertEquals(3, ArrayLen(definition), "There should be three items in the array when we walk the whole object hierarchy.") />
+		<cfset assertEquals(4, ArrayLen(definition), "There should be four items in the array when we walk the whole object hierarchy.") />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotationsParent", definition[2].component) />
 
 		<!--- Test stopping at first superclass --->
-		<cfset definition = variables.introspector.getComponentDefinition(object:variables.dummy, walkTree:true, walkTreeStopClass:"MachII.tests.dummy.HasAnnotationsParent") />
+		<cfset definition = variables.introspector.getComponentDefinition(object:variables.dummy, walkTree:true, walkTreeStopClass:"MachII.tests.dummy.HasAnnotationsStopBase") />
 		<cfset assertEquals(2, ArrayLen(definition), "There should be two items in the array when we stop at the first parent.") />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotationsParent", definition[2].component) />
 	</cffunction>

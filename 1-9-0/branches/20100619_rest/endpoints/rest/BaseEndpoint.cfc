@@ -121,7 +121,7 @@ to return good responses and response codes, use of format (.json), etc.
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Child endpoints must call this configure method to setup the RESTful methods correctly.">
+		hint="Child endpoints must call this configure method [i.e. super.configure()] to setup the RESTful methods correctly.">
 
 		<cfset var restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_REST_BASE) />
 		<cfset var currMetadata = "" />
@@ -171,7 +171,14 @@ to return good responses and response codes, use of format (.json), etc.
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset arguments.event.setArg("pathInfo", cleanPathInfo()) />
+		<cfset var pathInfo = cleanPathInfo() />
+
+		<cfif Len(pathInfo) EQ 0 AND arguments.event.isArgDefined("uri")>
+			<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
+			<cfset arguments.event.setArg("pathInfo", arguments.event.getArg("uri")) />
+		<cfelse>
+			<cfset arguments.event.setArg("pathInfo", pathInfo) />
+		</cfif>
 		<cfset arguments.event.setArg("httpMethod", CGI.REQUEST_METHOD) />
 		<cfset arguments.event.setArg("rawContent", GetHttpRequestData().content) />
 	</cffunction>

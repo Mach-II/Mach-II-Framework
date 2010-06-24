@@ -55,14 +55,13 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.testEndpoint = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">
-		<cfset variables.testEndpoint = CreateObject("component", "MachII.tests.dummy.DummyRestEndpoint") />
+		<!--- Does nothing --->
 	</cffunction>
 
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
@@ -81,12 +80,12 @@ Notes:
 				uriPattern = "/content/item",
 				httpMethod="GET",
 				functionName="getContent",
-				endpoint=variables.testEndpoint
+				endpointName="content"
 				);
 			// Match, no format
 			assertTrue(restUri.matchUri('/content/item'), 'Should match /content/item.');
 			var tokens = restUri.getTokensFromUri('/content/item');
-			assertTrue(tokens.format == '', 'Should not have format included.');
+			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
 			// Match, w/format
 			tokens = restUri.getTokensFromUri('/content/item.json');
 			assertTrue(tokens.format == 'json', 'Should have json format.');
@@ -104,7 +103,7 @@ Notes:
 				uriPattern = "/content/item/{key}",
 				httpMethod="GET",
 				functionName="getContent",
-				endpoint=variables.testEndpoint
+				endpointName="content"
 				);
 			var tokens = "";
 
@@ -112,7 +111,7 @@ Notes:
 			assertTrue(restUri.matchUri('/content/item/my-item'), 'Should match /content/item/my-item.');
 
 			tokens = restUri.getTokensFromUri('/content/item/my-item');
-			assertTrue(tokens.format EQ '', 'Should not have format included.');
+			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
 
 			// Match, w/format
@@ -136,7 +135,7 @@ Notes:
 				uriPattern = "/content/item/{key}/{category}",
 				httpMethod="GET",
 				functionName="getContent",
-				endpoint=variables.testEndpoint
+				endpointName="content"
 				);
 			var tokens = "";
 
@@ -144,7 +143,7 @@ Notes:
 			assertTrue(restUri.matchUri('/content/item/my-item/my-cat'), 'Should match /content/item/my-item/my-cat.');
 
 			tokens = restUri.getTokensFromUri('/content/item/my-item/my-cat');
-			assertTrue(tokens.format EQ '', 'Should not have format included.');
+			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
 			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
 
