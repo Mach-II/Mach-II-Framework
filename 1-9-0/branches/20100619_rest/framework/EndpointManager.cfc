@@ -187,10 +187,15 @@ Notes:
 				<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' not available.</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 			<cfcatch type="any">
-				<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
-				<cfheader statuscode="500" statustext="Error" />
-				<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhanled exception." />
-				<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhanled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
+				<cfif event.isArgDefined("throw")>
+					<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
+					<cfrethrow />
+				<cfelse>
+					<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
+					<cfheader statuscode="500" statustext="Error" />
+					<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception." />
+					<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
+				</cfif>
 			</cfcatch>
 		</cftry>
 	</cffunction>
