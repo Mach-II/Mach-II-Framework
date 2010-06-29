@@ -110,7 +110,7 @@ is en_US.
 		<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(bundles) />
 		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
 
-		<cfset getAppManager().getGlobalizationManager().setGlobalizationConfigProperty(this) />
+		<cfset getAppManager().getGlobalizationManager().setGlobalizationLoaderProperty(this) />
 	</cffunction>
 
 	<!---

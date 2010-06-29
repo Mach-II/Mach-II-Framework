@@ -57,7 +57,7 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentGlobalizationManager = "" />
-	<cfset variables.globalizationConfigProperty = "" />
+	<cfset variables.globalizationLoaderProperty = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -94,7 +94,7 @@ Notes:
 		<cfargument name="args" type="array" required="true" />
 		<cfargument name="defaultString" type="string" required="true" />
 		
-		<cfreturn getGlobalizationConfigProperty().getMessageSource().getMessage(arguments.code, arguments.args, arguments.locale, arguments.defaultString) />
+		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, arguments.locale, arguments.defaultString) />
 	</cffunction>
 	
 	<!---
@@ -116,12 +116,12 @@ Notes:
 		<cfreturn variables.parentGlobalizationManager />
 	</cffunction>
 	
-	<cffunction name="setGlobalizationConfigProperty" access="public" returntype="void" output="false">
-		<cfargument name="globalizationConfigProperty" type="MachII.properties.GlobalizationConfigProperty" required="true" />
-		<cfset variables.globalizationConfigProperty = arguments.globalizationConfigProperty />
+	<cffunction name="setGlobalizationLoaderProperty" access="public" returntype="void" output="false">
+		<cfargument name="globalizationLoaderProperty" type="MachII.globalization.GlobalizationLoaderProperty" required="true" />
+		<cfset variables.globalizationLoaderProperty = arguments.globalizationLoaderProperty />
 	</cffunction>
-	<cffunction name="getGlobalizationConfigProperty" access="public" returntype="MachII.properties.GlobalizationConfigProperty" output="true">
-		<cfreturn variables.globalizationConfigProperty />
+	<cffunction name="getGlobalizationLoaderProperty" access="public" returntype="MachII.globalization.GlobalizationLoaderProperty" output="true">
+		<cfreturn variables.globalizationLoaderProperty />
 	</cffunction>
 	
 </cfcomponent>
