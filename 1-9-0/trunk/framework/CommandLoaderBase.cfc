@@ -59,6 +59,10 @@ Notes:
 	<cfset variables.beanUtil = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.expressionEvaluator = "" />
+	<cfset variables.cacheManager = "" />
+	<cfset variables.listenerManager = "" />
+	<cfset variables.filterManager = "" />
+
 	<cfset variables.configurableCommandTargets = ArrayNew(1) />
 	<cfset variables.cacheClearCommandLog = "" />
 	<cfset variables.cacheCommandLog = "" />
@@ -73,19 +77,27 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initialization function called by the framework.">
+
+		<cfset var logFactory = getAppManager().getLogFactory() />
+
 		<cfset variables.beanUtil = CreateObject("component", "MachII.util.BeanUtil").init() />
 		<cfset variables.utils = getAppManager().getUtils() />
 		<cfset variables.expressionEvaluator = getAppManager().getExpressionEvaluator() />
 
+		<!--- Setup locals to reduce method calls when loading commands --->
+		<cfset variables.cacheManager = getAppManager().getCacheManager() />
+		<cfset variables.listenerManager = getAppManager().getListenerManager() />
+		<cfset variables.filterManager = getAppManager().getFilterManager() />
+
 		<!--- Grab local references to increase performance because constantly getting a the
 			same log when computing the channel name via getMetadata is expensive --->
-		<cfset variables.cacheClearCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheClearCommand") />
-		<cfset variables.cacheCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CacheCommand") />
-		<cfset variables.callMethodCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.CallMethodCommand") />
-		<cfset variables.eventArgCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventArgCommand") />
-		<cfset variables.eventBeanCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand") />
-		<cfset variables.redirectCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.RedirectCommand") />
-		<cfset variables.defaultCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.DefaultCommand") />
+		<cfset variables.cacheClearCommandLog = logFactory.getLog("MachII.framework.commands.CacheClearCommand") />
+		<cfset variables.cacheCommandLog = logFactory.getLog("MachII.framework.commands.CacheCommand") />
+		<cfset variables.callMethodCommandLog = logFactory.getLog("MachII.framework.commands.CallMethodCommand") />
+		<cfset variables.eventArgCommandLog = logFactory.getLog("MachII.framework.commands.EventArgCommand") />
+		<cfset variables.eventBeanCommandLog = logFactory.getLog("MachII.framework.commands.EventBeanCommand") />
+		<cfset variables.redirectCommandlog = logFactory.getLog("MachII.framework.commands.RedirectCommand") />
+		<cfset variables.defaultCommandlog = logFactory.getLog("MachII.framework.commands.DefaultCommand") />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -175,7 +187,7 @@ Notes:
 		<cfset var criteria = "" />
 		<cfset var name = "" />
 
-		<cfset handlerId = getAppManager().getCacheManager().loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
+		<cfset handlerId = variables.cacheManager.loadCacheHandlerFromXml(arguments.commandNode, arguments.parentHandlerName, arguments.parentHandlerType, arguments.override) />
 
 		<cfif StructKeyExists(arguments.commandNode, "xmlAttributes") >
 			<!--- We cannot get the default cache strategy name because it has not been set
@@ -397,7 +409,7 @@ Notes:
 		<cfset var notifyMethod = arguments.commandNode.xmlAttributes["method"] />
 		<cfset var notifyResultKey = "" />
 		<cfset var notifyResultArg = "" />
-		<cfset var listenerProxy = getAppManager().getListenerManager().getListener(notifyListener).getProxy() />
+		<cfset var listenerProxy = variables.listenerManager.getListener(notifyListener).getProxy() />
 
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "resultKey")>
 			<cfset notifyResultKey = arguments.commandNode.xmlAttributes["resultKey"] />
@@ -489,7 +501,7 @@ Notes:
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
-		<cfset var filterProxy = getAppManager().getFilterManager().getFilter(filterName).getProxy() />
+		<cfset var filterProxy = variables.filterManager.getFilter(filterName).getProxy() />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(paramNodes)#" index="i">

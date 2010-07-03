@@ -21,23 +21,23 @@
     conditions of the GNU General Public License cover the whole
     combination.
 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -57,7 +57,8 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.requestHandler = "" />
+	<cfset variables.propertyManager = "" />
+	<cfset variables.utils = "" />
 	<cfset variables.defaultUrlBase = "" />
 	<cfset variables.eventParameter = "" />
 	<cfset variables.parameterPrecedence = "" />
@@ -88,6 +89,7 @@ Notes:
 			hint="Sets the base AppManager." />
 
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<cfreturn this />
@@ -160,7 +162,7 @@ Notes:
 
 		<cfset var redirectToUrl =  ""/>
 		<cfset var persistId =  "" />
-		<cfset var redirectPersistParam = getAppManager().getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
+		<cfset var redirectPersistParam = getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
 
 		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
 		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
@@ -171,7 +173,7 @@ Notes:
 		</cfif>
 
 		<!--- Add the persistId parameter to the url args if persist is required --->
-		<cfif arguments.persist AND getAppManager().getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+		<cfif arguments.persist AND getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
 			<cfset arguments.eventArgs[redirectPersistParam] = persistId />
 		</cfif>
 
@@ -304,7 +306,7 @@ Notes:
 			hint="Name of the event to build the url with." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<cfset var builtUrl = "" />
@@ -316,6 +318,16 @@ Notes:
 		<cfset var seriesDelimiter = getSeriesDelimiter() />
 		<cfset var pairDelimiter = getPairDelimiter() />
 		<cfset var parseSes = getParseSes() />
+		<cfset var eventManager = "" />
+
+		<cfif NOT StructKeyExists(arguments, "urlBase")>
+			<cfif Len(arguments.moduleName)>
+				<cfset eventManager = getAppManager />
+			<cfelse>
+				<cfset arguments.urlBase = />
+			</cfif>
+			<cfset arguments.urlBase = />
+		</cfif>
 
 		<!--- Nested the appending of the event parameter inside the next block
 			Moving it causes redirect commands with just urls to wrongly append
@@ -536,11 +548,10 @@ Notes:
 		hint="Removes an onRequestEndCallback from the stack by passing in the callback object.">
 		<cfargument name="callback" type="any" required="true" />
 
-		<cfset var utils = getAppManager().getUtils() />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#ArrayLen(variables.onRequestEndCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.onRequestEndCallbacks[i].callback, arguments.callback)>
+			<cfif getUtils().assertSame(variables.onRequestEndCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.onRequestEndCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -561,11 +572,10 @@ Notes:
 		hint="Removes an preRedirect from the stack by passing in the callback object.">
 		<cfargument name="callback" type="any" required="true" />
 
-		<cfset var utils = getAppManager().getUtils() />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.preRedirectCallbacks[i].callback, arguments.callback)>
+			<cfif getUtils().assertSame(variables.preRedirectCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.preRedirectCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -586,11 +596,10 @@ Notes:
 		hint="Removes an postRedirect from the stack by passing in the callback object.">
 		<cfargument name="callback" type="any" required="true" />
 
-		<cfset var utils = getAppManager().getUtils() />
 		<cfset var i = 0 />
 
 		<cfloop from="1" to="#ArrayLen(variables.postRedirectCallbacks)#" index="i">
-			<cfif utils.assertSame(variables.postRedirectCallbacks[i].callback, arguments.callback)>
+			<cfif getUtils().assertSame(variables.postRedirectCallbacks[i].callback, arguments.callback)>
 				<cfset ArrayDeleteAt(variables.postRedirectCallbacks, i) />
 				<cfbreak />
 			</cfif>
@@ -700,6 +709,7 @@ Notes:
 	<cffunction name="parseNonRouteModuleAndEvent" access="private" returntype="struct" output="false"
 		hint="Parses the module and/or event name out of an array of non-route URL elements. Supports a moduleDelimiter that is the same as the seriesDelimiter (as with all slashes in URL).">
 		<cfargument name="urlElements" type="array" required="true" />
+
 		<cfset var i = 0 />
 		<cfset var elements = arguments.urlElements />
 		<cfset var params = StructNew() />
@@ -753,16 +763,18 @@ Notes:
 
 		<cfset var route = getRoute(arguments.routeName) />
 		<cfset var routeParams = 0 />
+		<cfset var requestHanadler = getRequestHandler() />
 
 		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
 		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
-		<cfset getRequestHandler().setCurrentRouteName(arguments.routeName) />
-		<cfset getRequestHandler().setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
+		<cfset requestHandler.setCurrentRouteName(arguments.routeName) />
+		<cfset requestHandler.setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
 
 		<cfreturn routeParams />
 	</cffunction>
 
-	<cffunction name="checkRouteParameterNames" access="private" returntype="void" output="false">
+	<cffunction name="checkRouteParameterNames" access="private" returntype="void" output="false"
+		hint="Checks for collisions between route names and event handler names.">
 		<cfset var route = 0 />
 		<cfset var routes = getRoutes() />
 		<cfset var index = "" />
@@ -799,12 +811,20 @@ Notes:
 		<cfreturn variables.appManager />
 	</cffunction>
 
+	<cffunction name="setPropertyManager" access="private" returntype="void" output="false">
+		<cfargument name="propertyManager" type="MachII.framework.PropertyManager" required="true" />
+		<cfset variables.propertyManager = arguments.propertyManager />
+	</cffunction>
 	<cffunction name="getPropertyManager" access="private" returntype="MachII.framework.PropertyManager" output="false">
-		<cfreturn getAppManager().getPropertyManager() />
+		<cfreturn variables.propertyManager />
 	</cffunction>
 
+	<cffunction name="setUtils" access="private" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
+	</cffunction>
 	<cffunction name="getUtils" access="private" returntype="MachII.util.Utils" output="false">
-		<cfreturn getAppManager().getUtils() />
+		<cfreturn variables.utils />
 	</cffunction>
 
 	<cffunction name="setEventParameter" access="private" returntype="void" output="false">

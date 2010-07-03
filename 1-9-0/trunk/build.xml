@@ -196,8 +196,40 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			preservelastmodified="true"
 			verbose="${debug}"/>
 		<echo message="Built as version '${buildVersion}'"/>
+		<antcall target="optimizeBuild"/>
 		<antcall target="testReport"/>
 		<antcall target="varScopeCheck"/>
+	</target>
+	
+	<target name="optimizeBuild">
+		<echo message="---------------------------------------------"/>
+		<echo message="Optimizing the build"/>
+		<echo message="---------------------------------------------"/>
+
+		<replaceregexp match="([ ]*?|\()getAppManager\(\)[ ]*?"
+			replace="\1variables.appManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="CommandLoaderBase.cfc"/>
+		</replaceregexp>
+		<replaceregexp match="([ ]*?|\()getPropertyManager\(\)[ ]*?"
+			replace="\1variables.propertyManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+		</replaceregexp>
+		<replaceregexp match="=[ ]*?getUtils\(\)[ ]*?"
+			replace="variables.utils"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="Re[ ]*?getPropertyManager\(\)[ ]*?questManager.cfc"/>
+		</replaceregexp>
+		
+		<replaceregexp match="([ ]*?|\()getRequestManager\(\)[ ]*?"
+			replace="\1variables.requestManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
+		</replaceregexp>
+			
 	</target>
 	
 	<target name="buildNightly">
