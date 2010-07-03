@@ -87,12 +87,10 @@ Notes:
 		<cfset var log = filter.getLog() />
 		<cfset var paramArgs = getParamArgs() />
 
-		<cfif log.isDebugEnabled()>
-			<cfif StructCount(paramArgs)>
-				<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with runtime paramArgs.", paramArgs) />
-			<cfelse>
-				<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with no runtime paramArgs.") />
-			</cfif>
+		<cfif StructCount(paramArgs)>
+			<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with runtime paramArgs.", paramArgs) />
+		<cfelse>
+			<cfset log.debug("Filter '#filter.getComponentNameForLogging()#' beginning execution with no runtime paramArgs.") />
 		</cfif>
 
 		<cftry>
@@ -111,7 +109,7 @@ Notes:
 			</cfcatch>
 		</cftry>
 
-		<cfif NOT continue AND log.isInfoEnabled()>
+		<cfif NOT continue>
 			<cfset log.info("Filter '#filter.getComponentNameForLogging()# has changed the flow of this event.") />
 		</cfif>
 

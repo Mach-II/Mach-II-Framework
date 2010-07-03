@@ -117,22 +117,18 @@ Notes:
 		<!--- Set event-arg if overwrite is true or if event-arg is not defined
 			No need to check if overwrite is false since CF uses short-circuit logic --->
 		<cfif getOverwrite() OR NOT arguments.event.isArgDefined(getArgName())>
-			<cfif log.isDebugEnabled()>
-				<cfif IsSimpleValue(value)>
-					<cfset log.debug("Set event-arg named '#getArgName()#' with a value of '#value#'.") />
-				<cfelse>
-					<cfset log.debug("Set event-arg named '#getArgName()#' with a value of:", value) />
-				</cfif>
+			<cfif IsSimpleValue(value)>
+				<cfset log.debug("Set event-arg named '#getArgName()#' with a value of '#value#'.") />
+			<cfelse>
+				<cfset log.debug("Set event-arg named '#getArgName()#' with a value of:", value) />
 			</cfif>
 
 			<cfset arguments.event.setArg(getArgName(), value) />
 		<cfelse>
-			<cfif log.isDebugEnabled()>
-				<cfif IsSimpleValue(value)>
-					<cfset log.debug("An event-arg named '#getArgName()#' with overwrite 'false' is already defined. Current value or variable: '#value#'.") />
-				<cfelse>
-					<cfset log.debug("An event-arg named '#getArgName()#' with overwrite 'false' is already defined.", value) />
-				</cfif>
+			<cfif IsSimpleValue(value)>
+				<cfset log.debug("An event-arg named '#getArgName()#' with overwrite 'false' is already defined. Current value or variable: '#value#'.") />
+			<cfelse>
+				<cfset log.debug("An event-arg named '#getArgName()#' with overwrite 'false' is already defined.", value) />
 			</cfif>
 		</cfif>
 
@@ -150,7 +146,7 @@ Notes:
 
 		<cfif IsDefined(getArgVariable())>
 			<cfset value = Evaluate(getArgVariable()) />
-		<cfelseif log.isDebugEnabled()>
+		<cfelse>
 			<cfset log.debug("No value found for arg variable named '#getArgVariable()#' for event-arg named '#getArgName()#'.") />
 		</cfif>
 

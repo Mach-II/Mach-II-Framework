@@ -121,9 +121,7 @@ Notes:
 			handling to catch a cfabort --->
 		<cfset arguments.eventContext.clearEventQueue() />
 
-		<cfif log.isInfoEnabled()>
-			<cfset log.info("Redirecting to url '#redirectUrl#' with '#statusType#' status code (persist='#getPersist()#').") />
-		</cfif>
+		<cfset log.info("Redirecting to url '#redirectUrl#' with '#statusType#' status code (persist='#getPersist()#').") />
 
 		<cfset arguments.eventContext.getAppManager().getRequestManager().redirectUrl(redirectUrl, getStatusType()) />
 

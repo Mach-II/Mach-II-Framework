@@ -96,16 +96,15 @@ Notes:
 		<cfset var resolvedContentData = "" />
 		<cfset var log = getLog() />
 
-		<cfif log.isDebugEnabled()>
-			<cfif Len(arguments.contentKey)>
-				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
-			</cfif>
-			<cfif Len(arguments.contentArg)>
-				<cfset log.debug("Rendering view '#arguments.viewName#' in ContentArg '#arguments.contentArg#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
-			</cfif>
-			<cfif NOT Len(arguments.contentKey) AND NOT Len(arguments.ContentArg)>
-				<cfset log.debug("Rendering view '#arguments.viewName#'.") />
-			</cfif>
+		<!--- Log this view --->
+		<cfif Len(arguments.contentKey)>
+			<cfset log.debug("Rendering view '#arguments.viewName#' in ContentKey '#arguments.contentKey#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
+		</cfif>
+		<cfif Len(arguments.contentArg)>
+			<cfset log.debug("Rendering view '#arguments.viewName#' in ContentArg '#arguments.contentArg#' with append '#arguments.append#' and prepend '#arguments.prepend#'.") />
+		</cfif>
+		<cfif NOT Len(arguments.contentKey) AND NOT Len(arguments.ContentArg)>
+			<cfset log.debug("Rendering view '#arguments.viewName#'.") />
 		</cfif>
 
 		<!--- This has been left in for BC --->

@@ -83,9 +83,7 @@ Notes:
 		<cfset var log = arguments.listener.getLog() />
 
 		<cftry>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Listener '#componentNameForLogging#' invoking method '#arguments.method#'.") />
-			</cfif>
+			<cfset log.debug("Listener '#componentNameForLogging#' invoking method '#arguments.method#'.") />
 
 			<!--- Enable output and invoke listener method --->
 			<cfsetting enablecfoutputonly="false" /><cfinvoke
@@ -103,9 +101,7 @@ Notes:
 			</cfif>
 			<!--- resultArg --->
 			<cfif arguments.resultArg NEQ ''>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Listener '#componentNameForLogging#' method '#arguments.method#' returned data in event-arg '#arguments.resultArg#.'", resultValue) />
-				</cfif>
+				<cfset log.debug("Listener '#componentNameForLogging#' method '#arguments.method#' returned data in event-arg '#arguments.resultArg#.'", resultValue) />
 				<cfset arguments.event.setArg(arguments.resultArg, resultValue) />
 			</cfif>
 

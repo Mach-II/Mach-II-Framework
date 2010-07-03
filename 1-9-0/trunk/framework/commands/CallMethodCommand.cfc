@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -49,24 +49,24 @@ Updated version: 1.8.0
 Notes:
 This command can be used to call a method from an object configured through the ColdSpringProperty.
 
-<call-method bean="fantasyTeamService" method="getFantasyTeam" 
+<call-method bean="fantasyTeamService" method="getFantasyTeam"
 	arguments="fantasyteam_id=${event.id}" resultArg="fantasyTeam" />
 or
-<call-method bean="fantasyTeamService" method="getFantasyTeams" 
+<call-method bean="fantasyTeamService" method="getFantasyTeams"
 	resultArg="fantasyTeams" />
 or
-<call-method bean="fantasyTeamService" method="getFantasyTeams" 
+<call-method bean="fantasyTeamService" method="getFantasyTeams"
 	arguments="${event.id:0}" resultArg="fantasyTeams" />
 or
-<call-method bean="fantasyTeamService" method="searchFantasyTeams" 
+<call-method bean="fantasyTeamService" method="searchFantasyTeams"
 	arguments="argumentCollection=${event.getArgs()}" resultArg="fantasyTeams" />
 --->
-<cfcomponent 
-	displayname="CallMethodCommand" 
+<cfcomponent
+	displayname="CallMethodCommand"
 	extends="MachII.framework.Command"
 	output="false"
 	hint="A Command for calling a method on a bean configured and auto-wired in from an IoC container.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -78,7 +78,7 @@ or
 	<cfset variables.args = ArrayNew(1) />
 	<cfset variables.argumentList = "" />
 	<cfset variables.overwrite = "" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -89,17 +89,17 @@ or
 		<cfargument name="args" type="string" required="true" />
 		<cfargument name="resultArg" type="string" required="true" />
 		<cfargument name="overwrite" type="boolean" required="true" />
-		
+
 		<!--- Run setters --->
 		<cfset setBeanId(arguments.beanId) />
 		<cfset setMethod(arguments.method) />
 		<cfset setArgumentList(arguments.args) />
 		<cfset setResultArg(arguments.resultArg) />
 		<cfset setOverwrite(arguments.overwrite) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -119,26 +119,24 @@ or
 		<cfset var evalStatement = "" />
 		<cfset var log = getLog() />
 		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
-		
+
 		<cfif NOT IsObject(bean)>
 			<cfthrow type="MachII.framework.commands.NoBean"
 				message="A call-method command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#' did not have a bean named '#getBeanId()#' autowired into it."
 				detail="Ensure your IoC container such as the 'ColdSpringProperty' is of a version that supports the call-method command." />
 		</cfif>
-		
+
 		<!---
-			Typically we prefer to not short-circuit in a middle of a method, but we want to save 
-			some clock cycles by not making the method call of the arg is defined in the event and 
+			Typically we prefer to not short-circuit in a middle of a method, but we want to save
+			some clock cycles by not making the method call of the arg is defined in the event and
 			overwrite is false
 		--->
 		<cfif arguments.event.isArgDefined(getResultArg()) AND NOT getOverwrite()>
-			<cfif log.isDebugEnabled()>
-				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' did not return data in event-arg '#getResultArg()#' as data was already present and 'overwrite' is 'false'.")/>
-			</cfif>
+			<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' did not return data in event-arg '#getResultArg()#' as data was already present and 'overwrite' is 'false'.")/>
 
 			<cfreturn true />
 		</cfif>
-		
+
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(args)#" index="i">
 				<cfif args[i].name NEQ "">
@@ -151,7 +149,7 @@ or
 					<cfif args[i].isExpression>
 						<cfset ArrayAppend(argValues, variables.expressionEvaluator.evaluateExpression(args[i].value, arguments.event, propertyManager)) />
 					<cfelse>
-						<cfset ArrayAppend(argValues, args[i].value) /> 
+						<cfset ArrayAppend(argValues, args[i].value) />
 					</cfif>
 				</cfif>
 			</cfloop>
@@ -166,44 +164,40 @@ or
 		</cftry>
 
 		<cftry>
-		
+
 			<cfif ArrayLen(argValues) GT 0>
 				<cfset evalStatement = evalStatement & 'bean.#getMethod()#(' />
-				
+
 				<cfloop from="1" to="#ArrayLen(argValues)#" index="i">
 					<cfif i GT 1>
 						<cfset evalStatement = evalStatement & "," />
 					</cfif>
-					<!--- Just give areference to the argValues array instead of 
+					<!--- Just give areference to the argValues array instead of
 						outputing the value which fails if the value is a complex arg --->
 					<cfset evalStatement = evalStatement & "argValues[" & i & "]" />
 				</cfloop>
-				
+
 				<cfset evalStatement = evalStatement & ')' />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolved positional arguments:", argValues) />
-				</cfif>	
+				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolved positional arguments:", argValues) />
 
 				<cfset resultValue = Evaluate(evalStatement) />
 			<cfelse>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolve named arguments:", namedArgs) />
-				</cfif>	
-				<cfinvoke 
-					component="#bean#" 
-					method="#getMethod()#" 
+				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' with arguments '#getArgumentList()#'. Resolve named arguments:", namedArgs) />
+
+				<cfinvoke
+					component="#bean#"
+					method="#getMethod()#"
 					argumentcollection="#namedArgs#"
 					returnvariable="resultValue" />
 			</cfif>
-			
+
 			<cfif Len(getResultArg())>
+				<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
+
 				<cfset arguments.event.setArg(getResultArg(), resultValue) />
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Call-method on bean '#getBeanId()#' invoking method '#getMethod()#' returned data in event-arg '#getResultArg()#.'", resultValue) />
-				</cfif>
 			</cfif>
-			
+
 			<cfcatch type="expression">
 				<cfif FindNoCase("RESULTVALUE", cfcatch.Message)>
 					<cfif log.isErrorEnabled()>
@@ -227,31 +221,31 @@ or
 				</cfif>
 				<cfrethrow/>
 			</cfcatch>
-		</cftry>	
-		
+		</cftry>
+
 		<cfreturn true />
 	</cffunction>
-	
+
 	<cffunction name="addArgument" access="public" returntype="void" output="false"
 		hint="Adds and argument to an ordered list of arguments to pass to the bean method.">
 		<cfargument name="name" type="string" required="true" />
 		<cfargument name="value" type="any" required="true" />
-		
+
 		<cfset var arg = StructNew() />
-		
+
 		<cfset arg.name = arguments.name />
-		
+
 		<cfif isSimpleValue(value)>
 			<cfset arg.isExpression = expressionEvaluator.isExpression(value) />
 		<cfelse>
 			<cfset arg.isExpression = false />
 		</cfif>
-		
-		<cfset arg.value = value /> 
-		
+
+		<cfset arg.value = value />
+
 		<cfset ArrayAppend(variables.args, arg) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -260,34 +254,34 @@ or
 
 		<cfset var arg = "" />
 		<cfset var argText = "" />
-		
+
 		<cfloop list="#getArgumentList()#" index="argText">
 			<cfset arg = StructNew() />
-			
+
 			<cfif ListLen(argText, "=") GT 1>
 				<cfset arg.name = ListGetAt(argText, 1, "=") />
-				<cfset arg.value = ListGetAt(argText, 2, "=") /> 
+				<cfset arg.value = ListGetAt(argText, 2, "=") />
 			<cfelse>
 				<cfset arg.name = "" />
-				<cfset arg.value = argText /> 
+				<cfset arg.value = argText />
 			</cfif>
-			
+
 			<cfset addArgument(arg.name, arg.value) />
 		</cfloop>
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setExpressionEvaluator" access="public" returntype="void" output="false"
 		hint="Overrides the inherited method and automatically calls transFormArgumentList().">
 		<cfargument name="expressionEvaluator" type="MachII.util.ExpressionEvaluator" required="true" />
-		
+
 		<cfset super.setExpressionEvaluator(arguments.expressionEvaluator) />
-		
+
 		<cfset transformArgumentList() />
 	</cffunction>
-	
+
 	<cffunction name="setBeanId" access="private" returntype="void" output="false">
 		<cfargument name="beanId" type="string" required="true" />
 		<cfset variables.beanId = arguments.beanId />
@@ -295,7 +289,7 @@ or
 	<cffunction name="getBeanId" access="public" returntype="string" output="false">
 		<cfreturn variables.beanId />
 	</cffunction>
-	
+
 	<cffunction name="setBean" access="public" returntype="void" output="false">
 		<cfargument name="bean" type="any" required="true" />
 		<cfset variables.bean = arguments.bean />
@@ -303,7 +297,7 @@ or
 	<cffunction name="getBean" access="public" returntype="any" output="false">
 		<cfreturn variables.bean />
 	</cffunction>
-	
+
 	<cffunction name="setMethod" access="private" returntype="void" output="false">
 		<cfargument name="method" type="string" required="true" />
 		<cfset variables.method = arguments.method />
@@ -311,7 +305,7 @@ or
 	<cffunction name="getMethod" access="private" returntype="string" output="false">
 		<cfreturn variables.method />
 	</cffunction>
-	
+
 	<cffunction name="setArgumentList" access="private" returntype="void" output="false">
 		<cfargument name="argumentList" type="string" required="true" />
 		<cfset variables.argumentList = arguments.argumentList />
@@ -319,7 +313,7 @@ or
 	<cffunction name="getArgumentList" access="private" returntype="string" output="false">
 		<cfreturn variables.argumentList />
 	</cffunction>
-	
+
 	<cffunction name="setArguments" access="private" returntype="void" output="false">
 		<cfargument name="args" type="array" required="true" />
 		<cfset variables.args = arguments.args />
@@ -330,7 +324,7 @@ or
 	<cffunction name="hasArguments" access="private" returntype="boolean" output="false">
 		<cfreturn ArrayLen(variables.args) />
 	</cffunction>
-	
+
 	<cffunction name="setResultArg" access="private" returntype="void" output="false">
 		<cfargument name="resultArg" type="string" required="true" />
 		<cfset variables.resultArg = arguments.resultArg />
@@ -341,7 +335,7 @@ or
 	<cffunction name="hasResultArg" access="private" returntype="boolean" output="false">
 		<cfreturn Len(variables.resultArg) />
 	</cffunction>
-	
+
 	<cffunction name="setOverwrite" access="private" returntype="void" output="false">
 		<cfargument name="arg" type="boolean" required="true" />
 		<cfset variables.overwrite = arguments.arg />

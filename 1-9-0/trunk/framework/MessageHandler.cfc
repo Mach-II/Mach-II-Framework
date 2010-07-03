@@ -113,9 +113,7 @@ Notes:
 			<!--- Run in parallel if multithreaded is requested and threading is allow on this engine --->
 			<cfif getMultithreaded() AND threadingAdapter.allowThreading()>
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
-				</cfif>
+				<cfset log.debug("Received published message named '#getMessageName()#' (running in multi-threaded).") />
 
 				<!--- Setup parameters --->
 				<cfset parameters.event = arguments.event />
@@ -128,9 +126,7 @@ Notes:
 
 				<!--- Wait and join --->
 				<cfif getWaitForThreads()>
-					<cfif log.isDebugEnabled()>
-						<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
-					</cfif>
+					<cfset log.debug("Joining threads for message named '#getMessageName()#'.") />
 
 					<cfset results = threadingAdapter.join(threadIds, getTimeout()) />
 
@@ -150,17 +146,14 @@ Notes:
 					</cfif>
 				<!--- Or set thread ids into the event --->
 				<cfelse>
-					<cfif log.isTraceEnabled()>
-						<cfset log.trace("Not waiting to join message threads.") />
-					</cfif>
+					<cfset log.trace("Not waiting to join message threads.") />
+
 					<cfset StructAppend(publishThreadIdsInEvent, threadIds, "true") />
 					<cfset arguments.event.setArg("_publishThreadIds", publishThreadIdsInEvent) />
 				</cfif>
 			<!--- Run in serial --->
 			<cfelse>
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
-				</cfif>
+				<cfset log.debug("Received published message named '#getMessageName()#' (running in serial).") />
 
 				<cfloop collection="#subscribers#" item="key">
 					<cfset subscribers[key].execute(arguments.event, arguments.eventContext) />
@@ -168,9 +161,7 @@ Notes:
 			</cfif>
 
 		<cfelse>
-			<cfif log.isWarnEnabled()>
-				<cfset log.warn("There are no listeners or beans that have subscribed to a message named '#getMessageName()#'. Please check your configuration.") />
-			</cfif>
+			<cfset log.warn("There are no listeners or beans that have subscribed to a message named '#getMessageName()#'. Please check your configuration.") />
 		</cfif>
 
 		<cfreturn continue />

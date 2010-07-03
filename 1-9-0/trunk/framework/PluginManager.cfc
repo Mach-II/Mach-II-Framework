@@ -398,10 +398,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preProcessPlugins)#" index="i">
 				<cfset log = variables.preProcessPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.preProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-process point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preProcessPlugins[i].preProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -435,10 +433,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preEventPlugins)#" index="i">
 				<cfset log = variables.preEventPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.preEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-event point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preEventPlugins[i].preEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -472,10 +468,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postEventPlugins)#" index="i">
 				<cfset log = variables.postEventPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-event point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.postEventPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-event point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postEventPlugins[i].postEvent(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -509,10 +503,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.preViewPlugins)#" index="i">
 				<cfset log = variables.preViewPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.preViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running pre-view point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.preViewPlugins[i].preView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -546,10 +538,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postViewPlugins)#" index="i">
 				<cfset log = variables.postViewPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-view point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.postViewPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-view point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postViewPlugins[i].postView(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -584,10 +574,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.postProcessPlugins)#" index="i">
 				<cfset log = variables.postProcessPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-process point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.postProcessPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running post-process point.") />
-				</cfif>
 				<cfsetting enablecfoutputonly="false" /><cfset variables.postProcessPlugins[i].postProcess(arguments.eventContext) /><cfsetting enablecfoutputonly="true" />
 			</cfloop>
 			<cfcatch type="any">
@@ -614,10 +602,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionStartPlugins)#" index="i">
 				<cfset log = variables.onSessionStartPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.onSessionStartPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-start point.") />
-				</cfif>
 				<cfset variables.onSessionStartPlugins[i].onSessionStart() />
 			</cfloop>
 			<cfcatch type="any">
@@ -642,10 +628,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.onSessionEndPlugins)#" index="i">
 				<cfset log = variables.onSessionEndPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.onSessionEndPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running on-session-end point.") />
-				</cfif>
 				<cfset variables.onSessionEndPlugins[i].onSessionEnd(arguments.sessionScope) />
 			</cfloop>
 			<cfcatch type="any">
@@ -678,10 +662,8 @@ Notes:
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(variables.handleExceptionPlugins)#" index="i">
 				<cfset log = variables.handleExceptionPlugins[i].getLog() />
+				<cfset log.debug("Plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
 
-				<cfif log.isDebugEnabled()>
-					<cfset log.debug("Plugin '#variables.handleExceptionPlugins[i].getComponentNameForLogging()#' in module '#getAppManager().getModuleName()#' running handle-exception point.") />
-				</cfif>
 				<cfset variables.handleExceptionPlugins[i].handleException(arguments.eventContext, arguments.exception) />
 			</cfloop>
 			<cfcatch type="any">
