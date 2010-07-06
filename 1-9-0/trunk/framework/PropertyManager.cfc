@@ -63,7 +63,7 @@ Notes:
 	<cfset variables.majorVersion = "1.9.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
+		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -410,6 +410,8 @@ Notes:
 	<cffunction name="ensureBasePropertyDefaults" access="public" returntype="void" output="false"
 		hint="Ensures that base property defaults have been set.">
 
+		<cfset var temp = "" />
+
 		<!--- Make sure required properties are set if this the base application --->
 		<cfif NOT IsObject(getParent())>
 			<cfif NOT isPropertyDefined("defaultEvent")>
@@ -453,6 +455,13 @@ Notes:
 			</cfif>
 			<cfif NOT isPropertyDefined("urlBase")>
 				<cfset setProperty("urlBase", "index.cfm") />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlSecureBase")>
+				<cfset temp = getProperty("urlBase") />
+				<cfif Left(temp, 1) NEQ "/">
+					<cfset temp = "/" & temp />
+				</cfif>
+				<cfset setProperty("urlSecureBase", "https://" & cgi.SERVER_NAME & temp) />
 			</cfif>
 			<cfif NOT isPropertyDefined("urlDelimiters")>
 				<cfset setProperty("urlDelimiters", "?|&|=") />
