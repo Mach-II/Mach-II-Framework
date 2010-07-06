@@ -103,6 +103,7 @@ Notes:
 		<!--- Setup defaults --->
 		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />
 		<cfset setDefaultUrlBase(getPropertyManager().getProperty("urlBase")) />
+		<cfset setDefaultUrlSecureBase(getPropertyManager().getProperty("urlSecureBase")) />
 		<cfset setEventParameter(getPropertyManager().getProperty("eventParameter")) />
 		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
@@ -322,11 +323,16 @@ Notes:
 
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
 			<cfif Len(arguments.moduleName)>
-				<cfset eventManager = getAppManager />
+				<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
 			<cfelse>
-				<cfset arguments.urlBase = />
+				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
-			<cfset arguments.urlBase = />
+
+			<cfif arguments.urlBase = eventManager.getEventSecureType(arguments.eventName)>
+				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
+			<cfelse>
+				<cfset arguments.urlBase = getDefaultUrlBase() />
+			</cfif>
 		</cfif>
 
 		<!--- Nested the appending of the event parameter inside the next block
@@ -874,6 +880,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getDefaultUrlBase" access="private" returntype="string" output="false">
 		<cfreturn variables.defaultUrlBase />
+	</cffunction>
+
+	<cffunction name="setDefaultUrlSecureBase" access="private" returntype="void" output="false">
+		<cfargument name="defaultUrlSecureBase" type="string" required="true" />
+		<cfset variables.defaultUrlSecureBase = arguments.defaultUrlSecureBase />
+	</cffunction>
+	<cffunction name="getDefaultUrlSecureBase" access="private" returntype="string" output="false">
+		<cfreturn variables.defaultUrlSecureBase />
 	</cffunction>
 
 	<cffunction name="setQueryStringDelimiter" access="private" returntype="void" output="false">
