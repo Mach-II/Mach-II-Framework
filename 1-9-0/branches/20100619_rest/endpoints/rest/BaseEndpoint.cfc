@@ -180,7 +180,9 @@ to return good responses and response codes, use of format (.json), etc.
 			<cfset arguments.event.setArg("pathInfo", pathInfo) />
 		</cfif>
 		<cfset arguments.event.setArg("httpMethod", CGI.REQUEST_METHOD) />
-		<cfset arguments.event.setArg("rawContent", GetHttpRequestData().content) />
+		<cfif ListContainsNoCase("PUT,POST", CGI.REQUEST_METHOD)>
+			<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
@@ -269,6 +271,28 @@ to return good responses and response codes, use of format (.json), etc.
 		</cfif>
 
 		<cfreturn UrlDecode(pathInfo) />
+	</cffunction>
+
+	<cffunction name="cleanRawContent" access="private" returntype="any" output="false"
+		hint="Processes the raw request content and returns it. Sometimes the content is received as a byte array, when it is a valid string. Uses the Content-Type header to try and discern whether to cast the body as a String.">
+
+		<cfset var headers = GetHttpRequestData().headers />
+		<cfset var rawContent = GetHttpRequestData().content />
+		<cfset var contentType = "" />
+
+		<!--- If the content type is present, and is a text type, and is an array, cast it to a String. --->
+		<!--- Comprehensive list of content-type header values: http://www.iana.org/assignments/media-types/index.html --->
+		<cfif StructKeyExists(headers, "Content-Type")>
+			<cfset contentType = headers["Content-Type"] />
+			<cfif IsArray(rawContent) AND ArrayLen(rawContent) GT 0>
+				<cfif REFindNoCase('text\/|xml|json', contentType)>
+					<cfset rawContent = ToString(rawContent) />
+				</cfif>
+			</cfif>
+		</cfif>
+
+		<cfreturn rawContent />
+
 	</cffunction>
 
 	<!---
