@@ -56,6 +56,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.appManager = "" />
+	<cfset variables.log = "" />
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
@@ -141,13 +143,16 @@ Notes:
 		<cfif StructKeyExists(variables.endpointContextPathMap, cgi.PATH_INFO)>
 			<!--- The entire path info matched one of the endpoint contextPath parameters. --->
 			<cfset arguments.eventArgs[getEndpointParameter()] = variables.endpointContextPathMap[cgi.PATH_INFO] />
+			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched path '#cgi.PATH_INFO#' to endpoint.", arguments.eventArgs) />
 			<cfreturn true />
 		<cfelseif StructKeyExists(variables.endpoints, firstUrlItem)>
 			<!--- The first part of the URI matched an endpoint name. --->
 			<cfset arguments.eventArgs[getEndpointParameter()] = firstUrlItem />
+			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched first URL item '#firstUrlItem#' to endpoint.", arguments.eventArgs) />
 			<cfreturn true />
 		<cfelseif StructKeyExists(arguments.eventArgs, getEndpointParameter())>
 			<!--- The URL contains the endpoint parameter. --->
+			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Endpoint parameter provided in URL.", arguments.eventArgs) />
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />
@@ -195,6 +200,7 @@ Notes:
 					<cfheader statuscode="500" statustext="Error" />
 					<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception." />
 					<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
+					<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
 				</cfif>
 			</cfcatch>
 		</cftry>
@@ -265,7 +271,6 @@ Notes:
 
 		<!--- Resolve if a shortcut --->
 		<cfset arguments.endpointType = resolveEndTypeShortcut(arguments.endpointType) />
-
 		<!--- Ensure type is correct in parameters (where it is duplicated) --->
 		<cfset arguments.endpointParameters.type = arguments.endpointType />
 		<cfset arguments.endpointParameters.name = arguments.endpointName />
