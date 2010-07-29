@@ -313,7 +313,7 @@ Notes:
 
 		<cfset var builtUrl = "" />
 		<cfset var queryString = "" />
-		<cfset var params = "" />
+		<cfset var params = StructNew() />
 		<cfset var value = "" />
 		<cfset var i = "" />
 		<cfset var keyList = StructKeyList(params) />
