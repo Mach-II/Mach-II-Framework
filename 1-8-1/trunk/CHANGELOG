@@ -61,11 +61,17 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Certain form tags incorrectly sets the focus id
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/667
+(2010-07-29 peterfarrell)
+
 * Framework does not load when onSessionStart() is called if application name is shared
 
 Thanks to Hiren Patel for reporting this issue.
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/674
 (2010-07-28 peterfarrell)
 
@@ -73,19 +79,19 @@ http://trac.mach-ii.com/machii/ticket/674
 
 Thanks to Jason York for reporting this issue.
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/676
 (2010-07-28 peterfarrell)
 
 * Exception handling type differs on CFML engines for getProperty() etc in bootstrapper
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/631
 (2010-04-16 peterfarrell)
 
 * TimeSpanCache does not properly reap when storage scope is session
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/606
 (2010-04-07 peterfarrell)
 
@@ -93,7 +99,7 @@ http://trac.mach-ii.com/machii/ticket/606
 
 Use the new "external:" prepended to the href/src when passing URI to the the HtmlHelper. 
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/613
 (2010-04-06 peterfarrell)
 
@@ -101,7 +107,7 @@ http://trac.mach-ii.com/machii/ticket/613
 The getProperty() method in the ViewContext did not support a default value. Added
 in support for isPropertyDefined() shortcut method.
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/605
 (2010-04-02 peterfarrell)
 
@@ -111,7 +117,7 @@ types and create a "clean" id.
 
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
-For more informations see:
+For more information see:
 http://trac.mach-ii.com/machii/ticket/598
 (2010-03-20 peterfarrell)
 
