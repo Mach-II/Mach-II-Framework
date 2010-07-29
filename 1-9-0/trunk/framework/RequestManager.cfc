@@ -316,7 +316,7 @@ Notes:
 		<cfset var params = StructNew() />
 		<cfset var value = "" />
 		<cfset var i = "" />
-		<cfset var keyList = StructKeyList(params) />
+		<cfset var keyList = "" />
 		<cfset var seriesDelimiter = getSeriesDelimiter() />
 		<cfset var pairDelimiter = getPairDelimiter() />
 		<cfset var parseSes = getParseSes() />
@@ -324,9 +324,10 @@ Notes:
 
 		<!--- This was moved out the var block to pass the bug in var scope that is getting fixed --->
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset keyList = StructKeyList(params) />
 
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
-			<!--- 
+			<!---
 			<cfif Len(arguments.moduleName)>
 				<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
 			<cfelse>
@@ -338,7 +339,7 @@ Notes:
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
 			</cfif> --->
-			
+
 			<cfset arguments.urlBase = getDefaultUrlBase() />
 		</cfif>
 
@@ -748,7 +749,7 @@ Notes:
 
 		<cfif i GT 0 AND ArrayLen(elements) GTE i>
 			<!--- Module and/or event has to be the first element --->
-			
+
 			<!--- Using moduleNames.contains() is case sensitive so convert to lower since moduleNames is all lower --->
 			<cfif moduleNames.contains(LCase(elements[i]))>
 				<cfset params[getEventParameter()] = elements[i] & getModuleDelimiter() />
@@ -933,14 +934,14 @@ Notes:
 
 	<cffunction name="setModuleNames" access="private" returntype="void" output="false">
 		<cfargument name="moduleNames" type="array" required="true" />
-		
+
 		<cfset var names = ArrayNew(1) />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(arguments.moduleNames)#" index="i">
 			<cfset names[i] = LCase(arguments.moduleNames[i]) />
 		</cfloop>
-		
+
 		<cfset variables.moduleNames = names />
 	</cffunction>
 	<cffunction name="getModuleNames" access="private" returntype="array" output="false">
