@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 $Id$
@@ -47,11 +47,11 @@ Updated version: 1.9.0
 
 Notes:
 --->
-<cfcomponent 
-	displayname="AppFactory" 
+<cfcomponent
+	displayname="AppFactory"
 	output="false"
 	hint="Factory class for creating instances of AppManager.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -64,8 +64,8 @@ Notes:
 	<cffunction name="init" access="public" returntype="AppFactory" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfreturn this />
-	</cffunction> 
-	
+	</cffunction>
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -85,7 +85,7 @@ Notes:
 			hint="Optional argument for override Xml for a module. Defaults to empty string." />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Optional argument for the name of a module. Defaults to empty string." />
-			
+
 		<cfset var appManager = "" />
 		<cfset var propertyManager = "" />
 		<cfset var requestManager = "" />
@@ -100,7 +100,7 @@ Notes:
 		<cfset var endpointManager = "" />
 		<cfset var moduleManager = "" />
 		<cfset var cacheManager = "" />
-		
+
 		<cfset var configXml = "" />
 		<cfset var configXmlFile = "" />
 		<cfset var configXmls = ArrayNew(1) />
@@ -108,25 +108,25 @@ Notes:
 		<cfset var overrideIncludes = ArrayNew(1) />
 		<cfset var temp = StructNew() />
 		<cfset var i = "" />
-		
+
 		<!--- Clear the config file paths as this is important since the AppFactory is reused for full reloads --->
 		<cfset resetConfigFilePaths() />
-		
+
 		<!--- Create the AppManager --->
 		<cfset appManager = CreateObject("component", "MachII.framework.AppManager").init(arguments.parentAppManager) />
 		<cfset appManager.setAppKey(arguments.appkey) />
 		<cfif Len(arguments.moduleName)>
 			<cfset appManager.setModuleName(arguments.moduleName) />
 		</cfif>
-		
+
 		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->
 		<cfset variables.utils = appManager.getUtils() />
-		
+
 		<!--- Read the XML configuration file. --->
 		<cftry>
-			<cffile 
-				action="READ" 
-				file="#arguments.configXmlPath#" 
+			<cffile
+				action="READ"
+				file="#arguments.configXmlPath#"
 				variable="configXmlFile" />
 			<cfcatch type="any">
 				<cfthrow type="MachII.framework.CannotFindBaseConfigFile"
@@ -134,7 +134,7 @@ Notes:
 					detail="configPath=#arguments.configXmlPath#" />
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- Append the master config file to the file paths --->
 		<cfset appendConfigFilePath(arguments.configXmlPath) />
 
@@ -148,7 +148,7 @@ Notes:
 					detail="#variables.utils.buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- Validate the XML contents --->
 		<cfset validateConfigXml(arguments.validateXml, temp.configXml, arguments.configXmlPath, arguments.configDtdPath) />
 
@@ -162,8 +162,8 @@ Notes:
 		<cfif Len(arguments.overrideXml)>
 			<cfset configXmls = loadIncludes(configXmls, arguments.overrideXml, arguments.validateXml, arguments.configDtdPath, true, arguments.moduleName, true) />
 		</cfif>
-		
-		<!--- 
+
+		<!---
 			Create the Framework Managers and set them in the AppManager
 			Creation order is important so do not change:
 			* CacheManager (must be loaded first due to the cache commands loaded by Events and Subroutines)
@@ -183,26 +183,26 @@ Notes:
 
 		<!--- CacheManager is not a singleton and loads no XML --->
 		<cfset loadManager(appManager, "MachII.framework.CacheManager", false) />
-		
+
 		<!--- PropertyManager is not a singleton and loads XML --->
 		<cfset loadManager(appManager, "MachII.framework.PropertyManager", false, configXmls, arguments.overrideXml) />
-		
+
 		<!--- RequestManager is a singleton and loads no XML --->
 		<cfset loadManager(appManager, "MachII.framework.RequestManager", true) />
-		
+
 		<!--- These managers are not singletons and loads XML --->
 		<cfset loadManager(appManager, "MachII.framework.ListenerManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.MessageManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.EventFilterManager", false, configXmls, arguments.overrideXml) />
-		<cfset loadManager(appManager, "MachII.framework.SubroutineManager", false, configXmls, arguments.overrideXml) />		
-		<cfset loadManager(appManager, "MachII.framework.EventManager", false, configXmls, arguments.overrideXml) />				
+		<cfset loadManager(appManager, "MachII.framework.SubroutineManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.EventManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.ViewManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.PluginManager", false, configXmls, arguments.overrideXml) />
-		
+
 		<!--- GlobalizationManager is not a singleton and loads no XML --->
 		<cfset loadManager(appManager, "MachII.framework.GlobalizationManager", false) />
-				
-		<!--- These managers are singletons and loads no XML --->
+
+		<!--- EndpointManager is a singleton and loads no XML --->
 		<cfset loadManager(appManager, "MachII.framework.EndpointManager", true) />
 
 		<cfif NOT appManager.inModule()>
@@ -214,13 +214,13 @@ Notes:
 			<cfset moduleManager = arguments.parentAppManager.getModuleManager() />
 		</cfif>
 		<cfset appManager.setModuleManager(moduleManager) />
-		
+
 		<!--- Configure all the managers by calling the base configure --->
 		<cfset appManager.configure() />
-		
+
 		<cfreturn appManager />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -248,27 +248,27 @@ Notes:
 				returnvariable="manager" />
 		<cfelse>
 			<cfset manager = CreateObject("component", arguments.managerType).init(arguments.appManager) />
-	
+
 			<!--- Load in all the XML config files if defined --->
 			<cfif StructKeyExists(arguments, "configXmls")>
 				<cfloop from="1" to="#ArrayLen(arguments.configXmls)#" index="i">
 					<cfset manager.loadXml(arguments.configXmls[i].configXml, arguments.configXmls[i].override) />
 				</cfloop>
 			</cfif>
-			
+
 			<!--- Load in the override XML if defined --->
 			<cfif StructKeyExists(arguments, "overrideXml") AND Len(arguments.overrideXml)>
 				<cfset manager.loadXml(arguments.overrideXml, true) />
 			</cfif>
 		</cfif>
-		
+
 		<!--- Load the manager in the AppManager --->
 		<cfinvoke component="#arguments.appmanager#"
 			method="set#managerName#">
 			<cfinvokeargument name="#managerName#" value="#manager#" />
 		</cfinvoke>
 	</cffunction>
-	
+
 	<cffunction name="loadIncludes" access="private" returntype="array" output="false"
 		hint="Loads files to be included into the config xml array.">
 		<cfargument name="configFiles" type="array" required="true" />
@@ -279,24 +279,24 @@ Notes:
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="overrideIncludeType" type="boolean" required="false" default="false" />
 		<cfargument name="alreadyLoaded" type="struct" required="false" default="#StructNew()#" />
-		
+
 		<cfset var includeNodes = XmlSearch(arguments.configXML, "mach-ii/includes/include") />
 		<cfset var temp = StructNew() />
 		<cfset var includeFilePath = "" />
 		<cfset var includeXmlFile = "" />
 		<cfset var i = 0 />
-		
+
 		<cfif NOT arguments.overrideIncludeType>
 			<cfset includeNodes = XmlSearch(arguments.configXML, "mach-ii/includes/include") />
 		<cfelse>
 			<cfset includeNodes = XmlSearch(arguments.configXML, ".//includes/include") />
 		</cfif>
-		
+
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
 
 			<cfset temp = StructNew() />
 			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
-			
+
 			<cfif Left(includeFilePath, 1) IS ".">
 				<cfset includeFilePath = variables.utils.expandRelativePath(arguments.parentConfigFilePathDirectory, includeFilePath) />
 			<cfelse>
@@ -313,10 +313,10 @@ Notes:
 			<cfelse>
 				<cfset temp.override = true />
 			</cfif>
-			
+
 			<!--- Check for circular dependencies (pass a struct instead of stateful variables in case there is a error and it's impossible to cleanup)--->
 			<cfset checkIfAlreadyIncluded(arguments.alreadyLoaded, includeFilePath) />
-			
+
 			<!--- Read the include file --->
 			<cftry>
 				<cffile
@@ -329,7 +329,7 @@ Notes:
 						detail="includePath=#includeFilePath#" />
 				</cfcatch>
 			</cftry>
-			
+
 			<!--- Parse the XML contents --->
 			<cftry>
 				<cfset temp.configXml = XmlParse(includeXmlFile) />
@@ -342,33 +342,33 @@ Notes:
 
 			<!--- Validate the XML contents --->
 			<cfset validateConfigXml(arguments.validateXml, temp.configXml, includeFilePath, arguments.configDtdPath) />
-			
+
 			<!--- Append the include config file to the file paths --->
 			<cfset appendConfigFilePath(includeFilePath) />
-			
+
 			<!--- Append the parsed include file to the config xml array --->
 			<cfset ArrayAppend(arguments.configFiles, temp) />
-			
+
 			<!--- Recursively check the currently processing include for more includes --->
 			<cfset arguments.configFiles = loadIncludes(arguments.configFiles, temp.configXml, arguments.validateXml, arguments.configDtdPath, GetDirectoryFromPath(includeFilePath), arguments.moduleName, arguments.overrideIncludeType, arguments.alreadyLoaded) />
 		</cfloop>
-		
+
 		<cfreturn arguments.configFiles />
 	</cffunction>
-	
+
 	<cffunction name="validateConfigXml" access="private" returntype="void" output="false"
 		hint="Validates an xml file.">
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfargument name="configXml" type="any" required="true" />
 		<cfargument name="configXmlPath" type="string" required="true" />
 		<cfargument name="configDtdPath" type="string" required="true" />
-		
+
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
 		<cfset var vendorName = server.ColdFusion.ProductName />
 		<cfset var vendorMajorVersion = ListFirst(server.ColdFusion.ProductVersion) />
 		<cfset var vendorLevel = server.ColdFusion.ProductLevel />
-		
+
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND (
 					(FindNoCase("ColdFusion", vendorName) AND vendorMajorVersion GTE 7)
@@ -376,33 +376,33 @@ Notes:
 					OR (FindNoCase("BlueDragon", vendorName) AND vendorMajorVersion GTE 7 AND vendorLevel NEQ "GPL")
 					OR (FindNoCase("Railo", vendorName) AND vendorMajorVersion GTE 3)
 				)>
-			
+
 			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
 			<cfif NOT FindNoCase("http://", arguments.configDtdPath) AND NOT FileExists(arguments.configDtdPath)>
 				<cfthrow type="MachII.framework.XmlValidationException"
 					message="Unable to find the DTD for xml validation. Please check that this a valid path."
 					detail="dtdPath=#arguments.configDtdPath#" />
 			</cfif>
-			
+
 			<cfset validationResult = XmlValidate(arguments.configXml, arguments.configDtdPath) />
-			
+
 			<!--- Throw an error if the Xml config file does not validate --->
 			<cfif NOT validationResult.Status>
 				<cfset validationException = CreateObject("component", "MachII.util.XmlValidationException") />
 				<cfset validationException.wrapValidationResult(validationResult, arguments.configXmlPath, arguments.configDtdPath) />
-				<cfthrow type="MachII.framework.XmlValidationException" 
+				<cfthrow type="MachII.framework.XmlValidationException"
 					message="#validationException.getFormattedMessage()#" />
 			</cfif>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="checkIfAlreadyIncluded" access="private" returntype="void" output="false"
 		hint="Checks if the include has already been processed.">
 		<cfargument name="alreadyLoaded" type="struct" required="true" />
 		<cfargument name="includeFilePath" type="string" required="true" />
-		
+
 		<cfset var includeFilePathHash = Hash(arguments.includeFilePath) />
-		
+
 		<cfif StructKeyExists(arguments.alreadyLoaded, includeFilePathHash)>
 			<cfthrow type="MachII.framework.IncludeAlreadyDefined"
 				message="An include located at '#arguments.includeFilePath#' has already been included. You cannot define an include more than once." />
@@ -410,10 +410,10 @@ Notes:
 			<cfset arguments.alreadyLoaded[includeFilePathHash] = true />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
-	--->	
+	--->
 	<cffunction name="resetConfigFilePaths" access="private" returntype="void" output="false"
 		hint="Resets the config file paths to a zero element array.">
 		<cfset ArrayClear(variables.configFilePaths) />
@@ -427,5 +427,5 @@ Notes:
 		hint="Returns an array of config file paths.">
 		<cfreturn variables.configFilePaths />
 	</cffunction>
-	
+
 </cfcomponent>

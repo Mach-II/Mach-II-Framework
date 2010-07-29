@@ -118,10 +118,11 @@ in an XML config file.
 				<cfset metadata = metadata.extends />
 				<cfset currDefinition = getThisComponentFunctionDefinitions(metadata:metadata, searchPattern:arguments.searchPattern) />
 				<cfif NOT StructIsEmpty(currDefinition)>
-					<cfset ArrayAppend(definitions, currDefinition) />
 					<cfif currDefinition.component EQ walkTreeStopClass>
 						<!--- Bail out if we're at the requested stop class --->
 						<cfbreak />
+					<cfelse>
+						<cfset ArrayAppend(definitions, currDefinition) />
 					</cfif>
 				</cfif>
 			</cfloop>
@@ -151,9 +152,10 @@ in an XML config file.
 			<cfloop condition="#StructKeyExists(metadata, "extends")#">
 				<cfset metadata = metadata.extends />
 				<cfset currDefinition = getThisComponentDefinition(metadata) />
-				<cfset ArrayAppend(definitions, currDefinition) />
 				<cfif currDefinition.component EQ walkTreeStopClass>
 					<cfbreak />
+				<cfelse>
+					<cfset ArrayAppend(definitions, currDefinition) />
 				</cfif>
 			</cfloop>
 		</cfif>
@@ -206,6 +208,14 @@ in an XML config file.
 		<cfset var currKey = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
+		<cfset var searchPatternKey = Trim(ListFirst(arguments.searchPattern, "=")) />
+		<cfset var searchPatternValue = "" />
+
+		<cfif ListLen(arguments.searchPattern, "=") EQ 2>
+			<cfset searchPatternValue = Trim(ListLast(arguments.searchPattern, "=")) />
+			<!--- Strip off any double or single quotes --->
+			<cfset searchPatternValue = Mid(searchPatternValue, 2, Len(searchPatternValue) - 2) />
+		</cfif>
 
 		<cfif StructKeyExists(arguments.metadata, "name") AND StructKeyExists(arguments.metadata, "functions")>
 			<cfif Len(arguments.searchPattern) GT 0>
@@ -216,10 +226,14 @@ in an XML config file.
 
 					<!--- Loop through each function attribute, and if any match, then add the function to the returned array and break. --->
 					<cfloop collection="#currFunction#" item="currKey">
-						<cfif variables.matcher.match(arguments.searchPattern, currKey)>
-							<cfset ArrayAppend(matchedFunctions, currFunction) />
-							<cfbreak />
+						<cfif variables.matcher.match(searchPatternKey, currKey)>
+							<cfif NOT Len(searchPatternValue)
+								OR (Len(searchPatternValue) AND variables.matcher.match(searchPatternValue, currFunction[currKey]))>
+								<cfset ArrayAppend(matchedFunctions, currFunction) />
+								<cfbreak />
+							</cfif>
 						</cfif>
+
 					</cfloop>
 				</cfloop>
 			<cfelse>

@@ -49,6 +49,7 @@ Updated version: 1.9.0
 Notes:
 --->
 <cfcomponent displayname="HasAnnotationsParent"
+	extends="HasAnnotationsStopBase"
 	hint="Test Superclass for Introspector."
 	output="false">
 
@@ -67,9 +68,10 @@ Notes:
 	PUBLIC METHODS
 	--->
 
-	<cffunction name="myParentAnnotatedMethod" access="public" returntype="String" output="false"
+	<cffunction name="myBaseAnnotatedMethod"
+		access="public" returntype="String" output="false"
 		rest:uri="/parent/go"
-		rest:accepts="GET">
+		rest:method="GET">
 		<cfreturn "myParentAnnotatedMethod was called" />
 	</cffunction>
 

@@ -112,9 +112,38 @@ Notes:
 	PUBLIC FUNCTIONS - GENERAL
 	--->
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
-		hint="Handles a request made to the framework.">
+		hint="Handles all requests made to the framework. Checks for endpoint match first, and if no endpoint then go through handleEventRequest.">
 
+		<cfset var endpointManager = getAppManager().getEndpointManager() />
 		<cfset var eventArgs = StructNew() />
+		<cfset var log = getLog() />
+
+		<cfif log.isInfoEnabled()>
+			<cfset log.info("Begin processing request.") />
+		</cfif>
+
+		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
+		<cfset cleanPathInfo() />
+
+		<cfset eventArgs = getRequestEventArgs() />
+
+		<cfif log.isDebugEnabled()>
+			<cfset log.debug("Incoming event arguments:", eventArgs) />
+		</cfif>
+
+		<cfif endpointManager.isEndpointRequest(eventArgs)>
+			<cfset endpointManager.handleEndpointRequest(eventArgs) />
+		<cfelse>
+			<cfset handleEventRequest(eventArgs) />
+		</cfif>
+
+	</cffunction>
+
+	<cffunction name="handleEventRequest" access="private" returntype="void" output="true"
+		hint="Handles a normal module/event or route request made to the framework.">
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The parsed event args." />
+
 		<cfset var result = StructNew() />
 		<cfset var appManager = getAppManager() />
 		<cfset var moduleManager = getAppManager().getModuleManager() />
@@ -131,15 +160,7 @@ Notes:
 		<cfset result.moduleName = "" />
 
 		<cftry>
-			<cfset log.info("Begin processing request.") />
-
-			<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-			<cfset cleanPathInfo() />
-
-			<cfset eventArgs = getRequestEventArgs() />
-			<cfset result = parseEventParameter(eventArgs) />
-
-			<cfset log.debug("Incoming event arguments:", eventArgs) />
+			<cfset result = parseEventParameter(arguments.eventArgs) />
 
 			<!--- Set the module and name for now (in case module not found we need the original event name) --->
 			<cfset setRequestEventName(result.eventName) />

@@ -63,7 +63,7 @@ Notes:
 	<cfset variables.majorVersion = "1.9.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
+		 "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -440,6 +440,9 @@ Notes:
 			<cfelseif NOT IsNumeric(getProperty("maxEvents"))>
 				<cfthrow type="MachII.framework.invalidPropertyValue"
 					message="The 'maxEvents' property must be an integer." />
+			</cfif>
+			<cfif NOT isPropertyDefined("endpointParameter")>
+				<cfset setProperty("endpointParameter", "endpoint") />
 			</cfif>
 			<cfif NOT isPropertyDefined("redirectPersistParameter")>
 				<cfset setProperty("redirectPersistParameter", "persistId") />
