@@ -221,7 +221,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<replaceregexp match="=[ ]*?getUtils\(\)[ ]*?"
 			replace="variables.utils"
 			flags="igm">
-			<fileset dir="${dest}/MachII/framework" includes="Re[ ]*?getPropertyManager\(\)[ ]*?questManager.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
 		</replaceregexp>
 		
 		<replaceregexp match="([ ]*?|\()getRequestManager\(\)[ ]*?"

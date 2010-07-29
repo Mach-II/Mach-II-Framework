@@ -89,6 +89,7 @@ Notes:
 			hint="Sets the base AppManager." />
 
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setPropertyManager(arguments.appManager.getPropertyManager()) />
 		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
@@ -328,11 +329,13 @@ Notes:
 				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
 
-			<cfif arguments.urlBase = eventManager.getEventSecureType(arguments.eventName)>
+			<!--- <cfif eventManager.getEventSecureType(arguments.eventName)>
 				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
-			</cfif>
+			</cfif> --->
+			
+			<cfset arguments.urlBase = getDefaultUrlBase() />
 		</cfif>
 
 		<!--- Nested the appending of the event parameter inside the next block
@@ -769,12 +772,12 @@ Notes:
 
 		<cfset var route = getRoute(arguments.routeName) />
 		<cfset var routeParams = 0 />
-		<cfset var requestHanadler = getRequestHandler() />
+		<cfset var rH = getRequestHandler() />
 
 		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
 		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
-		<cfset requestHandler.setCurrentRouteName(arguments.routeName) />
-		<cfset requestHandler.setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
+		<cfset rH.setCurrentRouteName(arguments.routeName) />
+		<cfset rH.setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
 
 		<cfreturn routeParams />
 	</cffunction>

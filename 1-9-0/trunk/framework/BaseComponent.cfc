@@ -59,7 +59,6 @@ quick access to things such as announcing a new event or getting/setting propert
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
-	<cfset variables.requestManager = "" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.baseProxy = "" />
@@ -78,7 +77,6 @@ quick access to things such as announcing a new event or getting/setting propert
 
 		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setRequestManager(arguments.appManager.getRequestManager()) />
 		<cfset setParameters(arguments.parameters) />
 
 		<!--- Compute the full and short component name that will be used for logging --->
@@ -86,7 +84,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfset variables.componentNameFull = getMetaData(this).name />
 		<cfset variables.componentNameForLogging = ListLast(variables.componentNameFull, ".") />
 
-		<cfset setLog(arguments.appManager.getLogFactory()) />
+		<cfset setLog(getAppManager().getLogFactory()) />
 	</cffunction>
 
 	<cffunction name="setLog" access="public" returntype="void" output="false"
@@ -128,7 +126,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="any" required="false" default="#StructNew()#"
 			hint="A struct of arguments or an entire Event object to set as the event's args." />
-		<cfset getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs) />
 	</cffunction>
 
 	<cffunction name="announceEventInModule" access="public" returntype="void" output="false"
@@ -139,7 +137,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The name of the event to announce." />
 		<cfargument name="eventArgs" type="any" required="false" default="#StructNew()#"
 			hint="A struct of arguments or an entire Event object  to set as the event's args." />
-		<cfset getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().announceEvent(arguments.eventName, arguments.eventArgs, arguments.moduleName) />
 	</cffunction>
 
 	<cffunction name="redirectEvent" access="public" returntype="void" output="false"
@@ -154,9 +152,9 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
-		<cfset getRequestManager().getRequestHandler().getEventContext().redirectEvent(
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
 				arguments.eventName, arguments.args,
-				getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName(),
+				getAppManager().getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName(),
 				arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 
@@ -174,7 +172,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
-		<cfset getRequestManager().getRequestHandler().getEventContext().redirectEvent(
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
 			arguments.eventName, arguments.args, arguments.moduleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 
@@ -190,7 +188,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
-		<cfset getRequestManager().getRequestHandler().getEventContext().redirectRoute(
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
 			arguments.routeName, arguments.routeArgs, arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
 
@@ -200,7 +198,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="The full url to redirect to. Should be in the form of 'http://www.mach-ii.com'." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="String that represent which http status type to use in the redirect.">
-		<cfset getRequestManager().getRequestHandler().getEventContext().redirectUrl(
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectUrl(
 			arguments.redirectUrl, arguments.statusType) />
 	</cffunction>
 
@@ -219,10 +217,10 @@ quick access to things such as announcing a new event or getting/setting propert
 			<cfset arguments.moduleName = getAppManager().getModuleName() />
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfelse>
-			<cfset arguments.moduleName = getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName() />
+			<cfset arguments.moduleName = getAppManager().getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName() />
 		</cfif>
 
-		<cfreturn getRequestManager().buildUrl(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
@@ -235,7 +233,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn getRequestManager().buildUrl(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
@@ -248,7 +246,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn getRequestManager().buildRouteUrl(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
@@ -261,7 +259,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
 
-		<cfreturn getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
@@ -272,7 +270,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" required="false"
 			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
-		<cfreturn getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTMLBodyElement" access="public" returntype="boolean" output="false"
@@ -283,7 +281,7 @@ quick access to things such as announcing a new event or getting/setting propert
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" required="false"
 			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
-		<cfreturn getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
@@ -291,14 +289,14 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="name" type="string" required="true" />
 		<cfargument name="value" type="string" required="true" />
 		<cfargument name="charset" type="string" required="false" />
-		<cfset getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header by statusCode/statusText.">
 		<cfargument name="statuscode" type="string" required="true" />
 		<cfargument name="statustext" type="string" required="false" />
-		<cfset getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
+		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="uploadFile" access="public" returntype="struct" output="false"
@@ -310,7 +308,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="mode" type="string" required="false" />
 		<cfargument name="fileAttributes" type="string" required="false" />
 
-		<cfreturn getRequestManager().getRequestHandler().getEventContext().uploadFile(argumentcollection=arguments) />
+		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().uploadFile(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
@@ -504,7 +502,7 @@ quick access to things such as announcing a new event or getting/setting propert
 				<!--- Create a dummy event object to pass in --->
 				<cfset event = CreateObject("component", "MachII.framework.Event").init() />
 			<cfelse>
-				<cfset event = getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+				<cfset event = getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
 			</cfif>
 
 			<!--- Add in properties scope if missing and the expression is not scoped (for BC since the "properties." was not required)--->
@@ -536,17 +534,6 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Gets the components AppManager instance.">
 		<cfreturn variables.appManager />
-	</cffunction>
-
-	<cffunction name="setRequestManager" access="private" returntype="void" output="false"
-		hint="Sets the components RequestManager instance.">
-		<cfargument name="requestManager" type="MachII.framework.RequestManager" required="true"
-			hint="The RequestManager instance to set." />
-		<cfset variables.requestManager = arguments.requestManager />
-	</cffunction>
-	<cffunction name="getRequestManager" access="public" returntype="MachII.framework.RequestManager" output="false"
-		hint="Gets the components RequestManager instance.">
-		<cfreturn variables.requestManager />
 	</cffunction>
 
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
