@@ -105,9 +105,6 @@ Notes:
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
 
-		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-		<cfset cleanPathInfo() />
-
 		<cfreturn this />
 	</cffunction>
 
@@ -125,6 +122,9 @@ Notes:
 		<cfif log.isInfoEnabled()>
 			<cfset log.info("Begin processing request.") />
 		</cfif>
+
+		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
+		<cfset cleanPathInfo() />
 
 		<cfset eventArgs = getRequestEventArgs() />
 
