@@ -313,7 +313,7 @@ Notes:
 
 		<cfset var builtUrl = "" />
 		<cfset var queryString = "" />
-		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		<cfset var params = "" />
 		<cfset var value = "" />
 		<cfset var i = "" />
 		<cfset var keyList = StructKeyList(params) />
@@ -322,14 +322,18 @@ Notes:
 		<cfset var parseSes = getParseSes() />
 		<cfset var eventManager = "" />
 
+		<!--- This was moved out the var block to pass the bug in var scope that is getting fixed --->
+		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
+			<!--- 
 			<cfif Len(arguments.moduleName)>
 				<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
 			<cfelse>
 				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
 
-			<!--- <cfif eventManager.getEventSecureType(arguments.eventName)>
+			<cfif eventManager.getEventSecureType(arguments.eventName)>
 				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
