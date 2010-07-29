@@ -61,8 +61,17 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Framework does not load when onSessionStart() is called if application name is shared
+
+Thanks to Hiren Patel for reporting this issue.
+
+For more informations see:
+http://trac.mach-ii.com/machii/ticket/674
+(2010-07-28 peterfarrell)
+
 * Module name is case-sensitive in certain situations
-We have corrected an issue where the module name was case-sensitive
+
+Thanks to Jason York for reporting this issue.
 
 For more informations see:
 http://trac.mach-ii.com/machii/ticket/676
