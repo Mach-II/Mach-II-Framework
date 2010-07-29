@@ -109,6 +109,7 @@ Notes:
 
 			// Match, no format
 			assertTrue(restUri.matchUri('/content/item/my-item'), 'Should match /content/item/my-item.');
+			assertTrue(restUri.matchUri('/content/item/my-item/'), 'Should match /content/item/my-item/.');
 
 			tokens = restUri.getTokensFromUri('/content/item/my-item');
 			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
@@ -169,7 +170,6 @@ Notes:
 		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
 
 		<cfscript>
-			assertFalse(restUri.matchUri('/content/item/'), 'Should not match /content/item/');
 			assertFalse(restUri.matchUri('/content'), 'Should not match /content');
 			assertFalse(restUri.matchUri('/'), 'Should not match /');
 			assertFalse(restUri.matchUri(''), 'Should not match empty string');

@@ -199,7 +199,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		</cfif>
 
 		<!--- Set instance variables --->
-		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?$" />
+		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?(?:/)?$" />
 	</cffunction>
 
 	<cffunction name="reEscape" access="private" returntype="string" output="false"
