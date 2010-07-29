@@ -349,6 +349,9 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 	  
 		<!-- will be set if violations found else variable will be unset -->
 		<echo message="${varscoper.results}"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Report available at: file:///${varscoper.output}/results.csv"/>
+		<echo message="---------------------------------------------"/>
 	  
 		<fail message="Var scope violation is found.">
 			<condition>
