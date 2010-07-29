@@ -123,7 +123,7 @@ framework to be loaded as they interact with framework components:
 	</cffunction>
 
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
-		hint="Handles on session start event if sessions are enabled for this application.">	
+		hint="Handles on session start event if sessions are enabled for this application.">
 		<cfset ensureLoadedFramework() />
 		<cfset getAppManager().onSessionStart() />
 	</cffunction>
@@ -153,7 +153,7 @@ framework to be loaded as they interact with framework components:
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
 
-	<cffunction name="ensureLoadedFramework" access="pubclic" returntype="void" output="false"
+	<cffunction name="ensureLoadedFramework" access="public" returntype="void" output="false"
 		hint="Checks if the framework needs to be loaded or reloaded.">
 
 		<cfset var appKey = getAppKey() />
