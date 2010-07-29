@@ -85,7 +85,9 @@ Notes:
 	<cfparam name="attributes.id" type="string"
 		default="#attributes.name#_#createCleanId(attributes.value)#" />
 
-	<cfset setFirstElementId(attributes.id) />
+	<cfif NOT StructKeyExists(attributes, "ignoreFirstElementId") OR NOT attributes.ignoreFirstElementId>
+		<cfset setFirstElementId(attributes.id) />
+	</cfif>
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "radio") />

@@ -126,6 +126,7 @@ Notes:
 	<form:checkbox attributeCollection="#attributes#"
 		value="${output.value}"
 		id="${output.id}"
+		ignoreFirstElementId="true"
 		output="true"
 		outputBuffer="#variables.outputBuffer#" />
 
@@ -143,6 +144,10 @@ Notes:
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />
+			</cfif>
+
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
 			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
@@ -163,6 +168,10 @@ Notes:
 					<cfelse>
 						<cfset variables.finalOutput = variables.checkboxTemplate />
 					</cfif>
+					
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(createCleanId(attributes.items[i]))) />
+					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
@@ -181,10 +190,14 @@ Notes:
 						<cfset variables.finalOutput = variables.checkboxTemplate />
 					</cfif>
 
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value))) />
+					</cfif>
+
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalContent) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey]), "all") />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
 
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
@@ -210,6 +223,10 @@ Notes:
 			<cfelse>
 				<cfset variables.finalOutput = variables.checkboxTemplate />
 			</cfif>
+			
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
+			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
@@ -228,10 +245,14 @@ Notes:
 				<cfset variables.finalOutput = variables.checkboxTemplate />
 			</cfif>
 
+			<cfif attributes.items.currentRow EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
+			</cfif>
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow]), "all") />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
 
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>

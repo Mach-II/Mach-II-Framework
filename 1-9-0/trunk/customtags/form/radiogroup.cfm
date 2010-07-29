@@ -112,6 +112,7 @@ Notes:
 	<form:radio attributeCollection="#attributes#"
 		value="${output.value}"
 		id="${output.id}"
+		ignoreFirstElementId="true"
 		output="true"
 		outputBuffer="#variables.outputBuffer#" />
 
@@ -127,6 +128,10 @@ Notes:
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
+			</cfif>
+			
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
 			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
@@ -147,6 +152,10 @@ Notes:
 					<cfelse>
 						<cfset variables.finalOutput = variables.radioTemplate />
 					</cfif>
+					
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(createCleanId(attributes.items[i]))) />
+					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
@@ -163,6 +172,10 @@ Notes:
 						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.radioTemplate />
+					</cfif>
+
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
 					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
@@ -195,6 +208,10 @@ Notes:
 				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
 
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
+			</cfif>
+
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
@@ -210,6 +227,10 @@ Notes:
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
+			</cfif>
+
+			<cfif attributes.items.currentRow EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalContent) />

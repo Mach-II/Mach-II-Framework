@@ -88,7 +88,9 @@ Notes:
 	<cfparam name="attributes.delimiter" type="string"
 		default="," />
 
-	<cfset setFirstElementId(attributes.id) />
+	<cfif NOT StructKeyExists(attributes, "ignoreFirstElementId") OR NOT attributes.ignoreFirstElementId>
+		<cfset setFirstElementId(attributes.id) />
+	</cfif>
 
 	<!--- Set required attributes--->
 	<cfset setAttribute("type", "checkbox") />

@@ -121,8 +121,13 @@ Notes:
 			<cfset radioAttributes.value = ListGetAt(attributes.items, i, attributes.delimiter) />
 			
 			<form:radio attributeCollection="#radioAttributes#" 
+				ignoreFirstElementId="true"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
+				
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(ListGetAt(attributes.items, i, attributes.delimiter))) />
+			</cfif>
 			
 			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
 			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter))/>
@@ -146,8 +151,13 @@ Notes:
 					<cfset radioAttributes.value = attributes.items[i] />
 					
 					<form:radio attributeCollection="#radioAttributes#" 
+						ignoreFirstElementId="true"
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
+						
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(createCleanId(attributes.items[i]))) />
+					</cfif>
 					
 					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
 					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.labels[i]) />
@@ -169,8 +179,13 @@ Notes:
 					<cfset radioAttributes.value = attributes.items[i][attributes.valueKey] />
 					
 					<form:radio attributeCollection="#radioAttributes#" 
+						ignoreFirstElementId="true"
 						output="true" 
 						outputBuffer="#variables.outputBuffer#" />
+						
+					<cfif i EQ 1>
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+					</cfif>
 
 					<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
 					<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
@@ -205,9 +220,14 @@ Notes:
 			<cfset radioAttributes.value = sortedKeys[i] />
 			
 			<form:radio attributeCollection="#radioAttributes#" 
+				ignoreFirstElementId="true"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
-			
+
+			<cfif i EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(sortedKeys[i])) />
+			</cfif>
+
 			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
 			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[sortedKeys[i]]) />
 			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.id}", attributes.name & "_" & createCleanId(sortedKeys[i])) />
@@ -228,8 +248,13 @@ Notes:
 			<cfset radioAttributes.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
 			
 			<form:radio attributeCollection="#radioAttributes#" 
+				ignoreFirstElementId="true"
 				output="true" 
 				outputBuffer="#variables.outputBuffer#" />
+				
+			<cfif attributes.items.currentRow EQ 1>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
+			</cfif>
 			
 			<cfset finalOutput = ReplaceNoCase(originalGeneratedContent, "${output.radio}", variables.outputBuffer.content) />
 			<cfset finalOutput = ReplaceNoCase(finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
