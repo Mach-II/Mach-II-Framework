@@ -99,6 +99,7 @@ framework to be loaded as they interact with framework components:
 	--->
 	<cffunction name="onApplicationStart" access="public" returntype="boolean" output="false"
 		hint="Handles the application start event. Override to provide customized functionality.">
+
 		<!--- Load up the framework --->
 		<cfset LoadFramework() />
 
@@ -122,7 +123,8 @@ framework to be loaded as they interact with framework components:
 	</cffunction>
 
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
-		hint="Handles on session start event if sessions are enabled for this application.">
+		hint="Handles on session start event if sessions are enabled for this application.">	
+		<cfset ensureLoadedFramework() />
 		<cfset getAppManager().onSessionStart() />
 	</cffunction>
 
@@ -151,8 +153,8 @@ framework to be loaded as they interact with framework components:
 		<cfset request.MachIIReload = FALSE />
 	</cffunction>
 
-	<cffunction name="handleRequest" access="public" returntype="void" output="true"
-		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
+	<cffunction name="ensureLoadedFramework" access="pubclic" returntype="void" output="false"
+		hint="Checks if the framework needs to be loaded or reloaded.">
 
 		<cfset var appKey = getAppKey() />
 
@@ -193,6 +195,12 @@ framework to be loaded as they interact with framework components:
 				<cfset application[appKey].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
 			</cflock>
 		</cfif>
+	</cffunction>
+
+	<cffunction name="handleRequest" access="public" returntype="void" output="true"
+		hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
+
+		<cfset ensureLoadedFramework() />
 
 		<!---
 			Handle the request and suppress whitespace. Enableoutputonly may be false
