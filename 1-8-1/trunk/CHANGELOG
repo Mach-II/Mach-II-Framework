@@ -23,7 +23,7 @@ using a  bleeding edge release (BER) of the framework.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
@@ -61,16 +61,23 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Module name is case-sensitive in certain situations
+We have corrected an issue where the module name was case-sensitive
+
+For more informations see:
+http://trac.mach-ii.com/machii/ticket/676
+(2010-07-28 peterfarrell)
+
 * Exception handling type differs on CFML engines for getProperty() etc in bootstrapper
 
 For more informations see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/631
+http://trac.mach-ii.com/machii/ticket/631
 (2010-04-16 peterfarrell)
 
 * TimeSpanCache does not properly reap when storage scope is session
 
 For more informations see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/606
+http://trac.mach-ii.com/machii/ticket/606
 (2010-04-07 peterfarrell)
 
 * HtmlHelper erroneously appends file extensions when link is external and urlBase is ""
@@ -78,7 +85,7 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/606
 Use the new "external:" prepended to the href/src when passing URI to the the HtmlHelper. 
 
 For more informations see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/613
+http://trac.mach-ii.com/machii/ticket/613
 (2010-04-06 peterfarrell)
 
 * Fixed missing support for getProperty() default property value in ViewContext
@@ -86,7 +93,7 @@ The getProperty() method in the ViewContext did not support a default value. Add
 in support for isPropertyDefined() shortcut method.
 
 For more informations see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/605
+http://trac.mach-ii.com/machii/ticket/605
 (2010-04-02 peterfarrell)
 
 * Updates to the form library options tag
@@ -96,7 +103,7 @@ types and create a "clean" id.
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more informations see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/598
+http://trac.mach-ii.com/machii/ticket/598
 (2010-03-20 peterfarrell)
 
 * HtmlHelper method AddLink() with type of icon does not compute asset path
@@ -104,7 +111,7 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/598
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/565
+http://trac.mach-ii.com/machii/ticket/565
 (2010-03-18 peterfarrell)
 
 * Event bean error when using ignore field
@@ -114,7 +121,7 @@ it does not set any value in the bean.
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/551
+http://trac.mach-ii.com/machii/ticket/551
 (2010-03-06 peterfarrell)
 
 * Configure() method the RequestManager called too many times
@@ -127,7 +134,7 @@ The defect affected Mach-II 1.5.0, 1.6.0, 1.6.1 and 1.8.0 and has been
 fixed in the 1.8.1 release.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/549
+http://trac.mach-ii.com/machii/ticket/549
 (2010-03-06 peterfarrell)
 
 * Form/view tag library incorrect says that HTML helper is not available
@@ -138,7 +145,7 @@ base application.
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/541
+http://trac.mach-ii.com/machii/ticket/541
 (2010-02-18 peterfarrell)
 
 * Property manager dumps and aborts when a property is an M2 EL expression 
@@ -146,7 +153,7 @@ https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/541
 This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/436
+http://trac.mach-ii.com/machii/ticket/436
 (2010-02-18 peterfarrell)
 
 ------------------------------------------------
@@ -158,13 +165,13 @@ Special to Doug Smith at the The Lampo Group, Inc. for providing a patch
 that fixes this prior limitation.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/659
+http://trac.mach-ii.com/machii/ticket/659
 (2010-04-26 peterfarrell)
 
 * Fixed ExpressionEvaluator to support method calls on event object
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/594
+http://trac.mach-ii.com/machii/ticket/594
 (2010-03-24 peterfarrell)
 
 * Improved exception messages in ColdSpringProperty
@@ -172,7 +179,7 @@ The exception messages in the ColdSpringProperty were sometimes misleading
 We have added the original exception to the thrown exception for more detail.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/593
+http://trac.mach-ii.com/machii/ticket/593
 (2010-03-24 peterfarrell)
 
 ------------------------------------------------
@@ -181,5 +188,5 @@ Internal Framework Improvements / Enhancements / Other Changes
 * The cflock name in LogFactory needs to be more unique
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/556
+http://trac.mach-ii.com/machii/ticket/556
 (2010-03-10 peterfarrell)

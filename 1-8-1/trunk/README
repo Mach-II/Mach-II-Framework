@@ -30,6 +30,7 @@ defects (in no particular order):
 * Eli Tapolcsanyi (The Lampo Group, Inc.)
 * Ty Delong (The Lampo Group, Inc.)
 * Phil Thomas (The Lampo Group, Inc.)
+* Jason York (THe Lamp Group,Inc.)
 * Brandon Culpepper (Direct Solutions International, Inc.)
 * Derrick Jackson (The United States Senate - Sergeant at Arms)
 * Joel Cox (Goodyear Tire and Rubber Company)
@@ -40,7 +41,6 @@ defects (in no particular order):
 * Bryan Memmelaar (Curaspan Health Group, Inc.)
 * Jonah (Creori)
 * Shaun (Net Grow)
-* Jason York
 * Dave Shuck
 * Mike Rogers
 * Dan Skaggs 
@@ -219,7 +219,7 @@ on our Trac installation at http://trac.mach-ii.com.  Please search the tickets 
 duplicate / similar defect reports or enhancement requests before submitting a new
 ticket.
 
-* All documentation and FAQs are located in our wiki at: http://trac.mach-ii.com
+* All documentation and FAQs are located in our wiki at: http://trac.mach-ii.com/machii
 
 * The best place to get quick help from other developers is to join our public 
 email list / forums at: http://groups.google.com/group/mach-ii-for-coldfusion

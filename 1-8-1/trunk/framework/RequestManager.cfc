@@ -723,7 +723,9 @@ Notes:
 
 		<cfif i GT 0 AND ArrayLen(elements) GTE i>
 			<!--- Module and/or event has to be the first element --->
-			<cfif moduleNames.contains(elements[i])>
+			
+			<!--- Using moduleNames.contains() is case sensitive so convert to lower since moduleNames is all lower --->
+			<cfif moduleNames.contains(LCase(elements[i]))>
 				<cfset params[getEventParameter()] = elements[i] & getModuleDelimiter() />
 				<cfset ArrayDeleteAt(elements, i) />
 				<cfif ArrayLen(elements) GTE i AND getSeriesDelimiter() EQ getModuleDelimiter()>
@@ -888,7 +890,15 @@ Notes:
 
 	<cffunction name="setModuleNames" access="private" returntype="void" output="false">
 		<cfargument name="moduleNames" type="array" required="true" />
-		<cfset variables.moduleNames = arguments.moduleNames />
+		
+		<cfset var names = ArrayNew(1) />
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.moduleNames)#" index="i">
+			<cfset names[i] = LCase(arguments.moduleNames[i]) />
+		</cfloop>
+		
+		<cfset variables.moduleNames = names />
 	</cffunction>
 	<cffunction name="getModuleNames" access="private" returntype="array" output="false">
 		<cfreturn variables.moduleNames />
