@@ -166,12 +166,10 @@ Notes:
 
 		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
 		<cfset var endpoint = "" />
-		<cfset var endpointLog = "" />
 		<cfset event.setArgs(arguments.eventArgs) />
 
 		<cftry>
 			<cfset endpoint = getEndpointByName(event.getArg(getEndpointParameter())) />
-			<cfset endpointLog = endpoint.getLog() />
 
 			<cfif endpoint.isPreProcessDefined()>
 				<cfset endpoint.preProcess(event) />
@@ -183,13 +181,12 @@ Notes:
 				<cfset endpoint.postProcess(event) />
 			</cfif>
 
-			<!--- TODO: Still need to figure in onException handling --->
-
 			<cfcatch type="MachII.endpoints.EndpointNotDefined">
 				<!--- No endpoint so send a 404 --->
 				<cfheader statuscode="404" statustext="Not Found" />
-				<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' not available." />
-				<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' not available.</cfoutput><cfsetting enablecfoutputonly="true" />
+				<cfheader name="machii.endpoint.error" value="#cfcatch.message#" />
+				<cfset variables.log.error(cfcatch.message, arguments.event.getArgs()) />
+				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message#</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 			<cfcatch type="any">
 				<cfif event.isArgDefined("throw")>
@@ -224,7 +221,7 @@ Notes:
 			<cfreturn variables.endpoints[arguments.endpointName] />
 		<cfelse>
 			<cfthrow type="MachII.endpoints.EndpointNotDefined"
-				message="Endpoints with name '#arguments.endpointName#' is not defined."
+				message="Endpoint named '#arguments.endpointName#' is not defined."
 				detail="Available endpoints: '#ArrayToList(getEndpointNames())#'" />
 		</cfif>
 	</cffunction>

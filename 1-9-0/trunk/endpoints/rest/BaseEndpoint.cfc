@@ -189,19 +189,20 @@ to return good responses and response codes, use of format (.json), etc.
 		hint="Calls the defined REST Endpoint function and renders the response.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset var restUri = variables.restUris.findRestUri(arguments.event.getArg("pathInfo"), arguments.event.getArg("httpMethod")) />
+		<cfset var pathInfo = arguments.event.getArg("pathInfo", "") />
+		<cfset var httpMethod = arguments.event.getArg("httpMethod", "") />
+		<cfset var restUri = variables.restUris.findRestUri(pathInfo, httpMethod) />
 		<cfset var restResponseBody = "" />
 
 		<cfif IsObject(restUri)>
 			<cfset restResponseBody = callEndpointFunction(restUri, event) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<cfelse>
-			<!--- TODO: Exception handling needs to be worked on here --->
-			<h1>No REST endpoint</h1>
-			<cfdump var='#event.getArgs()#'>
-			<cfabort/>
+			<cfthrow type="MachII.endpoints.EndpointNotDefined"
+				message="No REST URI was found for '#pathInfo#', httpMethod='#httpMethod#'."
+				detail="" />
 		</cfif>
 
-		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
 	<!---
