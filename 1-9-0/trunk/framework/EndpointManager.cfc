@@ -185,7 +185,7 @@ Notes:
 				<!--- No endpoint so send a 404 --->
 				<cfheader statuscode="404" statustext="Not Found" />
 				<cfheader name="machii.endpoint.error" value="#cfcatch.message#" />
-				<cfset variables.log.error(cfcatch.message, arguments.event.getArgs()) />
+				<cfset variables.log.error(cfcatch.message, event.getArgs()) />
 				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message#</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 			<cfcatch type="any">
