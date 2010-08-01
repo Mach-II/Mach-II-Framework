@@ -52,6 +52,8 @@ Notes:
 - OPTIONAL ATTRIBUTES
 	arguments			= list
 	argumentSeparator 	= string
+	var					= string
+	display				= boolean
 --->
 
 <cfif thisTag.executionMode IS "start">
@@ -63,6 +65,7 @@ Notes:
 	<cfparam name="attributes.argumentSeparator" default="," type="string"/>
 	<cfparam name="attributes.text" default="" type="string"/>
 	<cfparam name="attributes.var" default="" type="string"/>
+	<cfparam name="attributes.display" default="#attributes.var EQ ''#" type="boolean">
 	
 	<cfif StructKeyExists(attributes, "arguments")>
 		<cfset variables.arguments = ListToArray(attributes.arguments, attributes.argumentSeparator)/>
@@ -73,13 +76,15 @@ Notes:
 	<cfset variables.text = attributes.text/>
 	<cfset variables.key = attributes.key/>
 	<cfset variables.var = attributes.var/>
+	<cfset variables.display = attributes.display/>
 	
 <cfelse>
 	<cfset variables.output = request.eventContext.getAppManager().getGlobalizationManager().getString(variables.key, getPageContext().getRequest().getLocale(), variables.arguments, variables.text)>
 	<cfif variables.var NEQ "">
 		<!--- store the output to whatever variable 'var' is pointing to --->
 		<cfset SetVariable(variables.var, variables.output)/>
-	<cfelse>
+	</cfif>
+	<cfif variables.display>
 		<!--- Output the label message --->
 		<cfset ThisTag.GeneratedContent = variables.output/>
 	</cfif>
