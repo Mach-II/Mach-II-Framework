@@ -48,45 +48,53 @@ Created version: 1.9.0
 
 Notes:
 - REQUIRED ATTRIBUTES
-	key					= string
+	key					= [string] The key of the message to get
 - OPTIONAL ATTRIBUTES
-	arguments			= list
-	argumentSeparator 	= string
-	var					= string
-	display				= boolean
+	arguments			= [list|array] A list or array of argument to substitute in the message
+	argumentSeparator 	= [string] The list separater to use when converting the 'arguments' attribute to an array (if a list is used)
+	var					= [string] The name of the variable to set the message to 
+	display				= [boolean] Sets if the message should be outputted / displayed. If the 'var' attribute is not used, the message will be 
+							displayed. If the 'var' is defined, then the message will not be displayed unless 'display="true"' is set
 --->
 
 <cfif thisTag.executionMode IS "start">
+
+	<!--- Setup the tag --->
+	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
+
 	<!--- Enforce required attributes --->
-	<cfif NOT StructKeyExists(attributes, "key")>
-		<cfthrow message="An attributed named 'key' must be defined for this tag." />
+	<cfset ensureByName("key") />
+	
+	<!--- Setup defaults --->
+	<cfparam name="attributes.argumentSeparator" type="string"
+		default="," />
+	<cfparam name="attributes.text" type="string" 
+		default="" />
+	<cfparam name="attributes.var" type="string" 
+		default="" />
+	<cfparam name="attributes.display" type="boolean" 
+		default="#attributes.var EQ ''#" />
+	<cfparam name="attributes.arguments" type="any"
+		default="#ArrayNew(1)#" />
+	
+	<!--- Convert to array if list is passed --->
+	<cfif IsSimpleValue(attributes.arguments)>
+		<cfset attributes.arguments = ListToArray(attributes.arguments, attributes.argumentSeparator) />
 	</cfif>
-	
-	<cfparam name="attributes.argumentSeparator" default="," type="string"/>
-	<cfparam name="attributes.text" default="" type="string"/>
-	<cfparam name="attributes.var" default="" type="string"/>
-	<cfparam name="attributes.display" default="#attributes.var EQ ''#" type="boolean">
-	
-	<cfif StructKeyExists(attributes, "arguments")>
-		<cfset variables.arguments = ListToArray(attributes.arguments, attributes.argumentSeparator)/>
-	<cfelse>
-		<cfset variables.arguments = ArrayNew(1)/>
-	</cfif>
-	
-	<cfset variables.text = attributes.text/>
-	<cfset variables.key = attributes.key/>
-	<cfset variables.var = attributes.var/>
-	<cfset variables.display = attributes.display/>
 	
 <cfelse>
-	<cfset variables.output = request.eventContext.getAppManager().getGlobalizationManager().getString(variables.key, getPageContext().getRequest().getLocale(), variables.arguments, variables.text)>
-	<cfif variables.var NEQ "">
-		<!--- store the output to whatever variable 'var' is pointing to --->
-		<cfset SetVariable(variables.var, variables.output)/>
+	<cfset variables.output = getAppManager().getGlobalizationManager().getString(attributes.key, getPageContext().getRequest().getLocale(), attributes.arguments, attributes.text) />
+
+	<!--- Store the output to whatever variable 'var' is pointing to --->
+	<cfif Len(attributes.var)>
+		<cfset SetVariable(attributes.var, variables.output) />
 	</cfif>
-	<cfif variables.display>
-		<!--- Output the label message --->
-		<cfset ThisTag.GeneratedContent = variables.output/>
+	
+	<!--- Output the label message or reset the output buffer if nothing is to be outputted --->
+	<cfif attributes.display>
+		<cfset ThisTag.GeneratedContent = variables.output />
+	<cfelse>
+		<cfset ThisTag.GeneratedContent = "" />
 	</cfif>
 </cfif>
 
