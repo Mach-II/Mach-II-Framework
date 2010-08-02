@@ -73,6 +73,7 @@ Notes:
 	<cfset variables.currentRouteParams = StructNew() />
 	<cfset variables.currentSESParams = StructNew() />
 	<cfset variables.currentRouteName = "" />
+	<cfset variables.locale = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -287,7 +288,18 @@ Notes:
 		hint="Returns the number of events that have been processed for this context.">
 		<cfreturn variables.eventCount />
 	</cffunction>
-
+	
+	<cffunction name="getCurrentLocale" access="public" returntype="string" output="false"
+		hint="Returns the current Locale for this request">
+		
+		<!--- If the current stored locale is empty, return the default locale --->
+		<cfif variables.locale EQ "">
+			<cfreturn getPageContext().getRequest().getLocale()/>
+		</cfif>
+		
+		<cfreturn variables.locale />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
 	--->
@@ -660,6 +672,16 @@ Notes:
 	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
 		<cfreturn variables.log />
+	</cffunction>
+	
+	<cffunction name="setLocale" access="public" returntype="void" output="false"
+		hint="Sets the current locale for a request">
+		<cfargument name="locale" type="string" required="true" />
+		<cfset variables.locale = arguments.locale/>
+	</cffunction>
+	<cffunction name="getLocale" access="public" returntype="string" output="false"
+		hint="Gets the current locale for a request">
+		<cfreturn getCurrentLocale()/>
 	</cffunction>
 
 </cfcomponent>

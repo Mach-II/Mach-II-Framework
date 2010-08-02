@@ -94,7 +94,13 @@ Notes:
 		<cfargument name="args" type="array" required="true" />
 		<cfargument name="defaultString" type="string" required="true" />
 		
-		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, arguments.locale, arguments.defaultString) />
+		<cfset var currentLocale = arguments.locale/>
+		<!--- If the user doesn't specify a locale, use the one for the current request --->
+		<cfif currentLocale EQ "">
+			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getLocale()/>
+		</cfif>
+		
+		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
 	</cffunction>
 	
 	<!---
