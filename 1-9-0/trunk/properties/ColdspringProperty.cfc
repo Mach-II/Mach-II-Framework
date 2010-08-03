@@ -759,7 +759,7 @@ application.serviceFactory_account variable.
 		hint="Get the configurable endpoints targets.">
 		<cfargument name="targetBase" type="struct" required="true" />
 
-		<cfset var endpointManager = getAppManager().getEndpointsManager() />
+		<cfset var endpointManager = getAppManager().getEndpointManager() />
 		<cfset var endpointNames = endpointManager.getEndpointNames() />
 		<cfset var i = 0 />
 
