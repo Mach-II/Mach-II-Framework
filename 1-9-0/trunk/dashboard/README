@@ -1,0 +1,312 @@
+------------------------------------------------
+    __  ___           __          ________
+   /  |/  /___ ______/ /_        /  _/  _/
+  / /|_/ / __ `/ ___/ __ \______ / / / /  
+ / /  / / /_/ / /__/ / / /_____// /_/ /   
+/_/  /_/\__,_/\___/_/ /_/     /___/___/  
+
+Project: Dashboard Module
+Version: 1.1.0.@minorVersion@
+Built-on: @buildDatetime@
+$Id$
+------------------------------------------------
+If version number and built-on are placeholders, you are using a bleeding
+edge release of the dashboard.
+------------------------------------------------
+___                                
+ | ._ _|_ ._ _  _|    _ _|_ o _ ._ 
+_|_| | |_ | (_)(_||_|(_  |_ |(_)| |
+------------------------------------------------
+Mach-II Dashboard is a module to assist in developing Mach-II 
+web-applications.  Current functionality of the dashboard:
+
+ - Basic authentication (login page)
+ - Reload base application or individual modules
+ - Reload base ColdSpring bean factory or individual child factories
+ - Reload individual listeners, plugins, filters or properties
+ - Manage logging
+ - Manage caching including charts of logging statistics
+ - Recent exception snapshots for easy debugging
+ - Basic server and application configuration information
+ - JVM memory usage including charts of memory usage 
+
+The dashboard is designed to be run as a Mach-II module and thus 
+*CANNOT* be run as a stand-alone Mach-II application. The Dashboard
+requires Mach-II 1.8.0 or higher.
+
+------------------------------------------------
+| o _ _ ._  _ _ 
+|_|(_(/_| |_>(/_
+------------------------------------------------
+Mach-II Dashboard 1.1.0 is released under the Apache 2.0 license.  You can 
+use the Mach-II Dashboard  on any commercial application as long as you abide 
+by the license. For more  details, please see the NOTICE and LICENSE files that 
+are shipped with the dashboard.
+
+	Copyright 2009-2010 GreatBizTools, LLC
+	
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at 
+	
+		http://www.apache.org/licenses/LICENSE-2.0 
+	
+	Unless required by applicable law or agreed to in writing, software 
+	distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and 
+	limitations under the License.
+
+----
+Mach-II documentation, implicit "M" logo and other logos are not licensed under 
+the Apache License:
+Copyright 2008-2009 GreatBizTools, LLC All rights reserved.
+----
+Special thanks to Mike James for providing the dashboard icons:
+http://www.famfamfam.com/lab/icons/silk/
+Icons licensed under Creative Commons Attribution 2.5 License:
+http://creativecommons.org/licenses/by/2.5/
+----
+Special thanks to Sascha Leib for providing the js.Dialog JavaScript Library
+This library is freely distributable under the terms of an MIT-style license.
+For details or updates, see http://code.kolmio.com/jsdialog
+----
+Build JARs in the /build folder are licensed under there respective licenses.
+----
+
+------------------------------------------------
+___                            
+ | ._  _ _|_ _.|| _._|_ o _ ._ 
+_|_| |_>  |_(_|||(_| |_ |(_)| |
+------------------------------------------------
+1.	Download the dashboard code from http://www.mach-ii.com.
+
+2.	Unzip the dashboard to your web root*. 
+
+	a.	For example, on Windows the default web root is [DRIVE]:\Inetpub\wwwroot, 
+		or if you are using your CFML server's built-in web server, your web root is 
+		likely [DRIVE]:\CFusionMX\wwwroot.  If you are on a Unix system, your web 
+		root will vary.
+
+	b.	The end result of this step is that you should have the directory MachIIDashboard 
+		(no hyphen) in your web root.  Inside this directory you will find the  
+		dashboard files.
+
+	c.	If you wish to place the core Mach-II Dashboard files in a location that is 
+		different from your webroot, just create a mapping called "MachIIDashboard" 
+		in the CFML administrator / control panel that points this mapping to the 
+		location where you placed the dashboard files.
+
+3.	Add the dashboard as a module in your Mach-II application configuration file and 
+	set the "password" property in the override XML section:
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+
+4.	Reload your Mach-II application and navigate to:
+
+	http://www.example.com/index.cfm?event=dashboard:info.index
+	
+	(You may have to modify this url if you use a different event parameter 
+	other than "event" or using SES URLs)
+
+Note: *If you are using virtual hosts, you will need to unzip to the root of your
+website domain. 
+
+----
+Optional Configuration Properties
+----
+
+There is are few optional configuration properties that can be added to change
+the behavior of the Dashboard at runtime.
+
+* "enableLogin" Property
+This property allows you to disable the login page. By default, this is set to true
+if you do not specify this property.  You can disable the login page by setting
+a property in the override XML for the module like this:
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="enableLogin" value="false" />
+				</properties>
+			</mach-ii>
+		</module>
+	</modules> 
+
+However, this could potentially be a large security whole in your application if your
+application is deployed to production in this manner.  You can enable the login page 
+by environment group or explicit environment name. The following example disables the 
+login page for all environments that belong to the "local" and "development" environment 
+groups and an explicitly enables the login page for an environment named "fooBar". If your 
+application is deployed to an environment that does not match any of the environment listed, 
+the login page will be *enabled* by default as this provides the most secure option.
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="enableLogin">
+						<struct>
+							<key name="group:local,development" value="false"/>
+							<key name="fooBar" value="false"/>
+						</struct>
+					</property>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules> 
+
+Note that environment groups use the "group:" syntax in the key name. This can contain a 
+list of environment groups.  Also, explicit environments can be defined as a list as well.
+Environment value resolution is always performed by explicit environment name, then environment
+group and finally the default value (in this case "true") if no environment resolution can be
+found. 
+
+* "enableDashboardExceptionLogging" Property
+
+In some circumstances you do not want to enable the exception logger that comes bundled
+with the Dashboard.  You can disable the logger by setting a property in the override
+XML for the module like this:
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="enableDashboardExceptionLogging" value="false"/>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+
+By default, the logger is enabled so you must explicitly disable the logger by using
+the above property in the override XML for the module.
+
+You can enable or disable the logger by environment group or explicit environment name. 
+The following example disables the logger for all environments that belong to the "production"
+environment group and an explicitly disables the logger for an environment named "fooBar".  
+If your application is deployed to an environment that does not match any of the environments 
+listed, the logger will be *enabled* by default.
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="enableDashboardExceptionLogging">
+						<struct>
+							<key name="group:local,development" value="false"/>
+							<key name="fooBar" value="true"/>
+						</struct>
+					</property>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+	
+* "logoutPromptTimeout" Property
+
+In some circumstances you may want the Dashboard to auto-logout somebody after a certain
+amount of time with no interaction has passed.  Due to the AJAX calls involved, an user
+is basically logged in indefinitely. By default, users are auto-logged after 30 minutes
+if the "enableLogin" is true. This property takes a number of minutes.
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="logoutPromptTimeout" value="30"/>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+
+You can enable or disable the auto-logout timeout by environment group or explicit environment name. 
+The following example disables the timeout for all environments that belong to the "production"
+environment group and an explicitly disables the timeout for an environment named "fooBar".  
+If your application is deployed to an environment that does not match any of the environments 
+listed, the timeout will be *30* (minutes) by default.
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="logoutPromptTimeout">
+						<struct>
+							<key name="group:local,development" value="false"/>
+							<key name="fooBar" value="true"/>
+						</struct>
+					</property>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+	
+* "chartProvider" Property
+
+This property allows you to switch charting providers from "cfcharts" to "googlecharts". This property
+by default is set to "cfchart" (unless the application is deployed to Google App Engine).
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="chartProvider" value="googlecharts" />
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+	
+* "loginIPs" Property
+
+In some circumstances you want to restrict the IPs or IP range that can even get to the
+login page of the Dashboard. You can enabled this feature by setting a property in the override
+XML for the module like this:
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="loginIPs" value="127.0.0.1,192.168.15.[2-255]"/>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+
+------------------------------------------------
+ _                      
+|_) _  _ _    ._ _ _  _ 
+| \(/__>(_)|_|| (_(/__> 
+------------------------------------------------
+* The best way of contacting Team Mach-II or helping the Mach-II project is 
+info@mach-ii.com.
+
+* All defect (bug) reports and enhancement requests should be logged as a new ticket
+on our Trac installation at http://trac.mach-ii.com/machii.  Please search the tickets for
+duplicate / similar defect reports or enhancement requests before submitting a new
+ticket.
+
+* The best place to get quick help from other developers is to join our public 
+email listserv/forums at: http://groups.google.com/group/mach-ii-for-coldfusion.
+
+* Check out http://www.mach-ii.com for Quick Starts, FAQs and additional sample 
+applications and documentation.
+
+* If you wish to submit code for defect fix or feature enhancement, your submission
+is governed under the license in which Mach-II is released. For more information, 
+please read the accompanying license.

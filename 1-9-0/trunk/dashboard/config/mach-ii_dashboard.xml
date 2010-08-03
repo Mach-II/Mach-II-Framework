@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+License:
+Copyright 2009-2010 GreatBizTools, LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Copyright: GreatBizTools, LLC
+$Id$
+
+Created version: 1.1.0
+Updated version: 1.1.0
+
+Notes:
+-->
+<!DOCTYPE mach-ii PUBLIC
+	"-//Mach-II//DTD Mach-II Configuration 1.9.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_9_0.dtd">
+
+<mach-ii version="1.8">
+	<!--PROPERTIES -->
+	<properties>
+		<property name="applicationRoot" value="/MachII/dashboard"/>
+		<property name="defaultEvent" value="info.index"/>
+		<property name="exceptionEvent" value="sys.exception"/>
+		
+		<property name="cfcDocBaseUrl" value="http://www.mach-ii.com/cfcdocs/"/>
+		<property name="enableLogin" value="true"/>
+		<property name="loginIPs" value=""/>
+		<property name="logoutPromptTimeout" value="30" />
+		<property name="enableDashboardExceptionLogging" value="true"/>
+		
+		<property name="chartProvider" value="googlecharts"/>
+		
+		<!-- Dynamic Settings -->
+		<property name="sessionManagementScope" value=""/>
+
+		<property name="udfs" type="MachII.dashboard.properties.Udfs"/>		
+		<property name="application" type="MachII.dashboard.properties.ApplicationProperty"/>
+		<property name="logging" type="MachII.logging.LoggingProperty">
+			<parameters>
+				<parameter name="Exception">
+					<struct>
+						<key name="type" value="MachII.dashboard.logging.loggers.ExceptionLog.Logger"/>
+						<key name="loggingEnabled" value="${properties.enableDashboardExceptionLogging}"/>
+						<key name="loggingLevel" value="all"/>
+						<key name="snapshotLevel" value="warn"/>
+						<key name="dashboardModuleName" value="${properties.moduleName}"/>
+						<key name="appKey" value="${properties.appKey}"/>
+					</struct>
+				</parameter>
+			</parameters>
+		</property>
+		<property name="caching" type="MachII.caching.CachingProperty"/>
+		<property name="html" type="MachII.properties.HtmlHelperProperty">
+			<parameters>
+				<parameter name="metaTitleSuffix" value="${properties.metaTitleSuffix}"/>
+				<parameter name="jsBasePath" value=""/>
+				<parameter name="cssBasePath" value=""/>
+			</parameters>
+		</property>
+		
+		<!-- Auto Update Settings -->
+		<property name="autoUpdateReleaseTypes">
+			<struct>
+				<!--The first element when pulled from SVN is 0 indicating you are using a BER with an unknown build number.-->
+				<key name="P0" value="BER / Nightly"/>
+				<key name="P1" value="Alpha"/>
+				<key name="P2" value="Beta"/>
+				<key name="P3" value="RC1"/>
+				<key name="P4" value="RC2"/>
+				<key name="P5" value="RC3"/>
+				<key name="P6" value="RC4"/>
+				<key name="P7" value="RC5"/>
+				<key name="P8" value="Development - Stable"/>
+				<key name="P9" value="Production - Stable"/>
+			</struct>
+		</property>
+		<property name="autoUpdateUrl" value="http://www.mach-ii.com/index.cfm/go/getVersions/"/>
+		<!-- <property name="autoUpdateUrl" value="http://m2website/index.cfm/go/getVersions/"/> -->
+	</properties>
+	
+	<!-- LISTENERS -->
+	<listeners>
+		<listener name="autoUpdate" type="MachII.dashboard.listeners.AutoUpdateListener"/>
+		<listener name="caching" type="MachII.dashboard.listeners.CachingListener"/>
+		<listener name="config" type="MachII.dashboard.listeners.ConfigListener"/>
+		<listener name="debugging" type="MachII.dashboard.listeners.DebuggingListener"/>
+		<listener name="info" type="MachII.dashboard.listeners.InfoListener"/>
+		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
+		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
+	</listeners>
+	
+	<!-- SUBSCRIBERS -->
+	<message-subscribers>
+		<message name="needConfigData" multithreaded="true" waitForThreads="true">
+			<subscribe listener="config" method="getBaseData" resultArg="baseData"/>
+			<subscribe listener="config" method="getBaseComponentData" resultArg="baseComponentData"/>			
+			<subscribe listener="config" method="getModuleData" resultArg="moduleData"/>
+			<subscribe listener="config" method="getModuleComponentData" resultArg="moduleComponentData"/>
+		</message>
+	</message-subscribers>
+	
+	<!-- EVENT-FILTERS -->
+	<event-filters> 
+		<event-filter name="serveFile" type="MachII.dashboard.filters.ServeFileFilter">
+			<parameters>
+				<parameter name="basePath" value="/MachII/dashboard/assets"/>
+				<parameter name="contentTypes">
+					<struct>
+						<key name="png" value="image/png"/>
+						<key name="gif" value="image/gif"/>
+						<key name="jpg" value="image/jpeg"/>
+						<key name="css" value="text/css"/>
+						<key name="ico" value="image/vnd.microsoft.icon"/>
+						<key name="js" value="application/x-javascript"/>
+					</struct>
+				</parameter>
+			</parameters>
+		</event-filter>
+	</event-filters>
+	
+	<!-- PLUGINS -->
+	<plugins runParent="none">
+		<plugin name="application" type="MachII.dashboard.plugins.ApplicationPlugin">
+			<parameters>
+				<parameter name="unprotectedEvents">
+					<array>
+						<element value="sys.login"/>
+						<element value="sys.serveAsset"/>
+					</array>
+				</parameter>
+				<parameter name="loginIPs" value="${properties.loginIPs}"/>
+			</parameters>
+		</plugin>
+	</plugins>
+	
+	<!-- EVENTS-HANDLERS -->
+	<event-handlers>
+		<!-- info -->
+		<event-handler event="info.index" access="public">
+			<view-page name="info.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="js.info.snip_memoryInformation" access="public">
+			<view-page name="info.snip_memoryInformation"/>
+		</event-handler>
+		<event-handler event="js.info.suggestGarbageCollection" access="public">
+			<notify listener="info" method="suggestGarbageCollection" />
+		</event-handler>
+	
+		<!-- config -->
+		<event-handler event="config.index" access="public">
+			<publish message="needConfigData" />		
+			<view-page name="config.snip_components" contentArg="layout.snip_components"/>	
+			<view-page name="config.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="config.reloadModule" access="public">
+			<notify listener="config" method="reloadModule"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
+		<event-handler event="config.reloadBaseApp" access="public">
+			<notify listener="config" method="reloadBaseApp"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
+		<event-handler event="config.reloadModuleDependencyInjectionEngine" access="public">
+			<notify listener="config" method="reloadModuleDependencyInjectionEngine"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
+		<event-handler event="config.reloadBaseAppDependencyInjectionEngine" access="public">
+			<notify listener="config" method="reloadBaseAppDependencyInjectionEngine"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
+		<event-handler event="config.reloadAllChangedComponents" access="public">
+			<notify listener="config" method="reloadAllChangedComponents"/>
+			<publish message="needConfigData" />
+			<view-page name="config.snip_components"/>
+		</event-handler>
+		<event-handler event="config.refreshAllChangedComponents" access="public">
+			<publish message="needConfigData" />
+			<view-page name="config.snip_components"/>
+		</event-handler>
+		<event-handler event="config.reloadListener" access="public">
+			<notify listener="config" method="reloadListener"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>		
+		<event-handler event="config.reloadFilter" access="public">
+			<notify listener="config" method="reloadFilter"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>		
+		<event-handler event="config.reloadPlugin" access="public">
+			<notify listener="config" method="reloadPlugin"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>		
+		<event-handler event="config.reloadProperty" access="public">
+			<notify listener="config" method="reloadProperty"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>		
+		
+		<!-- logging --> 
+		<event-handler event="logging.index" access="public">
+			<notify listener="logging" method="getLoggers" resultArg="loggers"/>
+			<view-page name="logging.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="logging.enableDisableLogger" access="public">
+			<notify listener="logging" method="enableDisableLogger"/>
+			<redirect event="logging.index" persist="true"/>
+		</event-handler>
+		<event-handler event="logging.changeLoggingLevel" access="public">
+			<notify listener="logging" method="changeLoggingLevel"/>
+			<redirect event="logging.index" persist="true"/>
+		</event-handler>
+		<event-handler event="logging.enableDisableAll" access="public">
+			<notify listener="logging" method="enableDisableAll"/>
+			<redirect event="logging.index" persist="true"/>
+		</event-handler>
+		
+		<!-- caching --> 
+		<event-handler event="caching.index" access="public">
+			<view-page name="caching.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="js.caching.snip_cachingInformation" access="public">
+			<notify listener="caching" method="getCacheStrategies" resultArg="cacheStrategies"/>
+			<view-page name="caching.snip_cachingInformation"/>
+		</event-handler>
+		<event-handler event="caching.enableDisableAll" access="public">
+			<notify listener="caching" method="enableDisableAll"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		<event-handler event="caching.reapAll" access="public">
+			<notify listener="caching" method="reapAll"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		<event-handler event="caching.flushAll" access="public">
+			<notify listener="caching" method="flushAll"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		<event-handler event="caching.enableDisableCacheStrategy" access="public">
+			<notify listener="caching" method="enableDisableCacheStrategy"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		<event-handler event="caching.reapCacheStrategy" access="public">
+			<notify listener="caching" method="reapCacheStrategy"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		<event-handler event="caching.flushCacheStrategy" access="public">
+			<notify listener="caching" method="flushCacheStrategy"/>
+			<redirect event="caching.index" persist="true"/>
+		</event-handler>
+		
+		<!-- debugging -->
+		<event-handler event="debugging.index" access="public">
+			<notify listener="debugging" method="getExceptionViewer" resultArg="exceptionViewer"/>
+			<notify listener="debugging" method="getExceptionViewerDataStorage" resultArg="dataStorage"/>
+			<view-page name="debugging.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="debugging.enableDisableExceptionViewer" access="public">
+			<notify listener="debugging" method="enableDisableExceptionViewer"/>
+			<redirect event="debugging.index" persist="true"/>
+		</event-handler>
+		<event-handler event="debugging.changeSnapshotLevel" access="public">
+			<notify listener="debugging" method="changeSnapshotLevel"/>
+			<redirect event="debugging.index" persist="true"/>
+		</event-handler>
+		
+		<event-handler event="debugging.flushExceptionViewerDataStorage" access="public">
+			<notify listener="debugging" method="flushExceptionViewerDataStorage"/>
+			<redirect event="debugging.index" persist="true"/>
+		</event-handler>
+		
+		<!-- auto update -->
+		<event-handler event="autoUpdate.index" access="public">
+			<cache>
+				<notify listener="autoUpdate" method="getPackageData"/>
+			</cache>
+			<view-page name="autoUpdate.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		
+		<!-- tools -->
+		<event-handler event="tools.index" access="public">
+			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="tools.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		
+		<event-handler event="tools.regex" access="public">
+			<event-arg name="type" value="refind" overwrite="false"/>
+			<event-arg name="caseSensitive" value="1" overwrite="false"/>
+			<event-arg name="replace1" value="*****" overwrite="false"/>
+			<event-arg name="replace2" value="*****" overwrite="false"/>
+			<event-arg name="replace3" value="*****" overwrite="false"/>
+			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="tools.regex.snip_referenceGuide" contentArg="layout.snip_referenceGuide"/>
+			<view-page name="tools.regex.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="js.tools.regex.process" access="public">
+			<notify listener="tools.regex" method="processRegex" resultArg="results"/>
+			<view-page name="tools.regex.snip_results"/>
+		</event-handler>
+		
+		<event-handler event="tools.beanGenerator" access="public">
+			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="tools.beanGenerator" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		
+		<!-- sys -->
+		<event-handler event="sys.serveAsset" access="public">
+			<filter name="serveFile"/>
+		</event-handler>
+		<event-handler event="sys.login" access="private">
+			<event-arg name="suppressHeadElements" value="true"/>
+			<view-page name="sys.login" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="sys.loginRestricted" access="private">
+			<event-arg name="suppressHeadElements" value="true"/>
+			<view-page name="sys.loginRestricted" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+
+		<event-handler event="sys.exception" access="private">
+			<view-page name="sys.exception" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+	</event-handlers>
+	
+	<!-- SUBROUTINES -->
+	<subroutines>
+		<subroutine name="doLayout">
+			<view-page name="layout.header" contentArg="layout.header"/>
+			<view-page name="layout.footer" contentArg="layout.footer"/>
+			<view-page name="layout.wrapper"/>
+		</subroutine>
+	</subroutines>
+	
+	<!-- PAGE-VIEWS -->
+	<page-views>
+		<view-loader type="MachII.framework.viewLoaders.PatternViewLoader" />
+	</page-views>
+
+</mach-ii>

@@ -116,6 +116,9 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 	</taskdef>
 	<classloader loader="project" classpath="${tasks.classpath}/commons-net-1.4.1.jar"/>
 	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>
+	<taskdef name="jsmin"
+        classname="net.matthaynes.jsmin.JSMin_Task"
+        classpath="${tasks.classpath}/jsmin.jar"/>
 	
 	<!--
 	TARGETS
@@ -168,13 +171,26 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 				<exclude name="build/"/>
 				<exclude name=".project"/>
 				<exclude name=".settings/"/>
+				<exclude name="dashboard/assets/"/>
+				<exclude name="dashboard/rawimg/"/>
 			</fileset>
+			<!-- filterset token replacement breaks 
+					images so assets were not included -->
 			<filterset begintoken="@" endtoken="@">
 				<filter token="minorVersion" value="${buildVersion}"/>
 				<filter token="buildDatetime" value="${buildDatetime}"/>
 			</filterset>
 		</copy>
+		<copy todir="${dest}/MachII/dashboard/"
+			verbose="${debug}"
+			preservelastmodified="true">
+			<fileset dir="${basedir}">
+				<include name="dashboard/assets/"/>
+			</fileset>
+		</copy>
+		<echo message="---------------------------------------------"/>
 		<echo message="Making copies of CHANGELOG, LICENSE, NOTICE and READMEs to .txt files for windows"/>
+		<echo message="---------------------------------------------"/>
 		<copy file="${dest}/MachII/CHANGELOG"
 			tofile="${dest}/MachII/CHANGELOG.txt"
 			preservelastmodified="true"
@@ -195,7 +211,31 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			tofile="${dest}/MachII/tests/README.txt"
 			preservelastmodified="true"
 			verbose="${debug}"/>
+		<copy file="${dest}/MachII/dashboard/CHANGELOG"
+			tofile="${dest}/MachII/dashboard/CHANGELOG.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/dashboard/LICENSE"
+			tofile="${dest}/MachII/dashboard/LICENSE.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/dashboard/NOTICE"
+			tofile="${dest}/MachII/dashboard/NOTICE.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<copy file="${dest}/MachII/dashboard/README"
+			tofile="${dest}/MachII/dashboard/README.txt"
+			preservelastmodified="true"
+			verbose="${debug}"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Minimizing JS files"/>
+		<echo message="---------------------------------------------"/>
+		<jsmin destdir="${dest}/MachII/dashboard/assets/js/" force="true">
+			<fileset dir="${basedir}/dashboard/assets/js/" includes="**/*.js"/>
+		</jsmin>
+		<echo message="---------------------------------------------"/>
 		<echo message="Built as version '${buildVersion}'"/>
+		<echo message="---------------------------------------------"/>
 		<antcall target="optimizeBuild"/>
 		<antcall target="testReport"/>
 		<antcall target="varScopeCheck"/>
