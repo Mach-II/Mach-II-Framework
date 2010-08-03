@@ -82,6 +82,17 @@ Notes:
 		
 		<cfif NOT foundScope>
 			<cftry>
+				<cfset scope = StructGet(getProperty("sessionManagementScope")) />
+				
+				<cfset foundScope = true />
+				<cfcatch type="any">
+					<!--- Do nothing --->
+				</cfcatch>
+			</cftry>
+		</cfif>
+		
+		<cfif NOT foundScope>
+			<cftry>
 				<cfset scope = StructGet("session") />
 				
 				<cfset setProperty("sessionManagementScope", "session") />
