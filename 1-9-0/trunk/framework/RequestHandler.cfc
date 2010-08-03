@@ -289,7 +289,10 @@ Notes:
 		<cfreturn variables.eventCount />
 	</cffunction>
 	
-	<cffunction name="getCurrentLocale" access="public" returntype="string" output="false"
+	<!---
+	PROTECTED FUNCTIONS - GENERAL
+	--->
+	<cffunction name="getWorkingLocale" access="private" returntype="string" output="false"
 		hint="Returns the current Locale for this request">
 		
 		<!--- If the current stored locale is empty, return the default locale --->
@@ -299,10 +302,7 @@ Notes:
 		
 		<cfreturn variables.locale />
 	</cffunction>
-	
-	<!---
-	PROTECTED FUNCTIONS - GENERAL
-	--->
+
 	<cffunction name="setupEventContext" access="private" returntype="void" output="false"
 		hint="Setup an EventContext instance.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -674,14 +674,14 @@ Notes:
 		<cfreturn variables.log />
 	</cffunction>
 	
-	<cffunction name="setLocale" access="public" returntype="void" output="false"
+	<cffunction name="setCurrentLocale" access="public" returntype="void" output="false"
 		hint="Sets the current locale for a request">
 		<cfargument name="locale" type="string" required="true" />
 		<cfset variables.locale = arguments.locale/>
 	</cffunction>
-	<cffunction name="getLocale" access="public" returntype="string" output="false"
+	<cffunction name="getCurrentLocale" access="public" returntype="string" output="false"
 		hint="Gets the current locale for a request">
-		<cfreturn getCurrentLocale()/>
+		<cfreturn getWorkingLocale()/>
 	</cffunction>
 
 </cfcomponent>

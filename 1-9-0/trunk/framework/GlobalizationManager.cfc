@@ -97,7 +97,7 @@ Notes:
 		<cfset var currentLocale = arguments.locale/>
 		<!--- If the user doesn't specify a locale, use the one for the current request --->
 		<cfif currentLocale EQ "">
-			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getLocale()/>
+			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()/>
 		</cfif>
 		
 		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
