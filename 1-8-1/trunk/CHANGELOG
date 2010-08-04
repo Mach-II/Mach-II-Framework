@@ -99,6 +99,8 @@ http://trac.mach-ii.com/machii/ticket/631
 
 * TimeSpanCache does not properly reap when storage scope is session
 
+This defect affected Mach-II 1.6.0, 1.6.1 and 1.8.0 and has been fixed in the 1.8.1 release.
+
 For more information see:
 http://trac.mach-ii.com/machii/ticket/606
 (2010-04-07 peterfarrell)
