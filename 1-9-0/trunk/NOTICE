@@ -14,6 +14,8 @@ Originally Created By:
 - Benjamin Edwards (ben@ben-edwards.com)
 - Hal Helms (hal@halhelms.com)
 
+-----------------------------
+
 Mach-II Framework Source Code:
 
 The software in this package is distributed under the GNU General Public
@@ -60,8 +62,10 @@ the GNU General Public License applies.
 	this library with the exception of independent module components that
 	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
+
+-----------------------------
 	
-Mach-II Dashboard Source Code:
+Mach-II Dashboard Source Code (located in /dashboard):
 
 Mach-II Dashboard is released under the Apache 2.0 license.  You can 
 use the Mach-II Dashboard  on any commercial application as long as you abide 
@@ -81,6 +85,8 @@ are shipped with the dashboard.
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 	See the License for the specific language governing permissions and 
 	limitations under the License.
+
+-----------------------------
 
 Mach-II's documentation and logos are *not* licensed under the GPL v3.0:
 Copyright 2007-2009 GreatBizTools, LLC All rights reserved.
