@@ -30,7 +30,7 @@ Notes:
 	<cfset copyToScope("${event.baseComponentData},${event.moduleData},${event.baseData}") />
 	<cfset variables.moduleOrder = StructKeyArray(variables.moduleData) />
 	<cfset ArraySort( variables.moduleOrder , "textnocase", "asc") />
-	
+
 	<view:script event="sys.serveAsset" p:path="@js@handler@config.js">
 		<cfoutput>
 			myConfigHandler = new ConfigHandler('#BuildUnescapedUrl("config.reloadAllChangedComponents")#', '#BuildUnescapedUrl("config.refreshAllChangedComponents")#');
@@ -132,11 +132,11 @@ Notes:
 		<td>
 			<table class="small">
 				<tr>
-					<td style="width:50%;"><h4>Evironment Name</h4></td>
+					<td style="width:50%;"><h4>Environment Name</h4></td>
 					<td style="width:50%;"><p>#getAppManager().getParent().getEnvironmentName()#</p></td>
 				</tr>
 				<tr>
-					<td><h4>Evironment Group</h4></td>
+					<td><h4>Environment Group</h4></td>
 					<td><p>#getAppManager().getParent().getEnvironmentGroup()#</p></td>
 				</tr>
 			</table>
@@ -202,11 +202,11 @@ Notes:
 			<cfset variables._appManager = getAppManager().getModuleManager().getModule(variables.moduleOrder[i]).getModuleAppManager() />
 			<table class="small">
 				<tr>
-					<td style="width:50%;"><h4>Evironment Name</h4></td>
+					<td style="width:50%;"><h4>Environment Name</h4></td>
 					<td style="width:50%;"><p>#variables._appManager.getEnvironmentName()#</p></td>
 				</tr>
 				<tr>
-					<td><h4>Evironment Group</h4></td>
+					<td><h4>Environment Group</h4></td>
 					<td><p>#variables._appManager.getEnvironmentGroup()#</p></td>
 				</tr>
 			</table>
