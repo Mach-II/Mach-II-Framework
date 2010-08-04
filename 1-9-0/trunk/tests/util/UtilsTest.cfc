@@ -172,5 +172,15 @@ Notes:
 		hint="Test escapeHtml().">
 		<cfset assertTrue(Compare(variables.utils.escapeHtml("< > Planchers de bambou, li&egrave;ge, ch&ecirc;ne FSC, &eacute;rable FSC, pin et eucalyptus &eacute;cologiques et durables &&& Peter&Matt"), "&lt; &gt; Planchers de bambou, li&egrave;ge, ch&ecirc;ne FSC, &eacute;rable FSC, pin et eucalyptus &eacute;cologiques et durables &amp;&amp;&amp; Peter&amp;Matt") EQ 0) />
 	</cffunction>
+	
+	<cffunction name="testGetMimeTypeByFileExtension" access="public" returntype="void" output="false"
+		hint="Test getMimeTypeByFileExtension()">
+		
+		<!--- Test single --->
+		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,"), "image/jpeg") />
+		
+		<!--- Test mixed --->
+		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,application/x-gzip"), "image/jpeg,image/gif,application/x-gzip") />
+	</cffunction>
 
 </cfcomponent>

@@ -304,7 +304,8 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="fileField" type="string" required="true" />
 		<cfargument name="destination" type="string" required="true" />
 		<cfargument name="nameConflict" type="string" required="false" default="error" />
-		<cfargument name="accept" type="string" required="false" default="*" />
+		<cfargument name="accept" type="string" required="false" default="*"
+			hint="Accepts a list of mixed MIME types or file extensions (which must start with a'.')." />
 		<cfargument name="mode" type="string" required="false" />
 		<cfargument name="fileAttributes" type="string" required="false" />
 

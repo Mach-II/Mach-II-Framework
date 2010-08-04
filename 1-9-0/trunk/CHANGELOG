@@ -66,13 +66,22 @@ Fixed Defects
 Improvements / Enhancements
 ------------------------------------------------
 
+* Add file extension to MIME-type conversion in accept attribute in uploadFile()
+
+The accept argument for uploadFile() will now convert file extensions (like
+.jpg) to MIME types for you automatically.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/455
+(2010-08-02 peterfarrell)
+
 * Added the optgroup form tag for HTML selects
 
-See for more information on the HTML optgroup tag:
+For more information on the HTML optgroup tag:
 http://www.w3schools.com/tags/tag_optgroup.asp
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/527
+https://trac.mach-ii.com/machii/ticket/527
 (2010-03-02 peterfarrell)
 
 ------------------------------------------------
@@ -86,7 +95,7 @@ and checkboxgroup form library tags.  Small test case sets show no degradation o
 improvement so this affects larger sets to iterate over.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/632
+https://trac.mach-ii.com/machii/ticket/632
 (2010-04-17 peterfarrell)
 
 * Reduced generated whitespace and improved performance of checkboxgroup and radiogroup 
@@ -94,14 +103,14 @@ form tags. We have reduced the amount of whitespace the custom tag generates and
 the performance of the tag by approximately 1,100% - 1,500% in our test cases.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/529
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/530
+https://trac.mach-ii.com/machii/ticket/529
+https://trac.mach-ii.com/machii/ticket/530
 (2010-02-02 peterfarrell)
 
 * Improved logging messages in CacheManager
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/554
+https://trac.mach-ii.com/machii/ticket/554
 (2010-03-10 peterfarrell)
 
 * Refactored how cache strategies are wired into cache handlers
@@ -110,5 +119,5 @@ Performance improvement is directly related to the number of cache handlers
 that are implemented in an application.
 
 For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/555
+https://trac.mach-ii.com/machii/ticket/555
 (2010-03-10 peterfarrell) 
