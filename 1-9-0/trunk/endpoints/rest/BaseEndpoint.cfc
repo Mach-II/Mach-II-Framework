@@ -247,7 +247,7 @@ to return good responses and response codes, use of format (.json), etc.
 		<cfargument name="format" type="String" required="true" />
 
 		<cfset var contentType = "" />
-		<cflog text="IN addContentTypeHeaderFromFormat() #arguments.format#">
+
 		<cftry>
 			<!--- Default content type: html --->
 			<cfif Len(arguments.format) EQ 0>
