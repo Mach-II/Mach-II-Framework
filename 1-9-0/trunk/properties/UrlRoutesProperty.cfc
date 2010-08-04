@@ -304,6 +304,16 @@ index.cfm/product/A12345/fancy/
 			<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & urlBase & "index.cfm/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
 		</cfloop>
 		<cfset contents.append(lf) />
+		
+		<!--- Add a catch all to run all request through Mach-II if it's not a real file and there is not index.cfm in the URL  --->
+		<cfif getProperty("urlExcludeEventParameter")>
+			<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-f" & lf) />
+			<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-d" & lf) />
+			<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-l" & lf) />
+			<cfset contents.append("$1 !^index\.cfm" & lf) />
+			<cfset contents.append("RewriteRule ^(.*)?$ " & urlBase & "index.cfm/" & eventParameter & "/$1 [PT,L]" & lf) />
+			<cfset contents.append(lf) />
+		</cfif>
 
 		<!--- The ampersand in the middle of the append is so that CFEclipse does think this is invalid code --->
 		<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/></' & 'cfsilent>' & lf) />
