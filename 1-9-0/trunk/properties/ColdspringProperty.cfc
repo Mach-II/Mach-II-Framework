@@ -444,7 +444,7 @@ application.serviceFactory_account variable.
 			<!--- Destroy the proxy if already constructed.
 				Must check if already constructed or it will cause an exception --->
 			<cfif remoteProxy.isConstructed()>
-				<cfset remoteProxy.destoryRemoteProxy() />
+				<cfset remoteProxy.destroyRemoteProxy() />
 			</cfif>
 
 			<!--- Create the proxy --->
