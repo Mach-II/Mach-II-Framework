@@ -183,6 +183,11 @@ Notes:
 		<cfreturn variables.appManager />
 	</cffunction>
 
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false"
+		hint="Gets the Utils component.">
+		<cfreturn getAppManager().getUtils() />
+	</cffunction>
+
 	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
 		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
 		<cfset variables.endpointManager = arguments.endpointManager />

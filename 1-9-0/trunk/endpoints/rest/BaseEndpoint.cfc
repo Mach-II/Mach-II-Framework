@@ -246,19 +246,27 @@ to return good responses and response codes, use of format (.json), etc.
 		hint="Adds a Content-Type response header based on the input format.">
 		<cfargument name="format" type="String" required="true" />
 
-		<!--- Would have used a struct literal but unsure of CFML engine compatibility --->
-		<!--- TODO: More to add here. --->
-		<cfswitch expression="#arguments.format#">
-			<cfcase value="json">
-				<cfheader name="Content-Type" value="application/json" />
-			</cfcase>
-			<cfcase value="txt">
-				<cfheader name="Content-Type" value="text/plain" />
-			</cfcase>
-			<cfdefaultcase>
-				<cfheader name="Content-Type" value="text/html" />
-			</cfdefaultcase>
-		</cfswitch>
+		<cfset var contentType = "" />
+		<cflog text="IN addContentTypeHeaderFromFormat() #arguments.format#">
+		<cftry>
+			<!--- Default content type: html --->
+			<cfif Len(arguments.format) EQ 0>
+				<cfset arguments.format = "html" />
+			</cfif>
+			<cfif NOT(arguments.format.startsWith("."))>
+				<cfset arguments.format = ".#arguments.format#" />
+			</cfif>
+			<!--- Leverage this nicely provided utility method --->
+			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format) />
+
+			<!--- Add the Content-Type header --->
+			<cfheader name="Content-Type" value="#contentType#" />
+			<cfcatch type="any">
+				<!--- Log exception --->
+				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
+			</cfcatch>
+		</cftry>
+
 	</cffunction>
 
 	<cffunction name="cleanPathInfo" access="private" returntype="string" output="false"

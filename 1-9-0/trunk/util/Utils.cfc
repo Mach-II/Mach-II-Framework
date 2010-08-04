@@ -108,12 +108,12 @@ Notes:
 
 		<cfset variables.statusCodeShortcutMap = statusCodeShortcutMap />
 	</cffunction>
-	
+
 	<cffunction name="buildMimeTypeMap" access="private" returntype="void" output="false"
 		hint="Builds a shortcut map for MIME type to file extensions.">
-		
+
 		<cfset var mime = StructNew() />
-		
+
 		<cfset mime.ai = "application/postscript" />
 		<cfset mime.aif = "audio/x-aiff" />
 		<cfset mime.aifc = "audio/x-aiff" />
@@ -167,6 +167,7 @@ Notes:
 		<cfset mime.jpeg = "image/jpeg" />
 		<cfset mime.jpg = "image/jpeg" />
 		<cfset mime.js = "application/x-javascript" />
+		<cfset mime.json = "application/json" />
 		<cfset mime.kar = "audio/midi" />
 		<cfset mime.latex = "application/x-latex" />
 		<cfset mime.lha = "application/octet-stream" />
@@ -668,16 +669,16 @@ Notes:
 			<cfreturn "" />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="getMimeTypeByFileExtension" access="public" returntype="string" output="false"
 		hint="Gets a MIME type(s) by file extension(s). Ignores any values that do not start with a '.'.">
 		<cfargument name="input" type="string" required="true"
 			hint="A single or list of file extensions.  Ignores any values that do not start with a '.' as a concrete MIME type which allows for mixed input of extensions and MIME types." />
-		
+
 		<cfset var inputArray = ListToArray(trimList(arguments.input)) />
 		<cfset var output = "" />
 		<cfset var i = 0 />
-		
+
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(inputArray)#" index="i">
 				<cfif inputArray[i].startsWith(".")>
@@ -692,7 +693,7 @@ Notes:
 					message="The 'getMimeTypeByFileExtension' method cannot find a valid MIME type conversion for a file extension of '#inputArray[i]#'." />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfreturn output />
 	</cffunction>
 
