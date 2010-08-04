@@ -6,7 +6,7 @@
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
 Project: Dashboard Module
-Version: 1.1.0.@minorVersion@
+Version: 1.9.0.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -38,7 +38,7 @@ requires Mach-II 1.8.0 or higher.
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
 ------------------------------------------------
-Mach-II Dashboard 1.1.0 is released under the Apache 2.0 license.  You can 
+Mach-II Dashboard is released under the Apache 2.0 license.  You can 
 use the Mach-II Dashboard  on any commercial application as long as you abide 
 by the license. For more  details, please see the NOTICE and LICENSE files that 
 are shipped with the dashboard.
@@ -79,25 +79,10 @@ ___
  | ._  _ _|_ _.|| _._|_ o _ ._ 
 _|_| |_>  |_(_|||(_| |_ |(_)| |
 ------------------------------------------------
-1.	Download the dashboard code from http://www.mach-ii.com.
+1.	The dashboard is now part of the core Mach-II download. You have nothing to install
+	before using.
 
-2.	Unzip the dashboard to your web root*. 
-
-	a.	For example, on Windows the default web root is [DRIVE]:\Inetpub\wwwroot, 
-		or if you are using your CFML server's built-in web server, your web root is 
-		likely [DRIVE]:\CFusionMX\wwwroot.  If you are on a Unix system, your web 
-		root will vary.
-
-	b.	The end result of this step is that you should have the directory MachIIDashboard 
-		(no hyphen) in your web root.  Inside this directory you will find the  
-		dashboard files.
-
-	c.	If you wish to place the core Mach-II Dashboard files in a location that is 
-		different from your webroot, just create a mapping called "MachIIDashboard" 
-		in the CFML administrator / control panel that points this mapping to the 
-		location where you placed the dashboard files.
-
-3.	Add the dashboard as a module in your Mach-II application configuration file and 
+2.	Add the dashboard as a module in your Mach-II application configuration file and 
 	set the "password" property in the override XML section:
 
 	<modules>
@@ -110,15 +95,12 @@ _|_| |_>  |_(_|||(_| |_ |(_)| |
 		</module>
 	</modules>
 
-4.	Reload your Mach-II application and navigate to:
+3.	Reload your Mach-II application and navigate to:
 
 	http://www.example.com/index.cfm?event=dashboard:info.index
 	
 	(You may have to modify this url if you use a different event parameter 
 	other than "event" or using SES URLs)
-
-Note: *If you are using virtual hosts, you will need to unzip to the root of your
-website domain. 
 
 ----
 Optional Configuration Properties

@@ -5,7 +5,7 @@
  / /  / / /_/ / /__/ / / /_____// /_/ /   
 /_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-Version: 1.1.0.@minorVersion@
+Version: 1.9.0.@minorVersion@
 Built-on: @buildDatetime@
 $Id$
 ------------------------------------------------
@@ -13,7 +13,7 @@ If version number and built-on are placeholders, you are using a bleeding
 edge release of the dashboard.
 ------------------------------------------------
 
-Copyright 2010 GreatBizTools, LLC
+Copyright 2009-2010 GreatBizTools, LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,45 +40,6 @@ Fixed Defects
 Improvements / Enhancements
 ------------------------------------------------
 
-* Added support for IP ranges for login page
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/449
-(2010-04-28 peterfarrell)
-
-* Added support for auto-reloading CFCs
-
-* Added support for Google Charts API instead of cfchart for Google App Engine
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/462
-(2009-12-05 peterfarrell)
-
-* Added an Auto-Logout by Timeout Feature via AJAX
-
-* Added Suggest Garbage Collection on Info Page
-
-* Added Auto-Updating Memory Information and Chart via AJAX on Info Page
-
-* Add support to disable the dashboard exception logger via override XML
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/421
-(2009-11-02 peterfarrell)
-
-* Auto Update of Mach-II projects like framework and dashboard
-
-For more information see:
-https://greatbiztoolsllc.trac.cvsdude.com/mach-ii/ticket/127
-(2009-05-21 derrickjackson)
-
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
-
-* Made use of view and form tag libraries
-
-* Updated to use Prototype 1.6.1 and Scriptaculous 1.8.3
-
-* Change scope location of the Exception Logger
-Moved from application._MachIIExceptionLoggerData to application[appKey]._MachIIExceptionLoggerData
