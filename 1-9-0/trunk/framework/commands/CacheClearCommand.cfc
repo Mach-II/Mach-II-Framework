@@ -116,10 +116,9 @@ Notes:
 			<!--- Clear by ids, aliases and/or strategy names --->
 			<cfelse>
 				<!--- Clear by ids without condition --->
-					<cfset log.debug("Clearing cache by ids '#getIds()#' (no condition to evaluate).") />
+				<cfset log.debug("Clearing cache by ids '#getIds()#' (no condition to evaluate).") />
+				<cfset clearCacheByIds(cacheManager, propertyManager, arguments.event) />
 
-					<cfset clearCacheByIds(cacheManager, propertyManager, arguments.event) />
-				</cfif>
 				<!--- Clear by aliases without condition --->
 				<cfif isAliasesDefined()>
 					<cfset log.debug("Clearing cache by aliases '#getAliases()#' (no condition to evaluate).") />
