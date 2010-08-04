@@ -61,6 +61,14 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* UrlRoutesProperty and sites in sub directories
+
+Thanks to Shaun (Net Grow) for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/641
+(2010-08-03 peterfarrell)
+
 * Certain form tags incorrectly sets the focus id
 
 For more information see:
