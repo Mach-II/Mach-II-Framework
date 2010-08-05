@@ -165,7 +165,7 @@ Notes:
 		<cfset var cacheStrategy = "" />
 		<cfset var strategyName = "" />
 		<cfset var cacheStrategyManager = getCacheStrategyManager() />
-		<cfset var cacheStrategies = cacheStrategyManager.getCacheStrategies() />
+		<cfset var cacheStrategies = cacheStrategyManager.getCacheStrategies(true) />
 
 		<!--- Configure all loaded cache strategies --->
 		<cfset cacheStrategyManager.configure() />
