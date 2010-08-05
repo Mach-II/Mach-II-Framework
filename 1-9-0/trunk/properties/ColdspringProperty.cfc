@@ -376,6 +376,9 @@ application.serviceFactory_account variable.
 		<cfif getParameter("placeFactoryInServerScope", false)>
 			<cfset bfUtils.setNamedFactory("server", factoryKey, bf) />
 		</cfif>
+		
+		<!--- Configure any utility connector --->
+		<cfset configureUtilityConnector() />
 
 		<!--- Resolve Mach-II dependences if required and application is not
 			loading (because during load Mach-II will call onObjectReload and
@@ -798,6 +801,19 @@ application.serviceFactory_account variable.
 		<cfloop from="1" to="#ArrayLen(configurableMessageCommands)#" index="i">
 			<cfset ArrayAppend(arguments.targetBase.targets, configurableMessageCommands[i]) />
 		</cfloop>
+	</cffunction>
+	
+	<cffunction name="configureUtilityConnector" access="private" returntype="void" output="false"
+		hint="Configures utility connectors.">
+	
+		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
+		<cfset var utilityConnectorBeanName = beanFactory.findBeanNameByType("MachII.util.UtilityConnector") />
+		<cfset var utilityConnector = "" />
+		
+		<cfif Len(utilityConnectorBeanName)>
+			<cfset utilityConnector = beanFactory.getBean(utilityConnectorBeanName) />
+			<cfset utilityConnector.setAppManager(getAppManager()) />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="referenceBeansToMachIIProperties" access="private" returntype="void" output="false"

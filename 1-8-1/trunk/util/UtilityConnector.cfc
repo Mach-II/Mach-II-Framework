@@ -91,17 +91,7 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="UtilityConnector" output="false"
-		hint="Initializes the connector.">
-
-		<!--- Use reference placed by ColdspringProperty when framework is loading --->
-		<cfif StructKeyExists(request, "_MachIIAppManager")>
-			<cfset setAppManager(request._MachIIAppManager) />
-		<cfelse>
-			<cfthrow type="MachII.util.UtilityConnector"
-				message="Cannot find the temporary AppManager reference in request._MachIIAppManager."
-				detail="Please be sure that you are using the ColdspringProperty located in 'MachII.properties.ColdspringProperty'." />
-		</cfif>
-
+		hint="Initializes the connector. The AppManager is wired in by the ColdSpringProperty">
 		<cfreturn this />
 	</cffunction>
 

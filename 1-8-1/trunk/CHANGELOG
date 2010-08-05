@@ -61,6 +61,17 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Fixed brittleness when loading the UtilityConnector
+
+Thanks to Jason York for reporting this issue.
+
+This edge case defect affected Mach-II 1.6.0, 1.6.1 and 1.8.0 and has been 
+fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/540
+(2010-08-05 peterfarrell)
+
 * UrlRoutesProperty and sites in sub directories
 
 Thanks to Shaun (Net Grow) for reporting this issue.
