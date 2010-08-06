@@ -119,18 +119,14 @@ Notes:
 		<cfset var eventArgs = StructNew() />
 		<cfset var log = getLog() />
 
-		<cfif log.isInfoEnabled()>
-			<cfset log.info("Begin processing request.") />
-		</cfif>
+		<cfset log.info("Begin processing request.") />
 
 		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
 		<cfset cleanPathInfo() />
 
 		<cfset eventArgs = getRequestEventArgs() />
 
-		<cfif log.isDebugEnabled()>
-			<cfset log.debug("Incoming event arguments:", eventArgs) />
-		</cfif>
+		<cfset log.debug("Incoming event arguments:", eventArgs) />
 
 		<cfif endpointManager.isEndpointRequest(eventArgs)>
 			<cfset endpointManager.handleEndpointRequest(eventArgs) />
@@ -288,18 +284,18 @@ Notes:
 		hint="Returns the number of events that have been processed for this context.">
 		<cfreturn variables.eventCount />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
 	--->
 	<cffunction name="getWorkingLocale" access="private" returntype="string" output="false"
 		hint="Returns the current Locale for this request">
-		
+
 		<!--- If the current stored locale is empty, return the default locale --->
 		<cfif variables.locale EQ "">
 			<cfreturn getPageContext().getRequest().getLocale()/>
 		</cfif>
-		
+
 		<cfreturn variables.locale />
 	</cffunction>
 
@@ -673,7 +669,7 @@ Notes:
 		hint="Gets the log.">
 		<cfreturn variables.log />
 	</cffunction>
-	
+
 	<cffunction name="setCurrentLocale" access="public" returntype="void" output="false"
 		hint="Sets the current locale for a request">
 		<cfargument name="locale" type="string" required="true" />
