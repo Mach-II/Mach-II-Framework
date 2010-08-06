@@ -58,6 +58,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.parentGlobalizationManager = "" />
 	<cfset variables.globalizationLoaderProperty = "" />
+	<cfset variables.localPersistenceObject = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -77,12 +78,21 @@ Notes:
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the manager.">
-		<!--- DOES NOTHING --->
+		
+		<cftry>
+			<cfset setLocalePersistenceObject(CreateObject("component", getGlobalizationLoaderProperty().getLocalePersistenceClass())) />
+			<cfset getLocalePersistenceObject().configure() />
+			
+			<cfcatch type="Any">
+				<cfabort showerror="Unable to create LocalePersistenceObject of type #getGlobalizationLoaderProperty().getLocalePersistenceClass()#. Please check that #getGlobalizationLoaderProperty().getLocalePersistenceClass()# is extended from MachII.globalization.persistence.AbstractPersistenceMethod: #cfcatch.message#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures the manager.">
-		<!--- DOES NOTHING --->
+		
+		<cfset getLocalePersistenceObject().deconfigure() />
 	</cffunction>
 	
 	<!---
@@ -101,6 +111,19 @@ Notes:
 		</cfif>
 		
 		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
+	</cffunction>
+	
+	<cffunction name="persistLocale" access="public" returntype="void" output="false"
+		hint="Persists the passed locale as the user's current locale for this 'session'.">
+		<cfargument name="locale" type="string" required="true" />
+		
+		<cfset getLocalePersistenceObject().storeLocale(arguments.locale) />
+	</cffunction>
+	
+	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"
+		hint="Retrieves the current locale as set by the user.">
+		
+		<cfreturn getLocalePersistenceObject().retrieveLocale() />
 	</cffunction>
 	
 	<!---
@@ -128,6 +151,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getGlobalizationLoaderProperty" access="public" returntype="MachII.globalization.GlobalizationLoaderProperty" output="true">
 		<cfreturn variables.globalizationLoaderProperty />
+	</cffunction>
+	
+	<cffunction name="setLocalePersistenceObject" access="public" returntype="void" output="false">
+		<cfargument name="localePersistenceObject" type="MachII.globalization.persistence.AbstractPersistenceMethod" required="true" />
+		<cfset variables.localePersistenceObject = arguments.localePersistenceObject />
+	</cffunction>
+	<cffunction name="getLocalePersistenceObject" access="public" returntype="MachII.globalization.persistence.AbstractPersistenceMethod" output="false">
+		<cfreturn variables.localePersistenceObject />
 	</cffunction>
 	
 </cfcomponent>

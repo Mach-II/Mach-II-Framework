@@ -83,7 +83,7 @@ Notes:
 	</cfif>
 	
 <cfelse>
-	<cfset variables.output = getAppManager().getGlobalizationManager().getString(attributes.key, getPageContext().getRequest().getLocale(), attributes.arguments, attributes.text) />
+	<cfset variables.output = getAppManager().getGlobalizationManager().getString(attributes.key, getAppManager().getRequestManager().getRequestHandler().getCurrentLocale(), attributes.arguments, attributes.text) />
 
 	<!--- Store the output to whatever variable 'var' is pointing to --->
 	<cfif Len(attributes.var)>

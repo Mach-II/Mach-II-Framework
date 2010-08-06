@@ -73,7 +73,6 @@ Notes:
 	<cfset variables.currentRouteParams = StructNew() />
 	<cfset variables.currentSESParams = StructNew() />
 	<cfset variables.currentRouteName = "" />
-	<cfset variables.locale = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -291,12 +290,34 @@ Notes:
 	<cffunction name="getWorkingLocale" access="private" returntype="string" output="false"
 		hint="Returns the current Locale for this request">
 
-		<!--- If the current stored locale is empty, return the default locale --->
-		<cfif variables.locale EQ "">
-			<cfreturn getPageContext().getRequest().getLocale()/>
-		</cfif>
+		<cfset var locale = "" />
 
-		<cfreturn variables.locale />
+		<!--- If the current stored locale is empty, return the default locale --->
+		<cfif IsObject(getAppManager().getGlobalizationManager())>
+			<cfset locale = getAppManager().getGlobalizationManager().retrieveLocale() />
+			<cfset getLog().debug("Retrieving locale from GlobalizationManager: #locale#") />
+		</cfif>
+		
+		<cfif locale EQ "">
+			<cfset locale = getPageContext().getRequest().getLocale() />
+		</cfif>
+		
+		<cfreturn locale />
+	</cffunction>
+	
+	<cffunction name="setWorkingLocale" access="private" returntype="void" output="false"
+		hint="Sets the current Locale for this request (and session).">
+		<cfargument name="locale" type="string" required="true" />
+		
+		<cfif IsObject(getAppManager().getGlobalizationManager())>
+			<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
+			
+		<cfelse>
+			<!--- I'm pretty ambivalent about the existence of this error message. --->
+			<cfabort showerror="GlobalizationManager not configured for attempt to set a locale. Please add a Globalization property to your configuration file."/>
+		</cfif>
+		
+		<cfset getLog().debug("Current locale set to #arguments.locale#") />
 	</cffunction>
 
 	<cffunction name="setupEventContext" access="private" returntype="void" output="false"
@@ -494,6 +515,7 @@ Notes:
 		<cfset var overwriteFormParams = (getParameterPrecedence() EQ "url") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var key = "" />
+		<cfset var locale = "" />
 
 		<!--- Build event args from form/url/SES --->
 		<cfset StructAppend(eventArgs, form) />
@@ -510,6 +532,14 @@ Notes:
 				<cfset eventArgs[Right(key, Len(key) - 3)] = eventArgs[key] />
 			</cfif>
 		</cfloop>
+		
+		<!--- If there is an incoming eventArg that matches the globalization locale key,
+			persist the new locale --->
+		<cfif IsObject(getAppManager().getGlobalizationManager()) AND
+			  StructKeyExists(eventArgs, getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam())>
+			<cfset locale = eventArgs[getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam()]>
+			<cfset setCurrentLocale(locale) />
+		</cfif>
 
 		<cfreturn eventArgs />
 	</cffunction>
@@ -673,7 +703,7 @@ Notes:
 	<cffunction name="setCurrentLocale" access="public" returntype="void" output="false"
 		hint="Sets the current locale for a request">
 		<cfargument name="locale" type="string" required="true" />
-		<cfset variables.locale = arguments.locale/>
+		<cfset setWorkingLocale(arguments.locale)/>
 	</cffunction>
 	<cffunction name="getCurrentLocale" access="public" returntype="string" output="false"
 		hint="Gets the current locale for a request">

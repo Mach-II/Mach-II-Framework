@@ -111,15 +111,30 @@ Created version: 1.9.0
 		
 		<cfset var messageFormat = "" />
 		<cfset var argsToUse = JavaCast("String[]", arguments.args) />
+		<cfset var localeArray = "" />
 		
 		<cfif NOT Len(arguments.code)>
 			<cfset getLog().trace("No code given, returning empty string") />
 			<cfreturn "" />
 		</cfif>
-
+		
 		<cfif NOT IsObject(arguments.locale)>
-			<cfset getLog().trace("No locale given, creating default locale") />
-			<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
+			<cfif Len(arguments.locale) GT 0>
+				<cfset localeArray = ListToArray(arguments.locale, "_") />
+				<cfif ArrayLen(localeArray) EQ 1>
+					<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1]) />
+				<cfelseif ArrayLen(localeArray) EQ 2>
+					<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1], localeArray[2]) />
+				<cfelse>
+					<!--- This seems like a sensible default to me; if there is a better default,
+						feel free to use it here --->
+					<cfset getLog().warn("Invalid locale given; using default locale")/>
+					<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
+				</cfif>
+			<cfelse>
+				<cfset getLog().trace("No locale given, creating default locale") />
+				<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
+			</cfif>
 		</cfif>
 		
 		<!--- If the arguments array is empty, assume there is no messageFormat necessary --->

@@ -87,6 +87,8 @@ is en_US.
 	<cfset variables.debugMode = false />
 	<cfset variables.debugPrefix = "**" />
 	<cfset variables.debugSuffix = "**" />
+	<cfset variables.localeUrlParam = "_locale" />
+	<cfset variables.localePersistenceClass = "MachII.globalization.persistence.SessionPersistenceMethod" />
 
 	<cfset variables.messageSource = "" />
 
@@ -102,7 +104,10 @@ is en_US.
 		<cfset setDebugEnabled(getParameter("debugEnabled", "false")) />
 		<cfset setDebugPrefix(getParameter("debugPrefix", "**")) />
 		<cfset setDebugSuffix(getParameter("debugSuffix", "**")) />
-
+		
+		<cfset setLocaleUrlParam(getParameter("localeUrlParam", "_locale")) />
+		<cfset setLocalePersistenceClass(getParameter("localePersistenceClass", "MachII.globalization.persistence.SessionPersistenceMethod")) />
+		
 		<cfif IsSimpleValue(bundles)>
 			<cfset bundles = ListToArray(bundles) />
 		</cfif>
@@ -112,7 +117,12 @@ is en_US.
 
 		<cfset getAppManager().getGlobalizationManager().setGlobalizationLoaderProperty(this) />
 	</cffunction>
-
+	
+	<cffunction name="deconfigure" access="public" output="false" returntype="void"
+		hint="Deconfigures the property.">
+		<!--- Does nothing --->
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
@@ -166,5 +176,21 @@ is en_US.
 	<cffunction name="getMessageSource" access="public" returntype="MachII.globalization.BaseMessageSource"  output="false">
 		<cfreturn variables.messageSource />
 	</cffunction>
-
+	
+	<cffunction name="setLocaleUrlParam" access="public" returntype="void" output="false">
+		<cfargument name="localeUrlParam" type="string" required="true"/>
+		<cfset variables.localeUrlParam = arguments.localeUrlParam />
+	</cffunction>
+	<cffunction name="getLocaleUrlParam" access="public" returntype="string" output="false">
+		<cfreturn variables.localeUrlParam />
+	</cffunction>
+	
+	<cffunction name="setLocalePersistenceClass" access="public" returntype="void" output="false">
+		<cfargument name="localePersistenceClass" type="string" required="true"/>
+		<cfset variables.localePersistenceClass = arguments.localePersistenceClass />
+	</cffunction>
+	<cffunction name="getLocalePersistenceClass" access="public" returntype="string" output="false">
+		<cfreturn variables.localePersistenceClass />
+	</cffunction>
+	
 </cfcomponent>
