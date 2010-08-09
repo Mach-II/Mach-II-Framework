@@ -196,6 +196,7 @@ to return good responses and response codes, use of format (.json), etc.
 
 		<cfif IsObject(restUri)>
 			<cfset restResponseBody = callEndpointFunction(restUri, event) />
+			<cfset addContentTypeHeaderFromFormat(event.getArg("format", "")) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<cfelse>
 			<cfthrow type="MachII.endpoints.EndpointNotDefined"

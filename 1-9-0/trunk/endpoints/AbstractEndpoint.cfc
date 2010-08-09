@@ -130,10 +130,6 @@ Notes:
 	PUBLIC FUNCTIONS - UTILS
 	--->
 
-	<!--- TODO: Implement method that introspects if
-		preProcess / postProcess methods have been implemented
-		in the endpoint because we shouldn't invoke those methods if they are not implemented --->
-
 	<!--- TODO: Implement get/setProperty --->
 
 	<cffunction name="setParameter" access="public" returntype="void" output="false"

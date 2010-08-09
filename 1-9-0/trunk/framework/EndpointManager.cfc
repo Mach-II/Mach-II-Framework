@@ -193,11 +193,15 @@ Notes:
 					<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
 					<cfrethrow />
 				<cfelse>
-					<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
-					<cfheader statuscode="500" statustext="Error" />
-					<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception." />
-					<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
-					<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
+					<cfif endpoint.isOnExceptionDefined()>
+						<cfset endpoint.onException(event, cfcatch) />
+					<cfelse>
+						<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
+						<cfheader statuscode="500" statustext="Error" />
+						<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception." />
+						<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
+						<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
+					</cfif>
 				</cfif>
 			</cfcatch>
 		</cftry>
