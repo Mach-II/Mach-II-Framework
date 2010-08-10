@@ -99,6 +99,8 @@ the GNU General Public License applies.
 	called via a direct API call.  These interfaces as follows:
 
 	- MachII.mach-ii
+	- MachII.endpoints.file.BaseEndpoint
+	- MachII.endpoints.rest.BaseEndpoint
 	- MachII.framework.BaseComponent
 	- MachII.framework.Listener
 	- MachII.framework.Property
@@ -119,7 +121,7 @@ the GNU General Public License applies.
 	- Any Mach-II custom tag that is extended through <cfinclude>
 
 Mach-II's documentation and logos are *not* licensed under the GPL v3.0 license:
-Copyright 2007-2009 GreatBizTools, LLC All rights reserved.
+Copyright 2007-2010 GreatBizTools, LLC All rights reserved.
 
 ------------------------------------------------
 ___                            
