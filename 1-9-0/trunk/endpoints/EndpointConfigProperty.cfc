@@ -87,9 +87,9 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS
+	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="configureEndpoint" access="public" returntype="void" output="false"
+	<cffunction name="configureEndpoint" access="private" returntype="void" output="false"
 		hint="Configures an endpoint.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="Name of the endpoint." />
