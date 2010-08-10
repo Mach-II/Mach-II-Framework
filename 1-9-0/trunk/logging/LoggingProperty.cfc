@@ -256,7 +256,7 @@ will bind to root parameter values.
 		</cfloop>
 
 		<!--- Deconfigure all the loggers --->
-		<cfset getLoggerManager().deconfigure()>
+		<cfset getLoggerManager().deconfigure() />
 	</cffunction>
 
 	<!---
