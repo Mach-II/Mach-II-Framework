@@ -173,13 +173,15 @@ to return good responses and response codes, use of format (.json), etc.
 
 		<cfset var pathInfo = cleanPathInfo() />
 
-		<cfif Len(pathInfo) EQ 0 AND arguments.event.isArgDefined("uri")>
+		<cfif NOT Len(pathInfo) AND arguments.event.isArgDefined("uri")>
 			<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
 			<cfset arguments.event.setArg("pathInfo", arguments.event.getArg("uri")) />
 		<cfelse>
 			<cfset arguments.event.setArg("pathInfo", pathInfo) />
 		</cfif>
+		
 		<cfset arguments.event.setArg("httpMethod", CGI.REQUEST_METHOD) />
+		
 		<cfif ListContainsNoCase("PUT,POST", CGI.REQUEST_METHOD)>
 			<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
 		</cfif>
@@ -242,16 +244,16 @@ to return good responses and response codes, use of format (.json), etc.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-
 	<cffunction name="addContentTypeHeaderFromFormat" access="private" returntype="void" output="false"
 		hint="Adds a Content-Type response header based on the input format.">
-		<cfargument name="format" type="String" required="true" />
+		<cfargument name="format" type="string" required="true"
+			hint="The incoming format type to add as header." />
 
 		<cfset var contentType = "" />
 
 		<cftry>
 			<!--- Default content type: html --->
-			<cfif Len(arguments.format) EQ 0>
+			<cfif NOT Len(arguments.format)>
 				<cfset arguments.format = "html" />
 			</cfif>
 			<cfif NOT(arguments.format.startsWith("."))>
@@ -262,6 +264,7 @@ to return good responses and response codes, use of format (.json), etc.
 
 			<!--- Add the Content-Type header --->
 			<cfheader name="Content-Type" value="#contentType#" />
+			
 			<cfcatch type="any">
 				<!--- Log exception --->
 				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
@@ -294,7 +297,7 @@ to return good responses and response codes, use of format (.json), etc.
 		<!--- Comprehensive list of content-type header values: http://www.iana.org/assignments/media-types/index.html --->
 		<cfif StructKeyExists(headers, "Content-Type")>
 			<cfset contentType = headers["Content-Type"] />
-			<cfif IsArray(rawContent) AND ArrayLen(rawContent) GT 0>
+			<cfif IsArray(rawContent) AND ArrayLen(rawContent)>
 				<cfif REFindNoCase('text\/|xml|json', contentType)>
 					<cfset rawContent = ToString(rawContent) />
 				</cfif>
@@ -302,13 +305,13 @@ to return good responses and response codes, use of format (.json), etc.
 		</cfif>
 
 		<cfreturn rawContent />
-
 	</cffunction>
 
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getRestUris" access="public" returntype="Struct" output="false">
+	<cffunction name="getRestUris" access="public" returntype="struct" output="false"
+		hint="">
 		<cfreturn variables.restUris />
 	</cffunction>
 
