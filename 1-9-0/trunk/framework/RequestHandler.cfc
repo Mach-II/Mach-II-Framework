@@ -536,6 +536,7 @@ Notes:
 		<!--- If there is an incoming eventArg that matches the globalization locale key,
 			persist the new locale --->
 		<cfif IsObject(getAppManager().getGlobalizationManager()) AND
+			  IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty()) AND
 			  StructKeyExists(eventArgs, getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam())>
 			<cfset locale = eventArgs[getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam()]>
 			<cfset setCurrentLocale(locale) />

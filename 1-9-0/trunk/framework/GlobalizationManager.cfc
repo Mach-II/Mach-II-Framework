@@ -58,7 +58,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.parentGlobalizationManager = "" />
 	<cfset variables.globalizationLoaderProperty = "" />
-	<cfset variables.localPersistenceObject = "" />
+	<cfset variables.localePersistenceObject = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -79,20 +79,24 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the manager.">
 		
-		<cftry>
-			<cfset setLocalePersistenceObject(CreateObject("component", getGlobalizationLoaderProperty().getLocalePersistenceClass())) />
-			<cfset getLocalePersistenceObject().configure() />
+		<cfif IsObject(getGlobalizationLoaderProperty())>
+			<cftry>
+				<cfset setLocalePersistenceObject(CreateObject("component", getGlobalizationLoaderProperty().getLocalePersistenceClass())) />
+				<cfset getLocalePersistenceObject().configure() />
 			
-			<cfcatch type="Any">
-				<cfabort showerror="Unable to create LocalePersistenceObject of type #getGlobalizationLoaderProperty().getLocalePersistenceClass()#. Please check that #getGlobalizationLoaderProperty().getLocalePersistenceClass()# is extended from MachII.globalization.persistence.AbstractPersistenceMethod: #cfcatch.message#" />
-			</cfcatch>
-		</cftry>
+				<cfcatch type="Any">
+					<cfabort showerror="Unable to create LocalePersistenceObject of type #getGlobalizationLoaderProperty().getLocalePersistenceClass()#. Please check that #getGlobalizationLoaderProperty().getLocalePersistenceClass()# is extended from MachII.globalization.persistence.AbstractPersistenceMethod: #cfcatch.message#" />
+				</cfcatch>
+			</cftry>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures the manager.">
-		
-		<cfset getLocalePersistenceObject().deconfigure() />
+
+		<cfif IsObject(getLocalePersistenceObject())>
+			<cfset getLocalePersistenceObject().deconfigure() />
+		</cfif>
 	</cffunction>
 	
 	<!---
@@ -149,7 +153,7 @@ Notes:
 		<cfargument name="globalizationLoaderProperty" type="MachII.globalization.GlobalizationLoaderProperty" required="true" />
 		<cfset variables.globalizationLoaderProperty = arguments.globalizationLoaderProperty />
 	</cffunction>
-	<cffunction name="getGlobalizationLoaderProperty" access="public" returntype="MachII.globalization.GlobalizationLoaderProperty" output="true">
+	<cffunction name="getGlobalizationLoaderProperty" access="public" returntype="any" output="true">
 		<cfreturn variables.globalizationLoaderProperty />
 	</cffunction>
 	
