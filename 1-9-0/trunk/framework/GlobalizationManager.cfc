@@ -94,7 +94,7 @@ Notes:
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures the manager.">
 
-		<cfif IsObject(getLocalePersistenceObject())>
+		<cfif IsObject(getGlobalizationLoaderProperty()) AND IsObject(getLocalePersistenceObject())>
 			<cfset getLocalePersistenceObject().deconfigure() />
 		</cfif>
 	</cffunction>
