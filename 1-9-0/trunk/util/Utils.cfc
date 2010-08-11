@@ -697,4 +697,9 @@ Notes:
 		<cfreturn output />
 	</cffunction>
 
+	<cffunction name="getMimeTypeMap" access="public" returntype="struct" output="false"
+		hint="Returns the whole mimeTypeMap for ad-hoc utility use.">
+		<cfreturn variables.mimeTypeMap />
+	</cffunction>
+
 </cfcomponent>
