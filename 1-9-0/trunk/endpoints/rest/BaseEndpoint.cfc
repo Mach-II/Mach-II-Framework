@@ -111,11 +111,13 @@ to return good responses and response codes, use of format (.json), etc.
 	<!---
 	PROPERTIES
 	--->
-	<!--- RestUriCollection of URLs that match in this endpoint. --->
-	<cfset variables.restUris = "" />
 	<!--- Introspector looks for REST:* annotations in child classes to find REST-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
+	<!--- UriCollection of rest.Uris that match in this endpoint. --->
 	<cfset variables.restUris = CreateObject("component", "MachII.endpoints.rest.UriCollection").init() />
+	<!--- The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
+	      it can be overridden in a subclass using setDefaultFormat(). --->
+	<cfset variables.defaultFormat = "html" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -179,9 +181,9 @@ to return good responses and response codes, use of format (.json), etc.
 		<cfelse>
 			<cfset arguments.event.setArg("pathInfo", pathInfo) />
 		</cfif>
-		
+
 		<cfset arguments.event.setArg("httpMethod", CGI.REQUEST_METHOD) />
-		
+
 		<cfif ListContainsNoCase("PUT,POST", CGI.REQUEST_METHOD)>
 			<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
 		</cfif>
@@ -254,7 +256,7 @@ to return good responses and response codes, use of format (.json), etc.
 		<cftry>
 			<!--- Default content type: html --->
 			<cfif NOT Len(arguments.format)>
-				<cfset arguments.format = "html" />
+				<cfset arguments.format = variables.defaultFormat />
 			</cfif>
 			<cfif NOT(arguments.format.startsWith("."))>
 				<cfset arguments.format = ".#arguments.format#" />
@@ -264,7 +266,7 @@ to return good responses and response codes, use of format (.json), etc.
 
 			<!--- Add the Content-Type header --->
 			<cfheader name="Content-Type" value="#contentType#" />
-			
+
 			<cfcatch type="any">
 				<!--- Log exception --->
 				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
@@ -313,6 +315,22 @@ to return good responses and response codes, use of format (.json), etc.
 	<cffunction name="getRestUris" access="public" returntype="struct" output="false"
 		hint="">
 		<cfreturn variables.restUris />
+	</cffunction>
+
+	<cffunction name="setDefaultFormat" access="public" returntype="void" output="false"
+				hint="Set this to override the defaultFormat.">
+		<cfargument name="defaultFormat" type="string" required="true" />
+		<cfset var mimeTypeMap = getUtils().getMimeTypeMap() />
+		<cfif StructKeyExists(mimeTypeMap, arguments.defaultFormat)>
+			<cfset variables.defaultFormat = arguments.defaultFormat />
+		<cfelse>
+			<cfthrow
+				type="MachII.framework.InvalidFormatType"
+				message="Cannot set the defaultFormat to '#arguments.defaultFormat#', not in the Mach-II mimeTypeMap." />
+		</cfif>
+	</cffunction>
+	<cffunction name="getDefaultFormat" access="public" returntype="string" output="false">
+		<cfreturn variables.defaultFormat />
 	</cffunction>
 
 </cfcomponent>
