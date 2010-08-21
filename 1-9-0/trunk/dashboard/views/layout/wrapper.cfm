@@ -42,7 +42,10 @@ Notes:
 	<cfset addHTTPHeaderByName("Pragma", "no-cache,no-store") />
 	<cfset addHTTPHeaderByName("Cache-Control", "no-cache,no-store,must-revalidate,max-age=0") />
 	<cfset addHTTPHeaderByName("Expires", "Sat, 05 Jul 1997 07:00:00 GMT") />
-	<view:script event="sys.serveAsset" p:path="@js@dump.js" outputType="inline" />
+
+	<script src="#getProperty("urlBase")#/_dashboardFileServe/js/dump.js"></script>
+
+	<!--- <view:script event="sys.serveAsset" p:path="@js@dump.js" outputType="inline" /> --->
 	<view:script event="sys.serveAsset" p:path="@js@prototype.js" outputType="inline" />
 	<view:script event="sys.serveAsset" p:path="@js@builder.js" outputType="inline" />
 	<view:script event="sys.serveAsset" p:path="@js@effects.js" outputType="inline" />

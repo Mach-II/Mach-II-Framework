@@ -86,6 +86,29 @@ Notes:
 				<key name="P9" value="Production - Stable"/>
 			</struct>
 		</property>
+		<property name="endpoints" type="MachII.endpoints.EndpointConfigProperty">
+			<parameters>
+				<parameter name="_dashboardFileServe">
+					<struct>
+						<key name="type" value="MachII.endpoints.file.BaseEndpoint"/>
+						<key name="basePath" value="/MachII/dashboard/assets"/>
+						<key name="expireHeaderEnabled">
+							<struct>
+								<key name="group:development" value="true"/>
+								<key name="group:production" value="true"/>
+							</struct>
+						</key>
+						<key name="expireHeaderMap">
+							<struct>
+								<key name=".*" value="access plus 8,0,0,0"/>
+								<key name=".js,.css" value="access plus 30,0,0,0"/>
+							</struct>
+						</key>
+					</struct>
+				</parameter>
+			</parameters>
+		</property>
+		
 		<property name="autoUpdateUrl" value="http://www.mach-ii.com/index.cfm/go/getVersions/"/>
 		<!-- <property name="autoUpdateUrl" value="http://m2website/index.cfm/go/getVersions/"/> -->
 	</properties>
