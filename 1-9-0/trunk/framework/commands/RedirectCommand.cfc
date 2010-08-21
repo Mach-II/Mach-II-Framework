@@ -181,6 +181,7 @@ Notes:
 			<cfelse>
 				<cfif expressionEvaluator.isExpression(i)>
 					<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, propertyManager) />
+					<cfset i = ListLast(ListFirst(REReplaceNoCase(i, "^\${(.*)}$", "\1", "all"), ":"), ".") />
 				<cfelse>
 					<cfset arg = arguments.event.getArg(i, "") />
 				</cfif>
