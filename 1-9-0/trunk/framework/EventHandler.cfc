@@ -113,7 +113,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="setSecure" access="public" returntype="void" output="false"
-		hint="Accepts 'undefined', 'secure' and 'unsecure'.">
+		hint="Accepts 'none', 'secure' and 'insecure'.">
 		<cfargument name="secure" type="string" required="true" />
 		<cfset variables.secure = arguments.secure />
 	</cffunction>

@@ -218,7 +218,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 <!ELEMENT event-handlers (event-handler*)>
 <!ATTLIST event-handlers
-	secureDefault (secure|unsecure|none) "none"
+	secureDefault (true|false|none) "none"
 >
 <!--
 	"event-handler"
@@ -233,7 +233,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	access (public|private) "public"
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
-	secure (secure|unsecure|none) "none"
+	secure (true|false|none) "none"
 >
 
 <!--
