@@ -88,6 +88,12 @@ https://trac.mach-ii.com/machii/ticket/527
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
 
+* Added property type shortcuts
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/696
+(2010-08-21 peterfarrell)
+
 * Switch to java.lang.StringBuffer for performance in form tag library "group" tags
 
 Large test case sets show up to a 33% performance improvement for options, radiogroup

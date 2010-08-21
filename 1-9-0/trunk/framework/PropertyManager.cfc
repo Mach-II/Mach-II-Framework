@@ -54,6 +54,19 @@ Notes:
 	hint="Manages defined properties for the framework.">
 
 	<!---
+	CONSTANTS
+	--->
+	<cfset variables.PROPERTY_SHORTCUTS = StructNew() />
+	<cfset variables.PROPERTY_SHORTCUTS["ColdspringProperty"] = "MachII.properties.ColdspringProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["EnvironmentProperty"] = "MachII.properties.EnvironmentProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["HtmlHelperLoaderProperty"] = "MachII.properties.HtmlHelperLoaderProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["HtmlHelperProperty"] = "MachII.properties.HtmlHelperProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["UrlRoutesProperty"] = "MachII.properties.UrlRoutesProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["CachingProperty"] = "MachII.caching.CachingProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["LoggingProperty"] = "MachII.logging.LoggingProperty" />
+	<cfset variables.PROPERTY_SHORTCUTS["GlobalizationLoaderProperty"] = "MachII.globalization.GlobalizationLoaderProperty" />
+
+	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
@@ -141,7 +154,7 @@ Notes:
 			<cfelse>
 				<!--- Setup if configurable property --->
 				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
-					<cfset propertyType = propertyNodes[i].xmlAttributes["type"] />
+					<cfset propertyType = resolvePropertyTypeShortcut(propertyNodes[i].xmlAttributes["type"]) />
 
 					<!--- Set the Property's parameters. --->
 					<cfset propertyParams = StructNew() />
@@ -518,6 +531,18 @@ Notes:
 		</cfloop>
 
 		<cfreturn configurable />
+	</cffunction>
+
+	<cffunction name="resolvePropertyTypeShortcut" access="public" returntype="string" output="false"
+		hint="Resolves a property type shorcut and returns the passed value if no match is found.">
+		<cfargument name="propertyType" type="string" required="true"
+			hint="Dot path to the property." />
+
+		<cfif StructKeyExists(variables.PROPERTY_SHORTCUTS, arguments.propertyType)>
+			<cfreturn variables.PROPERTY_SHORTCUTS[arguments.propertyType] />
+		<cfelse>
+			<cfreturn arguments.propertyType />
+		</cfif>
 	</cffunction>
 
 	<!---
