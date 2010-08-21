@@ -613,7 +613,7 @@ application.serviceFactory_account variable.
 			<cfset autowireBeanNames = ListToArray(getUtils().trimList(arguments.targetObjMetadata[arguments.autowireAttributeName])) />
 
 			<!--- Generate and instantiate autowire component with the getter/setter methods --->
-			<cfset autowireCfc = CreateObject("component", "MachII.properties.ColdSpringProperty_InjectionMethods").init(autowireBeanNames) />
+			<cfset autowireCfc = CreateObject("component", "MachII.properties.ColdspringProperty_InjectionMethods").init(autowireBeanNames) />
 
 			<!--- Build all the targets --->
 			<cftry>
