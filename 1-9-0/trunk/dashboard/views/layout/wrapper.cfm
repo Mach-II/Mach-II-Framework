@@ -30,7 +30,10 @@ Notes:
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<view:charset outputType="inline" />
-	<view:style event="sys.serveAsset" p:path="@css@basic.css" media="screen,projection" outputType="inline" />
+	
+	<link href="#getProperty("urlBase")#/_dashboardFileServe/css/basic.cfm?pipe=css" type="text/css" rel="stylesheet" media="screen,projection" />
+	
+	<!--- <view:style event="sys.serveAsset" p:path="@css@basic.css" media="screen,projection" outputType="inline" /> --->
 	<view:style event="sys.serveAsset" p:path="@css@dialog.css" media="screen,projection" outputType="inline" />
 	<view:link type="icon" event="sys.serveAsset" p:path="@img@favicon.ico" outputType="inline" />
 <cfif event.isArgDefined("meta.refresh")>

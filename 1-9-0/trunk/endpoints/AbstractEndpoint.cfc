@@ -57,9 +57,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.appManager = "" />
 	<cfset variables.endpointManager = "" />
-	<cfset variables.parameters = StructNew() />
 	<cfset variables.parameterPrecedence = "form" />
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
@@ -78,13 +76,10 @@ Notes:
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
 
+		<cfset super.init(arguments.appManager, arguments.parameters) />
+		
 		<!--- Run setters --->
-		<cfset setAppManager(arguments.appManager) />
 		<cfset setEndpointManager(arguments.endpointManager) />
-		<cfset setParameters(arguments.parameters) />
-
-		<!--- Setup additional --->
-		<cfset setLog(getAppManager().getLogFactory()) />
 
 		<cfreturn this />
 	</cffunction>
@@ -130,39 +125,6 @@ Notes:
 	PUBLIC FUNCTIONS - UTILS
 	--->
 
-	<!--- TODO: Implement get/setProperty --->
-
-	<cffunction name="setParameter" access="public" returntype="void" output="false"
-		hint="Sets a configuration parameter.">
-		<cfargument name="name" type="string" required="true"
-			hint="The parameter name." />
-		<cfargument name="value" type="any" required="true"
-			hint="The parameter value." />
-		<cfset variables.parameters[arguments.name] = arguments.value />
-	</cffunction>
-	<cffunction name="getParameter" access="public" returntype="any" output="false"
-		hint="Gets a configuration parameter value, or a default value if not defined.">
-		<cfargument name="name" type="string" required="true"
-			hint="The parameter name." />
-		<cfargument name="defaultValue" type="any" required="false" default=""
-			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
-		<cfif isParameterDefined(arguments.name)>
-			<cfreturn variables.parameters[arguments.name] />
-		<cfelse>
-			<cfreturn arguments.defaultValue />
-		</cfif>
-	</cffunction>
-	<cffunction name="isParameterDefined" access="public" returntype="boolean" output="false"
-		hint="Checks to see whether or not a configuration parameter is defined.">
-		<cfargument name="name" type="string" required="true"
-			hint="The parameter name." />
-		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
-	</cffunction>
-	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
-		hint="Returns a comma delimited list of parameter names.">
-		<cfreturn StructKeyList(variables.parameters) />
-	</cffunction>
-
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -171,40 +133,12 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setAppManager" access="public" returntype="void" output="false">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		<cfset variables.appManager = arguments.appManager />
-	</cffunction>
-	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
-		<cfreturn variables.appManager />
-	</cffunction>
-
-	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false"
-		hint="Gets the Utils component.">
-		<cfreturn getAppManager().getUtils() />
-	</cffunction>
-
 	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
 		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
 		<cfset variables.endpointManager = arguments.endpointManager />
 	</cffunction>
 	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
 		<cfreturn variables.endpointManager />
-	</cffunction>
-
-	<cffunction name="setParameters" access="public" returntype="void" output="false"
-		hint="Sets the full set of configuration parameters for the component.">
-		<cfargument name="parameters" type="struct" required="true" />
-
-		<cfset var key = "" />
-
-		<cfloop collection="#arguments.parameters#" item="key">
-			<cfset setParameter(key, arguments.parameters[key]) />
-		</cfloop>
-	</cffunction>
-	<cffunction name="getParameters" access="public" returntype="struct" output="false"
-		hint="Gets the full set of configuration parameters for the component.">
-		<cfreturn variables.parameters />
 	</cffunction>
 
 	<cffunction name="setIsPreProcessDefined" access="public" returntype="void" output="false">
@@ -229,16 +163,6 @@ Notes:
 	</cffunction>
 	<cffunction name="isOnExceptionDefined" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isOnExceptionDefined />
-	</cffunction>
-
-	<cffunction name="setLog" access="public" returntype="void" output="false"
-		hint="Uses the log factory to create a log.">
-		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
-	</cffunction>
-	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
-		hint="Gets the log.">
-		<cfreturn variables.log />
 	</cffunction>
 
 </cfcomponent>

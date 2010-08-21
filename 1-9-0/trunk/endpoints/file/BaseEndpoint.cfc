@@ -120,7 +120,7 @@ Configuration Notes:
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the file serve endpoint.">
-		<cfset setBasePath(ExpandPath(getParameter("basePath"))) />
+		<cfset setBasePath(getParameter("basePath")) />
 		<cfset setServiceEngineType(getParameter("serviceEngineType", "cfcontent")) />
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
@@ -186,9 +186,7 @@ Configuration Notes:
 
 		<cfset var pathInfo = cleanPathInfo() />
 		<cfset var filePath = "" />
-		<cfset var fileExtensionRaw = "" />
 		<cfset var fileExtension = "" />
-		<cfset var pipeExtension = "" />
 
 		<!--- Get file path with support URIs where the file is defined in the pathInfo --->
 		<cfif Len(pathInfo)>
@@ -198,13 +196,11 @@ Configuration Notes:
 		</cfif>
 		
 		<!--- Setup the file extension and any piping extension --->
-		<cfset fileExtensionRaw = ListLast(filePath, ".") />
-		<cfset fileExtension = ListFirst(fileExtensionRaw, ">") />
+		<cfset fileExtension = ListLast(filePath, ".") />
 		<cfset arguments.event.setArg("fileExtension", fileExtension) />
-		<cfset arguments.event.setArg("pipeExtension", ListLast(fileExtensionRaw, ">")) />
 		
 		<!--- Clean up any piping extension on the file path --->
-		<cfset arguments.event.setArg("file", ListFirst(filePath, ">")) />
+		<cfset arguments.event.setArg("file", ListFirst(filePath, ":")) />
 		
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
@@ -214,23 +210,55 @@ Configuration Notes:
 		</cfif>
 		
 		<!--- Set expiry type and value --->
-		<cfif StructKeyExists(variables.expireMap, fileExtension)>
+		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, "." & arguments.event.getArg("pipe", ".txt"))>
+			<cfset arguments.event.setArg("expires", variables.expireMap[pipeExtension]) />
+		<cfelseif StructKeyExists(variables.expireMap, fileExtension)>
 			<cfset arguments.event.setArg("expires", variables.expireMap[fileExtension]) />
 		<cfelse>
 			<cfset arguments.event.setArg("expires", getExpiresDefault()) />
 		</cfif>
 	</cffunction>
 	
-	<cffunction name="handleRequest" access="public" returntype="void" output="false"
+	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Serves the file request.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset serveStaticFile(arguments.event.getArg("file"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
+		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
+			<cfoutput>#serveCfmFile(arguments.event.getArg("file"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe"))#</cfoutput>
+		<cfelse>
+			<cfset serveStaticFile(arguments.event.getArg("file"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
+		</cfif>
 	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
 	--->
+	<cffunction name="serveCfmFile" access="private" returntype="string" output="false"
+		hint="Serves a cfm file.">
+		<cfargument name="filePath" type="string" required="true"
+			hint="The relative path to the file." />
+		<cfargument name="expires" type="struct" required="true"
+			hint="" />
+		<cfargument name="attachment" type="string" required="true"
+			hint="" />
+		<cfargument name="pipeExtension" type="string" required="true"
+			hint="" />
+		
+		<cfset var fullFilePath =  getBasePath() & arguments.filePath />
+		<cfset var contentType = getContentTypeFromFilePath("." & arguments.pipeExtension) />
+		
+		<cfheader name="Content-Type" value="#contentType#" />
+		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+
+		<cfif Len(arguments.attachment)>
+			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
+		</cfif>
+		
+		<cfsavecontent variable="output"><cfinclude template="#fullFilePath#" /></cfsavecontent>
+		
+		<cfreturn output />
+	</cffunction>
+	
 	<cffunction name="serveStaticFile" access="private" returntype="void" output="false"
 		hint="Serves a static file via cfcontent or mod x-sendfile.">
 		<cfargument name="filePath" type="string" required="true"
@@ -240,7 +268,7 @@ Configuration Notes:
 		<cfargument name="attachment" type="string" required="true"
 			hint="" />
 		
-		<cfset var fullFilePath =  getBasePath() & arguments.filePath />
+		<cfset var fullFilePath =  ExpandPath(getBasePath()) & arguments.filePath />
 		<cfset var contentType = getContentTypeFromFilePath(arguments.filePath) />
 		<cfset var fileInfo = "" />
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
