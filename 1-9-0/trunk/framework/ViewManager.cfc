@@ -53,6 +53,12 @@ Notes:
 	hint="Manages registered views for the framework.">
 
 	<!---
+	CONSTANTS
+	--->
+	<cfset variables.VIEW_LOADER_SHORTCUTS = StructNew() />
+	<cfset variables.VIEW_LOADER_SHORTCUTS["PatternViewLoader"] = "MachII.framework.viewLoaders.PatternViewLoader" />
+
+	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
@@ -157,7 +163,7 @@ Notes:
 
 		<!--- Setup each View-Loader --->
 		<cfloop from="1" to="#ArrayLen(viewLoaderNodes)#" index="i">
-			<cfset viewLoaderType = viewLoaderNodes[i].xmlAttributes["type"] />
+			<cfset viewLoaderType = resolveViewLoaderTypeShortcut(viewLoaderNodes[i].xmlAttributes["type"]) />
 
 			<!--- View-Loaders do not support overrideAction --->
 
@@ -307,6 +313,21 @@ Notes:
 	<cffunction name="getViewLoaders" access="public" returntype="array" output="false"
 		hint="Gets all view loader for this context.">
 		<cfreturn variables.viewLoaders />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="resolveViewLoaderTypeShortcut" access="public" returntype="string" output="false"
+		hint="Resolves a view loader type shorcut and returns the passed value if no match is found.">
+		<cfargument name="viewLoaderType" type="string" required="true"
+			hint="Dot path to the view loader." />
+
+		<cfif StructKeyExists(variables.VIEW_LOADER_SHORTCUTS, arguments.viewLoaderType)>
+			<cfreturn variables.VIEW_LOADER_SHORTCUTS[arguments.viewLoaderType] />
+		<cfelse>
+			<cfreturn arguments.viewLoaderType />
+		</cfif>
 	</cffunction>
 
 	<!---
