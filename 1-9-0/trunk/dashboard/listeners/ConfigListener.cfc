@@ -269,6 +269,15 @@ Notes:
 		</cfif>
 	</cffunction>
 
+	<cffunction name="reloadAllOrmComponents" access="public" returntype="void" output="false"
+		hints="Reloads all changed components.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />
+		<cfset OrmReload() />
+		<cfset message.setMessage("Reloaded all ORM Components.") />
+		<cfset arguments.event.setArg("message", message) />
+	</cffunction>
+
 	<cffunction name="reloadListener" access="public" returntype="void" output="false"
 		hint="Reloads a listener.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />

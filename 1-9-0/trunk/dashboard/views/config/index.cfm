@@ -30,6 +30,7 @@ Notes:
 	<cfset copyToScope("${event.baseComponentData},${event.moduleData},${event.baseData}") />
 	<cfset variables.moduleOrder = StructKeyArray(variables.moduleData) />
 	<cfset ArraySort( variables.moduleOrder , "textnocase", "asc") />
+	<cfset applicationInstance = createObject("component", "Application") />
 
 	<view:script event="sys.serveAsset" p:path="@js@handler@config.js">
 		<cfoutput>
@@ -234,6 +235,14 @@ Notes:
 			&nbsp;Refresh Stats
 		</a>
 	</li>
+	<cfif IsDefined("applicationInstance.ormenabled") AND applicationInstance.ormenabled EQ true >
+ 	<li>
+		<a href="#buildUrl("config.reloadAllOrmComponents")#">
+			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@database_refresh.png")#" width="16" height="16" alt="Reload ORM Components" />
+			&nbsp;Reload ORM Components
+		</a>
+	</li>
+	</cfif>
 </ul>
 
 <div id="changedComponents">

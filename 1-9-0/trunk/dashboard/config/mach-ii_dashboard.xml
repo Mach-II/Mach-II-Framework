@@ -214,6 +214,11 @@ Notes:
 			<publish message="needConfigData" />
 			<view-page name="config.snip_components"/>
 		</event-handler>
+		<event-handler event="config.reloadAllOrmComponents" access="public">
+			<notify listener="config" method="reloadAllOrmComponents"/>
+			<publish message="needConfigData" />
+			<redirect event="config.index" persist="true"/>
+		</event-handler>		
 		<event-handler event="config.reloadListener" access="public">
 			<notify listener="config" method="reloadListener"/>
 			<redirect event="config.index" persist="true"/>
