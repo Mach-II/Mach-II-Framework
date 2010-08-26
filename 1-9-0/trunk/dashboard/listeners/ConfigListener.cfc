@@ -272,10 +272,26 @@ Notes:
 	<cffunction name="reloadAllOrmComponents" access="public" returntype="void" output="false"
 		hints="Reloads all changed components.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />
-		<cfset OrmReload() />
-		<cfset message.setMessage("Reloaded all ORM Components.") />
+
+		<cfset var tickStart = 0 />
+		<cfset var tickEnd = 0 />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("", "success") />
+
+		<cftry>
+			<cfset tickStart = getTickCount() />
+			<cfset OrmReload() />
+			<cfset tickEnd = getTickCount() />
+			<cfset message.setMessage("Reloaded all ORM Components in #NumberFormat(tickEnd - tickStart)#ms.") />
+			
+			<cfcatch type="any">
+				<cfset message.setMessage("Exception occurred during the reload of the ORM.") />
+				<cfset message.setType("exception") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+		</cftry>
+		
 		<cfset arguments.event.setArg("message", message) />
+		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadListener" access="public" returntype="void" output="false"
