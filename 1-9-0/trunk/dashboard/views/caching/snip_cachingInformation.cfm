@@ -173,6 +173,8 @@ Notes:
 						<cfset variables.rangeMax = 100000 />
 					<cfelseif variables.highest LT 1000000>
 						<cfset variables.rangeMax = 1000000 />
+					<cfelse>
+						<cfset variables.rangeMax = variables.highest + 10000 />
 					</cfif>
 					<p class="center"><view:img src="http://chart.apis.google.com/chart?cht=bvg&chbh=a&chd=t:#cacheStats.getCacheHits()#,#cacheStats.getCacheMisses()#,#cacheStats.getActiveElements()#,#cacheStats.getTotalElements()#,#cacheStats.getEvictions()#&chds=0,#variables.rangeMax#&chs=450x300&chco=00B700|FF0000|0000FF|FFFF00|00FFFF&chtt=Stats Active for #getProperty("udfs").datetimeDifferenceString(cacheStats.getStatsActiveSince())#&chl=Hits|Misses|Active Elements|Total Elements|Evictions&chxt=y&chxr=0,0,#variables.rangeMax#&chf=bg,s,#backgroundColor#"
 						width="450"
