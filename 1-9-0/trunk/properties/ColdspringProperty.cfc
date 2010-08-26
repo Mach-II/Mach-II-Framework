@@ -376,7 +376,7 @@ application.serviceFactory_account variable.
 		<cfif getParameter("placeFactoryInServerScope", false)>
 			<cfset bfUtils.setNamedFactory("server", factoryKey, bf) />
 		</cfif>
-		
+
 		<!--- Configure any utility connector --->
 		<cfset configureUtilityConnector() />
 
@@ -768,7 +768,7 @@ application.serviceFactory_account variable.
 
 		<!--- Append each retrieved configurable properties to the targets array (in struct) --->
 		<cfloop from="1" to="#ArrayLen(endpointNames)#" index="i">
-			<cfset ArrayAppend(arguments.targetBase.targets, endpointManager.getEndpoint(endpointNames[i])) />
+			<cfset ArrayAppend(arguments.targetBase.targets, endpointManager.getEndpointByName(endpointNames[i])) />
 		</cfloop>
 	</cffunction>
 
@@ -802,14 +802,14 @@ application.serviceFactory_account variable.
 			<cfset ArrayAppend(arguments.targetBase.targets, configurableMessageCommands[i]) />
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="configureUtilityConnector" access="private" returntype="void" output="false"
 		hint="Configures utility connectors.">
-	
+
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
 		<cfset var utilityConnectorBeanName = beanFactory.findBeanNameByType("MachII.util.UtilityConnector") />
 		<cfset var utilityConnector = "" />
-		
+
 		<cfif Len(utilityConnectorBeanName)>
 			<cfset utilityConnector = beanFactory.getBean(utilityConnectorBeanName) />
 			<cfset utilityConnector.setAppManager(getAppManager()) />
