@@ -226,7 +226,7 @@ Notes:
 	</li>
 	<li>
 		<form:form actionEvent="">
-			Check for Changed Components Every <form:select path="reloadAllChangedComponentsValue" items="0,3,6,9,12,15" checkValue="3" onchange="myConfigHandler.periodicUpdateChangedComponents();" /> Seconds
+			Check for Changed Components Every <form:select path="reloadAllChangedComponentsValue" items="0,3,6,9,12,15" checkValue="0" onchange="myConfigHandler.periodicUpdateChangedComponents();" /> Seconds
 		</form:form>
 	</li>
 	<li>
