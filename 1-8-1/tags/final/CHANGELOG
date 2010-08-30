@@ -1,0 +1,228 @@
+------------------------------------------------
+    __  ___           __          ________
+   /  |/  /___ ______/ /_        /  _/  _/
+  / /|_/ / __ `/ ___/ __ \______ / / / /  
+ / /  / / /_/ / /__/ / / /_____// /_/ /   
+/_/  /_/\__,_/\___/_/ /_/     /___/___/  
+
+Version: 1.8.1.@minorVersion@ (Simplicity)
+Built-on: @buildDatetime@
+$Id$
+------------------------------------------------
+If version number and built-on are placeholders (e.g. @xyz@), you are 
+using a  bleeding edge release (BER) of the framework.
+------------------------------------------------
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizToolsl, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+    
+	As a special exception, the copyright holders of this library give you 
+	permission to link this library with independent modules to produce an 
+	executable, regardless of the license terms of these independent 
+	modules, and to copy and distribute the resultant executable under 
+	the terms of your choice, provided that you also meet, for each linked 
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from 
+	or based on this library and communicates with Mach-II solely through 
+	the public interfaces* (see definition below). If you modify this library, 
+	but you may extend this exception to your version of the library, 
+	but you are not obligated to do so. If you do not wish to do so, 
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on 
+	this library with the exception of independent module components that 
+	extend certain Mach-II public interfaces (see README for list of public 
+	interfaces).
+
+------------------------------------------------
+ _                         
+/ |_  _.._  _  _   |  _  _ 
+\_| |(_|| |(_|(/_  |_(_)(_|
+            _|           _|
+------------------------------------------------
+Fixed Defects
+------------------------------------------------
+* Fixed brittleness when loading the UtilityConnector
+
+Thanks to Jason York for reporting this issue.
+
+This edge case defect affected Mach-II 1.6.0, 1.6.1 and 1.8.0 and has been 
+fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/540
+(2010-08-05 peterfarrell)
+
+* UrlRoutesProperty and sites in sub directories
+
+Thanks to Shaun (Net Grow) for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/641
+(2010-08-03 peterfarrell)
+
+* Certain form tags incorrectly sets the focus id
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/667
+(2010-07-29 peterfarrell)
+
+* Framework does not load when onSessionStart() is called if application name is shared
+
+Thanks to Hiren Patel for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/674
+(2010-07-28 peterfarrell)
+
+* Module name is case-sensitive in certain situations
+
+Thanks to Jason York for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/676
+(2010-07-28 peterfarrell)
+
+* Exception handling type differs on CFML engines for getProperty() etc in bootstrapper
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/631
+(2010-04-16 peterfarrell)
+
+* TimeSpanCache does not properly reap when storage scope is session
+
+This defect affected Mach-II 1.6.0, 1.6.1 and 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/606
+(2010-04-07 peterfarrell)
+
+* HtmlHelper erroneously appends file extensions when link is external and urlBase is ""
+
+Use the new "external:" prepended to the href/src when passing URI to the the HtmlHelper. 
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/613
+(2010-04-06 peterfarrell)
+
+* Fixed missing support for getProperty() default property value in ViewContext
+The getProperty() method in the ViewContext did not support a default value. Added
+in support for isPropertyDefined() shortcut method.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/605
+(2010-04-02 peterfarrell)
+
+* Updates to the form library options tag
+Added support to option tag for "labels" attribute for list data 
+types and create a "clean" id.
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/598
+(2010-03-20 peterfarrell)
+
+* HtmlHelper method AddLink() with type of icon does not compute asset path
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/565
+(2010-03-18 peterfarrell)
+
+* Event bean error when using ignore field
+When using ignore field (<field name="xx" ignore="true" />) with event-bean 
+it does not set any value in the bean.
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/551
+(2010-03-06 peterfarrell)
+
+* Configure() method the RequestManager called too many times
+The configure() method in the RequestManager is being called by each module 
+and it should only be called once when the framework loads because this 
+manager is a singleton.  This is a superficial defect and only affected
+start up performance of the framework when multiple modules are employed. 
+
+The defect affected Mach-II 1.5.0, 1.6.0, 1.6.1 and 1.8.0 and has been
+fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/549
+(2010-03-06 peterfarrell)
+
+* Form/view tag library incorrect says that HTML helper is not available
+Form/view tag library incorrect says that HTML helper is not available when 
+the request is in a module, but the HTML helper is only defined in the parent 
+base application. 
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/541
+(2010-02-18 peterfarrell)
+
+* Property manager dumps and aborts when a property is an M2 EL expression 
+
+This defect affected Mach-II 1.8.0 and has been fixed in the 1.8.1 release.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/436
+(2010-02-18 peterfarrell)
+
+------------------------------------------------
+Improvements / Enhancements
+------------------------------------------------
+* SES URLs now supports using all slash delimiters including module delimiter
+
+Special to Doug Smith at the The Lampo Group, Inc. for providing a patch
+that fixes this prior limitation.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/659
+(2010-04-26 peterfarrell)
+
+* Fixed ExpressionEvaluator to support method calls on event object
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/594
+(2010-03-24 peterfarrell)
+
+* Improved exception messages in ColdSpringProperty
+The exception messages in the ColdSpringProperty were sometimes misleading
+We have added the original exception to the thrown exception for more detail.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/593
+(2010-03-24 peterfarrell)
+
+------------------------------------------------
+Internal Framework Improvements / Enhancements / Other Changes
+------------------------------------------------
+* The cflock name in LogFactory needs to be more unique
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/556
+(2010-03-10 peterfarrell)
