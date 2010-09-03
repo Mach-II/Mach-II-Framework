@@ -362,49 +362,18 @@ Notes:
 		hint="Creates a threading adapter if the CFML engine has threading capabilities.">
 
 		<cfset var threadingAdapter = "" />
-		<cfset var serverName = server.coldfusion.productname />
-		<cfset var rawProductVersion = server.coldfusion.productversion />
-		<cfset var serverMajorVersion = 0 />
-		<cfset var serverMinorVersion = 0 />
-		<cfset var serverProductLevel = server.coldfusion.productlevel />
 		<cfset var threadingAvailable = false />
-		<cfset var minorVersionRegex = 0 />
-		
-		<!--- Some version of OpenBD use "." not "," as the delimiter for the product version so convert it --->
-		<cfset rawProductVersion = ListChangeDelims(rawProductVersion, ",", ".") />
-		
-		<!--- Get major product version --->
-		<cfset serverMajorVersion = ListFirst(rawProductVersion, ",") />
-
-		<!--- Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release
-				but this will be added; however, probably not wise to always assume it's there. Set a
-				default of 0 in case it doesn't exist. --->
-		<cfif ListLen(rawProductVersion, ",") GT 1>
-			<cfset serverMinorVersion = ListGetAt(rawProductVersion, 2, ",") />
-			
-			<cfset minorVersionRegex = REFindNoCase("[[:alpha:]]", serverMinorVersion) />
-			
-			<!--- Remove any trailing sub-number like 1.4a --->
-			<cfif minorVersionRegex GT 0>
-				<cfset serverMinorVersion = Mid(serverMinorVersion, 1, minorVersionRegex) />
-			</cfif>
-		</cfif>
+		<cfset var engineInfo = getCfmlEngineInfo() />
 
 		<!--- Adobe ColdFusion 8+ --->
-		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
+		<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 8>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
-		<!--- BlueDragon 7+ threading engine is not currently compatible,
-			however will be compatiable in future versions --->
-		<cfelseif FindNoCase("BlueDragon", serverName)>
-			<cfif serverProductLevel EQ "GPL" AND serverMajorVersion GTE 1 AND serverMinorVersion GTE 3>
-				<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
-			</cfif>
-		<!--- BlueDragon 7+ threading engine is not currently compatible,
-			however will be compatiable in future versions --->
-		<!--- Railo 3.0 will introduce a threading engine
-		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 3>
+		<!--- OpenBD 1.3+ (BlueDragon 7+ threading engine is not currently compatible) --->
+		<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND engineInfo.majorVersio GTE 1 AND engineInfo.minorVersio GTE 3>
+			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
+		<!--- Railo 3 --->
+		<cfelseif FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
-		 --->
 		</cfif>
 
 		<!--- Test for threading availability --->
@@ -421,6 +390,51 @@ Notes:
 		</cfif>
 
 		<cfreturn threadingAdapter />
+	</cffunction>
+	
+	<cffunction name="getCfmlEngineInfo" access="public" returntype="struct" output="false"
+		hint="Gets normalized information like the server name, product level and major/minor version numbers of the CFML engine.">
+
+		<cfset var rawProductVersion = server.coldfusion.productversion />
+		<cfset var minorVersionRegex = 0 />
+		<cfset var result = StructNew() />	
+
+		<cfset result.name = server.coldfusion.productname />
+		<cfset result.majorVersion = 0 />
+		<cfset result.minorVersion = 0 />
+		<cfset result.productLevel = server.coldfusion.productlevel />
+		
+		<!---
+			Railo puts a "fake" version number (e.g. 8,0,0,1) in product version number so we need
+			to get the real version number of Railo which 
+		--->
+		<cfif FindNoCase("Railo", result.name)>
+			<cfset rawProductVersion = server.railo.version />
+		</cfif>
+		
+		<!--- OpenBD and Railo use "." while CF uses "," as the delimiter for the product version so convert it for consistency --->
+		<cfset rawProductVersion = ListChangeDelims(rawProductVersion, ".", ",") />
+		
+		<!--- Get major product version --->
+		<cfset result.majorVersion = ListFirst(rawProductVersion, ".") />
+
+		<!---
+			Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release
+			but this will be added; however, probably not wise to always assume it's there. Set a
+			default of 0 in case it doesn't exist.
+		--->
+		<cfif ListLen(rawProductVersion, ".") GT 1>
+			<cfset result.minorVersion = ListGetAt(rawProductVersion, 2, ".") />
+			
+			<cfset minorVersionRegex = REFindNoCase("[[:alpha:]]", result.minorVersion) />
+			
+			<!--- Remove any trailing sub-number like 1.4a in OpenBD --->
+			<cfif minorVersionRegex GT 0>
+				<cfset result.minorVersion = Mid(result.minorVersion, 1, minorVersionRegex) />
+			</cfif>
+		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 
 	<cffunction name="assertSame" access="public" returntype="boolean" output="false"
