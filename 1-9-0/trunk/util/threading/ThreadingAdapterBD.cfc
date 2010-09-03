@@ -43,8 +43,8 @@
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
-Created version: 1.6.0
-Updated version: 1.8.0
+Created version: 1.9.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -52,7 +52,7 @@ Notes:
 	displayname="ThreadingAdapter"
 	extends="MachII.util.threading.ThreadingAdapter"
 	output="false"
-	hint="Threading adapter for commercial BlueDragon and Open BlueDragon 1.2+.">
+	hint="Threading adapter for BlueDragon.">
 
 	<!---
 	PROPERTIES
@@ -63,7 +63,7 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ThreadingAdapter" output="false"
-		hint="This initializes the adapter for commercial BlueDragon and Open BlueDragon 1.2+.">
+		hint="This initializes the adapter for BlueDragon.">
 		<cfreturn this />
 	</cffunction>
 
@@ -72,22 +72,95 @@ Notes:
 	--->
 	<cffunction name="run" access="public" returntype="string" output="false"
 		hint="Runs a thread.">
-		<cfargument name="callback" type="any" required="true"
+		<cfargument name="callback" type="component" required="true"
 			hint="A CFC to perform the callback on." />
 		<cfargument name="method" type="string" required="true"
 			hint="Name of method to call on the callback CFC." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="Arguments to pass to the callback method." />
-		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.9.0." />
+
+		<cfset var threadId = createThreadId(arguments.method) />
+
+		<!--- cfthread duplicates all passed attributes (we do not want to pass a copy of the event to the thread) --->
+		<cfset request._MachIIThreadingAdapter[threadId] = {
+				component=arguments.callback
+				, method=arguments.method
+				, argumentCollection=arguments.parameters
+				, returnVariable="thread.resultData" } />
+
+		<!--- Run the thread and catch any errors for later --->
+		<cfthread action="run" name="#threadId#" threadId="#threadId#">
+			<cftry>
+				<cfset thread.collection = request._MachIIThreadingAdapter[threadId] />
+
+				<cfinvoke component="#thread.collection.component#"
+					method="#thread.collection.method#"
+					returnVariable="#thread.collection.returnVariable#" 
+					argumentcollection="#thread.collection.argumentCollection#" />
+
+				<cfif IsDefined("thread.resultData")>
+					<cfset thread.result = true />
+				<cfelse>
+					<cfset thread.result = false />
+					<cfset thread.resultData = "" />
+				</cfif>
+
+				<!--- Catch and rethrow so this will be logged --->
+				<cfcatch type="any">
+					<cfrethrow />
+				</cfcatch>
+			</cftry>
+		</cfthread>
+
+		<cfreturn threadId />
 	</cffunction>
 
-	<cffunction name="join" access="public" returntype="void" output="false"
+	<cffunction name="join" access="public" returntype="any" output="false"
 		hint="Joins a group of threads.">
 		<cfargument name="threadIds" type="any" required="true"
 			hint="A list, struct or array of thread ids to join." />
 		<cfargument name="timeout" type="numeric" required="true"
 			hint="How many seconds to wait to join threads. Set to 0 to wait forever (or until request timeout is reached)." />
-		<cfabort showerror="Unimplemented. Scheduled for Mach-II 1.9.0." />
+
+		<cfset var name = "" />
+		<cfset var results = StructNew() />
+		<cfset var i = "" />
+
+		<cfset collection.action = "join" />
+
+		<!--- Convert the thread ids into a list --->
+		<cfif IsStruct(arguments.threadIds)>
+			<cfset collection.name = StructKeyList(arguments.threadIds) />
+		<cfelseif IsArray(arguments.threadIds)>
+			<cfset collection.name = ArrayToList(arguments.threadIds) />
+		<cfelse>
+			<cfset collection.name = arguments.threadIds />
+		</cfif>
+
+		<!--- ResultArgs are automatically put into the event so we just have to wait for all threads --->
+		<cfthread action="join" 
+			name="#name#" 
+			timeout="#convertSecondsToMilliseconds(arguments.timeout)#" />
+
+		<cfset results.errors = ArrayNew(1) />
+
+		<!--- Check for unhandled errors in the threads --->
+		<cfloop list="#name#" index="i">
+
+			<!--- CF will error out for some reason if you don't pre-create the struct --->
+			<cfset results[i] = StructNew() />
+
+			<!--- Check if the thread was terminated and return the error to be handled --->
+			<cfif cfthread[i].status is "terminated">
+				<cfset ArrayAppend(results.errors, i) />
+				<cfset results[i].error = cfthread[i].error />
+			<cfelse>
+				<cfset results[i].result = cfthread[i].result />
+				<cfset results[i].resultData = cfthread[i].resultData />
+			</cfif>
+		</cfloop>
+
+		<cfreturn results />
 	</cffunction>
 
 </cfcomponent>

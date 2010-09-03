@@ -363,25 +363,44 @@ Notes:
 
 		<cfset var threadingAdapter = "" />
 		<cfset var serverName = server.coldfusion.productname />
-		<cfset var serverMajorVersion = ListFirst(server.coldfusion.productversion, ",") />
+		<cfset var rawProductVersion = server.coldfusion.productversion />
+		<cfset var serverMajorVersion = 0 />
 		<cfset var serverMinorVersion = 0 />
+		<cfset var serverProductLevel = server.coldfusion.productlevel />
 		<cfset var threadingAvailable = false />
+		<cfset var minorVersionRegex = 0 />
+		
+		<!--- Some version of OpenBD use "." not "," as the delimiter for the product version so convert it --->
+		<cfset rawProductVersion = ListChangeDelims(rawProductVersion, ",", ".") />
+		
+		<!--- Get major product version --->
+		<cfset serverMajorVersion = ListFirst(rawProductVersion, ",") />
 
 		<!--- Make sure we have a minor product version--Open BlueDragon doesn't have one on its initial release
 				but this will be added; however, probably not wise to always assume it's there. Set a
 				default of 0 in case it doesn't exist. --->
-		<cfif ListLen(server.coldfusion.productversion, ",") gt 1>
-			<cfset serverMinorVersion = ListGetAt(server.coldfusion.productversion, 2, ",") />
+		<cfif ListLen(rawProductVersion, ",") GT 1>
+			<cfset serverMinorVersion = ListGetAt(rawProductVersion, 2, ",") />
+			
+			<cfset minorVersionRegex = REFindNoCase("[[:alpha:]]", serverMinorVersion) />
+			
+			<!--- Remove any trailing sub-number like 1.4a --->
+			<cfif minorVersionRegex GT 0>
+				<cfset serverMinorVersion = Mid(serverMinorVersion, 1, minorVersionRegex) />
+			</cfif>
 		</cfif>
 
 		<!--- Adobe ColdFusion 8+ --->
 		<cfif FindNoCase("ColdFusion", serverName) AND serverMajorVersion GTE 8>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
-		<!--- Open / NewAtlanta BlueDragon 7+ threading engine is not currently compatible,
-			however will be compatiable in future versions
-		<cfelseif FindNoCase("BlueDragon", serverName) AND serverMajorVersion GTE 7>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
-		 --->
+		<!--- BlueDragon 7+ threading engine is not currently compatible,
+			however will be compatiable in future versions --->
+		<cfelseif FindNoCase("BlueDragon", serverName)>
+			<cfif serverProductLevel EQ "GPL" AND serverMajorVersion GTE 1 AND serverMinorVersion GTE 3>
+				<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
+			</cfif>
+		<!--- BlueDragon 7+ threading engine is not currently compatible,
+			however will be compatiable in future versions --->
 		<!--- Railo 3.0 will introduce a threading engine
 		<cfelseif FindNoCase("Railo", serverName) AND serverMajorVersion GTE 3>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
