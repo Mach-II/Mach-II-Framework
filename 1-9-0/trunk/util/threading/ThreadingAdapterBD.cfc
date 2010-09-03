@@ -126,15 +126,13 @@ Notes:
 		<cfset var results = StructNew() />
 		<cfset var i = "" />
 
-		<cfset collection.action = "join" />
-
 		<!--- Convert the thread ids into a list --->
 		<cfif IsStruct(arguments.threadIds)>
-			<cfset collection.name = StructKeyList(arguments.threadIds) />
+			<cfset name = StructKeyList(arguments.threadIds) />
 		<cfelseif IsArray(arguments.threadIds)>
-			<cfset collection.name = ArrayToList(arguments.threadIds) />
+			<cfset name = ArrayToList(arguments.threadIds) />
 		<cfelse>
-			<cfset collection.name = arguments.threadIds />
+			<cfset name = arguments.threadIds />
 		</cfif>
 
 		<!--- ResultArgs are automatically put into the event so we just have to wait for all threads --->
