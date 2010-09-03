@@ -61,6 +61,12 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Parsing URL routes in RequestManager performs double call
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/702
+(2010-09-02 peterfarrell)
+
 * Fixed brittleness when loading the UtilityConnector
 
 Thanks to Jason York for reporting this issue.

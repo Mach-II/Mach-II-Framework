@@ -784,7 +784,7 @@ Notes:
 		<!--- Put current route params in the request scope so we can grab them in buildCurrentUrl() --->
 		<cfset routeParams = route.parseRoute(arguments.urlElements, getModuleDelimiter(), getEventParameter()) />
 		<cfset rH.setCurrentRouteName(arguments.routeName) />
-		<cfset rH.setCurrentRouteParams(route.parseRouteParams(arguments.urlElements)) />
+		<cfset rH.setCurrentRouteParams(routeParams) />
 
 		<cfreturn routeParams />
 	</cffunction>
