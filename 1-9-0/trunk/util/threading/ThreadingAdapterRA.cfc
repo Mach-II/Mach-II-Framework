@@ -87,8 +87,6 @@ Notes:
 				, method=arguments.method
 				, argumentCollection=arguments.parameters
 				, returnVariable="thread.resultData" } />
-				
-		<cflog text="outside thread: #threadId#" type="fatal">
 
 		<!--- Run the thread and catch any errors for later --->
 		<cfthread action="run" name="#threadId#">
@@ -142,7 +140,7 @@ Notes:
 			name="#name#"
 			timeout="#convertSecondsToMilliseconds(arguments.timeout)#" />
 
-		<cfset results.errors = ArrayNew(1) />.
+		<cfset results.errors = ArrayNew(1) />
 
 		<!--- Check for unhandled errors in the threads --->
 		<cfloop list="#name#" index="i">
