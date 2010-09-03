@@ -272,16 +272,25 @@ index.cfm/product/A12345/fancy/
 		<!---
 			Check if requested file name is a real file, directory or symbolic link before
 			evaluating all the rewrite rules. This is for performance.
+			
+			We use document_root and request_uri because request_filename does not work unless nested in a <directory>
+			node in Apache.  When nesting in a <directory> node and using a proxy to a servlet engine like Tomcat,
+			none of the rewrite rules are checked.
 		--->
-		<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-f" & lf) />
-		<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-d" & lf) />
-		<cfset contents.append("RewriteCond %{REQUEST_FILENAME} !-l" & lf) />
+		<cfset contents.append("#### Check if the requested file name is a real file for performance" & lf) />
+		<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]" & lf) />
+		<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d [OR]" & lf) />
+		<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -l" & lf) />	
+		<cfset contents.append("RewriteRule ^(.*)$ - [PT,L]" & lf) />
+		<cfset contents.append(lf) />
 
 		<!--- Add standard url rule (e.g. with event parameter) --->
-		<cfset contents.append("RewriteRule ^" & rewriteBase & eventParameter & "(/.*)?$ " & urlBase & "index.cfm/" & eventParameter & "/$1 [PT,L]" & lf) />
+		<cfset contents.append("#### Rewrite any URIs that start with the event parameter" & lf) />
+		<cfset contents.append("RewriteRule ^" & rewriteBase & eventParameter & "(/.*)?$ " & rewriteBase & "index.cfm/" & eventParameter & "/$1 [PT,L]" & lf) />
 		<cfset contents.append(lf) />
 
 		<!--- Add all the routes --->
+		<cfset contents.append("#### Rewrite all URL routes" & lf) />
 		<cfloop from="1" to="#ArrayLen(names)#" index="i">
 			<cfset route = requestManager.getRoute(names[i]) />
 			<!---
@@ -301,13 +310,15 @@ index.cfm/product/A12345/fancy/
 			 And if someone happened to type in: newss they would be routed to index.cfm/event/newss where the
 			 exception handling of the framework could divert the missing event name (provided newss didnt exist)
 			 --->
-			<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & urlBase & "index.cfm/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
+			<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & rewriteBase & "index.cfm/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
 		</cfloop>
 		<cfset contents.append(lf) />
 		
 		<!--- Add a catch all to run all request through Mach-II if it's not a real file and there is not index.cfm in the URL  --->
 		<cfif getProperty("urlExcludeEventParameter", false)>
-			<cfset contents.append("RewriteRule ^(.*)?$ " & urlBase & "index.cfm/" & eventParameter & "/$1 [PT,L]" & lf) />
+			<cfset contents.append("#### Catch all for all requests if not a real file and does not contain index.cfm" & lf) />	
+			<cfset contents.append("RewriteCond $1 !^index\.cfm" & lf) />
+			<cfset contents.append("RewriteRule ^" & rewriteBase & "(.*)?$ " & rewriteBase & "index.cfm$1 [PT,L]" & lf) />
 			<cfset contents.append(lf) />
 		</cfif>
 
