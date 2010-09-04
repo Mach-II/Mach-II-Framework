@@ -112,6 +112,11 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Migrate dashboard license to GPL
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/704
+(2010-09-04 peterfarrell)
 
 * Added property type shortcuts
 
