@@ -55,7 +55,6 @@ Notes:
 	<cfset copyToScope("${event.baseComponentData},${event.moduleData},${event.baseData}") />
 	<cfset variables.moduleOrder = StructKeyArray(variables.moduleData) />
 	<cfset ArraySort( variables.moduleOrder , "textnocase", "asc") />
-	<cfset applicationInstance = createObject("component", "Application") />
 
 	<view:script event="sys.serveAsset" p:path="@js@handler@config.js">
 		<cfoutput>
