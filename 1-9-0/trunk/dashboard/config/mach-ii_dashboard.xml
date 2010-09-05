@@ -123,10 +123,28 @@ Notes:
 								<key name="group:production" value="true"/>
 							</struct>
 						</key>
-						<key name="expireHeaderMap">
+						<key name="expiresDefault" value="access plus 365,0,0,0" />
+						<key name="attachmentDefault" value="false" />
+						<key name="fileTypeSettings">
 							<struct>
-								<key name=".*" value="access plus 8,0,0,0"/>
-								<key name=".js,.css" value="access plus 30,0,0,0"/>
+								<key name=".*">
+									<struct>
+										<key name="expires" value="access plus 8,0,0,0"/>
+										<key name="attachment" value="false" />
+									</struct>
+								</key>
+								<key name=".js,.css,.jpg,.gif,.png">
+									<struct>
+										<key name="expires" value="access plus 365,0,0,0"/>
+										<key name="attachment" value="false" />
+									</struct>
+								</key>
+								<key name=".pdf">
+									<struct>
+										<key name="expires" value="access plus 0,0,0,0"/>
+										<key name="attachment" value="true" />
+									</struct>
+								</key>
 							</struct>
 						</key>
 					</struct>
