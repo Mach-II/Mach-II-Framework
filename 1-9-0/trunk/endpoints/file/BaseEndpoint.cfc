@@ -202,7 +202,11 @@ Configuration Notes:
 		
 		<!--- Clean up any piping extension on the file path --->
 		<cfset arguments.event.setArg("file", ListFirst(filePath, ":")) />
-		<cfset arguments.event.setArg("fileFullPath", getBasePath() & ListFirst(filePath, ":")) />
+		<cfif fileExtension EQ "cfm">
+			<cfset arguments.event.setArg("fileFullPath", getBasePath() & ListFirst(filePath, ":")) />
+		<cfelse>
+			<cfset arguments.event.setArg("fileFullPath", ExpandPath(getBasePath()) & ListFirst(filePath, ":")) />
+		</cfif>
 		
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
@@ -212,7 +216,7 @@ Configuration Notes:
 		</cfif>
 		
 		<!--- Set expiry type and value --->
-		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, "." & arguments.event.getArg("pipe", "txt"))>
+		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, "." & arguments.event.getArg("pipe", "htm"))>
 			<cfset arguments.event.setArg("expires", variables.expireMap[pipeExtension]) />
 		<cfelseif StructKeyExists(variables.expireMap, fileExtension)>
 			<cfset arguments.event.setArg("expires", variables.expireMap[fileExtension]) />
@@ -246,7 +250,7 @@ Configuration Notes:
 		<cfargument name="pipeExtension" type="string" required="true"
 			hint="The file extension type to pipe the output to (.cfm -> .css)." />
 		
-		<cfset var contentType = getContentTypeFromFilePath("." & arguments.pipeExtension) />
+		<cfset var contentType = getContentTypeFromFilePath(arguments.pipeExtension) />
 		
 		<cfheader name="Content-Type" value="#contentType#" />
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
@@ -255,7 +259,7 @@ Configuration Notes:
 			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
 		</cfif>
 		
-		<cfsavecontent variable="output"><cfinclude template="#arguments.fullFilePath#" /></cfsavecontent>
+		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
 		
 		<cfreturn output />
 	</cffunction>
@@ -269,7 +273,7 @@ Configuration Notes:
 		<cfargument name="attachment" type="string" required="true"
 			hint="The name of the file if an attachment. Zero-length string menas not to send as attachment." />
 		
-		<cfset var fullFilePath =  ExpandPath(arguments.fileFullPath) />
+		<cfset var fullFilePath =  arguments.fileFullPath />
 		<cfset var contentType = getContentTypeFromFilePath(arguments.fileFullPath) />
 		<cfset var fileInfo = "" />
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
