@@ -60,6 +60,6 @@ Notes:
 <cfif NOT getProperty("enableLogin")>
 	<p class="red">Login has been disabled. No security is being used for the Dashboard.</p> 
 </cfif>
-	<p>&copy; Copyright 2008-#Year(Now())# GreatBizTools, LLC and released under the Apache 2.0 license</p>
+	<p>&copy; Copyright 2008-#Year(Now())# GreatBizTools, LLC and released under the GPL3 license with Classpath Exception</p>
 </div>
 </cfoutput>
