@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.6.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_6_0.dtd" >
+
+<mach-ii version="1.6">
+	<!-- INCLUDES -->
+	<includes>
+		<!-- <include file="./mach-ii_coldspringProperty.xml" /> -->
+	</includes>
+	
+	<!-- PROPERTIES -->
+	<properties>
+		<property name="applicationRoot" value="/CHANGEME" />
+		<property name="defaultEvent" value="home" />
+		<property name="eventParameter" value="event" />
+		<property name="parameterPrecedence" value="form" />
+		<property name="maxEvents" value="10" />
+		<property name="exceptionEvent" value="exception" />
+		
+		<!-- CACHING RELATED -->
+		<!-- this will create an unnamed cache that caches data for 1 hour in the application scope -->
+		<!-- <property name="caching" type="MachII.caching.CachingProperty" /> -->
+		
+		<!-- LOGGING RELATED -->
+		<!-- this will log to the screen -->
+		<!-- <property name="logging" type="MachII.logging.LoggingProperty" /> -->
+	</properties>
+
+	<!-- LISTENERS -->
+	<listeners>
+		<!--
+		<listener name="yourListenerName" type="fully.Qualified.Dot.Delimited.Path.To.CFC">
+			<parameters>
+				<parameter name="yourParameterName" value="yourParameterValue" />
+			</parameters>
+		</listener>
+		-->
+	</listeners>
+	
+	<!-- MESSAGE SUBSCRIBERS -->
+	<message-subscribers>
+		<!-- see the messagePublisher event handler below for an example of what would call this -->
+		<!--
+		<message name="needStuff" multithreaded="true" waitForThreads="true" timeout="10">
+			<subscribe listener="listener1" method="method1" resultArg="stuff1" />
+			<subscribe listener="listener2" method="method2" resultArg="stuff2" />
+		</message>
+		-->
+	</message-subscribers>
+	
+	<!-- EVENT-FILTERS -->
+	<event-filters>
+		<!--
+		<event-filter name="yourEventFilterName" type="fully.Qualified.Dot.Delimited.Path.To.CFC">
+			<parameters>
+				<parameter name="yourParameterName" value="yourParameterValue" />
+			</parameters>
+		</event-filter>
+		-->
+	</event-filters>
+
+	<!-- PLUGINS -->
+	<plugins>
+		<!--
+		<plugin name="yourPluginName" type="fully.Qualified.Dot.Delimited.Path.To.CFC">
+			<parameters>
+				<parameter name="yourParameterName" value="yourParameterValue" />
+			</parameters>
+		</plugin>
+		-->
+	</plugins>
+
+	<!-- EVENT-HANDLERS -->
+	<event-handlers>
+		<event-handler event="home" access="public">
+			<!-- <notify listener="SomeListener" method="doSomething" resultArg="resultOfSomething" />  -->
+			<view-page name="home" />
+		</event-handler>
+		
+		<!-- sample event handler that uses caching and the default cache (data cached for 1 hour in application scope) -->
+		<!--
+		<event-handler event="useCache" access="public">
+			<cache>
+				<notify listener="SomeListener" method="getDataForCache" resultArg="cachedData" />
+			</cache>
+		</event-handler>
+		-->
+		
+		<!-- sample event handler that uses message/subscriber listener notification -->
+		<!--
+		<event-handler event="messagePublisher" access="public">
+			<publish message="needStuff" />
+		</event-handler>
+		-->
+	
+		<event-handler event="exception" access="private">
+			<view-page name="exception" />
+		</event-handler>
+	</event-handlers>
+	
+	<!-- SUBROUTINES -->
+	<subroutines>
+		<!--
+		<subroutine name="yourSubroutineName">
+		</subroutine>
+		-->
+	</subroutines>
+	
+	<!-- PAGE-VIEWS -->
+	<page-views>
+		<page-view name="home" page="/views/home.cfm" />
+		<page-view name="exception" page="/views/exception.cfm" />
+	</page-views>
+	
+</mach-ii>
