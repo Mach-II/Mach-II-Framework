@@ -124,11 +124,13 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false">
+		<cfabort showerror="This method is abstract and must be overridden." />
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-
 
 	<!---
 	ACCESSORS
