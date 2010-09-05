@@ -120,6 +120,7 @@ Configuration Notes:
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the file serve endpoint.">
+
 		<cfset setBasePath(getParameter("basePath")) />
 		<cfset setServiceEngineType(getParameter("serviceEngineType", "cfcontent")) />
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
@@ -201,6 +202,7 @@ Configuration Notes:
 		
 		<!--- Clean up any piping extension on the file path --->
 		<cfset arguments.event.setArg("file", ListFirst(filePath, ":")) />
+		<cfset arguments.event.setArg("fileFullPath", getBasePath() & ListFirst(filePath, ":")) />
 		
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
@@ -224,9 +226,9 @@ Configuration Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
-			<cfoutput>#serveCfmFile(arguments.event.getArg("file"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe"))#</cfoutput>
+			<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe"))#</cfoutput>
 		<cfelse>
-			<cfset serveStaticFile(arguments.event.getArg("file"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
+			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
 		</cfif>
 	</cffunction>
 	
@@ -235,16 +237,15 @@ Configuration Notes:
 	--->
 	<cffunction name="serveCfmFile" access="private" returntype="string" output="false"
 		hint="Serves a cfm file.">
-		<cfargument name="filePath" type="string" required="true"
-			hint="The relative path to the file." />
+		<cfargument name="fileFullPath" type="string" required="true"
+			hint="The full path to the file." />
 		<cfargument name="expires" type="struct" required="true"
-			hint="" />
+			hint="The expires struct." />
 		<cfargument name="attachment" type="string" required="true"
-			hint="" />
+			hint="The name of the file if an attachment. Zero-length string means not to send as attachment." />
 		<cfargument name="pipeExtension" type="string" required="true"
-			hint="" />
+			hint="The file extension type to pipe the output to (.cfm -> .css)." />
 		
-		<cfset var fullFilePath =  getBasePath() & arguments.filePath />
 		<cfset var contentType = getContentTypeFromFilePath("." & arguments.pipeExtension) />
 		
 		<cfheader name="Content-Type" value="#contentType#" />
@@ -254,22 +255,22 @@ Configuration Notes:
 			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
 		</cfif>
 		
-		<cfsavecontent variable="output"><cfinclude template="#fullFilePath#" /></cfsavecontent>
+		<cfsavecontent variable="output"><cfinclude template="#arguments.fullFilePath#" /></cfsavecontent>
 		
 		<cfreturn output />
 	</cffunction>
 	
 	<cffunction name="serveStaticFile" access="private" returntype="void" output="false"
 		hint="Serves a static file via cfcontent or mod x-sendfile.">
-		<cfargument name="filePath" type="string" required="true"
-			hint="The relative path to the file." />
+		<cfargument name="fileFullPath" type="string" required="true"
+			hint="The full path to the file." />
 		<cfargument name="expires" type="struct" required="true"
-			hint="" />
+			hint="The expires struct." />
 		<cfargument name="attachment" type="string" required="true"
-			hint="" />
+			hint="The name of the file if an attachment. Zero-length string menas not to send as attachment." />
 		
-		<cfset var fullFilePath =  ExpandPath(getBasePath()) & arguments.filePath />
-		<cfset var contentType = getContentTypeFromFilePath(arguments.filePath) />
+		<cfset var fullFilePath =  ExpandPath(arguments.fileFullPath) />
+		<cfset var contentType = getContentTypeFromFilePath(arguments.fileFullPath) />
 		<cfset var fileInfo = "" />
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
 
@@ -277,13 +278,13 @@ Configuration Notes:
 		<cfdirectory 
 			name="fileInfo" 
 			action="list" 
-			directory="#getDirectoryFromPath(fullFilePath)#" 
-			filter="#getFileFromPath(fullFilePath)#" />
+			directory="#getDirectoryFromPath(fileFullPath)#" 
+			filter="#getFileFromPath(fileFullPath)#" />
 		
 		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 		<cfset getAssert().isTrue(fileInfo.recordcount EQ 1
 				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				, "File path: '#arguments.filePath#'") />
+				, "File path: '#arguments.fileFullPath#'") />
 
 		<cfheader name="Content-Length" value="#fileInfo.size#" />
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
@@ -304,7 +305,7 @@ Configuration Notes:
 			</cfif>
 		<cfelse>
 			<!--- x-sendfile correctly handles ETags and modified since headers itself --->
-			<cfheader name="X-Sendfile" value="#fullFilePath#" />
+			<cfheader name="X-Sendfile" value="#arguments.fullFilePath#" />
 		</cfif>
 	</cffunction>
 	
