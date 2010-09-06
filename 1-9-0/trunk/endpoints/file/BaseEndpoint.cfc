@@ -266,7 +266,7 @@ Configuration Notes:
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
 
 		<cfif Len(arguments.attachment)>
-			<cfheader name="Content-Disposition" value="attachment;file=#arguments.attachment#" />
+			<cfheader name="Content-Disposition" value="attachment; filename=#arguments.attachment#" />
 		</cfif>
 
 		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
