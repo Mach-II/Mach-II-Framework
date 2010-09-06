@@ -219,7 +219,7 @@ Configuration Notes:
 		</cfif>
 
 		<!--- Set expiry type and value --->
-		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, pipeExtension))>
+		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, pipeExtension)>
 			<cfset arguments.event.setArg("expires", variables.expireMap[pipeExtension]) />
 		<cfelseif StructKeyExists(variables.expireMap, fileExtension)>
 			<cfset arguments.event.setArg("expires", variables.expireMap[fileExtension]) />
