@@ -92,7 +92,8 @@ Notes:
 		Create an option template because calling the options tag repeatedly
 		on a huge number of items is exponentially slow
 	--->
-	<form:option value="${output.value}"
+	<form:option attributeCollection="#attributes#"		
+		value="${output.value}"
 		label="${output.label}"
 		id="#getParentTagAttribute("select", "id")#_${output.id}"
 		checkValue=""

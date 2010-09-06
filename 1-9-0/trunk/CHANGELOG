@@ -62,6 +62,12 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* Options form tag fails to pass on additional tag attributes
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/706
+(2010-09-06 peterfarrell)
+
 * Redirect command incorrectly computer event-arg name in "args" and "persistArgs" 
 with expression
 
