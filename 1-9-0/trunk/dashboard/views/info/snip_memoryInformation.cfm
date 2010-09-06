@@ -69,7 +69,7 @@ Notes:
 				title="Memory Usage (in MB)">
 				<cfchartseries type="pie" 
 					colorList="green,red,blue" 
-					paintstyle="light" >
+					paintstyle="light">
 					<cfchartdata item="Free Memory" 
 						value="#getProperty("udfs").byteConvert(memoryData["JVM - Free Memory"], "MB", false)#" />
 					<cfchartdata item="Used Memory" 

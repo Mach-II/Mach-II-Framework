@@ -133,7 +133,7 @@ Notes:
 										<key name="attachment" value="false" />
 									</struct>
 								</key>
-								<key name=".js,.css,.jpg,.gif,.png">
+								<key name=".js,.css,.jpg,.gif,.png,.ico">
 									<struct>
 										<key name="expires" value="access plus 365,0,0,0"/>
 										<key name="attachment" value="false" />
@@ -178,23 +178,6 @@ Notes:
 	</message-subscribers>
 	
 	<!-- EVENT-FILTERS -->
-	<event-filters> 
-		<event-filter name="serveFile" type="MachII.dashboard.filters.ServeFileFilter">
-			<parameters>
-				<parameter name="basePath" value="/MachII/dashboard/assets"/>
-				<parameter name="contentTypes">
-					<struct>
-						<key name="png" value="image/png"/>
-						<key name="gif" value="image/gif"/>
-						<key name="jpg" value="image/jpeg"/>
-						<key name="css" value="text/css"/>
-						<key name="ico" value="image/vnd.microsoft.icon"/>
-						<key name="js" value="application/x-javascript"/>
-					</struct>
-				</parameter>
-			</parameters>
-		</event-filter>
-	</event-filters>
 	
 	<!-- PLUGINS -->
 	<plugins runParent="none">
@@ -392,9 +375,6 @@ Notes:
 		</event-handler>
 		
 		<!-- sys -->
-		<event-handler event="sys.serveAsset" access="public">
-			<filter name="serveFile"/>
-		</event-handler>
 		<event-handler event="sys.login" access="private">
 			<event-arg name="suppressHeadElements" value="true"/>
 			<view-page name="sys.login" contentArg="layout.content"/>

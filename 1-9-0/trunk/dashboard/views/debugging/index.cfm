@@ -51,6 +51,7 @@ Notes:
 
 	<cfimport prefix="dashboard" taglib="/MachII/dashboard/customtags" />
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
+	<cfimport prefix="form" taglib="/MachII/customtags/form" />
 	<view:meta type="title" content="Debugging" />
 	
 	<cfset variables.exceptionViewer = event.getArg("exceptionViewer") />
@@ -61,62 +62,48 @@ Notes:
 	
 <h1>Exception Viewer</h1>
 
-<form action="#BuildUrl("debugging.changeSnapshotLevel")#"
+<form:form actionEvent="debugging.changeSnapshotLevel"
 	method="post"
 	id="changeSnapshotLevel">
 <ul class="pageNavTabs">
 <cfif variables.exceptionViewer.isLoggingEnabled()>
 	<li>
-		<a href="#buildUrl("debugging.enableDisableExceptionViewer", "mode=disable")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
+		<view:a event="debugging.enableDisableExceptionViewer" p:mode="disable">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disabled" />
 			&nbsp;Disable Exception Viewer
-		</a>
+		</view:a>
 	</li>
 <cfelse>
 	<li>
-		<a href="#buildUrl("debugging.enableDisableExceptionViewer", "mode=enable")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Disabled" />
+		<view:a event="debugging.enableDisableExceptionViewer" p:mode="enable">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/accept.png" width="16" height="16" alt="Enable" />
 			&nbsp;Enable Exception Viewer
-		</a>
+		</view:a>
 	</li>
 </cfif>
 	<li>
-		<a href="#buildUrl("debugging.flushExceptionViewerDataStorage")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_delete.png")#" width="16" height="16" alt="Disabled" />
+		<view:a event="debugging.flushExceptionViewerDataStorage">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_delete.png" width="16" height="16" alt="Flush" />
 			&nbsp;Flush Exception Viewer Data Storage
-		</a>
+		</view:a>
 	</li>
 	<li>
-		<a href="#BuildUrl("debugging.index")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/arrow_rotate_clockwise.png")#" width="16" height="16" alt="Flush All" />
+		<view:a event="debugging.index">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Refresh" />
 			&nbsp;Refresh Stats
-		</a>
+		</view:a>
 	</li>
 	<li>
 		Snapshot Level&nbsp;
-
-			<cfset variables.level = variables.exceptionViewer.getSnapshotLevel()>
-			<select name="level" style="width:8em;" onchange="document.getElementById('changeSnapshotLevel').submit();">
-				<option value="all"  
-						<cfif variables.level EQ "all">selected="selected"</cfif>>All</option>
-				<option value="trace" class="green"  
-						<cfif variables.level EQ "trace">selected="selected"</cfif>>Trace</option>
-				<option value="debug" class="green"  
-						<cfif variables.level EQ "debug">selected="selected"</cfif>>Debug</option>
-				<option value="info"  
-						<cfif variables.level EQ "info">selected="selected"</cfif>>Info</option>
-				<option value="warn"  
-						<cfif variables.level EQ "warn">selected="selected"</cfif>>Warn</option>
-				<option value="error" class="red"  
-						<cfif variables.level EQ "error">selected="selected"</cfif>>Error</option>
-				<option value="fatal" class="red"  
-						<cfif variables.level EQ "fatal">selected="selected"</cfif>>Fatal</option>
-				<option value="off"  
-						<cfif variables.level EQ "off">selected="selected"</cfif>>Off</option>
-			</select>
+		<form:select name="level" checkValue="#variables.exceptionViewer.getSnapshotLevel()#" style="width:8em;" onchange="document.getElementById('changeSnapshotLevel').submit();">
+			<form:options items="All" />
+			<form:options items="Trace,Debug,Info" class="green" />
+			<form:options items="Warn,Error,Fatal" class="red" />
+			<form:options items="Off" />
+		</form:select>
 	</li>
 </ul>
-</form>
+</form:form>
 
 <cfif ArrayLen(variables.dataStorage.data)>
 <cfloop from="1" to="#ArrayLen(variables.dataStorage.data)#" index="i">

@@ -61,31 +61,31 @@ Notes:
 <ul class="pageNavTabs">
 	<li class="green">
 		<view:a event="caching.enableDisableAll" p:mode="enable">
-			<view:img event="sys.serveAsset" p:path="/img/icons/accept.png" width="16" height="16" alt="Enabled" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/accept.png" width="16" height="16" alt="Enabled" />
 			&nbsp;Enable All
 		</view:a>
 	</li> 
 	<li class="red">
 		<view:a event="caching.enableDisableAll" p:mode="disable">
-			<view:img event="sys.serveAsset" p:path="/img/icons/stop.png" width="16" height="16" alt="Disable" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disable" />
 			&nbsp;Disable All
 		</view:a>
 	</li>
 	<li>
 		<view:a event="caching.reapAll">
-			<view:img event="sys.serveAsset" p:path="/img/icons/database_refresh.png" width="16" height="16" alt="Reap All" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reap All" />
 			&nbsp;Reap All
 		</view:a>
 	</li>
 	<li>
 		<view:a event="caching.flushAll">
-			<view:img event="sys.serveAsset" p:path="/img/icons/database_delete.png" width="16" height="16" alt="Flush All" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_delete.png" width="16" height="16" alt="Flush All" />
 			&nbsp;Flush All
 		</view:a>
 	</li>
 	<li>
 		<a onclick="cachingInformation.stop();cachingInformation.start();">
-			<view:img event="sys.serveAsset" p:path="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Flush All" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Flush All" />
 			&nbsp;Refresh Stats (Automatically Updates Every 30 Seconds)
 		</a>
 	</li>

@@ -70,16 +70,16 @@ Notes:
 <cfif StructCount(variables.loggers) GT 0>
 <ul class="pageNavTabs">
  	<li class="green">
-		<a href="#BuildUrl("logging.enableDisableAll", "mode=enable")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
+		<view:a event="logging.enableDisableAll" p:mode="enable">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/accept.png" width="16" height="16" alt="Enabled" />
 			&nbsp;Enable All
-		</a>
+		</view:a>
 	</li>
 	<li class="red">
-		<a href="#BuildUrl("logging.enableDisableAll", "mode=disable")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
+		<view:a event="logging.enableDisableAll" p:mode="disable">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disabled" />
 			&nbsp;Disable All
-		</a>
+		</view:a>
 	</li>
 </ul>
 
@@ -105,7 +105,7 @@ Notes:
 				<p class="small">
 				<cfif listGetAt(loggerType, 1, ".") eq "MachII">
 					<a href="#getProperty("udfs").getCFCDocUrl(loggerType)#" target="_blank">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/link_go.png" width="16" height="16" alt="Link" />
 						#logger.getLoggerTypeName()# (#loggerType#)
 					</a>
 				<cfelse>
@@ -145,7 +145,7 @@ Notes:
 				<p class="small">
 				<cfif listGetAt(filterType, 1, ".") eq "MachII">
 					<a href="#getProperty("udfs").getCFCDocUrl(filterType)#" target="_blank">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" /> 
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/link_go.png" width="16" height="16" alt="Link" /> 
 						#filter.getFilterTypeName()# (#filterType#)
 					</a>
 				<cfelse>
@@ -195,17 +195,17 @@ Notes:
 				<ul class="none">
 				<cfif logger.isLoggingEnabled()>
 					<li class="green">
-						<a href="#BuildUrl("logging.enableDisableLogger", "moduleName=#module#|loggerName=#loggerName#|mode=disable")#" title="Click to Disable">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
+						<view:a event="logging.enableDisableLogger" p:moduleName="#module#" p:loggerName="#loggerName#" p:mode="disable" title="Click to Disable">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/accept.png" width="16" height="16" alt="Enabled" />
 							&nbsp;Enabled
-						</a>
+						</view:a>
 					</li>
 				<cfelse>
 					<li class="red">
-						<a href="#BuildUrl("logging.enableDisableLogger", "moduleName=#module#|loggerName=#loggerName#|mode=enable")#" title="Click to Enable">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
+						<view:a event="logging.enableDisableLogger" p:moduleName="#module#" p:loggerName="#loggerName#" p:mode="enable" title="Click to Enable">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disabled" />
 							&nbsp;Disabled
-						</a>
+						</view:a>
 					</li>
 				</cfif>
 				</ul>				

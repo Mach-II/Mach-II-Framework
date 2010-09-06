@@ -86,23 +86,24 @@ Notes:
 <div id="serverInfo">
 	<ul>
 		<li>
-			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/world_link.png")#" width="16" height="16" alt="Domain Name" title="Domain Name" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/world_link.png" width="16" height="16" alt="Domain Name" title="Domain Name" />
 			 #cgi.server_name#</li>
 		<li>
-			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/server.png")#" width="16" height="16" alt="Machine Name" title="Machine Name" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/server.png" width="16" height="16" alt="Machine Name" title="Machine Name" />
 			 #CreateObject("java", "java.net.InetAddress").getLocalHost().getHostName()#
 		</li>
 		<li>
-			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/instance.png")#" width="16" height="16" alt="Instance Name" title="Instance Name" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/instance.png" width="16" height="16" alt="Instance Name" title="Instance Name" />
 			#variables.instanceName#</li>
 		<li>
-			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/application.png")#" width="16" height="16" alt="Application Name" title="Application Name" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/application.png" width="16" height="16" alt="Application Name" title="Application Name" />
 			#application.applicationName#</li>
 	<cfif getProperty("enableLogin")>
 		<li class="red">
-			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/cancel.png")#" width="16" height="16" alt="Logout" title="Logout"
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/cancel.png" width="16" height="16" alt="Logout" title="Logout"
 				 onclick="myGlobalHandler.performLogout();" />
-			<a onclick="myGlobalHandler.performLogout();">Logout</a></li>
+			<a onclick="myGlobalHandler.performLogout();">Logout</a>
+		</li>
 	</cfif>
 	</ul>
 </div>

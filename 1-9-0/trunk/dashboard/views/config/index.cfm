@@ -70,30 +70,30 @@ Notes:
 
 <ul class="pageNavTabs">
 	<li>
-		<a href="#buildUrl("config.reloadBaseApp")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reload" />
+		<view:a event="config.reloadBaseApp">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload All Mach-II Config Files" />
 			&nbsp;Reload All Mach-II Config Files
-		</a>
+		</view:a>
 	</li>
 <cfif StructKeyExists(variables.baseData, "lastDependencyInjectionEngineReloadDateTime")>
 	<li>
-		<a href="#buildUrl("config.reloadBaseAppDependencyInjectionEngine")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reload" />
+		<view:a event="config.reloadBaseAppDependencyInjectionEngine">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload All DI Engine Config Files" />
 			&nbsp;Reload All DI Engine Config Files
-		</a>
+		</view:a>
 	</li>
 </cfif>
 	<li>
-		<a  onclick="myConfigHandler.reloadAllChangedComponents();">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reload" />
+		<a onclick="myConfigHandler.reloadAllChangedComponents();">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload All Changed Components" />
 			&nbsp;Reload All Changed Components
 		</a>
 	</li>
 	<li>
-		<a href="#BuildUrl("config.index")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/arrow_rotate_clockwise.png")#" width="16" height="16" alt="Flush All" />
+		<view:a event="config.index">
+			<view:img endpoint="dashboard.serveAsset" p:file="img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Refresh Stats" />
 			&nbsp;Refresh Stats
-		</a>
+		</view:a>
 	</li>
 </ul>
 
@@ -108,45 +108,45 @@ Notes:
 		<td>
 			<h4>Base</h4>
 			<p class="small">
-				<a href="#BuildUrlToModule("", variables.baseData.appManager.getPropertyManager().getProperty("defaultEvent"))#">
-					<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
+				<view:a module="" event="#variables.baseData.appManager.getPropertyManager().getProperty("defaultEvent")#">
+					<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/link_go.png" width="16" height="16" alt="Link" />
 					go to default event
-				</a>
+				</view:a>
 			</p>
 		</td>
 		<td>
 			<p>
-				<a href="#buildUrl("config.reloadBaseApp")#">
+				<view:a event="config.reloadBaseApp">
 				<cfif variables.baseData.shouldReloadConfig>
 					<span class="red">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 						&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.baseData.lastReloadDateTime)# ago
 					</span>
 				<cfelse>
 					<span class="green">
-					<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
-					&nbsp;OK
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+						&nbsp;OK
 					</span>
 				</cfif>
-				</a>
+				</view:a>
 			</p>
 		</td>
 	<cfif StructKeyExists(variables.baseData, "lastDependencyInjectionEngineReloadDateTime")>
 		<td>
 			<p>
-				<a href="#buildUrl("config.reloadBaseAppDependencyInjectionEngine")#">
+				<view:a event="config.reloadBaseAppDependencyInjectionEngine">
 					<cfif variables.baseData.shouldReloadDependencyInjectionEngineConfig>
 						<span class="red">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 							&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.baseData.lastDependencyInjectionEngineReloadDateTime)# ago
 						</span>
 					<cfelse>
 						<span class="green">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 							&nbsp;OK
 						</span>
 					</cfif>
-				</a>
+				</view:a>
 			</p>
 		</td>
 	<cfelse>
@@ -173,10 +173,10 @@ Notes:
 			<h4>#UCase(Left(variables.moduleOrder[i], 1))##Right(variables.moduleOrder[i], Len(variables.moduleOrder[i]) -1)#</h4>
 		<cfif getAppManager().getModuleName() NEQ variables.moduleOrder[i]>
 			<p class="small">
-				<a href="#BuildUrlToModule(variables.moduleOrder[i], variables.moduleData[variables.moduleOrder[i]].appManager.getPropertyManager().getProperty("defaultEvent"))#">
-					<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
+				<view:a module="#variables.moduleOrder[i]#" event="#variables.moduleData[variables.moduleOrder[i]].appManager.getPropertyManager().getProperty("defaultEvent")#">
+					<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/link_go.png" width="16" height="16" alt="Link" />
 					go to default event
-				</a>
+				</view:a>
 			</p>
 		<cfelse>
 			<p>&nbsp;</p>
@@ -184,37 +184,37 @@ Notes:
 		</td>
 		<td>
 			<p>
-				<a href="#buildUrl("config.reloadModule", "moduleName=#variables.moduleOrder[i]#")#">
+				<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
 				<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadConfig>
 					<span class="red">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 						&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.moduleData[variables.moduleOrder[i]].lastReloadDateTime)# ago
 					</span>
 				<cfelse>
 					<span class="green">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 						&nbsp;OK
 					</span>
 				</cfif>
-				</a>
+				</view:a>
 			</p>
 		</td>
 	<cfif StructKeyExists(variables.moduleData[variables.moduleOrder[i]], "lastDependencyInjectionEngineReloadDateTime")>
 		<td>
 			<p>
-				<a href="#buildUrl("config.reloadModuleDependencyInjectionEngine", "moduleName=#variables.moduleOrder[i]#")#">
+				<view:a event="config.reloadModuleDependencyInjectionEngine" p:moduleName="#variables.moduleOrder[i]#">
 					<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadDependencyInjectionEngineConfig>
 						<span class="red">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 							&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.moduleData[variables.moduleOrder[i]].lastDependencyInjectionEngineReloadDateTime)# ago
 						</span>
 					<cfelse>
 						<span class="green">
-						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
-						&nbsp;OK
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+							&nbsp;OK
 						</span>
 					</cfif>
-				</a>
+				</view:a>
 			</p>
 		</td>
 	<cfelse>
@@ -244,7 +244,7 @@ Notes:
 <ul class="pageNavTabs">
 	<li>
 		<a onclick="myConfigHandler.reloadAllChangedComponents();">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reload" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload" />
 			&nbsp;Reload All Changed Components
 		</a>
 	</li>
@@ -255,16 +255,16 @@ Notes:
 	</li>
 	<li>
 		<a onclick="myConfigHandler.updateChangedComponents();">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/arrow_rotate_clockwise.png")#" width="16" height="16" alt="Flush All" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Flush All" />
 			&nbsp;Refresh Stats
 		</a>
 	</li>
 	<cfif IsDefined("applicationInstance.ormenabled") AND applicationInstance.ormenabled EQ true >
  	<li>
-		<a href="#buildUrl("config.reloadAllOrmComponents")#">
-			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reload ORM Components" />
+		<view:a event="config.reloadAllOrmComponents">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload ORM Components" />
 			&nbsp;Reload ORM Components
-		</a>
+		</view:a>
 	</li>
 	</cfif>
 </ul>
