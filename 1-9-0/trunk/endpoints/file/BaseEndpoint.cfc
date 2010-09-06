@@ -188,6 +188,7 @@ Configuration Notes:
 		<cfset var pathInfo = cleanPathInfo() />
 		<cfset var filePath = "" />
 		<cfset var fileExtension = "" />
+		<cfset var pipeExtension = "" />
 
 		<!--- Get file path with support URIs where the file is defined in the pathInfo --->
 		<cfif Len(pathInfo)>
@@ -210,11 +211,15 @@ Configuration Notes:
 
 		<!--- Set up the piping --->
 		<cfif ListLen(filePath, ":") EQ 2>
-			<cfset arguments.event.setArg("pipe", ListLast(filePath, ":"))>
+			<cfset pipeExtension =  ListLast(filePath, ":") />
+			<cfif NOT Len(pipeExtension)>
+				<cfset pipeExtension = "htm" />
+			</cfif>
+			<cfset arguments.event.setArg("pipe", pipeExtension) />
 		</cfif>
 
 		<!--- Set expiry type and value --->
-		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, "." & arguments.event.getArg("pipe", "htm"))>
+		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, pipeExtension))>
 			<cfset arguments.event.setArg("expires", variables.expireMap[pipeExtension]) />
 		<cfelseif StructKeyExists(variables.expireMap, fileExtension)>
 			<cfset arguments.event.setArg("expires", variables.expireMap[fileExtension]) />
@@ -225,7 +230,7 @@ Configuration Notes:
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
 			<cfif StructKeyExists(variables.attachmentMap, event.getArg("pipe", fileExtension))>
-				<cfset arguments.event.setArg("attachment", getFileFromPath(arguments.event.getArg("file"))) />
+				<cfset arguments.event.setArg("attachment", getFileFromPath(ReplaceNoCase(arguments.event.getArg("file"), "." & fileExtension, "." & pipeExtension))) />
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -261,7 +266,7 @@ Configuration Notes:
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
 
 		<cfif Len(arguments.attachment)>
-			<cfheader name="Content-Disposition" value="attachment;file=#getFileFromPath(arguments.fileFullPath)#" />
+			<cfheader name="Content-Disposition" value="attachment;file=#arguments.attachment#" />
 		</cfif>
 
 		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
