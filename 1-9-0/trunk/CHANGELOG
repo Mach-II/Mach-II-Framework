@@ -62,6 +62,12 @@ using a  bleeding edge release (BER) of the framework.
 Fixed Defects
 ------------------------------------------------
 
+* File tag does not compute tag "name" from path and 
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/707
+(2010-09-06 peterfarrell)
+
 * Options form tag fails to pass on additional tag attributes
 
 For more information see:
@@ -78,6 +84,13 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+
+* Add ability to set enctype if file tag exists
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/707
+(2010-09-06 peterfarrell)
+
 * Add support for threading on Railo
 
 This adds support for multi-threading for message-subscribers
