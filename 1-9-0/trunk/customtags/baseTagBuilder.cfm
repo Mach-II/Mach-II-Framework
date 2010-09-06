@@ -504,6 +504,8 @@ PUBLIC FUNCTIONS - UTIL
 		</cfif>
 
 		<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildRouteUrl(attributes[arguments.attributeNameForRoute], urlParameters, queryStringParameters) />
+	<cfelseif StructKeyExists(attributes, "endpoint")>
+		<cfset builtUrl = request.eventContext.getAppManager().getEndpointManager().buildEndpointUrl(attributes["endpoint"], urlParameters) />
 	<cfelse>
 		<cfif getTagLib() EQ "view" AND getTagType() EQ "a">
 			<cfif StructKeyExists(attributes, "useCurrentUrl")>

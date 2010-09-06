@@ -89,6 +89,7 @@ N.B. Links to CSS files should use the <style> tag's "src" attribute.
 	<cfset StructDelete(variables.additionalAttributes, "event", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "module", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "route", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "endpoint", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "p", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 	

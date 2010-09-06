@@ -78,7 +78,7 @@ Notes:
 <div id="logo">
 	<h3>
 		<view:a event="#getProperty("defaultEvent")#">
-			<view:img event="sys.serveAsset" p:path="@img@machiiLogo.gif" width="218" height="60" alt="Mach-II" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/machiiLogo.gif" width="218" height="60" alt="Mach-II" />
 		</view:a>
 	</h3>
 </div>
@@ -86,21 +86,21 @@ Notes:
 <div id="serverInfo">
 	<ul>
 		<li>
-			<view:img src="#BuildUrl("sys.serveAsset", "path=@img@icons@world_link.png")#" width="16" height="16" alt="Domain Name" title="Domain Name" />
+			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/world_link.png")#" width="16" height="16" alt="Domain Name" title="Domain Name" />
 			 #cgi.server_name#</li>
 		<li>
-			<view:img src="#BuildUrl("sys.serveAsset", "path=@img@icons@server.png")#" width="16" height="16" alt="Machine Name" title="Machine Name" />
+			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/server.png")#" width="16" height="16" alt="Machine Name" title="Machine Name" />
 			 #CreateObject("java", "java.net.InetAddress").getLocalHost().getHostName()#
 		</li>
 		<li>
-			<view:img src="#BuildUrl("sys.serveAsset", "path=@img@icons@instance.png")#" width="16" height="16" alt="Instance Name" title="Instance Name" />
+			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/instance.png")#" width="16" height="16" alt="Instance Name" title="Instance Name" />
 			#variables.instanceName#</li>
 		<li>
-			<view:img src="#BuildUrl("sys.serveAsset", "path=@img@icons@application.png")#" width="16" height="16" alt="Application Name" title="Application Name" />
+			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/application.png")#" width="16" height="16" alt="Application Name" title="Application Name" />
 			#application.applicationName#</li>
 	<cfif getProperty("enableLogin")>
 		<li class="red">
-			<view:img src="#BuildUrl("sys.serveAsset", "path=@img@icons@cancel.png")#" width="16" height="16" alt="Logout" title="Logout"
+			<view:img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/cancel.png")#" width="16" height="16" alt="Logout" title="Logout"
 				 onclick="myGlobalHandler.performLogout();" />
 			<a onclick="myGlobalHandler.performLogout();">Logout</a></li>
 	</cfif>

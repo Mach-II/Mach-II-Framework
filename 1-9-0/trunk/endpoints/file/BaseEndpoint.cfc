@@ -114,6 +114,7 @@ Configuration Notes:
 	<cfset variables.attachmentDefault = false />
 	<cfset variables.expireMap = StructNew() />
 	<cfset variables.attachmentMap = StructNew() />
+	<cfset variables.urlBase = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -122,6 +123,7 @@ Configuration Notes:
 		hint="Configures the file serve endpoint.">
 
 		<cfset setBasePath(getParameter("basePath")) />
+		<cfset setUrlBase(getProperty("urlBase")) />
 		<cfset setServiceEngineType(getParameter("serviceEngineType", "cfcontent")) />
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
@@ -244,6 +246,42 @@ Configuration Notes:
 		<cfelse>
 			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an URL formatted for file server endpoint.">
+		<cfargument name="file" type="string" required="true"
+			hint="The path to the file." />
+		<cfargument name="pipe" type="string" required="false"
+			hint="The pipe extension for the URL (e.g. css, js, etc.)." />
+		<cfargument name="attachment" type="string" required="false"
+			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pip extension if applicable." />
+		
+		<cfset var builtUrl = getUrlBase() & getParameter("name") />
+		<cfset var fileName = "" />
+		<cfset var fileExtension = "" />
+		
+		<cfif NOT arguments.file.startsWith("/")>
+			<cfset builtUrl = builtUrl & "/" />
+		</cfif>
+		
+		<cfset builtUrl = builtUrl & arguments.file />
+		
+		<cfif StructKeyExists(arguments, "pipe")>
+			<cfset builtUrl = builtUrl & ":" & arguments.pipe />
+		</cfif>
+		
+		<cfif StructKeyExists(arguments, "attachment")>
+			<cfif IsBoolean(arguments.attachment) AND arguments.attachment>
+				<cfset fileName = getFileFromPath(arguments.file) />
+				<cfset fileExtension = ListLast(arguments.file, ".") />
+				<cfset arguments.attachment = ReplaceNoCase(getFileFromPath(fileName), "." & fileExtension, "." & arguments.pipe) />
+			</cfif>
+			
+			<cfset builtUrl = builtUrl & "?attachment=" & arguments.attachment />
+		</cfif>
+		
+		<cfreturn builtUrl />
 	</cffunction>
 	
 	<!---
@@ -392,6 +430,19 @@ Configuration Notes:
 	</cffunction>
 	<cffunction name="getBasePath" access="public" returntype="string" output="false">
 		<cfreturn variables.basePath />
+	</cffunction>
+
+	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
+		<cfargument name="urlBase" type="string" required="true" />
+
+		<cfif NOT arguments.urlBase.endsWith("/")>
+			<cfset arguments.urlBase = arguments.urlBase & "/" />
+		</cfif>
+
+		<cfset variables.urlBase = arguments.urlBase />
+	</cffunction>
+	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
+		<cfreturn variables.urlBase />
 	</cffunction>
 
 	<cffunction name="setServiceEngineType" access="public" returntype="void" output="false">

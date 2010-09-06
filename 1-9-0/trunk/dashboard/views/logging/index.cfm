@@ -71,13 +71,13 @@ Notes:
 <ul class="pageNavTabs">
  	<li class="green">
 		<a href="#BuildUrl("logging.enableDisableAll", "mode=enable")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@accept.png")#" width="16" height="16" alt="Enabled" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
 			&nbsp;Enable All
 		</a>
 	</li>
 	<li class="red">
 		<a href="#BuildUrl("logging.enableDisableAll", "mode=disable")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@stop.png")#" width="16" height="16" alt="Disabled" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
 			&nbsp;Disable All
 		</a>
 	</li>
@@ -105,7 +105,7 @@ Notes:
 				<p class="small">
 				<cfif listGetAt(loggerType, 1, ".") eq "MachII">
 					<a href="#getProperty("udfs").getCFCDocUrl(loggerType)#" target="_blank">
-						<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@link_go.png")#" width="16" height="16" alt="Link" />
+						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
 						#logger.getLoggerTypeName()# (#loggerType#)
 					</a>
 				<cfelse>
@@ -145,7 +145,7 @@ Notes:
 				<p class="small">
 				<cfif listGetAt(filterType, 1, ".") eq "MachII">
 					<a href="#getProperty("udfs").getCFCDocUrl(filterType)#" target="_blank">
-						<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@link_go.png")#" width="16" height="16" alt="Link" /> 
+						<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" /> 
 						#filter.getFilterTypeName()# (#filterType#)
 					</a>
 				<cfelse>
@@ -196,14 +196,14 @@ Notes:
 				<cfif logger.isLoggingEnabled()>
 					<li class="green">
 						<a href="#BuildUrl("logging.enableDisableLogger", "moduleName=#module#|loggerName=#loggerName#|mode=disable")#" title="Click to Disable">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@accept.png")#" width="16" height="16" alt="Enabled" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
 							&nbsp;Enabled
 						</a>
 					</li>
 				<cfelse>
 					<li class="red">
 						<a href="#BuildUrl("logging.enableDisableLogger", "moduleName=#module#|loggerName=#loggerName#|mode=enable")#" title="Click to Enable">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@stop.png")#" width="16" height="16" alt="Disabled" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
 							&nbsp;Disabled
 						</a>
 					</li>

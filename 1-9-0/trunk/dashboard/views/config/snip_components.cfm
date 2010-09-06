@@ -76,12 +76,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadListener", "listenerName=#variables.baseComponentData.listeners[i].name#")#">
 						<cfif variables.baseComponentData.listeners[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.listeners[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.listeners[i].name#
 							</span>
 						</cfif>
@@ -99,12 +99,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadFilter", "filterName=#variables.baseComponentData.filters[i].name#")#">
 						<cfif variables.baseComponentData.filters[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.filters[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.filters[i].name#
 							</span>
 						</cfif>
@@ -122,12 +122,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadPlugin", "pluginName=#variables.baseComponentData.plugins[i].name#")#">
 						<cfif variables.baseComponentData.plugins[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.plugins[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.plugins[i].name#
 							</span>
 						</cfif>
@@ -145,12 +145,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadProperty", "propertyName=#variables.baseComponentData.properties[i].name#")#">
 						<cfif variables.baseComponentData.properties[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.properties[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.properties[i].name#
 							</span>
 						</cfif>
@@ -183,12 +183,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadListener", "listenerName=#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#|moduleName=#variables.moduleOrder[j]#")#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
 							</span>
 						</cfif>
@@ -206,12 +206,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadFilter", "filterName=#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#|moduleName=#variables.moduleOrder[j]#")#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].filters[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
 							</span>
 						</cfif>
@@ -229,12 +229,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadPlugin", "pluginName=#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#|moduleName=#variables.moduleOrder[j]#")#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
 							</span>
 						</cfif>
@@ -252,12 +252,12 @@ Notes:
 						<p><a href="#buildUrl("config.reloadProperty", "propertyName=#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#|moduleName=#variables.moduleOrder[j]#")#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].properties[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@exclamation.png")#" width="16" height="16" alt="Reload" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@tick.png")#" width="16" height="16" alt="OK" />
+								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
 							</span>
 						</cfif>

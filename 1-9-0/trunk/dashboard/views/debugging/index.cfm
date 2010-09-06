@@ -68,27 +68,27 @@ Notes:
 <cfif variables.exceptionViewer.isLoggingEnabled()>
 	<li>
 		<a href="#buildUrl("debugging.enableDisableExceptionViewer", "mode=disable")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@stop.png")#" width="16" height="16" alt="Disabled" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disabled" />
 			&nbsp;Disable Exception Viewer
 		</a>
 	</li>
 <cfelse>
 	<li>
 		<a href="#buildUrl("debugging.enableDisableExceptionViewer", "mode=enable")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@accept.png")#" width="16" height="16" alt="Disabled" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Disabled" />
 			&nbsp;Enable Exception Viewer
 		</a>
 	</li>
 </cfif>
 	<li>
 		<a href="#buildUrl("debugging.flushExceptionViewerDataStorage")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@database_delete.png")#" width="16" height="16" alt="Disabled" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_delete.png")#" width="16" height="16" alt="Disabled" />
 			&nbsp;Flush Exception Viewer Data Storage
 		</a>
 	</li>
 	<li>
 		<a href="#BuildUrl("debugging.index")#">
-			<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@arrow_rotate_clockwise.png")#" width="16" height="16" alt="Flush All" />
+			<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/arrow_rotate_clockwise.png")#" width="16" height="16" alt="Flush All" />
 			&nbsp;Refresh Stats
 		</a>
 	</li>

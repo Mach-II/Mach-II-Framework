@@ -262,6 +262,15 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
 
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific url.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of the target endpoint." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />		
+		<cfreturn getAppManager().getEndpointManager().buildEndpointUrl(argumentcollection=arguments) />
+	</cffunction>
+
 	<cffunction name="addHTMLHeadElement" access="public" returntype="boolean" output="false"
 		hint="Adds a HTML head element. Returns a boolean if the element was appened to head (always returns true unless you allow duplicates).">
 		<cfargument name="text" type="string" required="true"

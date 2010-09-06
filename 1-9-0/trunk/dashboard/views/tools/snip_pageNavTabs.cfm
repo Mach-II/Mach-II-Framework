@@ -54,13 +54,13 @@ Notes:
 <ul class="pageNavTabs">
 	<li>
 		<view:a event="tools.regex">
-			<view:img event="sys.serveAsset" p:path="@img@icons@arrow_rotate_clockwise.png" alt="Use Regex Tester Tool" />
+			<view:img event="sys.serveAsset" p:path="/img/icons/arrow_rotate_clockwise.png" alt="Use Regex Tester Tool" />
 			&nbsp;RegEx Tester
 		</view:a>
 	</li>
 <!--- 	<li>
 		<view:a event="tools.beanGenerator">
-			<view:img event="sys.serveAsset" p:path="@img@icons@arrow_rotate_clockwise.png" alt="Use Bean Generator Tool" />
+			<view:img event="sys.serveAsset" p:path="/img/icons/arrow_rotate_clockwise.png" alt="Use Bean Generator Tool" />
 			&nbsp;Bean Generator
 		</view:a>
 	</li> --->

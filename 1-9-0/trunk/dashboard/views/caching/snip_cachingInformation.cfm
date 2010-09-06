@@ -86,7 +86,7 @@ Notes:
 				<p class="small">
 					<cfif listGetAt(strategyType, 1, ".") eq "MachII">
 						<a href="#getProperty("udfs").getCFCDocUrl(strategyType)#" target="_blank">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@link_go.png")#" width="16" height="16" alt="Link" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
 							#strategy.getStrategyTypeName()# (#strategyType#)
 						</a>
 					<cfelse>
@@ -213,27 +213,27 @@ Notes:
 				<cfif strategy.isCacheEnabled()>
 					<li class="green">
 						<a href="#BuildUrl("caching.enableDisableCacheStrategy", "moduleName=#module#|strategyName=#strategyName#|mode=disable")#" title="Click to Disable">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@accept.png")#" width="16" height="16" alt="Enabled" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
 							&nbsp;Enabled
 						</a>
 					</li>
 				<cfelse>
 					<li class="red">
 						<a href="#BuildUrl("caching.enableDisableCacheStrategy", "moduleName=#module#|strategyName=#strategyName#|mode=enable")#" title="Click to Enable">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@stop.png")#" width="16" height="16" alt="Disable" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disable" />
 							&nbsp;Disabled
 						</a>
 					</li>
 				</cfif>
 					<li>
 						<a href="#BuildUrl("caching.reapCacheStrategy", "moduleName=#module#|strategyName=#strategyName#")#">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@database_refresh.png")#" width="16" height="16" alt="Reap" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reap" />
 							&nbsp;Reap
 						</a>
 					</li>
 					<li>
 						<a href="#BuildUrl("caching.flushCacheStrategy", "moduleName=#module#|strategyName=#strategyName#")#">
-							<img src="#BuildUrl("sys.serveAsset", "path=@img@icons@database_delete.png")#" width="16" height="16" alt="Flush" />
+							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_delete.png")#" width="16" height="16" alt="Flush" />
 							&nbsp;Flush
 						</a>
 					</li>

@@ -59,7 +59,7 @@ html {
 body {
 	font: 0.75em/1.5em Arial, Helvetica, sans-serif;
 	margin:0;
-	background: ##FFF url(#getProperty("urlBase")#/_dashboardFileServe/img/headerBk.jpg) top left repeat-x;
+	background: ##FFF url(#getProperty("urlBase")#/dashboard.serveAsset/img/headerBk.jpg) top left repeat-x;
 }
 
 hr {
@@ -314,7 +314,7 @@ pre.bold, code.bold {
 	color: ##0971AF;
 	padding: 0.5em 0 0.5em 2.5em;
 	margin: 0.5em 0 1em 0;
-	background: ##E6ECFF url(#getProperty("urlBase")#/_dashboardFileServe/img/icons/information.png) 0.5em center no-repeat;
+	background: ##E6ECFF url(#getProperty("urlBase")#/dashboard.serveAsset/img/icons/information.png) 0.5em center no-repeat;
 	border: 1px solid ##0971AF;
 	border-top: 6px solid ##0971AF;
 }
@@ -324,7 +324,7 @@ pre.bold, code.bold {
 	color: ##6BB300;
 	padding: 0.5em 0 0.5em 2.5em;
 	margin: 0.5em 0 1em 0;
-	background: ##E9FFE6 url(#getProperty("urlBase")#/_dashboardFileServe/img/icons/tick.png) 0.5em center no-repeat;
+	background: ##E9FFE6 url(#getProperty("urlBase")#/dashboard.serveAsset/img/icons/tick.png) 0.5em center no-repeat;
 	border: 1px solid ##6BB300;
 	border-top: 6px solid ##6BB300;
 }
@@ -334,7 +334,7 @@ pre.bold, code.bold {
 	color: ##CC0000;
 	padding: 0.5em 0 0.5em 2.5em;
 	margin: 0.5em 0 1em 0;
-	background: ##FFE6E6 url(#getProperty("urlBase")#/_dashboardFileServe/img/icons/exclamation.png) 0.5em center no-repeat;
+	background: ##FFE6E6 url(#getProperty("urlBase")#/dashboard.serveAsset/img/icons/exclamation.png) 0.5em center no-repeat;
 	border: 1px solid ##CC0000;
 	border-top: 6px solid ##CC0000;
 }

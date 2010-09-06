@@ -79,12 +79,12 @@ any inline javascript code.
 
 	<!--- Ensure attributes if no body content --->
 	<cfif NOT Len(variables.bodyContent)>
-		<cfset ensureOneByNameList("src,event,route") />
+		<cfset ensureOneByNameList("src,event,route,endpoint") />
 	</cfif>
 
 	<!--- If the src is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "src")
-		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
+		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route") OR StructKeyExists(attributes, "endpoint"))>
 		<cfset attributes.src = "external:" & makeUrl() />
 	</cfif>
 

@@ -57,6 +57,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.utils = "" />
 	<cfset variables.log = "" />
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
@@ -74,6 +75,7 @@ Notes:
 			hint="Sets the base AppManager." />
 
 		<cfset setAppManager(arguments.appManager) />
+		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<cfreturn this />
@@ -253,6 +255,19 @@ Notes:
 			hint="Name of endpoint to check." />
 		<cfreturn StructKeyExists(variables.endpoints, arguments.endpointName) />
 	</cffunction>
+	
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific url.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of the target endpoint." />
+		<cfargument name="urlParameters" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		
+		<cfset var endpoint = getEndpointByName(arguments.endpointName) />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		
+		<cfreturn endpoint.buildEndpointUrl(argumentcollection=params) />
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
@@ -339,6 +354,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
+	</cffunction>
+	
+	<cffunction name="setUtils" access="private" returntype="void" output="false">
+		<cfargument name="utils" type="MachII.util.Utils" required="true" />
+		<cfset variables.utils = arguments.utils />
+	</cffunction>
+	<cffunction name="getUtils" access="private" returntype="MachII.util.Utils" output="false">
+		<cfreturn variables.utils />
 	</cffunction>
 
 	<cffunction name="setEndpointContextPathMap" access="private" returntype="void" output="false">

@@ -113,7 +113,7 @@ Notes:
 		</property>
 		<property name="endpoints" type="MachII.endpoints.EndpointConfigProperty">
 			<parameters>
-				<parameter name="_dashboardFileServe">
+				<parameter name="dashboard.serveAsset">
 					<struct>
 						<key name="type" value="MachII.endpoints.file.BaseEndpoint"/>
 						<key name="basePath" value="/MachII/dashboard/assets"/>

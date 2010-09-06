@@ -82,12 +82,12 @@ Notes:
 
 	<!--- Ensure attributes if no body content --->
 	<cfif NOT Len(variables.bodyContent)>
-		<cfset ensureOneByNameList("href,event,route") />
+		<cfset ensureOneByNameList("href,event,route,endpoint") />
 	</cfif>
 
 	<!--- If the href is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "href")
-		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route"))>
+		AND (StructKeyExists(attributes, "event") OR StructKeyExists(attributes, "route") OR StructKeyExists(attributes, "endpoint"))>
 		<cfset attributes.href = "external:" & makeUrl() />
 	</cfif>
 
@@ -101,6 +101,7 @@ Notes:
   <cfset StructDelete(variables.additionalAttributes, "event", "false") />
   <cfset StructDelete(variables.additionalAttributes, "module", "false") />
   <cfset StructDelete(variables.additionalAttributes, "route", "false") />
+  <cfset StructDelete(variables.additionalAttributes, "endpoint", "false") />
   <cfset StructDelete(variables.additionalAttributes, "p", "false") />
   <cfset StructDelete(variables.additionalAttributes, "q", "false") />
 

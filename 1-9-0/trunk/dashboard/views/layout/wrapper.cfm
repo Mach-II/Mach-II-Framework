@@ -56,11 +56,9 @@ Notes:
 <head>
 	<view:charset outputType="inline" />
 	
-	<link href="#getProperty("urlBase")#/_dashboardFileServe/css/basic.cfm?pipe=css" type="text/css" rel="stylesheet" media="screen,projection" />
-	
-	<!--- <view:style event="sys.serveAsset" p:path="@css@basic.css" media="screen,projection" outputType="inline" /> --->
-	<view:style event="sys.serveAsset" p:path="@css@dialog.css" media="screen,projection" outputType="inline" />
-	<view:link type="icon" event="sys.serveAsset" p:path="@img@favicon.ico" outputType="inline" />
+	<view:style endpoint="dashboard.serveAsset" p:file="/css/basic.cfm:css" media="screen,projection" outputType="inline" />
+	<view:style endpoint="dashboard.serveAsset" p:file="/css/dialog.cfm:css" media="screen,projection" outputType="inline" />
+	<view:link type="icon" endpoint="dashboard.serveAsset" p:file="/img/favicon.ico" outputType="inline" />
 <cfif event.isArgDefined("meta.refresh")>
 	<view:meta type="refresh" content="#event.getArg("meta.refresh")#" outputType="inline" />
 </cfif>
@@ -71,17 +69,16 @@ Notes:
 	<cfset addHTTPHeaderByName("Cache-Control", "no-cache,no-store,must-revalidate,max-age=0") />
 	<cfset addHTTPHeaderByName("Expires", "Sat, 05 Jul 1997 07:00:00 GMT") />
 
-	<script src="#getProperty("urlBase")#/_dashboardFileServe/js/dump.js"></script>
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/dump.js" outputType="inline" />
 
-	<!--- <view:script event="sys.serveAsset" p:path="@js@dump.js" outputType="inline" /> --->
-	<view:script event="sys.serveAsset" p:path="@js@prototype.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@builder.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@effects.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@builder.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@dragdrop.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@controls.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@slider.js" outputType="inline" />
-	<view:script event="sys.serveAsset" p:path="@js@dialog.js" outputType="inline">
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/prototype.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/builder.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/effects.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/builder.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/dragdrop.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/controls.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/slider.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/dialog.js" outputType="inline">
 		Dialog.settings.dialogOpacity = 1;
 		Dialog.settings.cancelWhenOverlayIsClicked = true;
 	</view:script>
@@ -90,7 +87,7 @@ Notes:
 	<cfelse>
 		<cfset variables.confirmLogout = 0 />
 	</cfif>
-	<view:script event="sys.serveAsset" p:path="@js@handler@global.js" outputType="inline">
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/global.js" outputType="inline">
 		myGlobalHandler = new GlobalHandler('#variables.confirmLogout#', '#BuildUnescapedUrl(event.getRequestName(), "logout=true")#');
 	</view:script>
 </head>
