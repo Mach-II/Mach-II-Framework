@@ -64,7 +64,7 @@ Notes:
 			path can't be used as the value but we'll use it as the name. --->
 	<cfif StructKeyExists(attributes, "path")>
 		<cfparam name="attributes.name" type="string" 
-			default="#wrapResolvePath(attributes.path)#" />
+			default="#attributes.path#" />
 	<cfelse>
 		<cfset attributes.path = "file" />
 	</cfif>
@@ -87,6 +87,9 @@ Notes:
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
+	
+	<!--- Set flag for encrypt-type --->
+	<cfset request._MachIIFormLib.hasFileTag = true />
 
 <cfelse>	
 	<cfset thisTag.generatedContent = doStartTag() />

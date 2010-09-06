@@ -106,11 +106,18 @@ Notes:
 	<!--- Add event attributes specific to form tag --->
 	<cfset setAttributeIfDefined("onsubmit") />
 	<cfset setAttributeIfDefined("onreset") />
-
 	</cfsilent>
-	<cfoutput>#doStartTag()#</cfoutput>
 <cfelse>
-	<cfoutput>#doEndTag()#</cfoutput>
+	<cfset setContent(thisTag.GeneratedContent) />
+	<cfset thisTag.GeneratedContent = "" />
+
+	<cfif IsDefined("request._MachIIFormLib.hasFileTag") AND request._MachIIFormLib.hasFileTag>
+		<cfset setAttribute("enctype", "multipart/form-data") />
+		<cfset setAttribute("method", "post") />
+	</cfif>
+
+	<cfoutput>#doStartTag()##doEndTag()#</cfoutput>
+
 	<cfif NOT IsBoolean(attributes.autoFocus)
 		OR (IsBoolean(attributes.autoFocus) AND attributes.autoFocus)>
 
