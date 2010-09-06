@@ -138,7 +138,7 @@ Configuration Notes:
 	<cffunction name="buildFileSettingsMap" access="private" returntype="void" output="false"
 		hint="Builds the file settings map for expire and attachment settings by file type.">
 		
-		<cfset var rawSettings = getParameter("fileSettings", StructNew()) />	
+		<cfset var rawSettings = getParameter("fileTypeSettings", StructNew()) />	
 		<cfset var expireMap = StructNew() />
 		<cfset var attachmentMap = StructNew() />
 		<cfset var fileExtensionsArray = "" />
@@ -150,8 +150,8 @@ Configuration Notes:
 		<cfset var i = 0 />
 		
 		<cfloop collection="#rawSettings#" item="key">
-
-			<cfset temp = rawSetting[key] />
+			
+			<cfset temp = StructFind(rawSettings, key) />
 			
 			<cfif StructKeyExists(temp, "expires")>
 				<cfset expires = parseExpiresLanguage(temp.expires) />
@@ -197,7 +197,7 @@ Configuration Notes:
 		</cfif>
 		
 		<!--- Setup the file extension and any piping extension --->
-		<cfset fileExtension = ListLast(filePath, ".") />
+		<cfset fileExtension = ListFirst(ListLast(filePath, "."), ":") />
 		<cfset arguments.event.setArg("fileExtension", fileExtension) />
 		
 		<!--- Clean up any piping extension on the file path --->
@@ -207,14 +207,12 @@ Configuration Notes:
 		<cfelse>
 			<cfset arguments.event.setArg("fileFullPath", ExpandPath(getBasePath()) & ListFirst(filePath, ":")) />
 		</cfif>
-		
-		<!--- Process attachment type --->
-		<cfif NOT arguments.event.isArgDefined("attachment")>
-			<cfif StructKeyExists(variables.attachmentMap, fileExtension)>
-				<cfset arguments.event.setArg("attachment", getFileFromPath(filePath)) />
-			</cfif>
+
+		<!--- Set up the piping --->
+		<cfif ListLen(filePath, ":") EQ 2>
+			<cfset arguments.event.setArg("pipe", ListLast(filePath, ":"))>
 		</cfif>
-		
+
 		<!--- Set expiry type and value --->
 		<cfif fileExtension EQ "cfm" AND StructKeyExists(variables.expireMap, "." & arguments.event.getArg("pipe", "htm"))>
 			<cfset arguments.event.setArg("expires", variables.expireMap[pipeExtension]) />
@@ -223,6 +221,13 @@ Configuration Notes:
 		<cfelse>
 			<cfset arguments.event.setArg("expires", getExpiresDefault()) />
 		</cfif>
+		
+		<!--- Process attachment type --->
+		<cfif NOT arguments.event.isArgDefined("attachment")>
+			<cfif StructKeyExists(variables.attachmentMap, event.getArg("pipe", fileExtension))>
+				<cfset arguments.event.setArg("attachment", getFileFromPath(arguments.event.getArg("file"))) />
+			</cfif>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
@@ -230,7 +235,7 @@ Configuration Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
-			<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe"))#</cfoutput>
+			<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
 		<cfelse>
 			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
 		</cfif>
@@ -256,9 +261,9 @@ Configuration Notes:
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
 
 		<cfif Len(arguments.attachment)>
-			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
+			<cfheader name="Content-Disposition" value="attachment;file=#getFileFromPath(arguments.fileFullPath)#" />
 		</cfif>
-		
+
 		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
 		
 		<cfreturn output />
