@@ -158,6 +158,7 @@ Notes:
 		<cfset mime.htm = "text/html" />
 		<cfset mime.html = "text/html" />
 		<cfset mime.ice = "x-conference/x-cooltalk" />
+		<cfset mime.ico = "image/vnd.microsoft.icon" />
 		<cfset mime.ief = "image/ief" />
 		<cfset mime.iges = "model/iges" />
 		<cfset mime.igs = "model/iges" />
