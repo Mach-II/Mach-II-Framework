@@ -262,6 +262,13 @@ Notes:
 			<redirect event="config.index" persist="true"/>
 		</event-handler>		
 		
+		<!-- properties viewer -->
+		<event-handler event="config.properties" access="public">
+			<publish message="needConfigData" />
+			<view-page name="config.properties.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		
 		<!-- logging --> 
 		<event-handler event="logging.index" access="public">
 			<notify listener="logging" method="getLoggers" resultArg="loggers"/>
