@@ -174,22 +174,22 @@ Notes:
 		<th colspan="3"><h3>Anchors</h3></th>
 	</tr>
 	<tr class="shade">
-		<td class="center" style="width:10%;"><pre class="bold">^</pre></td>
+		<td class="center" style="width:10%;"><pre class="bold">^</pre><br/><pre class="bold">\A</pre></td>
 		<td style="width:30%;"><p>Starts with</p></td>
 		<td style="width:60%;">
 			<table>
 				<tr>
-					<td style="width:40%;"><code>^m</code></td>
+					<td style="width:40%;"><code>^m</code> OR <code>\Am</code></td>
 					<td style="width:20%;" class="center good"><code>=</code></td>
 					<td style="width:40%;"><code class="right">mike</code></td>
 				</tr>
 				<tr>
-					<td><code>^m</code></td>
+					<td><code>^m</code> OR <code>\Am</code></td>
 					<td class="center good"><code>=</code></td>
 					<td><code class="right">matt</code></td>
 				</tr>
 				<tr>
-					<td><code>^m</code></td>
+					<td><code>^m</code> OR <code>\Am</code></td>
 					<td class="center bad"><code>&ne;</code></td>
 					<td><code class="right">peter</code></td>
 				</tr>
@@ -197,24 +197,47 @@ Notes:
 		</td>
 	</tr>
 	<tr>
-		<td class="center"><pre class="bold">$</pre></td>
+		<td class="center"><pre class="bold">$</pre><br/><pre class="bold">\Z</pre></td>
 		<td><p>Ends with</p></td>
 		<td>
 			<table>
 				<tr>
-					<td style="width:40%;"><code>n$</code></td>
+					<td style="width:40%;"><code>n$</code> OR <code>n\Z</code></td>
 					<td style="width:20%;" class="center good"><code>=</code></td>
 					<td style="width:40%;"><code class="right">brian</code></td>
 				</tr>
 				<tr>
-					<td><code>n$</code></td>
+					<td><code>n$</code> OR <code>n\Z</code></td>
 					<td class="center good"><code>=</code></td>
 					<td><code class="right">adrian</code></td>
 				</tr>
 				<tr>
-					<td><code>n$</code></td>
+					<td><code>n$</code> OR <code>n\Z</code></td>
 					<td class="center bad"><code>&ne;</code></td>
 					<td><code class="right">kurt</code></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr class="shade">
+		<td class="center"><pre class="bold">^...$</pre></td>
+		<td><p>Starts with and ends with combination</p></td>
+		<td>
+			<table>
+				<tr>
+					<td style="width:40%;"><code>^p.*n$</code></td>
+					<td style="width:20%;" class="center good"><code>=</code></td>
+					<td style="width:40%;"><code class="right">peter and brian</code></td>
+				</tr>
+				<tr>
+					<td><code>^p.*n$</code></td>
+					<td class="center good"><code>=</code></td>
+					<td><code class="right">pension</code></td>
+				</tr>
+				<tr>
+					<td><code>^p.*n$</code></td>
+					<td class="center bad"><code>&ne;</code></td>
+					<td><code class="right">peter and matt</code></td>
 				</tr>
 			</table>
 		</td>
@@ -250,7 +273,7 @@ Notes:
 	</tr>
 	<tr>
 		<td class="center"><pre class="bold">|</pre></td>
-		<td><p>Matches Either / Or.</p></td>
+		<td><p>Matches Either / Or</p></td>
 		<td>
 			<table>
 				<tr>
@@ -313,5 +336,65 @@ Notes:
 			</table>
 		</td>
 	</tr>
+</table>
+
+<table style="margin-top:24px;">
+	<tr>
+		<th colspan="3"><h3>Common Patterns</h3></th>
+	</tr>
+	<tr class="shade">
+		<td>
+			<table>
+				<tr>
+					<td style="width:30%;">Matches single open / closing HTML tag</code></td>
+					<td style="width:70%;"><code class="small">(\<(/?[^\>]+)\>)</code></td>
+				</tr>
+				<tr>
+					<td>Matches open / closing HTML tag with text between</code></td>
+					<td><code class="small"><([A-Za-z][A-Za-z0-9]*)\b[^>]*>(.*?)</\1></code></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td style="width:30%;">Matches valid IP addresses</code></td>
+					<td style="width:70%;"><code class="small">\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b</code></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td style="width:30%;">Matches number range 0-999</code></td>
+					<td style="width:70%;"><code class="small">^([0-9]|[1-9][0-9]|[1-9][0-9][0-9])$</code></td>
+				</tr>
+				<tr>
+					<td>Matches number range 0-56</code></td>
+					<td><code class="small">^[0-5]?[0-9]$</code></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table>
+				<tr>
+					<td style="width:30%;">Matches date format mm/dd/yyyy (19xx or 20xx)</code></td>
+					<td style="width:70%;"><code class="small">^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)\d\d$</code></td>
+				</tr>
+				<tr>
+					<td>Matches date format dd-mm-yyyy (19xx or 20xx)</code></td>
+					<td><code class="small">^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$</code></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+
+
 </table>
 </cfoutput>
