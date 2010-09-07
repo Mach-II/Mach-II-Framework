@@ -95,6 +95,12 @@ Notes:
 			&nbsp;Refresh Stats
 		</view:a>
 	</li>
+	<li>
+		<view:a event="config.properties">
+			<view:img endpoint="dashboard.serveAsset" p:file="img/icons/database_refresh.png" width="16" height="16" alt="Property Viewer" />
+			&nbsp;Property Viewer
+		</view:a>
+	</li>
 </ul>
 
 <table>
