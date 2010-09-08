@@ -74,9 +74,9 @@ in an XML config file.
 	--->
 	<cffunction name="findFunctionsWithAnnotations" access="public" returntype="Array" output="false"
 		hint="Returns the definition of all of the functions in the input Component instance that have an annotation with the input namespace. An annotation attribute has a namespace and a colon delimiter, like 'rest:uri'. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in reverse order.">
-		<cfargument name="object" type="Component" required="true"
+		<cfargument name="object" type="any" required="true"
 			hint="The component to introspect for its definition." />
-		<cfargument name="namespace" type="String" required="true"
+		<cfargument name="namespace" type="string" required="true"
 			hint="The namespace of the annotations. Searches for '<namespace>:' in function attributes." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
 			hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
@@ -94,9 +94,9 @@ in an XML config file.
 
 	<cffunction name="getFunctionDefinitions" access="public" returntype="Array" output="false"
 		hint="Returns the definition of all of the functions in the input Component instance. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in order. The key of the struct is the fully qualified path name of the component.">
-		<cfargument name="object" type="Component" required="true"
+		<cfargument name="object" type="any" required="true"
 			hint="The component to introspect for its definition." />
-		<cfargument name="searchPattern" type="String" required="false" default=""
+		<cfargument name="searchPattern" type="string" required="false" default=""
 			hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
 			hint="When true, search for function definitions up the inheritance hierarchy of the input object." />
@@ -133,7 +133,7 @@ in an XML config file.
 
 	<cffunction name="getComponentDefinition" access="public" returntype="Array" output="false"
 		hint="Returns the definition of the input component instance. An Array of Structs is used so that if walkTree is true, each object in the hierarchy is listed in order. (When walkTree is false, only one Struct will be in the Array.)">
-		<cfargument name="object" type="Component" required="true"
+		<cfargument name="object" type="any" required="true"
 			hint="The component to introspect for its definition." />
 		<cfargument name="walkTree" type="boolean" required="false" default="false"
 			hint="When true, search for component definitions up the inheritance hierarchy of the input object." />
@@ -161,6 +161,26 @@ in an XML config file.
 		</cfif>
 
 		<cfreturn definitions />
+	</cffunction>
+	
+	<cffunction name="isInstanceOf" access="public" returntype="boolean" output="false"
+		hint="Returns a boolen if the input component is of a the passed type by walking through the inheritence hierarchy automatically.">
+		<cfargument name="object" type="any" required="true"
+			hint="The component to introspect for its definition." />
+		<cfargument name="type" type="string" required="true"
+			hint="The type of object to check for." />
+		
+		<cfset var definition = getComponentDefinition(arguments.object, "true") />
+		<cfset var i = "" />
+		
+		<!--- Walk the inheritance tree looking for a type match --->
+		<cfloop from="1" to="#ArrayLen(definition)#" index="i">
+			<cfif definition[i].name EQ arguments.type>
+				<cfreturn true />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn false />
 	</cffunction>
 
 	<!---
@@ -197,9 +217,9 @@ in an XML config file.
 
 	<cffunction name="getThisComponentFunctionDefinitions" access="private" returntype="Struct" output="false"
 		hint="Returns the definition of the functions for the input component metadata. The returned struct has the fully qualified path name of the component as the key, and an array of function definition structs as the value.">
-		<cfargument name="metadata" type="Struct" required="true"
+		<cfargument name="metadata" type="struct" required="true"
 			hint="The component to introspect for its function definitions." />
-		<cfargument name="searchPattern" type="String" required="false" default=""
+		<cfargument name="searchPattern" type="string" required="false" default=""
 			hint="An optional search pattern. When present, only functions that have at least one attribute that matches the searchPattern will be returned." />
 
 		<cfset var definition = StructNew() />
