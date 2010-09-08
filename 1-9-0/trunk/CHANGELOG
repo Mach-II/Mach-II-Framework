@@ -85,6 +85,18 @@ https://trac.mach-ii.com/machii/ticket/546
 Improvements / Enhancements
 ------------------------------------------------
 
+* Add scribble pad to dashboard
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/708
+(2010-09-07 peterfarrell)
+
+* Add property viewer to dashboard
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/684
+(2010-09-07 jorgeloyo)
+
 * Add ability to set enctype if file tag exists
 
 For more information see:
