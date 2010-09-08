@@ -630,7 +630,7 @@ Notes:
 	<cffunction name="addRoute" access="public" returntype="void" output="false"
 		hint="Adds a route by route name.">
 		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		<cfargument name="route" type="MachII.framework.url.UrlRoute" required="true" />
 		<cfargument name="overwrite" type="boolean" required="false" default="false" />
 
 		<!--- Check for name conflicts if this is not an overwrite --->
@@ -662,7 +662,7 @@ Notes:
 			<cfset StructDelete(variables.routeAliases, route.getUrlAlias(), false) />
 		</cfif>
 	</cffunction>
-	<cffunction name="getRoute" access="public" returntype="MachII.framework.UrlRoute" output="false"
+	<cffunction name="getRoute" access="public" returntype="MachII.framework.url.UrlRoute" output="false"
 		hint="Gets a route by route name.">
 		<cfargument name="routeNameOrUrlAlias" type="string" required="true" />
 

@@ -174,7 +174,7 @@ index.cfm/product/A12345/fancy/
 	<cffunction name="addRoute" access="public" returntype="void" output="false"
 		hint="Adds a route by name and UrlRoute object.">
 		<cfargument name="routeName" type="string" required="true" />
-		<cfargument name="route" type="MachII.framework.UrlRoute" required="true" />
+		<cfargument name="route" type="MachII.framework.url.UrlRoute" required="true" />
 
 		<!--- Insert the owner ID so we can know which routes are managed by this property --->
 		<cfset arguments.route.setOwnerId(variables.OWNER_ID) />
@@ -202,7 +202,7 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="optionalParameters" type="any" required="false"
 			hint="An array or comma-delimited list of optional parameters." />
 
-		<cfset var route = CreateObject("component", "MachII.framework.UrlRoute").init(arguments.routeName) />
+		<cfset var route = CreateObject("component", "MachII.framework.url.UrlRoute").init(arguments.routeName) />
 
 		<cfset route.setEventName(arguments.event) />
 
