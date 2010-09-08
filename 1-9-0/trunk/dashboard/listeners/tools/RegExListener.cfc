@@ -170,4 +170,5 @@ Notes:
 		
 		<cfreturn results />
 	</cffunction>
+	
 </cfcomponent>

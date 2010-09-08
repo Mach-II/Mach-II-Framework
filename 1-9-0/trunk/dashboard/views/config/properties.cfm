@@ -39,9 +39,10 @@ Notes:
 	<cfset ArraySort(variables.propertyArray, "textnocase", "asc") />
 	<cfset nameOfModule = "#UCase(Left(nameOfModule, 1))##Right(nameOfModule, Len(nameOfModule) -1)# Module" />
 </cfsilent>
+<cfoutput>
 
 <h1>Property Viewer</h1>
-<cfoutput>
+
 <table>
 	<tr><th><h3>Modules</h3></th></tr>
 	<tr>

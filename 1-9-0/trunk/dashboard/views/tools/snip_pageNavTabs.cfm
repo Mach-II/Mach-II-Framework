@@ -48,21 +48,27 @@ Updated version: 1.1.0
 
 Notes:
 --->
+	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 </cfsilent>
 <cfoutput>
-<cfimport prefix="view" taglib="/MachII/customtags/view" />
-<ul class="pageNavTabs">
+<ul>
 	<li>
-		<view:a event="tools.regex">
-			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" alt="Use Regex Tester Tool" />
+		<view:a event="tools.regex" class="#getProperty("udfs").highlight("tools.regex")#">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_magnify.png" alt="Use Regex Tester Tool" />
 			&nbsp;RegEx Tester
 		</view:a>
 	</li>
 <!--- 	<li>
 		<view:a event="tools.beanGenerator">
-			<view:img event="sys.serveAsset" p:path="/img/icons/arrow_rotate_clockwise.png" alt="Use Bean Generator Tool" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" alt="Use Bean Generator Tool" />
 			&nbsp;Bean Generator
 		</view:a>
 	</li> --->
+	<li>
+		<view:a event="tools.scribble" class="#getProperty("udfs").highlight("tools.scribble")#">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_gear.png" alt="Use Scribble Pad" />
+			&nbsp;Scribble Pad
+		</view:a>
+	</li>
 </ul>
 </cfoutput>

@@ -225,6 +225,48 @@ pre.bold, code.bold {
 	border: 6px solid ##CC0000;
 }
 
+/* NAVTABS
+---------------*/
+##subNavTabs {
+	float: right;
+	margin-top: 9px;
+	margin-right: 12px;
+	margin-bottom: 24px;
+	width: 960px;
+}
+
+##subNavTabs ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	float: right;
+}
+
+##subNavTabs li {
+	border-right: 1px dotted ##CCC !important;
+	border-right: 1px solid ##CCC; /* fix for IE6 */
+	float: left;
+	line-height: 1.1em;
+	margin: 0 -1em 0 1em;
+	padding: 0 1em 0 1em;
+}
+
+##subNavTabs li img {
+	float: left;
+	margin-top: -1px;
+	margin-right: 3px;
+}
+
+##subNavTabs a, ##subNavTabs a:visited {
+	color: ##333;
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+##subNavTabs a:hover, ##subNavTabs a.highlight {
+	color: ##CC3300;
+}
+
 /* SERVERINFO
 ---------------*/
 

@@ -467,5 +467,17 @@ Notes:
 
 		<cfreturn inRange />
 	</cffunction>
+	
+	<cffunction name="highlight" access="public" returntype="string" output="false">
+		<cfargument name="level" type="string" required="true" />
+		
+		<cfset var result = "" />
+		
+		<cfif getAppManager().getRequestManager().getRequestHandler().getEventContext().getCurrentEvent().getRequestName().toLowerCase().startsWith(arguments.level)>
+			<cfset result = 'highlight' />
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
 
 </cfcomponent>

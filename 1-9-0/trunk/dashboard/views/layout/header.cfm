@@ -49,7 +49,7 @@ Updated version: 1.1.0
 
 Notes:
 --->
-<cfset variables.eventName = event.getRequestName() />
+
 <cfset variables.sysProperties = createObject("java", "java.lang.System").getProperties() />
 
 <cfif StructKeyExists(variables.sysProperties, "jrun.server.name")>
@@ -57,19 +57,6 @@ Notes:
 <cfelse>
 	<cfset variables.instanceName = "n/a" />
 </cfif>
-
-	<!--- This is a hack --->
-	<cffunction name="highlight" access="public" returntype="string" output="false">
-		<cfargument name="level" type="string" required="true" />
-		
-		<cfset var result = "" />
-		
-		<cfif variables.eventName.toLowerCase().startsWith(arguments.level)>
-			<cfset result = 'highlight' />
-		</cfif>
-		
-		<cfreturn result />
-	</cffunction>
 
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 </cfsilent>
@@ -110,20 +97,14 @@ Notes:
 
 <div id="navTabs">
 	<ul>
-		<li><view:a event="info.index" class="#highlight("info.")#">Info</view:a></li>
-		<li><view:a event="config.index" class="#highlight("config.")#">Config</view:a></li>
-		<li><view:a event="logging.index" class="#highlight("logging.")#">Logging</view:a></li>
-		<li><view:a event="caching.index" class="#highlight("caching.")#">Caching</view:a></li>
-		<li><view:a event="debugging.index" class="#highlight("debugging.")#">Debugging</view:a></li>
-		<li><view:a event="tools.index" class="#highlight("tools.")#">Tools</view:a></li>
-		<li><view:a event="autoUpdate.index" class="#highlight("autoupdate.")#">Auto Update</view:a></li>
+		<li><view:a event="info.index" class="#getProperty("udfs").highlight("info.")#">Info</view:a></li>
+		<li><view:a event="config.index" class="#getProperty("udfs").highlight("config.")#">Config</view:a></li>
+		<li><view:a event="logging.index" class="#getProperty("udfs").highlight("logging.")#">Logging</view:a></li>
+		<li><view:a event="caching.index" class="#getProperty("udfs").highlight("caching.")#">Caching</view:a></li>
+		<li><view:a event="debugging.index" class="#getProperty("udfs").highlight("debugging.")#">Debugging</view:a></li>
+		<li><view:a event="tools.index" class="#getProperty("udfs").highlight("tools.")#">Tools</view:a></li>
+		<li><view:a event="autoUpdate.index" class="#getProperty("udfs").highlight("autoupdate.")#">Auto Update</view:a></li>
 	</ul>
 </div>
 </cfif>
-<!---
-	Delete the function scope leakage into the ViewContext that can make errors hard to figure out
-	We really shouldn't be putting a function at the top of the view.
---->
-<cfset StructDelete(this, "highlight") />
-<cfset StructDelete(variables, "highlight") />
 </cfoutput>

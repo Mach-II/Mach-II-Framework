@@ -41,17 +41,29 @@
 	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
-$Id$
+$Id: snip_pageNavTabs.cfm 2366 2010-09-06 20:44:17Z peterjfarrell $
 
 Created version: 1.1.0
 Updated version: 1.1.0
 
 Notes:
 --->
-	<cfimport prefix="view" taglib="/MachII/customtags/view" />
-	<view:meta type="title" content="Tools" />
+
+<cfimport prefix="view" taglib="/MachII/customtags/view" />
 </cfsilent>
 <cfoutput>
-<h1>Tools</h1>
-
+<ul>
+	<li>
+		<view:a event="config.index" class="#getProperty("udfs").highlight("config.index")#">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_magnify.png" alt="Use Regex Tester Tool" />
+			&nbsp;File Status
+		</view:a>
+	</li>
+	<li>
+		<view:a event="config.properties" class="#getProperty("udfs").highlight("config.properties")#">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_gear.png" alt="Property Viewer" />
+			&nbsp;Property Viewer
+		</view:a>
+	</li>
+</ul>
 </cfoutput>

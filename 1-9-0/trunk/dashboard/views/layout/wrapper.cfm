@@ -98,6 +98,10 @@ Notes:
 	#event.getArg("layout.header")#
 </div>
 
+<div id="subNavTabs">
+	#event.getArg("layout.snip_pageNavTabs")#
+</div>
+
 <div id="content">
 	#event.getArg("layout.content")#
 </div>

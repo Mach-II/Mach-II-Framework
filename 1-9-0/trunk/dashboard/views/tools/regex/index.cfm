@@ -30,9 +30,6 @@ Notes:
 <cfoutput>
 <h1>RegEx Tester</h1>
 
-<!--- Output the pageNavTabs --->
-#event.getArg("layout.snip_pageNavTabs")#
-
 <h2 id="resultsTitle">Results</h2>
 <div id="results" style="padding-bottom:24px;">
 </div>

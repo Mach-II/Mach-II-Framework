@@ -66,13 +66,14 @@ Notes:
 		<property name="enableDashboardExceptionLogging" value="true"/>
 		
 		<property name="chartProvider" value="googlecharts"/>
+		<property name="scribbleAvailable" value="true"/>
 		
 		<!-- Dynamic Settings -->
 		<property name="sessionManagementScope" value=""/>
 
 		<property name="udfs" type="MachII.dashboard.properties.Udfs"/>		
 		<property name="application" type="MachII.dashboard.properties.ApplicationProperty"/>
-		<property name="logging" type="MachII.logging.LoggingProperty">
+		<property name="logging" type="LoggingProperty">
 			<parameters>
 				<parameter name="Exception">
 					<struct>
@@ -86,8 +87,8 @@ Notes:
 				</parameter>
 			</parameters>
 		</property>
-		<property name="caching" type="MachII.caching.CachingProperty"/>
-		<property name="html" type="MachII.properties.HtmlHelperProperty">
+		<property name="caching" type="CachingProperty"/>
+		<property name="html" type="HtmlHelperProperty">
 			<parameters>
 				<parameter name="metaTitleSuffix" value="${properties.metaTitleSuffix}"/>
 				<parameter name="jsBasePath" value=""/>
@@ -165,6 +166,7 @@ Notes:
 		<listener name="info" type="MachII.dashboard.listeners.InfoListener"/>
 		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
 		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
+		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
 	</listeners>
 	
 	<!-- SUBSCRIBERS -->
@@ -210,7 +212,8 @@ Notes:
 	
 		<!-- config -->
 		<event-handler event="config.index" access="public">
-			<publish message="needConfigData" />		
+			<publish message="needConfigData" />
+			<view-page name="config.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
 			<view-page name="config.snip_components" contentArg="layout.snip_components"/>	
 			<view-page name="config.index" contentArg="layout.content"/>
 			<execute subroutine="doLayout"/>
@@ -265,7 +268,8 @@ Notes:
 		<!-- properties viewer -->
 		<event-handler event="config.properties" access="public">
 			<publish message="needConfigData" />
-			<view-page name="config.properties.index" contentArg="layout.content"/>
+			<view-page name="config.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="config.properties" contentArg="layout.content"/>
 			<execute subroutine="doLayout"/>
 		</event-handler>
 		
@@ -377,8 +381,20 @@ Notes:
 		
 		<event-handler event="tools.beanGenerator" access="public">
 			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
-			<view-page name="tools.beanGenerator" contentArg="layout.content"/>
+			<view-page name="tools.beanGenerator.index" contentArg="layout.content"/>
 			<execute subroutine="doLayout"/>
+		</event-handler>
+		
+		<event-handler event="tools.scribble" access="public">
+			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="tools.scribble.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+
+		<event-handler event="js.tools.scribble.process" access="public">
+			<notify listener="tools.scribble" method="processInput"/>
+			<view-page name="tools.scribble.snip_output"/>
+			<notify listener="tools.scribble" method="cleanup"/>
 		</event-handler>
 		
 		<!-- sys -->
@@ -410,7 +426,7 @@ Notes:
 	
 	<!-- PAGE-VIEWS -->
 	<page-views>
-		<view-loader type="MachII.framework.viewLoaders.PatternViewLoader" />
+		<view-loader type="PatternViewLoader" />
 	</page-views>
 
 </mach-ii>
