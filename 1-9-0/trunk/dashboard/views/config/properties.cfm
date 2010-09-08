@@ -38,6 +38,8 @@ Notes:
 	<cfset variables.propertyArray = StructKeyArray(variables.propertyStruct) />
 	<cfset ArraySort(variables.propertyArray, "textnocase", "asc") />
 	<cfset nameOfModule = "#UCase(Left(nameOfModule, 1))##Right(nameOfModule, Len(nameOfModule) -1)# Module" />
+	
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 </cfsilent>
 <cfoutput>
 
@@ -101,10 +103,34 @@ Notes:
 				<cfif propertyType eq "String">
 					#propertyValue#
 				<cfelseif propertyType eq "Object">
-					<cfset propertyValue = getMetaData(propertyValue) />
-					<cfdump var="#propertyValue#" label="#propertyValue.name#" expand="false" />
+					<cfset variables.m2property = false />
+					<cfif variables.introspector.isInstanceOf(propertyValue, "MachII.framework.BaseProxy")>
+						<cfset propertyValue = propertyValue.getObject() />
+						<cfset variables.m2property = true />
+					</cfif>
+				<div id="property#i#" style="display:none;">
+					<!--- Inner div needed for effects to display properly --->
+					<div>
+						<h3>Object</h3>
+						<cfdump var="#propertyValue#" expand="true" />
+						
+						<!--- Show any configuration parameters passed to M2 property object --->
+						<cfif variables.m2property>
+						<h3>Parameters</h3>
+						<cfdump var="#propertyValue.getParameters()#" expand="true" />
+						</cfif>
+					</div>
+				</div>
+				<!--- Used an effect because Railo / OpenBD don't collapse the dump --->
+				<p><a href="##" onclick="Effect.toggle('property#i#', 'blind'); return false;">Show / hide</p>
 				<cfelse>
-					<cfdump var="#propertyValue#" label="#variables.propertyArray[i]#" expand="false" />
+				<div id="property#i#" style="display:none;">
+					<!--- Inner div needed for effects to display properly --->
+					<div>
+						<cfdump var="#propertyValue#" label="#variables.propertyArray[i]#" expand="true" />
+					</div>
+				</div>
+				<p><a href="##" onclick="Effect.toggle('property#i#', 'blind'); return false;">Show / hide</p>
 				</cfif>
 			</td>
 		</tr>
