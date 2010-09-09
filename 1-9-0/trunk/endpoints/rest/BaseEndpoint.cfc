@@ -58,17 +58,9 @@ To Test it out, do the following:
 
 1. 	In a new Mach-II app, add this to the Mach-II config:
 
-	<properties>
-		<property name="endpoint" type="MachII.endpoints.EndpointConfigProperty">
-			<parameters>
-				<parameter name="test">
-					<struct>
-						<key name="type" value="MachII.tests.dummy.DummyRestEndpoint"/>
-					</struct>
-				</parameter>
-			</parameters>
-		</property>
-	</properties>
+	<endpoints>
+		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint"/>
+	</endpoints>
 
 2. 	Setup a web server like Apache to route all non-file URLs to your ColdFusion app:
 

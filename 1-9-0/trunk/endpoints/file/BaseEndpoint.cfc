@@ -52,47 +52,44 @@ http://tn123.ath.cx/mod_xsendfile/
 
 Configuration Notes:
 
-<property name="endpoints" type="MachII.endpoints.EndpointConfigProperty">
-	<parameters>
-		<parameter name="_dashboardFileServe">
-			<struct>
-				<key name="type" value="MachII.endpoints.file.BaseEndpoint"/>
-				<key name="basePath" value="/MachII/dashboard/assets"/>
-				<key name="servingEngineType" value="cfcontent|sendfile" />
-				<key name="expireHeaderEnabled">
-					<struct>
-						<key name="group:development" value="true"/>
-						<key name="group:production" value="true"/>
-					</struct>
-				</key>
-				<key name="expiresDefault" value="access plus 365,0,0,0" />
-				<key name="attachmentDefault" value="false" />
-				<key name="fileTypeSettings">
-					<struct>
-						<key name=".*">
-							<struct>
-								<key name="expires" value="access plus 8,0,0,0"/>
-								<key name="attachment" value="false" />
-							</struct>
-						</key>
-						<key name=".js,.css,.jpg,.gif,.png">
-							<struct>
-								<key name="expires" value="access plus 365,0,0,0"/>
-								<key name="attachment" value="false" />
-							</struct>
-						</key>
-						<key name=".pdf">
-							<struct>
-								<key name="expires" value="access plus 0,0,0,0"/>
-								<key name="attachment" value="true" />
-							</struct>
-						</key>
-					</struct>
-				</key>
-			</struct>
-		</parameter>
-	</parameters>
-</property>
+<endpoints>
+	<endpoint name="dashboard.serveAsset" type="MachII.endpoints.file.BaseEndpoint">
+		<parameters>
+			<parameter name="basePath" value="/MachII/dashboard/assets"/>
+			<parameter name="servingEngineType" value="cfcontent|sendfile" />
+			<parameter name="expireHeaderEnabled">
+				<struct>
+					<key name="group:development" value="true"/>
+					<key name="group:production" value="true"/>
+				</struct>
+			</parameter>
+			<parameter name="expiresDefault" value="access plus 365,0,0,0" />
+			<parameter name="attachmentDefault" value="false" />
+			<parameter name="fileTypeSettings">
+				<struct>
+					<key name=".*">
+						<struct>
+							<key name="expires" value="access plus 8,0,0,0"/>
+							<key name="attachment" value="false" />
+						</struct>
+					</key>
+					<key name=".js,.css,.jpg,.gif,.png">
+						<struct>
+							<key name="expires" value="access plus 365,0,0,0"/>
+							<key name="attachment" value="false" />
+						</struct>
+					</key>
+					<key name=".pdf">
+						<struct>
+							<key name="expires" value="access plus 0,0,0,0"/>
+							<key name="attachment" value="true" />
+						</struct>
+					</key>
+				</struct>
+			</parameter>
+		</parameters>
+	</endpoint>
+</endpoints>
 
 --->
 <cfcomponent
