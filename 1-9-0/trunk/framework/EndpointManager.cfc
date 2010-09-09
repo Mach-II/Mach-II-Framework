@@ -110,6 +110,7 @@ Notes:
 
 		<cfset var utils = getAppManager().getUtils() />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
 
 		<!--- Search for endpoints --->
 		<cfif NOT arguments.override>

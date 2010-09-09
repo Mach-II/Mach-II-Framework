@@ -167,10 +167,10 @@ Configuration Notes:
 				<cfset attachment = getAttachmentDefault() />
 			</cfif>
 
-			<cfset fileExtensions = ListToArray(key) />
+			<cfset fileExtensionsArray = ListToArray(key) />
 			
-			<cfloop from="1" to="#ArrayLen(fileExtensions)#" index="i">
-				<cfset fileExtension = ReplaceNoCase(fileExtensions[i], ".", "", "all") />
+			<cfloop from="1" to="#ArrayLen(fileExtensionsArray)#" index="i">
+				<cfset fileExtension = ReplaceNoCase(fileExtensionsArray[i], ".", "", "all") />
 				<cfset expireMap[fileExtension] = expires />
 				<cfset attachmentMap[fileExtension] = attachment />
 			</cfloop>
@@ -299,6 +299,7 @@ Configuration Notes:
 			hint="The file extension type to pipe the output to (.cfm -> .css)." />
 		
 		<cfset var contentType = getContentTypeFromFilePath(arguments.pipeExtension) />
+		<cfset var output = "" />
 		
 		<cfheader name="Content-Type" value="#contentType#" />
 		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
