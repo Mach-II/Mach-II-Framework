@@ -67,7 +67,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	"mach-ii"
 		version - the version of the DTD being used for configuration
 -->
-<!ELEMENT mach-ii ((includes?, modules?, properties?, listeners?, message-subscribers?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(includes?, modules?, properties?, listeners?, message-subscribers?, event-filters?, plugins?, event-handlers?, subroutines?, page-views?))>
+<!ELEMENT mach-ii ((includes?, modules?, properties?, endpoints?, listeners?, message-subscribers?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(includes?, modules?, properties?, endpoints?, listeners?, message-subscribers?, event-filters?, plugins?, event-handlers?, subroutines?, page-views?))>
 <!ATTLIST mach-ii 
 	version CDATA #IMPLIED
 >
@@ -128,6 +128,23 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	type CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
+>
+
+<!--
+	The "endpoints" element defines all the endpoints to be registered with the framework.
+	Endpoints are like Java servlets implemented in CFML.
+	Endpoints are referenced by name and are global per application (not base or module).
+-->
+<!ELEMENT endpoints (endpoint*)>
+<!--
+	"endpoint"
+		name - the name of the endpoint
+		type - the type of the endpoint (fully qualified CFC dot path)
+--->
+<!ELEMENT endpoint (parameters?)>
+<!ATTLIST property
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
 >
 
 <!--

@@ -57,14 +57,18 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
+	<cfset variables.parentEndpointManager = "" />
 	<cfset variables.utils = "" />
 	<cfset variables.log = "" />
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
-	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
-
+	
+	<!---
+	CONSTANTS
+	--->
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
-	<cfset variables.ENDPOINT_SHORTCUTS["ShortcutName"] = "MachII.endpoints.impl.NameOfEndpoint" />
+	<cfset variables.ENDPOINT_SHORTCUTS["file"] = "MachII.endpoints.file.BaseEndpoint" />
 
 	<!---
 	INITIALIZATION/CONFIGURATION
@@ -75,18 +79,82 @@ Notes:
 			hint="Sets the base AppManager." />
 
 		<cfset setAppManager(arguments.appManager) />
+		
+		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getEndpointManager()) />
+			
+			<!--- Share the endponts struct betwen the parent and child since they are global not module specific --->
+			<cfset setEndpoints(getParent().getEndpoints()) />
+			<cfset setEndpointContextPathMap(getParent().getEndpointContextPathMap()) />
+		</cfif>
+		
 		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<cfreturn this />
+	</cffunction>
+	
+	<cffunction name="loadXml" access="public" returntype="void" output="false"
+		hint="Loads xml into the manager.">
+		<cfargument name="configXML" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
+
+		<cfset var endpointNodes = ArrayNew(1) />
+		<cfset var endpointName = "" />
+		<cfset var endpointType = "" />
+		<cfset var endpointParams = "" />
+
+		<cfset var paramsNodes = ArrayNew(1) />
+		<cfset var paramName = "" />
+		<cfset var paramValue = "" />
+
+		<cfset var utils = getAppManager().getUtils() />
+		<cfset var i = 0 />
+
+		<!--- Search for endpoints --->
+		<cfif NOT arguments.override>
+			<cfset endpointNodes = XMLSearch(arguments.configXML, "mach-ii/endpoints/endpoint") />
+		<cfelse>
+			<cfset endpointNodes = XMLSearch(arguments.configXML, ".//endpoints/endpoint") />
+		</cfif>
+
+		<!--- Set the endpoints from the XML file. --->
+		<cfloop from="1" to="#ArrayLen(endpointNodes)#" index="i">
+			<cfset endpointName = endpointNodes[i].xmlAttributes["name"] />
+			<cfset endpointType = endpointNodes[i].xmlAttributes["type"] />
+
+			<!--- Set the Endpoint's parameters. --->
+			<cfset endpointParams = StructNew() />
+
+			<!--- Parse all the parameters --->
+			<cfif StructKeyExists(endpointNodes[i], "parameters")>
+				<cfset paramsNodes = endpointNodes[i].parameters.xmlChildren />
+				<cfloop from="1" to="#ArrayLen(paramsNodes)#" index="j">
+					<cfset paramName = paramsNodes[j].XmlAttributes["name"] />
+					<cftry>
+						<cfset paramValue = utils.recurseComplexValues(paramsNodes[j]) />
+						<cfcatch type="any">
+							<cfthrow type="MachII.framework.InvalidPropertyXml"
+								message="Xml parsing error for the endpoint named '#endpointName#'." />
+						</cfcatch>
+					</cftry>
+					<cfset endpointParams[paramName] = paramValue />
+				</cfloop>
+			</cfif> 
+
+			<!--- Set the property (allowable property names ared checked by setProperty() method so no check needed here)--->
+			<cfset loadEndpoint(endpointName, endpointType, endpointParams, arguments.override) />
+		</cfloop>
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures all the endpoints.">
 
 		<cfset var appManager = getAppManager() />
+		<cfset var parent = getParent() />
 		<cfset var endpoints = getEndpoints() />
 		<cfset var anEndpoint = "" />
+		<cfset var modules = "" />
 		<cfset var key = "" />
 
 		<cfset setEndpointParameter(appManager.getPropertyManager().getProperty("endpointParameter")) />
@@ -96,13 +164,12 @@ Notes:
 			<cfset appManager.onObjectReload(anEndpoint) />
 			<cfset anEndpoint.configure() />
 		</cfloop>
-
-		<cfset buildEndpointContextPathMap() />
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures all the endpoints.">
 
+		<cfset var parent = getParent() />
 		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 
@@ -113,7 +180,7 @@ Notes:
 		<cfset variables.endpointContextPathMap = StructNew() />
 	</cffunction>
 
-	<cffunction name="buildEndpointContextPathMap" access="private" returntype="void" output="false"
+	<cffunction name="buildEndpointContextPathMap" access="private" returntype="struct" output="false"
 		hint="Builds a map of context paths and endpoint names.">
 
 		<cfset var endpointContextPathMap = StructNew() />
@@ -208,16 +275,23 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-
-	<!---
-	PUBLIC FUNCTIONS - GENERAL
-	--->
-	<cffunction name="isTargetPageEndpoint" access="public" returntype="boolean" output="false"
-		hint="Checks if the target page should be handled by the endpoint.">
-		<cfargument name="targetPage" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.endpointTargetPageMap, arguments.targetPage) />
+	
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific url.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of the target endpoint." />
+		<cfargument name="urlParameters" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		
+		<cfset var endpoint = getEndpointByName(arguments.endpointName) />
+		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
+		
+		<cfreturn endpoint.buildEndpointUrl(argumentcollection=params) />
 	</cffunction>
-
+	
+	<!---
+	PUBLIC FUNCTIONS
+	--->
 	<cffunction name="getEndpointByName" access="public" returntype="MachII.endpoints.AbstractEndpoint" output="false"
 		hint="Gets a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
@@ -255,33 +329,20 @@ Notes:
 			hint="Name of endpoint to check." />
 		<cfreturn StructKeyExists(variables.endpoints, arguments.endpointName) />
 	</cffunction>
-	
-	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
-		hint="Builds an endpoint specific url.">
-		<cfargument name="endpointName" type="string" required="true"
-			hint="Name of the target endpoint." />
-		<cfargument name="urlParameters" required="false" default=""
-			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		
-		<cfset var endpoint = getEndpointByName(arguments.endpointName) />
-		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
-		
-		<cfreturn endpoint.buildEndpointUrl(argumentcollection=params) />
-	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS - UTILS
+	PUBLIC FUNCTIONS - LOCAL UTILS
 	--->
 	<cffunction name="loadEndpoint" access="public" returntype="void" output="false"
 		hint="Loads an endpoint and adds the endpoint to the manager.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
-			hint="The AppManager the endpoint was loaded from." />
 		<cfargument name="endpointName" type="string" required="true"
 			hint="Name of endpoint." />
 		<cfargument name="endpointType" type="string" required="true"
 			hint="Dot path to the endpoint." />
 		<cfargument name="endpointParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Configuration parameters for the endpoint." />
+		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
+			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />
 
 		<cfset var endpoint = "" />
 
@@ -298,7 +359,7 @@ Notes:
 
 		<!--- Create the endpoint --->
 		<cftry>
-			<cfset endpoint = CreateObject("component", arguments.endpointType).init(arguments.appManager, this, arguments.endpointParameters) />
+			<cfset endpoint = CreateObject("component", arguments.endpointType).init(getAppManager(), this, arguments.endpointParameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.endpointType>
@@ -315,7 +376,7 @@ Notes:
 		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
 		<cfset endpoint.setIsOnExceptionDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onException"', true, "MachII.endpoints.AbstractEndpoint"))) />
 
-		<cfset addEndpoint(arguments.endpointName, endpoint) />
+		<cfset addEndpoint(arguments.endpointName, endpoint, arguments.overrideCheck) />
 	</cffunction>
 
 	<cffunction name="resolveEndTypeShortcut" access="public" returntype="string" output="false"
@@ -330,11 +391,6 @@ Notes:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="getEndpoints" access="public" returntype="struct" output="false"
-		hint="Gets all registered endpoints for this manager.">
-		<cfreturn variables.endpoints />
-	</cffunction>
-
 	<cffunction name="getEndpointNames" access="public" returntype="array" output="false"
 		hint="Returns an array of endpoint names.">
 		<cfreturn StructKeyArray(variables.endpoints) />
@@ -344,7 +400,7 @@ Notes:
 		hint="Returns a boolean of on whether or not there are any registered endpoints.">
 		<cfreturn StructCount(variables.endpoints) GT 0 />
 	</cffunction>
-
+	
 	<!---
 	ACCESSORS
 	--->
@@ -355,13 +411,29 @@ Notes:
 	<cffunction name="getAppManager" access="private" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
+	<cffunction name="setParent" access="public" returntype="void" output="false">
+		<cfargument name="parentEndpointManager" type="MachII.framework.EndpointManager" required="true" />
+		<cfset variables.parentEndpointManager = arguments.parentEndpointManager />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false">
+		<cfreturn variables.parentEndpointManager />
+	</cffunction>
+
 	<cffunction name="setUtils" access="private" returntype="void" output="false">
 		<cfargument name="utils" type="MachII.util.Utils" required="true" />
 		<cfset variables.utils = arguments.utils />
 	</cffunction>
 	<cffunction name="getUtils" access="private" returntype="MachII.util.Utils" output="false">
 		<cfreturn variables.utils />
+	</cffunction>
+
+	<cffunction name="setEndpoints" access="public" returntype="void" output="false">
+		<cfargument name="endpoints" type="struct" required="true" />
+		<cfset variables.endpoints = arguments.endpoints />
+	</cffunction>
+	<cffunction name="getEndpoints" access="public" returntype="struct" output="false">
+		<cfreturn variables.endpoints />
 	</cffunction>
 
 	<cffunction name="setEndpointContextPathMap" access="private" returntype="void" output="false">

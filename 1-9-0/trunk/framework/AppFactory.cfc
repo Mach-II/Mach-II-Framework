@@ -198,12 +198,10 @@ Notes:
 		<cfset loadManager(appManager, "MachII.framework.EventManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.ViewManager", false, configXmls, arguments.overrideXml) />
 		<cfset loadManager(appManager, "MachII.framework.PluginManager", false, configXmls, arguments.overrideXml) />
+		<cfset loadManager(appManager, "MachII.framework.EndpointManager", false, configXmls, arguments.overrideXml) />
 
 		<!--- GlobalizationManager is not a singleton and loads no XML --->
 		<cfset loadManager(appManager, "MachII.framework.GlobalizationManager", false) />
-
-		<!--- EndpointManager is a singleton and loads no XML --->
-		<cfset loadManager(appManager, "MachII.framework.EndpointManager", true) />
 
 		<cfif NOT appManager.inModule()>
 			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, GetDirectoryFromPath(arguments.configXmlPath), arguments.configDtdPath, arguments.validateXML) />

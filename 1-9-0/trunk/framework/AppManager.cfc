@@ -135,12 +135,12 @@ Notes:
 		<cfset getSubroutineManager().configure() />
 		<cfset getEventManager().configure() />
 		<cfset getViewManager().configure() />
+		<cfset getEndpointManager().configure() />
 
 		<!--- These managers are singletons and only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
 			<cfset getModuleManager().configure() />
 			<cfset getGlobalizationManager().configure() />
-			<cfset getEndpointManager().configure() />
 		</cfif>
 
 		<!--- Flip loading to false --->
