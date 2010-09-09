@@ -259,7 +259,7 @@ Notes:
 			&nbsp;Refresh Stats
 		</a>
 	</li>
-	<cfif IsDefined("applicationInstance.ormenabled") AND applicationInstance.ormenabled EQ true >
+	<cfif getProperty('OrmEnabled') EQ true >
  	<li>
 		<view:a event="config.reloadAllOrmComponents">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reload ORM Components" />
