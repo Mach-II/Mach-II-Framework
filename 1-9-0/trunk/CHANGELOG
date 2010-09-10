@@ -84,6 +84,12 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Add property to set the interval in which to reload all changed 
+components in the dashboard
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/695
+(2010-09-09 peterfarrell)
 
 * View library tags now support "event" and "module" attributes to
 dynamically build URLs to a Mach-II event

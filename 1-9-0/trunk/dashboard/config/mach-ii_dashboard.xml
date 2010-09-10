@@ -65,6 +65,12 @@ Notes:
 		<property name="logoutPromptTimeout" value="30" />
 		<property name="enableDashboardExceptionLogging" value="true"/>
 		
+		<property name="reloadAllChangedComponentsInterval">
+			<struct>
+				<key name="group:development" value="3"/>
+			</struct>
+		</property>
+		
 		<property name="chartProvider" value="googlecharts"/>
 		<property name="scribbleAvailable" value="true"/>
 		

@@ -96,6 +96,7 @@ Notes:
 		<cfset setProperty("moduleName", getAppManager().getModuleName()) />
 		<cfset setProperty("appKey", getAppManager().getAppKey()) />
 		<cfset setProperty("metaTitleSuffix", " | Dashboard (" & cgi.SERVER_NAME & ")") />
+		<cfset setProperty("reloadAllChangedComponentsInterval", resolveValueByEnvironment(getProperty("reloadAllChangedComponentsInterval", 0), 0)) />
 	</cffunction>
 
 	<!---

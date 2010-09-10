@@ -302,6 +302,28 @@ XML for the module like this:
 			</mach-ii>
 		</module>
 	</modules>
+	
+* "reloadAllChangedComponentsInterval" Property
+
+This property allows you to change the default interval between checks to reload changed component 
+on the config page. This property by default is set to "0" for all evnironments except for environments
+in the "development" group in which the value is "3".  For example, in production environment groups
+the value should probably be set to "0" (default).
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="reloadAllChangedComponentsInterval">
+						<struct>
+							<key name="group:development" value="3"/>
+						</struct>
+					</property>
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
 
 ------------------------------------------------
  _                      
