@@ -170,5 +170,11 @@ Notes:
 		<cfset assertEquals(2, ArrayLen(definition), "There should be two items in the array when we stop at the first parent.") />
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotationsParent", definition[2].component) />
 	</cffunction>
+	
+	<cffunction name="testIsInstanceOf" access="public" returntype="void" output="false"
+		hint="Test isInstanceOf method.">
+		
+		<cfset assertTrue(variables.introspector.isInstanceOf(variables.dummy, "MachII.tests.dummy.HasAnnotations")) />
+	</cffunction>
 
 </cfcomponent>
