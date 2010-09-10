@@ -316,9 +316,18 @@ Notes:
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
 			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />
 
+		<cfset var currEndpoint = "" />
+
 		<cfif NOT arguments.overrideCheck AND isEndpointDefined(arguments.endpointName)>
-			<cfthrow type="MachII.endpoints.EndpointAlreadyDefined"
-				message="An endpoint with name '#arguments.endpointName#' is already registered." />
+			<cfset currEndpoint = getEndpointByName(arguments.endpointName) />
+			
+			<!--- If the endpoint being added is from the same module overwrite --->
+			<cfif currEndpoint.getAppManager().getModuleName() EQ getAppManager().getModuleName()>
+				<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
+			<cfelse>
+				<cfthrow type="MachII.endpoints.EndpointAlreadyDefined"
+					message="An endpoint with name '#arguments.endpointName#' is already registered." />
+			</cfif>
 		<cfelse>
 			<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
 		</cfif>
