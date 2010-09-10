@@ -252,7 +252,7 @@ Notes:
 				<cfheader statuscode="404" statustext="Not Found" />
 				<cfheader name="machii.endpoint.error" value="#cfcatch.message#" />
 				<cfset variables.log.error(cfcatch.message, event.getArgs()) />
-				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message#</cfoutput><cfsetting enablecfoutputonly="true" />
+				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message# #cfcatch.detail#</cfoutput><cfsetting enablecfoutputonly="true" />
 			</cfcatch>
 			<cfcatch type="any">
 				<cfif event.isArgDefined("throw")>
