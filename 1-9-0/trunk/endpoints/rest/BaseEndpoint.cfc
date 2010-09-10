@@ -59,22 +59,33 @@ To Test it out, do the following:
 1. 	In a new Mach-II app, add this to the Mach-II config:
 
 	<endpoints>
-		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint"/>
+		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint">
+			<parameters>
+				<!--
+					Optionally sets the default return format (MIME type) of the request 
+					if not defined in the url (defaults to html if not defined)
+				-->
+				<parameter name="defaultFormat" value="json" />
+			</parameters>
+		</endpoint>
 	</endpoints>
 
-2. 	Setup a web server like Apache to route all non-file URLs to your ColdFusion app:
+2. 	Setup a web server like Apache to route all non-file URLs to your CFML app.
 
 	RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
 	RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
 	RewriteRule "^/(.*)$" "/index.cfm/$1" [C,QSA]
 
-3. 	Setup your Coldfusion app to route all requests to /index.cfm/* so the PATH_INFO
+3. 	Setup your CFML app to route all requests to /index.cfm/* so the PATH_INFO
 	from all requests will be routed to Mach-II. On Adobe CF, you can use:
 
 	<servlet-mapping id="coldfusion_mapping_7">
 		<servlet-name>CfmServlet</servlet-name>
 		<url-pattern>/index.cfm/*</url-pattern>
 	</servlet-mapping>
+	
+	You can all other mapping in other servlet engines like Tomcat by looking in
+	the web.xml file in the servlet roo base path.
 
 4.	Start the app, and test these URLs:
 
@@ -116,41 +127,11 @@ to return good responses and response codes, use of format (.json), etc.
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Child endpoints must call this configure method [i.e. super.configure()] to setup the RESTful methods correctly.">
-
-		<cfset var restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_REST_BASE) />
-		<cfset var currMetadata = "" />
-		<cfset var currFunction = "" />
-		<cfset var currRestUri = "" />
-		<cfset var currHttpMethod = "" />
-		<cfset var i = 0 />
-
-		<cfif ArrayLen(restMethodMetadata)>
-			<!--- TODO: Limiting to the base component for now, not following whole object hierarchy yet. --->
-			<cfset currMetadata = restMethodMetadata[1] />
-
-			<cfif StructKeyExists(currMetadata, "functions")>
-				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
-					<!--- Iterate through found methods and look for required REST:URI annotation --->
-					<cfset currFunction = currMetadata.functions[i] />
-					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
-						<!--- Default to GET method --->
-						<cfif StructKeyExists(currFunction, ANNOTATION_REST_METHOD)>
-							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
-						<cfelse>
-							<cfset currHttpMethod = "GET" />
-						</cfif>
-						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
-						<cfset currRestUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
-								currFunction[variables.ANNOTATION_REST_URI]
-								, currHttpMethod
-								, currFunction.name
-								, getParameter("name")
-							) />
-						<cfset variables.restUris.addRestUri(currRestUri) />
-					</cfif>
-				</cfloop>
-			</cfif>
-		</cfif>
+		
+		<!--- Configure any parameters --->
+		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />	
+		
+		<cfset setupRestMethods() />
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
@@ -300,28 +281,77 @@ to return good responses and response codes, use of format (.json), etc.
 
 		<cfreturn rawContent />
 	</cffunction>
+	
+	<cffunction name="setupRestMethods" access="private" returntype="void" output="false"
+		hint="Setups the REST methods by introspecting the metadata. This method is recursive and look through all the object hierarchy until the stop base class.">
+		<cfargument name="restMethodMetadata" type="array" required="false"
+			default="#variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint')#"
+			hint="An array of metadata to discover any REST methods in." />
+		
+		<cfset var currMetadata = "" />
+		<cfset var currFunction = "" />
+		<cfset var currRestUri = "" />
+		<cfset var currHttpMethod = "" />
+		<cfset var i = 0 />
+
+		<cfif ArrayLen(arguments.restMethodMetadata)>
+			<cfset currMetadata = arguments.restMethodMetadata[1] />
+
+			<cfif StructKeyExists(currMetadata, "functions")>
+				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
+					<!--- Iterate through found methods and look for required REST:URI annotation --->
+					<cfset currFunction = currMetadata.functions[i] />
+					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
+						<!--- Default to GET method --->
+						<cfif StructKeyExists(currFunction, ANNOTATION_REST_METHOD)>
+							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
+						<cfelse>
+							<cfset currHttpMethod = "GET" />
+						</cfif>
+						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
+						<cfset currRestUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
+								currFunction[variables.ANNOTATION_REST_URI]
+								, currHttpMethod
+								, currFunction.name
+								, getParameter("name")
+							) />
+						<cfset variables.restUris.addRestUri(currRestUri) />
+					</cfif>
+				</cfloop>
+			</cfif>
+			
+			<!--- Pop off the current level of metadata and recurse until the stop class if required --->
+			<cfset ArrayDeleteAt(arguments.restMethodMetadata, 1) />
+			
+			<cfif ArrayLen(arguments.restMethodMetadata)>
+				<cfset setupRestMethods(arguments.restMethodMetadata) />
+			</cfif>
+		</cfif>
+	</cffunction>
 
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="getRestUris" access="public" returntype="struct" output="false"
-		hint="">
+		hint="Gets the REST URIs collection object.">
 		<cfreturn variables.restUris />
 	</cffunction>
 
 	<cffunction name="setDefaultFormat" access="public" returntype="void" output="false"
-				hint="Set this to override the defaultFormat.">
+		hint="Set this to override the defaultFormat.">
 		<cfargument name="defaultFormat" type="string" required="true" />
+		
 		<cfset var mimeTypeMap = getUtils().getMimeTypeMap() />
+		
 		<cfif StructKeyExists(mimeTypeMap, arguments.defaultFormat)>
 			<cfset variables.defaultFormat = arguments.defaultFormat />
 		<cfelse>
-			<cfthrow
-				type="MachII.framework.InvalidFormatType"
+			<cfthrow type="MachII.framework.InvalidFormatType"
 				message="Cannot set the defaultFormat to '#arguments.defaultFormat#', not in the Mach-II mimeTypeMap." />
 		</cfif>
 	</cffunction>
-	<cffunction name="getDefaultFormat" access="public" returntype="string" output="false">
+	<cffunction name="getDefaultFormat" access="public" returntype="string" output="false"
+		hint="Gets the default format MIME type.">
 		<cfreturn variables.defaultFormat />
 	</cffunction>
 
