@@ -63,6 +63,7 @@ Notes:
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
+	<cfset variables.localEndpointNames = StructNew() />
 	
 	<!---
 	CONSTANTS
@@ -152,16 +153,13 @@ Notes:
 		hint="Configures all the endpoints.">
 
 		<cfset var appManager = getAppManager() />
-		<cfset var parent = getParent() />
-		<cfset var endpoints = getEndpoints() />
 		<cfset var anEndpoint = "" />
-		<cfset var modules = "" />
 		<cfset var key = "" />
 
 		<cfset setEndpointParameter(appManager.getPropertyManager().getProperty("endpointParameter")) />
 
-		<cfloop collection="#endpoints#" item="key">
-			<cfset anEndpoint = endpoints[key] />
+		<cfloop collection="#variables.localEndpointNames#" item="key">
+			<cfset anEndpoint = getEndpointByName(key) />
 			<cfset appManager.onObjectReload(anEndpoint) />
 			<cfset anEndpoint.configure() />
 		</cfloop>
@@ -170,12 +168,10 @@ Notes:
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures all the endpoints.">
 
-		<cfset var parent = getParent() />
-		<cfset var endpoints = getEndpoints() />
 		<cfset var key = "" />
 
-		<cfloop collection="#endpoints#" item="key">
-			<cfset endpoints[key].deconfigure() />
+		<cfloop collection="#variables.localEndpointNames#" item="key">
+			<cfset getEndpointByName(key).deconfigure() />
 		</cfloop>
 
 		<cfset variables.endpointContextPathMap = StructNew() />
@@ -324,12 +320,14 @@ Notes:
 			<!--- If the endpoint being added is from the same module overwrite --->
 			<cfif currEndpoint.getAppManager().getModuleName() EQ getAppManager().getModuleName()>
 				<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
+				<cfset variables.localEndpointNames[arguments.endpointName] = ""  />
 			<cfelse>
 				<cfthrow type="MachII.endpoints.EndpointAlreadyDefined"
 					message="An endpoint with name '#arguments.endpointName#' is already registered." />
 			</cfif>
 		<cfelse>
 			<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
+			<cfset variables.localEndpointNames[arguments.endpointName] = ""  />
 		</cfif>
 	</cffunction>
 
