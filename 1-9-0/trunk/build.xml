@@ -211,10 +211,6 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			tofile="${dest}/MachII/tests/README.txt"
 			preservelastmodified="true"
 			verbose="${debug}"/>
-		<copy file="${dest}/MachII/dashboard/CHANGELOG"
-			tofile="${dest}/MachII/dashboard/CHANGELOG.txt"
-			preservelastmodified="true"
-			verbose="${debug}"/>
 		<copy file="${dest}/MachII/dashboard/LICENSE"
 			tofile="${dest}/MachII/dashboard/LICENSE.txt"
 			preservelastmodified="true"
