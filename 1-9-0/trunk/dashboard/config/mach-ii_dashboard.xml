@@ -71,6 +71,12 @@ Notes:
 			</struct>
 		</property>
 		
+		<property name="apiLoginCredentials">
+			<struct>
+				<!-- Must be supplied by override xml as a default username/password would be a security hole -->
+			</struct>
+		</property>
+		
 		<property name="chartProvider" value="googlecharts"/>
 		<property name="scribbleAvailable" value="true"/>
 		
@@ -197,6 +203,11 @@ Notes:
 						</key>
 					</struct>
 				</parameter>
+			</parameters>
+		</endpoint>
+		<endpoint name="dashboard.api" type="MachII.dashboard.endpoints.ApiEndpoint">
+			<parameters>
+				<parameter name="loginCredentials" value="${properties.apiLoginCredentials}"/>
 			</parameters>
 		</endpoint>
 	</endpoints>
