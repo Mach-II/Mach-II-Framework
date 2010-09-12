@@ -315,6 +315,13 @@ Notes:
 		<cfreturn variables.viewLoaders />
 	</cffunction>
 	
+	<cffunction name="reloadViewLoader" access="public" returntype="void" output="false"
+		hint="Reloads a view-loader.">
+		<cfargument name="viewLoaderName" type="string" required="true"
+			hint="Name of view-loader to reload." />
+		<cfset variables.viewLoaders[arguments.viewLoaderName].discoverViews() />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->

@@ -418,6 +418,56 @@ Notes:
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
+	
+	<cffunction name="reloadEndpoint" access="public" returntype="void" output="false"
+		hint="Reloads an endpoint.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
+		<cfset var endpointName = arguments.event.getArg("endpointName") />
+		<cfset var moduleName = arguments.event.getArg("moduleName") />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reloaded endpoint named '#endpointName#' in module '#moduleName#'.", "success") />
+
+		<cftry>
+			<cfif Len(moduleName)>
+				<cfset reloadEndpointByModuleName(endpointName, moduleName) />
+			<cfelse>
+				<cfset reloadEndpointByModuleName(endpointName) />
+			</cfif>
+			<cfcatch type="any">
+				<cfset message.setMessage("Exception occurred during the reload of endpoint named '#endpointName#' in module '#moduleName#'.") />
+				<cfset message.setType("exception") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+		</cftry>
+
+		<cfset arguments.event.setArg("message", message) />
+		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+	</cffunction>
+	
+	<cffunction name="reloadViewLoader" access="public" returntype="void" output="false"
+		hint="Reloads a view-loader.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
+		<cfset var viewLoaderName = arguments.event.getArg("viewLoaderName") />
+		<cfset var moduleName = arguments.event.getArg("moduleName") />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reloaded view-loader named '#viewLoaderName#' in module '#moduleName#'.", "success") />
+
+		<cftry>
+			<cfif Len(moduleName)>
+				<cfset reloadViewLoaderByModuleName(viewLoaderName, moduleName) />
+			<cfelse>
+				<cfset reloadViewLoaderByModuleName(viewLoaderName) />
+			</cfif>
+			<cfcatch type="any">
+				<cfset message.setMessage("Exception occurred during the reload of view-loader named '#viewLoaderName#' in module '#moduleName#'.") />
+				<cfset message.setType("exception") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+		</cftry>
+
+		<cfset arguments.event.setArg("message", message) />
+		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+	</cffunction>
 
 	<cffunction name="reloadModuleDependencyInjectionEngine" access="public" returntype="void" output="false"
 		hint="Reloads dependency injection engine in a module by module name.">
@@ -567,6 +617,40 @@ Notes:
 
 			<cfset ArrayAppend(data.properties, temp) />
 		</cfloop>
+		
+		<!--- Endpoints --->
+		<cfset objectNames = moduleAppManager.getEndpointManager().getLocalEndpointNames() />
+		<cfset ArraySort(objectNames, "textnocase", "asc") />
+
+		<cfset data.endpoints = ArrayNew(1) />
+
+		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+			<!--- <cfset objectProxy = moduleAppManager.getEndpointManager().getEndpointByName(objectNames[i]) /> --->
+
+			<cfset temp = StructNew() />
+
+			<cfset temp.name = objectNames[i] />
+			<cfset temp.shouldReloadObject = false />
+			<!--- <cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
+
+			<cfset ArrayAppend(data.endpoints, temp) />
+		</cfloop>
+		
+		<!--- View-Loaders --->
+		<cfset objectNames = moduleAppManager.getViewManager().getViewLoaders() />
+
+		<cfset data.viewLoaders = ArrayNew(1) />
+
+		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+
+			<cfset temp = StructNew() />
+
+			<cfset temp.name = i />
+			<cfset temp.shouldReloadObject = false />
+			<!--- <cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
+
+			<cfset ArrayAppend(data.viewLoaders, temp) />
+		</cfloop>
 
 		<cfreturn data />
 	</cffunction>
@@ -637,6 +721,40 @@ Notes:
 		</cfif>
 
 		<cfset propertyManager.reloadProperty(arguments.propertyName) />
+	</cffunction>
+
+	<cffunction name="reloadEndpointByModuleName" access="private" returntype="void" output="false"
+		hint="Reloads an endpoint by module name.">
+		<cfargument name="endpointName" type="string" required="true" />
+		<cfargument name="moduleName" type="string" required="false"
+			hint="Not passing a module name indicates the 'base' application." />
+
+		<cfset var endpointManager = "" />
+
+		<cfif StructKeyExists(arguments, "moduleName")>
+			<cfset endpointManager = getAppManager().getModuleManager().getModule(moduleName).getModuleAppManager().getEndpointManager() />
+		<cfelse>
+			<cfset endpointManager = getAppManager().getParent().getEndpointManager() />
+		</cfif>
+
+		<cfset endpointManager.reloadEndpoint(arguments.endpointName) />
+	</cffunction>
+
+	<cffunction name="reloadViewLoaderByModuleName" access="private" returntype="void" output="false"
+		hint="Reloads a view-loader by module name.">
+		<cfargument name="viewLoaderName" type="string" required="true" />
+		<cfargument name="moduleName" type="string" required="false"
+			hint="Not passing a module name indicates the 'base' application." />
+
+		<cfset var viewManager = "" />
+
+		<cfif StructKeyExists(arguments, "moduleName")>
+			<cfset viewManager = getAppManager().getModuleManager().getModule(moduleName).getModuleAppManager().getViewManager() />
+		<cfelse>
+			<cfset viewManager = getAppManager().getParent().getViewManager() />
+		</cfif>
+
+		<cfset viewManager.reloadViewLoader(arguments.viewLoaderName) />
 	</cffunction>
 
 </cfcomponent>

@@ -279,7 +279,15 @@ Notes:
 		<event-handler event="config.reloadProperty" access="public">
 			<notify listener="config" method="reloadProperty"/>
 			<redirect event="config.index" persist="true"/>
-		</event-handler>		
+		</event-handler>	
+		<event-handler event="config.reloadEndpoint" access="public">
+			<notify listener="config" method="reloadEndpoint"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
+		<event-handler event="config.reloadViewLoader" access="public">
+			<notify listener="config" method="reloadViewLoader"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
 		
 		<!-- properties viewer -->
 		<event-handler event="config.properties" access="public">

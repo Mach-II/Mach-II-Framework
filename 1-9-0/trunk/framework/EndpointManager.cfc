@@ -339,7 +339,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS - LOCAL UTILS
+	PUBLIC FUNCTIONS - UTILS
 	--->
 	<cffunction name="loadEndpoint" access="public" returntype="void" output="false"
 		hint="Loads an endpoint and adds the endpoint to the manager.">
@@ -403,10 +403,36 @@ Notes:
 		hint="Returns an array of endpoint names.">
 		<cfreturn StructKeyArray(variables.endpoints) />
 	</cffunction>
+	
+	<cffunction name="getLocalEndpointNames" access="public" returntype="array" output="false"
+		hint="Returns an array of local endpoint names.">
+		<cfreturn StructKeyArray(variables.localEndpointNames) />
+	</cffunction>
 
 	<cffunction name="containsEndpoints" access="public" returntype="boolean" output="false"
 		hint="Returns a boolean of on whether or not there are any registered endpoints.">
 		<cfreturn StructCount(variables.endpoints) GT 0 />
+	</cffunction>
+	
+	<cffunction name="reloadEndpoint" access="public" returntype="void" output="false"
+		hint="Reloads an endpoint.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of endpoint to reload." />
+
+		<cfset var newEndpoint = "" />
+		<cfset var currentEndpoint = getEndpointByName(arguments.endpointName) />
+
+		<!--- Setup the endpoint --->
+		<cfset loadEndpoint(arguments.endpointName, currentEndpoint.getParameter("type"), currentEndpoint.getParameters(), true) />
+
+		<cfset newEndpoint = getEndpointByName(arguments.endpointName) />
+
+		<!--- Configure the Property --->
+		<cfset getAppManager().onObjectReload(newEndpoint) />
+		<cfset newEndpoint.configure() />
+		
+		<!--- Deconfigure the current endpoint --->
+		<cfset currentEndpoint.deconfigure() />
 	</cffunction>
 	
 	<!---
