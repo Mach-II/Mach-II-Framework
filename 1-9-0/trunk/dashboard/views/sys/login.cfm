@@ -68,7 +68,7 @@ event and then redirect to the originally requested event handler.
 	<h4><label for="password">Password</label></h4>
 	<p>
 		<form:password path="password" size="20" />&nbsp;
-		<form:buuton value="Login" />
+		<form:button value="Login" />
 	</p>
 </form:form>
 </cfoutput>
