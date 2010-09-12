@@ -57,7 +57,6 @@ need to override the abstract methods if you do not want to have
 errors thrown.
 * Must make use the the CacheStats if you want caching stats available
 in the Mach-II dashboard.
-
 --->
 <cfcomponent
  	displayname="AbstractCacheStrategy"
@@ -71,7 +70,7 @@ in the Mach-II dashboard.
 	<cfset variables.instance.strategyTypeName = "undefined" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.parameters.cachingEnabled = true />
-	<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStats").init() />
+	<cfset variables.cacheStats = 0 />
 	<cfset variables.log = 0 />
 	<cfset variables.assert = "" />
 	
@@ -82,9 +81,20 @@ in the Mach-II dashboard.
 		hint="Initializes the caching strategy. Do not override.">
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
+		<cfset var atomicTest = 0 />
 		
 		<cfset setParameters(arguments.parameters) />
 		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
+		
+		<!--- Java below 1.5 (CF 7) does not support java.util.concurrent.atomic.AtomicLong so we check to see if it exists
+			 and use the CFML cache stats implementation. --->
+		<cftry>
+			<cfset atomicTest = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
+			<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStatsJava").init() />
+			<cfcatch type="any">
+				<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStatsCFML").init() />
+			</cfcatch>
+		</cftry>
 		
 		<cfreturn this />
 	</cffunction>

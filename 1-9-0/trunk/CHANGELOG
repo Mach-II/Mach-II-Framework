@@ -162,6 +162,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Changed CacheStats over to use AtomicInteger when present (Java 1.5+). 
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/121
+(2010-09-12 kurtwiersma)
+
 * Refactor PluginManager findPluginPoints() to use new Introspector.cfc
 
 For more information see:

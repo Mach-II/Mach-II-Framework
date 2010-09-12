@@ -41,7 +41,7 @@
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
-$Id$
+$Id: CacheStats.cfc 2204 2010-04-27 07:36:11Z peterfarrell $
 
 Created version: 1.6.0
 Updated version: 1.8.0
@@ -65,75 +65,27 @@ each method in a cflock, but that would lead to degraded performance. Since Cach
 gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not warranted.
 --->
 <cfcomponent
-	displayname="CacheStats"
+	displayname="CacheStatsJava"
+	extends="MachII.caching.CacheStats"
 	output="false"
 	hint="Holds cache stats for a concrete strategy.">
 
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.extraStats = structNew() />
-	<cfset variables.statsActiveSince = Now() />
+	<cfset variables.cacheHits = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
+	<cfset variables.cacheMisses = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
+	<cfset variables.activeElements = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
+	<cfset variables.totalElements = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
+	<cfset variables.evictions = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="CacheStats" output="false"
+	<cffunction name="init" access="public" returntype="CacheStatsJava" output="false"
 		hint="Initializes the stats.">
+		<cfset super.init() />
 		<cfreturn this />
-	</cffunction>
-
-	<!---
-	PUBLIC FUNCTIONS
-	--->	
-	<cffunction name="reset" access="public" returntype="void" output="false"
-		hint="Resets all the standard caching stats.">
-		<cfset setCacheHits(0) />
-		<cfset setCacheMisses(0) />
-		<cfset setEvictions(0) />
-		<cfset setTotalElements(0) />
-		<cfset setActiveElements(0) />
-		<cfset setStatsActiveSince(Now()) />
-	</cffunction>
-
-	<cffunction name="setExtraStat" access="public" returntype="void" output="false"
-		hint="Sets an extra stats value by stat name.">
-		<cfargument name="statName" type="string" required="true" />
-		<cfargument name="statValue" type="any" required="true" />
-		<cfset variables.extraStats[statName] = statValue />
-	</cffunction>
-	<cffunction name="getExtraStats" access="public" returntype="struct" output="false"
-		hint="Gets the extra stats which must be a key of this struct.">
-		<cfreturn variables.extraStats />
-	</cffunction>
-	
-	<cffunction name="getCacheHitRatio" access="public" returntype="numeric" output="false"
-		hint="Gets the hit ratio (decimal) which is (hits / total accesses) where total accesses is hits + misses.">
-		
-		<cfset var hits = getCacheHits() />
-		<cfset var totalAccesses = hits + getCacheMisses() />
-		
-		<!--- Ensure that we are not dividing anything with a 0 --->
-		<cfif hits AND totalAccesses>
-			<cfreturn hits / totalAccesses />
-		<cfelse>
-			<cfreturn 0 />
-		</cfif>
-	</cffunction>
-	
-	<cffunction name="getAllStats" access="public" returntype="struct" output="false"
-		hint="Gets all the standard caching stats.">
-		
-		<cfset var stats = StructNew() />
-		
-		<cfset stats.cacheHits = getCacheHits() />
-		<cfset stats.cacheMisses = getCacheMisses() />
-		<cfset stats.activeElements = getActiveElements() />
-		<cfset stats.totalElements = getTotalElements() />
-		<cfset stats.evictions = getEvictions() />
-		<cfset stats.statsActiveSince = getStatsActiveSince() />
-	
-		<cfreturn stats />
 	</cffunction>
 	
 	<!---
@@ -141,83 +93,107 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	--->
 	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false"
 		hint="Increments the number of hits by the default of 1 or by the amount passed.">
-		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfargument name="amount" type="numeric" required="false" default="1" />	
+		<cfif arguments.amount EQ 1>
+			<cfset variables.cacheHits.incrementAndGet() />
+		<cfelse>
+			<cfset variables.cacheHits.addAndGet( arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="setCacheHits" access="public" returntype="void" output="false">
 		<cfargument name="cacheHits" type="numeric" required="true" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfset variables.cacheHits.set(arguments.cacheHits) />
 	</cffunction>
 	<cffunction name="getCacheHits" access="public" returntype="numeric" output="false">
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfreturn variables.cacheHits.get() />
 	</cffunction>
 
 	<cffunction name="incrementCacheMisses" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.cacheMisses.incrementAndGet() />
+		<cfelse>
+			<cfset variables.cacheMisses.addAndGet(arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="decrementCacheMisses" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.cacheMisses.decrementAndGet() />
+		<cfelse>
+			<cfset variables.cacheMisses.addAndGet("-" & arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="setCacheMisses" access="public" returntype="void" output="false">
 		<cfargument name="cacheMisses" type="numeric" required="true" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfset variables.cacheMisses.set(arguments.cacheMisses) />
 	</cffunction>
 	<cffunction name="getCacheMisses" access="public" returntype="numeric" output="false">
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfreturn variables.cacheMisses.get() />
 	</cffunction>
 	
 	<cffunction name="incrementEvictions" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.evictions.incrementAndGet() />
+		<cfelse>
+			<cfset variables.evictions.addAndGet(arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="setEvictions" access="public" returntype="void" output="false">
 		<cfargument name="evictions" type="numeric" required="true" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfset variables.evictions.set(arguments.evictions) />
 	</cffunction>
 	<cffunction name="getEvictions" access="public" returntype="numeric" output="false">
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfreturn variables.evictions.get() />
 	</cffunction>
 	
 	<cffunction name="incrementTotalElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.totalElements.incrementAndGet() />
+		<cfelse>
+			<cfset variables.totalElements.addAndGet(arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="decrementTotalElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.totalElements.decrementAndGet() />
+		<cfelse>
+			<cfset variables.totalElements.addAndGet("-" & arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="setTotalElements" access="public" returntype="void" output="false">
 		<cfargument name="totalElements" type="numeric" required="true" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfset variables.totalElements.set(arguments.totalElements) />
 	</cffunction>
 	<cffunction name="getTotalElements" access="public" returntype="numeric" output="false">
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfreturn variables.totalElements.get() />
 	</cffunction>
 	
 	<cffunction name="incrementActiveElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.activeElements.incrementAndGet() />
+		<cfelse>
+			<cfset variables.activeElements.addAndGet(arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="decrementActiveElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfif arguments.amount EQ 1>
+			<cfset variables.activeElements.decrementAndGet() />
+		<cfelse>
+			<cfset variables.activeElements.addAndGet("-" & arguments.amount) />
+		</cfif>
 	</cffunction>
 	<cffunction name="setActiveElements" access="public" returntype="void" output="false">
 		<cfargument name="activeElements" type="numeric" required="true" />
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfset variables.activeElements.set(arguments.activeElements) />
 	</cffunction>
 	<cffunction name="getActiveElements" access="public" returntype="numeric" output="false">
-		<cfthrow message="This method must be implemented by the class that exteneds CacheStats" />
+		<cfreturn variables.activeElements.get() />
 	</cffunction>
 	
-	<cffunction name="setStatsActiveSince" access="public" returntype="void" output="false">
-		<cfargument name="statsActiveSince" type="date" required="true" />
-		<cfset variables.statsActiveSince = arguments.statsActiveSince />
-	</cffunction>
-	<cffunction name="getStatsActiveSince" access="public" returntype="date" output="false">
-		<cfreturn variables.statsActiveSince />
-	</cffunction>
-
 </cfcomponent>
