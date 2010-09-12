@@ -171,10 +171,10 @@ Notes:
 		<cfset assertEquals("MachII.tests.dummy.HasAnnotationsParent", definition[2].component) />
 	</cffunction>
 	
-	<cffunction name="testIsInstanceOf" access="public" returntype="void" output="false"
-		hint="Test isInstanceOf method.">
+	<cffunction name="testIsObjectInstanceOf" access="public" returntype="void" output="false"
+		hint="Test isObjectInstanceOf method.">
 		
-		<cfset assertTrue(variables.introspector.isInstanceOf(variables.dummy, "MachII.tests.dummy.HasAnnotations")) />
+		<cfset assertTrue(variables.introspector.isObjectInstanceOf(variables.dummy, "MachII.tests.dummy.HasAnnotations")) />
 	</cffunction>
 
 </cfcomponent>
