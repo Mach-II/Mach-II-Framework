@@ -104,7 +104,7 @@ Notes:
 					#propertyValue#
 				<cfelseif propertyType eq "Object">
 					<cfset variables.m2property = false />
-					<cfif variables.introspector.isInstanceOf(propertyValue, "MachII.framework.BaseProxy")>
+					<cfif variables.introspector.isObjectInstanceOf(propertyValue, "MachII.framework.BaseProxy")>
 						<cfset propertyValue = propertyValue.getObject() />
 						<cfset variables.m2property = true />
 					</cfif>

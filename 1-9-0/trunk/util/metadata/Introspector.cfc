@@ -163,7 +163,7 @@ in an XML config file.
 		<cfreturn definitions />
 	</cffunction>
 	
-	<cffunction name="isInstanceOf" access="public" returntype="boolean" output="false"
+	<cffunction name="isObjectInstanceOf" access="public" returntype="boolean" output="false"
 		hint="Returns a boolen if the input component is of a the passed type by walking through the inheritence hierarchy automatically.">
 		<cfargument name="object" type="any" required="true"
 			hint="The component to introspect for its definition." />
