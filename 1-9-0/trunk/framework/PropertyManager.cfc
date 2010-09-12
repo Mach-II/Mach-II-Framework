@@ -300,8 +300,10 @@ Notes:
 			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
 		--->
 		<cfif IsObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
-			<cfthrow type="MachII.framework.propertyNotAllowed"
-				message="The '#arguments.propertyName#' property cannot be set inside of a module." />
+			<cfif NOT getAppManager().isLoading()>
+				<cfthrow type="MachII.framework.propertyNotAllowed"
+					message="The '#arguments.propertyName#' property cannot be set inside of a module." />
+			</cfif>
 		<cfelse>
 			<!--- Save the proxy if this is a configurable property --->
 			<cfif IsObject(arguments.propertyValue) AND StructKeyExists(arguments.propertyValue, "getProxy")>
