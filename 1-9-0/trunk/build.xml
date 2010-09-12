@@ -254,7 +254,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
 		</replaceregexp>
-		<replaceregexp match="=[ ]*?getUtils\(\)[ ]*?"
+		<replaceregexp match="[ ]*?getUtils\(\)[ ]*?"
 			replace="variables.utils"
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
