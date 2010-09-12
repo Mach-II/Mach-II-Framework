@@ -138,6 +138,24 @@ Notes:
 			<cfset variables.cacheStrategies[arguments.cacheStrategyName] = arguments.cacheStrategy />
 		</cfif>
 	</cffunction>
+	
+	<cffunction name="removeCacheStrategy" access="public" returntype="void" output="false"
+		hint="Removes a cache strategy with the specified name.">
+		<cfargument name="cacheStrategyName" type="string" required="true"
+			hint="The name of the cache stategy to get." />
+		<cfargument name="checkParent" type="boolean" required="false" default="false"
+			hint="Flag to check parent strategy manager." />
+
+		<cfif isCacheStrategyDefined(arguments.cacheStrategyName)>
+			<cfset StructDelete(variables.cacheStrategies, arguments.cacheStrategyName, false) />
+		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isCacheStrategyDefined(arguments.cacheStrategyName)>
+			<cfreturn getParent().removeCacheStrategy(arguments.cacheStrategyName, arguments.checkParent) />
+		<cfelse>
+			<cfthrow type="MachII.caching.CacheStrategyNotDefined"
+				message="Cache strategy with name '#arguments.cacheStrategyName#' is not defined and cannot be removed from the strategy manager."
+				detail="Available cache strategies: '#ArrayToList(getCacheStrategyNames())#'" />
+		</cfif>
+	</cffunction>
 
 	<cffunction name="isCacheStrategyDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a cache strategy is registered with the specified name. Does NOT check parent.">

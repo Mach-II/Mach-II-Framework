@@ -75,7 +75,7 @@ Notes:
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
 	<cffunction name="testLoadConfigureGet" access="public" returntype="void" output="false"
-		hint="Tests load(), configure() and get() routines.">
+		hint="Tests load(), configure(), get() and removed() routines.">
 
 		<cfset var strategy = "" />
 
@@ -90,6 +90,12 @@ Notes:
 
 		<!--- Assert we got a strategy back --->
 		<cfset assertTrue(IsObject(strategy)) />
+		
+		<!--- Remove the strategy --->
+		<cfset variables.cacheStrategyManager.removeCacheStrategy("default") />
+		
+		<!--- Assert the the strategy has been removed --->
+		<cfset assertFalse(variables.cacheStrategyManager.isCacheStrategyDefined("defined")) />
 	</cffunction>
 
 	<cffunction name="testGenerateScopeKey" access="public" returntype="void" output="false"
