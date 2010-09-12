@@ -82,6 +82,7 @@ Notes:
 	<cfset variables.parentPluginManager = "" />
 	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,onSessionStart,onSessionEnd,handleException") />
 	<cfset variables.runParent = "" />
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -688,7 +689,7 @@ Notes:
 		hint="Finds the registered plugin points in a plugin.">
 		<cfargument name="plugin" type="MachII.framework.Plugin" required="true" />
 
-		<cfset var md = GetMetaData(arguments.plugin) />
+		<cfset var md = variables.introspector.getFunctionDefinitions(arguments.plugin, "", true, "MachII.framework.Plugin") />
 		<cfset var points = StructNew() />
 
 		<!--- recursively search the plugin's parents for plugin points --->
@@ -699,20 +700,21 @@ Notes:
 
 	<cffunction name="gatherPluginMetaData" access="private" returntype="void" output="false"
 		hint="A recursive method that gathers meta data about a plugin.">
-		<cfargument name="metadata" type="struct" required="true" />
+		<cfargument name="metadata" type="array" required="true" />
 		<cfargument name="points" type="struct" required="true" />
 
+		<cfset var currentLevel = arguments.metadata[1] />
 		<cfset var i = 0 />
 
-		<cfif StructKeyExists(arguments.metadata, "functions")>
-			<cfloop from="1" to="#ArrayLen(arguments.metadata.functions)#" index="i">
-				<cfset StructInsert(arguments.points, arguments.metadata.functions[i].name, 1, true) />
+		<cfif StructKeyExists(currentLevel, "functions")>
+			<cfloop from="1" to="#ArrayLen(currentLevel.functions)#" index="i">
+				<cfset StructInsert(arguments.points, currentLevel.functions[i].name, 1, true) />
 			</cfloop>
 		</cfif>
 
-		<cfif StructKeyExists(arguments.metadata, "extends")
-			AND arguments.metadata.extends.name NEQ "MachII.framework.Plugin">
-			<cfset gatherPluginMetaData(arguments.metadata.extends, arguments.points) />
+		<cfif ArrayLen(arguments.metadata) GT 1>
+			<cfset ArrayDeleteAt(arguments.metadata, 1) />
+			<cfset gatherPluginMetaData(arguments.metadata, arguments.points) />
 		</cfif>
 	</cffunction>
 
