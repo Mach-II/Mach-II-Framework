@@ -91,7 +91,7 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="UtilityConnector" output="false"
-		hint="Initializes the connector. The AppManager is wired in by the ColdSpringProperty">
+		hint="Initializes the connector. The AppManager is wired in by the ColdSpringProperty.">
 		<cfreturn this />
 	</cffunction>
 
@@ -108,6 +108,20 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getAppManager().getEnvironmentGroup() />
 	</cffunction>
 
+	<cffunction name="inEnvironmentGroup" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment group matches the passed list/array of groups.">
+		<cfargument name="environmentGroup" type="any" required="true"
+			hint="A comma-delimited list or array of groups to use for matching." />
+		<cfreturn getAppManager().inEnvironmentGroup(arguments.environmentGroup) />
+	</cffunction>
+
+	<cffunction name="inEnvironmentName" access="public" returntype="boolean" output="false"
+		hint="Checks if the current environment name matches the passed list/array of names.">
+		<cfargument name="environmentName" type="any" required="true"
+			hint="A comma-delimited list or array of names to use for matching." />
+		<cfreturn getAppManager().inEnvironmentName(arguments.environmentName) />
+	</cffunction>
+
 	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false"
 		hint="Gets the LogFactory.">
 		<cfreturn getAppManager().getLogFactory() />
@@ -117,7 +131,7 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		hints="Returns a log with the specified channel.">
 		<cfargument name="channelName" type="string" required="true"
 			hint="Channel to log. Usually the dot path to the CFC." />
-		<cfreturn getLogFactory.getLog(arguments.channelName) />
+		<cfreturn getLogFactory().getLog(arguments.channelName) />
 	</cffunction>
 
 	<cffunction name="getCacheStrategyManager" access="public" returntype="MachII.caching.CacheStrategyManager" output="false"
