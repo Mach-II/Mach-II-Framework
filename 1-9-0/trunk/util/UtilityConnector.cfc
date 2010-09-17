@@ -160,6 +160,15 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
 	</cffunction>
 
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific url.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="Name of the target endpoint." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />		
+		<cfreturn getAppManager().getEndpointManager().buildEndpointUrl(argumentcollection=arguments) />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
