@@ -526,6 +526,9 @@ Notes:
 
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "type")>
 			<cfset beanType = arguments.commandNode.xmlAttributes["type"] />
+		<cfelse>
+			<!--- If no type, then set reinit to false --->
+			<cfset reinit = false />
 		</cfif>
 
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "autopopulate")>
