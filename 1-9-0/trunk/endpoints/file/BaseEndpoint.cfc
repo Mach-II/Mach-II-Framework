@@ -417,7 +417,6 @@ Configuration Notes:
 		
 		<cfreturn result />
 	</cffunction>
-	
 
 	<!---
 	ACCESSORS

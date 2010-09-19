@@ -232,6 +232,7 @@ Notes:
 
 		<cfset var event = CreateObject("component", "MachII.framework.Event").init(args:arguments.eventArgs) />
 		<cfset var endpoint = "" />
+		<cfset var exception = "" />
 
 		<cftry>
 			<cfset endpoint = getEndpointByName(event.getArg(getEndpointParameter())) />
@@ -246,28 +247,13 @@ Notes:
 				<cfset endpoint.postProcess(event) />
 			</cfif>
 
-			<cfcatch type="MachII.endpoints.EndpointNotDefined">
-				<!--- No endpoint so send a 404 --->
-				<cfheader statuscode="404" statustext="Not Found" />
-				<cfheader name="machii.endpoint.error" value="#cfcatch.message#" />
-				<cfset variables.log.error(cfcatch.message, event.getArgs()) />
-				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message# #cfcatch.detail#</cfoutput><cfsetting enablecfoutputonly="true" />
-			</cfcatch>
 			<cfcatch type="any">
-				<cfif event.isArgDefined("throw")>
-					<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
-					<cfrethrow />
-				<cfelse>
-					<cfif endpoint.isOnExceptionDefined()>
-						<cfset endpoint.onException(event, cfcatch) />
-					<cfelse>
-						<!--- Something went wrong and no concrete exception handling was performed by the endpoint --->
-						<cfheader statuscode="500" statustext="Error" />
-						<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception." />
-						<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getEndpointParameter())#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
-						<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(cfcatch), cfcatch) />
-					</cfif>
-				</cfif>
+				<!--- Wrap the catch --->
+				<cfset exception = CreateObject("component", "MachII.util.Exception").wrapException(cfcatch) />
+				<cfset event.setArg("exception", exception) />
+				
+				<!--- Handle the exception --->
+				<cfset endpoint.onException(event, exception) />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -381,7 +367,6 @@ Notes:
 
 		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
 		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
-		<cfset endpoint.setIsOnExceptionDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onException"', true, "MachII.endpoints.AbstractEndpoint"))) />
 
 		<cfset addEndpoint(arguments.endpointName, endpoint, arguments.overrideCheck) />
 	</cffunction>

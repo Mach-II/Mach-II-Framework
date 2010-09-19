@@ -106,7 +106,7 @@ Notes:
 	<cffunction name="handleRequest" access="public" returntype="String" output="true"
 		hint="Handles endpoint request. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overridden." />
+		<cfabort showerror="This method is abstract and must be overridden. This method is required for all concrete endpoints." />
 	</cffunction>
 
 	<cffunction name="postProcess" access="public" returntype="void" output="false"
@@ -115,16 +115,33 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
-	<cffunction name="onException" access="public" returntype="void" output="false"
-		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality.">
+	<cffunction name="onException" access="public" returntype="void" output="true"
+		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		<cfabort showerror="This method is abstract and must be overridden." />
+		<cfargument name="exception" type="MachII.util.Exception" required="true"
+			hint="The Exception that was thrown/caught by the framework." />
+		
+		<!--- TODO: Secure "throw" parameter so it cannot be access in production (configuratble via parameters)--->
+		
+		<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
+		<cfif arguments.event.isArgDefined("throw")>
+			<cfheader statuscode="500" statustext="Error" />
+			<cfdump var="#arguments.exception.getCaughtException()#" />
+
+		<!--- Default exception handling --->
+		<cfelse>
+			<cfheader statuscode="500" statustext="Error" />
+			<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception." />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
+			<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(arguments.exception.getCaughtException()), arguments.exception.getCaughtException()) />
+		</cfif>
 	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
-	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false">
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific URL.">
 		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
@@ -157,14 +174,6 @@ Notes:
 	</cffunction>
 	<cffunction name="isPostProcessDefined" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isPostProcessDefined />
-	</cffunction>
-
-	<cffunction name="setIsOnExceptionDefined" access="public" returntype="void" output="false">
-		<cfargument name="isOnExceptionDefined" type="boolean" required="true" />
-		<cfset variables.isOnExceptionDefined = arguments.isOnExceptionDefined />
-	</cffunction>
-	<cffunction name="isOnExceptionDefined" access="public" returntype="boolean" output="false">
-		<cfreturn variables.isOnExceptionDefined />
 	</cffunction>
 
 </cfcomponent>
