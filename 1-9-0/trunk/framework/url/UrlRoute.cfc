@@ -75,6 +75,7 @@ Notes:
 		<cfargument name="urlAlias" type="string" required="false" default="" />
 		<cfargument name="requiredParameters" type="array" required="false" default="#ArrayNew(1)#" />
 		<cfargument name="optionalParameters" type="array" required="false" default="#ArrayNew(1)#" />
+		<cfargument name="urlParameterFormatters" type="struct" required="false" default="#StructNew()#" />
 		
 		<cfset setName(arguments.name) />
 		<cfset setModuleName(arguments.moduleName) />
@@ -82,6 +83,7 @@ Notes:
 		<cfset setUrlAlias(arguments.urlAlias) />
 		<cfset setRequiredParameters(arguments.requiredParameters) />
 		<cfset setOptionalParameters(arguments.optionalParameters) />
+		<cfset setUrlParameterFormatters(arguments.urlParameterFormatters) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -144,11 +146,11 @@ Notes:
 			<cfloop from="1" to="#ArrayLen(arguments.urlElements)#" index="i">
 				<!--- Builds all the required parameters from the known URL elements --->
 				<cfif requiredParametersCount GTE i>
-					<cfset params[ListGetAt(requiredParameters[i], 1, ":")] = arguments.urlElements[i] />
+					<cfset params[requiredParameters[i].name] = arguments.urlElements[i] />
 					<cfset totalRequiredParametersProcessed = totalRequiredParametersProcessed + 1 />
 				<!--- Continues to build with optional parameters from the remaining known URL elements --->
 				<cfelseif optionalParametersCount GTE (i - requiredParametersCount)>
-					<cfset params[ListGetAt(optionalParameters[i - requiredParametersCount], 1, ":")] = arguments.urlElements[i] />
+					<cfset params[optionalParameters[i - requiredParametersCount].name] = arguments.urlElements[i] />
 					<cfset totalOptionalParametersProcessed = totalOptionalParametersProcessed + 1 />
 				</cfif>
 				
@@ -172,10 +174,10 @@ Notes:
 		<cfif totalOptionalParametersProcessed LT optionalParametersCount>
 			<cfloop from="#totalOptionalParametersProcessed + 1#" to="#optionalParametersCount#" index="i">
 				<cfset element = optionalParameters[i] />
-				<cfif ListGetAt(element, 2, ":") EQ "''">
-					<cfset params[ListGetAt(element, 1, ":")] = "" />
+				<cfif element.default EQ "''">
+					<cfset params[element.name] = "" />
 				<cfelse>
-					<cfset params[ListGetAt(element, 1, ":")] = ListGetAt(element, 2, ":") />
+					<cfset params[element.name] = element.default />
 				</cfif>
 			</cfloop>
 		</cfif>
@@ -225,12 +227,9 @@ Notes:
 			<cfset defaultValue = "" />
 			<cfset isDefaultValueDefined = false />
 			
-			<!--- Get the required parameter --->
-			<cfset element = ListGetAt(requiredParameters[i], 1, ":") />
-			
 			<!--- Get the default if defined --->
-			<cfif ListLen(requiredParameters[i], ":") GT 1>
-				<cfset defaultValue = ListGetAt(requiredParameters[i], 2, ":") />
+			<cfif StructKeyExists(requiredParameters[i], "default")>
+				<cfset defaultValue = requiredParameters[i].default />
 				<cfif defaultValue EQ "''">
 					<cfset defaultValue = "" />
 				</cfif>
@@ -238,25 +237,29 @@ Notes:
 			</cfif>
 			
 			<!--- Ensure the required parameter has a default value --->
-			<cfif NOT StructKeyExists(params, element) AND NOT isDefaultValueDefined>
-				<cfthrow type="MachII.framework.UrlRoute.RouteArgumentMissing"
-					message="When attempting to build a url for the route '#getName()#' required parameter '#element#' was not specified."
-					detail="Required parameters: #ArrayToList(requiredParameters)#" />
+			<cfif NOT StructKeyExists(params, requiredParameters[i].name) AND NOT isDefaultValueDefined>
+				<cfthrow type="MachII.framework.url.UrlRoute.RouteArgumentMissing"
+					message="When attempting to build a url for the route '#getName()#' required parameter '#requiredParameters[i].name#' was not specified."
+					detail="All parameters: #getAllParameterNames()#" />
 			</cfif>
 			
 			<!--- Reset variables --->
 			<cfset param = StructNew() />
 			
 			<!--- Required parameter has not been defined so use the default value --->
-			<cfif NOT StructKeyExists(params, element)>
-				<cfset params[element] = defaultValue />
-				<cfset param.name = element />
+			<cfif NOT StructKeyExists(params, requiredParameters[i].name)>
+				<cfset params[requiredParameters[i].name] = defaultValue />
+				<cfset param.name = requiredParameters[i].name />
 				<cfset param.value = defaultValue />
 			
 			<!--- Required parameter has been defined in the url params with a value so we just need to put in the ordered array --->
 			<cfelse>
-				<cfset param.name = element />
-				<cfset param.value = params[element] />
+				<cfset param.name = requiredParameters[i].name />
+				<cfset param.value = params[requiredParameters[i].name] />
+			</cfif>
+			
+			<cfif StructKeyExists(requiredParameters[i], "formatter")>
+				<cfset param.value = variables.urlParameterFormatters[requiredParameters[i].formatter].format(param.value, param.name, arguments.urlParameters) />
 			</cfif>
 			
 			<cfset ArrayAppend(orderedParams, param) />
@@ -281,12 +284,9 @@ Notes:
 			<cfset usedDefaultValue = false />
 			<cfset param = StructNew() />
 			
-			<!--- Get the optional parameter --->
-			<cfset element = ListGetAt(optionalParameters[i], 1, ":") />
-			
 			<!--- Get the default if defined --->
-			<cfif ListLen(optionalParameters[i], ":") GT 1>
-				<cfset defaultValue = ListGetAt(optionalParameters[i], 2, ":") />
+			<cfif StructKeyExists(optionalParameters[i], "default")>
+				<cfset defaultValue = optionalParameters[i].default />
 				<cfif defaultValue EQ "''">
 					<cfset defaultValue = "" />
 				</cfif>
@@ -294,16 +294,20 @@ Notes:
 			</cfif>
 			
 			<!--- Optional parameter has not been defined so use the default value --->
-			<cfif NOT StructKeyExists(params, element)>
-				<cfset params[element] = defaultValue />
+			<cfif NOT StructKeyExists(params, optionalParameters[i].name)>
+				<cfset params[optionalParameters[i].name] = defaultValue />
 				<cfset param.name = element />
 				<cfset param.value = defaultValue />
 				<cfset usedDefaultValue = true />
 			
 			<!--- Optional parameter has been defined in the url params with a value so we just need to put in the ordered array --->
 			<cfelse>
-				<cfset param.name = element />
-				<cfset param.value = params[element] />
+				<cfset param.name = optionalParameters[i].name />
+				<cfset param.value = params[optionalParameters[i].name] />
+			</cfif>
+			
+			<cfif StructKeyExists(optionalParameters[i], "formatter")>
+				<cfset param.value = variables.urlParameterFormatters[optionalParameters[i].formatter].format(param.value, param.name, arguments.urlParameters) />
 			</cfif>
 			
 			<cfset ArrayAppend(orderedParams, param) />
@@ -354,9 +358,51 @@ Notes:
 		<cfreturn builtUrl />
 	</cffunction>
 	
+	<cffunction name="getAllParameterNames" access="public" returntype="string" output="false"
+		hint="Gets all parameter names - both required and optional.">
+		
+		<cfset var parameterList = "" />
+		<cfset var requiredParameters = getRequiredParameters() />
+		<cfset var optionalParameters = getOptionalParameters() />
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#arrayLen(requiredParameters)#" index="i">
+			<cfset parameterList = ListAppend(parameterList, requiredParameters[i].name) />
+		</cfloop>
+		
+		<cfloop from="1" to="#arrayLen(optionalParameters)#" index="i">
+			<cfset parameterList = ListAppend(parameterList, optionalParameters[i].name) />
+		</cfloop>
+		
+		<cfreturn parameterList />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="explodeParameter" access="private" returntype="struct" output="false"
+		hint="Explodes a parameter into a struct.">
+		<cfargument name="parameterString" type="string" required="true" />
+		
+		<cfset var temp = StructNew() />
+
+		<cfif arguments.parameterString.endsWith(">")>
+			<cfset temp.formatter = "default" />
+			<cfset arguments.parameterString = Left(arguments.parameterString, Len(arguments.parameterString) - 1) />
+		<cfelseif ListLen(arguments.parameterString, ">") EQ 2>
+			<cfset temp.formatter = ListLast(arguments.parameterString, ">") />
+			<cfset arguments.parameterString = ListDeleteAt(arguments.parameterString, 2, ">") />
+		</cfif>
+
+		<cfif ListLen(arguments.parameterString, ":") EQ 2>
+			<cfset temp.default = ListLast(arguments.parameterString, ":") />
+			<cfset arguments.parameterString = ListDeleteAt(arguments.parameterString, 2, ":") />
+		</cfif>
+		
+		<cfset temp.name = arguments.parameterString />		
+		
+		<cfreturn temp />
+	</cffunction>
 
 	<!---
 	ACCESSORS
@@ -404,35 +450,18 @@ Notes:
 
 	<cffunction name="setRequiredParameters" access="public" returntype="void" output="false">
 		<cfargument name="requiredParameters" type="array" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<!--- Explode parameters --->
+		<cfloop from="1" to="#ArrayLen(arguments.requiredParameters)#" index="i">			
+			<cfset arguments.requiredParameters[i]  = explodeParameter(arguments.requiredParameters[i]) />
+		</cfloop>
+		
 		<cfset variables.requiredParameters = arguments.requiredParameters />
 	</cffunction>	
 	<cffunction name="getRequiredParameters" access="public" returntype="array" output="false">
 		<cfreturn variables.requiredParameters />
-	</cffunction>
-	
-	<cffunction name="getAllParameterNames" access="public" returntype="string" output="false">
-		<cfset var parameterList = "" />
-		<cfset var optionalParameters = getOptionalParameters() />
-		<cfset var requiredParameters = getRequiredParameters() />
-		<cfset var i = 0>
-		
-		<cfloop from="1" to="#arrayLen(optionalParameters)#" index="i">
-			<cfif NOT ListLen(optionalParameters[i], ":") EQ 2>
-				<cfset parameterList = ListAppend(parameterList, optionalParameters[i]) />
-			<cfelse>
-				<cfset parameterList = ListAppend(parameterList, ListGetAt(optionalParameters[i], 1, ":")) />
-			</cfif>
-		</cfloop>
-		
-		<cfloop from="1" to="#arrayLen(requiredParameters)#" index="i">
-			<cfif NOT ListLen(requiredParameters[i], ":") EQ 2>
-				<cfset parameterList = ListAppend(parameterList, requiredParameters[i]) />
-			<cfelse>
-				<cfset parameterList = ListAppend(parameterList, ListGetAt(requiredParameters[i], 1, ":")) />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn parameterList />
 	</cffunction>
 
 	<cffunction name="setOptionalParameters" access="public" returntype="void" output="false">
@@ -440,12 +469,14 @@ Notes:
 		
 		<cfset var i = 0 />
 		
-		<!--- Verify that all optional parameters have a default defined --->
-		<cfloop from="1" to="#ArrayLen(arguments.optionalParameters)#" index="i">			
+		<!--- Verify that all optional parameters have a default defined and explode --->
+		<cfloop from="1" to="#ArrayLen(arguments.optionalParameters)#" index="i">
 			<cfif NOT ListLen(arguments.optionalParameters[i], ":") EQ 2>
 				<cfthrow type="MachII.properties.UrlRoute.InvalidOptionalParams"
 					message="The optional URL Route '#getName()#' with parameter '#ListGetAt(arguments.optionalParameters[i], 1, ":")#' does not have default defined.">
 			</cfif>
+			
+			<cfset arguments.optionalParameters[i]  = explodeParameter(arguments.optionalParameters[i]) />
 		</cfloop>
 		
 		<cfset variables.optionalParameters = arguments.optionalParameters />
@@ -460,6 +491,14 @@ Notes:
 	</cffunction>	
 	<cffunction name="getOwnerId" access="public" returntype="string" output="false">
 		<cfreturn variables.ownerId />
+	</cffunction>
+
+	<cffunction name="setUrlParameterFormatters" access="public" returntype="void" output="false">
+		<cfargument name="urlParameterFormatters" type="struct" required="true" />
+		<cfset variables.urlParameterFormatters = arguments.urlParameterFormatters />
+	</cffunction>
+	<cffunction name="getUrlParameterFormatters" access="public" returntype="struct" output="false">
+		<cfreturn variables.urlParameterFormatters />
 	</cffunction>
 
 </cfcomponent>

@@ -49,7 +49,8 @@ Updated version: 1.9.0
 Notes:
 --->
 <cfcomponent 
-	displayname="AbstractUrlRouteParameterFormatter"
+	displayname="DefaultUrlParameterFormatter"
+	extends="AbstractUrlParameterFormatter"
 	output="false"
 	hint="An URL route parameter formatter. This is abstract and must be extended by a concrete formatter implementation.">
 	
@@ -60,7 +61,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="DefaultUrlRouteParameterFormatter" output="false"
+	<cffunction name="init" access="public" returntype="DefaultUrlParameterFormatter" output="false"
 		hint="Initializes the formatter.">
 		<cfreturn this />
 	</cffunction>

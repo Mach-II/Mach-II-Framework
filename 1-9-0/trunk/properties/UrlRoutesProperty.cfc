@@ -92,8 +92,8 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.rewriteConfigFile = "" />
 	<cfset variables.rewriteStandardUrls = false />
 
-	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile" />
-	<cfset variables.OWNER_ID = "_" & REReplaceNoCase(CreateUUID(), "[[:punct:]]", "", "ALL") />
+	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile,urlParameterFormatters" />
+	<cfset variables.OWNER_ID = "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -101,28 +101,15 @@ index.cfm/product/A12345/fancy/
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property by building the routes.">
 
-		<cfset var parameters = getParameters() />
+		<cfset var parameters = StructNew() />
 		<cfset var parameterName = "" />
 		<cfset var parameter = 0 />
 		<cfset var i = 0 />
 		<cfset var route = 0 />
 		<cfset var currentModuleName = getAppManager().getModuleName() />
-
-		<cfloop collection="#parameters#" item="parameterName">
-
-			<cfset parameter = parameters[parameterName] />
-
-			<cfif NOT ListFindNoCase(variables.RESERVED_PARAMETER_NAMES, parameterName)>
-
-				<cfset getAssert().isTrue(StructKeyExists(parameter, "event")
-						, "You must provide a struct key for 'event' for route '#parameterName#'") />
-
-				<!--- Add the route name to the parameters so it can be use as an argument collection --->
-				<cfset parameter.routeName = parameterName />
-
-				<cfset addRouteByAttributes(argumentcollection=parameter) />
-			</cfif>
-		</cfloop>
+		
+		<!--- Use StructAppend() we don't delete directly from the parameters --->
+		<cfset StructAppend(parameters, getParameters()) />
 
 		<!--- Process reserved parameters --->
 		<cfif isParameterDefined("rewriteConfigFile")>
@@ -143,6 +130,37 @@ index.cfm/product/A12345/fancy/
 				</cfif>
 			</cfif>
 		</cfif>
+		
+		<!--- Setup default url parameter formatter --->
+		<cfset loadUrlParameterFormatter("default", "MachII.framework.url.DefaultUrlParameterFormatter") />
+		
+		<!--- Load url parameter formatters if any are defined --->
+		<cfif isParameterDefined("urlParameterFormatters")>
+			<cfset parameters = getParameter("urlParameterFormatters") />
+			
+			<cfloop collection="#parameters#" item="parameterName">
+				<cfset loadUrlParameterFormatter(parameterName, parameters[parameterName]) />
+			</cfloop>
+		</cfif>
+		
+		<!--- Remove all reserved parameter names from our local reference of parameters --->
+		<cfloop list="#variables.RESERVED_PARAMETER_NAMES#" index="i">
+			<cfset StructDelete(parameters, i, false) />
+		</cfloop>
+
+		<!--- Loop over the url routes --->
+		<cfloop collection="#parameters#" item="parameterName">
+
+			<cfset parameter = parameters[parameterName] />
+
+			<cfset getAssert().isTrue(StructKeyExists(parameter, "event")
+					, "You must provide a struct key for 'event' for route '#parameterName#'") />
+
+			<!--- Add the route name to the parameters so it can be use as an argument collection --->
+			<cfset parameter.routeName = parameterName />
+
+			<cfset addRouteByAttributes(argumentcollection=parameter) />
+		</cfloop>
 
 		<!--- This operation must be done after all routes have been added --->
 		<cfif Len(getRewriteConfigFile())>
@@ -205,6 +223,7 @@ index.cfm/product/A12345/fancy/
 		<cfset var route = CreateObject("component", "MachII.framework.url.UrlRoute").init(arguments.routeName) />
 
 		<cfset route.setEventName(arguments.event) />
+		<cfset route.setUrlParameterFormatters(getUrlParameterFormatters()) />
 
 		<cfif  StructKeyExists(arguments, "module")>
 			<cfset route.setModuleName(arguments.module) />
@@ -379,6 +398,17 @@ index.cfm/product/A12345/fancy/
 		<cfreturn arguments.parameters />
 	</cffunction>
 
+	<cffunction name="loadUrlParameterFormatter" access="private" returntype="void" output="false"
+		hint="Loads an URL parameter formatter.">
+		<cfargument name="name" type="string" required="true"
+			hint="The name of the formatter." />
+		<cfargument name="type" type="string" required="true"
+			hint="The type of the formatter." />
+		
+		<cfset var formatter = CreateObject("component", arguments.type).init() />
+		
+		<cfset variables.urlParameterFormatters[arguments.name] = formatter />
+	</cffunction>
 
 	<!---
 	ACCESSORS
@@ -389,6 +419,14 @@ index.cfm/product/A12345/fancy/
 	</cffunction>
 	<cffunction name="getRewriteConfigFile" access="public" returntype="string" output="false">
 		<cfreturn variables.rewriteConfigFile />
+	</cffunction>
+
+	<cffunction name="setUrlParameterFormatters" access="private" returntype="void" output="false">
+		<cfargument name="urlParameterFormatters" type="struct" required="true" />
+		<cfset variables.urlParameterFormatters = arguments.urlParameterFormatters />
+	</cffunction>
+	<cffunction name="getUrlParameterFormatters" access="public" returntype="struct" output="false">
+		<cfreturn variables.urlParameterFormatters />
 	</cffunction>
 
 </cfcomponent>
