@@ -625,13 +625,12 @@ Notes:
 		<cfset data.endpoints = ArrayNew(1) />
 
 		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<!--- <cfset objectProxy = moduleAppManager.getEndpointManager().getEndpointByName(objectNames[i]) /> --->
+			<cfset objectProxy = moduleAppManager.getEndpointManager().getEndpointByName(objectNames[i]).getProxy() />
 
 			<cfset temp = StructNew() />
 
 			<cfset temp.name = objectNames[i] />
-			<cfset temp.shouldReloadObject = false />
-			<!--- <cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
+			<<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
 
 			<cfset ArrayAppend(data.endpoints, temp) />
 		</cfloop>

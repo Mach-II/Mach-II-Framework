@@ -66,6 +66,7 @@ Notes:
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Listener"] = "" />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Plugin"] = "" />
 	<cfset variables.BASE_OBJECT_TYPES["MachII.framework.Property"] = "" />
+	<cfset variables.BASE_OBJECT_TYPES["MachII.endpoints.AbstractEndpoint"] = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION

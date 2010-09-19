@@ -338,6 +338,7 @@ Notes:
 			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />
 
 		<cfset var endpoint = "" />
+		<cfset var baseProxy = "" />
 
 		<!--- Resolve if a shortcut --->
 		<cfset arguments.endpointType = resolveEndTypeShortcut(arguments.endpointType) />
@@ -367,6 +368,9 @@ Notes:
 
 		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
 		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
+
+		<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(endpoint, arguments.endpointType, arguments.endpointParameters) />
+		<cfset endpoint.setProxy(baseProxy) />
 
 		<cfset addEndpoint(arguments.endpointName, endpoint, arguments.overrideCheck) />
 	</cffunction>
