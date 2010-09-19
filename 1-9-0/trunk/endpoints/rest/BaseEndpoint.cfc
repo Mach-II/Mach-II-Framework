@@ -93,9 +93,6 @@ To Test it out, do the following:
 	* http://<yourapp>/content/item/something-else.json - returns a JSON structure.
 	* http://<yourapp>/content/item/notfound - throws a 404.
 
-TODO: Write more about REST Endpoints, including good API design, expectation
-to return good responses and response codes, use of format (.json), etc.
-
 --->
 <cfcomponent
 	displayname="RestEndpoint"

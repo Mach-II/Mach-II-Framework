@@ -93,15 +93,6 @@ Notes:
 		<cfset setMaxEvents(arguments.maxEvents) />
 		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
 
-		<!--- Setup the EventQueue --->
-		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
-
-		<!--- Setup the EventContext --->
-		<cfset setEventContext(CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue())) />
-
-		<!--- Set the EventContext into the request scope for backwards compatibility --->
-		<cfset request.eventContext = getEventContext() />
-
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
 
@@ -147,6 +138,15 @@ Notes:
 		<cfset var exception = "" />
 		<cfset var missingEvent = "" />
 		<cfset var log = getLog() />
+
+		<!--- Setup the EventQueue --->
+		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
+
+		<!--- Setup the EventContext --->
+		<cfset setEventContext(CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue())) />
+
+		<!--- Set the EventContext into the request scope for backwards compatibility --->
+		<cfset request.eventContext = getEventContext() />
 
 		<!---
 		We have to default the module and event name in case the call to
@@ -236,16 +236,6 @@ Notes:
 
 		<!--- Start the event processing --->
 		<cfset processEvents() />
-	</cffunction>
-
-	<cffunction name="handleOnMissingTemplate" access="public" returntype="void" output="true"
-		hint="Handles an onMissingTemplate exception and passes it to the framework.">
-		<cfargument name="targetPage" type="string" required="true"
-			hint="The target page is the path to the missing template." />
-
-		<!--- TODO: Stub --->
-		<cfthrow message="This needs to be implemented." />
-
 	</cffunction>
 
 	<cffunction name="createException" access="public" returntype="MachII.util.Exception" output="false"

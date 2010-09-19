@@ -230,9 +230,8 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="The events args needed to complete the request." />
 
-		<cfset var event = CreateObject("component", "MachII.framework.Event").init() />
+		<cfset var event = CreateObject("component", "MachII.framework.Event").init(args:arguments.eventArgs) />
 		<cfset var endpoint = "" />
-		<cfset event.setArgs(arguments.eventArgs) />
 
 		<cftry>
 			<cfset endpoint = getEndpointByName(event.getArg(getEndpointParameter())) />
