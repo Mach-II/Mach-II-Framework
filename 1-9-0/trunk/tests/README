@@ -22,3 +22,7 @@ Test Runners:
 	You must have the MXUnit jars in your ANT class path.
 * Use our ANT task 'testRepor' build.xml to run the test suit
 	and get a JUnit report of test suite results
+
+N.B. /tests/customtags/form
+While it looks like an incomplete test suite, it is fully complete
+as some test classes test more than one custom tag. 
