@@ -274,7 +274,7 @@ Configuration Notes:
 		
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
-			<cfif StructKeyExists(variables.attachmentMap, event.getArg("pipe", fileExtension))>
+			<cfif StructKeyExists(variables.attachmentMap, arguments.event.getArg("pipe", fileExtension)) AND variables.attachmentMap[arguments.event.getArg("pipe", fileExtension)]>
 				<cfset arguments.event.setArg("attachment", getFileFromPath(ReplaceNoCase(arguments.event.getArg("file"), "." & fileExtension, "." & pipeExtension))) />
 			</cfif>
 		</cfif>
@@ -357,9 +357,22 @@ Configuration Notes:
 		
 		<cfset var contentType = getContentTypeFromFilePath(arguments.pipeExtension) />
 		<cfset var output = "" />
-		
+
+		<!--- Read file info for content-length and last-modified headers --->
+		<cfdirectory 
+			name="fileInfo" 
+			action="list" 
+			directory="#getDirectoryFromPath(ExpandPath(fileFullPath))#" 
+			filter="#getFileFromPath(ExpandPath(fileFullPath))#" />
+	
 		<cfheader name="Content-Type" value="#contentType#" />
-		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+
+		<!--- Set the expires header using either access or modified --->
+		<cfif arguments.expires.type EQ "access">
+			<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+		<cfelseif arguments.expires.type EQ "modified">
+			<cfheader name="Expires" value="#GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)#" />
+		</cfif>
 
 		<cfif Len(arguments.attachment)>
 			<cfheader name="Content-Disposition" value="attachment; filename=#arguments.attachment#" />
