@@ -69,7 +69,9 @@ Notes:
 
 		<cfset var propertyManager = "" />
 		<cfset var requestManager = "" />
+		<cfset var requestHandler = "" />
 		<cfset var moduleManager = "" />
+		<cfset var endpointManager = "" />
 
 		<!--- Setup the AppManager with the required collaborators --->
 		<cfset variables.appManager = CreateObject("component", "MachII.framework.AppManager").init() />
@@ -94,14 +96,28 @@ Notes:
 		<cfset moduleManager =  CreateObject("component", "MachII.framework.ModuleManager").init(appManager, "", "") />
 		<cfset variables.appManager.setModuleManager(moduleManager) />
 
+		<!--- Setup the EndpointManager --->
+		<cfset endpointManager =  CreateObject("component", "MachII.framework.EndpointManager").init(appManager, "", "") />
+		<cfset variables.appManager.setEndpointManager(endpointManager) />
+
 		<!--- Configure the managers --->
 		<cfset propertyManager.configure() />
 		<cfset requestManager.configure() />
 
 		<!--- Setup a fake request --->
-		<cfset requestManager = requestManager.getRequestHandler() />
 		<cfset request.event = CreateObject("component", "MachII.framework.Event").init() />
-		<cfset requestManager.getEventContext().setup(appManager, request.event) />
+		<cfset requestHandler = requestManager.getRequestHandler() />
+		<!--- Setup the EventContext --->
+		<cfset makePublic(requesthandler, "setEventQueue") />
+		<cfset makePublic(requesthandler, "getEventQueue") />
+		<cfset makePublic(requesthandler, "setEventContext") />
+		<cfset requestHandler.setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(10)) />
+		<cfset requestHandler.setEventContext(CreateObject("component", "MachII.framework.EventContext").init(requestHandler, requestHandler.getEventQueue())) />
+
+		<!--- Set the EventContext into the request scope for backwards compatibility --->
+		<cfset request.eventContext = requestHandler.getEventContext() />
+
+		<cfset requestHandler.getEventContext().setup(appManager, request.event) />
 
 		<!--- Include the tag library only once --->
 		<cfif NOT variables.included>
