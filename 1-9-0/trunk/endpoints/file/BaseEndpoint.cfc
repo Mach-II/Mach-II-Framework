@@ -271,7 +271,7 @@ Configuration Notes:
 		
 		<cfset var builtUrl = getUrlBase() & getParameter("name") />
 		<cfset var fileName = "" />
-		<cfset var fileExtension = ListLast(arguments.file, ".") />
+		<cfset var fileExtension = ListFirst(ListLast(arguments.file, "."), ":") />
 		<cfset var queryString = "" />
 		
 		<cfif NOT arguments.file.startsWith("/")>
@@ -293,8 +293,8 @@ Configuration Notes:
 			<cfset queryString = ListAppend(queryString, "attachment=" & arguments.attachment, "&") />
 		</cfif>
 		
-		<cfif ((StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR getTimestampDefault())>
-			<cfset queryString = ListAppend(queryString, fetchAssetTimestamp(arguments.file), "&") />
+		<cfif (StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR (NOT StructKeyExists(variables.timestampMap, fileExtension) AND getTimestampDefault())>
+			<cfset queryString = ListAppend(queryString, fetchAssetTimestamp(ListFirst(arguments.file, ":")), "&") />
 		</cfif>
 
 		<cfif Len(queryString)>
@@ -446,7 +446,7 @@ Configuration Notes:
 		<cfargument name="file" type="string" required="true"
 			hint="This is the file path." />
 		
-		<cfset var fullPath = ExpandPath(getBasePath()) & arguments.file) />
+		<cfset var fullPath = ExpandPath(getBasePath()) & "/" & arguments.file />
 		<cfset var directoryResults = "" />
 
 		<cfdirectory name="directoryResults"
