@@ -57,23 +57,16 @@ Configuration Notes:
 		<parameters>
 			<parameter name="basePath" value="/MachII/dashboard/assets"/>
 			<parameter name="servingEngineType" value="cfcontent|sendfile" />
-			<parameter name="expireHeaderEnabled">
-				<struct>
-					<key name="group:development" value="true"/>
-					<key name="group:production" value="true"/>
-				</struct>
-			</parameter>
+			<!--
+			Uses Apache "style" syntax which supports "access" or "modified" with
+			days,hours,minutes,seconds timespan format or the value of "none" if 
+			no expires header should be used.
+			-->
 			<parameter name="expiresDefault" value="access plus 365,0,0,0" />
 			<parameter name="attachmentDefault" value="false" />
 			<parameter name="timestampDefault" value="true" />
 			<parameter name="fileTypeSettings">
 				<struct>
-					<key name=".*">
-						<struct>
-							<key name="expires" value="access plus 8,0,0,0"/>
-							<key name="attachment" value="false" />
-						</struct>
-					</key>
 					<key name=".js,.css,.jpg,.gif,.png">
 						<struct>
 							<key name="expires" value="access plus 365,0,0,0"/>
@@ -360,7 +353,13 @@ Configuration Notes:
 				, "File path: '#arguments.fileFullPath#'") />
 
 		<cfheader name="Content-Length" value="#fileInfo.size#" />
-		<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+		
+		<!--- Set the expires header using either access or modified --->
+		<cfif arguments.expires.type EQ "access">
+			<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+		<cfelse  arguments.expires.type EQ "modified">
+			<cfheader name="Expires" value="#GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)#" />
+		</cfif>
 
 		<cfif Len(arguments.attachment)>
 			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
@@ -433,6 +432,9 @@ Configuration Notes:
 			
 			<cfset result.type = ListGetAt(arguments.inputString, 1, " ") />
 			<cfset result.amount = CreateTimespan(amountRaw[1], amountRaw[2], amountRaw[3], amountRaw[4]) />
+		<cfelseif arguments.inputString EQ "none">
+			<cfset result.type = "none" />
+			<cfset result.amount = 0 />
 		<cfelse>
 			<cfthrow type="MachII.endpoint.file.UnableToParseExpiresString"
 				message="Unable to parse expires string of '#arguments.inputString#'." />
