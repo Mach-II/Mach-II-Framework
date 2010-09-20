@@ -51,7 +51,7 @@ Notes:
 <cfcomponent
 	displayname="SelectTest"
 	extends="mxunit.framework.TestCase"
-	hint="Test cases for 'select', 'option' and 'options' custom tags.">
+	hint="Test cases for 'select', 'option', 'options' and 'optgroup' custom tags.">
 
 	<!---
 	PROPERTIES
@@ -327,6 +327,51 @@ Notes:
 		<cfset xml = XmlParse(output) />
 		<cfset node = assertXPath('/root/form/select/option[@value="red" and @id="favoriteColor_red" and @selected="selected" and "Big Red"]', xml) />
 		<cfset debug(node) />
+	</cffunction>
+
+	<cffunction name="testSelectAndOptGroup" access="public" returntype="void" output="false"
+		hint="Test basic 'select' and 'optgroup' tag.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var colorsPrimary = StructNew() />
+		<cfset var colorsSecondary = StructNew() />
+
+		<!--- Build colors data --->
+		<cfset colorsPrimary.Red = "Big Red" />
+		<cfset colorsPrimary.Green = "Gian Green" />
+		<cfset colorsPrimary.Blue = "Beautiful Blue" />
+		<cfset colorsSecondary.Brown = "Bad Brown" />
+		<cfset colorsSecondary.Pink =  "Precious Pink" />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset event.setArg("user", bean) />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:select path="favoriteColor" items="#colorsPrimary#">
+						<form:optgroup label="Primary Colors">
+							<form:options items="#colorsPrimary#" />
+						</form:optgroup>
+						<form:optgroup label="Secondary Colors">
+							<form:options items="#colorsSecondary#" />
+						</form:optgroup>
+					</form:select>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(output) />
+		
+		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="red" and @id="favoriteColor_red" and @selected="selected" and "Big Red"]', xml) />
+		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="pink" and @id="favoriteColor_pink" and "Precious Pink"]', xml) />
+		<cfset node = assertXPath('/root/form/select/optgroup[@label="Primary Colors"]', xml) />
 	</cffunction>
 
 </cfcomponent>
