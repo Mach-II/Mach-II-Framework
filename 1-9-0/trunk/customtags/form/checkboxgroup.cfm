@@ -194,7 +194,7 @@ Notes:
 						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 					</cfif>
 
-					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalContent) />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
