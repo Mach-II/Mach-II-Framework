@@ -197,9 +197,9 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Green" and @id="favoriteColor_Green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Brown" and @id="favoriteColor_Brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Red"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Red"]/span', xml, "Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Green"]/span', xml, "Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Brown"]/span', xml, "Brown") />
 	</cffunction>	
 
 	<cffunction name="testCheckboxgroupWithStructs" access="public" returntype="void" output="false"
@@ -240,9 +240,9 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Green" and @id="favoriteColor_Green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Brown" and @id="favoriteColor_Brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Red"]/span', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Green"]/span', xml, "Giant Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Brown"]/span', xml, "Bad Brown") />
 	</cffunction>
 
 	<cffunction name="testCheckboxgroupWithArrays" access="public" returntype="void" output="false"
@@ -287,9 +287,9 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Big Red" and @id="favoriteColor_Big_Red" and @checked="checked"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Giant Green" and @id="favoriteColor_Giant_Green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Bad Brown" and @id="favoriteColor_Bad_Brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Big_Red"]/span', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Giant_Green"]/span', xml, "Giant Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Bad_Brown"]/span', xml, "Bad Brown") />
 		
 		<cfset bean.setFavoriteColor("red") />
 		
@@ -328,10 +328,9 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="green" and @id="favoriteColor_green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="brown" and @id="favoriteColor_brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
-	</cffunction>
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />	</cffunction>
 
 	<cffunction name="testCheckboxgroupWithQueries" access="public" returntype="void" output="false"
 		hint="Test basic 'checkboxgroup' tag.">
@@ -375,9 +374,9 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="green" and @id="favoriteColor_green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="brown" and @id="favoriteColor_brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />
 	</cffunction>
 
 </cfcomponent>
