@@ -65,6 +65,7 @@ Configuration Notes:
 			</parameter>
 			<parameter name="expiresDefault" value="access plus 365,0,0,0" />
 			<parameter name="attachmentDefault" value="false" />
+			<parameter name="timestampDefault" value="true" />
 			<parameter name="fileTypeSettings">
 				<struct>
 					<key name=".*">
@@ -83,6 +84,7 @@ Configuration Notes:
 						<struct>
 							<key name="expires" value="access plus 0,0,0,0"/>
 							<key name="attachment" value="true" />
+							<key name="timestamp" value="false" />
 						</struct>
 					</key>
 				</struct>
@@ -109,8 +111,10 @@ Configuration Notes:
 	<cfset variables.servingEngineType = "cfcontent" />
 	<cfset variables.expiresDefault = StructNew() />
 	<cfset variables.attachmentDefault = false />
+	<cfset variables.timestampDefault = true />
 	<cfset variables.expireMap = StructNew() />
 	<cfset variables.attachmentMap = StructNew() />
+	<cfset variables.timestampMap = StructNew() />
 	<cfset variables.urlBase = "" />
 
 	<!---
@@ -124,6 +128,7 @@ Configuration Notes:
 		<cfset setServiceEngineType(getParameter("serviceEngineType", "cfcontent")) />
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
+		<cfset setTimestampDefault(getParameter("timestampDefault", "true")) />
 		
 		<!--- Setup the lookup maps --->
 		<cfset buildFileSettingsMap() />
@@ -140,12 +145,14 @@ Configuration Notes:
 		<cfset var rawSettings = getParameter("fileTypeSettings", StructNew()) />	
 		<cfset var expireMap = StructNew() />
 		<cfset var attachmentMap = StructNew() />
+		<cfset var timestampMap = StructNew() />
 		<cfset var fileExtensionsArray = "" />
 		<cfset var key = "" />
 		<cfset var temp = "" />
 		<cfset var fileExtension = "" />
 		<cfset var expires = "" />
 		<cfset var attachment = "" />
+		<cfset var timestamp = "" />
 		<cfset var i = 0 />
 		
 		<cfloop collection="#rawSettings#" item="key">
@@ -164,17 +171,25 @@ Configuration Notes:
 				<cfset attachment = getAttachmentDefault() />
 			</cfif>
 
+			<cfif StructKeyExists(temp, "timestamp")>
+				<cfset timestamp = temp.timestamp />
+			<cfelse>
+				<cfset timestamp = getTimestampDefault() />
+			</cfif>
+
 			<cfset fileExtensionsArray = ListToArray(key) />
 			
 			<cfloop from="1" to="#ArrayLen(fileExtensionsArray)#" index="i">
 				<cfset fileExtension = ReplaceNoCase(fileExtensionsArray[i], ".", "", "all") />
 				<cfset expireMap[fileExtension] = expires />
 				<cfset attachmentMap[fileExtension] = attachment />
+				<cfset timestampMap[fileExtension] = timestamp />
 			</cfloop>
 		</cfloop>
 		
 		<cfset variables.expireMap = expireMap />
 		<cfset variables.attachmentMap = attachmentMap />
+		<cfset variables.timestampMap = timestampMap />
 	</cffunction>
 
 	<!---
@@ -256,7 +271,8 @@ Configuration Notes:
 		
 		<cfset var builtUrl = getUrlBase() & getParameter("name") />
 		<cfset var fileName = "" />
-		<cfset var fileExtension = "" />
+		<cfset var fileExtension = ListLast(arguments.file, ".") />
+		<cfset var queryString = "" />
 		
 		<cfif NOT arguments.file.startsWith("/")>
 			<cfset builtUrl = builtUrl & "/" />
@@ -271,12 +287,19 @@ Configuration Notes:
 		<cfif StructKeyExists(arguments, "attachment")>
 			<cfif IsBoolean(arguments.attachment) AND arguments.attachment>
 				<cfset fileName = getFileFromPath(arguments.file) />
-				<cfset fileExtension = ListLast(arguments.file, ".") />
 				<cfset arguments.attachment = ReplaceNoCase(getFileFromPath(fileName), "." & fileExtension, "." & arguments.pipe) />
 			</cfif>
 			
-			<cfset builtUrl = builtUrl & "?attachment=" & arguments.attachment />
+			<cfset queryString = ListAppend(queryString, "attachment=" & arguments.attachment, "&") />
 		</cfif>
+		
+		<cfif ((StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR getTimestampDefault())>
+			<cfset queryString = ListAppend(queryString, fetchAssetTimestamp(arguments.file), "&") />
+		</cfif>
+
+		<cfif Len(queryString)>
+			<cfset builtUrl = builtUrl & "?" & queryString />
+		</cfif>		
 		
 		<cfreturn builtUrl />
 	</cffunction>
@@ -418,6 +441,28 @@ Configuration Notes:
 		<cfreturn result />
 	</cffunction>
 
+	<cffunction name="fetchAssetTimestamp" access="private" returntype="numeric" output="false"
+		hint="Fetches the asset timestamp (seconds from epoch) from the passed target asset path.">
+		<cfargument name="file" type="string" required="true"
+			hint="This is the file path." />
+		
+		<cfset var fullPath = ExpandPath(getBasePath()) & arguments.file) />
+		<cfset var directoryResults = "" />
+
+		<cfdirectory name="directoryResults"
+			action="list"
+			directory="#GetDirectoryFromPath(fullPath)#"
+			filter="#GetFileFromPath(fullPath)#" />
+
+		<!--- Assert the file was found --->
+		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
+				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path."
+				, "Asset path: '#fullPath#'") />
+
+		<!--- Conver current time to UTC because epoch is essentially UTC --->
+		<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->
@@ -473,6 +518,14 @@ Configuration Notes:
 	</cffunction>
 	<cffunction name="getAttachmentDefault" access="public" returntype="boolean" output="false">
 		<cfreturn variables.attachmentDefault />
+	</cffunction>
+	
+	<cffunction name="setTimestampDefault" access="private" returntype="void" output="false">
+		<cfargument name="timestampDefault" type="boolean" required="true" />
+		<cfset variables.timestampDefault = arguments.timestampDefault />
+	</cffunction>
+	<cffunction name="getTimestampDefault" access="public" returntype="boolean" output="false">
+		<cfreturn variables.timestampDefault />
 	</cffunction>
 
 </cfcomponent>
