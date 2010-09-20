@@ -166,7 +166,7 @@ Notes:
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset radioAttributes.value = attributes.items[i][attributes.valueKey] />
+					<cfset variables.value = attributes.items[i][attributes.valueKey] />
 
 					<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
@@ -175,13 +175,13 @@ Notes:
 					</cfif>
 
 					<cfif i EQ 1>
-						<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey]), "all") />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
 
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
@@ -233,7 +233,7 @@ Notes:
 				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 			</cfif>
 
-			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalContent) />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
