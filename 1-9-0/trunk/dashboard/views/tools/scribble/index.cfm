@@ -65,5 +65,6 @@ Notes:
 </view:script>
 <cfelse>
 	<h4>We are unable to write to a temp directory and therefore the scribble pad has been disabled.</h4>
+	<p>#getProperty("scribbleAvailableMessage")#</p>
 </cfif>
 </cfoutput>

@@ -181,11 +181,11 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 				<filter token="buildDatetime" value="${buildDatetime}"/>
 			</filterset>
 		</copy>
-		<copy todir="${dest}/MachII/dashboard/"
+		<copy todir="${dest}/MachII/dashboard/assets"
 			verbose="${debug}"
 			preservelastmodified="true">
-			<fileset dir="${basedir}">
-				<include name="dashboard/assets/"/>
+			<fileset dir="${basedir}/dashboard/assets">
+				<exclude name="dashboard/assets" />
 			</fileset>
 		</copy>
 		<echo message="---------------------------------------------"/>
@@ -242,7 +242,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<echo message="Optimizing the build"/>
 		<echo message="---------------------------------------------"/>
 
-		<replaceregexp match="([ ]*|\()getAppManager\(\)[ ]*?"
+		<replaceregexp match="(!getEventContext\(\)\.)([ ]*|\()getAppManager\(\)[ ]*?"
 			replace="\1variables.appManager"
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>

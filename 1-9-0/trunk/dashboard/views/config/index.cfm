@@ -91,7 +91,7 @@ Notes:
 	</li>
 	<li>
 		<view:a event="config.index">
-			<view:img endpoint="dashboard.serveAsset" p:file="img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Refresh Stats" />
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Refresh Stats" />
 			&nbsp;Refresh Stats
 		</view:a>
 	</li>

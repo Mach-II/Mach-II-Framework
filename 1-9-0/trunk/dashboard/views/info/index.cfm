@@ -84,7 +84,7 @@ Notes:
 			</a>
 		</span>
 		<span id="miInProgress" style="display:none;" class="red">
-			<<view:img endpoint="dashboard.serveAsset" p:file="file=/img/icons/ajax-loader.gif" width="16" height="16" alt="Loading" />
+			<<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/ajax-loader.gif" width="16" height="16" alt="Loading" />
 			&nbsp;<strong>Memory Information Refresh In Progress</strong>
 		</span>
 	</li>

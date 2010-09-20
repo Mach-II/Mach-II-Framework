@@ -492,7 +492,7 @@ Configuration Notes:
 		<cfargument name="file" type="string" required="true"
 			hint="This is the file path." />
 		
-		<cfset var fullPath = ExpandPath(getBasePath()) & "/" & arguments.file />
+		<cfset var fullPath = Replace(ExpandPath(getBasePath()) & arguments.file, "//", "/", "all") />
 		<cfset var directoryResults = "" />
 
 		<cfdirectory name="directoryResults"

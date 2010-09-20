@@ -81,12 +81,18 @@ Notes:
 			<cftry>
 				<cfset filePath = "/MachII/dashboard/temp/" & CreateUUID() & ".cfm" />		
 
-				<cffile action="write" file="#ExpandPath(filePath)#" output="temp" />
-				<cffile action="delete" file="#ExpandPath(filePath)#" />
+				<cffile action="write" 
+					file="#ExpandPath(filePath)#" 
+					output="temp" 
+					mode="777" 
+					attributes="normal" />
+				<cffile action="delete" 
+					file="#ExpandPath(filePath)#" />
 
-				<cfcatch type="any">	
+				<cfcatch type="any">
 					<cfset setRenderType("none") />
 					<cfset setProperty("scribbleAvailable", false) />
+					<cfset setProperty("scribbleAvailableMessage", "Are you sure you can write to: " & cfcatch.message) />
 				</cfcatch>
 			</cftry>
 		</cfif>
@@ -114,7 +120,11 @@ Notes:
 			<cfset filePath = "/MachII/dashboard/temp/" & CreateUUID() & ".cfm" />
 			<cfset arguments.event.setArg("filePath", filePath) />
 			
-			<cffile action="write" file="#ExpandPath(filePath)#" output="#input#" />
+			<cffile action="write" 
+				file="#ExpandPath(filePath)#" 
+				output="#input#" 
+				mode="777" 
+				attributes="normal" />
 		</cfif>
 	</cffunction>
 	
