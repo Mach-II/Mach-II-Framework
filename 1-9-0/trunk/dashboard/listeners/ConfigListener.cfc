@@ -213,7 +213,7 @@ Notes:
 			</cfloop>
 			<cfloop from="1" to="#ArrayLen(baseComponentData.filters)#" index="i">
 				<cfif baseComponentData.filters[i].shouldReloadObject>
-					<cfset type = "listener" />
+					<cfset type = "filter" />
 					<cfset name = baseComponentData.filters[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
@@ -222,7 +222,7 @@ Notes:
 			</cfloop>
 			<cfloop from="1" to="#ArrayLen(baseComponentData.plugins)#" index="i">
 				<cfif baseComponentData.plugins[i].shouldReloadObject>
-					<cfset type = "listener" />
+					<cfset type = "plugin" />
 					<cfset name = baseComponentData.plugins[i].name />
 					<cfset module = "" />
 					<cfset reloadPluginByModuleName(baseComponentData.plugins[i].name) />
@@ -230,11 +230,20 @@ Notes:
 			</cfloop>
 			<cfloop from="1" to="#ArrayLen(baseComponentData.properties)#" index="i">
 				<cfif baseComponentData.properties[i].shouldReloadObject>
-					<cfset type = "listener" />
+					<cfset type = "property" />
 					<cfset name = baseComponentData.properties[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
 					<cfset reloadPropertyByModuleName(baseComponentData.properties[i].name) />
+				</cfif>
+			</cfloop>
+			<cfloop from="1" to="#ArrayLen(baseComponentData.endpoints)#" index="i">
+				<cfif baseComponentData.endpoints[i].shouldReloadObject>
+					<cfset type = "endpoint" />
+					<cfset name = baseComponentData.endpoints[i].name />
+					<cfset module = "" />
+					<cfset count = count + 1 />
+					<cfset reloadEndpointByModuleName(baseComponentData.endpoints[i].name) />
 				</cfif>
 			</cfloop>
 
@@ -274,6 +283,15 @@ Notes:
 						<cfset module = key />
 						<cfset count = count + 1 />
 						<cfset reloadPropertyByModuleName(moduleComponentData[key].properties[i].name, key) />
+					</cfif>
+				</cfloop>
+				<cfloop from="1" to="#ArrayLen(moduleComponentData[key].endpoints)#" index="i">
+					<cfif moduleComponentData[key].endpoints[i].shouldReloadObject>
+						<cfset type = "endpoint" />
+						<cfset name = moduleComponentData[key].endpoints[i].name />
+						<cfset module = "" />
+						<cfset count = count + 1 />
+						<cfset reloadEndpointByModuleName(moduleComponentData[key].endpoints[i].name) />
 					</cfif>
 				</cfloop>
 			</cfloop>
