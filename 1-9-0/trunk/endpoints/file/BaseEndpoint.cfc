@@ -82,6 +82,17 @@ Configuration Notes:
 					</key>
 				</struct>
 			</parameter>
+			<!-- By default, the endpoint will not serve .cfm file unless you indicate a "safe" list -->
+			<parameter name="cfmFiles" value="/css/basic.cfm,/css/dialog.cfm" />
+			<!-- Or an array -->
+			<parameter name="cfmFiles">
+				<array>
+					<element value="/css/basic.cfm" />
+					<element value="/css/dialog.cfm" />
+				</array>
+			</parameter>
+			<!-- Or the least secure which indicates all .cfm files in the base path can be served -->
+			<parameter name="cfmFiles" value="*" />
 		</parameters>
 	</endpoint>
 </endpoints>
@@ -108,6 +119,7 @@ Configuration Notes:
 	<cfset variables.expireMap = StructNew() />
 	<cfset variables.attachmentMap = StructNew() />
 	<cfset variables.timestampMap = StructNew() />
+	<cfset variables.cfmSafeMap = StructNew() />
 	<cfset variables.urlBase = "" />
 
 	<!---
@@ -125,6 +137,7 @@ Configuration Notes:
 		
 		<!--- Setup the lookup maps --->
 		<cfset buildFileSettingsMap() />
+		<cfset buildCfmSafeMap() />
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
@@ -183,6 +196,31 @@ Configuration Notes:
 		<cfset variables.expireMap = expireMap />
 		<cfset variables.attachmentMap = attachmentMap />
 		<cfset variables.timestampMap = timestampMap />
+	</cffunction>
+	
+	<cffunction name="buildCfmSafeMap" access="private" returntyp="void" output="false"
+		hint="Builds the .cfm safe map.">
+		
+		<cfset var rawSettings = getParameter("cfmFiles", "") />
+		<cfset var cfmSafeMap = StructNew() />
+		<cfset var i = 0 />
+		
+		<!--- We allow lists or array --->
+		<cfif IsArray(rawSettings)>
+			<cfset rawSettings = ArrayToList(rawSettings) />
+		</cfif>
+		
+		<cfloop list="#rawSettings#" index="i">
+			<!--- Check to see if we have a global allow --->
+			<cfif i EQ "*">
+				<cfset StructClear(cfmSafeMap) />
+				<cfset cfmSafeMap["*"] = "" />
+				<cfbreak />
+			</cfif>
+			<cfset cfmSafeMap[i] = "" />
+		</cfloop>
+		
+		<cfset variables.cfmSafeMap = cfmSafeMap />
 	</cffunction>
 
 	<!---
@@ -247,7 +285,13 @@ Configuration Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
-			<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
+			<cfif StructKeyExists(variables.cfmSafeMap, arguments.event.getArg("file")) OR StructKeyExists(variables.cfmSafeMap, "*")>
+				<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
+			<cfelse>
+				<cfheader statuscode="401" statustext="Not Authorized" />
+				<cfthrow type="MachII.endpoints.file.notAuthorized" 
+					message="The file path '#arguments.event.getArg("file")#' is not an allowed .cfm file." />
+			</cfif>
 		<cfelse>
 			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
 		</cfif>
