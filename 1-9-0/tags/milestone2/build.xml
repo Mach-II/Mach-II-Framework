@@ -259,7 +259,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
 		</replaceregexp>
-		<replaceregexp match="([ ]*?|\()getRequestManager\(\)[ ]*?"
+		<replaceregexp match="(!variables\.appManager\.)([ ]*?)getRequestManager\(\)[ ]*?"
 			replace="\1variables.requestManager"
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
