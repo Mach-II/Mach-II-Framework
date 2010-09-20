@@ -1,0 +1,342 @@
+<!---
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+
+	As a special exception, the copyright holders of this library give you 
+	permission to link this library with independent modules to produce an 
+	executable, regardless of the license terms of these independent 
+	modules, and to copy and distribute the resultant executable under 
+	the terms of your choice, provided that you also meet, for each linked 
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from 
+	or based on this library and communicates with Mach-II solely through 
+	the public interfaces* (see definition below). If you modify this library, 
+	but you may extend this exception to your version of the library, 
+	but you are not obligated to do so. If you do not wish to do so, 
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on 
+	this library with the exception of independent module components that 
+	extend certain Mach-II public interfaces (see README for list of public 
+	interfaces).
+
+Author: Peter J. Farrell(peter@mach-ii.com)
+$Id$
+
+Created version: 1.9.0
+Updated version: 1.9.0
+
+Notes:
+--->
+<cfcomponent
+	displayname="SelectTest"
+	extends="mxunit.framework.TestCase"
+	hint="Test cases for 'checkbox' and 'checkboxgroup' custom tags.">
+
+	<!---
+	PROPERTIES
+	--->
+	<cfset variables.appManager = "" />
+	<!--- This is a fake attributes scope --->
+	<cfset variables.attributes = StructNew() />
+	<cfset variables.included = false />
+
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="setup" access="public" returntype="void" output="false"
+		hint="Logic to run to setup before each test case method.">
+
+		<cfset var propertyManager = "" />
+		<cfset var requestManager = "" />
+		<cfset var requestHandler = "" />
+		<cfset var moduleManager = "" />
+		<cfset var endpointManager = "" />
+
+		<!--- Setup the AppManager with the required collaborators --->
+		<cfset variables.appManager = CreateObject("component", "MachII.framework.AppManager").init() />
+		<cfset variables.appManager.setAppKey("dummy") />
+
+		<!--- Setup the PropertyManager with the required collaboration data --->
+		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager) />
+		<cfset variables.appManager.setPropertyManager(propertyManager) />
+
+		<!--- Insert properties if needed here --->
+		<cfset propertyManager.setProperty("urlExcludeEventParameter", false) />
+		<cfset propertyManager.setProperty("urlDelimiters", "?|&|=") />
+		<cfset propertyManager.setProperty("redirectPersistScope", "application") />
+		<cfset propertyManager.setProperty("maxEvents", 10) />
+		<cfset propertyManager.setProperty("eventParameter", "event") />
+
+		<!--- Setup the RequestManager --->
+		<cfset requestManager =  CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
+		<cfset variables.appManager.setRequestManager(requestManager) />
+
+		<!--- Setup the ModuleManager --->
+		<cfset moduleManager =  CreateObject("component", "MachII.framework.ModuleManager").init(appManager, "", "") />
+		<cfset variables.appManager.setModuleManager(moduleManager) />
+
+		<!--- Setup the EndpointManager --->
+		<cfset endpointManager =  CreateObject("component", "MachII.framework.EndpointManager").init(appManager, "", "") />
+		<cfset variables.appManager.setEndpointManager(endpointManager) />
+
+		<!--- Configure the managers --->
+		<cfset propertyManager.configure() />
+		<cfset requestManager.configure() />
+
+		<!--- Setup a fake request --->
+		<cfset request.event = CreateObject("component", "MachII.framework.Event").init() />
+		<cfset requestHandler = requestManager.getRequestHandler() />
+		<!--- Setup the EventContext --->
+		<cfset makePublic(requesthandler, "setEventQueue") />
+		<cfset makePublic(requesthandler, "getEventQueue") />
+		<cfset makePublic(requesthandler, "setEventContext") />
+		<cfset requestHandler.setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(10)) />
+		<cfset requestHandler.setEventContext(CreateObject("component", "MachII.framework.EventContext").init(requestHandler, requestHandler.getEventQueue())) />
+
+		<!--- Set the EventContext into the request scope for backwards compatibility --->
+		<cfset request.eventContext = requestHandler.getEventContext() />
+
+		<cfset requestHandler.getEventContext().setup(appManager, request.event) />
+
+		<!--- Include the tag library only once --->
+		<cfif NOT variables.included>
+			<cfimport prefix="form" taglib="/MachII/customtags/form" />
+			<cfset variables.included = true />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="tearDown" access="public" returntype="void" output="false"
+		hint="Logic to run to tear down after each test case method.">
+		<!--- Reset the fake attributes struct --->
+		<cfset variables.attributes = StructNew() />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - TEST CASES
+	--->
+	<cffunction name="testCheckboxes" access="public" returntype="void" output="false"
+		hint="Test basic 'checkbox' tag.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset event.setArg("user", bean) />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkbox path="favoriteColor" value="Red" />
+					<form:checkbox path="favoriteColor" value="Green" />
+					<form:checkbox path="favoriteColor" value="Bad Brown" />
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/input[@type="checkbox" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/input[@type="checkbox" and @value="Green" and @id="favoriteColor_Green"]', xml) />
+		<cfset node = assertXPath('/root/form/input[@type="checkbox" and @value="Bad Brown" and @id="favoriteColor_Bad_Brown"]', xml) />
+	</cffunction>
+
+	<cffunction name="testCheckboxgroupWithLists" access="public" returntype="void" output="false"
+		hint="Test 'checkboxgroup' tag with lists.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset event.setArg("user", bean) />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkboxgroup path="favoriteColor" items="Red,Green,Blue,Brown,Pink">
+						<label for="${output.id}"><span>${output.label}</span> ${output.checkbox}</label>
+					</form:checkboxgroup>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Green" and @id="favoriteColor_Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Brown" and @id="favoriteColor_Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Red"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Brown"]', xml) />
+	</cffunction>	
+
+	<cffunction name="testCheckboxgroupWithStructs" access="public" returntype="void" output="false"
+		hint="Test basic 'checkboxgroup' tag.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var colors = StructNew() />
+
+		<!--- Build colors data --->
+		<cfset colors.Red = "Big Red" />
+		<cfset colors.Green = "Giant Green" />
+		<cfset colors.Blue = "Beautiful Blue" />
+		<cfset colors.Brown = "Bad Brown" />
+		<cfset colors.Pink =  "Precious Pink" />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset event.setArg("user", bean) />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkboxgroup path="favoriteColor" items="#colors#">
+						<label for="${output.id}"><span>${output.label}</span> ${output.checkbox}</label>
+					</form:checkboxgroup>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Green" and @id="favoriteColor_Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Brown" and @id="favoriteColor_Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+	</cffunction>
+
+	<cffunction name="testCheckboxgroupWithArrays" access="public" returntype="void" output="false"
+		hint="Test basic 'checkboxgroup' tag.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var colors = ArrayNew(1) />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("Big Red") />
+		<cfset event.setArg("user", bean) />
+
+		<!--- Test with simple array --->
+		<cfset colors[1] = "Big Red" />
+		<cfset colors[2] = "Giant Green" />
+		<cfset colors[3] = "Beautiful Blue" />
+		<cfset colors[4] = "Bad Brown" />
+		<cfset colors[5] = "Precious Pink" />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("Big Red") />
+		<cfset event.setArg("user", bean) />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkboxgroup path="favoriteColor" items="#colors#">
+						<label for="${output.id}"><span>${output.label}</span> ${output.checkbox}</label>
+					</form:checkboxgroup>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Big Red" and @id="favoriteColor_Big_Red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Giant Green" and @id="favoriteColor_Giant_Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="Bad Brown" and @id="favoriteColor_Bad_Brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+	</cffunction>
+
+	<cffunction name="testCheckboxgroupWithQueries" access="public" returntype="void" output="false"
+		hint="Test basic 'checkboxgroup' tag.">
+
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+		<cfset var colors = QueryNew("v,l") />
+
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset event.setArg("user", bean) />
+
+		<!--- Test with simple array --->
+		<cfset QueryAddRow(colors) />
+		<cfset QuerySetCell(colors, "v", "red") />
+		<cfset QuerySetCell(colors, "l", "Big Red") />
+		<cfset QueryAddRow(colors) />
+		<cfset QuerySetCell(colors, "v", "green") />
+		<cfset QuerySetCell(colors, "l", "Giant Green") />
+		<cfset QueryAddRow(colors) />
+		<cfset QuerySetCell(colors, "v", "brown") />
+		<cfset QuerySetCell(colors, "l", "Bad Brown") />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkboxgroup path="favoriteColor" items="#colors#" labelCol="l" valueCol="v">
+						<label for="${output.id}"><span>${output.label}</span> ${output.checkbox}</label>
+					</form:checkboxgroup>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="green" and @id="favoriteColor_green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="brown" and @id="favoriteColor_brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+	</cffunction>
+
+</cfcomponent>
