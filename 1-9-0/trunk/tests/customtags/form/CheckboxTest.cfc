@@ -290,6 +290,47 @@ Notes:
 		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
 		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
 		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
+		
+		<cfset bean.setFavoriteColor("red") />
+		
+		<!--- Test with array of structs --->
+		<cfset colors = ArrayNew(1) />
+		<cfset colors[1] = StructNew() />
+		<cfset colors[1].l = "Big Red" />
+		<cfset colors[1].v = "red" />
+		<cfset colors[2] = StructNew() />
+		<cfset colors[2].l = "Giant Green" />
+		<cfset colors[2].v = "green" />
+		<cfset colors[3] = StructNew() />
+		<cfset colors[3].l = "Beautiful Blue" />
+		<cfset colors[3].v = "blue" />
+		<cfset colors[4] = StructNew() />
+		<cfset colors[4].l = "Bad Brown" />
+		<cfset colors[4].v = "brown" />
+		<cfset colors[5] = StructNew() />
+		<cfset colors[5].l = "Precious Pink" />
+		<cfset colors[5].v = "pink" />
+
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:checkboxgroup path="favoriteColor" items="#colors#" labelKey="l" valueKey="v">
+						<label for="${output.id}"><span>${output.label}</span> ${output.checkbox}</label>
+					</form:checkboxgroup>
+				</form:form>
+			</root>
+		</cfsavecontent>
+
+		<cfset xml = XmlParse(output) />
+		<cfset debug(node) />
+		<cfset debug(output) />
+
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="green" and @id="favoriteColor_green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="checkbox" and @value="brown" and @id="favoriteColor_brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Big Red"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Giant Green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/span["Bad Brown"]', xml) />
 	</cffunction>
 
 	<cffunction name="testCheckboxgroupWithQueries" access="public" returntype="void" output="false"
