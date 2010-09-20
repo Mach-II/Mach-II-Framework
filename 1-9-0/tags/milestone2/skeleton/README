@@ -1,0 +1,12 @@
+This is the skeleton for the final release of Mach-II 1.6. This skeleton is intended
+to give you a jumpstart on building Mach-II applications by providing a basic 
+template for Mach-II applications.
+
+In addition you may use this skeleton to test your Mach-II and ColdSpring installations 
+by calling the showHome event (http://server[/path]/index.cfm?event=showHome), which 
+will display a page giving you basic feedback on whether or not Mach-II and ColdSpring 
+are configured correctly.
+
+Please note that beyond this simple test page, this skeleton is not a running application 
+and doesn't "do" much of anything. It's provided strictly as an empty shell of a Mach-II 
+application into which you put your code.
