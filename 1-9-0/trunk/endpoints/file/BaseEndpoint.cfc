@@ -401,7 +401,7 @@ Configuration Notes:
 		<!--- Set the expires header using either access or modified --->
 		<cfif arguments.expires.type EQ "access">
 			<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
-		<cfelse  arguments.expires.type EQ "modified">
+		<cfelseif arguments.expires.type EQ "modified">
 			<cfheader name="Expires" value="#GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)#" />
 		</cfif>
 
