@@ -168,6 +168,9 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Form custom tag library has complete unit test suite
+(2010-09-20 peterfarrell)
+
 * Changed CacheStats over to use AtomicInteger when present (Java 1.5+). 
 
 For more info see:
