@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.6.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_6_0.dtd" >
+<!-- 
+The [beanFactoryPropertyName] parameter value is the name of the Mach-II property name 
+that will hold a reference to the ColdSpring beanFactory. This parameter 
+defaults to "coldspring.beanfactory.root" if not defined.
+
+The [configFile] parameter value holds the path of the ColdSpring configuration file. The path 
+can be an relative, ColdFusion mapped or absolute path. If you are using a relative or mapped
+path, be sure to set the [configFilePathIsRelative] parameter to TRUE or the ColdSpring will
+not find your configuration file.
+
+The [configFilePathIsRelative] parameter value defines if the configure file is a relative
+(including ColdFusion mapped) or absolute path. If you are using a relative or mapped
+path, be sure to set the [configFilePathIsRelative] parameter to TRUE or the property will
+not find your configuration file.
+- TRUE (for relative or mapped configuration file paths)
+- FALSE (for absolute configuration file paths)
+
+The [resolveMachIIDependencies] parameter value indicates if the property to "automagically"
+wire Mach-II listeners/filters/plugins/properties.  This parameter defaults to FALSE if not defined.
+- TRUE (resolves all Mach-II dependencies)
+- FALSE (does not resolve Mach-II dependencies)
+
+The [parentBeanFactoryScope] parameter values defines which scope to pull in a parent bean 
+factory. This parameter defaults to 'false' if not defined and indicates that a parent bean
+factory does not need to be referenced.
+
+The [parentBeanFactoryKey] parameter values defines a key to pull in a parent bean factory
+from the scope specified in the [parentBeanFactoryKey] parameter.  This parameter defaults 
+to 'false' if not defined and indicates that a parent bean factory does not need to be referenced.
+
+The [placeFactoryInApplicationScope] parameter indicates whether or not to place the bean factory 
+in the application scope.  This parameter is used to for setting your bean factory for use as a
+parent.  The key that used is driven from the value from of the [beanFactoryPropertyName] parameter.
+If the parent uses the same value for the beanFactoryPropertyName, the module name (e.g. "_account")
+is append to the end of the key to eliminate namespace conflicts in the application scope.
+This parameter defaults to 'false' if not defined and indicates that this bean factory should not
+be placed in the application scope.
+
+The [placeFactoryInServerScope] parameter indicates whether or not to place the bean factory 
+in the server scope.  This parameter is used to for setting your bean factory for use as a
+parent.  The key that used is driven from the value from of the [beanFactoryPropertyName] parameter.
+If the parent uses the same value for the beanFactoryPropertyName, the module name (e.g. "_account")
+is append to the end of the key to eliminate namespace conflicts in the server scope.
+This parameter defaults to 'false' if not defined and indicates that this bean factory should not
+be placed in the server scope.
+
+The [beansToMachIIProperties] parameter holds a struct of bean names and corresponding
+Mach-II property names. This parameter will inject the specified beans in the Mach-II property
+manager as the bean factory has been loaded.  In the past, a separate property had to be written 
+to accomplish this task. This should be used for framework required "utility" objects that you 
+want to be managed by ColdSpring such as UDF, i18n or session facade objects. Do not use this 
+feature to inject your model objects into the Mach-II property manager.
+
+Parent/Child Bean Factories Configuration for Use with Modules:
+
+Base Mach-II Config File (i.e. Parent Factory)
+<property name="coldspringProperty" type="MachII.properties.ColdspringProperty">
+	<parameters>
+		<parameter name="beanFactoryPropertyName" value="serviceFactory"/>
+		<parameter name="configFile" value="/path/to/config/services.xml"/>
+		<parameter name="configFilePathIsRelative" value="true"/>
+		<parameter name="placeFactoryInApplicationScope" value="true"/>
+		<parameter name="resolveMachIIDependencies" value="true"/>
+</property>
+
+You must put the parent bean factory in the application (or server scope) in order
+for a module to inherit from a parent factory. This example put the parent factory
+into the application.serviceFactory variable.
+
+Account Module Config File (i.e. Child Factory):
+<property name="coldspringProperty" type="MachII.properties.ColdspringProperty">
+	<parameters>
+		<parameter name="beanFactoryPropertyName" value="serviceFactory"/>
+		<parameter name="configFile" value="/path/to/modules/account/config/services_account.xml"/>
+		<parameter name="configFilePathIsRelative" value="true"/>
+		<parameter name="resolveMachIIDependencies" value="true"/>
+		<parameter name="placeFactoryInApplicationScope" value="true"/>
+		<parameter name="parentBeanFactoryScope" value="application"/>
+		<parameter name="parentBeanFactoryKey" value="serviceFactory"/>
+	</parameters>
+</property>
+
+You are NOT required to put child factories into the application (or server scope) for
+modules to inherit froma a parent factory. However, in this example the account module
+puts this child factory into the application scope. Since the parent and module use the
+same beanFactoryPropertyName, an application scope namespace conflict would occur - so
+the Property appends the module name to the end. This factory would be located in 
+application.serviceFactory_account variable.
+-->
+<mach-ii version="1.6">
+    <properties>
+		<property name="coldspringProperty" type="MachII.properties.ColdspringProperty">
+			<parameters>
+				<!-- Name of a Mach-II property name that will hold a reference to the ColdSpring beanFactory Default: 'coldspring.beanfactory.root' -->
+				<parameter name="beanFactoryPropertyName" value="serviceFactory"/>
+				<!-- Takes the path to the ColdSpring config file (required) -->
+				<parameter name="configFile" value="config/coldspring.xml"/>
+				<!-- Flag to indicate whether supplied config path is relative (mapped) or absolute	Default: FALSE (absolute path) -->				
+				<parameter name="configFilePathIsRelative" value="true"/>
+				<!-- Flag to indicate whether to resolve dependencies for listeners/filters/plugins Default: FALSE -->
+				<parameter name="resolveMachIIDependencies" value="false"/>
+				<!-- Indicate a scope to pull in a parent bean factory into a child bean factory  default: application -->
+				<parameter name="parentBeanFactoryScope" value="application"/>
+				<!-- Indicate a key to pull in a parent bean factory from the application scope Default: FALSE -->
+				<parameter name="parentBeanFactoryKey" value="false"/>
+				<!-- Indicate whether or not to place the bean factory in the application scope Default: FALSE -->
+				<parameter name="placeFactoryInApplicationScope" value="false" />
+				<!-- Indicate whether or not to place the bean factory in the application scope Default: FALSE -->
+				<parameter name="placeFactoryInServerScope" value="false" />
+				<!-- Struct of bean names and corresponding Mach-II property names for injecting back into Mach-II Default: does nothing if struct is not defined -->
+				<parameter name="beansToMachIIProperties">
+					<struct>
+						<!-- 
+						<key name="ColdSpringBeanName1" value="MachIIPropertyName1" />
+						<key name="ColdSpringBeanName2" value="MachIIPropertyName2" />
+						 -->
+					</struct>
+				</parameter>
+			</parameters>
+		</property>
+    </properties>
+</mach-ii>

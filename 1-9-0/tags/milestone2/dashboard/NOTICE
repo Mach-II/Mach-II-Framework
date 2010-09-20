@@ -1,0 +1,69 @@
+Copyright: 2010 GreatBizTools, LLC All rights reserved.
+
+On Going Contributors:
+- Peter J. Farrell (peter@mach-ii.com)
+- Matthew Woodward (matt@mach-ii.com)
+- Kurt Wiersma (kurt@mach-ii.com)
+- Derrick Jackson (derrick.jackson73@gmail.com)
+- And all additional contributors that have work submitted 
+by contributors on their behalf
+
+Mach-II Dashboard Module Source Code:
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
+
+----
+Mach-II documentation, implicit "M" logo and other logos are not licensed under 
+the Apache 2.0 License:
+Copyright 2008-2009 GreatBizTools, LLC All rights reserved.
+----
+Special thanks to Mike James for providing the dashboard icons:
+http://www.famfamfam.com/lab/icons/silk/
+Icons licensed under Creative Commons Attribution 2.5 License:
+http://creativecommons.org/licenses/by/2.5/
+----
+Special thanks to Sascha Leib for providing the js.Dialog JavaScript Library
+This library is freely distributable under the terms of an MIT-style license.
+For details or updates, see http://code.kolmio.com/jsdialog
+----
+Build JARs in the /build folder are licensed under there respective licenses.
+----
+$Id$
