@@ -258,6 +258,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			replace="\1variables.utils"
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="EndpointManager.cfc"/>
 		</replaceregexp>
 		<replaceregexp match="(!variables\.appManager\.)([ ]*?)getRequestManager\(\)[ ]*?"
 			replace="\1variables.requestManager"

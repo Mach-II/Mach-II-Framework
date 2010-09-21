@@ -99,7 +99,7 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 	</cffunction>
 
 	<cffunction name="addRestUri" access="public" returntype="void" output="false"
-				hint="Adds a RestUri to the collection, throwing exception for duplicates or unsupported HTTP methods.">
+		hint="Adds a RestUri to the collection, throwing exception for duplicates or unsupported HTTP methods.">
 		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
 
 		<cfif NOT StructKeyExists(variables.restUris, arguments.restUri.getHttpMethod())>
@@ -141,14 +141,16 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="resetRestUris" access="public" returntype="void" output="false">
+	<cffunction name="resetRestUris" access="public" returntype="void" output="false"
+		hint="Resets the REST URI collection.">
 		<cfset variables.restUris = StructNew() />
 	</cffunction>
 
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="getRestUris" access="public" returntype="struct" output="false">
+	<cffunction name="getRestUris" access="public" returntype="struct" output="false"
+		hint="Gets the REST URI collection.">
 		<cfreturn variables.restUris />
 	</cffunction>
 

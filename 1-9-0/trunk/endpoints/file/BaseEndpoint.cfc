@@ -126,7 +126,7 @@ Configuration Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the file serve endpoint.">
+		hint="Configures the file serve endpoint. Override to provide custom functionality and call super.preProcess().">
 
 		<cfset setBasePath(getParameter("basePath")) />
 		<cfset setUrlBase(getProperty("urlBase")) />
@@ -227,7 +227,7 @@ Configuration Notes:
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
-		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
+		hint="Runs when an endpoint request begins. Override to provide custom functionality and call super.preProcess().">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var pathInfo = cleanPathInfo() />

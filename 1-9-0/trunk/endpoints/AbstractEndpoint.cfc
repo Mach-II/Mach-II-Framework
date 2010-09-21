@@ -58,11 +58,9 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.endpointManager = "" />
-	<cfset variables.parameterPrecedence = "form" />
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
 	<cfset variables.onExceptionDefined = false />
-	<cfset variables.log = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
