@@ -117,7 +117,7 @@ Notes:
 				<hr />
 				<table class="small">
 					<tr>
-						<td style="width:35%;"><h4>Hit Radio</h4></td>
+						<td style="width:35%;"><h4>Hit Ratio</h4></td>
 						<td style="width:65%;"><p>#getProperty("udfs").decimalRound(cacheStats.getCacheHitRatio() * 100, 2)#%</p></td>
 					</tr>
 					<tr>
@@ -212,30 +212,30 @@ Notes:
 				<ul class="none">
 				<cfif strategy.isCacheEnabled()>
 					<li class="green">
-						<a href="#BuildUrl("caching.enableDisableCacheStrategy", "moduleName=#module#|strategyName=#strategyName#|mode=disable")#" title="Click to Disable">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/accept.png")#" width="16" height="16" alt="Enabled" />
+						<view:a event="caching.enableDisableCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#" p:mode="disable">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/accept.png" width="16" height="16" alt="Enabled" />
 							&nbsp;Enabled
-						</a>
+						</view:a>
 					</li>
 				<cfelse>
 					<li class="red">
-						<a href="#BuildUrl("caching.enableDisableCacheStrategy", "moduleName=#module#|strategyName=#strategyName#|mode=enable")#" title="Click to Enable">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/stop.png")#" width="16" height="16" alt="Disable" />
+						<view:a event="caching.enableDisableCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#" mode="enable">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disable" />
 							&nbsp;Disabled
-						</a>
+						</view:a>
 					</li>
 				</cfif>
 					<li>
-						<a href="#BuildUrl("caching.reapCacheStrategy", "moduleName=#module#|strategyName=#strategyName#")#">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_refresh.png")#" width="16" height="16" alt="Reap" />
+						<view:a event="caching.reapCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reap" />
 							&nbsp;Reap
-						</a>
+						</view:a>
 					</li>
 					<li>
-						<a href="#BuildUrl("caching.flushCacheStrategy", "moduleName=#module#|strategyName=#strategyName#")#">
-							<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/database_delete.png")#" width="16" height="16" alt="Flush" />
+						<view:a event="caching.flushCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_delete.png" width="16" height="16" alt="Flush" />
 							&nbsp;Flush
-						</a>
+						</view:a>
 					</li>
 				</ul>
 			</td>
