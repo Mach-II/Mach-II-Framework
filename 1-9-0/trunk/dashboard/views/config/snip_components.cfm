@@ -71,19 +71,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadListener", "listenerName=#variables.baseComponentData.listeners[i].name#")#">
+						<p><view:a event="config.reloadListener" p:listenerName="#variables.baseComponentData.listeners[i].name#">
 						<cfif variables.baseComponentData.listeners[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.listeners[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.listeners[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -94,19 +94,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadFilter", "filterName=#variables.baseComponentData.filters[i].name#")#">
+						<p><view:a event="config.reloadFilter" p:filterName="#variables.baseComponentData.filters[i].name#">
 						<cfif variables.baseComponentData.filters[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.filters[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.filters[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -117,19 +117,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadPlugin", "pluginName=#variables.baseComponentData.plugins[i].name#")#">
+						<p><view:a event="config.reloadPlugin" p:pluginName="#variables.baseComponentData.plugins[i].name#">
 						<cfif variables.baseComponentData.plugins[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.plugins[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.plugins[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -147,19 +147,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadProperty", "propertyName=#variables.baseComponentData.properties[i].name#")#">
+						<p><view:a event="config.reloadProperty" p:propertyName="#variables.baseComponentData.properties[i].name#">
 						<cfif variables.baseComponentData.properties[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.properties[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.properties[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -170,19 +170,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadEndpoint", "endpointName=#variables.baseComponentData.listeners[i].name#")#">
+						<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.baseComponentData.listeners[i].name#">
 						<cfif variables.baseComponentData.endpoints[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.endpoints[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.endpoints[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -193,19 +193,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadViewLoader", "viewLoaderName=#variables.baseComponentData.viewLoaders[i].name#")#">
+						<p><view:a event="config.reloadViewLoader" p:viewLoaderName="#variables.baseComponentData.viewLoaders[i].name#">
 						<cfif variables.baseComponentData.viewLoaders[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.baseComponentData.viewLoaders[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.baseComponentData.viewLoaders[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -230,19 +230,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadListener", "listenerName=#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadListener" p:listenerName="#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -253,19 +253,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadFilter", "filterName=#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadFilter" p:filterName="#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].filters[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -276,19 +276,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadPlugin", "pluginName=#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadPlugin" p:pluginName="#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -306,19 +306,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadProperty", "propertyName=#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadProperty" p:propertyName="#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].properties[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -329,19 +329,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadEndpoint", "endpointName=#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
@@ -352,19 +352,19 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><a href="#buildUrl("config.reloadViewLoader", "viewLoaderName=#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#|moduleName=#variables.moduleOrder[j]#")#">
+						<p><view:a event="config.reloadViewLoader" p:viewLoaderName="#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#" p:moduleName="#variables.moduleOrder[j]#">
 						<cfif variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].shouldReloadObject>
 							<span class="red">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/exclamation.png")#" width="16" height="16" alt="Reload" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
 							</span>
 						<cfelse>
 							<span class="green">
-								<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/tick.png")#" width="16" height="16" alt="OK" />
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
 								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
 							</span>
 						</cfif>
-						</a></p>
+						</view:a></p>
 					</td>
 				</tr>
 			</table>
