@@ -239,7 +239,7 @@ Configuration Notes:
 		<cfif Len(pathInfo)>
 			<cfset filePath = ListDeleteAt(pathInfo, 1, "/") />
 		<cfelse>
-			<cfset filePath = arguments.getArg("file") />
+			<cfset filePath = arguments.event.getArg("file") />
 		</cfif>
 		
 		<!--- Setup the file extension and any piping extension --->
@@ -306,16 +306,26 @@ Configuration Notes:
 		<cfargument name="attachment" type="string" required="false"
 			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pip extension if applicable." />
 		
-		<cfset var builtUrl = getUrlBase() & getParameter("name") />
+		<cfset var builtUrl = "" />
+		<cfset var urlBase = getUrlBase() />
 		<cfset var fileName = "" />
 		<cfset var fileExtension = ListFirst(ListLast(arguments.file, "."), ":") />
 		<cfset var queryString = "" />
-		
-		<cfif NOT arguments.file.startsWith("/")>
-			<cfset builtUrl = builtUrl & "/" />
+
+		<cfif NOT getProperty("urlParseSES")>
+			<cfset builtUrl = urlBase />
+			<cfset queryString = ListAppend(queryString, "endpoint=" & getParameter("name"), "&") />
+			<cfset queryString = ListAppend(queryString, "file=" & arguments.file, "&") />
+		<cfelse>
+			<cfif NOT urlBase.endsWith("/")>
+				<cfset urlBase = urlBase & "/" />
+			</cfif>
+			<cfset builtUrl = urlBase & getParameter("name") />
+			<cfif NOT arguments.file.startsWith("/")>
+				<cfset builtUrl = builtUrl & "/" />
+			</cfif>
+			<cfset builtUrl = builtUrl & arguments.file />
 		</cfif>
-		
-		<cfset builtUrl = builtUrl & arguments.file />
 		
 		<cfif StructKeyExists(arguments, "pipe")>
 			<cfset builtUrl = builtUrl & ":" & arguments.pipe />
@@ -535,10 +545,6 @@ Configuration Notes:
 
 	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
 		<cfargument name="urlBase" type="string" required="true" />
-
-		<cfif NOT arguments.urlBase.endsWith("/")>
-			<cfset arguments.urlBase = arguments.urlBase & "/" />
-		</cfif>
 
 		<cfset variables.urlBase = arguments.urlBase />
 	</cffunction>
