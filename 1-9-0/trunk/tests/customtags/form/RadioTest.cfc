@@ -332,51 +332,51 @@ Notes:
 		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
 		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />	</cffunction>
 
-	<cffunction name="testradiogroupWithQueries" access="public" returntype="void" output="false"
-		hint="Test basic 'radiogroup' tag.">
+<cffunction name="testRadiogroupWithQueries" access="public" returntype="void" output="false"
+	hint="Test basic 'radiogroup' tag.">
 
-		<cfset var output = "" />
-		<cfset var xml = "" />
-		<cfset var node = "" />
-		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
-		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
-		<cfset var colors = QueryNew("v,l") />
+	<cfset var output = "" />
+	<cfset var xml = "" />
+	<cfset var node = "" />
+	<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+	<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+	<cfset var colors = QueryNew("v,l") />
 
-		<!--- Add data to the the bean and set to the event so we can do binding --->
-		<cfset bean.setFavoriteColor("red") />
-		<cfset event.setArg("user", bean) />
+	<!--- Add data to the the bean and set to the event so we can do binding --->
+	<cfset bean.setFavoriteColor("red") />
+	<cfset event.setArg("user", bean) />
 
-		<!--- Test with simple array --->
-		<cfset QueryAddRow(colors) />
-		<cfset QuerySetCell(colors, "v", "red") />
-		<cfset QuerySetCell(colors, "l", "Big Red") />
-		<cfset QueryAddRow(colors) />
-		<cfset QuerySetCell(colors, "v", "green") />
-		<cfset QuerySetCell(colors, "l", "Giant Green") />
-		<cfset QueryAddRow(colors) />
-		<cfset QuerySetCell(colors, "v", "brown") />
-		<cfset QuerySetCell(colors, "l", "Bad Brown") />
+	<!--- Test with simple array --->
+	<cfset QueryAddRow(colors) />
+	<cfset QuerySetCell(colors, "v", "red") />
+	<cfset QuerySetCell(colors, "l", "Big Red") />
+	<cfset QueryAddRow(colors) />
+	<cfset QuerySetCell(colors, "v", "green") />
+	<cfset QuerySetCell(colors, "l", "Giant Green") />
+	<cfset QueryAddRow(colors) />
+	<cfset QuerySetCell(colors, "v", "brown") />
+	<cfset QuerySetCell(colors, "l", "Bad Brown") />
 
-		<cfsavecontent variable="output">
-			<root>
-				<form:form actionEvent="something" bind="${event.user}">
-					<form:radiogroup path="favoriteColor" items="#colors#" labelCol="l" valueCol="v">
-						<label for="${output.id}"><span>${output.label}</span> ${output.radio}</label>
-					</form:radiogroup>
-				</form:form>
-			</root>
-		</cfsavecontent>
+	<cfsavecontent variable="output">
+		<root>
+			<form:form actionEvent="something" bind="${event.user}">
+				<form:radiogroup path="favoriteColor" items="#colors#" labelCol="l" valueCol="v">
+					<label for="${output.id}"><span>${output.label}</span> ${output.radio}</label>
+				</form:radiogroup>
+			</form:form>
+		</root>
+	</cfsavecontent>
 
-		<cfset xml = XmlParse(output) />
-		<cfset debug(node) />
-		<cfset debug(output) />
+	<cfset xml = XmlParse(output) />
+	<cfset debug(node) />
+	<cfset debug(output) />
 
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="green" and @id="favoriteColor_green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="brown" and @id="favoriteColor_brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />
-	</cffunction>
+	<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
+	<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="green" and @id="favoriteColor_green"]', xml) />
+	<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="brown" and @id="favoriteColor_brown"]', xml) />
+	<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
+	<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
+	<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />
+</cffunction>
 
 </cfcomponent>

@@ -135,34 +135,34 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testInput" access="public" returntype="void" output="false"
-		hint="Test basic 'input' tag.">
+<cffunction name="testInput" access="public" returntype="void" output="false"
+	hint="Test basic 'input' tag.">
 
-		<cfset var output = "" />
-		<cfset var xml = "" />
-		<cfset var node = "" />
-		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
-		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+	<cfset var output = "" />
+	<cfset var xml = "" />
+	<cfset var node = "" />
+	<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+	<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
 
-		<!--- Add data to the the bean and set to the event so we can do binding --->
-		<cfset bean.setFavoriteColor("red") />
-		<cfset bean.setLastName("Farrell") />
-		<cfset event.setArg("user", bean) />
+	<!--- Add data to the the bean and set to the event so we can do binding --->
+	<cfset bean.setFavoriteColor("red") />
+	<cfset bean.setLastName("Farrell") />
+	<cfset event.setArg("user", bean) />
 
-		<cfsavecontent variable="output">
-			<root>
-				<form:form actionEvent="something" bind="${event.user}">
-					<form:input path="favoriteColor" />
-					<form:input path="lastName" showPassword="true" />
-				</form:form>
-			</root>
-		</cfsavecontent>
+	<cfsavecontent variable="output">
+		<root>
+			<form:form actionEvent="something" bind="${event.user}">
+				<form:input path="favoriteColor" />
+				<form:input path="lastName" />
+			</form:form>
+		</root>
+	</cfsavecontent>
 
-		<cfset xml = XmlParse(output) />
-		<cfset debug(output) />
+	<cfset xml = XmlParse(output) />
+	<cfset debug(output) />
 
-		<cfset node = assertXPath('/root/form/input[@type="text" and @value="red" and @id="favoriteColor"]', xml) />
-		<cfset node = assertXPath('/root/form/input[@type="text" and @value="Farrell" and @id="lastName"]', xml) />
-	</cffunction>
+	<cfset node = assertXPath('/root/form/input[@type="text" and @value="red" and @id="favoriteColor"]', xml) />
+	<cfset node = assertXPath('/root/form/input[@type="text" and @value="Farrell" and @id="lastName"]', xml) />
+</cffunction>
 	
 </cfcomponent>
