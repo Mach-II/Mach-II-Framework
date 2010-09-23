@@ -168,6 +168,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Allow assets in HTMLHelper and File Endpoint to not throw exception if timestamp cannot be generated
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/712
+(2010-09-23 peterfarrell)
+
 * Form custom tag library has complete unit test suite
 (2010-09-20 peterfarrell)
 

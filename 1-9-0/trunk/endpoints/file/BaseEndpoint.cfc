@@ -304,7 +304,7 @@ Configuration Notes:
 		<cfargument name="pipe" type="string" required="false"
 			hint="The pipe extension for the URL (e.g. css, js, etc.)." />
 		<cfargument name="attachment" type="string" required="false"
-			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pip extension if applicable." />
+			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pipe extension if applicable." />
 		
 		<cfset var builtUrl = "" />
 		<cfset var urlBase = getUrlBase() />
@@ -327,10 +327,16 @@ Configuration Notes:
 			<cfset builtUrl = builtUrl & arguments.file />
 		</cfif>
 		
+		<!--- Add in pipe if availanble --->
 		<cfif StructKeyExists(arguments, "pipe")>
 			<cfset builtUrl = builtUrl & ":" & arguments.pipe />
 		</cfif>
 		
+		<!---
+		Build optional query string parameters
+		* Attachment
+		* Timestamp
+		--->
 		<cfif StructKeyExists(arguments, "attachment")>
 			<cfif IsBoolean(arguments.attachment) AND arguments.attachment>
 				<cfset fileName = getFileFromPath(arguments.file) />
@@ -344,6 +350,7 @@ Configuration Notes:
 			<cfset queryString = ListAppend(queryString, fetchAssetTimestamp(ListFirst(arguments.file, ":")), "&") />
 		</cfif>
 
+		<!--- Append query string if any optional parameters were construct --->
 		<cfif Len(queryString)>
 			<cfset builtUrl = builtUrl & "?" & queryString />
 		</cfif>		
@@ -522,14 +529,17 @@ Configuration Notes:
 			action="list"
 			directory="#GetDirectoryFromPath(fullPath)#"
 			filter="#GetFileFromPath(fullPath)#" />
+		
+		<!--- Convert current time to UTC because epoch is essentially UTC --->
+		<cfif directoryResults.recordcount EQ 1>
+			<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+		
+		<!--- Log an exception if asset cannot be found --->
+		<cfelse>
+			<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
 
-		<!--- Assert the file was found --->
-		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
-				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path."
-				, "Asset path: '#fullPath#'") />
-
-		<!--- Conver current time to UTC because epoch is essentially UTC --->
-		<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+			<cfreturn 0 />
+		</cfif>
 	</cffunction>
 
 	<!---

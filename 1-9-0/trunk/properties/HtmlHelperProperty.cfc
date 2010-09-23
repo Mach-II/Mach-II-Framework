@@ -967,13 +967,16 @@ from the parent application.
 			directory="#GetDirectoryFromPath(fullPath)#"
 			filter="#GetFileFromPath(fullPath)#" />
 
-		<!--- Assert the file was found --->
-		<cfset getAssert().isTrue(directoryResults.recordcount EQ 1
-				, "Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path."
-				, "Asset path: '#fullPath#'") />
+		<!--- Convert current time to UTC because epoch is essentially UTC --->
+		<cfif directoryResults.recordcount EQ 1>
+			<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+		
+		<!--- Log an exception if asset cannot be found --->
+		<cfelse>
+			<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
 
-		<!--- Conver current time to UTC because epoch is essentially UTC --->
-		<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
+			<cfreturn 0 />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="getImageDimensions" access="private" returntype="struct" output="false"
@@ -985,6 +988,10 @@ from the parent application.
 		<cfset var image = "" />
 		<cfset var dimensions = StructNew() />
 
+		<!--- Set up a struct with defaults in case the asset cannot be found --->
+		<cfset dimensions.width = "" />
+		<cfset dimensions.height = "" />
+
 		<cftry>
 			<cfset image = variables.AWT_TOOLKIT.getImage(fullPath) />
 
@@ -994,10 +1001,9 @@ from the parent application.
 			<cfset dimensions.width = image.getWidth() />
 			<cfset dimensions.height = image.getHeight() />
 
+			<!--- Log a warning if the asset cannot be found. --->
 			<cfcatch type="any">
-				<cfthrow type="MachII.properties.HtmlHelperProperty.ImageDimensionException"
-					message="Unable to read image dimensions on asset path '#fullPath#'. Ensure image is of type GIF, PNG or JPG."
-					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+				<cfset getLog().warn("Unable to read image dimensions on asset path '#fullPath#'. Ensure image is of type GIF, PNG or JPG and the file exists.", cfcatch)>
 			</cfcatch>
 		</cftry>
 
