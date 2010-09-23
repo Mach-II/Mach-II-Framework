@@ -64,7 +64,7 @@ Notes:
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
 	<cfset variables.localEndpointNames = StructNew() />
-	
+
 	<!---
 	CONSTANTS
 	--->
@@ -80,21 +80,21 @@ Notes:
 			hint="Sets the base AppManager." />
 
 		<cfset setAppManager(arguments.appManager) />
-		
+
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getEndpointManager()) />
-			
+
 			<!--- Share the endponts struct betwen the parent and child since they are global not module specific --->
 			<cfset setEndpoints(getParent().getEndpoints()) />
 			<cfset setEndpointContextPathMap(getParent().getEndpointContextPathMap()) />
 		</cfif>
-		
+
 		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml into the manager.">
 		<cfargument name="configXML" type="string" required="true" />
@@ -142,7 +142,7 @@ Notes:
 					</cftry>
 					<cfset endpointParams[paramName] = paramValue />
 				</cfloop>
-			</cfif> 
+			</cfif>
 
 			<!--- Set the property (allowable property names ared checked by setProperty() method so no check needed here)--->
 			<cfset loadEndpoint(endpointName, endpointType, endpointParams, arguments.override) />
@@ -247,30 +247,37 @@ Notes:
 				<cfset endpoint.postProcess(event) />
 			</cfif>
 
+			<cfcatch type="MachII.endpoints.EndpointNotDefined">
+				<!--- No endpoint so send a 404 --->
+				<cfheader statuscode="404" statustext="Not Found" />
+				<cfheader name="machii.endpoint.error" value="#cfcatch.message#" />
+				<cfset variables.log.error(cfcatch.message, event.getArgs()) />
+				<cfsetting enablecfoutputonly="false" /><cfoutput>#cfcatch.message#</cfoutput><cfsetting enablecfoutputonly="true" />
+			</cfcatch>
 			<cfcatch type="any">
 				<!--- Wrap the catch --->
 				<cfset exception = CreateObject("component", "MachII.util.Exception").wrapException(cfcatch) />
 				<cfset event.setArg("exception", exception) />
-				
+
 				<!--- Handle the exception --->
 				<cfset endpoint.onException(event, exception) />
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
 		hint="Builds an endpoint specific url.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="Name of the target endpoint." />
 		<cfargument name="urlParameters" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
-		
+
 		<cfset var endpoint = getEndpointByName(arguments.endpointName) />
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
-		
+
 		<cfreturn endpoint.buildEndpointUrl(argumentcollection=params) />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -301,7 +308,7 @@ Notes:
 
 		<cfif NOT arguments.overrideCheck AND isEndpointDefined(arguments.endpointName)>
 			<cfset currEndpoint = getEndpointByName(arguments.endpointName) />
-			
+
 			<!--- If the endpoint being added is from the same module overwrite --->
 			<cfif currEndpoint.getAppManager().getModuleName() EQ getAppManager().getModuleName()>
 				<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
@@ -391,7 +398,7 @@ Notes:
 		hint="Returns an array of endpoint names.">
 		<cfreturn StructKeyArray(variables.endpoints) />
 	</cffunction>
-	
+
 	<cffunction name="getLocalEndpointNames" access="public" returntype="array" output="false"
 		hint="Returns an array of local endpoint names.">
 		<cfreturn StructKeyArray(variables.localEndpointNames) />
@@ -401,7 +408,7 @@ Notes:
 		hint="Returns a boolean of on whether or not there are any registered endpoints.">
 		<cfreturn StructCount(variables.endpoints) GT 0 />
 	</cffunction>
-	
+
 	<cffunction name="reloadEndpoint" access="public" returntype="void" output="false"
 		hint="Reloads an endpoint.">
 		<cfargument name="endpointName" type="string" required="true"
@@ -418,11 +425,11 @@ Notes:
 		<!--- Configure the Property --->
 		<cfset getAppManager().onObjectReload(newEndpoint) />
 		<cfset newEndpoint.configure() />
-		
+
 		<!--- Deconfigure the current endpoint --->
 		<cfset currentEndpoint.deconfigure() />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
