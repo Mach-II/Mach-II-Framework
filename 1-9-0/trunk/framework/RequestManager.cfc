@@ -248,7 +248,6 @@ Notes:
 		<cfset var routeName = getRequestHandler().getCurrentRouteName() />
 		<cfset var currentSESParams = getRequestHandler().getCurrentSESParams() />
 		<cfset var moduleDelimiter = getModuleDelimiter() />
-		<cfset var log = getLog() />
 
 		<!--- Automatically remove the Mach II redirect persist id from the url params --->
 		<cfset arguments.urlParametersToRemove = ListAppend(arguments.urlParametersToRemove, "persistId")>
@@ -261,12 +260,12 @@ Notes:
 		</cfloop>
 
 		<cfif Len(routeName)>
-			<cfset log.debug("Building route url for route '#routeName#'") />
+			<cfset getLog().debug("Building route url for route '#routeName#'") />
 
 			<cfreturn buildRouteUrl(routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
 		<cfelseif StructCount(currentSESParams)>
 			<cfloop collection="#currentSESParams#" item="key">
-				<cfif key eq getEventParameter()>
+				<cfif key eq eventParameterName>
 					<cfset eventName = currentSESParams[key] />
 					<cfif ListLen(eventName, moduleDelimiter) GT 1>
 						<cfset parsedModuleName = ListGetAt(eventName, 1, moduleDelimiter) />
@@ -274,8 +273,8 @@ Notes:
 					<cfelse>
 						<cfset parsedModuleName = arguments.moduleName />
 					</cfif>
-				<cfelseif NOT StructKeyExists(params, key) AND key neq eventParameterName
-					AND NOT ListFindNoCase(arguments.urlParametersToRemove, key)>
+				<!--- No need to check if the key is the eventParameter in this condition because the first condition would catch it --->
+				<cfelseif NOT StructKeyExists(params, key) AND NOT ListFindNoCase(arguments.urlParametersToRemove, key)>
 					<cfset arguments.urlParameters = ListAppend(arguments.urlParameters, "#key#=#currentSESParams[key]#", "|") />
 				</cfif>
 			</cfloop>

@@ -86,7 +86,8 @@ that combines the REST URIs for all RestEndpoints across this Mach-II applicatio
 
 		<cfif StructKeyExists(variables.restUris, arguments.httpMethod)>
 			<cfset currRestUriGroup = variables.restUris[arguments.httpMethod] />
-			<cfloop list="#StructKeyList(currRestUriGroup)#" index="currUriRegex">
+
+			<cfloop collection="#currRestUriGroup#" item="currUriRegex">
 				<cfif ReFindNoCase(currUriRegex, arguments.pathInfo, 1, false)>
 					<!--- Found a match: get it, and bail out of loop --->
 					<cfset restUri = currRestUriGroup[currUriRegex] />
