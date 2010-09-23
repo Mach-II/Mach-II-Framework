@@ -170,7 +170,7 @@ Notes:
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
 					<td>
-						<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.baseComponentData.listeners[i].name#">
+						<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.baseComponentData.endpoints[i].name#">
 						<cfif variables.baseComponentData.endpoints[i].shouldReloadObject>
 							<span class="red">
 								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
