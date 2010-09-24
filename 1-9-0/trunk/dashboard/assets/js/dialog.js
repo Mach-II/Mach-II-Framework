@@ -13,8 +13,8 @@ var Dialog = {
 					titleBG: '#ccc',	// background for the dialog title
 					dialogBG: '#eee',	// background of the dialog (except title)
 					dialogContainerBG: '#333', // background of the container
-					dialogOpacity: 0.75,	// default-opacity of the container
-					cancelWhenOverlayIsClicked:	false	// cancels all dialogs if the user clicks on the overlay
+					dialogOpacity: 1,	// default-opacity of the container
+					cancelWhenOverlayIsClicked:	true	// cancels all dialogs if the user clicks on the overlay
 				}
 };
 

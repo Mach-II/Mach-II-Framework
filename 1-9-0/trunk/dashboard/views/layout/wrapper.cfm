@@ -78,10 +78,8 @@ Notes:
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/dragdrop.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/controls.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/slider.js" outputType="inline" />
-	<view:script endpoint="dashboard.serveAsset" p:file="/js/dialog.js" outputType="inline">
-		Dialog.settings.dialogOpacity = 1;
-		Dialog.settings.cancelWhenOverlayIsClicked = true;
-	</view:script>
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/dialog.js" outputType="inline" />
+	
 	<cfif event.getName() NEQ "sys.login" AND getProperty("enableLogin")>
 		<cfset variables.confirmLogout = getProperty("logoutPromptTimeout") />
 	<cfelse>
