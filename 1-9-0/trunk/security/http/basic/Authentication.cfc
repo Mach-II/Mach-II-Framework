@@ -92,9 +92,7 @@ Notes:
 		<cfelse>
 			<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
 			<cfheader name="WWW-Authenticate" value='Basic realm="#getRealm()#"' />
-			<cfheader name="Content-Type" value="text/plain" />
 			<cfheader statuscode="401" statustext="Authorization Required" />
-			<cfoutput>Unauthorized</cfoutput>
 			
 			<cfreturn false />
 		</cfif>
