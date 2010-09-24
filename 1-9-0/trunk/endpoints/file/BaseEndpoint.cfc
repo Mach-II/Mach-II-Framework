@@ -373,11 +373,11 @@ Configuration Notes:
 			hint="The file extension type to pipe the output to (.cfm -> .css)." />
 		
 		<cfset var contentType = getContentTypeFromFilePath(arguments.pipeExtension) />
+		<cfset var fileInfo = "" />
 		<cfset var output = "" />
 
 		<!--- Read file info for content-length and last-modified headers --->
-		<cfdirectory 
-			name="fileInfo" 
+		<cfdirectory name="fileInfo" 
 			action="list" 
 			directory="#getDirectoryFromPath(ExpandPath(fileFullPath))#" 
 			filter="#getFileFromPath(ExpandPath(fileFullPath))#" />
@@ -415,8 +415,7 @@ Configuration Notes:
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
 
 		<!--- Read file info for content-length and last-modified headers --->
-		<cfdirectory 
-			name="fileInfo" 
+		<cfdirectory name="fileInfo" 
 			action="list" 
 			directory="#getDirectoryFromPath(fileFullPath)#" 
 			filter="#getFileFromPath(fileFullPath)#" />
