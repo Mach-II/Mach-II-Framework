@@ -224,6 +224,41 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			preservelastmodified="true"
 			verbose="${debug}"/>
 		<echo message="---------------------------------------------"/>
+		<echo message="Built as version '${buildVersion}'"/>
+		<echo message="---------------------------------------------"/>
+		<antcall target="optimizeBuild"/>
+		<antcall target="testReport"/>
+		<antcall target="varScopeCheck"/>
+	</target>
+	
+	<target name="optimizeBuild">
+		<echo message="---------------------------------------------"/>
+		<echo message="Optimizing the build"/>
+		<echo message="---------------------------------------------"/>
+		<replaceregexp match="(!getEventContext\(\)\.)([ ]*|\()getAppManager\(\)[ ]*?"
+			replace="\1variables.appManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="CommandLoaderBase.cfc"/>
+		</replaceregexp>
+		<replaceregexp match="(!arguments\.appManager\.)([ ]*|\()getPropertyManager\(\)[ ]*?"
+			replace="\1variables.propertyManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+		</replaceregexp>
+		<replaceregexp match="(!arguments\.appManager\.)([ ]*)getUtils\(\)[ ]*?"
+			replace="\1variables.utils"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
+			<fileset dir="${dest}/MachII/framework" includes="EndpointManager.cfc"/>
+		</replaceregexp>
+		<replaceregexp match="(!variables\.appManager\.)([ ]*?)getRequestManager\(\)[ ]*?"
+			replace="\1variables.requestManager"
+			flags="igm">
+			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
+		</replaceregexp>
+		<echo message="---------------------------------------------"/>
 		<echo message="Minimizing and Concatenating JS files"/>
 		<echo message="---------------------------------------------"/>
 		<jsmin destdir="${dest}/MachII/dashboard/assets/js/" force="true">
@@ -259,42 +294,6 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			replace='\&lt;view:style endpoint="dashboard.serveAsset" p:file="/css/combined.cfm:css" media="screen,projection" outputType="inline" /\&gt;'
 			flags="gs" byline="false">
 			<fileset dir="${dest}/MachII/dashboard/views/layout/" includes="wrapper.cfm"/>
-		</replaceregexp>
-		<echo message="---------------------------------------------"/>
-		<echo message="Built as version '${buildVersion}'"/>
-		<echo message="---------------------------------------------"/>
-		<antcall target="optimizeBuild"/>
-		<antcall target="testReport"/>
-		<antcall target="varScopeCheck"/>
-	</target>
-	
-	<target name="optimizeBuild">
-		<echo message="---------------------------------------------"/>
-		<echo message="Optimizing the build"/>
-		<echo message="---------------------------------------------"/>
-
-		<replaceregexp match="(!getEventContext\(\)\.)([ ]*|\()getAppManager\(\)[ ]*?"
-			replace="\1variables.appManager"
-			flags="igm">
-			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
-			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
-			<fileset dir="${dest}/MachII/framework" includes="CommandLoaderBase.cfc"/>
-		</replaceregexp>
-		<replaceregexp match="(!arguments\.appManager\.)([ ]*|\()getPropertyManager\(\)[ ]*?"
-			replace="\1variables.propertyManager"
-			flags="igm">
-			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
-		</replaceregexp>
-		<replaceregexp match="(!arguments\.appManager\.)([ ]*)getUtils\(\)[ ]*?"
-			replace="\1variables.utils"
-			flags="igm">
-			<fileset dir="${dest}/MachII/framework" includes="RequestManager.cfc"/>
-			<fileset dir="${dest}/MachII/framework" includes="EndpointManager.cfc"/>
-		</replaceregexp>
-		<replaceregexp match="(!variables\.appManager\.)([ ]*?)getRequestManager\(\)[ ]*?"
-			replace="\1variables.requestManager"
-			flags="igm">
-			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
 		</replaceregexp>
 	</target>
 	
