@@ -80,6 +80,7 @@ Notes:
 		
 		<!--- Authenticate the request via HTTP basic authentication --->
 		<cfif NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
+			<cfoutput><cfinclude template="/MachII/dashboard/endpoints/Unauthorized.cfm" /></cfoutput>
 			<!--- This is the one time we don't want the endpoint exception handling to process --->
 			<cfabort>
 		</cfif>
