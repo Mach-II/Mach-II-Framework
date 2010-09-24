@@ -324,6 +324,41 @@ the value should probably be set to "0" (default).
 			</mach-ii>
 		</module>
 	</modules>
+	
+* "apiCredentialFilePath" Property
+
+This property sets the file path to a credentials file for the dashboard API. By default, no credentials
+are setup for the external API therefore you must supply credentials to enable the API. The endpoint
+runs ExpandPath() on the file path you supply.
+
+	<modules>
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="PLACE YOUR PASSWORD HERE" />
+					<property name="apiCredentialFilePath" value="/path/to/DashboardCredentials.txt" />
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
+	
+The credentials file use one username per line separated by a ":" followed by a password that has been hashed
+using the "sha" algorithm:
+
+Exmample using CFML:
+<cfouput>#Hash("password", "sha")#</cfoutput>
+
+A sample file looks like:
+
+peter:4b8373d016f277527198385ba72fda0feb5da015
+matt:1fa2ef4755a9226cb9a0a4840bd89b158ac71391
+
+This file format is the same format used by the htpasswd program that is supplied by the Apache web server:
+
+http://httpd.apache.org/docs/2.0/programs/htpasswd.html
+
+You can create a username and password using this command line (where user@user:~$ is the prompt in terminal)
+user@user:~$ htpasswd -sb /path/to/DashboardCredentials username password 
 
 ------------------------------------------------
  _                      

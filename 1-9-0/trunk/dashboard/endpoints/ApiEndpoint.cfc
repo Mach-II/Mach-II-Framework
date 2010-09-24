@@ -56,7 +56,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.loginCredentials = StructNew() />
+	<cfset variables.authentication = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -64,8 +64,7 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the API endpoint.">
 		
-		<!--- Configure parameters --->
-		<cfset setLoginCredentials(getParameter("loginCredentials", StructNew())) />
+		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init("Dashboard API", getParameter("apiCredentialFilePath")) />
 				
 		<cfset super.configure() />
 	</cffunction>
@@ -79,54 +78,22 @@ Notes:
 
 		<cfset super.preProcess(arguments.event) />
 		
-		<!--- Authenticate the request --->
-		<cfif NOT authenticate(arguments.event.getArg("username"), arguments.event.getArg("password"))>
-			<cfthrow type="MachII.endpoints.EndpointNotDefined"
-				message="Not authenticated for '#arguments.event.getArg('pathInfo')#', httpMethod='#arguments.event.getArg('httpMethod')#'."
-				detail="Please check your credientials and try again." />
+		<!--- Authenticate the request via HTTP basic authentication --->
+		<cfif NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
+			<!--- This is the one time we don't want the endpoint exception handling to process --->
+			<cfabort>
 		</cfif>
 	</cffunction>
 
 	<!---
 	PUBLIC METHODS - REST
 	--->
-	<cffunction name="reloadApp" access="public" returntype="string" output="false"
-		hint="Reloads an app by module. Use 'base' as the module name if you want to reload the entire application."
-		rest:uri="/reloadApp/{module}"
-		rest:method="POST">
-
-		<cfset var key = arguments.event.getArg("module", "") />
-		<cfset var format = arguments.event.getArg("format") />
+	<cffunction name="temp" access="public" returntype="string" output="false"
+		hint="Temp testing method. To be removed"
+		rest:uri="/temp"
+		rest:method="GET">
 		
 		<cfreturn "temp" />
-	</cffunction>
-	
-	<!---
-	PROTECTED METHODS
-	--->
-	<cffunction name="authenticate" access="private" returntype="boolean" output="false"
-		hint="Authenticates an API call against the login credentials.">
-		<cfargument name="username" type="string" required="true" />
-		<cfargument name="password" type="string" required="true" />
-		
-		<cfset var credentials = getLoginCredentials() />
-		
-		<cfif StructKeyExists(credentials, arguments.username) AND Compare(credentials[arguments.username], arguments.password) EQ 0>
-			<cfreturn true />
-		<cfelse>
-			<cfreturn false />
-		</cfif>
-	</cffunction>
-	
-	<!---
-	ACCESSORS
-	--->
-	<cffunction name="setLoginCredentials" access="private" returntype="void" output="false">
-		<cfargument name="loginCredentials" type="struct" required="true" />
-		<cfset variables.loginCredentials = arguments.loginCredentials />
-	</cffunction>
-	<cffunction name="getLoginCredentials" access="private" returntype="struct" output="false">
-		<cfreturn variables.loginCredentials />
 	</cffunction>
 
 </cfcomponent>
