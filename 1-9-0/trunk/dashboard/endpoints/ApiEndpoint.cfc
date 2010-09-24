@@ -72,7 +72,7 @@ Notes:
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
-	<cffunction name="preProcess" access="public" returntype="void" output="false"
+	<cffunction name="preProcess" access="public" returntype="void" output="true"
 		hint="Runs when an endpoint request begins.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 

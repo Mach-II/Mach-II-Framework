@@ -103,7 +103,7 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="checkCredentials" access="private" returntype="boolean" output="false"
+	<cffunction name="checkCredentials" access="private" returntype="boolean" output="true"
 		hint="Checks the HTTP basic credentials. Override if using other authentication strategies like a database.">
 		<cfargument name="username" type="string" required="true"
 			hint="The user name." />
