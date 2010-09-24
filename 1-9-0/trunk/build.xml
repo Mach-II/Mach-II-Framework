@@ -224,11 +224,42 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			preservelastmodified="true"
 			verbose="${debug}"/>
 		<echo message="---------------------------------------------"/>
-		<echo message="Minimizing JS files"/>
+		<echo message="Minimizing and Concatenating JS files"/>
 		<echo message="---------------------------------------------"/>
 		<jsmin destdir="${dest}/MachII/dashboard/assets/js/" force="true">
 			<fileset dir="${basedir}/dashboard/assets/js/" includes="**/*.js"/>
 		</jsmin>
+		<concat destfile="${dest}/MachII/dashboard/assets/js/libraries.js">
+			<filelist dir="${dest}/MachII/dashboard/assets/js" files="prototype.js,effects.js,builder.js,dragdrop.js,controls.js,slider.js,dialog.js"/>
+		</concat>
+		<delete>
+			<fileset dir="${dest}/MachII/dashboard/assets/js">
+				<include name="*.js"/>
+				<exclude name="libraries.js"/>
+			</fileset>
+		</delete>
+		<replaceregexp match="\&lt;!--- dashboardJsStart ---\&gt;(.*)\&lt;!--- dashboardJsEnd ---\&gt;"
+			replace='\&lt;view:script endpoint="dashboard.serveAsset" p:file="/js/libraries.js" outputType="inline" /\&gt;'
+			flags="gs" byline="false">
+			<fileset dir="${dest}/MachII/dashboard/views/layout/" includes="wrapper.cfm"/>
+		</replaceregexp>
+		<echo message="---------------------------------------------"/>
+		<echo message="Concatenating CSS files"/>
+		<echo message="---------------------------------------------"/>
+		<concat destfile="${dest}/MachII/dashboard/assets/css/combined.cfm">
+			<filelist dir="${dest}/MachII/dashboard/assets/css" files="basic.cfm,dialog.cfm"/>
+		</concat>
+		<delete>
+			<fileset dir="${dest}/MachII/dashboard/assets/css">
+				<include name="*.cfm"/>
+				<exclude name="combined.cfm"/>
+			</fileset>
+		</delete>
+		<replaceregexp match="\&lt;!--- dashboardCssStart ---\&gt;(.*)\&lt;!--- dashboardCssEnd ---\&gt;"
+			replace='\&lt;view:style endpoint="dashboard.serveAsset" p:file="/css/combined.cfm:css" media="screen,projection" outputType="inline" /\&gt;'
+			flags="gs" byline="false">
+			<fileset dir="${dest}/MachII/dashboard/views/layout/" includes="wrapper.cfm"/>
+		</replaceregexp>
 		<echo message="---------------------------------------------"/>
 		<echo message="Built as version '${buildVersion}'"/>
 		<echo message="---------------------------------------------"/>

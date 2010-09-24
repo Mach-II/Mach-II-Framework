@@ -44,7 +44,7 @@
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.9.0
 
 Notes:
  - Leave cfcontent reset next to DocType to remove a line break that cause some browsers to go into quirks mode
@@ -55,9 +55,12 @@ Notes:
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<view:charset outputType="inline" />
-	
+
+	<!--- dashboardCssStart --->	
 	<view:style endpoint="dashboard.serveAsset" p:file="/css/basic.cfm:css" media="screen,projection" outputType="inline" />
 	<view:style endpoint="dashboard.serveAsset" p:file="/css/dialog.cfm:css" media="screen,projection" outputType="inline" />
+	<!--- dashboardCssEnd --->
+
 	<view:link type="icon" endpoint="dashboard.serveAsset" p:file="/img/favicon.ico" outputType="inline" />
 <cfif event.isArgDefined("meta.refresh")>
 	<view:meta type="refresh" content="#event.getArg("meta.refresh")#" outputType="inline" />
@@ -71,14 +74,15 @@ Notes:
 
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/dump.js" outputType="inline" />
 
+	<!--- dashboardJsStart --->
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/prototype.js" outputType="inline" />
-	<view:script endpoint="dashboard.serveAsset" p:file="/js/builder.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/effects.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/builder.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/dragdrop.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/controls.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/slider.js" outputType="inline" />
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/dialog.js" outputType="inline" />
+	<!--- dashboardJsEnd --->
 	
 	<cfif event.getName() NEQ "sys.login" AND getProperty("enableLogin")>
 		<cfset variables.confirmLogout = getProperty("logoutPromptTimeout") />
