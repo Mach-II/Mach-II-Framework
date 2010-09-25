@@ -235,12 +235,19 @@ Configuration Notes:
 		<cfset var fileExtension = "" />
 		<cfset var pipeExtension = "" />
 
-		<!--- Get file path with support URIs where the file is defined in the pathInfo --->
-		<cfif Len(pathInfo)>
+		<!---
+		Get file path with support URIs where the file is defined in the pathInfo
+		Checking the length of the path info is required in case the url looks like
+		/index.cfm/dashboard.serveAsset/?file=/some/path/to/file.txt
+		--->
+		<cfif Len(pathInfo) AND ListLen(pathInfo, "/") GT 1>
 			<cfset filePath = ListDeleteAt(pathInfo, 1, "/") />
 		<cfelse>
 			<cfset filePath = arguments.event.getArg("file") />
 		</cfif>
+		
+		<!--- Clean up the file path for directory transveral type attacks --->
+		<cfset filePath = cleanFilePath(filePath) />
 		
 		<!--- Setup the file extension and any piping extension --->
 		<cfset fileExtension = ListFirst(ListLast(filePath, "."), ":") />
@@ -462,10 +469,16 @@ Configuration Notes:
 		<cfargument name="filePath" type="string" required="true"
 			hint="The full path to the file." />
 		
+		<cfset var fileName = getFileFromPath(arguments.filePath) />
 		<cfset var fileExtension = "." & ListLast(arguments.filePath, ".") />
 		
-		<!--- Leverage this nicely provided utility method --->
-		<cfreturn getUtils().getMimeTypeByFileExtension(fileExtension) />
+		<!--- Get MIME type only if we have an extension --->
+		<cfif ListLen(fileName, ".")>
+			<cfreturn getUtils().getMimeTypeByFileExtension("." & ListLast(fileName, ".")) />	
+		<!--- If no file extension, then serve as plain text --->
+		<cfelse>
+			<cfreturn getUtils().getMimeTypeByFileExtension(".txt") />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="createDatetimeFromHttpTimeString" access="private" returntype="date" output="false"
@@ -518,10 +531,10 @@ Configuration Notes:
 
 	<cffunction name="fetchAssetTimestamp" access="private" returntype="numeric" output="false"
 		hint="Fetches the asset timestamp (seconds from epoch) from the passed target asset path.">
-		<cfargument name="file" type="string" required="true"
+		<cfargument name="filePath" type="string" required="true"
 			hint="This is the file path." />
 		
-		<cfset var fullPath = Replace(ExpandPath(getBasePath()) & arguments.file, "//", "/", "all") />
+		<cfset var fullPath = Replace(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
 		<cfset var directoryResults = "" />
 
 		<cfdirectory name="directoryResults"
@@ -539,6 +552,34 @@ Configuration Notes:
 
 			<cfreturn 0 />
 		</cfif>
+	</cffunction>
+
+	<cffunction name="cleanFilePath" access="private" returntype="string" output="false"
+		hint="Clean the file path for directory transversal type attacks.">
+		<cfargument name="filePath" type="string" required="true"
+			hint="The 'dirty' file path to be cleaned."/>
+		
+		<cfset var fileParts = "" />
+		<cfset var i = 0 />
+		
+		<!--- Convert any "\" to  "/" which will work on any OS --->
+		<cfset arguments.filePath = ReplaceNoCase(arguments.filePath, "\", "/") />
+		
+		<!--- Explode the file path into part --->
+		<cfset fileParts = ListToArray(arguments.filePath, "/") />
+		
+		<!---
+		Work through the file parts in reverse in case we have to delete empty parts 
+		(such as /path/to//file.txt where // ends up being an empty array element)
+		--->
+		<cfloop from="#ArrayLen(fileParts)#" to="1" index="i" step="-1">
+			<!--- Strip any empty file parts --->
+			<cfif NOT Len(fileParts[i]) OR fileParts[i] EQ ".." OR fileParts[i] EQ ".">
+				<cfset ArrayDeleteAt(fileParts, i) />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn "/" & ArrayToList(fileParts, "/") />
 	</cffunction>
 
 	<!---
