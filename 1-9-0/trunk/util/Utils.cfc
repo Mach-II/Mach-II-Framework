@@ -736,4 +736,60 @@ Notes:
 		<cfreturn variables.mimeTypeMap />
 	</cffunction>
 
+	<cffunction name="cleanPathInfo" access="public" returntype="string" output="false"
+		hint="Cleans the path info to an usable string including UrlDecode().">
+		<cfargument name="pathInfo" type="string" required="true"
+			hint="The path info to use usually the value from 'cgi.PATH_INFO'." />
+		<cfargument name="scriptName" type="string" required="true"
+			hint="The script name to use usually the value from 'cgi.SCRIPT_NAME'. This is required to fix IIS6 goofiness with path info." />
+	
+		<cfset var cleanPathInfo = arguments.pathInfo />
+
+		<!--- Remove script name from the path info since IIS6 breaks the RFC specification by prepending the script name --->
+		<cfif cleanPathInfo.toLowerCase().startsWith(arguments.scriptName.toLowerCase())>
+			<cfset cleanPathInfo = ReplaceNoCase(cleanPathInfo, arguments.scriptName, "", "one") />
+		</cfif>
+
+		<cfreturn UrlDecode(cleanPathInfo) />
+	</cffunction>
+
+	<cffunction name="createDatetimeFromHttpTimeString" access="private" returntype="date" output="false"
+		hint="Creates an UTC datetime from an HTTP time string.">
+		<cfargument name="httpTimeString" type="string" required="true"
+			hint="An HTTP time string in the format of '11 Aug 2010 17:58:48 GMT'." />
+	
+		<cfset var rawArray = ListToArray(ListLast(arguments.httpTimeString, ","), " ") />
+		<cfset var rawTimePart = ListToArray(rawArray[4], ":") />
+		
+		<cfreturn CreateDatetime(rawArray[3], DateFormat("#rawArray[2]#/1/2000", "m"), rawArray[1], rawTimePart[1], rawTimePart[2], rawTimePart[3]) />
+	</cffunction>
+
+	<cffunction name="filePathClean" access="public" returntype="string" output="false"
+		hint="Clean the file path for directory transversal type attacks.">
+		<cfargument name="filePath" type="string" required="true"
+			hint="The 'dirty' file path to be cleaned."/>
+		
+		<cfset var fileParts = "" />
+		<cfset var i = 0 />
+		
+		<!--- Convert any "\" to  "/" which will work on any OS --->
+		<cfset arguments.filePath = ReplaceNoCase(arguments.filePath, "\", "/") />
+		
+		<!--- Explode the file path into part --->
+		<cfset fileParts = ListToArray(arguments.filePath, "/") />
+		
+		<!---
+		Work through the file parts in reverse in case we have to delete empty parts 
+		(such as /path/to//file.txt where // ends up being an empty array element)
+		--->
+		<cfloop from="#ArrayLen(fileParts)#" to="1" index="i" step="-1">
+			<!--- Strip any empty file parts --->
+			<cfif NOT Len(fileParts[i]) OR fileParts[i] EQ ".." OR fileParts[i] EQ ".">
+				<cfset ArrayDeleteAt(fileParts, i) />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn "/" & ArrayToList(fileParts, "/") />
+	</cffunction>
+
 </cfcomponent>

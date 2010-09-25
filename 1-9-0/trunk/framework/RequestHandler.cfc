@@ -112,7 +112,7 @@ Notes:
 		<cfset log.info("Begin processing request.") />
 
 		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-		<cfset cleanPathInfo() />
+		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME)) />
 
 		<cfset eventArgs = getRequestEventArgs() />
 
@@ -536,22 +536,6 @@ Notes:
 
 		<cfreturn eventArgs />
 	</cffunction>
-
-	<cffunction name="cleanPathInfo" access="private" returntype="void" output="false"
-		hint="Cleans the path info to an usable string (IIS6 breaks the RFC specification by inserting the script name into the path info).">
-
-		<cfset var pathInfo = cgi.PATH_INFO />
-		<cfset var scriptName = cgi.SCRIPT_NAME />
-
-		<cfif pathInfo.toLowerCase().startsWith(scriptName.toLowerCase())>
-			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
-		</cfif>
-
-		<cfset pathInfo = UrlDecode(pathInfo) />
-
-		<cfset setCleanedPathInfo(pathInfo) />
-	</cffunction>
-
 	<!---
 	ACCESSORS
 	--->

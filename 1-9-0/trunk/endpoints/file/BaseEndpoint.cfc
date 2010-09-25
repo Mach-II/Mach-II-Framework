@@ -230,7 +230,7 @@ Configuration Notes:
 		hint="Runs when an endpoint request begins. Override to provide custom functionality and call super.preProcess().">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset var pathInfo = cleanPathInfo() />
+		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME) />
 		<cfset var filePath = "" />
 		<cfset var fileExtension = "" />
 		<cfset var pipeExtension = "" />
@@ -247,7 +247,7 @@ Configuration Notes:
 		</cfif>
 		
 		<!--- Clean up the file path for directory transveral type attacks --->
-		<cfset filePath = cleanFilePath(filePath) />
+		<cfset filePath = getUtils().filePathClean(filePath) />
 		
 		<!--- Setup the file extension and any piping extension --->
 		<cfset fileExtension = ListFirst(ListLast(filePath, "."), ":") />
@@ -388,6 +388,11 @@ Configuration Notes:
 			action="list" 
 			directory="#getDirectoryFromPath(ExpandPath(fileFullPath))#" 
 			filter="#getFileFromPath(ExpandPath(fileFullPath))#" />
+
+		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
+		<cfset getAssert().isTrue(fileInfo.recordcount EQ 1
+				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
+				, "File path: '#getFileFromPath(fileFullPath)#'") />
 	
 		<cfheader name="Content-Type" value="#contentType#" />
 
@@ -430,7 +435,7 @@ Configuration Notes:
 		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 		<cfset getAssert().isTrue(fileInfo.recordcount EQ 1
 				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				, "File path: '#arguments.fileFullPath#'") />
+				, "File path: '#getFileFromPath(fileFullPath)#'") />
 
 		<cfheader name="Content-Length" value="#fileInfo.size#" />
 		
@@ -447,7 +452,7 @@ Configuration Notes:
 
 		<cfif getServiceEngineType() EQ "cfcontent">
 			<!--- Return a 304 No Modified if the passed header and file modified timestamp are not the same --->
-			<cfif StructKeyExists(httpRequestHeaders ,"If-Modified-Since") AND DateCompare(createDatetimeFromHttpTimeString(httpRequestHeaders["If-Modified-Since"]), fileInfo.dateLastModified) NEQ 0>
+			<cfif StructKeyExists(httpRequestHeaders ,"If-Modified-Since") AND DateCompare(getUtils().createDatetimeFromHttpTimeString(httpRequestHeaders["If-Modified-Since"]), fileInfo.dateLastModified) NEQ 0>
 				<cfcontent reset="true" />
 				<cfheader statuscode="304" statustext="Not Modified" />
 			<!--- Serve the file using cfcontent --->
@@ -479,30 +484,6 @@ Configuration Notes:
 		<cfelse>
 			<cfreturn getUtils().getMimeTypeByFileExtension(".txt") />
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="createDatetimeFromHttpTimeString" access="private" returntype="date" output="false"
-		hint="Creates an UTC datetime from an HTTP time string.">
-		<cfargument name="httpTimeString" type="string" required="true"
-			hint="An HTTP time string in the format of '11 Aug 2010 17:58:48 GMT'." />
-	
-		<cfset var rawArray = ListToArray(ListLast(arguments.httpTimeString, ","), " ") />
-		<cfset var rawTimePart = ListToArray(rawArray[4], ":") />
-		
-		<cfreturn CreateDatetime(rawArray[3], DateFormat("#rawArray[2]#/1/2000", "m"), rawArray[1], rawTimePart[1], rawTimePart[2], rawTimePart[3]) />
-	</cffunction>
-	
-	<cffunction name="cleanPathInfo" access="private" returntype="string" output="false"
-		hint="Cleans the path info to an usable string (IIS6 breaks the RFC specification by inserting the script name into the path info).">
-
-		<cfset var pathInfo = cgi.PATH_INFO />
-		<cfset var scriptName = cgi.SCRIPT_NAME />
-
-		<cfif pathInfo.toLowerCase().startsWith(scriptName.toLowerCase())>
-			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
-		</cfif>
-
-		<cfreturn UrlDecode(pathInfo) />
 	</cffunction>
 	
 	<cffunction name="parseExpiresLanguage" access="private" returntype="struct" output="false"
@@ -552,34 +533,6 @@ Configuration Notes:
 
 			<cfreturn 0 />
 		</cfif>
-	</cffunction>
-
-	<cffunction name="cleanFilePath" access="private" returntype="string" output="false"
-		hint="Clean the file path for directory transversal type attacks.">
-		<cfargument name="filePath" type="string" required="true"
-			hint="The 'dirty' file path to be cleaned."/>
-		
-		<cfset var fileParts = "" />
-		<cfset var i = 0 />
-		
-		<!--- Convert any "\" to  "/" which will work on any OS --->
-		<cfset arguments.filePath = ReplaceNoCase(arguments.filePath, "\", "/") />
-		
-		<!--- Explode the file path into part --->
-		<cfset fileParts = ListToArray(arguments.filePath, "/") />
-		
-		<!---
-		Work through the file parts in reverse in case we have to delete empty parts 
-		(such as /path/to//file.txt where // ends up being an empty array element)
-		--->
-		<cfloop from="#ArrayLen(fileParts)#" to="1" index="i" step="-1">
-			<!--- Strip any empty file parts --->
-			<cfif NOT Len(fileParts[i]) OR fileParts[i] EQ ".." OR fileParts[i] EQ ".">
-				<cfset ArrayDeleteAt(fileParts, i) />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn "/" & ArrayToList(fileParts, "/") />
 	</cffunction>
 
 	<!---

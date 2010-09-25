@@ -143,7 +143,7 @@ To Test it out, do the following:
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset var pathInfo = cleanPathInfo() />
+		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME) />
 
 		<cfif NOT Len(pathInfo) AND arguments.event.isArgDefined("uri")>
 			<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
@@ -243,19 +243,6 @@ To Test it out, do the following:
 			</cfcatch>
 		</cftry>
 
-	</cffunction>
-
-	<cffunction name="cleanPathInfo" access="private" returntype="string" output="false"
-		hint="Cleans the path info to an usable string (IIS6 breaks the RFC specification by inserting the script name into the path info).">
-
-		<cfset var pathInfo = cgi.PATH_INFO />
-		<cfset var scriptName = cgi.SCRIPT_NAME />
-
-		<cfif pathInfo.toLowerCase().startsWith(scriptName.toLowerCase())>
-			<cfset pathInfo = ReplaceNoCase(pathInfo, scriptName, "", "one") />
-		</cfif>
-
-		<cfreturn UrlDecode(pathInfo) />
 	</cffunction>
 
 	<cffunction name="cleanRawContent" access="private" returntype="any" output="false"
