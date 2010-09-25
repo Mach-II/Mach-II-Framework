@@ -47,11 +47,25 @@ Created version: 1.9.0
 Updated version: 1.9.0
 
 Notes:
+For more information on HTTP basic access authentication:
+
+To use other credential verification schemas, then sub-class this component
+and override the checkCredentials() methods with your custom behavior. Other
+verfication schemas could include LDAP, database or single sign-on service.
+
+One should note that the authorization header sent by the browser is merely
+encoded in base64 and can be easily decoded back into plain text. This encoding
+is not used for security but to encode non-ASCII characters in an username or
+password into a string that can be passed in an HTTP header.
+
+Team Mach-II highly recommends that you use SSL (https) in conjunction with 
+basic access authorization because the authorization header is sent over the
+wire in plain text.
 --->
 <cfcomponent 
 	displayname="Authentication"
 	output="false"
-	hint="Performs HTTP basic authentication.">
+	hint="Performs HTTP basic access authentication.">
 		
 	<!---
 	PROPERTIES
@@ -140,21 +154,21 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 	
-	<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
-		hint="Loads a credential file into memory.">
-		<cfargument name="credentialFilePath" type="string" required="true" />
-		
-		<cfset var line = "" />
-		<cfset var credentials = StructNew() />
-		
-		<cfloop file="#ExpandPath(arguments.credentialFilePath)#" index="line">
-			<cfif NOT line.startsWith("##") AND ListLen(line, ":") EQ 2 >
-				<cfset credentials[ListFirst(line, ":")] = ListLast(line, ":") />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn credentials />
-	</cffunction>
+<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
+	hint="Loads a credential file into memory.">
+	<cfargument name="credentialFilePath" type="string" required="true" />
+	
+	<cfset var line = "" />
+	<cfset var credentials = StructNew() />
+	
+	<cfloop file="#ExpandPath(arguments.credentialFilePath)#" index="line">
+		<cfif NOT line.startsWith("##") AND ListLen(line, ":") EQ 2 >
+			<cfset credentials[ListFirst(line, ":")] = ListLast(line, ":") />
+		</cfif>
+	</cfloop>
+	
+	<cfreturn credentials />
+</cffunction>
 	
 	<!---
 	ACCESSORS
