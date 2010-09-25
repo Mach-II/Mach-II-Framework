@@ -46,6 +46,8 @@ Notes:
 
 <cfif  getProperty("enableLogin") AND NOT isLoggedIn()>
 	<p>Something went wrong however you are not logged in and therefore we cannot show you the exception.</p>
+	<!--- Don't show head elements if not logged in --->
+	<cfset event.setArg("suppressHeadElements", true) />
 <cfelse>
 <h2 style="margin:1em 0 3px 0">Information</h2>
 <table>
