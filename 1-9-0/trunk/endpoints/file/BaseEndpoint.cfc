@@ -487,7 +487,7 @@ Configuration Notes:
 	</cffunction>
 	
 	<cffunction name="parseExpiresLanguage" access="private" returntype="struct" output="false"
-		hint="Parses expires language into an uniform structure.">
+		hint="Parses expires language into an uniform structure with keys of 'type' and 'amount' (via createTimespan() BIF).">
 		<cfargument name="inputString" type="string" required="true" />
 		
 		<cfset var amountRaw = "" />
@@ -515,7 +515,7 @@ Configuration Notes:
 		<cfargument name="filePath" type="string" required="true"
 			hint="This is the file path." />
 		
-		<cfset var fullPath = Replace(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
+		<cfset var fullPath = ReplaceNoCase(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
 		<cfset var directoryResults = "" />
 
 		<cfdirectory name="directoryResults"
