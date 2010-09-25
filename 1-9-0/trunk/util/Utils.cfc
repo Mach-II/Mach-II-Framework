@@ -746,14 +746,14 @@ Notes:
 		<cfset var cleanPathInfo = arguments.pathInfo />
 
 		<!--- Remove script name from the path info since IIS6 breaks the RFC specification by prepending the script name --->
-		<cfif cleanPathInfo.toLowerCase().startsWith(arguments.scriptName.toLowerCase())>
+		<cfif Len(arguments.scriptName) AND cleanPathInfo.toLowerCase().startsWith(arguments.scriptName.toLowerCase())>
 			<cfset cleanPathInfo = ReplaceNoCase(cleanPathInfo, arguments.scriptName, "", "one") />
 		</cfif>
 
 		<cfreturn UrlDecode(cleanPathInfo) />
 	</cffunction>
 
-	<cffunction name="createDatetimeFromHttpTimeString" access="private" returntype="date" output="false"
+	<cffunction name="createDatetimeFromHttpTimeString" access="public" returntype="date" output="false"
 		hint="Creates an UTC datetime from an HTTP time string.">
 		<cfargument name="httpTimeString" type="string" required="true"
 			hint="An HTTP time string in the format of '11 Aug 2010 17:58:48 GMT'." />
@@ -772,7 +772,10 @@ Notes:
 		<cfset var fileParts = "" />
 		<cfset var i = 0 />
 		
-		<!--- Convert any "\" to  "/" which will work on any OS --->
+		<!---
+		Convert any "\" to  "/" which will work on any OS which allows us to not worry
+		about "./", "../", ".\" and "..\" types
+		--->
 		<cfset arguments.filePath = ReplaceNoCase(arguments.filePath, "\", "/") />
 		
 		<!--- Explode the file path into part --->
@@ -780,11 +783,12 @@ Notes:
 		
 		<!---
 		Work through the file parts in reverse in case we have to delete empty parts 
-		(such as /path/to//file.txt where // ends up being an empty array element)
+		(such as /path/to//file.txt where // ends up being an empty array element) or
+		directory transversal indicators such as "." or ".."
 		--->
 		<cfloop from="#ArrayLen(fileParts)#" to="1" index="i" step="-1">
-			<!--- Strip any empty file parts --->
-			<cfif NOT Len(fileParts[i]) OR fileParts[i] EQ ".." OR fileParts[i] EQ ".">
+			<!--- Strip any empty file parts or file parts that are all dots --->
+			<cfif NOT Len(fileParts[i]) OR REFindNocase(fileParts[i], "^\.{1,}$")>
 				<cfset ArrayDeleteAt(fileParts, i) />
 			</cfif>
 		</cfloop>

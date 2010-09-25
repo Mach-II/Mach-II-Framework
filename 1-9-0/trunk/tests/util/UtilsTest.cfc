@@ -183,4 +183,29 @@ Notes:
 		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,application/x-gzip"), "image/jpeg,image/gif,application/x-gzip") />
 	</cffunction>
 
+	<cffunction name="testCleanPathInfo" access="public" returntype="void" output="false"
+		hint="Test cleanPathInfo()">
+		<!--- Check for URL decoding "/test/../something"--->
+		<cfset assertEquals("/test/../something", variables.utils.cleanPathInfo("/test/%2e%2e/something", "")) />
+		<!--- Check that IIS6 bug "/index.cfm/test/something" --->
+		<cfset assertEquals("/test/something", variables.utils.cleanPathInfo("index.cfm/test/something", "index.cfm")) />
+	</cffunction>
+	
+	<cffunction name="testCreateDatetimeFromHttpTimeString" access="public" returntype="void" output="false"
+		hint="Test createDatetimeFromHttpTimeString()">
+		<cfset assertEquals(CreateDateTime("2010", "8", "11", "17", "58", "48"), variables.utils.createDatetimeFromHttpTimeString("11 Aug 2010 17:58:48 GMT")) />
+	</cffunction>
+	
+	<cffunction name="testFilePathClean" access="public" returntype="void" output="false"
+		hint="Test filePathClean()">
+		<!--- Test ./ and ../ --->
+		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("/test/./../../to/../myfile.txt")) />
+		<!--- Test doubl // angled hockey sticks --->
+		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("/test/to//myfile.txt")) />
+		<!--- Test leading ./ --->
+		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("./test/to/myfile.txt")) />
+		<!--- Test leading ../ --->
+		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("../test/to/myfile.txt")) />
+	</cffunction>
+
 </cfcomponent>
