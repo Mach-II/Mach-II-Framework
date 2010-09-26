@@ -165,7 +165,7 @@ Notes:
 		<cfset var comparisonList = "apples,oranges,pears" />
 		<cfset var returnedList = variables.utils.trimList(" apples, oranges ,pears ") />
 		
-		<cfset assertTrue(returnedList EQ comparisonList) />
+		<cfset assertEquals(returnedList, comparisonList) />
 	</cffunction>
 	
 	<cffunction name="testEscapeHtml" access="public" returntype="void" output="false"
@@ -179,8 +179,8 @@ Notes:
 		<!--- Test single --->
 		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,"), "image/jpeg") />
 		
-		<!--- Test mixed --->
-		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,application/x-gzip"), "image/jpeg,image/gif,application/x-gzip") />
+		<!--- Test mixed file extensions and mime types --->
+		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,.zip,audio/x-wav"), "image/jpeg,image/gif,application/x-gzip,audio/x-wav") />
 	</cffunction>
 
 	<cffunction name="testCleanPathInfo" access="public" returntype="void" output="false"
@@ -206,6 +206,12 @@ Notes:
 		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("./test/to/myfile.txt")) />
 		<!--- Test leading ../ --->
 		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("../test/to/myfile.txt")) />
+	</cffunction>
+
+	<cffunction name="testGetHTTPHeaderStatusTextByStatusCode" access="public" returntype="void" output="false"
+		hint="Test getHTTPHeaderStatusTextByStatusCode()">
+		<cfset assertEquals("Not Modified", variables.utils.getHTTPHeaderStatusTextByStatusCode(304)) />
+		<cfset assertEquals("", variables.utils.getHTTPHeaderStatusTextByStatusCode(999)) />
 	</cffunction>
 
 </cfcomponent>

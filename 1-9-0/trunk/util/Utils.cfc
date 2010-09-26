@@ -44,7 +44,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -66,217 +66,27 @@ Notes:
 	<cffunction name="init" access="public" returntype="Utils" output="false"
 		hint="Initialization function called by the framework.">
 
-		<cfset buildStatusCodeShortcutMap() />
-		<cfset buildMimeTypeMap() />
+
+		<cfset variables.statusCodeShortcutMap = loadResourceData("/MachII/util/resources/data/httpStatuscodes.properties") />
+		<cfset variables.mimeTypeMap = loadResourceData("/MachII/util/resources/data/mimeTypes.properties") />
 
 		<cfreturn this />
 	</cffunction>
+	
+	<cffunction name="loadResourceData" access="private" returntype="struct" output="false"
+		hint="Loads resource data">
+		<cfargument name="resourcePath" type="string" required="true" />
 
-	<cffunction name="buildStatusCodeShortcutMap" access="private" returntype="void" output="false"
-		hint="Builds a shortcut map for HTTP header status code.">
+		<cfset var resourceMap = StructNew() />
+		<cfset var line = "" />
 
-		<cfset var statusCodeShortcutMap = StructNew() />
+		<cfloop file="#ExpandPath(arguments.resourcePath)#" index="line">
+			<cfif NOT line.startsWith("##") AND ListLen(line, "=") EQ 2 >
+				<cfset resourceMap[ListFirst(line, "=")] = ListLast(line, "=") />
+			</cfif>
+		</cfloop>
 
-		<cfset statusCodeShortcutMap["100"] = "Continue" />
-		<cfset statusCodeShortcutMap["101"] = "Switching Protocols" />
-		<cfset statusCodeShortcutMap["200"] = "OK" />
-		<cfset statusCodeShortcutMap["201"] = "Created" />
-		<cfset statusCodeShortcutMap["202"] = "Accepted" />
-		<cfset statusCodeShortcutMap["203"] = "Non-Authoritative Information" />
-		<cfset statusCodeShortcutMap["204"] = "No Content" />
-		<cfset statusCodeShortcutMap["205"] = "Reset Content" />
-		<cfset statusCodeShortcutMap["206"] = "Partial Content" />
-		<cfset statusCodeShortcutMap["300"] = "Multiple Choices" />
-		<cfset statusCodeShortcutMap["301"] = "Moved Permanently" />
-		<cfset statusCodeShortcutMap["302"] = "Found" />
-		<cfset statusCodeShortcutMap["303"] = "See Other" />
-		<cfset statusCodeShortcutMap["304"] = "Not Modified" />
-		<cfset statusCodeShortcutMap["307"] = "Temporary Redirect" />
-		<cfset statusCodeShortcutMap["400"] = "Bad Request" />
-		<cfset statusCodeShortcutMap["401"] = "Unauthorized" />
-		<cfset statusCodeShortcutMap["403"] = "Forbidden" />
-		<cfset statusCodeShortcutMap["404"] = "Not Found" />
-		<cfset statusCodeShortcutMap["405"] = "Method Not Allowed" />
-		<cfset statusCodeShortcutMap["406"] = "Not Acceptable" />
-		<cfset statusCodeShortcutMap["408"] = "Request Timeout" />
-		<cfset statusCodeShortcutMap["410"] = "Gone" />
-		<cfset statusCodeShortcutMap["500"] = "Internal Server Error" />
-		<cfset statusCodeShortcutMap["501"] = "Not Implemented" />
-		<cfset statusCodeShortcutMap["502"] = "Bad Gateway" />
-		<cfset statusCodeShortcutMap["503"] = "Service Unavailable" />
-		<cfset statusCodeShortcutMap["504"] = "Gateway Timeout" />
-
-		<cfset variables.statusCodeShortcutMap = statusCodeShortcutMap />
-	</cffunction>
-
-	<cffunction name="buildMimeTypeMap" access="private" returntype="void" output="false"
-		hint="Builds a shortcut map for MIME type to file extensions.">
-
-		<cfset var mime = StructNew() />
-
-		<cfset mime.ai = "application/postscript" />
-		<cfset mime.aif = "audio/x-aiff" />
-		<cfset mime.aifc = "audio/x-aiff" />
-		<cfset mime.aiff = "audio/x-aiff" />
-		<cfset mime.asc = "text/plain" />
-		<cfset mime.au = "audio/basic" />
-		<cfset mime.avi = "video/x-msvideo" />
-		<cfset mime.bcpio = "application/x-bcpio" />
-		<cfset mime.bin = "application/octet-stream" />
-		<cfset mime.c = "text/plain" />
-		<cfset mime.cc = "text/plain" />
-		<cfset mime.ccad = "application/clariscad" />
-		<cfset mime.cdf = "application/x-netcdf" />
-		<cfset mime.class = "application/octet-stream" />
-		<cfset mime.cpio = "application/x-cpio" />
-		<cfset mime.cpt = "application/mac-compactpro" />
-		<cfset mime.csh = "application/x-csh" />
-		<cfset mime.css = "text/css" />
-		<cfset mime.dcr = "application/x-director" />
-		<cfset mime.dir = "application/x-director" />
-		<cfset mime.dms = "application/octet-stream" />
-		<cfset mime.doc = "application/msword" />
-		<cfset mime.drw = "application/drafting" />
-		<cfset mime.dvi = "application/x-dvi" />
-		<cfset mime.dwg = "application/acad" />
-		<cfset mime.dxf = "application/dxf" />
-		<cfset mime.dxr = "application/x-director" />
-		<cfset mime.eps = "application/postscript" />
-		<cfset mime.etx = "text/x-setext" />
-		<cfset mime.exe = "application/octet-stream" />
-		<cfset mime.ez = "application/andrew-inset" />
-		<cfset mime.f = "text/plain" />
-		<cfset mime.f90 = "text/plain" />
-		<cfset mime.fli = "video/x-fli" />
-		<cfset mime.gif = "image/gif" />
-		<cfset mime.gtar = "application/x-gtar" />
-		<cfset mime.gz = "application/x-gzip" />
-		<cfset mime.h = "text/plain" />
-		<cfset mime.hdf = "application/x-hdf" />
-		<cfset mime.hh = "text/plain" />
-		<cfset mime.hqx = "application/mac-binhex40" />
-		<cfset mime.htm = "text/html" />
-		<cfset mime.html = "text/html" />
-		<cfset mime.ice = "x-conference/x-cooltalk" />
-		<cfset mime.ico = "image/vnd.microsoft.icon" />
-		<cfset mime.ief = "image/ief" />
-		<cfset mime.iges = "model/iges" />
-		<cfset mime.igs = "model/iges" />
-		<cfset mime.ips = "application/x-ipscript" />
-		<cfset mime.ipx = "application/x-ipix" />
-		<cfset mime.jpe = "image/jpeg" />
-		<cfset mime.jpeg = "image/jpeg" />
-		<cfset mime.jpg = "image/jpeg" />
-		<cfset mime.js = "application/x-javascript" />
-		<cfset mime.json = "application/json" />
-		<cfset mime.kar = "audio/midi" />
-		<cfset mime.latex = "application/x-latex" />
-		<cfset mime.lha = "application/octet-stream" />
-		<cfset mime.lsp = "application/x-lisp" />
-		<cfset mime.lzh = "application/octet-stream" />
-		<cfset mime.m = "text/plain" />
-		<cfset mime.man = "application/x-troff-man" />
-		<cfset mime.me = "application/x-troff-me" />
-		<cfset mime.mesh = "model/mesh" />
-		<cfset mime.mid = "audio/midi" />
-		<cfset mime.midi = "audio/midi" />
-		<cfset mime.mif = "application/vnd.mif" />
-		<cfset mime.mime = "www/mime" />
-		<cfset mime.mov = "video/quicktime" />
-		<cfset mime.movie = "video/x-sgi-movie" />
-		<cfset mime.mp2 = "audio/mpeg" />
-		<cfset mime.mp3 = "audio/mpeg" />
-		<cfset mime.mpe = "video/mpeg" />
-		<cfset mime.mpeg = "video/mpeg" />
-		<cfset mime.mpg = "video/mpeg" />
-		<cfset mime.mpga = "audio/mpeg" />
-		<cfset mime.ms = "application/x-troff-ms" />
-		<cfset mime.msh = "model/mesh" />
-		<cfset mime.nc = "application/x-netcdf" />
-		<cfset mime.oda = "application/oda" />
-		<cfset mime.pbm = "image/x-portable-bitmap" />
-		<cfset mime.pdb = "chemical/x-pdb" />
-		<cfset mime.pdf = "application/pdf" />
-		<cfset mime.pgm = "image/x-portable-graymap" />
-		<cfset mime.pgn = "application/x-chess-pgn" />
-		<cfset mime.png = "image/png" />
-		<cfset mime.pnm = "image/x-portable-anymap" />
-		<cfset mime.pot = "application/mspowerpoint" />
-		<cfset mime.ppm = "image/x-portable-pixmap" />
-		<cfset mime.pps = "application/mspowerpoint" />
-		<cfset mime.ppt = "application/mspowerpoint" />
-		<cfset mime.ppz = "application/mspowerpoint" />
-		<cfset mime.pre = "application/x-freelance" />
-		<cfset mime.prt = "application/pro_eng" />
-		<cfset mime.ps = "application/postscript" />
-		<cfset mime.qt = "video/quicktime" />
-		<cfset mime.ra = "audio/x-realaudio" />
-		<cfset mime.ram = "audio/x-pn-realaudio" />
-		<cfset mime.ras = "image/cmu-raster" />
-		<cfset mime.rgb = "image/x-rgb" />
-		<cfset mime.rm = "audio/x-pn-realaudio" />
-		<cfset mime.roff = "application/x-troff" />
-		<cfset mime.rpm = "audio/x-pn-realaudio-plugin" />
-		<cfset mime.rtf = "text/rtf" />
-		<cfset mime.rtx = "text/richtext" />
-		<cfset mime.scm = "application/x-lotusscreencam" />
-		<cfset mime.set = "application/set" />
-		<cfset mime.sgm = "text/sgml" />
-		<cfset mime.sgml = "text/sgml" />
-		<cfset mime.sh = "application/x-sh" />
-		<cfset mime.shar = "application/x-shar" />
-		<cfset mime.silo = "model/mesh" />
-		<cfset mime.sit = "application/x-stuffit" />
-		<cfset mime.skd = "application/x-koan" />
-		<cfset mime.skm = "application/x-koan" />
-		<cfset mime.skp = "application/x-koan" />
-		<cfset mime.skt = "application/x-koan" />
-		<cfset mime.smi = "application/smil" />
-		<cfset mime.smil = "application/smil" />
-		<cfset mime.snd = "audio/basic" />
-		<cfset mime.sol = "application/solids" />
-		<cfset mime.spl = "application/x-futuresplash" />
-		<cfset mime.src = "application/x-wais-source" />
-		<cfset mime.step = "application/STEP" />
-		<cfset mime.stl = "application/SLA" />
-		<cfset mime.stp = "application/STEP" />
-		<cfset mime.sv4cpio = "application/x-sv4cpio" />
-		<cfset mime.sv4crc = "application/x-sv4crc" />
-		<cfset mime.swf = "application/x-shockwave-flash" />
-		<cfset mime.t = "application/x-troff" />
-		<cfset mime.tar = "application/x-tar" />
-		<cfset mime.tcl = "application/x-tcl" />
-		<cfset mime.tex = "application/x-tex" />
-		<cfset mime.texi = "application/x-texinfo" />
-		<cfset mime.texinfo = "application/x-texinfo" />
-		<cfset mime.tif = "image/tiff" />
-		<cfset mime.tiff = "image/tiff" />
-		<cfset mime.tr = "application/x-troff" />
-		<cfset mime.tsi = "audio/TSP-audio" />
-		<cfset mime.tsp = "application/dsptype" />
-		<cfset mime.tsv = "text/tab-separated-values" />
-		<cfset mime.txt = "text/plain" />
-		<cfset mime.unv = "application/i-deas" />
-		<cfset mime.ustar = "application/x-ustar" />
-		<cfset mime.vcd = "application/x-cdlink" />
-		<cfset mime.vda = "application/vda" />
-		<cfset mime.viv = "video/vnd.vivo" />
-		<cfset mime.vivo = "video/vnd.vivo" />
-		<cfset mime.vrml = "model/vrml" />
-		<cfset mime.wav = "audio/x-wav" />
-		<cfset mime.wrl = "model/vrml" />
-		<cfset mime.xbm = "image/x-xbitmap" />
-		<cfset mime.xlc = "application/vnd.ms-excel" />
-		<cfset mime.xll = "application/vnd.ms-excel" />
-		<cfset mime.xlm = "application/vnd.ms-excel" />
-		<cfset mime.xls = "application/vnd.ms-excel" />
-		<cfset mime.xlw = "application/vnd.ms-excel" />
-		<cfset mime.xml = "text/xml" />
-		<cfset mime.xpm = "image/x-xpixmap" />
-		<cfset mime.xwd = "image/x-xwindowdump" />
-		<cfset mime.xyz = "chemical/x-pdb" />
-
-		<cfset variables.mimeTypeMap = mime />
+		<cfreturn resourceMap />
 	</cffunction>
 
 	<!---
