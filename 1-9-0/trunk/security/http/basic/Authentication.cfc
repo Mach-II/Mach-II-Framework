@@ -154,21 +154,21 @@ wire in plain text.
 		<cfreturn result />
 	</cffunction>
 	
-<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
-	hint="Loads a credential file into memory.">
-	<cfargument name="credentialFilePath" type="string" required="true" />
-	
-	<cfset var line = "" />
-	<cfset var credentials = StructNew() />
-	
-	<cfloop file="#ExpandPath(arguments.credentialFilePath)#" index="line">
-		<cfif NOT line.startsWith("##") AND ListLen(line, ":") EQ 2 >
-			<cfset credentials[ListFirst(line, ":")] = ListLast(line, ":") />
-		</cfif>
-	</cfloop>
-	
-	<cfreturn credentials />
-</cffunction>
+	<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
+		hint="Loads a credential file into memory.">
+		<cfargument name="credentialFilePath" type="string" required="true" />
+		
+		<cfset var line = "" />
+		<cfset var credentials = StructNew() />
+		
+		<cfloop file="#ExpandPath(arguments.credentialFilePath)#" index="line">
+			<cfif NOT line.startsWith("##") AND ListLen(line, ":") EQ 2 >
+				<cfset credentials[ListFirst(line, ":")] = ListLast(line, ":") />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn credentials />
+	</cffunction>
 	
 	<!---
 	ACCESSORS
