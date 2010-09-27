@@ -549,7 +549,7 @@ Notes:
 	<cffunction name="setLog" access="private" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
-		<cfset variables.log = arguments.logFactory.getLog(getMetadata(this).name) />
+		<cfset variables.log = arguments.logFactory.getLog("MachII.framework.CacheManager") />
 	</cffunction>
 	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
