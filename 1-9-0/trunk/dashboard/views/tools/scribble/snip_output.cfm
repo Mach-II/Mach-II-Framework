@@ -1,5 +1,6 @@
 <cfoutput>
 <div style="border:1px dotted ##CCC;padding:12px;margin-top:12px;">
+<cfset variables.tickStart = getTickCount() />
 	<cftry>
 		<cfif event.getArg("renderType") EQ "render">
 			#render(event.getArg('input'))#
@@ -14,4 +15,5 @@
 		</cfcatch>
 	</cftry>
 </div>
+<p>Execution Time: #NumberFormat(getTickCount() - variables.tickStart)#ms</p>
 </cfoutput>
