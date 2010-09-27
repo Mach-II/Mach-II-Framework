@@ -114,7 +114,7 @@ To Test it out, do the following:
 	<!--- Introspector looks for REST:* annotations in child classes to find REST-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<!--- UriCollection of rest.Uris that match in this endpoint. --->
-	<cfset variables.restUris = CreateObject("component", "MachII.endpoints.rest.UriCollection").init() />
+	<cfset variables.restUris = CreateObject("component", "MachII.framework.url.UriCollection").init() />
 	<!--- The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
 	      it can be overridden in a subclass using setDefaultFormat(). --->
 	<cfset variables.defaultFormat = "html" />
@@ -133,7 +133,7 @@ To Test it out, do the following:
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Reset the endpoint to a default state.">
-		<cfset variables.restUris.resetRestUris() />
+		<cfset variables.restUris.resetUris() />
 	</cffunction>
 
 	<!---
@@ -165,7 +165,7 @@ To Test it out, do the following:
 
 		<cfset var pathInfo = arguments.event.getArg("pathInfo", "") />
 		<cfset var httpMethod = arguments.event.getArg("httpMethod", "") />
-		<cfset var restUri = variables.restUris.findRestUri(pathInfo, httpMethod) />
+		<cfset var restUri = variables.restUris.findUri(pathInfo, httpMethod) />
 		<cfset var restResponseBody = "" />
 
 		<cfif IsObject(restUri)>
@@ -292,14 +292,14 @@ To Test it out, do the following:
 						<cfelse>
 							<cfset currHttpMethod = "GET" />
 						</cfif>
-						<!--- Create instance of RestUri and add it to the RestUriCollection. --->
-						<cfset currRestUri = CreateObject("component", "MachII.endpoints.rest.Uri").init(
+						<!--- Create instance of Uri and add it to the UriCollection. --->
+						<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
 								currFunction[variables.ANNOTATION_REST_URI]
 								, currHttpMethod
 								, currFunction.name
 								, getParameter("name")
 							) />
-						<cfset variables.restUris.addRestUri(currRestUri) />
+						<cfset variables.restUris.addUri(currRestUri) />
 					</cfif>
 				</cfloop>
 			</cfif>

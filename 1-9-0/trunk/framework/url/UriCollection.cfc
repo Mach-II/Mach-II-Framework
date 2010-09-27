@@ -1,0 +1,154 @@
+<!---
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
+
+Author: Doug Smith (doug.smith@daveramsey.com)
+$Id$
+
+Created version: 1.9.0
+
+Notes:
+A UriCollection links HTTP METHODs and regex URI matching patterns to the
+associated Uri instances.
+--->
+<cfcomponent
+	displayname="UriCollection"
+	output="false"
+	hint="Represents a collection of URIs which are organized by HTTP method and regex.">
+
+	<!---
+	PROPERTIES
+	--->
+	<!--- This is a struct of structs, where the outer key is the HTTP Method, and the inner key is the urlRegex that points to each Uri. --->
+	<cfset variables.uris = StructNew() />
+
+	<!---
+	INITIALIZATION / CONFIGURATION
+	--->
+	<cffunction name="init" access="public" returntype="UriCollection" output="false"
+		hint="Initializes the UriCollection.">
+		<cfreturn this />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS
+	--->
+	<cffunction name="findUri" access="public" returntype="any" output="false"
+		hint="Tries to find an Uri that matches the incoming pathInfo and HttpMethod. Returns it if found, otherwise returns empty string.">
+		<cfargument name="pathInfo" type="string" required="true" />
+		<cfargument name="httpMethod" type="string" required="true" />
+
+		<cfset var uri = "" />
+		<cfset var currUriGroup = "" />
+		<cfset var currUriRegex = "" />
+
+		<cfif StructKeyExists(variables.uris, arguments.httpMethod)>
+			<cfset currUriGroup = variables.uris[arguments.httpMethod] />
+
+			<cfloop collection="#currUriGroup#" item="currUriRegex">
+				<cfif ReFindNoCase(currUriRegex, arguments.pathInfo, 1, false)>
+					<!--- Found a match: get it, and bail out of loop --->
+					<cfset uri = currUriGroup[currUriRegex] />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		</cfif>
+
+		<cfreturn uri />
+	</cffunction>
+
+	<cffunction name="addUri" access="public" returntype="void" output="false"
+		hint="Adds a Uri to the collection, throwing exception for duplicates or unsupported HTTP methods.">
+		<cfargument name="uri" type="MachII.framework.url.Uri" required="true" />
+
+		<cfif NOT StructKeyExists(variables.uris, arguments.uri.getHttpMethod())>
+			<!--- Create new inner struct for httpMethod if not present --->
+			<cfset StructInsert(variables.uris, arguments.uri.getHttpMethod(), StructNew()) />
+		</cfif>
+
+		<cfif NOT StructKeyExists(variables.uris[arguments.uri.getHttpMethod()], arguments.uri.getUriRegex())>
+			<!--- Add currRestUri to restUris structure, with uriRegex as the key, if not duplicate --->
+			<cfset StructInsert(variables.uris[arguments.uri.getHttpMethod()], arguments.uri.getUriRegex(), arguments.uri) />
+		<cfelse>
+			<!--- Throw exception if this Uri is already defined here. --->
+			<cfthrow type="MachII.framework.url.DuplicateUri"
+					message="The URI Pattern '#arguments.uri.getUriPattern()#' for this UriCollection method has already been defined. URIs patterns must be unique."
+					detail="Currently defined patterns: '#StructKeyList(variables.uris)#'"  />
+		</cfif>
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="appendUriCollection" access="public" returntype="void" output="false"
+		hint="Appends the Uris in the input UriCollection to this UriCollection. Throws exception on any duplicates.">
+		<cfargument name="uriCollection" type="MachII.framework.url.UriCollection" required="true"
+			hint="The UriCollection to merge with this collection." />
+
+		<cfset var inUris = arguments.uriCollection.getUris() />
+		<cfset var currHttpMethod = "" />
+		<cfset var currUriGroup = "" />
+		<cfset var currUriRegex = "" />
+
+		<!--- Iterate through HTTP methods, get Uris, call add on each one --->
+		<cfloop collection="#inUris#" item="currHttpMethod">
+			<cfset currUriGroup = inUris[currHttpMethod] />
+			<cfloop collection="#currUriGroup#" item="currUriRegex">
+				<!--- Add each Uri to this collection. Throws exception if duplicate. --->
+				<cfset this.addUri(currUriGroup[currUriRegex]) />
+			</cfloop>
+		</cfloop>
+	</cffunction>
+
+	<cffunction name="resetUris" access="public" returntype="void" output="false"
+		hint="Resets the URI collection.">
+		<cfset variables.uris = StructNew() />
+	</cffunction>
+
+	<!---
+	ACCESSORS
+	--->
+	<cffunction name="getUris" access="public" returntype="struct" output="false"
+		hint="Gets the URI collection.">
+		<cfreturn variables.uris />
+	</cffunction>
+
+</cfcomponent>

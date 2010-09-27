@@ -47,7 +47,7 @@ Created version: 1.9.0
 
 Notes:
 
-A RestUri is a link between a URI pattern and an endpoint method that
+A tUri is a link between a URI pattern and an endpoint method that
 will be invoked when an incoming URL matches the pattern. The RestUri
 pattern can include tokens that defined variable portions of the
 incoming URI.
@@ -56,7 +56,7 @@ For example, a uriPattern like "/service/doit/{value}"
 
 --->
 <cfcomponent
-	displayname="RestUri"
+	displayname="Uri"
 	output="false"
 	hint="Represents a URI that can be compared against incoming urls to determine matches and retrieve variable tokens.">
 
@@ -83,19 +83,19 @@ For example, a uriPattern like "/service/doit/{value}"
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="Uri" output="false"
-		hint="Initializes the RestUri.">
+		hint="Initializes the Uri.">
 		<cfargument name="uriPattern" type="String" required="false" default=""
 			hint="The URI pattern to be used for this endpoint route." />
 		<cfargument name="httpMethod" type="String" required="false" default=""
 			hint="The HTTP method to be used for this endpoint route." />
 		<cfargument name="functionName" type="String" required="false" default=""
 			hint="The name of the function to call when this endpoint route is invoked" />
-		<cfargument name="endpointName" type="String" required="false" default=""
-			hint="The name of this endpoint." />
+		<cfargument name="uriPrefix" type="String" required="false" default=""
+			hint="The name of the URI prefiex." />
 
 		<cfset setHttpMethod(arguments.httpMethod) />
 		<cfset setFunctionName(arguments.functionName) />
-		<cfset setEndpointName(arguments.endpointName) />
+		<cfset setUriPrefix(arguments.uriPrefix) />
 		<cfset setUriPattern(arguments.uriPattern) />
 
 		<cfreturn this />
@@ -147,7 +147,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="void" output="false"
-		hint="Take an input REST URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
+		hint="Take an input URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
 		<cfargument name="uriPattern" type="string" required="true"
 			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
 
@@ -192,10 +192,9 @@ For example, a uriPattern like "/service/doit/{value}"
 			</cfif>
 		</cfloop>
 
-		<!--- If first element in URI isn't the endpoint name, add it --->
-		<cfif NOT urlElements[1] EQ variables.endpointName>
-			<cflog text="urlElements[1]=#urlElements[1]#, variables.endpointName=#variables.endpointName#">
-			<cfset ArrayInsertAt(urlElements, 1, variables.endpointName) />
+		<!--- If first element in URI prefix, add it --->
+		<cfif NOT urlElements[1] EQ variables.uriPrefix>
+			<cfset ArrayInsertAt(urlElements, 1, variables.uriPrefix) />
 		</cfif>
 
 		<!--- Set instance variables --->
@@ -254,12 +253,12 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setEndpointName" access="public" returntype="void" output="false">
-		<cfargument name="endpointName" type="string" required="true" />
-		<cfset variables.endpointName = arguments.endpointName />
+	<cffunction name="setUriPrefix" access="public" returntype="void" output="false">
+		<cfargument name="uriPrefix" type="string" required="true" />
+		<cfset variables.uriPrefix = arguments.uriPrefix />
 	</cffunction>
-	<cffunction name="getEndpointName" access="public" returntype="string" output="false">
-		<cfreturn variables.endpointName />
+	<cffunction name="getUriPrefix" access="public" returntype="string" output="false">
+		<cfreturn variables.uriPrefix />
 	</cffunction>
 
 	<cffunction name="setFunctionName" access="public" returntype="void" output="false">
@@ -276,11 +275,13 @@ For example, a uriPattern like "/service/doit/{value}"
 
 		<!--- Require an appropriate URI pattern (pretty loose validation, just require initial slash and almost anything following) --->
 		<cfset arguments.uriPattern = Trim(arguments.uriPattern) />
+
 		<cfif REFind("^([\/]*)([^\/\?&]+)", arguments.uriPattern, 1, false) EQ 0>
-			<cfthrow type="MachII.endpoints.rest.InvalidRestUriPattern"
-				message="Invalid uriPattern for RestUri."
+			<cfthrow type="MachII.framework.url.InvalidUriPattern"
+				message="Invalid uriPattern for this URI."
 				detail="The uriPattern must be an slash-delimited, valid URL string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
 		</cfif>
+
 		<cfset variables.uriPattern = arguments.uriPattern />
 		<cfset makeUriPatternIntoRegex(variables.uriPattern) />
 	</cffunction>
