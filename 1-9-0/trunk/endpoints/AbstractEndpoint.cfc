@@ -77,16 +77,31 @@ Notes:
 			hint="A reference to the AppManager this endpoint was loaded from." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
+		
+		<cfset var temp = "" />
+
 		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setParameters(arguments.parameters) />
 
 		<!--- Compute the full and short component name that will be used for logging --->
-
 		<cfset variables.componentNameFull = getMetaData(this).name />
 		<cfset variables.componentNameForLogging = ListLast(variables.componentNameFull, ".") />
 
 		<cfset setLog(getAppManager().getLogFactory()) />
+
+		<!--- Setup required default parameters --->
+		<cfif NOT isParameterDefined("enableThrow")>
+			<cfset temp = StructNew() />
+			<cfset temp["group:development"] = true />
+			<cfset temp["group:local"] = true />
+			<cfset setParameter("enableThrow", temp) />
+		</cfif>
+		<cfset setParameter("enableThrow", resolveValueByEnvironment(getParameter("enableThrow"), "false")) />
+		
+		<cfif NOT isParameterDefined("throwTemplate")>
+			<cfset setParameter("throwTemplate", "/MachII/endpoints/defaultThrowTemplate.cfm") />
+		</cfif>
 
 		<cfreturn this />
 	</cffunction>
@@ -146,15 +161,12 @@ Notes:
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
-			hint="The Exception that was thrown/caught by the framework." />
-		
-		<!--- TODO: Secure "throw" parameter so it cannot be access in production (configuratble via parameters)--->
+			hint="The Exception that was thrown/caught by the endpoint request processor." />
 		
 		<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
-		<cfif arguments.event.isArgDefined("throw")>
+		<cfif arguments.event.isArgDefined("throw") AND getParameter("enableThrow")>
 			<cfheader statuscode="500" statustext="Error" />
-			<cfdump var="#arguments.exception.getCaughtException()#" />
-
+			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="#getParameter("throwTemplate")#" /></cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfheader statuscode="500" statustext="Error" />
