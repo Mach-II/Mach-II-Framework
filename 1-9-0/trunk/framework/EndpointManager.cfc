@@ -234,6 +234,9 @@ Notes:
 		<cfset var endpoint = "" />
 		<cfset var exception = "" />
 
+		<!--- Event is always in request scope --->
+		<cfset request.event = event />
+
 		<cftry>
 			<cfset endpoint = getEndpointByName(event.getArg(getEndpointParameter())) />
 
@@ -360,7 +363,7 @@ Notes:
 
 		<!--- Create the endpoint --->
 		<cftry>
-			<cfset endpoint = CreateObject("component", arguments.endpointType).init(getAppManager(), this, arguments.endpointParameters) />
+			<cfset endpoint = CreateObject("component", arguments.endpointType).init(getAppManager(), arguments.endpointParameters) />
 
 			<cfcatch type="any">
 				<cfif StructKeyExists(cfcatch, "missingFileName") AND cfcatch.missingFileName EQ arguments.endpointType>

@@ -50,14 +50,20 @@ Notes:
 --->
 <cfcomponent
 	displayname="AbstractEndpoint"
-	extends="MachII.framework.BaseComponent"
 	output="false"
 	hint="An endpoint. This is abstract and must be extended by a concrete strategy implementation.">
 
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.appManager = "" />
+	<cfset variables.parameters = StructNew() />
+	<cfset variables.log = "" />
+	<cfset variables.baseProxy = "" />
+	<cfset variables.componentNameFull = "" />
+	<cfset variables.componentNameForLogging = "" />
 	<cfset variables.endpointManager = "" />
+	
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
 	<cfset variables.onExceptionDefined = false />
@@ -69,17 +75,40 @@ Notes:
 		hint="Initializes the endpoint. Do not override.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
 			hint="A reference to the AppManager this endpoint was loaded from." />
-		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true"
-			hint="A reference to the EndpointManager." />
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
-
-		<cfset super.init(arguments.appManager, arguments.parameters) />
-		
 		<!--- Run setters --->
-		<cfset setEndpointManager(arguments.endpointManager) />
+		<cfset setAppManager(arguments.appManager) />
+		<cfset setParameters(arguments.parameters) />
+
+		<!--- Compute the full and short component name that will be used for logging --->
+
+		<cfset variables.componentNameFull = getMetaData(this).name />
+		<cfset variables.componentNameForLogging = ListLast(variables.componentNameFull, ".") />
+
+		<cfset setLog(getAppManager().getLogFactory()) />
 
 		<cfreturn this />
+	</cffunction>
+
+	<cffunction name="setLog" access="public" returntype="void" output="false"
+		hint="Uses the log factory to create a log.">
+		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />
+		<cfset variables.log = arguments.logFactory.getLog(variables.componentNameFull) />
+	</cffunction>
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
+		hint="Gets the log.">
+		<cfreturn variables.log />
+	</cffunction>
+
+	<cffunction name="setProxy" access="public" returntype="void" output="false"
+		hint="Sets the base proxy.">
+		<cfargument name="proxy" type="MachII.framework.BaseProxy" required="true" />
+		<cfset variables.baseProxy = arguments.proxy>
+	</cffunction>
+	<cffunction name="getProxy" access="public" returntype="any" output="false"
+		hint="Gets the base proxy.">
+		<cfreturn variables.baseProxy />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -93,7 +122,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - ENDPOINT REQUEST HANDLING
 	--->
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
@@ -136,26 +165,296 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS - UTILS
+	PUBLIC FUNCTIONS - GENERAL
 	--->
+	<cffunction name="buildUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url without specifying a module name. Does not escape entities.">
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+
+		<!--- If we are loading, then fall back to current module, because this means
+			BuildUrl is being called during configure() and there is no current request --->
+		<cfset arguments.moduleName = getAppManager().getModuleName() />
+
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url. Does not escape entities.">
+		<cfargument name="moduleName" type="string" required="true"
+			hint="Name of the module to build the url with. Defaults to base module if empty string." />
+		<cfargument name="eventName" type="string" required="true"
+			hint="Name of the event to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
+		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		<cfargument name="routeName" type="string" required="true"
+			hint="Name of the route to build the url with." />
+		<cfargument name="urlParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
+		<cfargument name="queryStringParameters" type="any" required="false" default=""
+			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
+		<cfargument name="urlBase" type="string" required="false"
+			hint="Base of the url. Defaults to the value of the urlBase property." />
+		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
+	</cffunction>
+	
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
 		hint="Builds an endpoint specific URL.">
 		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
+	<cffunction name="resolveValueByEnvironment" access="public" returntype="any" output="false"
+		hint="Resolves a value by deployed environment name or group (explicit environment names are searched first then groups then default).">
+		<cfargument name="environmentValues" type="struct" required="true"
+			hint="A struct of environment values. Key prefixed with 'group:' are treated as groups and keys can contain ',' to indicate multiple environments names or groups." />
+		<cfargument name="defaultValue" type="any" required="false"
+			hint="A default value to provide if no environment is found. An exception will be thrown if no 'defaultValue' is provide and no value can be resolved." />
+
+		<cfset var currentEnvironmentName = getAppManager().getEnvironmentName() />
+		<cfset var currentEnvironmentGroup = getAppManager().getEnvironmentGroup() />
+		<cfset var valuesByEnvironmentName = StructNew() />
+		<cfset var valuesByEnvironmentGroup = StructNew() />
+		<cfset var validEnvironmentGroupNames = getAppManager().getEnvironmentGroupNames() />
+		<cfset var scrubbedEnvironmentGroups = "" />
+		<cfset var scrubbedEnvironmentNames = "" />
+		<cfset var i = "" />
+		<cfset var key = "" />
+		<cfset var assert = getAssert() />
+		<cfset var utils = getUtils() />
+
+		<!--- Build values by name and group --->
+		<cfloop collection="#arguments.environmentValues#" item="key">
+			<!--- An environment group if it is prefixed with 'group:' --->
+			<cfif key.toLowerCase().startsWith("group:")>
+				<!--- Removed 'group:' and trim each list element --->
+				<cfset scrubbedEnvironmentGroups = utils.trimList(Right(key, Len(key) - 6)) />
+
+				<cfloop list="#scrubbedEnvironmentGroups#" index="i">
+					<cfset assert.isTrue(ListFindNoCase(validEnvironmentGroupNames, i)
+							, "An environment group named '#i#' is not a valid environment group name. Valid environment group names: '#validEnvironmentGroupNames#'.") />
+					<cfset valuesByEnvironmentGroup[i] = arguments.environmentValues[key] />
+				</cfloop>
+			<!--- An explicit environment name if it does not have a prefix --->
+			<cfelse>
+				<!--- Trim each list element --->
+				<cfset scrubbedEnvironmentNames = utils.trimList(key) />
+
+				<cfloop list="#scrubbedEnvironmentNames#" index="i">
+					<cfset valuesByEnvironmentName[i] = arguments.environmentValues[key] />
+				</cfloop>
+			</cfif>
+		</cfloop>
+
+		<!---
+			Typically, we prefer to only have one return, however in this case
+			it is easier to just short-ciruit the process.
+
+			Resolution order:
+			 * by explicit environment name
+			 * by environment group
+			 * by default value (if provided)
+			 * throw exception
+		--->
+
+		<!--- Resolve value by explicit environment name --->
+		<cfif StructKeyExists(valuesByEnvironmentName, currentEnvironmentName)>
+			<cfreturn valuesByEnvironmentName[currentEnvironmentName] />
+		</cfif>
+
+		<!--- Resolve value by explicit environment group --->
+		<cfif StructKeyExists(valuesByEnvironmentGroup, currentEnvironmentGroup)>
+			<cfreturn valuesByEnvironmentGroup[currentEnvironmentGroup] />
+		</cfif>
+
+		<!--- No environment to resolve, return default value if provided --->
+		<cfset assert.isTrue(StructKeyExists(arguments, "defaultValue")
+					, "Cannot resolve value by environment name or group and no default value was provided. Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'") />
+		<cfreturn arguments.defaultValue />
+	</cffunction>
+
+	<cffunction name="setParameter" access="public" returntype="void" output="false"
+		hint="Sets a configuration parameter.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfargument name="value" type="any" required="true"
+			hint="The parameter value." />
+		<cfset variables.parameters[arguments.name] = arguments.value />
+	</cffunction>
+	<cffunction name="getParameter" access="public" returntype="any" output="false"
+		hint="Gets a configuration parameter value, or a default value if not defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
+		<cfif isParameterDefined(arguments.name)>
+			<cfreturn bindValue(arguments.name, variables.parameters[arguments.name]) />
+		<cfelse>
+			<cfreturn arguments.defaultValue />
+		</cfif>
+	</cffunction>
+	<cffunction name="isParameterDefined" access="public" returntype="boolean" output="false"
+		hint="Checks to see whether or not a configuration parameter is defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfreturn StructKeyExists(variables.parameters, arguments.name) />
+	</cffunction>
+	<cffunction name="getParameterNames" access="public" returntype="string" output="false"
+		hint="Returns a comma delimited list of parameter names.">
+		<cfreturn StructKeyList(variables.parameters) />
+	</cffunction>
+
+	<cffunction name="setProperty" access="public" returntype="void" output="false"
+		hint="Sets the specified property - this is just a shortcut for getPropertyManager().setProperty()">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to set."/>
+		<cfargument name="propertyValue" type="any" required="true"
+			hint="The value to store in the property." />
+		<cfset getPropertyManager().setProperty(arguments.propertyName, arguments.propertyValue) />
+	</cffunction>
+	<cffunction name="getProperty" access="public" returntype="any" output="false"
+		hint="Gets the specified property - this is just a shortcut for getPropertyManager().getProperty()">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The name of the property to return."/>
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to use if the requested property is not defined." />
+		<cfreturn getPropertyManager().getProperty(arguments.propertyName, arguments.defaultValue) />
+	</cffunction>
+	<cffunction name="isPropertyDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if property name is defined in the properties - this is just a shortcutfor getPropertyManager().isPropertyDefined(). Does NOT check a parent.">
+		<cfargument name="propertyName" type="string" required="true"
+			hint="The named of the property to check if it is defined." />
+		<cfreturn getPropertyManager().isPropertyDefined(arguments.propertyName) />
+	</cffunction>
+
+	<cffunction name="getPropertyManager" access="public" returntype="MachII.framework.PropertyManager" output="false"
+		hint="Gets the components PropertyManager instance.">
+		<cfreturn getAppManager().getPropertyManager() />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
+		<cfreturn getAppManager().getEndpointManager() />
+	</cffunction>
+
+	<cffunction name="getUtils" access="public" returntype="MachII.util.Utils" output="false"
+		hint="Gets the Utils component.">
+		<cfreturn getAppManager().getUtils() />
+	</cffunction>
+
+	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
+		hint="Gets the Assert component.">
+		<cfreturn getAppManager().getAssert() />
+	</cffunction>
+
+	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
+		hint="Gets the component name for logging.">
+		<cfreturn variables.componentNameForLogging />
+	</cffunction>
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="bindValue" access="private" returntype="any" output="false"
+		hint="Binds placeholders to any passed value.">
+		<cfargument name="parameterName" type="string" required="true"
+			hint="The name of the parameter to bind." />
+		<cfargument name="parameterValue" type="any" required="true"
+			hint="The current value of the parameter." />
+
+		<cfset var expressionEvaluator = getAppManager().getExpressionEvaluator() />
+		<cfset var value =  arguments.parameterValue />
+		<cfset var scope = "" />
+		<cfset var event = "" />
+
+		<!--- Can only bind simple parameter values --->
+		<cfif IsSimpleValue(arguments.parameterValue)
+			AND expressionEvaluator.isExpression(arguments.parameterValue)>
+
+			<!---
+				For BC with bindable property parameters, a scope name was not "required"
+				(during framework loading) and defaults to "properties", however it is best
+				practice to provide a scope
+			--->
+			<cfif getAppManager().isLoading()>
+				<!--- Disallow event scope during framework load --->
+				<cfif FindNoCase("${event.", value)>
+					<cfthrow type="MachII.framework.BindToParameterInvalidScope"
+						message="Cannot bind to a parameter named '#arguments.parameterName#' for '#getComponentNameForLogging()#' because the 'event.' scope is not available for use during on framework load." />
+				</cfif>
+
+				<!--- Create a dummy event object to pass in --->
+				<cfset event = CreateObject("component", "MachII.framework.Event").init() />
+			<cfelse>
+				<cfset event = request.event />
+			</cfif>
+
+			<!--- Add in properties scope if missing and the expression is not scoped (for BC since the "properties." was not required)--->
+			<cfset value = REReplaceNoCase(value, "\$\{(?!properties\.|event\.)", "${properties.", "all") />
+
+			<cftry>
+				<cfset value = expressionEvaluator.evaluateExpression(value, event, getPropertyManager()) />
+
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.BindToParameterException"
+						message="Error trying bind to a parameter named '#arguments.parameterName#' for '#getComponentNameForLogging()#'."
+						detail="Please check your expression for errors." />
+				</cfcatch>
+			</cftry>
+		</cfif>
+
+		<cfreturn value />
+	</cffunction>
 
 	<!---
 	ACCESSORS
 	--->
-	<cffunction name="setEndpointManager" access="public" returntype="void" output="false">
-		<cfargument name="endpointManager" type="MachII.framework.EndpointManager" required="true" />
-		<cfset variables.endpointManager = arguments.endpointManager />
+	<cffunction name="setAppManager" access="private" returntype="void" output="false"
+		hint="Sets the components AppManager instance.">
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true"
+			hint="The AppManager instance to set." />
+		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
-	<cffunction name="getEndpointManager" access="public" returntype="MachII.framework.EndpointManager" output="false">
-		<cfreturn variables.endpointManager />
+	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
+		hint="Gets the components AppManager instance.">
+		<cfreturn variables.appManager />
+	</cffunction>
+
+	<cffunction name="setParameters" access="public" returntype="void" output="false"
+		hint="Sets the full set of configuration parameters for the component.">
+		<cfargument name="parameters" type="struct" required="true"
+			hint="Struct to set as parameters" />
+
+		<cfset var key = "" />
+
+		<cfloop collection="#arguments.parameters#" item="key">
+			<cfset setParameter(key, arguments.parameters[key]) />
+		</cfloop>
+	</cffunction>
+	<cffunction name="getParameters" access="public" returntype="struct" output="false"
+		hint="Gets the full set of configuration parameters for the component.">
+
+		<cfset var key = "" />
+		<cfset var resolvedParameters = StructNew() />
+
+		<!--- Get values and bind placeholders --->
+		<cfloop collection="#variables.parameters#" item="key">
+			<cfset resolvedParameters[key] = bindValue(key, variables.parameters[key]) />
+		</cfloop>
+
+		<cfreturn resolvedParameters />
 	</cffunction>
 
 	<cffunction name="setIsPreProcessDefined" access="public" returntype="void" output="false">
