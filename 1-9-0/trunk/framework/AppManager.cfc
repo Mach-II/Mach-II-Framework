@@ -141,6 +141,8 @@ Notes:
 		<cfif NOT inModule()>
 			<cfset getModuleManager().configure() />
 			<cfset getGlobalizationManager().configure() />
+			
+			<cfset getRequestManager().createRewriteConfigFile() />
 		</cfif>
 
 		<!--- Flip loading to false --->
