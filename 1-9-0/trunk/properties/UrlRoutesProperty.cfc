@@ -91,8 +91,9 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.dummyEvent = CreateObject("component", "MachII.framework.Event").init() />
 	<cfset variables.rewriteConfigFile = "" />
 	<cfset variables.rewriteStandardUrls = false />
+	<cfset variables.rewriteBaseFileName = "index.cfm" />
 
-	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile,urlParameterFormatters" />
+	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile,urlParameterFormatters,rewriteBaseFileName" />
 	<cfset variables.OWNER_ID = "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 
 	<!---
@@ -142,6 +143,9 @@ index.cfm/product/A12345/fancy/
 				<cfset loadUrlParameterFormatter(parameterName, parameters[parameterName]) />
 			</cfloop>
 		</cfif>
+		
+		<!--- Setup other rewrite--->
+		<cfset setRewriteBaseFileName(getParameter("rewriteBaseFileName", "index.cfm")) />
 		
 		<!--- Remove all reserved parameter names from our local reference of parameters --->
 		<cfloop list="#variables.RESERVED_PARAMETER_NAMES#" index="i">
@@ -254,15 +258,17 @@ index.cfm/product/A12345/fancy/
 		<cfset var contents = CreateObject("java", "java.lang.StringBuffer") />
 		<cfset var requestManager = getAppManager().getRequestManager() />
 		<cfset var eventParameter = getProperty("eventParameter") />
+		<cfset var endpointParameter = getProperty("endpointParameter") />
 		<cfset var urlBase = getProperty("urlBase") />
 		<cfset var rewriteBase = "" />
+		<cfset var rewriteBaseFileName = getRewriteBaseFileName() />
 		<cfset var moduleName = getAppManager().getModuleName() />
-		<cfset var names = variables.routeNames.toArray() />
+		<cfset var routeNames = variables.routeNames.toArray() />
 		<cfset var route = 0 />
 		<cfset var i = 0 />
 
 		<!--- Clean up the appRoot --->
-		<cfif Right(urlBase, 1) neq "/">
+		<cfif NOT urlBase.endsWith("/")>
 			<cfset urlBase = urlBase & "/" />
 		</cfif>
 
@@ -280,7 +286,6 @@ index.cfm/product/A12345/fancy/
 			it if the Mach-II application does not live in the root of the host.
 		--->
 		<cfif urlBase NEQ "/">
-
 			<cfset contents.append("RewriteBase " & urlBase & lf) />
 			<cfset contents.append(lf) />
 			<cfset rewriteBase = "" />
@@ -305,13 +310,18 @@ index.cfm/product/A12345/fancy/
 
 		<!--- Add standard url rule (e.g. with event parameter) --->
 		<cfset contents.append("#### Rewrite any URIs that start with the event parameter" & lf) />
-		<cfset contents.append("RewriteRule ^" & rewriteBase & eventParameter & "(/.*)?$ " & rewriteBase & "index.cfm/" & eventParameter & "/$1 [PT,L]" & lf) />
+		<cfset contents.append("RewriteRule ^" & rewriteBase & eventParameter & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & eventParameter & "/$1 [PT,L]" & lf) />
 		<cfset contents.append(lf) />
 
+		<!--- Add standard url rule (e.g. with endpoint parameter) --->
+		<cfset contents.append("#### Rewrite any URIs that start with the endpoint parameter" & lf) />
+		<cfset contents.append("RewriteRule ^" & rewriteBase & endpointParameter & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & endpointParameter & "/$1 [PT,L]" & lf) />
+		<cfset contents.append(lf) />
+	
 		<!--- Add all the routes --->
 		<cfset contents.append("#### Rewrite all URL routes" & lf) />
-		<cfloop from="1" to="#ArrayLen(names)#" index="i">
-			<cfset route = requestManager.getRoute(names[i]) />
+		<cfloop from="1" to="#ArrayLen(routeNames)#" index="i">
+			<cfset route = requestManager.getRoute(routeNames[i]) />
 			<!---
 			 Because the base has been defined we dont use it here. Additionally we can end the rule without the
 			 trailing forward slash as many users may not type this. If a slash is found then we can also grab any
@@ -329,17 +339,15 @@ index.cfm/product/A12345/fancy/
 			 And if someone happened to type in: newss they would be routed to index.cfm/event/newss where the
 			 exception handling of the framework could divert the missing event name (provided newss didnt exist)
 			 --->
-			<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & rewriteBase & "index.cfm/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
+			<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
 		</cfloop>
 		<cfset contents.append(lf) />
 		
 		<!--- Add a catch all to run all request through Mach-II if it's not a real file and there is not index.cfm in the URL  --->
-		<cfif getProperty("urlExcludeEventParameter", false)>
-			<cfset contents.append("#### Catch all for all requests if not a real file and does not contain index.cfm" & lf) />
-			<cfset contents.append("RewriteCond $1 !^index\.cfm" & lf) />
-			<cfset contents.append("RewriteRule ^" & rewriteBase & "(.*)?$ " & rewriteBase & "index.cfm$1 [PT,L]" & lf) />
-			<cfset contents.append(lf) />
-		</cfif>
+		<cfset contents.append("#### Catch all for all requests if not a real file and does not contain index.cfm" & lf) />
+		<cfset contents.append("RewriteCond $1 !^index\.cfm" & lf) />
+		<cfset contents.append("RewriteRule ^" & rewriteBase & "(.*)?$ " & rewriteBase & rewriteBaseFileName & "/$1 [PT,L]" & lf) />
+		<cfset contents.append(lf) />
 
 		<!--- The ampersand in the middle of the append is so that CFEclipse does think this is invalid code --->
 		<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/></' & 'cfsilent>' & lf) />
@@ -421,6 +429,14 @@ index.cfm/product/A12345/fancy/
 		<cfreturn variables.rewriteConfigFile />
 	</cffunction>
 
+	<cffunction name="setRewriteBaseFileName" access="private" returntype="void" output="false">
+		<cfargument name="rewriteBaseFileName" type="string" required="true" />
+		<cfset variables.rewriteBaseFileName = arguments.rewriteBaseFileName />
+	</cffunction>
+	<cffunction name="getRewriteBaseFileName" access="public" returntype="string" output="false">
+		<cfreturn variables.rewriteBaseFileName />
+	</cffunction>
+
 	<cffunction name="setUrlParameterFormatters" access="private" returntype="void" output="false">
 		<cfargument name="urlParameterFormatters" type="struct" required="true" />
 		<cfset variables.urlParameterFormatters = arguments.urlParameterFormatters />
@@ -428,5 +444,9 @@ index.cfm/product/A12345/fancy/
 	<cffunction name="getUrlParameterFormatters" access="public" returntype="struct" output="false">
 		<cfreturn variables.urlParameterFormatters />
 	</cffunction>
+	
+
+	
+	
 
 </cfcomponent>
