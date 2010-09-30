@@ -165,7 +165,7 @@ Notes:
 		<cfset variables.loadException = arguments.exception />
 	</cffunction>
 
-	<cffunction name="getLoadException" access="public" returntype="void" output="false"
+	<cffunction name="getLoadException" access="public" returntype="any" output="false"
 		hint="Gets the exception that occurred during load">
 		<cfreturn variables.loadException />
 	</cffunction>
