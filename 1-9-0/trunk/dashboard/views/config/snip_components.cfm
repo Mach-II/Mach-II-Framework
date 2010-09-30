@@ -217,160 +217,162 @@ Notes:
 <cfset variables.moduleComponentData = event.getArg("moduleComponentData") />
 
 <cfloop from="1" to="#ArrayLen(variables.moduleOrder)#" index="j">
-<h2 style="margin:1em 0 3px 0;">#UCase(Left(variables.moduleOrder[j], 1))##Right(variables.moduleOrder[j], Len(variables.moduleOrder[j]) -1)# Module</h2>
-<table>
-	<tr>
-		<th style="width:33%;"><h3>Listeners (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)#)</h3></th>
-		<th style="width:33%;"><h3>Event-Filters (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)#)</h3></th>
-		<th style="width:33%;"><h3>Plugins (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)#)</h3></th>
-	</tr>
-	<tr>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadListener" p:listenerName="#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadFilter" p:filterName="#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].filters[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadPlugin" p:pluginName="#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-	</tr>
-	<tr>
-		<th style="width:25%;"><h3>Configurable Properties (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)#)</h3></th>
-		<th style="width:33%;"><h3>Endpoints (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)#)</h3></th>
-		<th style="width:33%;"><h3>View-Loaders (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewloaders)#)</h3></th>
-	</tr>
-	<tr>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadProperty" p:propertyName="#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].properties[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-		<td style="padding:0;">
-			<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders)#" index="i">
-			<table>
-				<tr <cfif i MOD 2>class="shade"</cfif>>
-					<td>
-						<p><view:a event="config.reloadViewLoader" p:viewLoaderName="#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#" p:moduleName="#variables.moduleOrder[j]#">
-						<cfif variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].shouldReloadObject>
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
-							</span>
-						<cfelse>
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-								&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
-							</span>
-						</cfif>
-						</view:a></p>
-					</td>
-				</tr>
-			</table>
-			</cfloop>
-		</td>
-	</tr>
-</table>
+	<cfif variables.moduleData[variables.moduleOrder[j]].enabled>
+		<h2 style="margin:1em 0 3px 0;">#UCase(Left(variables.moduleOrder[j], 1))##Right(variables.moduleOrder[j], Len(variables.moduleOrder[j]) -1)# Module</h2>
+		<table>
+			<tr>
+				<th style="width:33%;"><h3>Listeners (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)#)</h3></th>
+				<th style="width:33%;"><h3>Event-Filters (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)#)</h3></th>
+				<th style="width:33%;"><h3>Plugins (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)#)</h3></th>
+			</tr>
+			<tr>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadListener" p:listenerName="#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].listeners[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadFilter" p:filterName="#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].filters[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].filters[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadPlugin" p:pluginName="#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].plugins[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+			</tr>
+			<tr>
+				<th style="width:25%;"><h3>Configurable Properties (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)#)</h3></th>
+				<th style="width:33%;"><h3>Endpoints (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)#)</h3></th>
+				<th style="width:33%;"><h3>View-Loaders (#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewloaders)#)</h3></th>
+			</tr>
+			<tr>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadProperty" p:propertyName="#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].properties[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].properties[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadEndpoint" p:endpointName="#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].endpoints[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+				<td style="padding:0;">
+					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders)#" index="i">
+					<table>
+						<tr <cfif i MOD 2>class="shade"</cfif>>
+							<td>
+								<p><view:a event="config.reloadViewLoader" p:viewLoaderName="#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#" p:moduleName="#variables.moduleOrder[j]#">
+								<cfif variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].shouldReloadObject>
+									<span class="red">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
+									</span>
+								<cfelse>
+									<span class="green">
+										<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+										&nbsp;#variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders[i].name#
+									</span>
+								</cfif>
+								</view:a></p>
+							</td>
+						</tr>
+					</table>
+					</cfloop>
+				</td>
+			</tr>
+		</table>
+	</cfif>
 </cfloop>
 </cfoutput>

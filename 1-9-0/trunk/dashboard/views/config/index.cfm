@@ -100,8 +100,9 @@ Notes:
 <table>
 	<tr>
 		<th style="width:20%;"><h3>Module</h3></th>
-		<th style="width:20%;"><h3>Mach-II</h3></th>
-		<th style="width:20%;"><h3>DI Engine</h3></th>
+		<th style="width:15%;"><h3>Mach-II</h3></th>
+		<th style="width:15%;"><h3>DI Engine</h3></th>
+		<th style="width:10%;"><h3>Enabled</h3></th>
 		<th style="width:40%;"><h3>Configuration</h3></th>
 	</tr>
 	<tr>
@@ -155,6 +156,9 @@ Notes:
 		</td>
 	</cfif>
 		<td>
+			<p>n/a</p>
+		</td>
+		<td>
 			<table class="small">
 				<tr>
 					<td style="width:50%;"><h4>Environment Name</h4></td>
@@ -184,19 +188,37 @@ Notes:
 		</td>
 		<td>
 			<p>
-				<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
-				<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadConfig>
-					<span class="red">
-						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
-						&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.moduleData[variables.moduleOrder[i]].lastReloadDateTime)# ago
-					</span>
+				<cfif variables.moduleData[variables.moduleOrder[i]].enabled >
+					<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
+					<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadConfig >
+						<span class="red">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+							<cfif isDate(variables.moduleData[variables.moduleOrder[i]].lastReloadDateTime)>
+								&nbsp;reloaded #getProperty("udfs").datetimeDifferenceString(variables.moduleData[variables.moduleOrder[i]].lastReloadDateTime)# ago
+							</cfif>
+						</span>
+					<cfelse>
+						<span class="green">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
+							&nbsp;OK
+						</span>
+					</cfif>
+					</view:a>
+				<cfelseif isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
+					<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
+						<span class="red">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Reload" />
+							&nbsp;Load Error
+						</span>
+						<p class="small">
+							<a href="##" onclick="Effect.toggle('exception_#variables.moduleOrder[i]#', 'blind'); return false;">
+								show error
+							</a>
+						</p>
+					</view:a>
 				<cfelse>
-					<span class="green">
-						<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="OK" />
-						&nbsp;OK
-					</span>
+					n/a
 				</cfif>
-				</view:a>
 			</p>
 		</td>
 	<cfif StructKeyExists(variables.moduleData[variables.moduleOrder[i]], "lastDependencyInjectionEngineReloadDateTime")>
@@ -223,20 +245,61 @@ Notes:
 		</td>
 	</cfif>
 		<td>
+			<p>
+				<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
+					<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="disable">
+						<span class="green">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
+							&nbsp;Enabled
+						</span>
+					</view:a>
+				<cfelse>
+					<cfif NOT isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
+						<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="enable">
+							<span class="red">
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
+								&nbsp;Disabled
+							</span>
+						</view:a>
+					<cfelse>
+						<span class="red">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
+							&nbsp;Error
+						</span>
+						<p class="small">
+							<a href="##" onclick="Effect.toggle('exception_#variables.moduleOrder[i]#', 'blind'); return false;">
+								show error
+							</a>
+						</p>
+					</cfif>
+				</cfif>
+			</p>
+		</td>
+		<td>
 			<!--- The _ is important or we get errors --->
-			<cfset variables._appManager = getAppManager().getModuleManager().getModule(variables.moduleOrder[i]).getModuleAppManager() />
-			<table class="small">
-				<tr>
-					<td style="width:50%;"><h4>Environment Name</h4></td>
-					<td style="width:50%;"><p>#variables._appManager.getEnvironmentName()#</p></td>
-				</tr>
-				<tr>
-					<td><h4>Environment Group</h4></td>
-					<td><p>#variables._appManager.getEnvironmentGroup()#</p></td>
-				</tr>
-			</table>
+			<cftry>
+				<cfset variables._appManager = getAppManager().getModuleManager().getModule(variables.moduleOrder[i], true).getModuleAppManager() />
+				<table class="small">
+					<tr>
+						<td style="width:50%;"><h4>Environment Name</h4></td>
+						<td style="width:50%;"><p>#variables._appManager.getEnvironmentName()#</p></td>
+					</tr>
+					<tr>
+						<td><h4>Environment Group</h4></td>
+						<td><p>#variables._appManager.getEnvironmentGroup()#</p></td>
+					</tr>
+				</table>
+				<cfcatch type="MachII.framework.ModuleFailedToLoad">
+					<p>n/a</p>
+				</cfcatch>
+			</cftry>
 		</td>
 	</tr>
+	<cfif isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
+		<cfset message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Exception occurred during the (re)load of module named '#variables.moduleOrder[i]#'.", "exception") />
+		<cfset message.setCaughtException(variables.moduleData[variables.moduleOrder[i]].loadException.getCaughtException()) />
+		<tr id="exception_#variables.moduleOrder[i]#" style="display:none"><td colspan="6"><dashboard:displayMessage message="#message#" /></td></tr>
+	</cfif>
 </cfloop>
 </table>
 

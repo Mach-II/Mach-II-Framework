@@ -71,15 +71,21 @@ Notes:
 		hint="Gets the data for all the modules.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset var modules = getAppManager().getModuleManager().getModules() />
+		<cfset var modules = getAppManager().getModuleManager().getModules(includeDisabled=true) />
 		<cfset var moduleData = StructNew() />
 		<cfset var dependencyInjectionEngineProperty = "" />
 		<cfset var i = "" />
+		<cfset var hasModuleErrors = false />
 
 		<cfloop collection="#modules#" item="i">
 			<cfset moduleData[modules[i].getModuleName()]["lastReloadDateTime"] = modules[i].getModuleAppManager().getAppLoader().getLastReloadDatetime() />
 			<cfset moduleData[modules[i].getModuleName()]["shouldReloadConfig"] = modules[i].getModuleAppManager().getAppLoader().shouldReloadConfig() />
 			<cfset moduleData[modules[i].getModuleName()]["appManager"] = modules[i].getModuleAppManager() />
+			<cfset moduleData[modules[i].getModuleName()]["enabled"] = modules[i].isEnabled() />
+			<cfset moduleData[modules[i].getModuleName()]["loadException"] = modules[i].getLoadException() />
+			<cfif isObject(moduleData[modules[i].getModuleName()]["loadException"])>
+				<cfset hasModuleErrors = true />
+			</cfif>
 			<cfset dependencyInjectionEngineProperty = getProperty("udfs").findPropertyByType("MachII.properties.ColdspringProperty", modules[i].getModuleAppManager().getPropertyManager()) />
 			<!--- Only grab this data if this module has a dependency injection engine property --->
 			<cfif IsObject(dependencyInjectionEngineProperty)>
@@ -88,6 +94,10 @@ Notes:
 			</cfif>
 		</cfloop>
 
+		<cfif hasModuleErrors>
+			<cfset arguments.event.setArg("message", 
+					CreateObject("component", "MachII.dashboard.model.sys.Message").init("One or more modules contain a load error.", "exception")) />
+		</cfif>
 		<cfreturn moduleData />
 	</cffunction>
 
@@ -101,6 +111,8 @@ Notes:
 		<cfset baseData["lastReloadDateTime"] = getAppManager().getParent().getAppLoader().getLastReloadDatetime() />
 		<cfset baseData["shouldReloadConfig"] = getAppManager().getParent().getAppLoader().shouldReloadBaseConfig() />
 		<cfset baseData["appManager"] = getAppManager().getParent() />
+		<cfset baseData["enabled"] = true />
+		<cfset baseData["loadException"] = "" />
 		<cfset dependencyInjectionEngineProperty = getProperty("udfs").findPropertyByType("MachII.properties.ColdspringProperty", getAppManager().getParent().getPropertyManager()) />
 		<cfif IsObject(dependencyInjectionEngineProperty)>
 			<cfset baseData["lastDependencyInjectionEngineReloadDateTime"] = dependencyInjectionEngineProperty.getLastReloadDatetime() />
@@ -143,7 +155,7 @@ Notes:
 		<cfif getAppManager().getModuleManager().isModuleDefined(moduleName)>
 			<cftry>
 				<cfset tickStart = getTickcount() />
-				<cfset getAppManager().getModuleManager().getModule(moduleName).reloadModuleConfig() />
+				<cfset getAppManager().getModuleManager().getModule(moduleName, true).reloadModuleConfig() />
 				<cfset tickEnd = getTickcount() />
 				<cfset message.setMessage("Reloaded module '#moduleName#' in #NumberFormat(tickEnd - tickStart)#ms.") />
 				<cfcatch type="any">
@@ -158,6 +170,40 @@ Notes:
 		</cfif>
 	</cffunction>
 
+	<cffunction name="enableDisableModule" access="public" returntype="void" output="false"
+		hint="Enables or disables a module.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
+		<cfset var moduleName = arguments.event.getArg("moduleName", "") />
+		<cfset var mode = arguments.event.getArg("mode", "enable") />
+		<cfset var tickStart = 0 />
+		<cfset var tickEnd = 0 />
+		<cfset var moduleManager = "" />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("", "success") />
+
+		<cfif getAppManager().getModuleManager().isModuleDefined(moduleName)>
+			<cftry>
+				<cfset tickStart = getTickcount() />
+				<cfset moduleManager = getAppManager().getModuleManager() />
+				<cfif mode EQ "enable">
+					<cfset moduleManager.enableModule(moduleName) />
+				<cfelse>
+					<cfset moduleManager.disableModule(moduleName) />
+				</cfif>				
+				<cfset tickEnd = getTickcount() />
+				<cfset message.setMessage("#mode#d module '#moduleName#' in #NumberFormat(tickEnd - tickStart)#ms.") />
+				<cfcatch type="any">
+					<cfset message.setMessage("Exception occurred attempting to #mode# module named '#moduleName#'.") />
+					<cfset message.setType("exception") />
+					<cfset message.setCaughtException(cfcatch) />
+				</cfcatch>
+			</cftry>
+
+			<cfset arguments.event.setArg("message", message) />
+			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="reloadBaseApp" access="public" returntype="void" output="false"
 		hint="Reload the base app.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />

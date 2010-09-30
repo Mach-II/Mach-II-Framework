@@ -52,68 +52,69 @@ Notes:
 <cfif thisTag.ExecutionMode IS "start">
 
 	<cfset variables.event = request.event />
+	<cfparam name="attributes.message" default="#variables.event.getArg("message")#" >
+	<cfset variables.message = attributes.message />
 
-	<cfif variables.event.isArgDefined("message")>
+	<cfif isObject(variables.message)>
 
-	<cfset variables.message = variables.event.getArg("message") />
-	<cfset variables.unique = getTickCount() />
-
-
-	<cfparam name="attributes.refresh" default="true" />
-
-	<cfoutput>
-	<div id="messageBox_#variables.unique#">
-	<div class="#variables.message.getType()#">
-		<p>#variables.message.getMessage()#</p>
-	</div>
-
-	<cfif variables.message.hasCaughtException()>
-	<cfset variables.exception = variables.message.getCaughtException() />
-
-	<table>
-		<tr>
-			<th style="width:15%;">
-				<h3>Message</h3>
-			</th>
-			<td style="width:85%;">
-				<p>#variables.exception.message#</p>
-			</td>
-		</tr>
-		<tr>
-			<th>
-				<h3>Detail</h3>
-			</th>
-			<td>
-				<p>#variables.exception.detail#</p>
-			</td>
-		</tr>
-		<tr>
-			<th>
-				<h3>Type</h3>
-			</th>
-			<td>
-				<p>#variables.exception.type#</p>
-			</td>
-		</tr>
-		<tr>
-			<th>
-				<h3>Full Catch</h3>
-			</th>
-			<td>
-				<p><cfdump var="#variables.exception#" expand="false" /></p>
-			</td>
-		</tr>
-	</table>
-
-	</cfif>
-	</div>
-
-	<cfif variables.message.getType() NEQ "exception" AND attributes.refresh>
-		<view:script outputType="inline">
-			timeoutId = setInterval(function() { new Effect.BlindUp('messageBox_#variables.unique#', { queue: 'end' }); clearTimeout(timeoutId);}, 5000);
-		</view:script>
-	</cfif>
-	</cfoutput>
+		<cfset variables.unique = getTickCount() />
+	
+	
+		<cfparam name="attributes.refresh" default="true" />
+	
+		<cfoutput>
+		<div id="messageBox_#variables.unique#">
+		<div class="#variables.message.getType()#">
+			<p>#variables.message.getMessage()#</p>
+		</div>
+	
+		<cfif variables.message.hasCaughtException()>
+			<cfset variables.exception = variables.message.getCaughtException() />
+		
+			<table>
+				<tr>
+					<th style="width:15%;">
+						<h3>Message</h3>
+					</th>
+					<td style="width:85%;">
+						<p>#variables.exception.message#</p>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<h3>Detail</h3>
+					</th>
+					<td>
+						<p>#variables.exception.detail#</p>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<h3>Type</h3>
+					</th>
+					<td>
+						<p>#variables.exception.type#</p>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						<h3>Full Catch</h3>
+					</th>
+					<td>
+						<p><cfdump var="#variables.exception#" expand="false" /></p>
+					</td>
+				</tr>
+			</table>
+	
+		</cfif>
+		</div>
+	
+		<cfif variables.message.getType() NEQ "exception" AND attributes.refresh>
+			<view:script outputType="inline">
+				timeoutId = setInterval(function() { new Effect.BlindUp('messageBox_#variables.unique#', { queue: 'end' }); clearTimeout(timeoutId);}, 5000);
+			</view:script>
+		</cfif>
+		</cfoutput>
 	</cfif>
 </cfif>
 <cfsetting enablecfoutputonly="false" />

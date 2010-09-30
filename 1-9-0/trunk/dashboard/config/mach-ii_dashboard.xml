@@ -229,6 +229,10 @@ Notes:
 			<notify listener="config" method="reloadModule"/>
 			<redirect event="config.index" persist="true"/>
 		</event-handler>
+		<event-handler event="config.enableDisableModule" access="public">
+			<notify listener="config" method="enableDisableModule"/>
+			<redirect event="config.index" persist="true"/>
+		</event-handler>
 		<event-handler event="config.reloadBaseApp" access="public">
 			<notify listener="config" method="reloadBaseApp"/>
 			<redirect event="config.index" persist="true"/>

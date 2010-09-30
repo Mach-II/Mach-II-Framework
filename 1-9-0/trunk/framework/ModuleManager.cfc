@@ -56,7 +56,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.modules = StructNew() />
+	<cfset variables.enabledModules = StructNew() />
+	<cfset variables.disabledModules = StructNew() />
 	<cfset variables.appManager = "" />
 	<cfset variables.baseConfigFileDirectory = "" />
 	<cfset variables.dtdPath = "" />
@@ -122,11 +123,20 @@ Notes:
 				<cfset overrideXml = "" />
 			</cfif>
 		
-			<!--- Setup the Module. --->
-			<cfset module = CreateObject("component", "MachII.framework.Module").init(getAppManager(), name, file, overrideXml) />
-
-			<!--- Add the Module to the Manager. --->
-			<cfset addModule(name, module, arguments.override) />
+			<cftry>
+				<!--- Setup the Module. --->
+				<cfset module = CreateObject("component", "MachII.framework.Module") />
+				<cfset module.init(getAppManager(), name, file, overrideXml) />
+	
+				<!--- Add the Module to the Manager. --->
+				<cfset addModule(name, module, arguments.override) />
+				
+				<cfcatch type="any">
+					<cfset module.setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+					<cfset module.setEnabled(false) />
+					<cfset addModule(name, module, arguments.override) />
+				</cfcatch>
+			</cftry>
 		</cfloop>
 	</cffunction>
 	
@@ -135,8 +145,14 @@ Notes:
 		
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.modules#" item="key">
-			<cfset variables.modules[key].configure(getDtdPath(), getValidateXML()) />
+		<cfloop collection="#variables.enabledModules#" item="key">
+			<cftry>
+				<cfset variables.enabledModules[key].configure(getDtdPath(), getValidateXML()) />
+				<cfcatch type="any">
+					<cfset variables.enabledModules[key].setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+					<cfset disableModule(key) />
+				</cfcatch>
+			</cftry>
 		</cfloop>
 	</cffunction>
 
@@ -145,8 +161,8 @@ Notes:
 		
 		<cfset var key = "" />
 		
-		<cfloop collection="#variables.modules#" item="key">
-			<cfset variables.modules[key].getModuleAppManager().deconfigure() />
+		<cfloop collection="#variables.enabledModules#" item="key">
+			<cfset variables.enabledModules[key].getModuleAppManager().deconfigure() />
 		</cfloop>
 	</cffunction>
 	
@@ -156,9 +172,22 @@ Notes:
 	<cffunction name="getModule" access="public" returntype="MachII.framework.Module" output="false"
 		hint="Gets a module with the specified name.">
 		<cfargument name="moduleName" type="string" required="true" />
+		<cfargument name="includeDisabled" type="boolean" required="false" default="false" />
 		
 		<cfif isModuleDefined(arguments.moduleName)>
-			<cfreturn variables.modules[arguments.moduleName] />
+			<cfif isModuleEnabled(arguments.moduleName)>
+				<cfreturn variables.enabledModules[arguments.moduleName] />
+			<cfelseif arguments.includeDisabled>
+				<cfreturn variables.disabledModules[arguments.moduleName] />
+			<cfelse>
+				<cfif variables.disabledModules[arguments.moduleName].hasException()>
+					<cfthrow type="MachII.framework.ModuleFailedToLoad" 
+						message="Module with name '#arguments.moduleName#' failed to load." />
+				<cfelse>
+					<cfthrow type="MachII.framework.ModuleDisabled" 
+						message="Module with name '#arguments.moduleName#' is disabled." />
+				</cfif>
+			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.framework.ModuleNotDefined" 
 				message="Module with name '#arguments.moduleName#' is not defined." />
@@ -166,8 +195,21 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getModules" access="public" returntype="struct" output="false"
-		hint="Returns a struct of all registered modules.">
-		<cfreturn variables.modules />
+		hint="Returns a struct of all enabled registered modules.">
+		<cfargument name="includeDisabled" type="boolean" required="false" default="false" />
+		<cfset var tempStruct = "" />
+		<cfif NOT arguments.includeDisabled>
+			<cfreturn variables.enabledModules />
+		<cfelse>
+			<cfset tempStruct = StructCopy(variables.enabledModules) />
+			<cfset StructAppend(tempStruct, variables.disabledModules) />
+			<cfreturn tempStruct />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="getDisabledModules" access="public" returntype="struct" output="false"
+		hint="Returns a struct of all enabled registered modules.">
+		<cfreturn variables.disabledModules />
 	</cffunction>
 	
 	<cffunction name="addModule" access="public" returntype="void" output="false"
@@ -179,15 +221,44 @@ Notes:
 		<cfif NOT arguments.override AND isModuleDefined(arguments.moduleName)>
 			<cfthrow type="MachII.framework.ModuleAlreadyDefined"
 				message="A Module with name '#arguments.moduleName#' is already registered." />
+		<cfelseif arguments.module.isEnabled()>
+			<cfset variables.enabledModules[arguments.moduleName] = arguments.module />
 		<cfelse>
-			<cfset variables.modules[arguments.moduleName] = arguments.module />
+			<cfset variables.disabledModules[arguments.moduleName] = arguments.module />
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="isModuleDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if a module is registered with the specified name.">
 		<cfargument name="moduleName" type="string" required="true" />
-		<cfreturn StructKeyExists(variables.modules, arguments.moduleName) />
+		<cfreturn StructKeyExists(variables.enabledModules, arguments.moduleName)
+					OR StructKeyExists(variables.disabledModules, arguments.moduleName) />
+	</cffunction>
+
+	<cffunction name="isModuleEnabled" access="public" returntype="boolean" output="false"
+		hint="Returns true if a module is enabled with the specified name.">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfreturn StructKeyExists(variables.enabledModules, arguments.moduleName) />
+	</cffunction>
+
+	<cffunction name="disableModule" access="public" returntype="void" output="false"
+		hint="Disables a module.">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfif isModuleEnabled(arguments.moduleName)>
+			<cfset variables.disabledModules[arguments.moduleName] = variables.enabledModules[arguments.moduleName] />
+			<cfset variables.disabledModules[arguments.moduleName].setEnabled(false) />
+			<cfset StructDelete(variables.enabledModules, arguments.moduleName) />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="enableModule" access="public" returntype="void" output="false"
+		hint="Enables a module.">
+		<cfargument name="moduleName" type="string" required="true" />
+		<cfif NOT isModuleEnabled(arguments.moduleName)>
+			<cfset variables.enabledModules[arguments.moduleName] = variables.disabledModules[arguments.moduleName] />
+			<cfset variables.enabledModules[arguments.moduleName].setEnabled(true) />
+			<cfset StructDelete(variables.disabledModules, arguments.moduleName) />
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -195,7 +266,7 @@ Notes:
 	--->
 	<cffunction name="getModuleNames" access="public" returntype="array" output="false"
 		hint="Returns an array of module names.">
-		<cfreturn StructKeyArray(variables.modules) />
+		<cfreturn StructKeyArray(variables.enabledModules) />
 	</cffunction>
 
 	<!---

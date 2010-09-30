@@ -63,6 +63,9 @@ Notes:
 	<cfset variables.appLoader = "" />
 	<cfset variables.dtdPath = "" />
 	<cfset variables.overrideXml = "" />
+	<cfset variables.enabled = true />
+	<cfset variables.loadException = "" />
+	
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -109,17 +112,64 @@ Notes:
 			hint="Should the XML be validated before parsing." />
 		
 		<cfset var oldModuleAppManager = getModuleAppManager() />
-		
-		<!--- Create a new module --->
-		<cfset configure(getDtdPath(), arguments.validateXml) />
-		
-		<!--- Only run deconfigure in old module once the new module has successfully been configured --->
-		<cfset oldModuleAppManager.deconfigure() />
+		<cftry>
+			<cfset clearLoadException() />
+			<!--- Create a new module --->
+			<cfset configure(getDtdPath(), arguments.validateXml) />
+
+			<!--- Only run deconfigure in old module once the new module has successfully been configured --->
+			<cfif isObject(oldModuleAppManager)>
+				<cfset oldModuleAppManager.deconfigure() />
+			</cfif>
+
+			<cfif NOT isEnabled()>
+				<cfset getModuleAppManager().getModuleManager().enableModule(variables.moduleName) />
+			</cfif>
+			
+			<cfcatch type="any">
+				<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+				<cfif isObject(oldModuleAppManager)>
+					<cfset oldModuleAppManager.getModuleManager().disableModule(variables.moduleName) />
+				</cfif>
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="isEnabled" access="public" returntype="boolean" output="false"
+		hint="Returns the enabled status of the module">
+		<cfreturn variables.enabled />
+	</cffunction>
+
+	<cffunction name="setEnabled" access="public" returntype="boolean" output="false"
+		hint="Returns the enabled status of the module">
+		<cfargument name="enabled" type="boolean" required="true" />
+		<cfset variables.enabled = arguments.enabled />
+	</cffunction>
+
+	<cffunction name="hasException" access="public" returntype="boolean" output="false"
+		hint="Returns if the module is disabled due to an exception">
+		<cfreturn isObject(variables.loadException) />
+	</cffunction>
+	
+	<cffunction name="clearLoadException" access="private" returntype="void" output="false"
+		hint="Clears an exception that occurred during load">
+		<cfset variables.loadException = "" />
+	</cffunction>
+
+	<cffunction name="setLoadException" access="public" returntype="void" output="false"
+		hint="Sets an exception that occurred during load">
+		<cfargument name="exception" type="MachII.util.Exception" required="true" />
+		<cfset variables.loadException = arguments.exception />
+	</cffunction>
+
+	<cffunction name="getLoadException" access="public" returntype="void" output="false"
+		hint="Gets the exception that occurred during load">
+		<cfreturn variables.loadException />
+	</cffunction>
+
 	<cffunction name="setFile" access="public" returntype="void" output="false"
 		hint="Sets the path to the module Mach II config file">
 		<cfargument name="file" type="string" required="true" />
@@ -154,17 +204,17 @@ Notes:
 		<cfset variables.appManager = arguments.appManager />
 	</cffunction>
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Sets the AppManager instance this ModuleManager belongs to.">
+		hint="Sets the AppManager instance this Module belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
 	
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"
-		hint="Returns the ModuleAppManager instance this ModuleManager belongs to.">
+		hint="Returns the ModuleAppManager instance this Module belongs to.">
 		<cfargument name="moduleAppManager" type="MachII.framework.AppManager" required="true" />
 		<cfset variables.moduleAppManager = arguments.moduleAppManager />
 	</cffunction>
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Sets the ModuLeAppManager instance this ModuleManager belongs to.">
+		hint="Sets the ModuLeAppManager instance this Module belongs to.">
 		<cfreturn variables.moduleAppManager />
 	</cffunction>
 	
