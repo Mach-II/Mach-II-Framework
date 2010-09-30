@@ -92,6 +92,9 @@ Notes:
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		<cfset setMaxEvents(arguments.maxEvents) />
 		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
+		
+		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
+		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME)) />
 
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
@@ -104,24 +107,22 @@ Notes:
 	--->
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles all requests made to the framework. Checks for endpoint match first, and if no endpoint then go through handleEventRequest.">
+		<cfargument name="eventArgs" type="struct" required="false" default="#getRequestEventArgs()#"
+			hint="The event args to be used or the framweork will automatically use the results from getRequestEventArgs()." />
 
 		<cfset var endpointManager = getAppManager().getEndpointManager() />
-		<cfset var eventArgs = StructNew() />
 		<cfset var log = getLog() />
 
 		<cfset log.info("Begin processing request.") />
 
-		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME)) />
+		<cfset arguments.eventArgs = getRequestEventArgs() />
 
-		<cfset eventArgs = getRequestEventArgs() />
+		<cfset log.debug("Incoming event arguments:", arguments.eventArgs) />
 
-		<cfset log.debug("Incoming event arguments:", eventArgs) />
-
-		<cfif endpointManager.isEndpointRequest(eventArgs)>
-			<cfset endpointManager.handleEndpointRequest(eventArgs) />
+		<cfif endpointManager.isEndpointRequest(arguments.eventArgs)>
+			<cfset endpointManager.handleEndpointRequest(arguments.eventArgs) />
 		<cfelse>
-			<cfset handleEventRequest(eventArgs) />
+			<cfset handleEventRequest(arguments.eventArgs) />
 		</cfif>
 
 	</cffunction>
@@ -639,7 +640,7 @@ Notes:
 		<cfargument name="isException" type="boolean" required="true" />
 		<cfset variables.isException = arguments.isException />
 	</cffunction>
-	<cffunction name="getIsException" access="public" returntype="string" output="false">
+	<cffunction name="getIsException" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isException />
 	</cffunction>
 
