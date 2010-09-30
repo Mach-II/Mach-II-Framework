@@ -143,7 +143,7 @@ Notes:
 		<cfreturn variables.enabled />
 	</cffunction>
 
-	<cffunction name="setEnabled" access="public" returntype="boolean" output="false"
+	<cffunction name="setEnabled" access="public" returntype="void" output="false"
 		hint="Returns the enabled status of the module">
 		<cfargument name="enabled" type="boolean" required="true" />
 		<cfset variables.enabled = arguments.enabled />

@@ -102,8 +102,8 @@ Notes:
 		<th style="width:20%;"><h3>Module</h3></th>
 		<th style="width:15%;"><h3>Mach-II</h3></th>
 		<th style="width:15%;"><h3>DI Engine</h3></th>
-		<th style="width:10%;"><h3>Enabled</h3></th>
-		<th style="width:40%;"><h3>Configuration</h3></th>
+		<th style="width:15%;"><h3>Enabled</h3></th>
+		<th style="width:35%;"><h3>Configuration</h3></th>
 	</tr>
 	<tr>
 		<td>
@@ -188,7 +188,7 @@ Notes:
 		</td>
 		<td>
 			<p>
-				<cfif variables.moduleData[variables.moduleOrder[i]].enabled >
+				<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
 					<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
 					<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadConfig >
 						<span class="red">
@@ -246,32 +246,37 @@ Notes:
 	</cfif>
 		<td>
 			<p>
-				<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
-					<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="disable">
-						<span class="green">
-							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
-							&nbsp;Enabled
-						</span>
-					</view:a>
-				<cfelse>
-					<cfif NOT isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
-						<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="enable">
-							<span class="red">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
-								&nbsp;Disabled
+				<!--- Don't allow the dashboard to be disable from within itself --->
+				<cfif variables.moduleOrder[i] NEQ getAppManager().getModuleName()>
+					<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
+						<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="disable">
+							<span class="green">
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
+								&nbsp;Enabled
 							</span>
 						</view:a>
 					<cfelse>
-						<span class="red">
-							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
-							&nbsp;Error
-						</span>
-						<p class="small">
-							<a href="##" onclick="Effect.toggle('exception_#variables.moduleOrder[i]#', 'blind'); return false;">
-								show error
-							</a>
-						</p>
+						<cfif NOT isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
+							<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="enable">
+								<span class="red">
+									<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
+									&nbsp;Disabled
+								</span>
+							</view:a>
+						<cfelse>
+							<span class="red">
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
+								&nbsp;Error
+							</span>
+							<p class="small">
+								<a href="##" onclick="Effect.toggle('exception_#variables.moduleOrder[i]#', 'blind'); return false;">
+									show error
+								</a>
+							</p>
+						</cfif>
 					</cfif>
+				<cfelse>
+					n/a
 				</cfif>
 			</p>
 		</td>
