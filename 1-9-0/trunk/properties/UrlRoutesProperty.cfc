@@ -213,6 +213,15 @@ index.cfm/product/A12345/fancy/
 
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route, true) />
 	</cffunction>
+	
+	<cffunction name="removeRoute" access="public" returntype="void" output="false"
+		hint="Removes a route by name.">
+		<cfargument name="routeName" type="string" required="true" />
+		
+		<cfset variables.routeNames.remove(arguments.routeName) />
+
+		<cfset getAppManager().getRequestManager().removeRoute(arguments.routeName) />
+	</cffunction>
 
 	<cffunction name="addRouteByAttributes" access="public" returntype="void" output="false"
 		hint="Adds a route by attributes.">
