@@ -185,7 +185,7 @@ To Test it out, do the following:
 	--->
 	<cffunction name="callEndpointFunction" access="public" returntype="string" output="false"
 		hint="Calls the endpoint function linked to the input RestUri (in event arg), passing the parsed URI tokens as arguments to the function.">
-		<cfargument name="restUri" type="MachII.endpoints.rest.Uri" required="true" />
+		<cfargument name="restUri" type="MachII.framework.url.Uri" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var responseBody = "" />
