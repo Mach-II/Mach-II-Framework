@@ -115,8 +115,6 @@ Notes:
 
 		<cfset log.info("Begin processing request.") />
 
-		<cfset arguments.eventArgs = getRequestEventArgs() />
-
 		<cfset log.debug("Incoming event arguments:", arguments.eventArgs) />
 
 		<cfif endpointManager.isEndpointRequest(arguments.eventArgs)>
