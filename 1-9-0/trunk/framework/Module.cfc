@@ -65,6 +65,9 @@ Notes:
 	<cfset variables.overrideXml = "" />
 	<cfset variables.enabled = true />
 	<cfset variables.loadException = "" />
+	<cfset variables.loaded = false />
+	<cfset variables.lazyLoad = false />
+	<cfset variables.validateXml = false />
 	
 	
 	<!---
@@ -81,7 +84,6 @@ Notes:
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setOverrideXml(arguments.overrideXml) />
-		
 		<cfreturn this />
 	</cffunction>
 	
@@ -91,13 +93,37 @@ Notes:
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
 
-		<cfset var appLoader = CreateObject("component", "MachII.framework.AppLoader").init(
-				getFile(), arguments.configDtdPath, getAppManager().getAppKey(), arguments.validateXML, getAppManager(), getOverrideXml(), getModuleName()) />
-		<cfset var moduleAppManager = appLoader.getAppManager() />
-
 		<cfset setDtdPath(arguments.configDtdPath) />
-		<cfset moduleAppManager.setAppLoader(appLoader) />
-		<cfset setModuleAppManager(moduleAppManager) />
+		<cfset setValidateXml(arguments.validateXml) />
+
+		<cfif NOT getLazyLoad()>
+			<cfset load() />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="load" access="private" returntype="void" output="false">
+		<cfset var appLoader = "" />
+		<cfset var moduleAppManager = "" />
+
+		<cftry>
+			<cfset appLoader = CreateObject("component", "MachII.framework.AppLoader") />
+			<cfset appLoader.init(getFile(), getDtdPath(), getAppManager().getAppKey(), 
+					getValidateXml(), getAppManager(), getOverrideXml(), getModuleName()) />
+			<cfset moduleAppManager = appLoader.getAppManager() />
+	
+			<cfset moduleAppManager.setAppLoader(appLoader) />
+			<cfset setModuleAppManager(moduleAppManager) />
+			<cfset variables.loaded = true />
+			<cfcatch type="any">
+				<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+					<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+					<cfset getAppManager().getModuleManager().disableModule(variables.moduleName) />
+					<cfset setModuleAppManager(getAppManager()) />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<!---
@@ -127,9 +153,13 @@ Notes:
 			</cfif>
 			
 			<cfcatch type="any">
-				<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
-				<cfif isObject(oldModuleAppManager)>
-					<cfset oldModuleAppManager.getModuleManager().disableModule(variables.moduleName) />
+				<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+					<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+					<cfif isObject(oldModuleAppManager)>
+						<cfset oldModuleAppManager.getModuleManager().disableModule(variables.moduleName) />
+					</cfif>
+				<cfelse>
+					<cfrethrow />
 				</cfif>
 			</cfcatch>
 		</cftry>
@@ -162,12 +192,23 @@ Notes:
 	<cffunction name="setLoadException" access="public" returntype="void" output="false"
 		hint="Sets an exception that occurred during load">
 		<cfargument name="exception" type="MachII.util.Exception" required="true" />
+ 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.Module").fatal("Module '#variables.moduleName#' caused an exception while loading", arguments.exception.getMessage()) />
 		<cfset variables.loadException = arguments.exception />
 	</cffunction>
 
 	<cffunction name="getLoadException" access="public" returntype="any" output="false"
 		hint="Gets the exception that occurred during load">
 		<cfreturn variables.loadException />
+	</cffunction>
+
+	<cffunction name="setLazyLoad" access="public" returntype="boolean" output="false"
+		hint="Sets the lazy load status of this module">
+		<cfargument name="lazyLoad" type="boolean" required="true" />
+		<cfreturn variables.lazyLoad />
+	</cffunction>
+	<cffunction name="getLazyLoad" access="public" returntype="boolean" output="false"
+		hint="Returns if this module should lazy load">
+		<cfreturn variables.lazyLoad />
 	</cffunction>
 
 	<cffunction name="setFile" access="public" returntype="void" output="false"
@@ -184,8 +225,16 @@ Notes:
 		<cfargument name="dtdPath" type="string" required="true" />
 		<cfset variables.dtdPath = arguments.dtdPath />
 	</cffunction>
-	<cffunction name="getDtdPath" access="public" type="string" output="false">
+	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
 		<cfreturn variables.dtdPath />
+	</cffunction>
+	
+	<cffunction name="setValidateXml" access="public" returntype="void" output="false">
+		<cfargument name="validateXml" type="boolean" required="true" />
+		<cfset variables.validateXml = arguments.validateXml />
+	</cffunction>
+	<cffunction name="getValidateXml" access="public" returntype="boolean" output="false">
+		<cfreturn variables.validateXml />
 	</cffunction>
 	
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
@@ -215,6 +264,9 @@ Notes:
 	</cffunction>
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the ModuLeAppManager instance this Module belongs to.">
+		<cfif NOT variables.loaded>
+			<cfset load() />
+		</cfif>
 		<cfreturn variables.moduleAppManager />
 	</cffunction>
 	

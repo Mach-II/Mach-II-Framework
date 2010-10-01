@@ -99,6 +99,7 @@ Notes:
 		<cfset var file = "" />
 		<cfset var overrideXml = "" />
 		<cfset var i = 0 />
+		<cfset var lazyLoad = "" />
 		
 		<!--- Setup up each Module. --->
 		<cfif NOT arguments.override>
@@ -127,14 +128,27 @@ Notes:
 				<!--- Setup the Module. --->
 				<cfset module = CreateObject("component", "MachII.framework.Module") />
 				<cfset module.init(getAppManager(), name, file, overrideXml) />
+
+				<cfset lazyLoad = getAppManager().getPropertyManager().getProperty("modules:lazyLoad", "") />
+				<cfif lazyLoad EQ "all" OR ListFindNoCase(lazyLoad, name) >
+					<cfset module.setLazyLoad(true) />
+				</cfif>
 	
+				<cfif ListFindNoCase(getAppManager().getPropertyManager().getProperty("modules:disable", ""), name) >
+					<cfset module.setEnabled(false) />
+				</cfif>
+
 				<!--- Add the Module to the Manager. --->
 				<cfset addModule(name, module, arguments.override) />
 				
 				<cfcatch type="any">
-					<cfset module.setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
-					<cfset module.setEnabled(false) />
-					<cfset addModule(name, module, arguments.override) />
+					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+						<cfset module.setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+						<cfset module.setEnabled(false) />
+						<cfset addModule(name, module, arguments.override) />
+					<cfelse>
+						<cfrethrow />
+					</cfif>
 				</cfcatch>
 			</cftry>
 		</cfloop>
@@ -149,8 +163,12 @@ Notes:
 			<cftry>
 				<cfset variables.enabledModules[key].configure(getDtdPath(), getValidateXML()) />
 				<cfcatch type="any">
-					<cfset variables.enabledModules[key].setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
-					<cfset disableModule(key) />
+					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+						<cfset variables.enabledModules[key].setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+						<cfset disableModule(key) />
+					<cfelse>
+						<cfrethrow />
+					</cfif>
 				</cfcatch>
 			</cftry>
 		</cfloop>
