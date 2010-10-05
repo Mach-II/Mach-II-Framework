@@ -394,17 +394,17 @@ Configuration Notes:
 				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
 				, "File path: '#getFileFromPath(fileFullPath)#'") />
 	
-		<cfheader name="Content-Type" value="#contentType#" />
+		<cfset addHTTPHeaderByName("Content-Type", contentType) />
 
 		<!--- Set the expires header using either access or modified --->
 		<cfif arguments.expires.type EQ "access">
-			<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(Now() + arguments.expires.amount)) />
 		<cfelseif arguments.expires.type EQ "modified">
-			<cfheader name="Expires" value="#GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)#" />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)) />
 		</cfif>
 
 		<cfif Len(arguments.attachment)>
-			<cfheader name="Content-Disposition" value="attachment; filename=#arguments.attachment#" />
+			<cfset addHTTPHeaderByName("Content-Disposition", "attachment; filename=#arguments.attachment#") />
 		</cfif>
 
 		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
@@ -437,32 +437,32 @@ Configuration Notes:
 				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
 				, "File path: '#getFileFromPath(fileFullPath)#'") />
 
-		<cfheader name="Content-Length" value="#fileInfo.size#" />
+		<cfset addHTTPHeaderByName("Content-Length", fileInfo.size) />
 		
 		<!--- Set the expires header using either access or modified --->
 		<cfif arguments.expires.type EQ "access">
-			<cfheader name="Expires" value="#GetHttpTimeString(Now() + arguments.expires.amount)#" />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(Now() + arguments.expires.amount)) />
 		<cfelseif arguments.expires.type EQ "modified">
-			<cfheader name="Expires" value="#GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)#" />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)) />
 		</cfif>
 
 		<cfif Len(arguments.attachment)>
-			<cfheader name="Content-Disposition" value="attachment; file='#arguments.attachment#'" />
+			<cfset addHTTPHeaderByName("Content-Disposition", "attachment; file='#arguments.attachment#'") />
 		</cfif>
 
 		<cfif getServiceEngineType() EQ "cfcontent">
 			<!--- Return a 304 No Modified if the passed header and file modified timestamp are not the same --->
 			<cfif StructKeyExists(httpRequestHeaders ,"If-Modified-Since") AND DateCompare(getUtils().createDatetimeFromHttpTimeString(httpRequestHeaders["If-Modified-Since"]), fileInfo.dateLastModified) NEQ 0>
 				<cfcontent reset="true" />
-				<cfheader statuscode="304" statustext="Not Modified" />
+				<cfset addHTTPHeaderByStatus(304) />
 			<!--- Serve the file using cfcontent --->
 			<cfelse>
-				<cfheader name="Last-Modified" value="#GetHttpTimeString(fileInfo.dateLastModified)#" />
+				<cfset addHTTPHeaderByName("Last-Modified", GetHttpTimeString(fileInfo.dateLastModified)) />
 				<cfcontent file="#fullFilePath#" type="#contentType#" />
 			</cfif>
 		<cfelse>
 			<!--- x-sendfile correctly handles ETags and modified since headers itself --->
-			<cfheader name="X-Sendfile" value="#arguments.fullFilePath#" />
+			<cfset addHTTPHeaderByName("X-Sendfile", arguments.fullFilePath) />
 		</cfif>
 	</cffunction>
 	

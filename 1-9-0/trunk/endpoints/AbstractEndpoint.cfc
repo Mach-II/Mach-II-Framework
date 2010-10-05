@@ -430,6 +430,126 @@ Notes:
 		<cfreturn value />
 	</cffunction>
 
+	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+		<cfargument name="name" type="string" required="false" default="" />
+		<cfargument name="value" type="string" required="false" default="" />
+		<cfargument name="statusCode" type="numeric" required="false" default="0" />
+		<cfargument name="statusText" type="string" required="false" default="" />
+		<cfargument name="charset" type="string" required="false" default="" />
+
+		<cfset var i = 0 />
+		<cfset var log = getLog() />
+
+		<cfif Len(arguments.name)>
+			<cfif Len(arguments.charset)>
+				<cfheader name="#arguments.name#"
+					value="#arguments.value#"
+					charset="#arguments.charset#" />
+			<cfelse>
+				<cfheader name="#arguments.name#"
+					value="#arguments.value#" />
+			</cfif>
+		<cfelseif arguments.statusCode NEQ 0>
+			<cfif NOT Len(arguments.statusText)>
+				<cfset arguments.statusText = getUtils().getHTTPHeaderStatusTextByStatusCode(arguments.statusCode) />
+
+				<cfif NOT Len(arguments.statusText) AND log.isWarnEnabled()>
+					<cfset log.warn("Unabled to resolve a status text shortcut for a HTTP header with the status code of '#arguments.statusCode#'. Please check that you are using a supported status code.") />
+				</cfif>
+			</cfif>
+			<cfheader statuscode="#arguments.statusCode#"
+				statustext="#arguments.statusText#" />
+		<cfelse>
+			<cfthrow type="MachII.framework.invalidHTTPHeaderArguments"
+				message="The method addHTTPHeader required arguments must be 'name,value' or 'statusCode'."
+				detail="Passed arguments:#arguments.toString()#" />
+		</cfif>
+
+		<!--- Notify any registered observers --->
+		<cfif StructKeyExists(request, "_MachIIEndpoint_HTTPHeaderCallbacks")>
+			<cfloop from="1" to="#ArrayLen(request._MachIIEndpoint_HTTPHeaderCallbacks)#" index="i">
+				<cfinvoke component="#request._MachIIEndpoint_HTTPHeaderCallbacks[i].callback#"
+					method="#request._MachIIEndpoint_HTTPHeaderCallbacks[i].method#"
+					argumentcollection="#arguments#" />
+			</cfloop>
+		</cfif>
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by name/value.">
+		<cfargument name="name" type="string" required="true" />
+		<cfargument name="value" type="string" required="true" />
+		<cfargument name="charset" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+
+	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
+		hint="Adds a HTTP header by statusCode/statusText.">
+		<cfargument name="statuscode" type="string" required="true" />
+		<cfargument name="statustext" type="string" required="false" />
+		<cfset addHTTPHeader(argumentcollection=arguments) />
+	</cffunction>
+	
+	<cffunction name="observeHTTPHeader" access="private" returntype="void" output="false"
+		hint="Adds a HTTP header. You must use named arguments or addHTTPHeaderByName/addHTTPHeaderByStatus helper methods.">
+
+		<!--- Individual arguments are not passed in so we just observe the argument collection --->
+		
+		<cfif NOT IsDefined("request._MachIIEndpoint_HTTPHeaders")>
+			<cfset request["_MachIIEndpoint_HTTPHeaders"] = ArrayNew(1) />
+		</cfif>
+		
+		<cfset ArrayAppend(request["_MachIIEndpoint_HTTPHeaders"], arguments) />
+	</cffunction>
+	
+	<cffunction name="getObservedHTTPHeaders" access="private" returntype="array" output="false"
+		hint="Gets observed HTTP headers.">
+		<cfif IsDefined("request._MachIIEndpoint_HTTPHeaders")>
+			<cfreturn request["_MachIIEndpoint_HTTPHeaders"] />
+		<cfelse>
+			<cfreturn ArrayNew(1) />
+		</cfif>
+	</cffunction>
+	<cffunction name="replayHTTPHeaders" access="private" returntype="void" output="false"
+		hint="Replays cached HTTP header.">
+		<cfargument name="HTTPHeaders" type="array" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.HTTPHeaders)#" index="i">
+			<cfset addHTTPHeader(argumentcollection=arguments.HTTPHeaders[i]) />
+		</cfloop>
+	</cffunction>
+	
+	<cffunction name="addHTTPHeaderCallback" access="private" returntype="void" output="false"
+		hint="Adds callback to notify when addHTMLHeadElement is run.">
+		<cfargument name="callback" type="any" required="true" />
+		<cfargument name="method" type="string" required="true" />
+
+		<cfif NOT IsDefined("request._MachIIEndpoint_HTTPHeaderCallbacks")>
+			<cfset request["_MachIIEndpoint_HTTPHeaderCallbacks"] = ArrayNew(1) />
+		</cfif>
+		
+		<cfset ArrayAppend(request._MachIIEndpoint_HTTPHeaderCallbacks, arguments) />
+	</cffunction>
+	<cffunction name="removeHTTPHeaderCallback" access="private" returntype="void" output="false"
+		hint="Removes callback to notify when addHTTPHeaderCallback is run.">
+		<cfargument name="callback" type="any" required="true" />
+
+		<cfset var utils = getUtils() />
+		<cfset var i = 0 />
+
+		<cfif StructKeyExists(request, "_MachIIEndpoint_HTTPHeaderCallbacks")>
+			<cfloop from="1" to="#ArrayLen(request._MachIIEndpoint_HTTPHeaderCallbacks)#" index="i">
+				<cfif utils.assertSame(request._MachIIEndpoint_HTTPHeaderCallbacks[i].callback, arguments.callback)>
+					<cfset ArrayDeleteAt(request._MachIIEndpoint_HTTPHeaderCallbacks, i) />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		</cfif>
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->

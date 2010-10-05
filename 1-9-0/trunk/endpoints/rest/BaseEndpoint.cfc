@@ -137,7 +137,7 @@ To Test it out, do the following:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - ENDPOINT REQUEST HANDLING
 	--->
 	<cffunction name="preProcess" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
@@ -235,7 +235,7 @@ To Test it out, do the following:
 			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format) />
 
 			<!--- Add the Content-Type header --->
-			<cfheader name="Content-Type" value="#contentType#" />
+			<cfset addHTTPHeaderByName("Content-Type", contentType) />
 
 			<cfcatch type="any">
 				<!--- Log exception --->
