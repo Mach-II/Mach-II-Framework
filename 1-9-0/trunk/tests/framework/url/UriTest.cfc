@@ -82,13 +82,17 @@ Notes:
 				"getContent",
 				"content"
 				);
+			var tokens = "";
+			
 			// Match, no format
 			assertTrue(uri.matchUri('/content/item'), 'Should match /content/item.');
-			var tokens = uri.getTokensFromUri('/content/item');
+			tokens = uri.getTokensFromUri('/content/item');
 			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
+			
 			// Match, w/format
 			tokens = uri.getTokensFromUri('/content/item.json');
 			assertTrue(tokens.format == 'json', 'Should have json format.');
+			
 			// No match
 			commonInvalidMatches(uri);
 		</cfscript>
@@ -124,6 +128,10 @@ Notes:
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
 			assertTrue(tokens.format EQ 'json', 'Should have json format.');
 
+			tokens = uri.getTokensFromUri('/content/item/peter@mach-ii%2Ecom.json');
+			assertTrue(tokens.key EQ 'peter@mach-ii.com', "Should have a key token match of 'peter@mach-ii.com'.");
+			assertTrue(tokens.format EQ 'json', 'Should have json format.');
+
 			// No match
 			assertFalse(uri.matchUri('/content/item'), 'Should not match /content/item');
 			assertFalse(uri.matchUri('/content/item.xml'), 'Should not match /content/item.xml');
@@ -152,9 +160,19 @@ Notes:
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
 			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
 
+			tokens = uri.getTokensFromUri('/content/item/peter@mach-ii%2Ecom/my-cat');
+			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
+			assertTrue(tokens.key EQ 'peter@mach-ii.com', "Should have a key token match of 'peter@mach-ii.com'.");
+			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
+
 			// Match, w/format
 			tokens = uri.getTokensFromUri('/content/item/my-item/my-cat.json');
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
+			assertTrue(tokens.format EQ 'json', 'Should have json format.');
+			
+			tokens = uri.getTokensFromUri('/content/item/peter@mach-ii%2Ecom/my-cat.json');
+			assertTrue(tokens.key EQ 'peter@mach-ii.com', "Should have a key token match of 'peter@mach-ii.com'.");
 			assertTrue(tokens.category EQ 'my-cat', 'Should have a category token match of my-cat.');
 			assertTrue(tokens.format EQ 'json', 'Should have json format.');
 
