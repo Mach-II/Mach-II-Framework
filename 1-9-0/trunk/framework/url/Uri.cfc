@@ -112,6 +112,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfset var stcTokens = StructNew() />
 		<cfset var stcMatches = REFind(variables.uriRegex, arguments.pathInfo, 1, true) />
 		<cfset var intMatchCount = ArrayLen(stcMatches.LEN) />
+		<cfset var key = "" />
 		<cfset var i = 0 />
 
 		<cfif stcMatches.LEN[1]>
@@ -133,6 +134,11 @@ For example, a uriPattern like "/service/doit/{value}"
 				<cfset stcTokens["format"] = Mid(arguments.pathInfo, stcMatches.POS[intMatchCount]+1, stcMatches.LEN[intMatchCount]) />
 			</cfif>
 		</cfif>
+		
+		<!--- Url decode all the tokens now (we do this here so &2E remains in a token and doesn't get used as a format) --->
+		<cfloop collection="#stcTokens#" item="key">
+			<cfset stcTokens[key] = UrlDecode(stcTokens[key]) />
+		</cfloop>
 
 		<cfreturn stcTokens />
 	</cffunction>

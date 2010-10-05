@@ -114,6 +114,10 @@ Notes:
 			tokens = uri.getTokensFromUri('/content/item/my-item');
 			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
 			assertTrue(tokens.key EQ 'my-item', 'Should have a key token match of my-item.');
+			
+			tokens = uri.getTokensFromUri('/content/item/peter@mach-ii%2Ecom');
+			assertFalse(IsDefined("tokens.format"), 'Should not have format included.');
+			assertTrue(tokens.key EQ 'peter@mach-ii.com', "Should have a key token match of 'peter@mach-ii.com'.");
 
 			// Match, w/format
 			tokens = uri.getTokensFromUri('/content/item/my-item.json');
