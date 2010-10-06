@@ -329,7 +329,7 @@ To Test it out, do the following:
 						<cfset currRestUriMetadata = StructNew() />
 					
 						<!--- Default to GET method --->
-						<cfif StructKeyExists(currFunction, ANNOTATION_REST_METHOD)>
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_METHOD)>
 							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
 						<cfelse>
 							<cfset currHttpMethod = "GET" />
