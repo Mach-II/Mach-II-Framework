@@ -479,10 +479,10 @@ Configuration Notes:
 		
 		<!--- Get MIME type only if we have an extension --->
 		<cfif ListLen(fileName, ".")>
-			<cfreturn getUtils().getMimeTypeByFileExtension("." & ListLast(fileName, ".")) />	
+			<cfreturn getUtils().getMimeTypeByFileExtension("." & ListLast(fileName, "."), variables.customMimeTypeMap) />	
 		<!--- If no file extension, then serve as plain text --->
 		<cfelse>
-			<cfreturn getUtils().getMimeTypeByFileExtension(".txt") />
+			<cfreturn getUtils().getMimeTypeByFileExtension(".txt", variables.customMimeTypeMap) />
 		</cfif>
 	</cffunction>
 	

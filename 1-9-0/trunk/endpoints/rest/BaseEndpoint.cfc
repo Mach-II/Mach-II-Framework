@@ -240,7 +240,7 @@ To Test it out, do the following:
 				<cfset arguments.format = ".#arguments.format#" />
 			</cfif>
 			<!--- Leverage this nicely provided utility method --->
-			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format) />
+			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format, variables.customMimeTypeMap) />
 
 			<!--- Add the Content-Type header --->
 			<cfset addHTTPHeaderByName("Content-Type", contentType) />
@@ -376,7 +376,11 @@ To Test it out, do the following:
 		hint="Set this to override the defaultFormat.">
 		<cfargument name="defaultFormat" type="string" required="true" />
 		
-		<cfset var mimeTypeMap = getUtils().getMimeTypeMap() />
+		<cfset var mimeTypeMap = StructNew() />
+		
+		<!--- Use StructAppend to not pollute base mime-type map via references when "mixing" custom mime types --->
+		<cfset StructAppend(mimeTypeMap, getUtils().getMimeTypeMap()) />
+		<cfset StructAppend(mimeTypeMap, variables.customMimeTypeMap) />
 		
 		<cfif StructKeyExists(mimeTypeMap, arguments.defaultFormat)>
 			<cfset variables.defaultFormat = arguments.defaultFormat />

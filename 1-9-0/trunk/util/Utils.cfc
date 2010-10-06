@@ -518,15 +518,26 @@ Notes:
 		hint="Gets a MIME type(s) by file extension(s). Ignores any values that do not start with a '.'.">
 		<cfargument name="input" type="string" required="true"
 			hint="A single or list of file extensions.  Ignores any values that do not start with a '.' as a concrete MIME type which allows for mixed input of extensions and MIME types." />
+		<cfargument name="customMimeTypes" type="struct" required="false"
+			hint="Custom mime-type map (key=file extension, value=mime-type). Keys that conflict with the base mime-type map will be overridden." />
 
 		<cfset var inputArray = ListToArray(trimList(arguments.input)) />
 		<cfset var output = "" />
+		<cfset var mimeTypes= StructNew() />
 		<cfset var i = 0 />
+		
+		<!--- Use StructAppend to not pollute base mime-type map via references when "mixing" custom mime types --->
+		<cfif StructKeyExists(arguments, "customMimeTypes")>
+			<cfset StructAppend(mimeTypes, variables.mimeTypeMap) />
+			<cfset StructAppend(mimeTypes, variables.mimeTypeMap) />
+		<cfelse>
+			<cfset mimeTypes = variables.mimeTypeMap />
+		</cfif>
 
 		<cftry>
 			<cfloop from="1" to="#ArrayLen(inputArray)#" index="i">
 				<cfif inputArray[i].startsWith(".")>
-					<cfset output = ListAppend(output, StructFind(variables.mimeTypeMap, Right(inputArray[i], Len(inputArray[i]) -1))) />
+					<cfset output = ListAppend(output, StructFind(mimeTypes, Right(inputArray[i], Len(inputArray[i]) -1))) />
 				<cfelse>
 					<cfset output = ListAppend(output, inputArray[i]) />
 				</cfif>
@@ -542,7 +553,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="getMimeTypeMap" access="public" returntype="struct" output="false"
-		hint="Returns the whole mimeTypeMap for ad-hoc utility use.">
+		hint="Returns the base mimeTypeMap for ad-hoc utility use.">
 		<cfreturn variables.mimeTypeMap />
 	</cffunction>
 

@@ -66,6 +66,7 @@ Notes:
 	
 	<cfset variables.enableThrow = false />
 	<cfset variables.throwTemplate = "/MachII/endpoints/defaultThrowTemplate.cfm" />
+	<cfset variables.customMimeTypeMap = StructNew() />
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
 	<cfset variables.isOnAuthenticateDefined = false />
@@ -390,6 +391,21 @@ Notes:
 	<cffunction name="getComponentNameForLogging" access="public" returntype="string" output="false"
 		hint="Gets the component name for logging.">
 		<cfreturn variables.componentNameForLogging />
+	</cffunction>
+
+	<cffunction name="registerMimeType" access="private" returntype="void" output="false"
+		hint="Registers a custom mime type which adds to or overrides the base mime-type map known to Mach-II.">
+		<cfargument name="fileExtension" type="string" required="true" 
+			hint="The file extension to map the mime-type to." />
+		<cfargument name="mimeType" type="string" required="true" 
+			hint="The mime-type associated with the file extension." />
+		
+		<!--- Remove a leading "." if defined on the file extension --->
+		<cfif arguments.fileExtension.startsWith(".")>
+			<cfset arguments.fileExtension = Right(arguments.fileExtension, Len(arguments.fileExtension) - 1) />
+		</cfif>
+		
+		<cfset variables.customMimeTypeMap[arguments.fileExtension] = arguments.mimeType />
 	</cffunction>
 
 	<!---
