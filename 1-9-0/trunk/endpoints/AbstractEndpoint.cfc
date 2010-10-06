@@ -98,14 +98,15 @@ Notes:
 				, "Invalid enableThrow."
 				, "Must be boolean or struct of environments.")>
 			<cfif IsStruct(getParameter("enableThrow"))>
-				<cfset setEnableThrow(resolveValueByEnvironment(getParameter("enableThrow"))) />
+				<cfset setEnableThrow(resolveValueByEnvironment(getParameter("enableThrow"), false)) />
 			<cfelse>
 				<cfset setEnableThrow(getParameter("enableThrow", false)) />
 			</cfif>
 		<cfelse>
 			<cfset defaultEnableThrow["group:development"] = true />
 			<cfset defaultEnableThrow["group:local"] = true />
-			<cfset setEnableThrow(resolveValueByEnvironment(defaultEnableThrow)) />
+			<cfset defaultEnableThrow["group:_default_"] = false />
+			<cfset setEnableThrow(resolveValueByEnvironment(defaultEnableThrow, false)) />
 		</cfif>
 		
 		<cfif isParameterDefined("throwTemplate") AND getAssert().hasText(getParameter("throwTemplate")

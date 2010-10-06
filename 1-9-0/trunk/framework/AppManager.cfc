@@ -83,7 +83,7 @@ Notes:
 	<cfset variables.loading = TRUE />
 	<cfset variables.environmentName = "_default_" />
 	<cfset variables.environmentGroup = "_default_" />
-	<cfset variables.environmentGroupNames = "production,qa,staging,development,local" />
+	<cfset variables.environmentGroupNames = "production,qa,staging,development,local,_default_" />
 	<cfset variables.moduleName = "" />
 
 	<!---
