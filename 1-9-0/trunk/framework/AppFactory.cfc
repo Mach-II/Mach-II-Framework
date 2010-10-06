@@ -206,7 +206,8 @@ Notes:
 		<cfif NOT appManager.inModule()>
 			<cfset moduleManager = CreateObject("component", "MachII.framework.ModuleManager").init(appManager, GetDirectoryFromPath(arguments.configXmlPath), arguments.configDtdPath, arguments.validateXML) />
 			<cfloop from="1" to="#ArrayLen(configXmls)#" index="i">
-				<cfset moduleManager.loadXml(configXmls[i].configXml, configXmls[i].override) />
+					<!--- Register the XML for later which is deferred to be loaded during configure() --->
+				<cfset moduleManager.registerXml(configXmls[i].configXml, configXmls[i].override) />
 			</cfloop>
 		<cfelse>
 			<cfset moduleManager = arguments.parentAppManager.getModuleManager() />

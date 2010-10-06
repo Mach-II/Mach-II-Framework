@@ -84,6 +84,7 @@ Notes:
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setOverrideXml(arguments.overrideXml) />
+
 		<cfreturn this />
 	</cffunction>
 	
@@ -101,7 +102,9 @@ Notes:
 		</cfif>
 	</cffunction>
 
-	<cffunction name="load" access="private" returntype="void" output="false">
+	<cffunction name="load" access="public" returntype="void" output="false"
+		hint="Loads a module.">
+
 		<cfset var appLoader = "" />
 		<cfset var moduleAppManager = "" />
 
@@ -113,7 +116,9 @@ Notes:
 	
 			<cfset moduleAppManager.setAppLoader(appLoader) />
 			<cfset setModuleAppManager(moduleAppManager) />
-			<cfset variables.loaded = true />
+			<cfset setEnabled(true)	 />
+			<cfset setLoaded(true) />
+
 			<cfcatch type="any">
 				<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
 					<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
@@ -168,11 +173,20 @@ Notes:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="isLoaded" access="public" returntype="boolean" output="false"
+		hint="Returns the loaded status of the module">
+		<cfreturn variables.loaded />
+	</cffunction>
+	<cffunction name="setLoaded" access="public" returntype="void" output="false"
+		hint="Returns the loaded status of the module">
+		<cfargument name="loaded" type="boolean" required="true" />
+		<cfset variables.loaded = arguments.loaded />
+	</cffunction>
+	
 	<cffunction name="isEnabled" access="public" returntype="boolean" output="false"
 		hint="Returns the enabled status of the module">
 		<cfreturn variables.enabled />
 	</cffunction>
-
 	<cffunction name="setEnabled" access="public" returntype="void" output="false"
 		hint="Returns the enabled status of the module">
 		<cfargument name="enabled" type="boolean" required="true" />
@@ -201,10 +215,10 @@ Notes:
 		<cfreturn variables.loadException />
 	</cffunction>
 
-	<cffunction name="setLazyLoad" access="public" returntype="boolean" output="false"
+	<cffunction name="setLazyLoad" access="public" returntype="void" output="false"
 		hint="Sets the lazy load status of this module">
 		<cfargument name="lazyLoad" type="boolean" required="true" />
-		<cfreturn variables.lazyLoad />
+		<cfset variables.lazyLoad = arguments.lazyLoad />
 	</cffunction>
 	<cffunction name="getLazyLoad" access="public" returntype="boolean" output="false"
 		hint="Returns if this module should lazy load">
@@ -264,7 +278,7 @@ Notes:
 	</cffunction>
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the ModuLeAppManager instance this Module belongs to.">
-		<cfif NOT variables.loaded>
+		<cfif NOT isLoaded()>
 			<cfset load() />
 		</cfif>
 		<cfreturn variables.moduleAppManager />

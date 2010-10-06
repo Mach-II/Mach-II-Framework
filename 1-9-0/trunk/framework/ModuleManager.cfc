@@ -63,6 +63,7 @@ Notes:
 	<cfset variables.dtdPath = "" />
 	<cfset variables.validateXml = "" />
 	<cfset variables.baseName = "" />
+	<cfset variables.xml = ArrayNew(1) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -84,9 +85,17 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
+	
+	<cffunction name="registerXml" access="public" returntype="void" output="false"
+		hint="Registers xml for the manager.">
+		<cfargument name="configXml" type="string" required="true" />
+		<cfargument name="override" type="boolean" required="false" default="false" />
+		
+		<cfset ArrayAppend(variables.xml, arguments) />		
+	</cffunction>
 
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
-		hint="Loads xml for the manager">
+		hint="Loads xml for the manager.">
 		<cfargument name="configXml" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
 
@@ -157,7 +166,13 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures each of the registered modules.">
 
+		<cfset var i = 0 />
 		<cfset var key = "" />
+		
+		<!--- Load all registered xml --->
+		<cfloop from="1" to="#ArrayLen(variables.xml)#" index="i">
+			<cfset loadXml(argumentcollection=variables.xml[i]) />
+		</cfloop>
 
 		<cfloop collection="#variables.enabledModules#" item="key">
 			<cftry>
@@ -215,7 +230,9 @@ Notes:
 	<cffunction name="getModules" access="public" returntype="struct" output="false"
 		hint="Returns a struct of all enabled registered modules.">
 		<cfargument name="includeDisabled" type="boolean" required="false" default="false" />
+
 		<cfset var tempStruct = "" />
+
 		<cfif NOT arguments.includeDisabled>
 			<cfreturn variables.enabledModules />
 		<cfelse>
@@ -262,6 +279,7 @@ Notes:
 	<cffunction name="disableModule" access="public" returntype="void" output="false"
 		hint="Disables a module.">
 		<cfargument name="moduleName" type="string" required="true" />
+		
 		<cfif isModuleEnabled(arguments.moduleName)>
 			<cfset variables.disabledModules[arguments.moduleName] = variables.enabledModules[arguments.moduleName] />
 			<cfset variables.disabledModules[arguments.moduleName].setEnabled(false) />
@@ -272,10 +290,13 @@ Notes:
 	<cffunction name="enableModule" access="public" returntype="void" output="false"
 		hint="Enables a module.">
 		<cfargument name="moduleName" type="string" required="true" />
+		
 		<cfif NOT isModuleEnabled(arguments.moduleName)>
 			<cfset variables.enabledModules[arguments.moduleName] = variables.disabledModules[arguments.moduleName] />
-			<cfset variables.enabledModules[arguments.moduleName].setEnabled(true) />
+			<cfset variables.enabledModules[arguments.moduleName].load() />
 			<cfset StructDelete(variables.disabledModules, arguments.moduleName) />
+		<cfelseif NOT variables.enabledModules[arguments.moduleName].isLoaded()>
+			<cfset variables.enabledModules[arguments.moduleName].load() />
 		</cfif>
 	</cffunction>
 

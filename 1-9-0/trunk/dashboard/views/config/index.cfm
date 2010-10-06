@@ -175,7 +175,7 @@ Notes:
 	<tr <cfif i MOD 2>class="shade"</cfif>>
 		<td>
 			<h4>#UCase(Left(variables.moduleOrder[i], 1))##Right(variables.moduleOrder[i], Len(variables.moduleOrder[i]) -1)#</h4>
-		<cfif getAppManager().getModuleName() NEQ variables.moduleOrder[i]>
+		<cfif getAppManager().getModuleName() NEQ variables.moduleOrder[i] AND variables.moduleData[variables.moduleOrder[i]].showInDashboard>
 			<p class="small">
 				<view:a module="#variables.moduleOrder[i]#" event="#variables.moduleData[variables.moduleOrder[i]].appManager.getPropertyManager().getProperty("defaultEvent")#">
 					<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/link_go.png" width="16" height="16" alt="Link" />
@@ -186,9 +186,10 @@ Notes:
 			<p>&nbsp;</p>
 		</cfif>
 		</td>
+
 		<td>
 			<p>
-				<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
+				<cfif variables.moduleData[variables.moduleOrder[i]].showInDashboard>
 					<view:a event="config.reloadModule" p:moduleName="#variables.moduleOrder[i]#">
 					<cfif variables.moduleData[variables.moduleOrder[i]].shouldReloadConfig >
 						<span class="red">
@@ -221,7 +222,7 @@ Notes:
 				</cfif>
 			</p>
 		</td>
-	<cfif StructKeyExists(variables.moduleData[variables.moduleOrder[i]], "lastDependencyInjectionEngineReloadDateTime")>
+	<cfif variables.moduleData[variables.moduleOrder[i]].showInDashboard AND StructKeyExists(variables.moduleData[variables.moduleOrder[i]], "lastDependencyInjectionEngineReloadDateTime")>
 		<td>
 			<p>
 				<view:a event="config.reloadModuleDependencyInjectionEngine" p:moduleName="#variables.moduleOrder[i]#">
@@ -248,7 +249,7 @@ Notes:
 			<p>
 				<!--- Don't allow the dashboard to be disable from within itself --->
 				<cfif variables.moduleOrder[i] NEQ getAppManager().getModuleName()>
-					<cfif variables.moduleData[variables.moduleOrder[i]].enabled>
+					<cfif variables.moduleData[variables.moduleOrder[i]].showInDashboard>
 						<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="disable">
 							<span class="green">
 								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
@@ -281,23 +282,32 @@ Notes:
 			</p>
 		</td>
 		<td>
-			<!--- The _ is important or we get errors --->
-			<cftry>
-				<cfset variables._appManager = getAppManager().getModuleManager().getModule(variables.moduleOrder[i], true).getModuleAppManager() />
-				<table class="small">
-					<tr>
-						<td style="width:50%;"><h4>Environment Name</h4></td>
-						<td style="width:50%;"><p>#variables._appManager.getEnvironmentName()#</p></td>
-					</tr>
-					<tr>
-						<td><h4>Environment Group</h4></td>
-						<td><p>#variables._appManager.getEnvironmentGroup()#</p></td>
-					</tr>
-				</table>
-				<cfcatch type="MachII.framework.ModuleFailedToLoad">
-					<p>n/a</p>
-				</cfcatch>
-			</cftry>
+			<cfif variables.moduleData[variables.moduleOrder[i]].showInDashboard>
+				<!--- The _ is important or we get errors --->
+				<cftry>
+					<cfset variables._appManager = getAppManager().getModuleManager().getModule(variables.moduleOrder[i], true).getModuleAppManager() />
+					<table class="small">
+						<tr>
+							<td style="width:50%;"><h4>Environment Name</h4></td>
+							<td style="width:50%;"><p>#variables._appManager.getEnvironmentName()#</p></td>
+						</tr>
+						<tr>
+							<td><h4>Environment Group</h4></td>
+							<td><p>#variables._appManager.getEnvironmentGroup()#</p></td>
+						</tr>
+					</table>
+					<cfcatch type="MachII.framework.ModuleFailedToLoad">
+						<p>n/a</p>
+					</cfcatch>
+				</cftry>
+			<cfelse>
+					<table class="small">
+						<tr>
+							<td style="width:50%;"><h4>Lazy Load</h4></td>
+							<td style="width:50%;"><p>#variables.moduleData[variables.moduleOrder[i]].lazyLoad#</p></td>
+						</tr>
+					</table>
+			</cfif>
 		</td>
 	</tr>
 	<cfif isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>

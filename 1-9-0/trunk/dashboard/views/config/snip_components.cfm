@@ -217,7 +217,7 @@ Notes:
 <cfset variables.moduleComponentData = event.getArg("moduleComponentData") />
 
 <cfloop from="1" to="#ArrayLen(variables.moduleOrder)#" index="j">
-	<cfif variables.moduleData[variables.moduleOrder[j]].enabled>
+	<cfif StructKeyExists(variables.moduleComponentData, variables.moduleOrder[j])>
 		<h2 style="margin:1em 0 3px 0;">#UCase(Left(variables.moduleOrder[j], 1))##Right(variables.moduleOrder[j], Len(variables.moduleOrder[j]) -1)# Module</h2>
 		<table>
 			<tr>

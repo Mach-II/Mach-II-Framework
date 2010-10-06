@@ -78,15 +78,24 @@ Notes:
 		<cfset var hasModuleErrors = false />
 
 		<cfloop collection="#modules#" item="i">
-			<cfset moduleData[modules[i].getModuleName()]["lastReloadDateTime"] = modules[i].getModuleAppManager().getAppLoader().getLastReloadDatetime() />
-			<cfset moduleData[modules[i].getModuleName()]["shouldReloadConfig"] = modules[i].getModuleAppManager().getAppLoader().shouldReloadConfig() />
-			<cfset moduleData[modules[i].getModuleName()]["appManager"] = modules[i].getModuleAppManager() />
 			<cfset moduleData[modules[i].getModuleName()]["enabled"] = modules[i].isEnabled() />
+			<cfset moduleData[modules[i].getModuleName()]["lazyload"] = modules[i].getLazyLoad() />
+			<cfset moduleData[modules[i].getModuleName()]["loaded"] = modules[i].isLoaded() />
 			<cfset moduleData[modules[i].getModuleName()]["loadException"] = modules[i].getLoadException() />
 			<cfif isObject(moduleData[modules[i].getModuleName()]["loadException"])>
 				<cfset hasModuleErrors = true />
 			</cfif>
-			<cfset dependencyInjectionEngineProperty = getProperty("udfs").findPropertyByType("MachII.properties.ColdspringProperty", modules[i].getModuleAppManager().getPropertyManager()) />
+
+			<cfif modules[i].isEnabled() AND modules[i].isLoaded()>
+				<cfset moduleData[modules[i].getModuleName()]["showInDashboard"]= true />
+				<cfset moduleData[modules[i].getModuleName()]["lastReloadDateTime"] = modules[i].getModuleAppManager().getAppLoader().getLastReloadDatetime() />
+				<cfset moduleData[modules[i].getModuleName()]["shouldReloadConfig"] = modules[i].getModuleAppManager().getAppLoader().shouldReloadConfig() />
+				<cfset moduleData[modules[i].getModuleName()]["appManager"] = modules[i].getModuleAppManager() />
+				<cfset dependencyInjectionEngineProperty = getProperty("udfs").findPropertyByType("MachII.properties.ColdspringProperty", modules[i].getModuleAppManager().getPropertyManager()) />
+			<cfelse>
+				<cfset moduleData[modules[i].getModuleName()]["showInDashboard"]= false />
+			</cfif>
+			
 			<!--- Only grab this data if this module has a dependency injection engine property --->
 			<cfif IsObject(dependencyInjectionEngineProperty)>
 				<cfset moduleData[modules[i].getModuleName()]["lastDependencyInjectionEngineReloadDateTime"] = dependencyInjectionEngineProperty.getLastReloadDatetime() />
@@ -137,7 +146,9 @@ Notes:
 		<cfset var i = "" />
 
 		<cfloop collection="#modules#" item="i">
-			<cfset data[modules[i].getModuleName()] = getComponentDataByAppManager(modules[i].getModuleAppManager()) />
+			<cfif modules[i].isEnabled() AND NOT modules[i].getLazyLoad()>
+				<cfset data[modules[i].getModuleName()] = getComponentDataByAppManager(modules[i].getModuleAppManager()) />
+			</cfif>
 		</cfloop>
 
 		<cfreturn data />
