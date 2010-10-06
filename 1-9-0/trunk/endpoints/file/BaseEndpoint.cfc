@@ -139,11 +139,6 @@ Configuration Notes:
 		<cfset buildFileSettingsMap() />
 		<cfset buildCfmSafeMap() />
 	</cffunction>
-
-	<cffunction name="deconfigure" access="public" returntype="void" output="false"
-		hint="Deconfigures the file serve endpoint.">
-		<!--- Does nothing --->
-	</cffunction>
 	
 	<cffunction name="buildFileSettingsMap" access="private" returntype="void" output="false"
 		hint="Builds the file settings map for expire and attachment settings by file type.">
