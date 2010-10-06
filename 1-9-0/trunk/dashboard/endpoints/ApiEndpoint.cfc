@@ -51,7 +51,8 @@ Notes:
 <cfcomponent displayname="ApiEndpoint"
 	extends="MachII.endpoints.rest.BaseEndpoint"
 	hint="An endpoint that provides a REST API to dashboard functionality."
-	output="false">
+	output="false"
+	rest:authenticate="true">
 
 	<!---
 	PROPERTIES
@@ -72,14 +73,14 @@ Notes:
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
-	<cffunction name="preProcess" access="public" returntype="void" output="true"
-		hint="Runs when an endpoint request begins.">
+	<cffunction name="onAuthenticate" access="public" returntype="void" output="true"
+		hint="Runs authentication.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-
-		<cfset super.preProcess(arguments.event) />
+		
+		<cfset var restUri = arguments.event.getArg("restUri") />
 		
 		<!--- Authenticate the request via HTTP basic authentication --->
-		<cfif NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
+		<cfif restUri.getUriMetadataParameter("authenticate", getAuthenticateDefault()) AND NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
 			<cfoutput><cfinclude template="/MachII/dashboard/endpoints/Unauthorized.cfm" /></cfoutput>
 			<!--- This is the one time we don't want the endpoint exception handling to process --->
 			<cfabort>

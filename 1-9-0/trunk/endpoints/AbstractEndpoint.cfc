@@ -167,7 +167,7 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 	
-	<cffunction name="onAutenticate" access="public" returntype="void" output="false"
+	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Runs when an endpoint authentication is required. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfabort showerror="This method is abstract and must be overridden." />

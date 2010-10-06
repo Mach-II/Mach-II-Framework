@@ -78,25 +78,29 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!--- uriRegex & uriTokenNames are only set internally, generated when setUriPattern() is called --->
 	<cfset variables.uriRegex = "" />
 	<cfset variables.uriTokenNames = ArrayNew(1) />
+	<cfset variables.uriMetadataParameters = StructNew() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="Uri" output="false"
 		hint="Initializes the Uri.">
-		<cfargument name="uriPattern" type="String" required="false" default=""
+		<cfargument name="uriPattern" type="string" required="false" default=""
 			hint="The URI pattern to be used for this endpoint route." />
-		<cfargument name="httpMethod" type="String" required="false" default=""
+		<cfargument name="httpMethod" type="string" required="false" default=""
 			hint="The HTTP method to be used for this endpoint route." />
-		<cfargument name="functionName" type="String" required="false" default=""
+		<cfargument name="functionName" type="string" required="false" default=""
 			hint="The name of the function to call when this endpoint route is invoked" />
-		<cfargument name="uriPrefix" type="String" required="false" default=""
+		<cfargument name="uriPrefix" type="string" required="false" default=""
 			hint="The name of the URI prefiex." />
+		<cfargument name="uriMetadataParameters" type="struct" required="false" default="#StructNew()#"
+			hint="Any metadata for the URI being defined." />
 
 		<cfset setHttpMethod(arguments.httpMethod) />
 		<cfset setFunctionName(arguments.functionName) />
 		<cfset setUriPrefix(arguments.uriPrefix) />
 		<cfset setUriPattern(arguments.uriPattern) />
+		<cfset setUriMetadataParameters(arguments.uriMetadataParameters) />
 
 		<cfreturn this />
 	</cffunction>
@@ -148,6 +152,41 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfargument name="pathInfo" type="string" required="true" />
 		<cfreturn REFind(variables.uriRegex, arguments.pathInfo, 1, false) />
 	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - UTILS
+	--->
+	<cffunction name="setUriMetadataParameter" access="public" returntype="void" output="false"
+		hint="Sets an URI metadata parameter.">
+		<cfargument name="name" type="string" required="true"
+			hint="The parameter name." />
+		<cfargument name="value" type="any" required="true"
+			hint="The parameter value." />
+		<cfset variables.uriMetadataParameters[arguments.name] = arguments.value />
+	</cffunction>
+	<cffunction name="getUriMetadataParameter" access="public" returntype="any" output="false"
+		hint="Gets an URI metadata parameter value, or a default value if not defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The URI metadata parameter name." />
+		<cfargument name="defaultValue" type="any" required="false" default=""
+			hint="The default value to return if the parameter is not defined. Defaults to a blank string." />
+		<cfif isUriMetadataParameterDefined(arguments.name)>
+			<cfreturn variables.uriMetadataParameters[arguments.name] />
+		<cfelse>
+			<cfreturn arguments.defaultValue />
+		</cfif>
+	</cffunction>
+	<cffunction name="isUriMetadataParameterDefined" access="public" returntype="boolean" output="false"
+		hint="Checks to see whether or not a configuration parameter is defined.">
+		<cfargument name="name" type="string" required="true"
+			hint="The URI metadata name." />
+		<cfreturn StructKeyExists(variables.uriMetadataParameters, arguments.name) />
+	</cffunction>
+	<cffunction name="getUriMetadataParameterNames" access="public" returntype="string" output="false"
+		hint="Returns a comma delimited list of URI metadata names.">
+		<cfreturn StructKeyList(variables.uriMetadataParameters) />
+	</cffunction>
+
 
 	<!---
 	PROTECTED FUNCTIONS
@@ -311,6 +350,22 @@ For example, a uriPattern like "/service/doit/{value}"
 	</cffunction>
 	<cffunction name="getUriRegex" access="public" returntype="string" output="false">
 		<cfreturn variables.uriRegex />
+	</cffunction>
+	
+	<cffunction name="setUriMetadataParameters" access="public" returntype="void" output="false"
+		hint="Sets the full set of URI metadata parameters for this URI.">
+		<cfargument name="uriMetadataParameters" type="struct" required="true"
+			hint="Struct to set as URI metadata parameters" />
+
+		<cfset var key = "" />
+
+		<cfloop collection="#arguments.uriMetadataParameters#" item="key">
+			<cfset setUriMetadataParameter(key, arguments.uriMetadataParameters[key]) />
+		</cfloop>
+	</cffunction>
+	<cffunction name="getUriMetadataParameters" access="public" returntype="struct" output="false"
+		hint="Gets the full set of URI metadata parameters for this URI.">
+		<cfreturn variables.uriMetadataParameters />
 	</cffunction>
 
 </cfcomponent>
