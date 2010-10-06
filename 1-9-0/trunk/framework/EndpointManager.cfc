@@ -70,6 +70,7 @@ Notes:
 	--->
 	<cfset variables.ENDPOINT_SHORTCUTS = StructNew() />
 	<cfset variables.ENDPOINT_SHORTCUTS["file"] = "MachII.endpoints.file.BaseEndpoint" />
+	<cfset variables.ENDPOINT_STOP_CLASS = "MachII.endpoints.AbstractEndpoint" />
 
 	<!---
 	INITIALIZATION/CONFIGURATION
@@ -244,6 +245,10 @@ Notes:
 				<cfset endpoint.preProcess(event) />
 			</cfif>
 
+			<cfif endpoint.isOnAuthenticateDefined()>
+				<cfset endpoint.onAuthenticate(event) />
+			</cfif>
+
 			<cfset endpoint.handleRequest(event) />
 
 			<cfif endpoint.isPostProcessDefined()>
@@ -376,8 +381,9 @@ Notes:
 			</cfcatch>
 		</cftry>
 
-		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
-		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, "MachII.endpoints.AbstractEndpoint"))) />
+		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, variables.ENDPOINT_STOP_CLASS))) />
+		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, variables.ENDPOINT_STOP_CLASS))) />
+		<cfset endpoint.setIsOnAuthenticateDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onAuthenticate"', true, variables.ENDPOINT_STOP_CLASS))) />
 
 		<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(endpoint, arguments.endpointType, arguments.endpointParameters) />
 		<cfset endpoint.setProxy(baseProxy) />

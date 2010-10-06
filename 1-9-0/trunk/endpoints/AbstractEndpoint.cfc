@@ -64,9 +64,11 @@ Notes:
 	<cfset variables.componentNameForLogging = "" />
 	<cfset variables.endpointManager = "" />
 	
+	<cfset variables.enableThrow = false />
+	<cfset variables.throwTemplate = "/MachII/endpoints/defaultThrowTemplate.cfm" />
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
-	<cfset variables.onExceptionDefined = false />
+	<cfset variables.isOnAuthenticateDefined = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -78,7 +80,7 @@ Notes:
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
 		
-		<cfset var temp = "" />
+		<cfset var defaultEnableThrow = StructNew() />
 
 		<!--- Run setters --->
 		<cfset setAppManager(arguments.appManager) />
@@ -91,16 +93,24 @@ Notes:
 		<cfset setLog(getAppManager().getLogFactory()) />
 
 		<!--- Setup required default parameters --->
-		<cfif NOT isParameterDefined("enableThrow")>
-			<cfset temp = StructNew() />
-			<cfset temp["group:development"] = true />
-			<cfset temp["group:local"] = true />
-			<cfset setParameter("enableThrow", temp) />
+		<cfif isParameterDefined("enableThrow") AND getAssert().isTrue(IsBoolean(getParameter("enableThrow")) OR IsStruct(getParameter("enableThrow"))
+				, "Invalid enableThrow."
+				, "Must be boolean or struct of environments.")>
+			<cfif IsStruct(getParameter("enableThrow"))>
+				<cfset setEnableThrow(resolveValueByEnvironment(getParameter("enableThrow"))) />
+			<cfelse>
+				<cfset setEnableThrow(getParameter("enableThrow", false)) />
+			</cfif>
+		<cfelse>
+			<cfset defaultEnableThrow["group:development"] = true />
+			<cfset defaultEnableThrow["group:local"] = true />
+			<cfset setEnableThrow(resolveValueByEnvironment(defaultEnableThrow)) />
 		</cfif>
-		<cfset setParameter("enableThrow", resolveValueByEnvironment(getParameter("enableThrow"), "false")) />
 		
-		<cfif NOT isParameterDefined("throwTemplate")>
-			<cfset setParameter("throwTemplate", "/MachII/endpoints/defaultThrowTemplate.cfm") />
+		<cfif isParameterDefined("throwTemplate") AND getAssert().hasText(getParameter("throwTemplate")
+				, "Invalid throwTemplate."
+				, "Must be path to throw template.")>
+			<cfset setThrowTemplate(getParameter("throwTemplate")) />
 		</cfif>
 
 		<cfreturn this />
@@ -156,6 +166,12 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
+	
+	<cffunction name="onAutenticate" access="public" returntype="void" output="false"
+		hint="Runs when an endpoint authentication is required. Override to provide custom functionality.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfabort showerror="This method is abstract and must be overridden." />
+	</cffunction>
 
 	<cffunction name="onException" access="public" returntype="void" output="true"
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
@@ -164,9 +180,9 @@ Notes:
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 		
 		<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
-		<cfif arguments.event.isArgDefined("throw") AND getParameter("enableThrow")>
+		<cfif arguments.event.isArgDefined("throw") AND getEnableThrow()>
 			<cfheader statuscode="500" statustext="Error" />
-			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="#getParameter("throwTemplate")#" /></cfoutput><cfsetting enablecfoutputonly="true" />
+			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="#getThrowTemplate()#" /></cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfheader statuscode="500" statustext="Error" />
@@ -588,6 +604,22 @@ Notes:
 
 		<cfreturn resolvedParameters />
 	</cffunction>
+	
+	<cffunction name="setEnableThrow" access="public" returntype="void" output="false">
+		<cfargument name="enableThrow" type="boolean" required="true" />
+		<cfset variables.enableThrow = arguments.enableThrow />
+	</cffunction>
+	<cffunction name="getEnableThrow" access="public" returntype="boolean" output="false">
+		<cfreturn variables.enableThrow />
+	</cffunction>
+
+	<cffunction name="setThrowTemplate" access="public" returntype="void" output="false">
+		<cfargument name="throwTemplate" type="string" required="true" />
+		<cfset variables.throwTemplate = arguments.throwTemplate />
+	</cffunction>
+	<cffunction name="getThrowTemplate" access="public" returntype="string" output="false">
+		<cfreturn variables.throwTemplate />
+	</cffunction>
 
 	<cffunction name="setIsPreProcessDefined" access="public" returntype="void" output="false">
 		<cfargument name="isPreProcessDefined" type="boolean" required="true" />
@@ -603,6 +635,14 @@ Notes:
 	</cffunction>
 	<cffunction name="isPostProcessDefined" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isPostProcessDefined />
+	</cffunction>
+	
+	<cffunction name="setIsOnAuthenticateDefined" access="public" returntype="void" output="false">
+		<cfargument name="isOnAuthenticateDefined" type="boolean" required="true" />
+		<cfset variables.isOnAuthenticateDefined = arguments.isOnAuthenticateDefined />
+	</cffunction>
+	<cffunction name="isOnAuthenticateDefined" access="public" returntype="boolean" output="false">
+		<cfreturn variables.isOnAuthenticateDefined />
 	</cffunction>
 
 </cfcomponent>
