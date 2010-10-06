@@ -189,6 +189,8 @@ Notes:
 		<cfset assertEquals("/test/../something", variables.utils.cleanPathInfo("/test/%2e%2e/something", "")) />
 		<!--- Check that IIS6 bug "/index.cfm/test/something" --->
 		<cfset assertEquals("/test/something", variables.utils.cleanPathInfo("index.cfm/test/something", "index.cfm")) />
+		<!--- Check to see if URL decoding is off --->
+		<cfset assertEquals("/test/%2e%2e/something", variables.utils.cleanPathInfo("/test/%2e%2e/something", "", false)) />
 	</cffunction>
 	
 	<cffunction name="testCreateDatetimeFromHttpTimeString" access="public" returntype="void" output="false"

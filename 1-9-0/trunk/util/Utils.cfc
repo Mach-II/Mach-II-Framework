@@ -552,6 +552,8 @@ Notes:
 			hint="The path info to use usually the value from 'cgi.PATH_INFO'." />
 		<cfargument name="scriptName" type="string" required="true"
 			hint="The script name to use usually the value from 'cgi.SCRIPT_NAME'. This is required to fix IIS6 goofiness with path info." />
+		<cfargument name="urlDecode" type="boolean" required="false" default="true"
+			hint="Decides if the path info should be Url decoded. Defaults to true." />
 	
 		<cfset var cleanPathInfo = arguments.pathInfo />
 
@@ -559,8 +561,12 @@ Notes:
 		<cfif Len(arguments.scriptName) AND cleanPathInfo.toLowerCase().startsWith(arguments.scriptName.toLowerCase())>
 			<cfset cleanPathInfo = ReplaceNoCase(cleanPathInfo, arguments.scriptName, "", "one") />
 		</cfif>
-
-		<cfreturn UrlDecode(cleanPathInfo) />
+		
+		<cfif arguments.urlDecode>
+			<cfreturn UrlDecode(cleanPathInfo) />
+		<cfelse>
+			<cfreturn cleanPathInfo />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="createDatetimeFromHttpTimeString" access="public" returntype="date" output="false"

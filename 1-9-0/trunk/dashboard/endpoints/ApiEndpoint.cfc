@@ -72,7 +72,7 @@ Notes:
 
 	<!---
 	PUBLIC METHODS - REQUEST
-	--->
+	
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="true"
 		hint="Runs authentication.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -85,7 +85,7 @@ Notes:
 			<!--- This is the one time we don't want the endpoint exception handling to process --->
 			<cfabort>
 		</cfif>
-	</cffunction>
+	</cffunction>--->
 
 	<!---
 	PUBLIC METHODS - REST
@@ -93,7 +93,7 @@ Notes:
 	<cffunction name="temp" access="public" returntype="string" output="false"
 		hint="Temp testing method. To be removed"
 		rest:uri="/temp"
-		rest:method="GET">
+		rest:method="PUT">
 		
 		<cfreturn "temp" />
 	</cffunction>

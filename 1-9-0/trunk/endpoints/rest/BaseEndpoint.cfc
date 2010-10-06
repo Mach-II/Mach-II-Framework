@@ -146,8 +146,9 @@ To Test it out, do the following:
 		hint="Runs when an endpoint request begins. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
-		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME) />
-		<cfset var httpMethod = CGI.REQUEST_METHOD />
+		<!--- Don't get cleaned path info that is urlDecoded --->
+		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME, false) />
+		<cfset var httpMethod = discoverHttpMethod(arguments.event) />
 		<cfset var restUri = "" />
 
 		<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
@@ -271,6 +272,21 @@ To Test it out, do the following:
 		</cfif>
 
 		<cfreturn rawContent />
+	</cffunction>
+	
+	<cffunction name="discoverHttpMethod" access="private" returntype="string" output="false"
+		hint="Discovers the http method by event-arg '_method', then 'x-http-method-override' header and finally cgi.REQUEST_METHOD.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfset var headers = GetHttpRequestData().headers />
+		
+		<cfif arguments.event.isArgDefined("_method")>
+			<cfreturn arguments.event.getArg("_method") />
+		<cfelseif StructKeyExists(headers, "x-http-method-override")>
+			<cfreturn headers["x-http-method-override"] />
+		<cfelse>
+			<cfreturn cgi.REQUEST_METHOD />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="setupRestComponent" access="private" returntyp="void" output="false"
