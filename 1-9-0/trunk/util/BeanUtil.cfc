@@ -244,7 +244,12 @@ This utility is thread-safe (no instance data) and can be used as a singleton.
 				<cfinvoke component="#arguments.bean#"
 					method="#metaFunction.name#"
 					returnVariable="fieldValue" />
-				<cfset map[fieldName] = fieldValue />
+				<!--- Adobe CF 9's ORM support returns nulls by default --->
+				<cfif isDefined("fieldValue")>
+					<cfset map[fieldName] = fieldValue />
+				<cfelse>
+					<cfset map[fieldName] = "" />
+				</cfif>
 			</cfif>
 		</cfloop>
 
