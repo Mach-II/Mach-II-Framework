@@ -313,6 +313,7 @@ Configuration Notes:
 		<cfset var fileName = "" />
 		<cfset var fileExtension = ListFirst(ListLast(arguments.file, "."), ":") />
 		<cfset var queryString = "" />
+		<cfset var assetTimestamp = "" />
 
 		<cfif NOT getProperty("urlParseSES")>
 			<cfset builtUrl = urlBase />
@@ -349,7 +350,10 @@ Configuration Notes:
 		</cfif>
 		
 		<cfif (StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR (NOT StructKeyExists(variables.timestampMap, fileExtension) AND getTimestampDefault())>
-			<cfset queryString = ListAppend(queryString, fetchAssetTimestamp(ListFirst(arguments.file, ":")), "&") />
+			<cfset assetTimestamp = fetchAssetTimestamp(ListFirst(arguments.file, ":")) />
+			<cfif assetTimestamp NEQ 0>
+				<cfset queryString = ListAppend(queryString, assetTimestamp, "&") />
+			</cfif>
 		</cfif>
 
 		<!--- Append query string if any optional parameters were construct --->
@@ -516,7 +520,8 @@ Configuration Notes:
 		<cfdirectory name="directoryResults"
 			action="list"
 			directory="#GetDirectoryFromPath(fullPath)#"
-			filter="#GetFileFromPath(fullPath)#" />
+			filter="#GetFileFromPath(fullPath)#"
+			type="file" />
 		
 		<!--- Convert current time to UTC because epoch is essentially UTC --->
 		<cfif directoryResults.recordcount EQ 1>
