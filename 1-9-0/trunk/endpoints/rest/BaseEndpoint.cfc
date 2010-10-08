@@ -280,6 +280,7 @@ To Test it out, do the following:
 		
 		<cfset var headers = GetHttpRequestData().headers />
 		
+		<!--- Order of evaluation is important --->
 		<cfif arguments.event.isArgDefined("_method")>
 			<cfreturn arguments.event.getArg("_method") />
 		<cfelseif StructKeyExists(headers, "x-http-method-override")>
