@@ -416,6 +416,10 @@ Notes:
 			<notify listener="tools.scribble" method="cleanup"/>
 		</event-handler>
 		
+		<event-handler event="js.tools.scribble.processPasteBin" access="public">
+			<notify listener="tools.scribble" method="processPasteBin"/>
+		</event-handler>
+		
 		<!-- sys -->
 		<event-handler event="sys.login" access="private">
 			<event-arg name="suppressHeadElements" value="true"/>
