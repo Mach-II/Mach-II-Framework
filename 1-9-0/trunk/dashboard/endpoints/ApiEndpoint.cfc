@@ -73,7 +73,7 @@ Notes:
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
-	<cffunction name="onAuthenticate" access="public" returntype="void" output="true"
+	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Runs authentication.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
@@ -81,9 +81,25 @@ Notes:
 		
 		<!--- Authenticate the request via HTTP basic authentication --->
 		<cfif restUri.getUriMetadataParameter("authenticate", getAuthenticateDefault()) AND NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
-			<cfoutput><cfinclude template="/MachII/security/http/basic/defaultUnauthorized.cfm" /></cfoutput>
-			<!--- This is the one time we don't want the endpoint exception handling to process --->
-			<cfabort>
+			<cfthrow type="MachII.dashboard.endpoints.notAuthorized"
+				message="Bad credentials." />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="onException" access="public" returntype="void" output="true"
+		hint="Runs when an exception occurs in the endpoint.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="exception" type="MachII.util.Exception" required="true"
+			hint="The Exception that was thrown/caught by the endpoint request processor." />
+		
+		<!--- Handle notFound --->
+		<cfif arguments.exception.getType() EQ "MachII.dashboard.endpoints.notAuthorized">
+			<cfset addHTTPHeaderByStatus(401) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="/MachII/security/http/basic/defaultUnauthorized.cfm" /></cfoutput><cfsetting enablecfoutputonly="true" />
+		<!--- Default exception handling --->
+		<cfelse>
+			<cfset super.onException(arguments.event, arguments.exception) />
 		</cfif>
 	</cffunction>
 
