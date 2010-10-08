@@ -179,6 +179,14 @@ wire in plain text.
 	</cffunction>
 	<cffunction name="getRealm" access="public" returntype="string" output="false">
 		<cfreturn variables.realm />
+	</cffunction>
+	
+	<cffunction name="setCredentials" access="public" returntype="void" output="false">
+		<cfargument name="credentials" type="struct" required="true" />
+		<cfset variables.credentials = arguments.credentials />
+	</cffunction>
+	<cffunction name="getCredentials" access="public" returntype="struct" output="false">
+		<cfreturn variables.credentials />
 	</cffunction>	
 
 </cfcomponent>

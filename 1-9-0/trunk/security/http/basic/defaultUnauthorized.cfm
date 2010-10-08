@@ -6,6 +6,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   </head>
 	<body>
-		<h1>401 Unauthorized - Bad Credentials for Dashboard API</h1>
+		<h1>401 Unauthorized - Bad Credentials</h1>
 	</body>
 </html>

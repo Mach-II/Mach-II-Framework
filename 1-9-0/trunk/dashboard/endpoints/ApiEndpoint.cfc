@@ -72,7 +72,7 @@ Notes:
 
 	<!---
 	PUBLIC METHODS - REQUEST
-	
+	--->
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="true"
 		hint="Runs authentication.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -81,11 +81,11 @@ Notes:
 		
 		<!--- Authenticate the request via HTTP basic authentication --->
 		<cfif restUri.getUriMetadataParameter("authenticate", getAuthenticateDefault()) AND NOT variables.authentication.authenticate(getHTTPRequestData().headers)>
-			<cfoutput><cfinclude template="/MachII/dashboard/endpoints/Unauthorized.cfm" /></cfoutput>
+			<cfoutput><cfinclude template="/MachII/security/http/basic/defaultUnauthorized.cfm" /></cfoutput>
 			<!--- This is the one time we don't want the endpoint exception handling to process --->
 			<cfabort>
 		</cfif>
-	</cffunction>--->
+	</cffunction>
 
 	<!---
 	PUBLIC METHODS - REST
