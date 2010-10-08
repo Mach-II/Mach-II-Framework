@@ -130,6 +130,7 @@ Notes:
 		<cfset var scheduleTaskService = createObject("component", "bluedragon.adminapi.ScheduledTasks") />
 		<cfset var rawTasks = "" />
 		<cfset var results = StructNew() />
+		<cfset var taskName = "" />
 		<cfset var i = 0 />
 		
 		<cftry>
