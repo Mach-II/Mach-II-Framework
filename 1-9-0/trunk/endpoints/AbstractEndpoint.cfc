@@ -183,12 +183,12 @@ Notes:
 		
 		<!--- Optional "throw" parameter can cause the full exception to be rendered in the browser. --->
 		<cfif arguments.event.isArgDefined("throw") AND getEnableThrow()>
-			<cfheader statuscode="500" statustext="Error" />
+			<cfset addHTTPHeaderByStatus(500) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="#getThrowTemplate()#" /></cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
-			<cfheader statuscode="500" statustext="Error" />
-			<cfheader name="machii.endpoint.error" value="Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception." />
+			<cfset addHTTPHeaderByStatus(500) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", "Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.") />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
 			<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(arguments.exception.getCaughtException()), arguments.exception.getCaughtException()) />
 		</cfif>

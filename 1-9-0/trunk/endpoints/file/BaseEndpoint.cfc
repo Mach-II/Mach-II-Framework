@@ -290,12 +290,33 @@ Configuration Notes:
 			<cfif StructKeyExists(variables.cfmSafeMap, arguments.event.getArg("file")) OR StructKeyExists(variables.cfmSafeMap, "*")>
 				<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
 			<cfelse>
-				<cfheader statuscode="401" statustext="Not Authorized" />
-				<cfthrow type="MachII.endpoints.file.notAuthorized" 
+				<cfthrow type="MachII.endpoints.file.cfmNotAuthorized" 
 					message="The file path '#arguments.event.getArg("file")#' is not an allowed .cfm file." />
 			</cfif>
 		<cfelse>
 			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="onException" access="public" returntype="void" output="true"
+		hint="Runs when an exception occurs in the endpoint.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="exception" type="MachII.util.Exception" required="true"
+			hint="The Exception that was thrown/caught by the endpoint request processor." />
+		
+		<!--- Handle notFound --->
+		<cfif arguments.exception.getType() EQ "MachII.endpoints.file.notFound">
+			<cfset addHTTPHeaderByStatus(404) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<!--- Handle cfmNotAuthorized --->
+		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.file.cfmNotAuthorized">
+			<cfset addHTTPHeaderByStatus(401) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>401 Not Authorized- #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<!--- Default exception handling --->
+		<cfelse>
+			<cfset super.onException(arguments.event, arguments.exception) />
 		</cfif>
 	</cffunction>
 	
@@ -386,12 +407,15 @@ Configuration Notes:
 		<cfdirectory name="fileInfo" 
 			action="list" 
 			directory="#getDirectoryFromPath(ExpandPath(fileFullPath))#" 
-			filter="#getFileFromPath(ExpandPath(fileFullPath))#" />
+			filter="#getFileFromPath(ExpandPath(fileFullPath))#"
+			type="file" />
 
 		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
-		<cfset getAssert().isTrue(fileInfo.recordcount EQ 1
-				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				, "File path: '#getFileFromPath(fileFullPath)#'") />
+		<cfif fileInfo.recordcount NEQ 1>
+			<cfthrow type="MachII.endpoints.file.notFound" 
+				message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
+				detail="File path: '#getFileFromPath(fileFullPath)#'." />
+		</cfif>
 	
 		<cfset addHTTPHeaderByName("Content-Type", contentType) />
 
@@ -429,12 +453,15 @@ Configuration Notes:
 		<cfdirectory name="fileInfo" 
 			action="list" 
 			directory="#getDirectoryFromPath(fileFullPath)#" 
-			filter="#getFileFromPath(fileFullPath)#" />
+			filter="#getFileFromPath(fileFullPath)#"
+			type="file" />
 		
 		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
-		<cfset getAssert().isTrue(fileInfo.recordcount EQ 1
-				, "Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				, "File path: '#getFileFromPath(fileFullPath)#'") />
+		<cfif fileInfo.recordcount NEQ 1>
+			<cfthrow type="MachII.endpoints.file.notFound" 
+				message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
+				detail="File path: '#getFileFromPath(fileFullPath)#'." />
+		</cfif>
 
 		<cfset addHTTPHeaderByName("Content-Length", fileInfo.size) />
 		
