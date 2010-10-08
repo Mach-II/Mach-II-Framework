@@ -197,6 +197,20 @@ Notes:
 		hint="Test createDatetimeFromHttpTimeString()">
 		<cfset assertEquals(CreateDateTime("2010", "8", "11", "17", "58", "48"), variables.utils.createDatetimeFromHttpTimeString("11 Aug 2010 17:58:48 GMT")) />
 	</cffunction>
+
+	<cffunction name="testConvertTimespanStringToSeconds" access="public" returntype="void" output="false"
+		hint="Test convertTimespanStringToSeconds()">
+		<!--- Zero --->
+		<cfset assertEquals(0, variables.utils.convertTimespanStringToSeconds("0,0,0,0")) />
+		<!--- Minute --->
+		<cfset assertEquals(60, variables.utils.convertTimespanStringToSeconds("0,0,1,0")) />
+		<!--- Hour --->
+		<cfset assertEquals(3600, variables.utils.convertTimespanStringToSeconds("0,1,0,0")) />
+		<!--- Day --->
+		<cfset assertEquals(86400, variables.utils.convertTimespanStringToSeconds("1,0,0,0")) />
+		<!--- Year --->
+		<cfset assertEquals(31536000, variables.utils.convertTimespanStringToSeconds("365,0,0,0")) />
+	</cffunction>
 	
 	<cffunction name="testFilePathClean" access="public" returntype="void" output="false"
 		hint="Test filePathClean()">

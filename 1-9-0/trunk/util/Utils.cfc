@@ -590,6 +590,16 @@ Notes:
 		
 		<cfreturn CreateDatetime(rawArray[3], DateFormat("#rawArray[2]#/1/2000", "m"), rawArray[1], rawTimePart[1], rawTimePart[2], rawTimePart[3]) />
 	</cffunction>
+	
+	<cffunction name="convertTimespanStringToSeconds" access="public" returntype="numeric" output="false"
+		hint="Converts a timespan string (e.g. 0,0,0,0) into seconds.">
+		<cfargument name="timespanString" type="string" required="true"
+			hint="The input timespan string." />
+		
+		<cfset var timespan = CreateTimespan(ListGetAt(arguments.timespanString, 1), ListGetAt(arguments.timespanString, 2), ListGetAt(arguments.timespanString, 3), ListGetAt(arguments.timespanString, 4)) />
+
+		<cfreturn Round((timespan * 60) / 0.000694444444444) />
+	</cffunction>
 
 	<cffunction name="filePathClean" access="public" returntype="string" output="false"
 		hint="Clean the file path for directory transversal type attacks.">
