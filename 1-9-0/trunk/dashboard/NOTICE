@@ -63,6 +63,11 @@ http://creativecommons.org/licenses/by/2.5/
 Special thanks to Sascha Leib for providing the js.Dialog JavaScript Library
 This library is freely distributable under the terms of an MIT-style license.
 For details or updates, see http://code.kolmio.com/jsdialog
+---
+Special thanks to  Marijn Haverbeke and the contributors at CodeMirror for providing 
+the syntax highlighting and line numbering library. This library is freely 
+distributable under the terms of an zlib-style license. For details or 
+updates, see http://codemirror.net/
 ----
 Build JARs in the /build folder are licensed under there respective licenses.
 ----

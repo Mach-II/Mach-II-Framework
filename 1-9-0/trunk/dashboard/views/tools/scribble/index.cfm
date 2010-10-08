@@ -26,6 +26,15 @@ Notes:
 	<cfimport prefix="form" taglib="/MachII/customtags/form" />
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 	<view:meta type="title" content="Tools - Scribble Pad" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/lib/codemirror/js/codemirror.js" />
+	<view:style>
+		.CodeMirror-line-numbers {
+			font: 10pt monospace;
+			margin-top:5px;
+			background-color: #D0D0D0;
+			padding: 0 6px 0 6px;
+		}
+	</view:style>
 </cfsilent>
 <cfoutput>
 <h1>Scribble Pad</h1>
@@ -35,9 +44,34 @@ Notes:
 
 <form:form actionEvent="js.tools.scribble.process" id="processScribble">
 	<p>The scribble code is rendered within Mach-II. All function calls available in normal Mach-II views are available (e.g. <code>buildUrl()</code>, etc.).</p>
-	<p><form:textarea path="input" style="width:100%;margin-top:12px" rows="10" /></p>
+	<div style="border: 1px solid black; padding: 6px;">
+		<form:textarea name="code">
+&lt;html>
+  &lt;head>
+    &lt;title>HTML Example&lt;/title>
+  &lt;/head>
+  &lt;body>
+    &lt;p>Duh&lt;/p>
+  &lt;/body>
+&lt;/html>
+		</form:textarea>
+	</div>
 	<p class="right"><form:button /></p>
 </form:form>
+
+<view:script outputType="inline">
+  editor = CodeMirror.fromTextArea('code', {
+    height: "350px",
+     parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+    stylesheet: ["#BuildUnescapedEndpointUrl("dashboard.serveAsset", "file=/lib/codemirror/css/xmlcolors.css")#"
+		, "#BuildUnescapedEndpointUrl("dashboard.serveAsset", "file=/lib/codemirror/css/jscolors.css")#"
+		, "#BuildUnescapedEndpointUrl("dashboard.serveAsset", "file=/lib/codemirror/css/csscolors.css")#"
+		],
+	path: "#BuildUnescapedEndpointUrl("dashboard.serveAsset", "file=/lib/codemirror/js/")#",
+	lineNumbers: true,
+	textWrapping: false
+  });
+</view:script>
 
 <p class="clear" />
 
@@ -48,6 +82,7 @@ Notes:
 <view:script outputType="inline">
 	Event.observe('processScribble', 'submit', function(event) {
 	    Event.stop(event); // stop the form from submitting first in case we encounter an error
+	    
 	    $('processScribble').request({
 	    	parameters: {
 				evalJS: true
@@ -60,8 +95,6 @@ Notes:
 	        }
 	    });
 	});
-
-	new TextAreaResize('input');
 </view:script>
 <cfelse>
 	<h4>We are unable to write to a temp directory and therefore the scribble pad has been disabled.</h4>

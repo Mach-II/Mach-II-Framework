@@ -105,7 +105,7 @@ Notes:
 		hint="Process scribble pad form post.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var input = arguments.event.getArg("input") />
+		<cfset var input = arguments.event.getArg("code") />
 		<cfset var filePath = "" />
 		
 		<cfset arguments.event.setArg("renderType", getRenderType()) />
