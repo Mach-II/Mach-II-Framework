@@ -548,7 +548,6 @@ Configuration Notes:
 
 	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
 		<cfargument name="urlBase" type="string" required="true" />
-
 		<cfset variables.urlBase = arguments.urlBase />
 	</cffunction>
 	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
