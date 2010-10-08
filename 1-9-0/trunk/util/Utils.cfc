@@ -203,6 +203,33 @@ Notes:
 		<cfreturn threadingAdapter />
 	</cffunction>
 	
+	<cffunction name="createAdminApiAdapter" access="public" returntype="MachII.util.cfmlEngine.AdminApiAdapter" output="false"
+		hint="Creates an admin api adapter for the CFML engine.">
+
+		<cfset var adminApiAdapter = "" />
+		<cfset var engineInfo = getCfmlEngineInfo() />
+
+		<!--- Adobe ColdFusion 8+ --->
+		<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 8>
+			<cfset adminApiAdapter = CreateObject("component", "MachII.util.cfmlEngine.AdminApiAdapterCF").init() />
+		<!--- OpenBD 1.3+ (BlueDragon 7+ admin API is not currently implemented) --->
+		<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND engineInfo.majorVersion GTE 1 AND engineInfo.minorVersion GTE 3>
+			<cfset adminApiAdapter = CreateObject("component", "MachII.util.cfmlEngine.AdminApiAdapterBD").init() />
+		<!--- Railo 3
+		<cfelseif FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3>
+			<cfset adminApiAdapter = CreateObject("component", "MachII.util.cfmlEngine.AdminApiAdapterRA").init() /> --->
+		</cfif>
+
+		<!--- Test for admin api availability --->
+		<cfif NOT IsObject(adminApiAdapter)>
+			<cfthrow type="MachII.utils.NoAdminApiAdapterAvailable"
+				message="Cannot create an admin API adapter for the target system. No compatible adapter available."
+				detail="Engine Name: '#engineInfo.Name#', Major Version: '#engineInfo.majorVersion#', Minor Version: '#engineInfo.minorVersion#', Product Level: '#engineInfo.productLeve#'" />
+		</cfif>
+
+		<cfreturn adminApiAdapter />
+	</cffunction>
+	
 	<cffunction name="getCfmlEngineInfo" access="public" returntype="struct" output="false"
 		hint="Gets normalized information like the server name, product level and major/minor version numbers of the CFML engine.">
 
