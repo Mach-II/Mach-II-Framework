@@ -50,13 +50,18 @@ Notes:
 Configuration Notes:
 
 <endpoints>
-	<endpoint name="scheduledTasks" type="MachII.endpoints.schedule.BaseEndpoint">
+	<endpoint name="scheduledTasks" type="MachII.endpoints.task.BaseEndpoint">
 		<parameters>
 			<!--
 			Optional: The prefix to use in front of the task name when registering it with cfschedule
 			Default:  "{application.applicationName}_{endpointName}"
 			-->
 			<parameter name="taskNamePrefix" value="" />
+			<!--
+			Optional: THe base server and protocol to use for task url.
+			Default:  http://{cgi.server_name}
+			-->
+			<parameter name="server" value="" />
 			<!--
 			Optional: The basic HTTP access authentication user name.
 			Default: Auto-generated
@@ -90,7 +95,8 @@ Configuration Notes:
 	<cfset variables.ANNOTATION_TASK_REQUESTTIMEOUT = variables.ANNOTATION_TASK_BASE & ":REQUESTTIMEOUT" />
 	<cfset variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS = variables.ANNOTATION_TASK_BASE & ":ALLOWCONCURRENTEXECUTIONS" />
 	<cfset variables.ANNOTATION_TASK_RETRYONFAILURE = variables.ANNOTATION_TASK_BASE & ":RETRYONFAILURE" />
-	<cfset variables.STARTDATE_DEFAULT = "8/1/03" />
+	<cfset variables.STARTDATE_DEFAULT = "8/1/03" /><!--- The date of our first release which is sufficiently enough in the past --->
+	<cfset variables.REQUESTTIMEOUT_DEFAULT = 180 />
 
 	<!---
 	PROPERTIES
@@ -98,6 +104,8 @@ Configuration Notes:
 	<!--- Introspector looks for TASK:* annotations in child classes to find TASK-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.authentication = "" />
+	<cfset variables.urlBase = "" />
+	<cfset variables.server = "" />
 	<cfset variables.authUsername = "" />
 	<cfset variables.authPassword = "" />
 	<cfset variables.adminApi = "" />
@@ -108,11 +116,12 @@ Configuration Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the scheduled task endpoint. Override to provide custom functionality and call super.preProcess().">
+		hint="Configures the scheduled task endpoint. Override to provide custom functionality and call super.preProcess() last.">
 		
 		<!--- Default is "{applicationName}_{endpointName}" or "{userDefinedPrefix}" --->
 		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.applicationName & "_" & getParameter("name")) & "_") />
 		<cfset setUrlBase(getProperty("urlBase")) />
+		<cfset setServer(getParameter("server", cgi.server_name)) />
 
 		<!--- Setup default in parameters so if the endpoint is reloaded by dashboard they don't change --->
 		<cfif NOT IsParameterDefined("authUsername")>
@@ -125,9 +134,11 @@ Configuration Notes:
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
 		
-		<!--- Setup additional services --->
+		<!--- Setup authentication services --->
 		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init(application.applicationName & "Scheduled Tasks") />
 		<cfset variables.authentication.setCredentials(buildAuthCredentials()) />
+		
+		<!--- Get a CFML engine API engine adapter --->
 		<cfset variables.adminApi = getUtils().createAdminApiAdapter() />
 		
 		<!--- Setup the endpoint --->
@@ -138,16 +149,8 @@ Configuration Notes:
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
-	<cffunction name="preProcess" access="public" returntype="void" output="false"
-		hint="Executes the scheduled task pre-process.">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
-		<!--- Setup basic required request args --->
-		<cfset arguments.event.setArg("retryOnFailureCount", 0) />
-	</cffunction>
-	
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
-		hint="Authenticates the scheduled task request.">
+		hint="Authenticates the scheduled task request. Do not override this method.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<!--- All requests must be authenticated --->
@@ -158,14 +161,17 @@ Configuration Notes:
 	</cffunction>
 	
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
-		hint="Executes the scheduled task method.">
+		hint="Executes the scheduled task method. Do not override this method.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var taskName = arguments.event.getArg("task") />
 		<cfset var task = "" />
 		<cfset var aquiredLock = false />
 		<cfset var output = "" />
-		
+
+		<!--- Setup basic required request args --->
+		<cfset arguments.event.setArg("retryOnFailureCount", 0) />
+	
 		<!--- Check for a task that accepts requests from the outside (always check variables.tasks for security reasons) --->
 		<cfif StructKeyExists(variables.tasks, taskName)>
 			<cfset task = variables.tasks[taskName] />
@@ -194,7 +200,7 @@ Configuration Notes:
 	</cffunction>
 	
 	<cffunction name="onException" access="public" returntype="void" output="true"
-		hint="Runs when an exception occurs in the endpoint.">
+		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException(arguments.event, arguments.exception) last.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
@@ -314,8 +320,7 @@ Configuration Notes:
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_REQUESTTIMEOUT)>
 							<cfset taskMetadata.requestTimeout = currFunction[variables.ANNOTATION_TASK_REQUESTTIMEOUT] />
 						<cfelse>
-							<!--- TODO: Setup up default request timeout --->
-							<cfset taskMetadata.requestTimeout = 180 />
+							<cfset taskMetadata.requestTimeout = variables.REQUESTTIMEOUT_DEFAULT />
 						</cfif>
 
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS)>
@@ -357,9 +362,8 @@ Configuration Notes:
 		<cfloop collection="#variables.tasks#" item="key">
 			<cfset task = variables.tasks[key] />
 			
-			<!--- TODO: setting the server name like this is brittle and should be "auto-discovered" or configurable --->
 			<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
-												, "http://" & cgi.server_name & "/" & BuildEndpointUrl(task.name)
+												, getServer() & BuildEndpointUrl(task.name)
 												, task.interval
 												, task.startDate
 												, task.endDate
@@ -397,6 +401,22 @@ Configuration Notes:
 	</cffunction>
 	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
 		<cfreturn variables.urlBase />
+	</cffunction>
+	
+	<cffunction name="setServer" access="public" returntype="void" output="false">
+		<cfargument name="server" type="string" required="true" />
+		
+		<!--- Only set the server if url base does not have a full URL with server and protocal in it --->
+		<cfif NOT getUrlBase().startsWith("http://") OR NOT getUrlBase().startsWith("https://")>
+			<!--- Ensure an absolute path if to route bootstrapper file --->
+			<cfif NOT getUrlBase().startsWith("/")>
+				<cfset arguments.server = arguments.server & getDirectoryFromPath(cgi.scriptName) />
+			</cfif>
+			<cfset variables.server = arguments.server />
+		</cfif>
+	</cffunction>
+	<cffunction name="getServer" access="public" returntype="string" output="false">
+		<cfreturn variables.server />
 	</cffunction>
 	
 	<cffunction name="setAuthUsername" access="public" returntype="void" output="false">
