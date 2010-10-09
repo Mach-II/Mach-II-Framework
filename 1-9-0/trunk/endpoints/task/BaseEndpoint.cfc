@@ -46,11 +46,20 @@ $Id$
 Created version: 1.9.0
 
 Notes:
+Your concrete task implementation with extend this CFC:
+
+MachII.endpoints.task.BaseEndpoint
 
 Configuration Notes:
 
+Simple Configuration:
 <endpoints>
-	<endpoint name="scheduledTasks" type="MachII.endpoints.task.BaseEndpoint">
+	<endpoint name="scheduledTasks" type="path.to.you.TaskEndpoint" />
+</endpoints>
+
+Custom Configuration:
+<endpoints>
+	<endpoint name="scheduledTasks" type="path.to.you.TaskEndpoint">
 		<parameters>
 			<!--
 			Optional: The prefix to use in front of the task name when registering it with cfschedule
@@ -233,10 +242,6 @@ Configuration Notes:
 		
 		<cfreturn builtUrl />
 	</cffunction>
-	
-	<!---
-	PUBLIC METHODS - UTILS
-	--->
 	
 	<!---
 	PROTECTED METHODS
