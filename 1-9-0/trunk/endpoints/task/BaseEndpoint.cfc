@@ -69,11 +69,13 @@ Configuration Notes:
 	<!--- Constants for the annotations we allow in ScheduledTask sub-classes --->
 	<cfset variables.ANNOTATION_TASK_BASE = "TASK" />
 	<cfset variables.ANNOTATION_TASK_INTERVAL = variables.ANNOTATION_TASK_BASE & ":INTERVAL" />
-	<cfset variables.ANNOTATION_TASK_STARTDATETIME = variables.ANNOTATION_TASK_BASE & ":STARTDATETIME" />
-	<cfset variables.ANNOTATION_TASK_ENDDATETIME = variables.ANNOTATION_TASK_BASE & ":ENDDATETIME" />
+	<cfset variables.ANNOTATION_TASK_STARTDATE = variables.ANNOTATION_TASK_BASE & ":STARTDATE" />
+	<cfset variables.ANNOTATION_TASK_ENDDATE = variables.ANNOTATION_TASK_BASE & ":ENDDATE" />
+	<cfset variables.ANNOTATION_TASK_TIMEPERIOD = variables.ANNOTATION_TASK_BASE & ":TIMEPERIOD" />
 	<cfset variables.ANNOTATION_TASK_REQUESTTIMEOUT = variables.ANNOTATION_TASK_BASE & ":REQUESTTIMEOUT" />
 	<cfset variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS = variables.ANNOTATION_TASK_BASE & ":ALLOWCONCURRENTEXECUTIONS" />
 	<cfset variables.ANNOTATION_TASK_RETRYONFAILURE = variables.ANNOTATION_TASK_BASE & ":RETRYONFAILURE" />
+	<cfset variables.STARTDATE_DEFAULT = "8/1/03" />
 
 	<!---
 	PROPERTIES
@@ -94,24 +96,25 @@ Configuration Notes:
 		hint="Configures the scheduled task endpoint. Override to provide custom functionality and call super.preProcess().">
 		
 		<!--- Default is "{applicationName}_{endpointName}_" or "{userDefinedPrefix}_" --->
-		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.name & "_" & getParameter("name")) & "_") />
+		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.applicationName & "_" & getParameter("name")) & "_") />
 		<cfset setUrlBase(getProperty("urlBase")) />
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
 		
 		<!--- Setup additional services --->
-		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init(application.name & "Scheduled Tasks") />
+		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init(application.applicationName & "Scheduled Tasks") />
 		<cfset variables.authentication.setCredentials(buildAuthCredentials()) />
 		<cfset variables.adminApi = getUtils().createAdminApiAdapter() />
 		
 		<!--- Setup the endpoint --->
 		<cfset setupTaskMethods() />
+		<cfset manageTasks() />
 	</cffunction>
 
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
-	<cffunction name="onAuthentication" access="public" returntype="void" output="false"
+	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Authenticates the scheduled task request.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
@@ -158,7 +161,7 @@ Configuration Notes:
 		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.task.notAuthorized">
 			<cfset addHTTPHeaderByStatus(401) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
-			<cfsetting enablecfoutputonly="false" /><cfoutput>401 Not Authorized- #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>401 Not Authorized - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfset super.onException(arguments.event, arguments.exception) />
@@ -172,8 +175,8 @@ Configuration Notes:
 			
 		<cfset var builtUrl = getUrlBase() & "?" />
 		
-		<cfset builtUrl = ListAppend(builtUrl, "endpoint=" & getParameter("name"), "&") />
-		<cfset builtUrl = ListAppend(builtUrl, "task=" & arguments.file, "&") />
+		<cfset builtUrl = builtUrl & "endpoint=" & getParameter("name") />
+		<cfset builtUrl = ListAppend(builtUrl, "task=" & arguments.task, "&") />
 		
 		<cfreturn builtUrl />
 	</cffunction>
@@ -190,13 +193,100 @@ Configuration Notes:
 		<cfargument name="taskMethodMetadata" type="array" required="false"
 			default="#variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_TASK_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.schedule.BaseEndpoint')#"
 			hint="An array of metadata to discover any TASK methods in." />
+
+		<cfset var currMetadata = "" />
+		<cfset var currFunction = "" />
+		<cfset var taskMetadata = "" />
+		<cfset var i = 0 />
 		
-		<!--- TODO: Parse metadata and build task struct --->
+		<cfif ArrayLen(arguments.taskMethodMetadata)>
+			<cfset currMetadata = arguments.taskMethodMetadata[1] />
+
+			<cfif StructKeyExists(currMetadata, "functions")>
+				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
+					<!--- Iterate through found methods and look for required TASK:INTERVAL annotation which is required for a tasks --->
+					<cfset currFunction = currMetadata.functions[i] />
+					
+					<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_INTERVAL)>
+						<cfset taskMetadata = StructNew() />
+						
+						<cfset taskMetadata.name = currFunction.name />
+						<cfset taskMetadata.interval = currFunction[variables.ANNOTATION_TASK_INTERVAL] />
+						
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_STARTDATE)>
+							<cfset taskMetadata.startDate = currFunction[variables.ANNOTATION_TASK_STARTDATE] />
+						<cfelse>
+							<cfset taskMetadata.startDate = variables.STARTDATE_DEFAULT />
+						</cfif>
+
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ENDDATE)>
+							<cfset taskMetadata.endDate = currFunction[variables.ANNOTATION_TASK_ENDDATE] />
+						<cfelse>
+							<cfset taskMetadata.endDate = 0 />
+						</cfif>
+						
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_TIMEPERIOD)>
+							<cfset taskMetadata.timePeriod = currFunction[variables.ANNOTATION_TASK_TIMEPERIOD] />
+						<cfelse>
+							<cfset taskMetadata.timePeriod = "00:00" />
+						</cfif>
+						
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_REQUESTTIMEOUT)>
+							<cfset taskMetadata.requestTimeout = currFunction[variables.ANNOTATION_TASK_REQUESTTIMEOUT] />
+						<cfelse>
+							<!--- TODO: Setup up default request timeout --->
+							<cfset taskMetadata.requestTimeout = 180 />
+						</cfif>
+
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS)>
+							<cfset taskMetadata.allowConcurrentExecutions = currFunction[variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS] />
+						<cfelse>
+							<cfset taskMetadata.allowConcurrentExecutions = false />
+						</cfif>
+						
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_RETRYONFAILURE)>
+							<cfset taskMetadata.retryOnFailure = currFunction[variables.ANNOTATION_TASK_RETRYONFAILURE] />
+						<cfelse>
+							<cfset taskMetadata.retryOnFailure = false />
+						</cfif>
+
+						<cfset variables.tasks[taskMetadata.name] = taskMetadata />
+					</cfif>
+				</cfloop>
+			</cfif>
+			
+			<!--- Pop off the current level of metadata and recurse until the stop class if required --->
+			<cfset ArrayDeleteAt(arguments.taskMethodMetadata, 1) />
+			
+			<cfif ArrayLen(arguments.taskMethodMetadata)>
+				<cfset setupTaskMethods(arguments.taskMethodMetadata) />
+			</cfif>
+		</cfif>
+	</cffunction>
+
+	<cffunction name="manageTasks" access="private" returntype="void" output="false"
+		hint="Manages tasks that belong to this endpoint.">
+		
+		<cfset var key = "" />
+		<cfset var task = "" />
 		
 		<!--- Remove all task by prefix --->
 		<cfset variables.adminApi.deleteTasks(getTaskNamePrefix() & "*") />
 		
-		<!--- TODO: Add all discovered tasks --->
+		<!--- Add all defined tasks --->
+		<cfloop collection="#variables.tasks#" item="key">
+			<cfset task = variables.tasks[key] />
+			
+			<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
+												, "http://" & cgi.server_name & "/" & BuildEndpointUrl(task.name)
+												, task.interval
+												, task.startDate
+												, task.endDate
+												, task.timePeriod
+												, getAuthUsername()
+												, getAuthPassword()
+												, task.requestTimeout) />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="buildAuthCredentials" access="private" returntype="struct" output="false"
@@ -220,12 +310,12 @@ Configuration Notes:
 		<cfreturn variables.taskNamePrefix />
 	</cffunction>
 	
-	<cffunction name="setBasePath" access="public" returntype="void" output="false">
-		<cfargument name="basePath" type="string" required="true" />
-		<cfset variables.basePath = arguments.basePath />
+	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
+		<cfargument name="urlBase" type="string" required="true" />
+		<cfset variables.urlBase = arguments.urlBase />
 	</cffunction>
-	<cffunction name="getBasePath" access="public" returntype="string" output="false">
-		<cfreturn variables.basePath />
+	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
+		<cfreturn variables.urlBase />
 	</cffunction>
 	
 	<cffunction name="setAuthUsername" access="public" returntype="void" output="false">
@@ -233,8 +323,9 @@ Configuration Notes:
 		
 		<cfif NOT Len(arguments.authUsername)>
 			<!--- TODO: generate random username --->
-			<cfset arguments.authUsername = "GENERATEDRANDOMUSERNAME" />
+			<cfset arguments.authUsername = Left(Hash(getTickCount() & RandRange(0, 1000000) & RandRange(0, 1000000)), 12) />
 		</cfif>
+		
 		<cfset variables.authUsername = arguments.authUsername />
 	</cffunction>
 	<cffunction name="getAuthUsername" access="public" returntype="string" output="false">
@@ -245,9 +336,9 @@ Configuration Notes:
 		<cfargument name="authpassword" type="string" required="true" />
 		
 		<cfif NOT Len(arguments.authPassword)>
-			<!--- TODO: generated random passworf --->
-			<cfset arguments.authPassword = "GENERATEDRANDOMUPASSWORD" />
+			<cfset arguments.authPassword = CreateUUID() />
 		</cfif>
+		
 		<cfset variables.authPassword = arguments.authPassword />
 	</cffunction>
 	<cffunction name="getAuthpassword" access="public" returntype="string" output="false">

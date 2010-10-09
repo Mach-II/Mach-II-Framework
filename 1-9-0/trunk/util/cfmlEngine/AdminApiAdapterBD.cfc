@@ -170,26 +170,6 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="addTask" access="public" returntype="void" output="false"
-		hint="Adds a scheduled task.">
-		<cfargument name="taskName" type="string" required="true"
-			hint="Name of task." />
-		<cfargument name="url" type="string" required="true"
-			hint="URL to task." />
-		<cfargument name="interval" type="string" required="true"
-			hint="The interval to run the task ('once', 'daily', 'weekly', 'monthly' or X seconds)" />
-		<cfargument name="startDatetime" type="date" required="true"
-			hint="The date/time to start the task." />
-		<cfargument name="endDatetime" type="any" required="true"
-			hint="The data/time to end the task. Use '0'' for infinity." />
-		<cfargument name="username"  type="string" required="false"
-			hint="The username for basic HTTP access authentication." />
-		<cfargument name="password" type="string" required="false"
-			hint="The password for basic HTTP access authentication." />
-		<cfargument name="requestTimeout" type="numeric" required="false"
-			default="90"
-			hint="The number of seconds for the task to run before timing out." />
-		<cfabort showerror="This method is abstract and must be overriden." />
-	</cffunction>
+	<!--- addTask is inherited --->
 	
 </cfcomponent>
