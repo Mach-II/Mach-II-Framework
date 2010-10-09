@@ -81,6 +81,7 @@ in the Mach-II dashboard.
 		hint="Initializes the caching strategy. Do not override.">
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
+		
 		<cfset var atomicTest = 0 />
 		
 		<cfset setParameters(arguments.parameters) />

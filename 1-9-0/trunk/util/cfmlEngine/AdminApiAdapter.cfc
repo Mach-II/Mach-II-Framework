@@ -105,7 +105,7 @@ Notes:
 			default="90"
 			hint="The number of seconds for the task to run before timing out." />
 
-		<!--- Convert timespan --->
+		<!--- Convert interval timespan into seconds--->
 		<cfif REFindNoCase("([0-9]+,){3}([0-9]+)", arguments.interval)>
 			<cfset arguments.interval = convertTimespanStringToSeconds(arguments.interval) />
 		</cfif>
@@ -115,6 +115,7 @@ Notes:
 			<cfset StructDelete(arguments, "endDate", false) />
 		</cfif>
 		
+		<!--- Convert time period into start/EndTime keys (if required) --->
 		<cfif StructKeyExists(arguments, "timePeriod")>
 			<cfif REFindNoCase("[0-9]{1,2}:[0-9]{2}(-[0-9]{1,2}:[0-9]{2})?", arguments.timePeriod)>
 				<cfset arguments.startTime = ListFirst(arguments.timePeriod, "-") />
