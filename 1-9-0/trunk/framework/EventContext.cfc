@@ -812,7 +812,7 @@ Notes:
 		<cfargument name="fileAttributes" type="string" required="false" />
 
 		<cfset var uploadResult = StructNew() />
-		<cfset var convertedAccept = getUtils().getMimeTypeByFileExtension(arguments.accept) />
+		<cfset var convertedAccept = getAppManager().getUtils().getMimeTypeByFileExtension(arguments.accept) />
 
 		<!--- mode and attributes are mutually exclusive (mode = *nix only, attributes = Windows only),
 				but I suppose if someone was writing code that they wanted to have one apply on *nix
