@@ -62,6 +62,13 @@ Custom Configuration:
 	<endpoint name="scheduledTasks" type="path.to.you.TaskEndpoint">
 		<parameters>
 			<!--
+			Optional: Enables (boolean) the registeration of scheduled tasks in the CFML engine if set to
+				false the endpoint will be available, but no tasks will be registered in the CFML engine
+				and any tasks in the CFML engine that start with the taskNamePrefix will be removed
+			Default: true
+			-->
+			<parameter name="enabled" value="" />
+			<!--
 			Optional: The prefix to use in front of the task name when registering it with cfschedule
 			Default:  "{application.applicationName}_{endpointName}"
 			-->
@@ -143,6 +150,12 @@ Custom Configuration:
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
 		
+		<cfif IsStruct(getParameter("enabled"))>
+			<cfset setEnabled(resolveValueByEnvironment(getParameter("enabled"), true)) />
+		<cfelse>
+			<cfset setEnabled(getParameter("enabled", true)) />
+		</cfif>
+		
 		<!--- Setup authentication services --->
 		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init(application.applicationName & "Scheduled Tasks") />
 		<cfset variables.authentication.setCredentials(buildAuthCredentials()) />
@@ -185,6 +198,9 @@ Custom Configuration:
 		<cfif StructKeyExists(variables.tasks, taskName)>
 			<cfset task = variables.tasks[taskName] />
 			
+			<!--- Set the request timeout for this task --->
+			<cfsetting requesttimeout="#task.requestTimeout#" />
+			
 			<!--- Handle allow concurrent execution --->
 			<cfif NOT task.allowConcurrentExecutions>
 				<cflock name="_MachIITaskEndpoint_#getTaskNamePrefix()##taskName#" type="exclusive" timeout="1" throwontimeout="false">
@@ -203,6 +219,7 @@ Custom Configuration:
 			
 			<cfsetting enablecfoutputonly="false" /><cfoutput>#output#</cfoutput><cfsetting enablecfoutputonly="true" />		
 		<cfelse>
+			<!--- Ultimately this will be processed by the AbstractEndpoint base onException() --->
 			<cfthrow type="MachII.endpoints.EndpointNotDefined"
 				message="Cannot find a task named '#taskName#' in '#getParameter("name")#' endpoint." />
 		</cfif>
@@ -360,23 +377,25 @@ Custom Configuration:
 		<cfset var key = "" />
 		<cfset var task = "" />
 		
-		<!--- Remove all task by prefix --->
+		<!--- Remove all tasks by prefix --->
 		<cfset variables.adminApi.deleteTasks(getTaskNamePrefix() & "*") />
 		
-		<!--- Add all defined tasks --->
-		<cfloop collection="#variables.tasks#" item="key">
-			<cfset task = variables.tasks[key] />
-			
-			<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
-												, getServer() & BuildEndpointUrl(task.name)
-												, task.interval
-												, task.startDate
-												, task.endDate
-												, task.timePeriod
-												, getAuthUsername()
-												, getAuthPassword()
-												, task.requestTimeout) />
-		</cfloop>
+		<!--- Add all defined tasks if enabled--->
+		<cfif getEnabled()>
+			<cfloop collection="#variables.tasks#" item="key">
+				<cfset task = variables.tasks[key] />
+				
+				<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
+													, getServer() & BuildEndpointUrl(task.name)
+													, task.interval
+													, task.startDate
+													, task.endDate
+													, task.timePeriod
+													, getAuthUsername()
+													, getAuthPassword()
+													, task.requestTimeout) />
+			</cfloop>
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="buildAuthCredentials" access="private" returntype="struct" output="false"
@@ -392,6 +411,14 @@ Custom Configuration:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setEnabled" access="public" returntype="void" output="false">
+		<cfargument name="enabled" type="boolean" required="true" />
+		<cfset variables.enabled = arguments.enabled />
+	</cffunction>
+	<cffunction name="iEnabled" access="public" returntype="boolean" output="false">
+		<cfreturn variables.enabled />
+	</cffunction>
+	
 	<cffunction name="setTaskNamePrefix" access="public" returntype="void" output="false">
 		<cfargument name="taskNamePrefix" type="string" required="true" />
 		<cfset variables.taskNamePrefix = arguments.taskNamePrefix />
