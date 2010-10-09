@@ -52,6 +52,21 @@ Configuration Notes:
 <endpoints>
 	<endpoint name="scheduledTasks" type="MachII.endpoints.schedule.BaseEndpoint">
 		<parameters>
+			<!--
+			Optional: The prefix to use in front of the task name when registering it with cfschedule
+			Default:  "{application.applicationName}_{endpointName}"
+			-->
+			<parameter name="taskNamePrefix" value="" />
+			<!--
+			Optional: The basic HTTP access authentication user name.
+			Default: Auto-generated
+			-->
+			<parameter name="authUsername" value="" />
+			<!--
+			Optional: The basic HTTP access authentication password.
+			Default: Auto-generated
+			-->
+			<parameter name="authPassword" value="" />
 		</parameters>
 	</endpoint>
 </endpoints>
@@ -95,9 +110,18 @@ Configuration Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the scheduled task endpoint. Override to provide custom functionality and call super.preProcess().">
 		
-		<!--- Default is "{applicationName}_{endpointName}_" or "{userDefinedPrefix}_" --->
+		<!--- Default is "{applicationName}_{endpointName}" or "{userDefinedPrefix}" --->
 		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.applicationName & "_" & getParameter("name")) & "_") />
 		<cfset setUrlBase(getProperty("urlBase")) />
+
+		<!--- Setup default in parameters so if the endpoint is reloaded by dashboard they don't change --->
+		<cfif NOT IsParameterDefined("authUsername")>
+			<cfset setParameter("authUsername", Left(Hash(getTickCount() & RandRange(0, 1000000) & RandRange(0, 1000000)), 12)) />
+		</cfif>
+		<cfif NOT IsParameterDefined("authPassword")>
+			<cfset setParameter("authPassword", CreateUUID()) />
+		</cfif>		
+		
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
 		
@@ -114,6 +138,14 @@ Configuration Notes:
 	<!---
 	PUBLIC METHODS - REQUEST
 	--->
+	<cffunction name="preProcess" access="public" returntype="void" output="false"
+		hint="Executes the scheduled task pre-process.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<!--- Setup basic required request args --->
+		<cfset arguments.event.setArg("retryOnFailureCount", 0) />
+	</cffunction>
+	
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Authenticates the scheduled task request.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -130,19 +162,34 @@ Configuration Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var taskName = arguments.event.getArg("task") />
+		<cfset var task = "" />
+		<cfset var aquiredLock = false />
+		<cfset var output = "" />
 		
 		<!--- Check for a task that accepts requests from the outside (always check variables.tasks for security reasons) --->
 		<cfif StructKeyExists(variables.tasks, taskName)>
+			<cfset task = variables.tasks[taskName] />
 			
-			<!--- TODO: Handle allow concurrent execution --->
+			<!--- Handle allow concurrent execution --->
+			<cfif NOT task.allowConcurrentExecutions>
+				<cflock name="_MachIITaskEndpoint_#getTaskNamePrefix()##taskName#" type="exclusive" timeout="1" throwontimeout="false">
+					<cfset aquiredLock = true />
+					<cfset output = invokeTask(task, arguments.event) />
+				</cflock>
+
+				<!--- It is easier to check a condition then try/catch a failed attempt at aquiring a lock --->
+				<cfif NOT aquiredLock>
+					<cfthrow type="MachII.endpoints.task.noConcurrentExecution"
+						message="Blocked concurrent execution of task '#taskName#' in '#getParameter("name")#' endpoint." />
+				</cfif>
+			<cfelse>
+				<cfset output = invokeTask(task, arguments.event) />
+			</cfif>
 			
-			<!--- TODO: Handle retry on failure --->
-			<cfinvoke method="#taskName#">
-				<cfinvokeargument name="event" value="#arguments.event#" />
-			</cfinvoke>
+			<cfsetting enablecfoutputonly="false" /><cfoutput>#output#</cfoutput><cfsetting enablecfoutputonly="true" />		
 		<cfelse>
-			<cfthrow type="MachII.endpoints.task.notFound"
-				message="Cannot find a task named '#taskName#' in scheduled task endpoint." />
+			<cfthrow type="MachII.endpoints.EndpointNotDefined"
+				message="Cannot find a task named '#taskName#' in '#getParameter("name")#' endpoint." />
 		</cfif>
 	</cffunction>
 	
@@ -152,16 +199,16 @@ Configuration Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 		
-		<!--- Handle notFound --->
-		<cfif arguments.exception.getType() EQ "MachII.endpoints.task.notFound">
-			<cfset addHTTPHeaderByStatus(404) />
-			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
-			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
-		<!--- Handle cfmNotAuthorized --->
-		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.task.notAuthorized">
+		<!--- Handle notAuthorized --->
+		<cfif arguments.exception.getType() EQ "MachII.endpoints.task.notAuthorized">
 			<cfset addHTTPHeaderByStatus(401) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>401 Not Authorized - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<!--- Handle noConcurrentExecution --->
+		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.task.noConcurrentExecution">
+			<cfset addHTTPHeaderByStatus(409) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>409 Conflict - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />		
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfset super.onException(arguments.event, arguments.exception) />
@@ -188,6 +235,39 @@ Configuration Notes:
 	<!---
 	PROTECTED METHODS
 	--->
+	<cffunction name="invokeTask" access="private" returntype="string" output="false"
+		hint="Invokes a task. This method is recursive if retry on failure is enabled for this task.">
+		<cfargument name="task" type="struct" required="true"
+			hint="The internal task metadata struct." />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
+		<cfset var output = "" />
+		<cfset var startTick = getTickCount() />
+			
+		<cftry>
+			<cfinvoke component="#this#" method="#arguments.task.name#" returnvariable="output">
+				<cfinvokeargument name="event" value="#arguments.event#" />
+			</cfinvoke>
+			<cfcatch type="any">
+				<!--- Increment the failures --->
+				<cfset arguments.event.setArg("retryOnFailureCount", arguments.event.getArg("retryOnFailureCount") + 1) />
+
+				<!--- Handle retry on failure --->
+				<cfif arguments.task.retryOnFailure GT 0 AND arguments.event.getArg("retryOnFailureCount") LTE arguments.task.retryOnFailure>
+					<cfset invokeTask(arguments.task, arguments.event) />
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
+		
+		<cfif IsDefined("output")>
+			<cfreturn output />
+		<cfelse>
+			<cfreturn "Task '#task.name#' has completed execution in #getTickCount() - startTick#ms." />
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="setupTaskMethods" access="private" returntype="void" output="false"
 		hint="Setups all task related methods by introspection the metadata. This method is recursive and looks through all the object hierarchy until the stop class.">
 		<cfargument name="taskMethodMetadata" type="array" required="false"
@@ -247,7 +327,7 @@ Configuration Notes:
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_RETRYONFAILURE)>
 							<cfset taskMetadata.retryOnFailure = currFunction[variables.ANNOTATION_TASK_RETRYONFAILURE] />
 						<cfelse>
-							<cfset taskMetadata.retryOnFailure = false />
+							<cfset taskMetadata.retryOnFailure = 0 />
 						</cfif>
 
 						<cfset variables.tasks[taskMetadata.name] = taskMetadata />
@@ -277,6 +357,7 @@ Configuration Notes:
 		<cfloop collection="#variables.tasks#" item="key">
 			<cfset task = variables.tasks[key] />
 			
+			<!--- TODO: setting the server name like this is brittle and should be "auto-discovered" or configurable --->
 			<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
 												, "http://" & cgi.server_name & "/" & BuildEndpointUrl(task.name)
 												, task.interval
@@ -320,12 +401,6 @@ Configuration Notes:
 	
 	<cffunction name="setAuthUsername" access="public" returntype="void" output="false">
 		<cfargument name="authUsername" type="string" required="true" />
-		
-		<cfif NOT Len(arguments.authUsername)>
-			<!--- TODO: generate random username --->
-			<cfset arguments.authUsername = Left(Hash(getTickCount() & RandRange(0, 1000000) & RandRange(0, 1000000)), 12) />
-		</cfif>
-		
 		<cfset variables.authUsername = arguments.authUsername />
 	</cffunction>
 	<cffunction name="getAuthUsername" access="public" returntype="string" output="false">
@@ -334,11 +409,6 @@ Configuration Notes:
 
 	<cffunction name="setAuthpassword" access="public" returntype="void" output="false">
 		<cfargument name="authpassword" type="string" required="true" />
-		
-		<cfif NOT Len(arguments.authPassword)>
-			<cfset arguments.authPassword = CreateUUID() />
-		</cfif>
-		
 		<cfset variables.authPassword = arguments.authPassword />
 	</cffunction>
 	<cffunction name="getAuthpassword" access="public" returntype="string" output="false">
