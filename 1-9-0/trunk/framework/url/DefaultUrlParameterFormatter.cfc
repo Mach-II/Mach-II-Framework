@@ -81,8 +81,7 @@ Notes:
 		<cfset var result = arguments.urlParameterValue />
 
 		<cfset result = REReplaceNoCase(result, "[[:punct:]]", "", "all") />
-		<cfset result = ReplaceNoCase(result, " ", "-", "all") />
-		<cfset result = ReplaceNoCase(result, "--", "-", "all") />
+		<cfset result = REReplaceNoCase(result, "[ ]{1,}", "-", "all") />
 		
 		<cfset result = ReplaceList(result, "À,Á,Â,Ã,Ä,Æ,Ç,È,É,Ê,Ë,Ì,Í,Î,Ï,Ð,Ñ,Ò,Ó,Ô,Õ,Ö,Ø,Ù,Ú,Û,Ü,Ý,Þ,ß,à,á,â,ã,ä,å,æ,c,è,é,ê,ë,ì,í,î,ï,ð,ñ,ò,ó,ô,õ,ö,ø,ù,ú,û,ü,ý,þ,ÿ", "A,A,A,A,A,AE,C,E,E,E,E,I,I,I,I,D,N,O,O,O,O,O,O,U,U,U,U,Y,P,B,a,a,a,a,a,a,ae,c,e,e,e,e,i,i,i,i,o,n,o,o,o,o,o,o,u,u,u,u,y,p,y") />		
 
