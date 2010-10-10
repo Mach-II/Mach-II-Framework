@@ -198,7 +198,7 @@ from the parent application.
 		<!--- Build reference data --->
 		<cfset buildMimeShortcutMap() />
 		<cfset buildHttpEquivReferenceMap() />
-		<cfset buildDocTypeReferenceMap() />
+		<cfset setDocTypeReferenceMap(getUtils().loadResourceData("/MachII/util/resources/data/htmlDocTypes.properties")) />
 
 		<!--- Add a reference of the helper in a known property location --->
 		<cfset setProperty(variables.HTML_HELPER_PROPERTY_NAME, this) />
@@ -269,23 +269,6 @@ from the parent application.
 		<cfset httpEquivReferenceMap["www-authenticate"] = "" />
 
 		<cfset setHttpEquivReferenceMap(httpEquivReferenceMap) />
-	</cffunction>
-
-	<cffunction name="buildDocTypeReferenceMap" access="private" returntype="void" output="false"
-		hint="Build the available HTML doctype reference map.">
-
-		<cfset var docTypeReferenceMap = StructNew() />
-
-		<cfset docTypeReferenceMap["xhtml-1.0-strict"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' />
-		<cfset docTypeReferenceMap["xhtml-1.0-trans"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' />
-		<cfset docTypeReferenceMap["xhtml-1.0-frame"] 	= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">' />
-		<cfset docTypeReferenceMap["xhtml-1.1"] 		= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">' />
-		<cfset docTypeReferenceMap["html-4.0-strict"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">' />
-		<cfset docTypeReferenceMap["html-4.0-trans"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">' />
-		<cfset docTypeReferenceMap["html-4.0-frame"] 	= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">' />
-		<cfset docTypeReferenceMap["html-5.0"] 			= '<!DOCTYPE HTML>' />
-
-		<cfset setDocTypeReferenceMap(docTypeReferenceMap) />
 	</cffunction>
 
 	<!---

@@ -72,22 +72,6 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
-	
-	<cffunction name="loadResourceData" access="private" returntype="struct" output="false"
-		hint="Loads resource data">
-		<cfargument name="resourcePath" type="string" required="true" />
-
-		<cfset var resourceMap = StructNew() />
-		<cfset var line = "" />
-
-		<cfloop file="#ExpandPath(arguments.resourcePath)#" index="line">
-			<cfif NOT line.startsWith("##") AND ListLen(line, "=") EQ 2 >
-				<cfset resourceMap[ListFirst(line, "=")] = ListLast(line, "=") />
-			</cfif>
-		</cfloop>
-
-		<cfreturn resourceMap />
-	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
@@ -167,6 +151,22 @@ Notes:
 		</cfif>
 
 		<cfreturn resolvedPath />
+	</cffunction>
+	
+	<cffunction name="loadResourceData" access="public" returntype="struct" output="false"
+		hint="Loads resource data by path and returns a struct.">
+		<cfargument name="resourcePath" type="string" required="true" />
+
+		<cfset var resourceMap = StructNew() />
+		<cfset var line = "" />
+
+		<cfloop file="#ExpandPath(arguments.resourcePath)#" index="line">
+			<cfif NOT line.startsWith("##") AND ListLen(line, "=") EQ 2 >
+				<cfset resourceMap[ListFirst(line, "=")] = ListLast(line, "=") />
+			</cfif>
+		</cfloop>
+
+		<cfreturn resourceMap />
 	</cffunction>
 
 	<cffunction name="createThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false"
