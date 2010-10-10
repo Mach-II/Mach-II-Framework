@@ -349,9 +349,17 @@ To Test it out, do the following:
 								, currHttpMethod
 								, currFunction.name
 								, getParameter("name")
-								, currRestUriMetadata
-							) />
-						<cfset variables.restUris.addUri(currRestUri) />
+								, currRestUriMetadata) />
+							
+						<!---
+						Check for already added URI as we do not want to add in duplicates created by inheritance
+						We loop from top level object first so super class are of a lesser importance
+						Our duplicate check looks at the regex, http method and function name as there could
+						easily be duplicate uriRegex and http method with different function names.
+						--->
+						<cfif NOT variables.restUris.isUriDefined(currRestUri, "uriRegex,httpMethod,functionName")>
+							<cfset variables.restUris.addUri(currRestUri) />
+						</cfif>
 					</cfif>
 				</cfloop>
 			</cfif>

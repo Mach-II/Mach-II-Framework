@@ -114,6 +114,53 @@ associated Uri instances.
 					detail="Currently defined patterns: '#StructKeyList(variables.uris)#'"  />
 		</cfif>
 	</cffunction>
+	
+	<cffunction name="isUriDefined" access="public" returntype="boolean" output="false"
+		hint="Checks if the specified URI is already defined.">
+		<cfargument name="uri" type="MachII.framework.url.Uri" required="true" />
+		<cfargument name="comparisonKeys" type="any" required="false"
+			default="uriRegex,httpMethod"
+			hint="A list or array of URI key names to use for comparison. Defaults to 'uriRegex,httpMethod'" />
+		
+		<cfset var comparisonUri = "" />
+		<cfset var comparisonUriValue = "" />
+		<cfset var uriValue = "">
+		<cfset var i = "" />
+
+		<!--- Create new inner struct for httpMethod if not present --->
+		<cfif NOT StructKeyExists(variables.uris, arguments.uri.getHttpMethod())>
+			<cfset StructInsert(variables.uris, arguments.uri.getHttpMethod(), StructNew()) />
+		</cfif>
+		
+		<!--- If URI is not available, then false --->
+		<cfif NOT StructKeyExists(variables.uris[arguments.uri.getHttpMethod()], arguments.uri.getUriRegex())>
+			<cfreturn false />
+		</cfif>
+		
+		<!--- We have a basic match so check against comparisonKeys --->
+		<cfset comparisonUri = variables.uris[arguments.uri.getHttpMethod()][arguments.uri.getUriRegex()] />
+
+		<cfif NOT IsArray(arguments.comparisonKeys)>
+			<cfset arguments.comparisonKeys = ListToArray(arguments.comparisonKeys) />
+		</cfif>
+		
+		<cfloop from="1" to="#ArrayLen(arguments.comparisonKeys)#" index="i">
+			<cfinvoke component="#comparisonUri#" 
+				method="get#arguments.comparisonKeys[i]#" 
+				returnvariable="comparisonUriValue" />
+			<cfinvoke component="#arguments.uri#" 
+				method="get#arguments.comparisonKeys[i]#" 
+				returnvariable="uriValue" />
+			
+			<!--- We don't have a duplicate (as defined by the comparison keys )if values don't match --->
+			<cfif uriValue NEQ comparisonUriValue>
+				<cfreturn false />
+			</cfif>
+		</cfloop>
+		
+		<!--- If we have gotten this far, then all the comparison keys matched and we have duplicate --->
+		<cfreturn true />
+	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
