@@ -315,7 +315,14 @@ Custom Configuration:
 					<!--- Iterate through found methods and look for required TASK:INTERVAL annotation which is required for a tasks --->
 					<cfset currFunction = currMetadata.functions[i] />
 					
-					<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_INTERVAL)>
+					<!---
+					Add the task if the required TASK:INTERVAL is defined and the task name is not already defined.
+					We need to check for already defined tasks due to object inheritance. We loop through the top level
+					inheritance first so those should be even priority over matches in the super classes.
+					--->
+					<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_INTERVAL)
+						AND NOT StructKeyExists(variables.tasks, currFunction.name)>
+						
 						<cfset taskMetadata = StructNew() />
 						
 						<cfset taskMetadata.name = currFunction.name />
