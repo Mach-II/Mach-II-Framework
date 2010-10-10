@@ -381,7 +381,7 @@ Custom Configuration:
 		<cfset variables.adminApi.deleteTasks(getTaskNamePrefix() & "*") />
 		
 		<!--- Add all defined tasks if enabled--->
-		<cfif getEnabled()>
+		<cfif isEnabled()>
 			<cfloop collection="#variables.tasks#" item="key">
 				<cfset task = variables.tasks[key] />
 				
@@ -415,7 +415,7 @@ Custom Configuration:
 		<cfargument name="enabled" type="boolean" required="true" />
 		<cfset variables.enabled = arguments.enabled />
 	</cffunction>
-	<cffunction name="iEnabled" access="public" returntype="boolean" output="false">
+	<cffunction name="isEnabled" access="public" returntype="boolean" output="false">
 		<cfreturn variables.enabled />
 	</cffunction>
 	
