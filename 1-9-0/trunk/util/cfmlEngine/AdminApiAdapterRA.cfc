@@ -75,13 +75,7 @@ Notes:
 		<cfabort showerror="This method is abstract and must be overriden." />
 	</cffunction>
 	
-	<cffunction name="deleteTasks" access="public" returntype="void" output="false"
-		hint="Deletes all scheduled tasks by filter pattern.">
-		<cfargument name="searchPattern" type="string" required="false"
-			default="*"
-			hint="Allows you to filter by task name using simple patern matching syntax." />
-		<cfabort showerror="This method is abstract and must be overriden." />
-	</cffunction>
+	<!--- deleteTasks is inherited --->
 	
 	<!--- addTask is inherited --->
 	

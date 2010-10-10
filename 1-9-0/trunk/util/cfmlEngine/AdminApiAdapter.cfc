@@ -80,7 +80,13 @@ Notes:
 		<cfargument name="searchPattern" type="string" required="false"
 			default="*"
 			hint="Allows you to filter by task name using simple patern matching syntax." />
-		<cfabort showerror="This method is abstract and must be overriden." />
+		
+		<cfset var tasks = getScheduledTasks(arguments.searchPattern) />
+		<cfset var key = "" />
+		
+		<cfloop collection="#tasks#" item="key">
+			<cfschedule action="delete" task="#key#" />
+		</cfloop>
 	</cffunction>
 	
 	<cffunction name="addTask" access="public" returntype="void" output="false"
