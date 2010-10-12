@@ -296,7 +296,7 @@ Notes:
 			<cfset temp = StructNew() />
 			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
 
-			<cfif Left(includeFilePath, 1) IS ".">
+			<cfif includeFilePath.startsWith(".")>
 				<cfset includeFilePath = variables.utils.expandRelativePath(arguments.parentConfigFilePathDirectory, includeFilePath) />
 			<cfelse>
 				<cfset includeFilePath = ExpandPath(includeFilePath) />
@@ -364,20 +364,20 @@ Notes:
 
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
-		<cfset var vendorName = server.ColdFusion.ProductName />
-		<cfset var vendorMajorVersion = ListFirst(server.ColdFusion.ProductVersion) />
-		<cfset var vendorLevel = server.ColdFusion.ProductLevel />
+		<cfset var engineInfo = variables.utils.getCfmlEngineInfo() />
 
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND (
-					(FindNoCase("ColdFusion", vendorName) AND vendorMajorVersion GTE 7)
-					OR (FindNoCase("BlueDragon", vendorName) AND vendorMajorVersion GTE 1 AND vendorLevel EQ "GPL")
-					OR (FindNoCase("BlueDragon", vendorName) AND vendorMajorVersion GTE 7 AND vendorLevel NEQ "GPL")
-					OR (FindNoCase("Railo", vendorName) AND vendorMajorVersion GTE 3)
+					(FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 7)
+					OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 1 AND engineInfo.productLevel EQ "GPL")
+					OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 7 AND engineInfo.productLevel NEQ "GPL")
+					OR (FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3)
 				)>
 
 			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
-			<cfif NOT FindNoCase("http://", arguments.configDtdPath) AND NOT FileExists(arguments.configDtdPath)>
+			<cfif NOT arguments.configDtdPath.startsWith("http://") 
+				AND NOT arguments.configDtdPath.startsWith("http://") 
+				AND NOT FileExists(arguments.configDtdPath)>
 				<cfthrow type="MachII.framework.XmlValidationException"
 					message="Unable to find the DTD for xml validation. Please check that this a valid path."
 					detail="dtdPath=#arguments.configDtdPath#" />

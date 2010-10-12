@@ -231,7 +231,7 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="getCfmlEngineInfo" access="public" returntype="struct" output="false"
-		hint="Gets normalized information like the server name, product level and major/minor version numbers of the CFML engine.">
+		hint="Gets normalized information of the CFML engine. Keys: 'name', 'majorVersion', 'minorVersion' and 'productLevel'.">
 
 		<cfset var rawProductVersion = server.coldfusion.productversion />
 		<cfset var minorVersionRegex = 0 />
