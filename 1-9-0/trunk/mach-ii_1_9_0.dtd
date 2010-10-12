@@ -142,7 +142,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		type - the type of the endpoint (fully qualified CFC dot path)
 -->
 <!ELEMENT endpoint (parameters?)>
-<!ATTLIST property
+<!ATTLIST endpoint
 	name CDATA #REQUIRED
 	type CDATA #REQUIRED
 >

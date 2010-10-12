@@ -125,45 +125,6 @@ Notes:
 		<!-- <property name="autoUpdateUrl" value="http://m2website/index.cfm/go/getVersions/"/> -->
 	</properties>
 	
-	<!-- LISTENERS -->
-	<listeners>
-		<listener name="autoUpdate" type="MachII.dashboard.listeners.AutoUpdateListener"/>
-		<listener name="caching" type="MachII.dashboard.listeners.CachingListener"/>
-		<listener name="config" type="MachII.dashboard.listeners.ConfigListener"/>
-		<listener name="debugging" type="MachII.dashboard.listeners.DebuggingListener"/>
-		<listener name="info" type="MachII.dashboard.listeners.InfoListener"/>
-		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
-		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
-		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
-	</listeners>
-	
-	<!-- SUBSCRIBERS -->
-	<message-subscribers>
-		<message name="needConfigData" multithreaded="true" waitForThreads="true">
-			<subscribe listener="config" method="getBaseData" resultArg="baseData"/>
-			<subscribe listener="config" method="getBaseComponentData" resultArg="baseComponentData"/>			
-			<subscribe listener="config" method="getModuleData" resultArg="moduleData"/>
-			<subscribe listener="config" method="getModuleComponentData" resultArg="moduleComponentData"/>
-		</message>
-	</message-subscribers>
-	
-	<!-- EVENT-FILTERS -->
-	
-	<!-- PLUGINS -->
-	<plugins runParent="none">
-		<plugin name="application" type="MachII.dashboard.plugins.ApplicationPlugin">
-			<parameters>
-				<parameter name="unprotectedEvents">
-					<array>
-						<element value="sys.login"/>
-						<element value="sys.serveAsset"/>
-					</array>
-				</parameter>
-				<parameter name="loginIPs" value="${properties.loginIPs}"/>
-			</parameters>
-		</plugin>
-	</plugins>
-	
 	<!-- ENDPOINTS -->
 	<endpoints>
 		<endpoint name="dashboard.serveAsset" type="MachII.endpoints.file.BaseEndpoint">
@@ -202,6 +163,45 @@ Notes:
 			</parameters>
 		</endpoint>
 	</endpoints>
+	
+	<!-- LISTENERS -->
+	<listeners>
+		<listener name="autoUpdate" type="MachII.dashboard.listeners.AutoUpdateListener"/>
+		<listener name="caching" type="MachII.dashboard.listeners.CachingListener"/>
+		<listener name="config" type="MachII.dashboard.listeners.ConfigListener"/>
+		<listener name="debugging" type="MachII.dashboard.listeners.DebuggingListener"/>
+		<listener name="info" type="MachII.dashboard.listeners.InfoListener"/>
+		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
+		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
+		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
+	</listeners>
+	
+	<!-- SUBSCRIBERS -->
+	<message-subscribers>
+		<message name="needConfigData" multithreaded="true" waitForThreads="true">
+			<subscribe listener="config" method="getBaseData" resultArg="baseData"/>
+			<subscribe listener="config" method="getBaseComponentData" resultArg="baseComponentData"/>			
+			<subscribe listener="config" method="getModuleData" resultArg="moduleData"/>
+			<subscribe listener="config" method="getModuleComponentData" resultArg="moduleComponentData"/>
+		</message>
+	</message-subscribers>
+	
+	<!-- EVENT-FILTERS -->
+	
+	<!-- PLUGINS -->
+	<plugins runParent="none">
+		<plugin name="application" type="MachII.dashboard.plugins.ApplicationPlugin">
+			<parameters>
+				<parameter name="unprotectedEvents">
+					<array>
+						<element value="sys.login"/>
+						<element value="sys.serveAsset"/>
+					</array>
+				</parameter>
+				<parameter name="loginIPs" value="${properties.loginIPs}"/>
+			</parameters>
+		</plugin>
+	</plugins>
 	
 	<!-- EVENTS-HANDLERS -->
 	<event-handlers>
