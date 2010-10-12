@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -52,7 +52,7 @@ Notes:
 	displayname="Module"
 	output="false"
 	hint="Holds a Module.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -68,8 +68,8 @@ Notes:
 	<cfset variables.loaded = false />
 	<cfset variables.lazyLoad = false />
 	<cfset variables.validateXml = false />
-	
-	
+
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -79,7 +79,7 @@ Notes:
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="file" type="string" required="true" />
 		<cfargument name="overrideXml" type="any" required="true" />
-		
+
 		<cfset setFile(arguments.file) />
 		<cfset setModuleName(arguments.moduleName) />
 		<cfset setAppManager(arguments.appManager) />
@@ -87,7 +87,7 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false">
 		<cfargument name="configDtdPath" type="string" required="true"
 		 	hint="The full path to the configuration DTD file." />
@@ -107,28 +107,30 @@ Notes:
 
 		<cfset var appLoader = "" />
 		<cfset var moduleAppManager = "" />
+		<cfif NOT isLoaded()>
+			<cftry>
+				<cfset appLoader = CreateObject("component", "MachII.framework.AppLoader") />
+				<cfset appLoader.init(getFile(), getDtdPath(), getAppManager().getAppKey(),
+						getValidateXml(), getAppManager(), getOverrideXml(), getModuleName()) />
+				<cfset moduleAppManager = appLoader.getAppManager() />
 
-		<cftry>
-			<cfset appLoader = CreateObject("component", "MachII.framework.AppLoader") />
-			<cfset appLoader.init(getFile(), getDtdPath(), getAppManager().getAppKey(), 
-					getValidateXml(), getAppManager(), getOverrideXml(), getModuleName()) />
-			<cfset moduleAppManager = appLoader.getAppManager() />
-	
-			<cfset moduleAppManager.setAppLoader(appLoader) />
-			<cfset setModuleAppManager(moduleAppManager) />
-			<cfset setEnabled(true)	 />
-			<cfset setLoaded(true) />
+				<cfset moduleAppManager.setAppLoader(appLoader) />
+				<cfset setModuleAppManager(moduleAppManager) />
+				<cfset setLoaded(true) />
 
-			<cfcatch type="any">
-				<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
-					<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
-					<cfset getAppManager().getModuleManager().disableModule(variables.moduleName) />
-					<cfset setModuleAppManager(getAppManager()) />
-				<cfelse>
-					<cfrethrow />
-				</cfif>
-			</cfcatch>
-		</cftry>
+				<cfcatch type="any">
+					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+						<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
+						<cfset getAppManager().getModuleManager().disableModule(variables.moduleName) />
+						<cfthrow type="MachII.framework.ModuleFailedToLoad"
+							message="Module with name '#variables.moduleName#' failed to load."
+							extendedInfo="#getLoadException().getMessage()#" />
+					<cfelse>
+						<cfrethrow />
+					</cfif>
+				</cfcatch>
+			</cftry>
+		</cfif>
 	</cffunction>
 
 	<!---
@@ -137,14 +139,15 @@ Notes:
 	<cffunction name="shouldReloadConfig" access="public" returntype="boolean" output="false">
 		<cfreturn getModuleAppManager().getAppLoader().shouldReloadConfig() />
 	</cffunction>
-		
+
 	<cffunction name="reloadModuleConfig" access="public" returntype="void" output="false">
 		<cfargument name="validateXml" type="boolean" required="false" default="false"
 			hint="Should the XML be validated before parsing." />
-		
+
 		<cfset var oldModuleAppManager = getModuleAppManager() />
 		<cftry>
 			<cfset clearLoadException() />
+			<cfset setLoaded(false) />
 			<!--- Create a new module --->
 			<cfset configure(getDtdPath(), arguments.validateXml) />
 
@@ -156,7 +159,7 @@ Notes:
 			<cfif NOT isEnabled()>
 				<cfset getModuleAppManager().getModuleManager().enableModule(variables.moduleName) />
 			</cfif>
-			
+
 			<cfcatch type="any">
 				<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
 					<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
@@ -169,7 +172,7 @@ Notes:
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -182,7 +185,7 @@ Notes:
 		<cfargument name="loaded" type="boolean" required="true" />
 		<cfset variables.loaded = arguments.loaded />
 	</cffunction>
-	
+
 	<cffunction name="isEnabled" access="public" returntype="boolean" output="false"
 		hint="Returns the enabled status of the module">
 		<cfreturn variables.enabled />
@@ -197,7 +200,7 @@ Notes:
 		hint="Returns if the module is disabled due to an exception">
 		<cfreturn isObject(variables.loadException) />
 	</cffunction>
-	
+
 	<cffunction name="clearLoadException" access="private" returntype="void" output="false"
 		hint="Clears an exception that occurred during load">
 		<cfset variables.loadException = "" />
@@ -234,7 +237,7 @@ Notes:
 		hint="Gets the file to use when setting up the module's AppManager">
 		<cfreturn variables.file />
 	</cffunction>
-	
+
 	<cffunction name="setDtdPath" access="public" returntype="void" output="false">
 		<cfargument name="dtdPath" type="string" required="true" />
 		<cfset variables.dtdPath = arguments.dtdPath />
@@ -242,7 +245,7 @@ Notes:
 	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
 		<cfreturn variables.dtdPath />
 	</cffunction>
-	
+
 	<cffunction name="setValidateXml" access="public" returntype="void" output="false">
 		<cfargument name="validateXml" type="boolean" required="true" />
 		<cfset variables.validateXml = arguments.validateXml />
@@ -250,7 +253,7 @@ Notes:
 	<cffunction name="getValidateXml" access="public" returntype="boolean" output="false">
 		<cfreturn variables.validateXml />
 	</cffunction>
-	
+
 	<cffunction name="setModuleName" access="public" returntype="void" output="false"
 		hint="Sets the name of the module">
 		<cfargument name="moduleName" type="string" required="true" />
@@ -260,7 +263,7 @@ Notes:
 		hint="Gets the module name">
 		<cfreturn variables.moduleName />
 	</cffunction>
-	
+
 	<cffunction name="setAppManager" access="public" returntype="void" output="false"
 		hint="Returns the AppManager instance this Module belongs to.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
@@ -270,7 +273,7 @@ Notes:
 		hint="Sets the AppManager instance this Module belongs to.">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 	<cffunction name="setModuleAppManager" access="public" returntype="void" output="false"
 		hint="Returns the ModuleAppManager instance this Module belongs to.">
 		<cfargument name="moduleAppManager" type="MachII.framework.AppManager" required="true" />
@@ -279,11 +282,12 @@ Notes:
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
 		hint="Sets the ModuLeAppManager instance this Module belongs to.">
 		<cfif NOT isLoaded()>
+	 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.Module").debug("Executing lazy load for module: '#variables.moduleName#'") />
 			<cfset load() />
 		</cfif>
 		<cfreturn variables.moduleAppManager />
 	</cffunction>
-	
+
 	<cffunction name="setOverrideXml" access="public" returntype="void" output="false"
 		hint="Sets the override Xml for this module.">
 		<cfargument name="overrideXml" type="any" required="true" />

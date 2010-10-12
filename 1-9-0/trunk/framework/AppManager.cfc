@@ -123,11 +123,6 @@ Notes:
 		<cfset getPropertyManager().configure() />
 		<cfset getCacheManager().configure() />
 
-		<!--- Module Manager is a singleton only call if this is the parent AppManager --->
-		<cfif NOT inModule()>
-			<cfset getRequestManager().configure() />
-		</cfif>
-
 		<cfset getPluginManager().configure() />
 		<cfset getListenerManager().configure() />
 		<cfset getMessageManager().configure() />
@@ -140,8 +135,9 @@ Notes:
 		<!--- These managers are singletons and only call if this is the parent AppManager --->
 		<cfif NOT inModule()>
 			<cfset getModuleManager().configure() />
+			<cfset getRequestManager().configure() />
 			<cfset getGlobalizationManager().configure() />
-			
+
 			<cfset getRequestManager().createRewriteConfigFile() />
 		</cfif>
 
@@ -281,7 +277,9 @@ Notes:
 			<cfset modules = variables.moduleManager.getModules() />
 
 			<cfloop collection="#modules#" item="key">
-				<cfset modules[key].getModuleAppManager().onSessionStart() />
+				<cfif modules[key].isLoaded()>
+					<cfset modules[key].getModuleAppManager().onSessionStart() />
+				</cfif>
 			</cfloop>
 		</cfif>
 	</cffunction>

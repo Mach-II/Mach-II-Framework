@@ -38,7 +38,7 @@ Notes:
 	<cfset variables.propertyArray = StructKeyArray(variables.propertyStruct) />
 	<cfset ArraySort(variables.propertyArray, "textnocase", "asc") />
 	<cfset nameOfModule = "#UCase(Left(nameOfModule, 1))##Right(nameOfModule, Len(nameOfModule) -1)# Module" />
-	
+
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 </cfsilent>
 <cfoutput>
@@ -58,10 +58,14 @@ Notes:
 	<cfloop from="1" to="#ArrayLen(variables.moduleOrder)#" index="i">
 	<tr class="<view:flip value='#i mod 2#' items='none,shade' />">
 		<td class="small">
-			<view:a event="#event.getName()#" p:module="#variables.moduleOrder[i]#">
-				<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
-				#variables.moduleOrder[i]#
-			</view:a>
+			<cfif moduledata[variables.moduleOrder[i]].showInDashboard>
+				<view:a event="#event.getName()#" p:module="#variables.moduleOrder[i]#">
+					<img src="#BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/link_go.png")#" width="16" height="16" alt="Link" />
+					#variables.moduleOrder[i]#
+				</view:a>
+			<cfelse>
+				#variables.moduleOrder[i]# : Not loaded (Lazy load enabled)
+			</cfif>
 		</td>
 	</tr>
 	</cfloop>
@@ -113,7 +117,7 @@ Notes:
 					<div>
 						<h3>Object</h3>
 						<cfdump var="#propertyValue#" expand="true" />
-						
+
 						<!--- Show any configuration parameters passed to M2 property object --->
 						<cfif variables.m2property>
 						<h3>Parameters</h3>

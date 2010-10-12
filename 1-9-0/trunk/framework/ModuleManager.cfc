@@ -85,13 +85,13 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="registerXml" access="public" returntype="void" output="false"
 		hint="Registers xml for the manager.">
 		<cfargument name="configXml" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
-		
-		<cfset ArrayAppend(variables.xml, arguments) />		
+
+		<cfset ArrayAppend(variables.xml, arguments) />
 	</cffunction>
 
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
@@ -140,6 +140,7 @@ Notes:
 
 				<cfset lazyLoad = getAppManager().getPropertyManager().getProperty("modules:lazyLoad", "!*") />
 				<cfif lazyLoad EQ "*" OR ListFindNoCase(lazyLoad, name) >
+			 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.ModuleManager").debug("Configuring module: '#name#' to lazy load") />
 					<cfset module.setLazyLoad(true) />
 				</cfif>
 
@@ -168,7 +169,7 @@ Notes:
 
 		<cfset var i = 0 />
 		<cfset var key = "" />
-		
+
 		<!--- Load all registered xml --->
 		<cfloop from="1" to="#ArrayLen(variables.xml)#" index="i">
 			<cfset loadXml(argumentcollection=variables.xml[i]) />
@@ -215,7 +216,8 @@ Notes:
 			<cfelse>
 				<cfif variables.disabledModules[arguments.moduleName].hasException()>
 					<cfthrow type="MachII.framework.ModuleFailedToLoad"
-						message="Module with name '#arguments.moduleName#' failed to load." />
+						message="Module with name '#arguments.moduleName#' failed to load."
+						extendedInfo="#variables.disabledModules[arguments.moduleName].getLoadException().getMessage()#" />
 				<cfelse>
 					<cfthrow type="MachII.framework.ModuleDisabled"
 						message="Module with name '#arguments.moduleName#' is disabled." />
@@ -257,8 +259,10 @@ Notes:
 			<cfthrow type="MachII.framework.ModuleAlreadyDefined"
 				message="A Module with name '#arguments.moduleName#' is already registered." />
 		<cfelseif arguments.module.isEnabled()>
+	 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.ModuleManager").debug("Adding enabled module: '#arguments.moduleName#'") />
 			<cfset variables.enabledModules[arguments.moduleName] = arguments.module />
 		<cfelse>
+	 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.ModuleManager").debug("Adding disabled module: '#arguments.moduleName#'") />
 			<cfset variables.disabledModules[arguments.moduleName] = arguments.module />
 		</cfif>
 	</cffunction>
@@ -279,7 +283,7 @@ Notes:
 	<cffunction name="disableModule" access="public" returntype="void" output="false"
 		hint="Disables a module.">
 		<cfargument name="moduleName" type="string" required="true" />
-		
+
 		<cfif isModuleEnabled(arguments.moduleName)>
 			<cfset variables.disabledModules[arguments.moduleName] = variables.enabledModules[arguments.moduleName] />
 			<cfset variables.disabledModules[arguments.moduleName].setEnabled(false) />
@@ -290,13 +294,11 @@ Notes:
 	<cffunction name="enableModule" access="public" returntype="void" output="false"
 		hint="Enables a module.">
 		<cfargument name="moduleName" type="string" required="true" />
-		
+
 		<cfif NOT isModuleEnabled(arguments.moduleName)>
 			<cfset variables.enabledModules[arguments.moduleName] = variables.disabledModules[arguments.moduleName] />
-			<cfset variables.enabledModules[arguments.moduleName].load() />
+			<cfset variables.disabledModules[arguments.moduleName].setEnabled(true) />
 			<cfset StructDelete(variables.disabledModules, arguments.moduleName) />
-		<cfelseif NOT variables.enabledModules[arguments.moduleName].isLoaded()>
-			<cfset variables.enabledModules[arguments.moduleName].load() />
 		</cfif>
 	</cffunction>
 

@@ -250,20 +250,16 @@ Notes:
 				<!--- Don't allow the dashboard to be disable from within itself --->
 				<cfif variables.moduleOrder[i] NEQ getAppManager().getModuleName()>
 					<cfif variables.moduleData[variables.moduleOrder[i]].showInDashboard>
-						<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="disable">
-							<span class="green">
-								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
-								&nbsp;Enabled
-							</span>
-						</view:a>
+						<span class="green">
+							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/tick.png" width="16" height="16" alt="Enabled" />
+							&nbsp;Enabled
+						</span>
 					<cfelse>
 						<cfif NOT isObject(variables.moduleData[variables.moduleOrder[i]].loadException)>
-							<view:a event="config.enableDisableModule" p:moduleName="#variables.moduleOrder[i]#" p:mode="enable">
-								<span class="red">
-									<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
-									&nbsp;Disabled
-								</span>
-							</view:a>
+							<span class="red">
+								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />
+								&nbsp;Disabled
+							</span>
 						<cfelse>
 							<span class="red">
 								<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/exclamation.png" width="16" height="16" alt="Disabled" />

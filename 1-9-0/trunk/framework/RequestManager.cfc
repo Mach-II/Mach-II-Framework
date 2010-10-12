@@ -114,7 +114,7 @@ Notes:
 		<cfset setUrlExcludeEventParameter(getPropertyManager().getProperty("urlExcludeEventParameter")) />
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
-		<cfset setModuleNames(StructKeyArray(getAppManager().getModuleManager().getModules())) />
+		<cfset setModuleNames(getAppManager().getModuleManager().getModuleNames()) />
 
 		<!--- Parse through the complex list of delimiters --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
@@ -501,14 +501,14 @@ Notes:
 		<cfset var endpointNames = getAppManager().getEndpointManager().getEndpointNames() />
 		<cfset var route = 0 />
 		<cfset var i = 0 />
-		
+
 		<cfif getRewriteConfigFileOn()>
 
 			<!--- Clean up the appRoot --->
 			<cfif NOT urlBase.endsWith("/")>
 				<cfset urlBase = urlBase & "/" />
 			</cfif>
-	
+
 			<!--- Build rewrite rules --->
 			<!--- Some CFML engines do no obey enable cfouput only use cfsilent is required as well --->
 			<cfset contents.append('#### <cfsilent><cfsetting enablecfoutputonly="true"/>' & lf) />
@@ -516,7 +516,7 @@ Notes:
 			<cfset contents.append(lf) />
 			<cfset contents.append("RewriteEngine on" & lf) />
 			<cfset contents.append(lf) />
-	
+
 			<!---
 				RewriteBase cannot be located in a basic http.conf or virtual host so only write
 				it if the Mach-II application does not live in the root of the host.
@@ -528,11 +528,11 @@ Notes:
 			<cfelse>
 				<cfset rewriteBase = "/" />
 			</cfif>
-	
+
 			<!---
 				Check if requested file name is a real file, directory or symbolic link before
 				evaluating all the rewrite rules. This is for performance.
-				
+
 				We use document_root and request_uri because request_filename does not work unless nested in a <directory>
 				node in Apache.  When nesting in a <directory> node and using a proxy to a servlet engine like Tomcat,
 				none of the rewrite rules are checked.
@@ -540,27 +540,27 @@ Notes:
 			<cfset contents.append("#### Check if the requested file name is a real file for performance" & lf) />
 			<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]" & lf) />
 			<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d [OR]" & lf) />
-			<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -l" & lf) />	
+			<cfset contents.append("RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -l" & lf) />
 			<cfset contents.append("RewriteRule ^(.*)$ - [PT,L]" & lf) />
 			<cfset contents.append(lf) />
-	
+
 			<!--- Add standard url rule (e.g. with event parameter) --->
 			<cfset contents.append("#### Rewrite any URIs that start with the event parameter" & lf) />
 			<cfset contents.append("RewriteRule ^" & rewriteBase & eventParameter & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & eventParameter & "/$1 [PT,L]" & lf) />
 			<cfset contents.append(lf) />
-	
+
 			<!--- Add standard url rule (e.g. with endpoint parameter) --->
 			<cfset contents.append("#### Rewrite any URIs that start with the endpoint parameter" & lf) />
 			<cfset contents.append("RewriteRule ^" & rewriteBase & endpointParameter & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & endpointParameter & "/$1 [PT,L]" & lf) />
 			<cfset contents.append(lf) />
-	
+
 			<!--- Add all the endpoint --->
 			<cfset contents.append("#### Rewrite all base endpoints" & lf) />
 			<cfloop from="1" to="#ArrayLen(endpointNames)#" index="i">
 				<cfset contents.append("RewriteRule ^" & rewriteBase & endpointNames[i] & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & endpointNames[i] & "$1 [PT,L]" & lf) />
 			</cfloop>
 			<cfset contents.append(lf) />
-			
+
 			<!--- Add all the routes --->
 			<cfset contents.append("#### Rewrite all base URL routes" & lf) />
 			<cfloop from="1" to="#ArrayLen(routeNames)#" index="i">
@@ -569,7 +569,7 @@ Notes:
 				 Because the base has been defined we dont use it here. Additionally we can end the rule without the
 				 trailing forward slash as many users may not type this. If a slash is found then we can also grab any
 				 other params that may or may not be following it. This allows us to match the following type of urls:
-	
+
 				 news
 				 news/
 				 news/1
@@ -578,14 +578,14 @@ Notes:
 				 newsArticle/
 				 newsArticle/1
 				 newsArticle/1/
-	
+
 				 And if someone happened to type in: newss they would be routed to index.cfm/event/newss where the
 				 exception handling of the framework could divert the missing event name (provided newss didnt exist)
 				 --->
 				<cfset contents.append("RewriteRule ^" & rewriteBase & route.getUrlAlias() & "(/.*)?$ " & rewriteBase & rewriteBaseFileName & "/" & route.getUrlAlias() & "$1 [PT,L]" & lf) />
 			</cfloop>
 			<cfset contents.append(lf) />
-			
+
 			<!--- Add a catch all to run all request through Mach-II if it's not a real file and there is not index.cfm in the URL  --->
 			<cfif getPropertyManager().getProperty("urlExcludeEventParameter", false)>
 				<cfset contents.append("#### Catch all for all requests if not a real file and does not contain index.cfm" & lf) />
@@ -593,16 +593,16 @@ Notes:
 				<cfset contents.append("RewriteRule ^" & rewriteBase & "(.*)?$ " & rewriteBase & rewriteBaseFileName & "/$1 [PT,L]" & lf) />
 				<cfset contents.append(lf) />
 			</cfif>
-	
+
 			<!--- The ampersand in the middle of the append is so that CFEclipse does think this is invalid code --->
 			<cfset contents.append('#### <cfsetting enablecfoutputonly="false"/></' & 'cfsilent>' & lf) />
-	
+
 			<!--- Write to file --->
 			<cftry>
 				<cffile action="write"
 					file="#configFilePath#"
 					output="#contents.toString()#"
-					mode="777" 
+					mode="777"
 					attributes="normal" />
 				<cfcatch type="any">
 					<cfthrow type="MachII.framework.RulesWritePermissions"
@@ -610,10 +610,10 @@ Notes:
 						detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 				</cfcatch>
 			</cftry>
-			
+
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	REDIRECT PERSIST
 	--->
@@ -1064,7 +1064,6 @@ Notes:
 
 	<cffunction name="setModuleNames" access="private" returntype="void" output="false">
 		<cfargument name="moduleNames" type="array" required="true" />
-
 		<cfset var names = ArrayNew(1) />
 		<cfset var i = 0 />
 
@@ -1101,7 +1100,7 @@ Notes:
 	<cffunction name="getRewriteConfigFileOn" access="public" returntype="boolean" output="false">
 		<cfreturn variables.rewriteConfigFileOn />
 	</cffunction>
-	
+
 	<cffunction name="setRewriteConfigFile" access="public" returntype="void" output="false">
 		<cfargument name="rewriteConfigFile" type="string" required="true" />
 		<cfset variables.rewriteConfigFile = arguments.rewriteConfigFile />
