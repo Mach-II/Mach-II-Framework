@@ -108,11 +108,16 @@ Notes:
 		<cfif getXmlPath() NEQ ''>
 			<cfset formattedMessage = formattedMessage & getXmlPath() & ": " />
 		</cfif>
-		<cfset formattedMessage = formattedMessage & "Line " & ListGetAt(rawMessage,2,':') & ", " />
-		<cfset formattedMessage = formattedMessage & "Column " & ListGetAt(rawMessage,3,':') & ": " />
-		<cfset formattedMessage = formattedMessage & ListGetAt(rawMessage,4,':') />
-
-		<!--- Gets the optional 5th place message part if it exists --->
+		
+		<cfif ListLen(rawMessage, ":") GTE 2>
+			<cfset formattedMessage = formattedMessage & "Line " & ListGetAt(rawMessage,2,':') & ", " />
+		</cfif>
+		<cfif ListLen(rawMessage, ":") GTE 3>
+			<cfset formattedMessage = formattedMessage & "Column " & ListGetAt(rawMessage,3,':') & ": " />
+		</cfif>
+		<cfif ListLen(rawMessage, ":") GTE 4>
+			<cfset formattedMessage = formattedMessage & ListGetAt(rawMessage,4,':') />
+		</cfif>
 		<cfif ListLen(rawMessage, ":") GTE 5>
 			<cfset formattedMessage = formattedMessage & " - " & ListGetAt(rawMessage,5,':') />
 		</cfif>
