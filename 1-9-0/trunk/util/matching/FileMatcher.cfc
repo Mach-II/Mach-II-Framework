@@ -50,16 +50,14 @@ Notes:
 --->
 <cfcomponent
 	displayname="FileMatcher"
+	extends="AntPathMatcher"
 	output="false"
 	hint="Provides path matching using ANT style path selectors on a file system.">
 
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.DEFAULT_PATH_SEPARATOR = "/" />
-	<cfset variables.pathSeparator = variables.DEFAULT_PATH_SEPARATOR />
-	<cfset variables.matcher = "" />
-
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -68,12 +66,6 @@ Notes:
 		<cfargument name="pathSeparator" type="string" required="false" />
 		
 		<cfset var temp = "" />
-		
-		<cfif StructKeyExists(arguments, "pathSeparator")>
-			<cfset setPathSeparator(arguments.pathSeparator) />
-		</cfif>
-		
-		<cfset variables.matcher = CreateObject("component", "AntPathMatcher").init(getPathSeparator()) />
 		
 		<!--- Determine if _queryDeleteRow_java should be used and reassign to common function --->
 		<cftry>
@@ -88,6 +80,8 @@ Notes:
 				<cfset variables.queryDeleteRow = variables._queryDeleteRow_java />
 			</cfcatch>
 		</cftry>
+		
+		<cfset super.init(argumentCollection=arguments) />
 
 		<cfreturn this />
 	</cffunction>
@@ -95,12 +89,6 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="isPattern" access="public" returntype="boolean" output="false"
-		hint="Does the passed path have a pattern in it (i.e. contains one or more of '?' and/or '*').">
-		<cfargument name="pattern" type="string" required="true" />
-		<cfreturn variables.matcher.isPattern(arguments.pattern) />
-	</cffunction>
-	
 	<cffunction name="match" access="public" returntype="query" output="false"
 		hint="Matches the passed path against the pattern according to the matching strategy.">
 		<cfargument name="pattern" type="string" required="true" />
@@ -163,8 +151,8 @@ Notes:
 				<cfloop from="1" to="#ArrayLen(arguments.excludePatterns)#" index="j">
 					<!--- If pattern and pattern matches or if exact path --->
 					<cfif arguments.excludePatterns[j] EQ pathResults.modifiedPath[i]
-						OR (variables.matcher.isPattern(arguments.excludePatterns[j]) 
-						AND variables.matcher.match(arguments.excludePatterns[j], pathResults.modifiedPath[i]))>
+						OR (isPattern(arguments.excludePatterns[j]) 
+						AND super.match(arguments.excludePatterns[j], pathResults.modifiedPath[i]))>
 						<!---
 						If a pattern is found, delete and break out of the inner loop (short-circuit)
 						We're using the underlying Java method
@@ -185,14 +173,14 @@ Notes:
 		--->
 		<cfif pathResults.recordCount GTE 2>
 			<cfloop from="#pathResults.recordCount#" to="2" index="i" step="-1">
-				<cfif NOT variables.matcher.match(arguments.pattern, pathResults.modifiedPath[i])>
+				<cfif NOT super.match(arguments.pattern, pathResults.modifiedPath[i])>
 					<cfset queryDeleteRow(pathResults, i) />
 				</cfif>
 			</cfloop>
 		</cfif>
 		
 		<!--- Get around a QueryDeleteRow() bug in OpenBD 1.3 when only one row of data remains in the query. --->
-		<cfif pathResults.recordCount GTE 1 AND NOT variables.matcher.match(arguments.pattern, pathResults.modifiedPath[1])>
+		<cfif pathResults.recordCount GTE 1 AND NOT super.match(arguments.pattern, pathResults.modifiedPath[1])>
 			<cfif pathResults.recordCount EQ 1>
 				<cfset pathResults = QueryNew("name,size,type,directory,dateLastModified,attributes,modifiedPath,fullPath") />
 			<cfelse>
@@ -206,13 +194,6 @@ Notes:
 	<cffunction name="matchStart" access="public" returntype="void" output="false"
 		hint="Not planned for implementation.">
 		<cfabort showerror="This method is not planned to be implemented." />
-	</cffunction>
-
-	<cffunction name="extractPathWithinPattern" access="public" returntype="string" output="false"
-		hint="Given a pattern and a full path, determine the pattern-mapped part.">
-		<cfargument name="pattern" type="string" required="true" />
-		<cfargument name="path" type="string" required="true" />
-		<cfreturn variables.matcher.extractPathWithinPattern(arguments.pattern, arguments.path) />
 	</cffunction>
 
 	<cffunction name="pathClean" access="public" returntype="string" output="false"
@@ -230,7 +211,7 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
-			<cfif NOT variables.matcher.isPattern(patternParts[i])>
+			<cfif NOT isPattern(patternParts[i])>
 				<cfset patternBase = ListAppend(patternBase, patternParts[i], "/") />
 			</cfif>
 		</cfloop>
@@ -262,17 +243,6 @@ Notes:
 		</cfloop>
 		
 		<cfreturn cleanedExcludePatterns />
-	</cffunction>
-	
-	<!---
-	ACCESSORS
-	--->
-	<cffunction name="setPathSeparator" access="public" returntype="void" output="false">
-		<cfargument name="pathSeparator" type="string" required="true" />
-		<cfset variables.pathSeparator = arguments.pathSeparator />
-	</cffunction>
-	<cffunction name="getPathSeparator" access="public" returntype="string" output="false">
-		<cfreturn variables.pathSeparator />
 	</cffunction>
 
 </cfcomponent>
