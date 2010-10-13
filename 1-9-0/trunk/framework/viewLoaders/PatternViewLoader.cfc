@@ -95,7 +95,7 @@ Wildcards for patterns:
 	<cfset variables.nameDelimiter = "" />
 	<cfset variables.exclude = ArrayNew(1) />
 	<cfset variables.throwIfNoMatches = "" />
-	<cfset variables.pathMatcher = CreateObject("component", "MachII.util.matching.AntPathMatcher").init() />
+	<cfset variables.pathMatcher = CreateObject("component", "MachII.util.matching.FileMatcher").init() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -117,16 +117,13 @@ Wildcards for patterns:
 		hint="Loads views based on the defined parameters.">
 		
 		<cfset var appRoot = getApplicationRoot() />	
-		<cfset var appRootPath = cleanPath(ExpandPath(appRoot)) />
+		<cfset var appRootPath = variables.pathMatcher.pathClean(ExpandPath(appRoot)) />
 		<cfset var searchPath = "" />
 		<cfset var pattern = getPattern() />
-		<cfset var exclude = getExclude() />
-		<cfset var pageViewQuery = "" />
-		<cfset var pageViewPaths = ArrayNew(1) />
+		<cfset var pageViewPaths = "" />
 		<cfset var results = StructNew() />
 		<cfset var viewData = "" />
 		<cfset var i = 0 />
-		<cfset var j = 0 />
 
 		<!--- Trailing slashes are bad on the appRootPath--->
 		<cfif appRootPath.endsWith("/")>
@@ -135,70 +132,31 @@ Wildcards for patterns:
 		
 		<!--- Decide if we need to resolve a relative pattern path   --->
 		<cfif pattern.startsWith(".")>
-			<cfset searchPath = getUtils().expandRelativePath(appRootPath, extractSearchPathBaseFromPattern(pattern)) />
+			<cfset searchPath = getUtils().expandRelativePath(appRootPath, variables.pathMatcher.extractSearchPathBaseFromPattern(pattern)) />
 			<!--- Clean up pattern --->
 			<cfset appRoot = appRoot & Replace(pattern, removeRelativePartsFromPattern(pattern), "", "one") />
 			<cfset pattern = removeRelativePartsFromPattern(pattern) />
-			<cfset appRootPath = ReplaceNoCase(searchPath, extractSearchPathBaseFromPattern(pattern), "") />
+			<cfset appRootPath = ReplaceNoCase(searchPath, variables.pathMatcher.extractSearchPathBaseFromPattern(pattern), "") />
 		<cfelse>
-			<cfset searchPath = appRootPath & "/" & extractSearchPathBaseFromPattern(pattern) />
+			<cfset searchPath = appRootPath & "/" & variables.pathMatcher.extractSearchPathBaseFromPattern(pattern) />
 		</cfif>
 		
-		<!---
-			Get all the possible page views
-			This would be a place to optimize to use "type" attribute when all engines 
-			support it and then remove EQ "file" condition in next block.
-		--->
-		<cfdirectory name="pageViewQuery" 
-			action="list" 
-			directory="#searchPath#" 
-			recurse="true" />
-		
-		<!---
-		Build possible page view paths by removing the applicationRoot 
-		(because cfinclude cannot use absolute file path) and then clean the paths
-		--->
-		<cfloop from="1" to="#pageViewQuery.recordcount#" index="i">
-			<cfif pageViewQuery.type[i] EQ "file">
-				<cfset ArrayAppend(pageViewPaths, ReplaceNoCase(Replace(pageViewQuery.directory[i], "\", "/", "all"), appRootPath, "", "one") & "/" & pageViewQuery.name[i]) />
-			</cfif>
-		</cfloop>
-		
-		<!--- N.B. At this point, all paths use "/" as the path separator regardless of OS --->
-		
-		<!--- Remove page view paths that match exclude paths or patterns 
-			(except go in reverse because we may delete from the array)--->
-		<cfif ArrayLen(exclude)>
-			<cfloop from="#ArrayLen(pageViewPaths)#" to="1" index="i" step="-1">
-				<cfloop from="1" to="#ArrayLen(exclude)#" index="j">
-					<!--- If pattern and pattern matches or if exact path --->
-					<cfif exclude[j] EQ pageViewPaths[i]
-						OR (variables.pathMatcher.isPattern(exclude[j]) 
-						AND variables.pathMatcher.match(exclude[j], pageViewPaths[i]))>
-						<!--- If a pattern is found, delete and break out of the inner loop (short-circuit) --->
-						<cfset ArrayDeleteAt(pageViewPaths, i) />
-						<cfbreak />
-					</cfif>
-				</cfloop>
-			</cfloop>
-		</cfif>
-		
+		<cfset pageViewPaths = variables.pathMatcher.match(pattern, searchPath, appRootPath, getExclude()) />
+
 		<!--- Build page-views that match patterns --->
-		<cfloop from="1" to="#ArrayLen(pageViewPaths)#" index="i">
-			<cfif variables.pathMatcher.match(pattern, pageViewPaths[i])>
-				<cfset viewData = StructNew() />
-				<cfset viewData.page = pageViewPaths[i] />
-				<cfset viewData.appRoot = appRoot />
-				<cfset viewData.appRootType = "local" />
-				<cfset results[buildPageViewName(pattern, pageViewPaths[i])] = viewData />
-			</cfif>
+		<cfloop from="1" to="#pageViewPaths.recordcount#" index="i">
+			<cfset viewData = StructNew() />
+			<cfset viewData.page = pageViewPaths.modifiedPath[i] />
+			<cfset viewData.appRoot = appRoot />
+			<cfset viewData.appRootType = "local" />
+			<cfset results[buildPageViewName(pattern, viewData.page)] = viewData />
 		</cfloop>
 		
 		<!--- Throw an exception if there are not matches --->
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#ArrayLen(pageViewPaths)#'." />
+				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#pageViewPaths.recordcount#'." />
 		</cfif>
 		
 		<cfreturn results />
@@ -206,13 +164,7 @@ Wildcards for patterns:
 	
 	<!---
 	PROTECTED FUNCTIONS - UTILS
-	--->
-	<cffunction name="cleanPath" access="private" returntype="string" output="false"
-		hint="Cleans paths so all paths use a uniform delimiter.">
-		<cfargument name="path" type="string" required="true" />
-		<cfreturn Replace(arguments.path, "\", "/", "all") />
-	</cffunction>
-	
+	--->	
 	<cffunction name="buildPageViewName" access="private" returntype="string" output="false"
 		hint="Builds page view name based on the path and pattern.">
 		<cfargument name="pattern" type="string" required="true" />
@@ -248,23 +200,6 @@ Wildcards for patterns:
 		</cfif>
 		
 		<cfreturn prefix & result />
-	</cffunction>
-	
-	<cffunction name="extractSearchPathBaseFromPattern" access="private" returntype="string" output="false"
-		hint="Extract the search path base (the part before the pattern starts) from a pattern.">
-		<cfargument name="pattern" type="string" required="true" />
-		
-		<cfset var patternParts = ListToArray(arguments.pattern, "/") />
-		<cfset var patternBase = "" />
-		<cfset var i = 0 />
-		
-		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
-			<cfif NOT variables.pathMatcher.isPattern(patternParts[i])>
-				<cfset patternBase = ListAppend(patternBase, patternParts[i], "/") />
-			</cfif>
-		</cfloop>
-		
-		<cfreturn patternBase />
 	</cffunction>
 	
 	<cffunction name="removeRelativePartsFromPattern" access="private" returntype="string" output="false"
@@ -303,7 +238,7 @@ Wildcards for patterns:
 				, "The value of the parameter 'pattern' is not a valid path pattern (ex. '/views/**/*.cfm')."
 				, "The passed pattern is '#arguments.pattern#'.") />
 		
-		<cfset variables.pattern = cleanPath(arguments.pattern) />
+		<cfset variables.pattern = arguments.pattern />
 	</cffunction>
 	<cffunction name="getPattern" access="public" returntype="string" output="false">
 		<cfreturn variables.pattern />
@@ -340,12 +275,7 @@ Wildcards for patterns:
 		<cfset getAssert().isTrue(IsArray(arguments.exclude)
 				, "The value of the parameter 'exclude' is must be a list or an array.") />
 		
-		<!--- Clean paths --->
-		<cfloop from="1" to="#ArrayLen(arguments.exclude)#" index="i">
-			<cfset ArrayAppend(cleanedExclude, cleanPath(arguments.exclude[i])) />
-		</cfloop>
-		
-		<cfset variables.exclude = cleanedExclude />
+		<cfset variables.exclude = arguments.exclude />
 	</cffunction>
 	<cffunction name="getExclude" access="public" returntype="array" output="false">
 		<cfreturn variables.exclude />
