@@ -74,8 +74,8 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testMatch" access="public" returntype="void" output="false"
-		hint="Tests match() with various coverage of exact, ?, *, ** and combos.">
+	<cffunction name="testMatchWithRootPathReplacement" access="public" returntype="void" output="false"
+		hint="Tests match() with various coverage using root path replacement.">
 		
 		<cfset var pathResults = variables.pm.match("/views/**/*.cfm", ExpandPath("/MachII/dashboard"), ExpandPath("/MachII/dashboard")) />
 		<cfset var assertResults = "" />
@@ -91,6 +91,63 @@ Notes:
 		</cfquery>
 		
 		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '/views/sys/login.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+	</cffunction>
+	
+	<cffunction name="testMatchWithoutRootPathReplacement" access="public" returntype="void" output="false"
+		hint="Tests match() with various coverage without using root path replacement.">
+		
+		<cfset var pathResults = variables.pm.match(ExpandPath("/MachII/dashboard") & "/views/**/*.cfm", ExpandPath("/MachII/dashboard")) />
+		<cfset var assertResults = "" />
+		
+		<cfset debug(pathResults) />
+		
+		<cfset assertIsQuery(pathResults) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '#ExpandPath("/MachII/dashboard")#/views/tools/scribble/index.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '#ExpandPath("/MachII/dashboard")#/views/sys/login.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+	</cffunction>
+	
+	<cffunction name="testMatchWithExcludePatterns" access="public" returntype="void" output="false"
+		hint="Tests match() with various coverage using exclude patterns.">
+		
+		<cfset var excludePatterns = [ '/views/tools/**' ] />
+		<cfset var pathResults = variables.pm.match("/views/**/*.cfm", ExpandPath("/MachII/dashboard"), ExpandPath("/MachII/dashboard"), excludePatterns) />
+		<cfset var assertResults = "" />
+		
+		<cfset debug(pathResults) />
+		
+		<cfset assertIsQuery(pathResults) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '/views/tools/scribble/index.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 0) />
 		
 		<cfquery dbtype="query" name="assertResults">
 			SELECT *

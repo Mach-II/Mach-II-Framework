@@ -129,16 +129,29 @@ Notes:
 		<!---
 		Build possible paths by removing the root path if requested. This option 
 		is offered because cfinclude cannot use absolute file paths
-		--->		
-		<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
-			<cfif pathResults.type[i] EQ "file">
-				<cfset pathResults.directory[i] =  ReplaceNoCase(pathResults.directory[i], "\", "/", "all") />
-				<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
-				<cfset pathResults.modifiedPath[i] =  ReplaceNoCase(pathResults.directory[i], arguments.removeRootPath, "", "one") & "/" & pathResults.name[i] />
-			<cfelse>
-				<cfset queryDeleteRow(pathResults, i) />
-			</cfif>
-		</cfloop>
+		I know two loop that are similar is harder to maintain, but it's better performance
+		--->
+		<cfif Len(arguments.removeRootPath)>
+			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
+				<cfif pathResults.type[i] EQ "file">
+					<cfset pathResults.directory[i] =  ReplaceNoCase(pathResults.directory[i], "\", "/", "all") />
+					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
+					<cfset pathResults.modifiedPath[i] =  ReplaceNoCase(pathResults.directory[i], arguments.removeRootPath, "", "one") & "/" & pathResults.name[i] />
+				<cfelse>
+					<cfset queryDeleteRow(pathResults, i) />
+				</cfif>
+			</cfloop>
+		<cfelse>
+			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
+				<cfif pathResults.type[i] EQ "file">
+					<cfset pathResults.directory[i] =  ReplaceNoCase(pathResults.directory[i], "\", "/", "all") />
+					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
+					<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
+				<cfelse>
+					<cfset queryDeleteRow(pathResults, i) />
+				</cfif>
+			</cfloop>
+		</cfif>
 		
 		<!--- N.B. At this point, all paths use "/" as the path separator regardless of OS --->
 		
