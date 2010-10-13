@@ -449,15 +449,17 @@ Configuration Notes:
 		<cfset var fileInfo = "" />
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
 
-		<!--- Read file info for content-length and last-modified headers --->
+		<!---
+		Read file info for content-length and last-modified headers
+		We cannot use type="file" as that does not work on OpenBD
+		--->
 		<cfdirectory name="fileInfo" 
 			action="list" 
 			directory="#getDirectoryFromPath(fileFullPath)#" 
-			filter="#getFileFromPath(fileFullPath)#"
-			type="file" />
+			filter="#getFileFromPath(fileFullPath)#" />
 		
 		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
-		<cfif fileInfo.recordcount NEQ 1>
+		<cfif fileInfo.recordcount NEQ 1 OR (fileInfo.recordcount EQ 1 AND  fileInfo.type[1] NEQ "file")>
 			<cfthrow type="MachII.endpoints.file.notFound" 
 				message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
 				detail="File path: '#getFileFromPath(fileFullPath)#'." />
