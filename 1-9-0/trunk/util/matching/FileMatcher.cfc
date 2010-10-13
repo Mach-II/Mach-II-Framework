@@ -79,6 +79,7 @@ Notes:
 		<cftry>
 			<cfset temp = QueryNew("name", "VarChar") />
 			<cfset QueryAddRow(temp, 2) />
+			<!--- Use two rows of data or QueryDeleteRow fails on OpenBD 1.3 --->
 			<cfset QuerySetCell(temp, "name", "Mach-II", 1) />
 			<cfset QuerySetCell(temp, "name", "Framework", 2) />
 			<cfset QueryDeleteRow(temp, 1) />
