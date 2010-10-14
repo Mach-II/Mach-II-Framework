@@ -132,13 +132,13 @@ Wildcards for patterns:
 		
 		<!--- Decide if we need to resolve a relative pattern path   --->
 		<cfif pattern.startsWith(".")>
-			<cfset searchPath = getUtils().expandRelativePath(appRootPath, variables.pathMatcher.extractSearchPathBaseFromPattern(pattern)) />
+			<cfset searchPath = getUtils().expandRelativePath(appRootPath, variables.pathMatcher.extractPathWithoutPattern(pattern)) />
 			<!--- Clean up pattern --->
 			<cfset appRoot = appRoot & Replace(pattern, removeRelativePartsFromPattern(pattern), "", "one") />
 			<cfset pattern = removeRelativePartsFromPattern(pattern) />
-			<cfset appRootPath = ReplaceNoCase(searchPath, variables.pathMatcher.extractSearchPathBaseFromPattern(pattern), "") />
+			<cfset appRootPath = ReplaceNoCase(searchPath, variables.pathMatcher.extractPathWithoutPattern(pattern), "") />
 		<cfelse>
-			<cfset searchPath = appRootPath & "/" & variables.pathMatcher.extractSearchPathBaseFromPattern(pattern) />
+			<cfset searchPath = appRootPath & "/" & variables.pathMatcher.extractPathWithoutPattern(pattern) />
 		</cfif>
 		
 		<cfset pageViewPaths = variables.pathMatcher.match(pattern, searchPath, appRootPath, getExclude()) />

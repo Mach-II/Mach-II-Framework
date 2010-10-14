@@ -98,6 +98,7 @@ Notes:
 		
 		<cfset var pathResults = "" />
 		<cfset var pathResultsRecordCount = 0 />
+		<cfset var recurse = false />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
@@ -105,10 +106,17 @@ Notes:
 		<cfset arguments.pattern = pathClean(arguments.pattern) />
 		<cfset arguments.removeRootPath = pathClean(arguments.removeRootPath) />
 		
+		<!--- Only recurse if there is a ** in the pattern to save on performance --->
+		<cfif FindNoCase("**", arguments.pattern)>
+			<cfset recurse = true />
+		</cfif>
+		
+		<!--- Find possible candidates --->
 		<cfdirectory name="pathResults" 
 			action="list" 
 			directory="#arguments.path#"
-			recurse="true" />
+			sort="name"
+			recurse="#recurse#" />
 		
 		<!--- Add modified path column --->
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
@@ -202,21 +210,25 @@ Notes:
 		<cfreturn ReplaceNoCase(arguments.path, "\", "/", "all") />
 	</cffunction>
 	
-	<cffunction name="extractSearchPathBaseFromPattern" access="public" returntype="string" output="false"
-		hint="Extract the search path base (the part before the pattern starts) from a pattern.">
-		<cfargument name="pattern" type="string" required="true" />
+	<cffunction name="extractPathWithoutPattern" access="public" returntype="string" output="false"
+		hint="Extract the path base (the part before the pattern starts) from a string.">
+		<cfargument name="string" type="string" required="true" />
 		
-		<cfset var patternParts = ListToArray(arguments.pattern, "/") />
-		<cfset var patternBase = "" />
+		<cfset var parts = ListToArray(arguments.string, "/") />
+		<cfset var result = "" />
 		<cfset var i = 0 />
 		
-		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
-			<cfif NOT isPattern(patternParts[i])>
-				<cfset patternBase = ListAppend(patternBase, patternParts[i], "/") />
+		<cfloop from="1" to="#ArrayLen(parts)#" index="i">
+			<cfif NOT isPattern(parts[i])>
+				<cfset result = ListAppend(result, parts[i], "/") />
 			</cfif>
 		</cfloop>
 		
-		<cfreturn patternBase />
+		<cfif arguments.string.startsWith("/")>
+			<cfset result = "/" & result>
+		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	
 	<!---
