@@ -657,7 +657,11 @@ Notes:
 			</cfif>
 		</cfloop>
 		
-		<cfreturn "/" & ArrayToList(fileParts, "/") />
+		<cfif arguments.filePath.startsWith("/")>
+			<cfreturn "/" & ArrayToList(fileParts, "/") />
+		<cfelse>
+			<cfreturn ArrayToList(fileParts, "/") />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>
