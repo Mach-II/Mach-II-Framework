@@ -62,7 +62,7 @@ To Test it out, do the following:
 		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint">
 			<parameters>
 				<!--
-					Optionally sets the default return format (MIME type) of the request 
+					Optionally sets the default return format (MIME type) of the request
 					if not defined in the url (defaults to html if not defined)
 				-->
 				<parameter name="defaultFormat" value="json" />
@@ -83,7 +83,7 @@ To Test it out, do the following:
 		<servlet-name>CfmServlet</servlet-name>
 		<url-pattern>/index.cfm/*</url-pattern>
 	</servlet-mapping>
-	
+
 	You can all other mapping in other servlet engines like Tomcat by looking in
 	the web.xml file in the servlet roo base path.
 
@@ -126,10 +126,10 @@ To Test it out, do the following:
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Child endpoints must call this configure method [i.e. super.configure()] to setup the RESTful methods correctly.">
-		
+
 		<!--- Configure any parameters --->
-		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />	
-		
+		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
+
 		<cfset setupRestComponent() />
 		<cfset setupRestMethods() />
 	</cffunction>
@@ -163,10 +163,10 @@ To Test it out, do the following:
 		<cfif ListContainsNoCase("PUT,POST", httpMethod)>
 			<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
 		</cfif>
-		
+
 		<!--- Find the REST URI --->
 		<cfset restUri = variables.restUris.findUri(pathInfo, httpMethod) />
-		
+
 		<cfif IsObject(restUri)>
 			<cfset arguments.event.setArg("restUri", restUri) />
 		<cfelse>
@@ -183,7 +183,7 @@ To Test it out, do the following:
 		<cfset var restResponseBody = callEndpointFunction(restUri, arguments.event) />
 
 		<cfset addContentTypeHeaderFromFormat(arguments.event.getArg("format", "")) />
-		
+
 		<!--- TODO: If callEndpointFunction() returns void, won't requestResponseBody be deleted as a var? This might need to be IsDefined() --->
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
@@ -200,6 +200,7 @@ To Test it out, do the following:
 		<cfset var pathInfo = arguments.event.getArg("pathInfo") />
 		<cfset var urlTokens = arguments.restUri.getTokensFromUri(pathInfo) />
 		<cfset var currToken = "" />
+		<cfset var stcArgs = "" />
 
 		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there --->
 		<cfloop collection="#urlTokens#" item="currToken">
@@ -209,13 +210,15 @@ To Test it out, do the following:
 		</cfloop>
 
 		<cfif restUri.matchUri(pathInfo)>
+			<cfset stcArgs = arguments.event.getArgs() />
+			<cfset stcArgs.event = arguments.event />
 			<!--- Call the function --->
+
 			<cfinvoke
 				component="#this#"
 				method="#restUri.getFunctionName()#"
-				returnVariable="responseBody">
-				<cfinvokeargument name="event" value="#arguments.event#" />
-			</cfinvoke>
+				returnVariable="responseBody"
+				argumentCollection="#stcArgs#" />
 		</cfif>
 
 		<cfreturn responseBody />
@@ -273,13 +276,13 @@ To Test it out, do the following:
 
 		<cfreturn rawContent />
 	</cffunction>
-	
+
 	<cffunction name="discoverHttpMethod" access="private" returntype="string" output="false"
 		hint="Discovers the http method by event-arg '_method', then 'x-http-method-override' header and finally cgi.REQUEST_METHOD.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var headers = GetHttpRequestData().headers />
-		
+
 		<!--- Order of evaluation is important --->
 		<cfif arguments.event.isArgDefined("_method")>
 			<cfreturn arguments.event.getArg("_method") />
@@ -289,28 +292,28 @@ To Test it out, do the following:
 			<cfreturn cgi.REQUEST_METHOD />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="setupRestComponent" access="private" returntyp="void" output="false"
 		hint="Setups the REST component by introspecting the metadata. This method is recursive and looks through all the object hierarhcy until the stop base calls.">
 		<cfargument name="restComponentMetadata" type="array" required="false"
 			default="#variables.introspector.getComponentDefinition(object:this, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint')#"
 			hint="An array of metadata to discover any REST component in." />
-		
+
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(arguments.restComponentMetadata)#" index="i">
 			<cfif StructKeyExists(arguments.restComponentMetadata[i], variables.ANNOTATION_REST_AUTHENTICATE)>
 				<cfset setAuthenticateDefault(arguments.restComponentMetadata[i][variables.ANNOTATION_REST_AUTHENTICATE]) />
 			</cfif>
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="setupRestMethods" access="private" returntype="void" output="false"
 		hint="Setups the REST methods by introspecting the metadata. This method is recursive and looks through all the object hierarchy until the stop base class.">
 		<cfargument name="restMethodMetadata" type="array" required="false"
 			default="#variables.introspector.findFunctionsWithAnnotations(object:this, namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint')#"
 			hint="An array of metadata to discover any REST methods in." />
-		
+
 		<cfset var currMetadata = "" />
 		<cfset var currFunction = "" />
 		<cfset var currRestUri = "" />
@@ -328,21 +331,21 @@ To Test it out, do the following:
 					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
 						<!--- Rest data structures --->
 						<cfset currRestUriMetadata = StructNew() />
-					
+
 						<!--- Default to GET method --->
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_METHOD)>
 							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
 						<cfelse>
 							<cfset currHttpMethod = "GET" />
 						</cfif>
-						
+
 						<!--- Default to global setting --->
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_AUTHENTICATE)>
 							<cfset currRestUriMetadata.authenticate = currFunction[variables.ANNOTATION_REST_AUTHENTICATE] />
 						<cfelse>
 							<cfset currRestUriMetadata.authenticate = getAuthenticateDefault() />
 						</cfif>
-						
+
 						<!--- Create instance of Uri and add it to the UriCollection. --->
 						<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
 								currFunction[variables.ANNOTATION_REST_URI]
@@ -350,7 +353,7 @@ To Test it out, do the following:
 								, currFunction.name
 								, getParameter("name")
 								, currRestUriMetadata) />
-							
+
 						<!---
 						Check for already added URI as we do not want to add in duplicates created by inheritance
 						We loop from top level object first so super class are of a lesser importance
@@ -363,10 +366,10 @@ To Test it out, do the following:
 					</cfif>
 				</cfloop>
 			</cfif>
-			
+
 			<!--- Pop off the current level of metadata and recurse until the stop class if required --->
 			<cfset ArrayDeleteAt(arguments.restMethodMetadata, 1) />
-			
+
 			<cfif ArrayLen(arguments.restMethodMetadata)>
 				<cfset setupRestMethods(arguments.restMethodMetadata) />
 			</cfif>
@@ -384,13 +387,13 @@ To Test it out, do the following:
 	<cffunction name="setDefaultFormat" access="public" returntype="void" output="false"
 		hint="Set this to override the defaultFormat.">
 		<cfargument name="defaultFormat" type="string" required="true" />
-		
+
 		<cfset var mimeTypeMap = StructNew() />
-		
+
 		<!--- Use StructAppend to not pollute base mime-type map via references when "mixing" custom mime types --->
 		<cfset StructAppend(mimeTypeMap, getUtils().getMimeTypeMap()) />
 		<cfset StructAppend(mimeTypeMap, variables.customMimeTypeMap) />
-		
+
 		<cfif StructKeyExists(mimeTypeMap, arguments.defaultFormat)>
 			<cfset variables.defaultFormat = arguments.defaultFormat />
 		<cfelse>
@@ -402,7 +405,7 @@ To Test it out, do the following:
 		hint="Gets the default format MIME type.">
 		<cfreturn variables.defaultFormat />
 	</cffunction>
-	
+
 	<cffunction name="setAuthenticateDefault" access="public" returntype="void" output="false">
 		<cfargument name="authenticateDefault" type="boolean" required="true" />
 		<cfset variables.authenticateDefault = arguments.authenticateDefault />

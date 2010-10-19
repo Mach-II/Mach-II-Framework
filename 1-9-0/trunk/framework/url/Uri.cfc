@@ -138,7 +138,7 @@ For example, a uriPattern like "/service/doit/{value}"
 				<cfset stcTokens["format"] = Mid(arguments.pathInfo, stcMatches.POS[intMatchCount]+1, stcMatches.LEN[intMatchCount]) />
 			</cfif>
 		</cfif>
-		
+
 		<!--- Url decode all the tokens now (we do this here so &2E remains in a token and doesn't get used as a format) --->
 		<cfloop collection="#stcTokens#" item="key">
 			<cfset stcTokens[key] = UrlDecode(stcTokens[key]) />
@@ -351,7 +351,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getUriRegex" access="public" returntype="string" output="false">
 		<cfreturn variables.uriRegex />
 	</cffunction>
-	
+
 	<cffunction name="setUriMetadataParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of URI metadata parameters for this URI.">
 		<cfargument name="uriMetadataParameters" type="struct" required="true"
@@ -366,6 +366,10 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getUriMetadataParameters" access="public" returntype="struct" output="false"
 		hint="Gets the full set of URI metadata parameters for this URI.">
 		<cfreturn variables.uriMetadataParameters />
+	</cffunction>
+
+	<cffunction name="getUriTokenNames" access="public" returntype="array" output="false">
+		<cfreturn variables.uriTokenNames />
 	</cffunction>
 
 </cfcomponent>

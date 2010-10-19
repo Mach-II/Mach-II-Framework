@@ -53,6 +53,12 @@ Notes:
 <cfoutput>
 <ul>
 	<li>
+		<view:a event="tools.wadl.doc" class="#getProperty("udfs").highlight("tools.wadl.doc")#">
+			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/information.png" alt="REST Endpoint Documentation" />
+			&nbsp;REST Endpoint Docs
+		</view:a>
+	</li>
+	<li>
 		<view:a event="tools.regex" class="#getProperty("udfs").highlight("tools.regex")#">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_magnify.png" alt="Use Regex Tester Tool" />
 			&nbsp;RegEx Tester

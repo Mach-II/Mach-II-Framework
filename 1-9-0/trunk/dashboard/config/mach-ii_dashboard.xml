@@ -174,6 +174,7 @@ Notes:
 		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
 		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
 		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
+		<listener name="tools.wadl" type="MachII.dashboard.listeners.tools.WadlListener"/>
 	</listeners>
 	
 	<!-- SUBSCRIBERS -->
@@ -414,6 +415,12 @@ Notes:
 			<notify listener="tools.scribble" method="processInput"/>
 			<view-page name="tools.scribble.snip_output"/>
 			<notify listener="tools.scribble" method="cleanup"/>
+		</event-handler>
+
+		<event-handler event="tools.wadl.doc" access="public">
+			<notify listener="tools.wadl" method="getWadlDocumentation" />
+			<notify listener="tools.wadl" method="getRestEndpointMetadata" resultArg="restEndpointMetadata" />
+			<view-page name="tools.wadl.wadl" />
 		</event-handler>
 		
 		<event-handler event="js.tools.scribble.processPasteBin" access="public">
