@@ -171,6 +171,7 @@ framework to be loaded as they interact with framework components:
 		hint="Ensures the framework is loaded and checks if it needs to be reloaded.">
 
 		<cfset var appKey = getAppKey() />
+		<cfset var configMode = "" />
 
 		<!---
 		Default is request.MachIIConfigMode if it is defined temporarily override the config mode
@@ -191,21 +192,24 @@ framework to be loaded as they interact with framework components:
 				</cfif>
 			</cflock>
 		</cfif>
+		
+		<!--- Use the loaded value from the xml otherwise default to value in Application.cfc --->
+		<cfset configMode = getProperty("machii:configMode", MACHII_CONFIG_MODE) />
 
 		<!--- Reload the configuration if necessary --->
-		<cfif MACHII_CONFIG_MODE EQ -1>
+		<cfif configMode EQ -1>
 			<!--- Do not reload config. --->
-		<cfelseif MACHII_CONFIG_MODE EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
+		<cfelseif configMode EQ 1 AND NOT StructKeyExists(request, "MachIIReload")>
 			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
 				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
-		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadBaseConfig()>
+		<cfelseif configMode EQ 0 AND application[appKey].appLoader.shouldReloadBaseConfig()>
 			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
 				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadConfig(MACHII_VALIDATE_XML) />
 			</cflock>
-		<cfelseif MACHII_CONFIG_MODE EQ 0 AND application[appKey].appLoader.shouldReloadModuleConfig()>
+		<cfelseif configMode EQ 0 AND application[appKey].appLoader.shouldReloadModuleConfig()>
 			<cflock name="application_#appKey#_reload" type="exclusive" timeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#">
 				<cfsetting requestTimeout="#MACHII_ONLOAD_REQUEST_TIMEOUT#" />
 				<cfset application[appKey].appLoader.reloadModuleConfig(MACHII_VALIDATE_XML) />
