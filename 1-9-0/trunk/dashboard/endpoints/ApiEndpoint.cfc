@@ -92,7 +92,7 @@ Notes:
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 		
-		<!--- Handle notFound --->
+		<!--- Handle notAuthorized --->
 		<cfif arguments.exception.getType() EQ "MachII.dashboard.endpoints.notAuthorized">
 			<cfset addHTTPHeaderByStatus(401) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />

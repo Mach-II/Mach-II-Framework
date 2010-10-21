@@ -68,9 +68,13 @@ Notes:
 		<!--- Does nothing --->
 		<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	</cffunction>
-<!------>
+
+	<!---
+	PUBLIC FUNCTIONS
+	--->
 	<cffunction name="getRestEndpointMetaData" access="public" returntype="struct" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		
 		<cfset var allEndpoints = getAppManager().getEndpointManager().getEndpoints() />
 		<cfset var restEndpoints = StructNew() />
 		<cfset var endpoint = "" />
@@ -85,15 +89,19 @@ Notes:
 		<cfset var httpMethod = "" />
 
 		<cfset stcResult.methodMetadata = StructNew () />
+		
 		<cfloop collection="#allEndpoints#" item="endpointKey">
 			<cftry>
 				<cfset endpoint = allEndpoints[endpointKey]  />
 				<cfset restEndpoints[endpointKey] = endpoint />
 				<cfset restComponentMetadata = variables.introspector.getComponentDefinition(object:restEndpoints[endpointKey], walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
+				
 				<cfloop array="#restComponentMetadata#" index="item" >
 					<cfset stcResult.componentMetadata[item.component] = item />
 				</cfloop>
+				
 				<cfset restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:restEndpoints[endpointKey], namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
+				
 				<cfloop array="#restMethodMetadata#" index="item" >
 					<cfloop array="#item.functions#" index="itemFunction">
 						<cfset pattern = itemFunction["REST:URI"]/>
@@ -112,6 +120,7 @@ Notes:
 						<cfset stcResult.methodMetadata[pattern] = stcTemp />
 					</cfloop>
 				</cfloop>
+				
 				<cfcatch type="Application">
 					<!--- This will fail for non-rest endpoints. --->
 				</cfcatch>
@@ -125,9 +134,12 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var strWadl = "" />
+
 		<cfcontent reset="true" />
+
 		<cfset addHTTPHeaderByName("Content-Type", "application/xml") />
 		<cfset stylesheet = event.getArg('stylesheet', BuildEndpointUrl("dashboard.serveAsset", "file=/xsl/wadl_documentation-2006-10.xsl")) />
 		<cfset event.setArg('stylesheet', stylesheet) />
 	</cffunction>
+	
 </cfcomponent>

@@ -85,6 +85,9 @@ Notes:
 	PROPERTIES
 	--->
 	
+	<!---
+	CONSTANTS
+	--->
 	<!--- Do not use these locators as they may change in future versions --->
 	<cfset variables.HTML_HELPER_PROPERTY_NAME = "_HTMLHelper" />
 

@@ -320,6 +320,7 @@ To Test it out, do the following:
 		<cfset var currHttpMethod = "" />
 		<cfset var currRestUriMetadata = StructNew() />
 		<cfset var i = 0 />
+		<cfset var key = "" />
 
 		<cfif ArrayLen(arguments.restMethodMetadata)>
 			<cfset currMetadata = arguments.restMethodMetadata[1] />
@@ -329,8 +330,16 @@ To Test it out, do the following:
 					<!--- Iterate through found methods and look for required REST:URI annotation --->
 					<cfset currFunction = currMetadata.functions[i] />
 					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
+						
 						<!--- Rest data structures --->
 						<cfset currRestUriMetadata = StructNew() />
+
+						<!--- Copy in additional "not documented" alternative "rest:" annotations to the metadata struct --->
+						<cfloop collection="#currFunction#" item="key">
+							<cfif key.toLowerCase().startsWith(variables.ANNOTATION_REST_BASE.toLowerCase() & ":")>
+								<cfset currRestUriMetadata[key] = currFunction[key] />
+							</cfif>
+						</cfloop>
 
 						<!--- Default to GET method --->
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_METHOD)>
@@ -368,9 +377,7 @@ To Test it out, do the following:
 			</cfif>
 
 			<!--- Pop off the current level of metadata and recurse until the stop class if required --->
-			<cfset ArrayDeleteAt(arguments.restMethodMetadata, 1) />
-
-			<cfif ArrayLen(arguments.restMethodMetadata)>
+			<cfif ArrayDeleteAt(arguments.restMethodMetadata, 1) AND ArrayLen(arguments.restMethodMetadata)>
 				<cfset setupRestMethods(arguments.restMethodMetadata) />
 			</cfif>
 		</cfif>

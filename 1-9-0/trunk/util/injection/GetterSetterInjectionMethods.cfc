@@ -47,7 +47,7 @@ Created version: 1.8.0
 Updated version: 1.8.0
 --->
 <cfcomponent
-	name="ColdspringProperty_InjectionMethods"
+	name="GetterSetterInjectionMethods"
 	hint="A target object for method injection."
 	output="false">
 
@@ -55,11 +55,12 @@ Updated version: 1.8.0
 	PROPERTIES
 	--->
 	<cfset variables.beanNames = ArrayNew(1) />
+	<cfset variables._MachIIBeansToMethods = ArrayNew(1) />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="ColdSpringProperty_InjectionMethods" output="false"
+	<cffunction name="init" access="public" returntype="GetterSetterInjectionMethods" output="false"
 		hint="Intializes the injection methods object.">
 		<cfargument name="beanNames" type="array" required="true" />
 		
@@ -70,7 +71,7 @@ Updated version: 1.8.0
 
 	<cffunction name="_injectMethods" access="public" returntype="void" output="false"
 		hint="Used to inject the methods. Due to the reflection involed we need to pass in a reference this to objection again.">
-		<cfargument name="object" type="MachII.properties.ColdSpringProperty_InjectionMethods" required="true"
+		<cfargument name="object" type="MachII.util.injection.GetterSetterInjectionMethods" required="true"
 			hint="A reference to this object." />
 		<cfargument name="targets" type="struct" required="true"
 			hint="A struct of bean targets." />
