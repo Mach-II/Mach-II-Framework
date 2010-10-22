@@ -86,6 +86,7 @@ Notes:
 		<cfset var itemFunction = "" />
 		<cfset var stcTemp = StructNew() />
 		<cfset var uri = "" />
+		<cfset var pattern = "" />
 		<cfset var httpMethod = "" />
 
 		<cfset stcResult.methodMetadata = StructNew () />
@@ -134,11 +135,10 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var strWadl = "" />
+		<cfset var stylesheet =  event.getArg('stylesheet', BuildEndpointUrl("dashboard.serveAsset", "file=/xsl/wadl_documentation-2006-10.xsl")) />
 
 		<cfcontent reset="true" />
-
 		<cfset addHTTPHeaderByName("Content-Type", "application/xml") />
-		<cfset stylesheet = event.getArg('stylesheet', BuildEndpointUrl("dashboard.serveAsset", "file=/xsl/wadl_documentation-2006-10.xsl")) />
 		<cfset event.setArg('stylesheet', stylesheet) />
 	</cffunction>
 	

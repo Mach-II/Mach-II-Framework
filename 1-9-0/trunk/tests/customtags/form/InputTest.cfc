@@ -50,16 +50,8 @@ Notes:
 --->
 <cfcomponent
 	displayname="InputTest"
-	extends="mxunit.framework.TestCase"
+	extends="FormTestCaseBase"
 	hint="Test cases for 'input' custom tag.">
-
-	<!---
-	PROPERTIES
-	--->
-	<cfset variables.appManager = "" />
-	<!--- This is a fake attributes scope --->
-	<cfset variables.attributes = StructNew() />
-	<cfset variables.included = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -67,102 +59,46 @@ Notes:
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">
 
-		<cfset var propertyManager = "" />
-		<cfset var requestManager = "" />
-		<cfset var requestHandler = "" />
-		<cfset var moduleManager = "" />
-		<cfset var endpointManager = "" />
+		<cfset super.setup() />
 
-		<!--- Setup the AppManager with the required collaborators --->
-		<cfset variables.appManager = CreateObject("component", "MachII.framework.AppManager").init() />
-		<cfset variables.appManager.setAppKey("dummy") />
-
-		<!--- Setup the PropertyManager with the required collaboration data --->
-		<cfset propertyManager = CreateObject("component", "MachII.framework.PropertyManager").init(appManager) />
-		<cfset variables.appManager.setPropertyManager(propertyManager) />
-
-		<!--- Insert properties if needed here --->
-		<cfset propertyManager.setProperty("urlExcludeEventParameter", false) />
-		<cfset propertyManager.setProperty("urlDelimiters", "?|&|=") />
-		<cfset propertyManager.setProperty("redirectPersistScope", "application") />
-		<cfset propertyManager.setProperty("maxEvents", 10) />
-		<cfset propertyManager.setProperty("eventParameter", "event") />
-
-		<!--- Setup the RequestManager --->
-		<cfset requestManager =  CreateObject("component", "MachII.framework.RequestManager").init(appManager) />
-		<cfset variables.appManager.setRequestManager(requestManager) />
-
-		<!--- Setup the ModuleManager --->
-		<cfset moduleManager =  CreateObject("component", "MachII.framework.ModuleManager").init(appManager, "", "") />
-		<cfset variables.appManager.setModuleManager(moduleManager) />
-
-		<!--- Setup the EndpointManager --->
-		<cfset endpointManager =  CreateObject("component", "MachII.framework.EndpointManager").init(appManager, "", "") />
-		<cfset variables.appManager.setEndpointManager(endpointManager) />
-
-		<!--- Configure the managers --->
-		<cfset propertyManager.configure() />
-		<cfset requestManager.configure() />
-
-		<!--- Setup a fake request --->
-		<cfset request.event = CreateObject("component", "MachII.framework.Event").init() />
-		<cfset requestHandler = requestManager.getRequestHandler() />
-		<!--- Setup the EventContext --->
-		<cfset makePublic(requesthandler, "setEventQueue") />
-		<cfset makePublic(requesthandler, "getEventQueue") />
-		<cfset makePublic(requesthandler, "setEventContext") />
-		<cfset requestHandler.setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(10)) />
-		<cfset requestHandler.setEventContext(CreateObject("component", "MachII.framework.EventContext").init(requestHandler, requestHandler.getEventQueue())) />
-
-		<!--- Set the EventContext into the request scope for backwards compatibility --->
-		<cfset request.eventContext = requestHandler.getEventContext() />
-
-		<cfset requestHandler.getEventContext().setup(appManager, request.event) />
-
-		<!--- Include the tag library only once --->
+		<!--- Include the tag library only once and it cannot be done in the inherited CFC --->
 		<cfif NOT variables.included>
 			<cfimport prefix="form" taglib="/MachII/customtags/form" />
 			<cfset variables.included = true />
 		</cfif>
 	</cffunction>
 
-	<cffunction name="tearDown" access="public" returntype="void" output="false"
-		hint="Logic to run to tear down after each test case method.">
-		<!--- Reset the fake attributes struct --->
-		<cfset variables.attributes = StructNew() />
-	</cffunction>
-
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-<cffunction name="testInput" access="public" returntype="void" output="false"
-	hint="Test basic 'input' tag.">
+	<cffunction name="testInput" access="public" returntype="void" output="false"
+		hint="Test basic 'input' tag.">
 
-	<cfset var output = "" />
-	<cfset var xml = "" />
-	<cfset var node = "" />
-	<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
-	<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
-
-	<!--- Add data to the the bean and set to the event so we can do binding --->
-	<cfset bean.setFavoriteColor("red") />
-	<cfset bean.setLastName("Farrell") />
-	<cfset event.setArg("user", bean) />
-
-	<cfsavecontent variable="output">
-		<root>
-			<form:form actionEvent="something" bind="${event.user}">
-				<form:input path="favoriteColor" />
-				<form:input path="lastName" />
-			</form:form>
-		</root>
-	</cfsavecontent>
-
-	<cfset xml = XmlParse(output) />
-	<cfset debug(output) />
-
-	<cfset node = assertXPath('/root/form/input[@type="text" and @value="red" and @id="favoriteColor"]', xml) />
-	<cfset node = assertXPath('/root/form/input[@type="text" and @value="Farrell" and @id="lastName"]', xml) />
-</cffunction>
+		<cfset var output = "" />
+		<cfset var xml = "" />
+		<cfset var node = "" />
+		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
+		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
+	
+		<!--- Add data to the the bean and set to the event so we can do binding --->
+		<cfset bean.setFavoriteColor("red") />
+		<cfset bean.setLastName("Farrell") />
+		<cfset event.setArg("user", bean) />
+	
+		<cfsavecontent variable="output">
+			<root>
+				<form:form actionEvent="something" bind="${event.user}">
+					<form:input path="favoriteColor" />
+					<form:input path="lastName" />
+				</form:form>
+			</root>
+		</cfsavecontent>
+	
+		<cfset xml = XmlParse(output) />
+		<cfset debug(output) />
+	
+		<cfset node = assertXPath('/root/form/input[@type="text" and @value="red" and @id="favoriteColor"]', xml) />
+		<cfset node = assertXPath('/root/form/input[@type="text" and @value="Farrell" and @id="lastName"]', xml) />
+	</cffunction>
 	
 </cfcomponent>

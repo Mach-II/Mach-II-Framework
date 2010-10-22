@@ -219,9 +219,9 @@ Notes:
 		<!--- Test doubl // angled hockey sticks --->
 		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("/test/to//myfile.txt")) />
 		<!--- Test leading ./ --->
-		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("./test/to/myfile.txt")) />
+		<cfset assertEquals("test/to/myfile.txt", variables.utils.filePathClean("./test/to/myfile.txt")) />
 		<!--- Test leading ../ --->
-		<cfset assertEquals("/test/to/myfile.txt", variables.utils.filePathClean("../test/to/myfile.txt")) />
+		<cfset assertEquals("test/to/myfile.txt", variables.utils.filePathClean("../test/to/myfile.txt")) />
 	</cffunction>
 
 	<cffunction name="testGetHTTPHeaderStatusTextByStatusCode" access="public" returntype="void" output="false"

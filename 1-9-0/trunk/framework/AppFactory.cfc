@@ -297,8 +297,6 @@ Notes:
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(includeNodes)#" index="i">
-
-			<cfset temp = StructNew() />
 			<cfset includeFilePath = includeNodes[i].xmlAttributes["file"] />
 
 			<!--- If this isn't a setup override includes, then check otherwise override --->
