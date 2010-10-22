@@ -58,7 +58,7 @@ Notes:
 	--->
 	<cfset variables.commands = ArrayNew(1) />
 	<cfset variables.access = "public" />
-	<cfset variables.secure = "undefined" />
+	<cfset variables.secure = "none" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION

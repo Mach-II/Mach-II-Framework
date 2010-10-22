@@ -474,13 +474,6 @@ Notes:
 			<cfif NOT isPropertyDefined("urlBase")>
 				<cfset setProperty("urlBase", "index.cfm") />
 			</cfif>
-			<cfif NOT isPropertyDefined("urlSecureBase")>
-				<cfset temp = getProperty("urlBase") />
-				<cfif Left(temp, 1) NEQ "/">
-					<cfset temp = "/" & temp />
-				</cfif>
-				<cfset setProperty("urlSecureBase", "https://" & cgi.SERVER_NAME & temp) />
-			</cfif>
 			<cfif NOT isPropertyDefined("urlDelimiters")>
 				<cfset setProperty("urlDelimiters", "?|&|=") />
 			<cfelseif ListLen(getProperty("urlDelimiters"), "|") NEQ 3>

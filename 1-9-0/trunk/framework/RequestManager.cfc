@@ -115,6 +115,26 @@ Notes:
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		<cfset setModuleNames(getAppManager().getModuleManager().getModuleNames()) />
+		
+		<!--- TODO:Check if the urlBase and urlSecureBase need to be dynamic server names --->
+		
+		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBase")>
+			<cfset temp =  getPropertyManager().getProperty("urlBase") />
+
+			<!--- If urlBase is fully qualified URL --->
+			<cfif temp.toLowerCase().startsWith("http://")>
+				<cfset temp = ReplaceNoCase(temp, "http://", "https://", "one") />
+			</cfif>
+
+			<cfset  getPropertyManager().setProperty("urlSecureBase", temp) />
+		</cfif>
+		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBaseCheckServerName")>
+			<cfset temp =  getPropertyManager().getProperty("urlSecureBase") />
+		
+			<cfif ListLen(temp, "//") GTE 2>
+				<cfset  getPropertyManager().setProperty("urlSecureBaseCheckServerName", ListFirst(ListGetAt(temp, 2, "//")), "/") />
+			</cfif>
+		</cfif>
 
 		<!--- Parse through the complex list of delimiters --->
 		<cfset setQueryStringDelimiter(ListGetAt(urlDelimiters, 1, "|")) />
@@ -323,27 +343,36 @@ Notes:
 		<cfset var pairDelimiter = getPairDelimiter() />
 		<cfset var parseSes = getParseSes() />
 		<cfset var eventManager = "" />
+		<cfset var secureType = -1 />
 
 		<!--- This was moved out the var block to pass the bug in var scope that is getting fixed --->
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset keyList = StructKeyList(params) />
 
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
-			<!---
 			<cfif Len(arguments.moduleName)>
 				<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
 			<cfelse>
 				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
+			
+			<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
 
-			<cfif eventManager.getEventSecureType(arguments.eventName)>
+			<!--- If event handler securt type is ambigous (-1), then default to the current secure type this request --->
+			<cfif secureType EQ -1>
+				<cfif cgi.SERVER_PORT_SECURE>
+					<cfset arguments.urlBase = getDefaultUrlSecureBase() />
+				<cfelse>
+					<cfset arguments.urlBase = getDefaultUrlBase() />
+				</cfif>
+			<cfelseif secureType EQ 1>
 				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
-			</cfif> --->
-
-			<cfset arguments.urlBase = getDefaultUrlBase() />
+			</cfif>
 		</cfif>
+		
+		<cfset getLog().trace("buildUrl...event #arguments.eventname#", arguments)>
 
 		<!--- Nested the appending of the event parameter inside the next block
 			Moving it causes redirect commands with just urls to wrongly append
@@ -402,12 +431,39 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="queryStringParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of query string parameters to append to end of the route." />
-		<cfargument name="urlBase" type="string" required="false" default="#getDefaultUrlBase()#"
+		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<cfset var params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset var parsedQueryStringParams = getUtils().parseAttributesIntoStruct(arguments.queryStringParameters) />
 		<cfset var route = getRoute(arguments.routeName) />
+		<cfset var moduleName = route.getModuleName() />
+		<cfset var eventName = route.getEventName() />
+		<cfset var eventManager = "" />
+		<cfset var secureType = -1 />
+		
+		<cfif NOT StructKeyExists(arguments, "urlBase")>
+			<cfif Len(moduleName)>
+				<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
+			<cfelse>
+				<cfset eventManager = getAppManager().getEventManager() />
+			</cfif>
+			
+			<cfset secureType = eventManager.getEventSecureType(eventName) />
+
+			<!--- If event handler securt type is ambigous (-1), then default to the current secure type this request --->
+			<cfif secureType EQ -1>
+				<cfif cgi.SERVER_PORT_SECURE>
+					<cfset arguments.urlBase = getDefaultUrlSecureBase() />
+				<cfelse>
+					<cfset arguments.urlBase = getDefaultUrlBase() />
+				</cfif>
+			<cfelseif secureType EQ 1>
+				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
+			<cfelse>
+				<cfset arguments.urlBase = getDefaultUrlBase() />
+			</cfif>
+		</cfif>
 
 		<cfreturn route.buildRouteUrl(params, parsedQueryStringParams, arguments.urlBase, getSeriesDelimiter(), getQueryStringDelimiter()) />
 	</cffunction>
@@ -1021,6 +1077,10 @@ Notes:
 	<cffunction name="getDefaultUrlBase" access="private" returntype="string" output="false">
 		<cfreturn variables.defaultUrlBase />
 	</cffunction>
+	<!--- TODO: This needs to be completed --->
+	<cffunction name="getDefaultUrlBase_dynamic" access="private" returntype="string" output="false">
+		<cfreturn "http://" & cgi.SERVER_NAME & variables.defaultUrlBase />
+	</cffunction>
 
 	<cffunction name="setDefaultUrlSecureBase" access="private" returntype="void" output="false">
 		<cfargument name="defaultUrlSecureBase" type="string" required="true" />
@@ -1028,6 +1088,10 @@ Notes:
 	</cffunction>
 	<cffunction name="getDefaultUrlSecureBase" access="private" returntype="string" output="false">
 		<cfreturn variables.defaultUrlSecureBase />
+	</cffunction>
+	<!--- TODO: This needs to be completed --->
+	<cffunction name="getDefaultUrlSecureBase_dynamic" access="private" returntype="string" output="false">
+		<cfreturn "https://" & cgi.SERVER_NAME & variables.defaultUrlSecureBase />
 	</cffunction>
 
 	<cffunction name="setQueryStringDelimiter" access="private" returntype="void" output="false">

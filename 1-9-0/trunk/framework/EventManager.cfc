@@ -352,23 +352,30 @@ Notes:
 		<cfreturn eventHandler.getAccess() EQ "public" />
 	</cffunction>
 	
-	<cffunction name="getEventSecureType" access="public" returntype="boolean" output="false"
-		hint="Check the secure type of the EventHandler for the named Event.">
+	<cffunction name="getEventSecureType" access="public" returntype="numeric" output="false"
+		hint="Check the secure type of the EventHandler for the named Event (1 for secure, 0 for unsecure, -1 for unknown).">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="checkParent" type="boolean" required="false" default="false" />
 		
-		<cfset var eventHandler = "" />
+		<cfset var secure = -1 />
 		
 		<cfif isEventDefined(arguments.eventName)>
-			<cfset eventHandler = getEventHandler(arguments.eventName) />
+			<cfset secure = getEventHandler(arguments.eventName).getSecure() />
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
-			<cfset eventHandler = getParent().getEventHandler(arguments.eventName) />
+			<cfset secure = getParent().getEventHandler(arguments.eventName).getSecure() />
 		<cfelse>
-			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
-				message="EventHandler for event '#arguments.eventName#' is not defined." />
+			<!--- Uknown --->
+			<cfreturn -1 />
 		</cfif>
 		
-		<cfreturn eventHandler.getSecure() />
+		<cfif secure EQ "true">
+			<cfreturn 1>
+		<cfelseif secure EQ "false">
+			<cfreturn 0 />
+		<cfelse>
+			<!--- Uknown --->
+			<cfreturn -1 />		
+		</cfif>
 	</cffunction>
 	
 	<!---
