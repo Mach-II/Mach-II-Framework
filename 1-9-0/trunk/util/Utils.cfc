@@ -65,10 +65,13 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="Utils" output="false"
 		hint="Initialization function called by the framework.">
+		<cfargument name="loadResources" type="boolean" required="false" default="true"
+			hint="Directive to load in resource files. Defaults to true." />
 
-
-		<cfset variables.statusCodeShortcutMap = loadResourceData("/MachII/util/resources/data/httpStatuscodes.properties") />
-		<cfset variables.mimeTypeMap = loadResourceData("/MachII/util/resources/data/mimeTypes.properties") />
+		<cfif arguments.loadResources>
+			<cfset variables.statusCodeShortcutMap = loadResourceData("/MachII/util/resources/data/httpStatuscodes.properties") />
+			<cfset variables.mimeTypeMap = loadResourceData("/MachII/util/resources/data/mimeTypes.properties") />
+		</cfif>
 
 		<cfreturn this />
 	</cffunction>

@@ -83,6 +83,16 @@ https://trac.mach-ii.com/machii/ticket/546
 
 ------------------------------------------------
 Improvements / Enhancements
+------------------------------------------------
+* Provide cache strategy that uses native cacheXXX() functions
+
+Special thanks to Joe Roberts for donating the base code for the
+TimeSpanNativeCfmlCache.cfc.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/724
+(2010-10-22 peterfarrell)
+
 * Added the ability to set MACHII_CONFIG_MODE in xml configuration file
 Allows you to set a property "machii:configMode" with 1, 0 or -1 to configure
 the config mode in the Application.cfc bootstrapper.

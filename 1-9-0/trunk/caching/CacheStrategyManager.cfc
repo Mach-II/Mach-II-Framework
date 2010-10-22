@@ -60,6 +60,7 @@ Notes:
 
 	<cfset variables.CACHE_STRATEGIES_SHORTCUTS = StructNew() />
 	<cfset variables.CACHE_STRATEGIES_SHORTCUTS["TimeSpanCache"] = "MachII.caching.strategies.TimeSpanCache" />
+	<cfset variables.CACHE_STRATEGIES_SHORTCUTS["TimeSpanNativeCfmlCache"] = "MachII.caching.strategies.TimeSpanNativeCfmlCache" />
 	<cfset variables.CACHE_STRATEGIES_SHORTCUTS["LRUCache"] = "MachII.caching.strategies.LRUCache" />
 
 	<!---
