@@ -103,6 +103,7 @@ Notes:
 		hint="Configures properties required to manage requests.">
 
 		<cfset var urlDelimiters = "" />
+		<cfset var temp = "" />
 
 		<!--- Setup defaults --->
 		<cfset urlDelimiters = getPropertyManager().getProperty("urlDelimiters") />
@@ -126,13 +127,13 @@ Notes:
 				<cfset temp = ReplaceNoCase(temp, "http://", "https://", "one") />
 			</cfif>
 
-			<cfset  getPropertyManager().setProperty("urlSecureBase", temp) />
+			<cfset getPropertyManager().setProperty("urlSecureBase", temp) />
 		</cfif>
 		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBaseCheckServerName")>
 			<cfset temp =  getPropertyManager().getProperty("urlSecureBase") />
 		
 			<cfif ListLen(temp, "//") GTE 2>
-				<cfset  getPropertyManager().setProperty("urlSecureBaseCheckServerName", ListFirst(ListGetAt(temp, 2, "//")), "/") />
+				<cfset getPropertyManager().setProperty("urlSecureBaseCheckServerName", ListFirst(ListGetAt(temp, 2, "//")), "/") />
 			</cfif>
 		</cfif>
 
