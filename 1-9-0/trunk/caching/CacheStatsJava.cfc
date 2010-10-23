@@ -73,6 +73,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<!---
 	PROPERTIES
 	--->
+	<!--- Do not mevore the instantiation of these Java objects because calling code try/catch tests will fail --->
 	<cfset variables.cacheHits = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 	<cfset variables.cacheMisses = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 	<cfset variables.activeElements = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
@@ -97,7 +98,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 		<cfif arguments.amount EQ 1>
 			<cfset variables.cacheHits.incrementAndGet() />
 		<cfelse>
-			<cfset variables.cacheHits.addAndGet( arguments.amount) />
+			<cfset variables.cacheHits.addAndGet(arguments.amount) />
 		</cfif>
 	</cffunction>
 	<cffunction name="setCacheHits" access="public" returntype="void" output="false">

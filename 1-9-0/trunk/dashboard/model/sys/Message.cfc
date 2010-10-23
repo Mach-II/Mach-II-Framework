@@ -63,7 +63,8 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="Message" output="false">
 		<cfargument name="message" type="string" required="false" default="" />
-		<cfargument name="type" type="string" required="false" default="info" />
+		<cfargument name="type" type="string" required="false" default="info"
+			hint="Sets the level of the message. 'info', 'warn' or 'exception'." />
 		<cfargument name="caughtException" type="struct" required="false" default="#StructNew()#" />
 
 		<!--- run setters --->
@@ -93,7 +94,8 @@ Notes:
 		<cfreturn variables.instance.message />
 	</cffunction>
 
-	<cffunction name="setType" access="public" returntype="void" output="false">
+	<cffunction name="setType" access="public" returntype="void" output="false"
+		hint="Sets the level of the message. 'info', 'warn' or 'exception'." >
 		<cfargument name="type" type="string" required="true" />
 		<cfset variables.instance.type = trim(arguments.type) />
 	</cffunction>

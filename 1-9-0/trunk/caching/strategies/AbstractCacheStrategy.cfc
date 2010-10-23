@@ -57,6 +57,7 @@ need to override the abstract methods if you do not want to have
 errors thrown.
 * Must make use the the CacheStats if you want caching stats available
 in the Mach-II dashboard.
+* All cache strategies support the 'cachingEnabled' parameter.
 --->
 <cfcomponent
  	displayname="AbstractCacheStrategy"
@@ -70,6 +71,8 @@ in the Mach-II dashboard.
 	<cfset variables.instance.strategyTypeName = "undefined" />
 	<cfset variables.parameters = StructNew() />
 	<cfset variables.parameters.cachingEnabled = true />
+	<cfset variables.flushImplemented = true />
+	<cfset variables.reapImplemented = true />
 	<cfset variables.cacheStats = 0 />
 	<cfset variables.log = 0 />
 	<cfset variables.assert = "" />
@@ -82,18 +85,17 @@ in the Mach-II dashboard.
 		<cfargument name="parameters" type="struct" required="false" default="#StructNew()#"
 			hint="A struct of configure time parameters." />
 		
-		<cfset var atomicTest = 0 />
-		
 		<cfset setParameters(arguments.parameters) />
 		<cfset setAssert(CreateObject("component", "MachII.util.Assert").init()) />
 		
-		<!--- Java below 1.5 (CF 7) does not support java.util.concurrent.atomic.AtomicLong so we check to see if it exists
-			 and use the CFML cache stats implementation. --->
+		<!---
+			Java below 1.5 (CF 7) does not support java.util.concurrent.atomic.AtomicLong that CacheStatsJava uses
+			so if instantiation fails we use the CFML cache stats implementation instead.
+		--->
 		<cftry>
-			<cfset atomicTest = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 			<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStatsJava").init() />
 			<cfcatch type="any">
-				<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStatsCFML").init() />
+				<cfset variables.cacheStats = CreateObject("component", "MachII.caching.CacheStatsCfml").init() />
 			</cfcatch>
 		</cftry>
 		
@@ -164,6 +166,16 @@ in the Mach-II dashboard.
 	<cffunction name="getConfigurationData" access="public" returntype="struct" output="false"
 		hint="Gets pretty configuration data for this caching strategy. Override to provide nicer looking information for Dashboard integration.">
 		<cfreturn variables.instance />
+	</cffunction>
+	
+	<cffunction name="isReapImplemented" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean of indicating if the 'reap' method has been implemented for this strategy.">
+		<cfreturn variables.reapImplemented />
+	</cffunction>
+	
+	<cffunction name="isFlushImplemented" access="public" returntype="boolean" output="false"
+		hint="Returns a boolean of indicating if the 'flush' method has been implemented for this strategy.">
+		<cfreturn variables.flushImplemented />
 	</cffunction>
 	
 	<cffunction name="setParameter" access="public" returntype="void" output="false"

@@ -225,18 +225,22 @@ Notes:
 						</view:a>
 					</li>
 				</cfif>
+				<cfif strategy.isReapImplemented()>
 					<li>
 						<view:a event="caching.reapCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#">
 							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_refresh.png" width="16" height="16" alt="Reap" />
 							&nbsp;Reap
 						</view:a>
 					</li>
+				</cfif>
+				<cfif strategy.isFlushImplemented()>
 					<li>
 						<view:a event="caching.flushCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#">
 							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/database_delete.png" width="16" height="16" alt="Flush" />
 							&nbsp;Flush
 						</view:a>
 					</li>
+				</cfif>
 				</ul>
 			</td>
 		</tr>

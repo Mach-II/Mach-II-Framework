@@ -129,7 +129,15 @@ Notes:
 			<cfset cacheStrategies = cacheStrategiesByModule[module] />
 			
 			<cfloop collection="#cacheStrategies#" item="cacheStrategyName">
-				<cfset cacheStrategies[cacheStrategyName].reap() />
+				<cftry>
+					<cfset cacheStrategies[cacheStrategyName].reap() />
+					<cfcatch type="MachII.caching.strategies.NotImplemented">
+						<!--- Do nothing an continue since the reap method is not implemented for this strategy --->
+					</cfcatch>
+					<cfcatch type="any">
+						<cfrethrow />
+					</cfcatch>
+				</cftry>
 			</cfloop>
 		</cfloop>
 		
@@ -152,7 +160,15 @@ Notes:
 			<cfset cacheStrategies = cacheStrategiesByModule[module] />
 			
 			<cfloop collection="#cacheStrategies#" item="cacheStrategyName">
-				<cfset cacheStrategies[cacheStrategyName].flush() />
+				<cftry>
+					<cfset cacheStrategies[cacheStrategyName].flush() />
+					<cfcatch type="MachII.caching.strategies.NotImplemented">
+						<!--- Do nothing an continue since the flush method is not implemented for this strategy --->
+					</cfcatch>
+					<cfcatch type="any">
+						<cfrethrow />
+					</cfcatch>
+				</cftry>
 			</cfloop>
 		</cfloop>
 		
@@ -189,8 +205,19 @@ Notes:
 		<cfset var strategyName = arguments.event.getArg("strategyName") />
 		<cfset var cacheStrategy = getCacheStrategyByModuleAndStrategyName(arguments.event.getArg("moduleName"), strategyName) />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reaped '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />		
-
-		<cfset cacheStrategy.reap() />
+		
+		<cftry>
+			<cfset cacheStrategy.reap() />
+			<cfcatch type="MachII.caching.strategies.NotImplemented">
+				<cfset message.setMessage("Cannot reap '#strategyName#' in module '#arguments.event.getArg("ModuleName")#' as this strategy does not support reap.") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfset message.setMessage("Cannot reap '#strategyName#' in module '#arguments.event.getArg("ModuleName")#' as an exception occurred.") />
+				<cfset message.setType("warn") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+		</cftry>
 		
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
@@ -203,8 +230,19 @@ Notes:
 		<cfset var strategyName = arguments.event.getArg("strategyName") />
 		<cfset var cacheStrategy = getCacheStrategyByModuleAndStrategyName(arguments.event.getArg("moduleName"), strategyName) />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Flushed '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />		
-
-		<cfset cacheStrategy.flush() />
+		
+		<cftry>
+			<cfset cacheStrategy.flush() />
+			<cfcatch type="MachII.caching.strategies.NotImplemented">
+				<cfset message.setMessage("Cannot flush '#strategyName#' in module '#arguments.event.getArg("ModuleName")#' as this strategy does not support flush.") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+			<cfcatch type="any">
+				<cfset message.setMessage("Cannot flush '#strategyName#' in module '#arguments.event.getArg("ModuleName")#' as an exception occurred.") />
+				<cfset message.setType("warn") />
+				<cfset message.setCaughtException(cfcatch) />
+			</cfcatch>
+		</cftry>
 		
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />

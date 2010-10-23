@@ -107,11 +107,12 @@ via reap() which is run every 3 minutes.
  	displayname="TimespanNativeCfmlStrategy"
 	extends="MachII.caching.strategies.AbstractCacheStrategy"
 	output="false"
-	hint="A caching strategy that uses a cfml engine's native CachePut and CacheGet methods">
+	hint="A caching strategy that uses a cfml engine's native CachePut and CacheGet methods.">
 	
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.reapImplemented = false />
 	<cfset variables.instance.strategyTypeName = "Time Span Native CFML" />
 	<cfset variables.instance.cacheName = "" />
 	<cfset variables.instance.timespan = "" />
@@ -200,9 +201,9 @@ via reap() which is run every 3 minutes.
 		
 		<!--- attempt to retrieve the element --->
 		<cfif variables.instance.useNamedCache>
-			<cfset element = cacheGet(hashedKey, false, getCacheName()) />
+			<cfset element = CacheGet(hashedKey, false, getCacheName()) />
 		<cfelse>
-			<cfset element = cacheGet(hashedKey) />
+			<cfset element = CacheGet(hashedKey) />
 		</cfif>
 		
 		<!--- if the requested element is in the cache, return it --->
@@ -225,12 +226,12 @@ via reap() which is run every 3 minutes.
 		<cfif variables.instance.useNamedCache>
 			<cfset ids = CacheGetAllIds(cacheName) />
 			<cfloop from="1" to="#ArrayLen(ids)#" index="i">
-				<cfset cacheRemove(ids[i], false, cacheName) />
+				<cfset CacheRemove(ids[i], false, cacheName) />
 			</cfloop>
 		<cfelse>
 			<cfset ids = CacheGetAllIds() />
 			<cfloop from="1" to="#ArrayLen(ids)#" index="i">
-				<cfset cacheRemove(ids[i], false) />
+				<cfset CacheRemove(ids[i], false) />
 			</cfloop>
 		</cfif>
 
@@ -242,17 +243,19 @@ via reap() which is run every 3 minutes.
 		
 		<!--- clear this cache store --->
 		<cfif variables.instance.useNamedCache>
-			<cfset cacheClear("", getCacheName()) />
+			<cfset CacheClear("", getCacheName()) />
 		<cfelse>
-			<cfset cacheClear() />
+			<cfset CacheClear() />
 		</cfif>
 		
 		<cfset getCacheStats().reset() />
 	</cffunction>
 	
 	<cffunction name="reap" access="public" returntype="void" output="false"
-		hint="Reaps 'expired' cache elements.">
-		<cfabort showerror="Reaping expired cache elements is handled natively, this error is intentional as the reap method has not been implemented." />
+		hint="Reaps 'expired' cache elements. Throws 'MachII.caching.strategies.NotImplemented' intentionally as this method is not implemented.">
+		<cfthrow type="MachII.caching.strategies.NotImplemented" 
+			message="Reaping expired cache elements is handled natively in 'TimeSpanNativeCfmlCache'."
+			detail="This exception is intentional as the reap method has not been implemented." />
 	</cffunction>
 	
 	<cffunction name="keyExists" access="public" returntype="boolean" output="false"
@@ -260,9 +263,9 @@ via reap() which is run every 3 minutes.
 		<cfargument name="key" type="string" required="true"
 			hint="The unique key for the data to check if it is in the cache." />	
 		<cfif variables.instance.useNamedCache>
-			<cfreturn cacheKeyExists(hashKey(arguments.key), getCacheName()) />
+			<cfreturn CacheKeyExists(hashKey(arguments.key), getCacheName()) />
 		<cfelse>
-			<cfreturn cacheKeyExists(hashKey(arguments.key)) />
+			<cfreturn CacheKeyExists(hashKey(arguments.key)) />
 		</cfif>
 	</cffunction>
 	
@@ -273,9 +276,9 @@ via reap() which is run every 3 minutes.
 
 		<!--- Remove this element from the cache --->
 		<cfif variables.instance.useNamedCache>
-			<cfset cacheRemove(hashKey(arguments.key), false, getCacheName()) />
+			<cfset CacheRemove(hashKey(arguments.key), false, getCacheName()) />
 		<cfelse>
-			<cfset cacheRemove(hashKey(arguments.key), false) />
+			<cfset CacheRemove(hashKey(arguments.key), false) />
 		</cfif>
 	</cffunction>
 
