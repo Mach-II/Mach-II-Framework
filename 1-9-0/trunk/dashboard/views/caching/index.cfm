@@ -51,6 +51,12 @@ Notes:
 	<cfimport prefix="dashboard" taglib="/MachII/dashboard/customtags" />
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 	<view:meta type="title" content="Caching" />
+	
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/caching.js">
+		<cfoutput>
+			myCachingHandler = new CachingHandler('#BuildUnescapedUrl("js.caching.snip_cachingInformation")#');
+		</cfoutput>
+	</view:script>
 </cfsilent>
 <cfoutput>
 
@@ -84,7 +90,7 @@ Notes:
 		</view:a>
 	</li>
 	<li>
-		<a onclick="cachingInformation.stop();cachingInformation.start();">
+		<a onclick="myCachingHandler.refreshCachingStats();">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" width="16" height="16" alt="Flush All" />
 			&nbsp;Refresh Stats (Automatically Updates Every 30 Seconds)
 		</a>
@@ -92,14 +98,8 @@ Notes:
 </ul>
 
 <div id="cachingInformation">
+	<div class="updating">
+		<h4>Updating Cache Stats</h4>
+	</div>
 </div>
-<view:script outputType="inline">
-	cachingInformation = new Ajax.PeriodicalUpdater('cachingInformation'
-		, '#BuildUnescapedUrl("js.caching.snip_cachingInformation")#'
-		, {
-			frequency: 30
-			, decay: 1
-		}
-	);
-</view:script>
 </cfoutput>
