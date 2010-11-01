@@ -184,9 +184,9 @@ via reap() which is run every 3 minutes.
 		
 		<!--- write the element to the cache --->
 		<cfif variables.instance.useNamedCache>
-			<cfset CachePut(hashedKey, arguments.data, getCacheTimespan(), getIdleTimespan(), getCacheName()) />
+			<cfset CachePut(hashedKey, arguments.data, getTimespan(), getIdleTimespan(), getCacheName()) />
 		<cfelse>
-			<cfset CachePut(hashedKey, arguments.data, getCacheTimespan(), getIdleTimespan()) />
+			<cfset CachePut(hashedKey, arguments.data, getTimespan(), getIdleTimespan()) />
 		</cfif>
 	</cffunction>
 	
@@ -376,7 +376,7 @@ via reap() which is run every 3 minutes.
 		<cfargument name="idleTimespanString" type="string" required="true"
 			hint="Must be in format of 0,0,0,0 (days,hours,minutes,seconds) or 'forever'." />
 		<cfset variables.instance.idleTimespanString = arguments.idleTimespanString />
-		<cfset setTimespan(arguments.idleTimespanString) />
+		<cfset setIdleTimespan(arguments.idleTimespanString) />
 	</cffunction>
 	<cffunction name="getIdleTimespanString" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.idleTimespanString />
