@@ -243,7 +243,9 @@ Notes:
 		<cfset result.name = server.coldfusion.productname />
 		<cfset result.majorVersion = 0 />
 		<cfset result.minorVersion = 0 />
+		<cfset result.fullVersion = rawProductVersion />
 		<cfset result.productLevel = server.coldfusion.productlevel />
+		<cfset result.appServer = server.coldfusion.appServer />
 		
 		<!---
 			Railo puts a "fake" version number (e.g. 8,0,0,1) in product version number so we need

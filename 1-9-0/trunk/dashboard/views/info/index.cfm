@@ -118,7 +118,6 @@ Notes:
 		</span>
 	</li>
 </ul>
-	
 <div class="twoColumn" style="margin-top:24px;">
 	<div class="left" style="width:454px;">
 		<table>
@@ -127,19 +126,19 @@ Notes:
 			</tr>
 			<tr>
 				<td style="width:30%;"><h4>Vendor</h4></td>
-				<td style="width:70%;"><p>#server.ColdFusion.ProductName#</p></td>
+				<td style="width:70%;"><p>#variables.engineInfo.Name#</p></td>
 			</tr>
 			<tr class="shade">
 				<td><h4>Version</h4></td>
-				<td><p>#server.ColdFusion.ProductVersion#</p></td>
+				<td><p>#variables.engineInfo.FullVersion#</p></td>
 			</tr>
 			<tr>
 				<td><h4>Version Level</h4></td>
-				<td><p>#server.ColdFusion.ProductLevel#</p></td>
+				<td><p>#variables.engineInfo.ProductLevel#</p></td>
 			</tr>
 			<tr class="shade">
 				<td><h4>Application Server</h4></td>
-				<td><p>#server.ColdFusion.Appserver#</p></td>
+				<td><p>#variables.engineInfo.AppServer#</p></td>
 			</tr>
 			<tr>
 				<td>
@@ -153,7 +152,6 @@ Notes:
 				</td>
 			</tr>
 		</table>
-		
 		<table style="margin-top:24px;">
 			<tr>
 				<th colspan="2"><h3>Server Information</h3></th>
