@@ -181,8 +181,13 @@ To Test it out, do the following:
 
 		<cfset var restUri =  arguments.event.getArg("restUri") />
 		<cfset var restResponseBody = callEndpointFunction(restUri, arguments.event) />
+		<cfset var format = arguments.event.getArg("format", "") />
 
-		<cfset addContentTypeHeaderFromFormat(arguments.event.getArg("format", "")) />
+		<cfif format EQ "" AND restUri.getUriMetadataParameters().defaultReturnFormat NEQ "">
+			<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
+		</cfif>
+
+		<cfset addContentTypeHeaderFromFormat(format) />
 
 		<!--- TODO: If callEndpointFunction() returns void, won't requestResponseBody be deleted as a var? This might need to be IsDefined() --->
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
@@ -319,6 +324,7 @@ To Test it out, do the following:
 		<cfset var currRestUri = "" />
 		<cfset var currHttpMethod = "" />
 		<cfset var currRestUriMetadata = StructNew() />
+		<cfset var parameter = "" />
 		<cfset var i = 0 />
 		<cfset var key = "" />
 
@@ -354,6 +360,18 @@ To Test it out, do the following:
 						<cfelse>
 							<cfset currRestUriMetadata.authenticate = getAuthenticateDefault() />
 						</cfif>
+
+						<!--- Check for default return format for the method --->
+						<cfloop array="#currFunction.parameters#" index="parameter">
+							<cfif parameter.name EQ "format">
+								<cfif StructKeyExists(parameter, "default")>
+									<cfset currRestUriMetadata.defaultReturnFormat = parameter.default />
+								<cfelse>
+									<cfset currRestUriMetadata.defaultReturnFormat = "" />
+								</cfif>
+								<cfbreak/>
+							</cfif>
+						</cfloop>
 
 						<!--- Create instance of Uri and add it to the UriCollection. --->
 						<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
