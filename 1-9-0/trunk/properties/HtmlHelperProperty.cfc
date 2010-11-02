@@ -140,13 +140,14 @@ from the parent application.
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.assetPathsCache = StructNew() />
 
+	<!---
+	CONSTANTS
+	--->
 	<!--- Some CFML engines such as OpenBD on GAE do not support java.awt.* package --->
 	<cfset variables.AWT_TOOLKIT = "" />
-
 	<!--- Do not use these locators as they may change in future versions --->
 	<cfset variables.HTML_HELPER_PROPERTY_NAME = "_HTMLHelper" />
 	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
-
 	<!--- Tabs, line feeds and carriage returns --->
 	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
 
@@ -158,17 +159,28 @@ from the parent application.
 
 		<cfset var cacheAssetPaths = StructNew() />
 		<cfset var webrootBasePath  = "" />
-		<cfset var serverInfo = server.coldfusion />
+		<cfset var engineInfo = getUtils().getCfmlEngineInfo() />
 
 		<!--- Configure auto-dimensions for addImage() --->
-		<cfif StructKeyExists(serverInfo, "productLevel") AND serverInfo.productLevel NEQ "Google App Engine">
+		<cftry>
+			<!--- OpenBD on GAE do not support java.awt.* package so replace with mock function --->
+			<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
+				<!--- We must explicitly throw an exception because the GAE version silently fails --->
+				<cfthrow type="MachII.framework.AWTNotSupportedOnThisEngine" />
+			</cfif>
+			
 			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
-		<cfelse>
-			<!--- Some hosts (such as GAE) do not support java.awt.* package so replace with mock function --->
-			<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
-			<cfset this.getImageDimensions = this.mock_getImageDimensions />
-		</cfif>
-
+			
+			<!---
+			AWT may not be supported if the server is running in headless. Try adding 
+			"-Djava.awt.headless=true" without the quotes to your JAVA_OPTS for your application engine
+			--->
+			<cfcatch type="any">
+				<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
+				<cfset this.getImageDimensions = this.mock_getImageDimensions />				
+			</cfcatch>
+		</cftry>
+		
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
 
