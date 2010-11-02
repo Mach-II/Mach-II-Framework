@@ -59,6 +59,23 @@ Notes:
 		<cfset variables.instanceName = "n/a" />
 	</cfif>
 	
+	<cfset variables.engineInfo = getAppManager().getUtils().getCfmlEngineInfo() />
+	
+	<cftry>
+		<!--- OpenBD on GAE do not support java.awt.* package so replace with mock function --->
+		<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
+			<!--- We must explicitly throw an exception because the GAE version silently fails --->
+			<cfthrow type="MachII.framework.AWTNotSupportedOnThisEngine" />
+		</cfif>
+		
+		<cfset variables.awtToolkit = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
+		<cfset variables.awtToolkitAvailable = true />
+		
+		<cfcatch type="any">
+			<cfset variables.awtToolkitAvailable = false />
+		</cfcatch>
+	</cftry>
+	
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/info.js">
 		<cfoutput>
 			myInfoHandler = new InfoHandler('#BuildUnescapedUrl("js.info.suggestGarbageCollection")#', '#BuildUnescapedUrl("js.info.snip_memoryInformation")#');
@@ -204,6 +221,10 @@ Notes:
 			<tr class="shade">
 				<td><h4>Persist Parameter</h4></td>
 				<td><p>#getProperty("redirectPersistParameter")#</p></td>
+			</tr>
+			<tr>
+				<td><h4>Java AWT Toolkit</h4></td>
+				<td><p>#YesNoFormat(variables.awtToolkitAvailable)#</p></td>
 			</tr>
 		</table>
 	</div>
