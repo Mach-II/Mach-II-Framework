@@ -578,7 +578,7 @@ Notes:
 				RewriteBase cannot be located in a basic http.conf or virtual host so only write
 				it if the Mach-II application does not live in the root of the host.
 			--->
-			<cfif urlBase NEQ "/">
+			<cfif urlBase NEQ "/" AND getPropertyManager().getProperty("urlRewriteBaseEnabled", true)>
 				<cfset contents.append("RewriteBase " & urlBase & lf) />
 				<cfset contents.append(lf) />
 				<cfset rewriteBase = "" />
