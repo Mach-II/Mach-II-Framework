@@ -218,10 +218,9 @@ Notes:
 
 			<cfif eventSecure NEQ -1 AND eventSecure NEQ requestSecure>
 				<cfif Len(getCurrentRouteName())>
-					<!--- TODO: These args aren't right, they don't match the signature of the redirectRoute method, but not sure what they should be. --->
-					<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, eventArgs, true, eventArgs) />
+					<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, true, eventArgs) />
 				<cfelse>
-					<cfset appManager.getRequestManager().redirectEvent( result.eventName, eventArgs, result.moduleName, true, eventArgs) />
+					<cfset appManager.getRequestManager().redirectEvent(result.eventName, eventArgs, result.moduleName, true, eventArgs) />
 				</cfif>
 			</cfif>
 
