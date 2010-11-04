@@ -82,7 +82,7 @@ Notes:
 		<cfset var thisThread = "" />
 		
 		<!--- Insert Fake credentials --->
-		<cfset httpHeaders["Authorization"] = generateFakeHeaderValue() />
+		<cfset httpHeaders["Authorization"] = variables.authentication.encodeAuthorizationHeader("peter", "peter") />
 		<cfset debug(httpHeaders) />
 		
 		<!--- Test with authorization --->
@@ -111,14 +111,11 @@ Notes:
 		<cfset assertFalse(cfthread.thisThread.result) /> 
 	</cffunction>
 	
-	<cffunction name="testDecodeAuthorizationHeader" access="public" returntype="void" output="false"
-		hint="Tests 'decodeAuthorizationHeader' method which is private.">
+	<cffunction name="testEncodeDecodeAuthorizationHeader" access="public" returntype="void" output="false"
+		hint="Tests 'encodeAuthorizationHeader' and 'decodeAuthorizationHeader' methods.">
 		
-		<cfset var fakeHeader = generateFakeHeaderValue() />
+		<cfset var fakeHeader = variables.authentication.encodeAuthorizationHeader("peter", "peter") />
 		<cfset var result = "" />
-			
-		<!--- Make the method public --->
-		<cfset makePublic(variables.authentication, "decodeAuthorizationHeader") />
 	
 		<!--- Get results --->
 		<cfset result = variables.authentication.decodeAuthorizationHeader(fakeHeader) />	
@@ -139,20 +136,10 @@ Notes:
 
 		<cfset credentials = variables.authentication.loadCredentialFile("/MachII/tests/dummy/Credentials") />
 		
-		<cfset debug(credentials) />
-		
 		<!--- Run assertions --->
+		<cfset debug(credentials) />
 		<cfset assertEquals(credentials["matt"], "1fa2ef4755a9226cb9a0a4840bd89b158ac71391") />
 		<cfset assertTrue(StructCount(credentials) EQ 2) />
-	</cffunction>
-
-	<!---
-	PROTECTED FUNCTIONS - UTILS
-	--->
-	<cffunction name="generateFakeHeaderValue" access="private" returntype="string" output="false"
-		hint="Generates a fake header value">
-		<!--- Authorization header is of format: "Basic Base64(username:password)" --->
-		<cfreturn "Basic " & ToBase64("peter:peter") />
 	</cffunction>
 	
 </cfcomponent>

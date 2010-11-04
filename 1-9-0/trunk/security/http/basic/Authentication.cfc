@@ -101,7 +101,7 @@ wire in plain text.
 		<cfargument name="httpHeaders" type="struct" required="true"
 			hint="The HTTP request data to use.">
 		
-		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=decodeAuthorizationHeader(arguments.httpHeaders["Authorization"]))>
+		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=decodeAuthorizationHeader(arguments.httpHeaders))>
 			<cfreturn true />
 		<cfelse>
 			<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
@@ -110,6 +110,52 @@ wire in plain text.
 			
 			<cfreturn false />
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="decodeAuthorizationHeader" access="public" returntype="struct" output="false"
+		hint="Decodes ann authorization header into realm, username and password.">
+		<cfargument name="value" type="any" required="true"
+			hint="The authorization header value or a struct of headers with an 'Authorization' key." />
+		
+		<cfset var tempUsernamePassword = "" />
+		<cfset var result = StructNew() />
+		
+		<!--- Convert headers struct into a value we can decode --->
+		<cfif IsStruct(arguments.value)>
+			<cftry>
+				<cfset arguments.value = arguments.value['Authorization'] />
+				<cfcatch>
+					<cfthrow type="MachII.security.http.InvalidHeader"
+						message="The passed headers to 'decodeAuthorizationHeader' does not contain an 'Authorization' key." />
+				</cfcatch>
+			</cftry>
+		</cfif>
+		
+		<!--- Setup a default result --->
+		<cfset result.username = "" />
+		<cfset result.password = "" />
+		
+		<!--- Check that we have the realm and the encoded username:password --->
+		<cfif ListLen(arguments.value, " ") EQ 2 AND ListFirst(arguments.value, " ") EQ "Basic">
+			<!--- Decode the username:password --->
+			<cfset tempUsernamePassword = ListLast(arguments.value, " ") />
+			<cfset tempUsernamePassword = ToString(ToBinary(tempUsernamePassword)) />
+			
+			<cfset result.username = ListFirst(tempUsernamePassword, ":") />
+			<cfset result.password = ListLast(tempUsernamePassword, ":") />			
+		</cfif>
+		
+		<cfreturn result />
+	</cffunction>
+	
+	<cffunction name="encodeAuthorizationHeader" access="public" returntype="string" output="false"
+		hint="Encodes an authorization header value in the proper format.">
+		<cfargument name="username" type="string" required="true"
+			hint="The username for the header value." />
+		<cfargument name="password" type="string" required="true"
+			hint="The password for the header value." />
+		<!--- Authorization header is of format: "Basic Base64(username:password)" --->
+		<cfreturn "Basic " & ToBase64(arguments.username & ":" & arguments.password) />
 	</cffunction>
 	
 	<!---
@@ -127,31 +173,6 @@ wire in plain text.
 		<cfelse>
 			<cfreturn false />
 		</cfif>
-	</cffunction>
-	
-	<cffunction name="decodeAuthorizationHeader" access="private" returntype="struct" output="false"
-		hint="Decodes ann authorization header into realm, username and password.">
-		<cfargument name="value" type="string" required="true"
-			hint="The authorization header value." />
-		
-		<cfset var tempUsernamePassword = "" />
-		<cfset var result = StructNew() />
-		
-		<!--- Setup a default result --->
-		<cfset result.username = "" />
-		<cfset result.password = "" />
-		
-		<!--- Check that we have the realm and the encoded username:password --->
-		<cfif ListLen(arguments.value, " ") EQ 2 AND ListFirst(arguments.value, " ") EQ "Basic">
-			<!--- Decode the username:password --->
-			<cfset tempUsernamePassword = ListLast(arguments.value, " ") />
-			<cfset tempUsernamePassword = ToString(ToBinary(tempUsernamePassword)) />
-			
-			<cfset result.username = ListFirst(tempUsernamePassword, ":") />
-			<cfset result.password = ListLast(tempUsernamePassword, ":") />			
-		</cfif>
-		
-		<cfreturn result />
 	</cffunction>
 	
 	<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
