@@ -92,7 +92,7 @@ Notes:
 		<cfset setModuleDelimiter(arguments.moduleDelimiter) />
 		<cfset setMaxEvents(arguments.maxEvents) />
 		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
-		
+
 		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
 		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME)) />
 
@@ -215,9 +215,10 @@ Notes:
 			<cfif cgi.SERVER_PORT_SECURE GTE 1 OR cgi.SERVER_NAME EQ appManager.getPropertyManager().getProperty("urlSecureBaseCheckServerName")>
 				<cfset requestSecure = 1 />
 			</cfif>
-			
+
 			<cfif eventSecure NEQ -1 AND eventSecure NEQ requestSecure>
 				<cfif Len(getCurrentRouteName())>
+					<!--- TODO: These args aren't right, they don't match the signature of the redirectRoute method, but not sure what they should be. --->
 					<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, eventArgs, true, eventArgs) />
 				<cfelse>
 					<cfset appManager.getRequestManager().redirectEvent( result.eventName, eventArgs, result.moduleName, true, eventArgs) />
@@ -227,7 +228,7 @@ Notes:
 			<!--- Create and queue the event. --->
 			<cfset nextEvent = appManager.getEventManager().createEvent(result.moduleName, result.eventName, eventArgs, result.eventName, result.moduleName) />
 			<cfset getEventQueue().put(nextEvent) />
-			<cfset setupEventContext(appManager, nextEvent) />	
+			<cfset setupEventContext(appManager, nextEvent) />
 
 			<!--- Handle any errors with the exception event --->
 			<cfcatch type="any">
@@ -304,26 +305,26 @@ Notes:
 			<cfset locale = getAppManager().getGlobalizationManager().retrieveLocale() />
 			<cfset getLog().debug("Retrieving locale from GlobalizationManager: #locale#") />
 		</cfif>
-		
+
 		<cfif locale EQ "">
 			<cfset locale = getPageContext().getRequest().getLocale() />
 		</cfif>
-		
+
 		<cfreturn locale />
 	</cffunction>
-	
+
 	<cffunction name="setWorkingLocale" access="private" returntype="void" output="false"
 		hint="Sets the current Locale for this request (and session).">
 		<cfargument name="locale" type="string" required="true" />
-		
+
 		<cfif IsObject(getAppManager().getGlobalizationManager())>
 			<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
-			
+
 		<cfelse>
 			<!--- I'm pretty ambivalent about the existence of this error message. --->
 			<cfabort showerror="GlobalizationManager not configured for attempt to set a locale. Please add a Globalization property to your configuration file."/>
 		</cfif>
-		
+
 		<cfset getLog().debug("Current locale set to #arguments.locale#") />
 	</cffunction>
 
@@ -539,7 +540,7 @@ Notes:
 				<cfset eventArgs[Right(key, Len(key) - 3)] = eventArgs[key] />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- If there is an incoming eventArg that matches the globalization locale key,
 			persist the new locale --->
 		<cfif IsObject(getAppManager().getGlobalizationManager()) AND
