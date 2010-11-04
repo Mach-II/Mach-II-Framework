@@ -364,7 +364,7 @@ Notes:
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
 			<cfset secure = getParent().getEventHandler(arguments.eventName).getSecure() />
 		<cfelse>
-			<!--- Uknown --->
+			<!--- Unknown --->
 			<cfreturn -1 />
 		</cfif>
 		
@@ -373,7 +373,7 @@ Notes:
 		<cfelseif secure EQ "false">
 			<cfreturn 0 />
 		<cfelse>
-			<!--- Uknown --->
+			<!--- Unknown --->
 			<cfreturn -1 />		
 		</cfif>
 	</cffunction>

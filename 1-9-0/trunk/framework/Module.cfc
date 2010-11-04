@@ -280,7 +280,7 @@ Notes:
 		<cfset variables.moduleAppManager = arguments.moduleAppManager />
 	</cffunction>
 	<cffunction name="getModuleAppManager" access="public" returntype="MachII.framework.AppManager" output="false"
-		hint="Sets the ModuLeAppManager instance this Module belongs to.">
+		hint="Sets the ModuleAppManager instance this Module belongs to.">
 		<cfif NOT isLoaded()>
 	 		<cfset getAppManager().getLogFactory().getLog("MachII.framework.Module").debug("Executing lazy load for module: '#variables.moduleName#'") />
 			<cfset load() />

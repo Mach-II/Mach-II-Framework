@@ -297,7 +297,7 @@ Notes:
 
 		<cfif NOT isModuleEnabled(arguments.moduleName)>
 			<cfset variables.enabledModules[arguments.moduleName] = variables.disabledModules[arguments.moduleName] />
-			<cfset variables.disabledModules[arguments.moduleName].setEnabled(true) />
+			<cfset variables.enabledModules[arguments.moduleName].setEnabled(true) />
 			<cfset StructDelete(variables.disabledModules, arguments.moduleName) />
 		</cfif>
 	</cffunction>

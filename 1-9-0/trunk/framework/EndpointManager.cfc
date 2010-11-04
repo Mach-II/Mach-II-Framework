@@ -85,7 +85,7 @@ Notes:
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getEndpointManager()) />
 
-			<!--- Share the endponts struct betwen the parent and child since they are global not module specific --->
+			<!--- Share the endpoints struct between the parent and child since they are global not module specific --->
 			<cfset setEndpoints(getParent().getEndpoints()) />
 			<cfset setEndpointContextPathMap(getParent().getEndpointContextPathMap()) />
 		</cfif>
@@ -350,7 +350,7 @@ Notes:
 		<cfargument name="endpointParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Configuration parameters for the endpoint." />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false"
-			hint="A boolean to allow an already managed endpoint to be overrided with a new one. Defaults to false." />
+			hint="A boolean to allow an already managed endpoint to be overridden with a new one. Defaults to false." />
 
 		<cfset var endpoint = "" />
 		<cfset var baseProxy = "" />

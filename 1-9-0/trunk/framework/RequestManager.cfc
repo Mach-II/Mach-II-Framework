@@ -116,9 +116,9 @@ Notes:
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		<cfset setModuleNames(getAppManager().getModuleManager().getModuleNames()) />
-		
+
 		<!--- TODO:Check if the urlBase and urlSecureBase need to be dynamic server names --->
-		
+
 		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBase")>
 			<cfset temp =  getPropertyManager().getProperty("urlBase") />
 
@@ -131,7 +131,7 @@ Notes:
 		</cfif>
 		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBaseCheckServerName")>
 			<cfset temp =  getPropertyManager().getProperty("urlSecureBase") />
-		
+
 			<cfif ListLen(temp, "//") GTE 2>
 				<cfset getPropertyManager().setProperty("urlSecureBaseCheckServerName", ListFirst(ListGetAt(temp, 2, "//")), "/") />
 			</cfif>
@@ -356,10 +356,10 @@ Notes:
 			<cfelse>
 				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
-			
+
 			<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
 
-			<!--- If event handler securt type is ambigous (-1), then default to the current secure type this request --->
+			<!--- If event handler secure type is ambiguous (-1), then default to the current secure type this request --->
 			<cfif secureType EQ -1>
 				<cfif cgi.SERVER_PORT_SECURE>
 					<cfset arguments.urlBase = getDefaultUrlSecureBase() />
@@ -442,14 +442,14 @@ Notes:
 		<cfset var eventName = route.getEventName() />
 		<cfset var eventManager = "" />
 		<cfset var secureType = -1 />
-		
+
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
 			<cfif Len(moduleName)>
 				<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
 			<cfelse>
 				<cfset eventManager = getAppManager().getEventManager() />
 			</cfif>
-			
+
 			<cfset secureType = eventManager.getEventSecureType(eventName) />
 
 			<!--- If event handler securt type is ambigous (-1), then default to the current secure type this request --->

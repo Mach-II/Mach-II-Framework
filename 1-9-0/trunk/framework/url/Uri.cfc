@@ -47,7 +47,7 @@ Created version: 1.9.0
 
 Notes:
 
-A tUri is a link between a URI pattern and an endpoint method that
+A Uri is a link between a URI pattern and an endpoint method that
 will be invoked when an incoming URL matches the pattern. The RestUri
 pattern can include tokens that defined variable portions of the
 incoming URI.
