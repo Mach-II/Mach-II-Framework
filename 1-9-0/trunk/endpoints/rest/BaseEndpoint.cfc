@@ -336,7 +336,7 @@ To Test it out, do the following:
 					<!--- Iterate through found methods and look for required REST:URI annotation --->
 					<cfset currFunction = currMetadata.functions[i] />
 					<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_URI)>
-						
+
 						<!--- Rest data structures --->
 						<cfset currRestUriMetadata = StructNew() />
 
@@ -362,12 +362,11 @@ To Test it out, do the following:
 						</cfif>
 
 						<!--- Check for default return format for the method --->
+						<cfset currRestUriMetadata.defaultReturnFormat = "" />
 						<cfloop array="#currFunction.parameters#" index="parameter">
 							<cfif parameter.name EQ "format">
 								<cfif StructKeyExists(parameter, "default")>
 									<cfset currRestUriMetadata.defaultReturnFormat = parameter.default />
-								<cfelse>
-									<cfset currRestUriMetadata.defaultReturnFormat = "" />
 								</cfif>
 								<cfbreak/>
 							</cfif>
