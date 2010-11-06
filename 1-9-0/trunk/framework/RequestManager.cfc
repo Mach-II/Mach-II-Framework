@@ -372,8 +372,6 @@ Notes:
 				<cfset arguments.urlBase = getDefaultUrlBase() />
 			</cfif>
 		</cfif>
-		
-		<cfset getLog().trace("buildUrl...event #arguments.eventname#", arguments)>
 
 		<!--- Nested the appending of the event parameter inside the next block
 			Moving it causes redirect commands with just urls to wrongly append
