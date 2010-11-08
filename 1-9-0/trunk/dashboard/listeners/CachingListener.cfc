@@ -48,15 +48,15 @@ Updated version: 1.0.0
 Notes:
 --->
 <cfcomponent
-	displayname="CachingListener" 
-	extends="MachII.framework.Listener"	
+	displayname="CachingListener"
+	extends="MachII.framework.Listener"
 	output="false"
 	hint="Basic interface for caching structures.">
 
 	<!---
 	PROPERTIES
 	--->
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -71,39 +71,39 @@ Notes:
 	<cffunction name="getCacheStrategies" access="public" returntype="struct" output="false"
 		hint="Gets the data for all the modules including the base app.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var cacheStrategies = structNew() />
-		
+
 		<cfset getBaseCacheStrategies(cacheStrategies) />
 		<cfset getModuleCacheStrategies(cacheStrategies) />
-		
+
 		<cfreturn cacheStrategies />
 	</cffunction>
-	
+
 	<cffunction name="enableDisableAll" access="public" returntype="void" output="false"
 		hint="Enables a cache strategy.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var cacheStrategiesByModule = getCacheStrategies(arguments.event) />
 		<cfset var cacheStrategies = "" />
-		<cfset var mode = arguments.event.getArg("mode") />		
+		<cfset var mode = arguments.event.getArg("mode") />
 		<cfset var module = "" />
 		<cfset var cacheStrategyName = "" />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />
-		
+
 		<cfloop collection="#cacheStrategiesByModule#" item="module">
-		
+
 			<cfset cacheStrategies = cacheStrategiesByModule[module] />
-			
+
 			<cfloop collection="#cacheStrategies#" item="cacheStrategyName">
 				<cfif mode EQ "enable">
 					<cfset cacheStrategies[cacheStrategyName].setCacheEnabled(true) />
 				<cfelse>
 					<cfset cacheStrategies[cacheStrategyName].setCacheEnabled(false) />
-				</cfif>				
+				</cfif>
 			</cfloop>
 		</cfloop>
-		
+
 		<cfif mode EQ "enable">
 			<cfset message.setMessage("Enabled all cache strategies.") />
 		<cfelse>
@@ -113,21 +113,21 @@ Notes:
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="reapAll" access="public" returntype="void" output="false"
 		hint="Reaps all cache strategies.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var cacheStrategiesByModule = getCacheStrategies(arguments.event) />
 		<cfset var cacheStrategies = "" />
 		<cfset var module = "" />
 		<cfset var cacheStrategyName = "" />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reaped all cache strategies.") />
-		
+
 		<cfloop collection="#cacheStrategiesByModule#" item="module">
-		
+
 			<cfset cacheStrategies = cacheStrategiesByModule[module] />
-			
+
 			<cfloop collection="#cacheStrategies#" item="cacheStrategyName">
 				<cftry>
 					<cfset cacheStrategies[cacheStrategyName].reap() />
@@ -140,25 +140,25 @@ Notes:
 				</cftry>
 			</cfloop>
 		</cfloop>
-		
+
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="flushAll" access="public" returntype="void" output="false"
 		hint="Reaps all cache strategies.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var cacheStrategiesByModule = getCacheStrategies(arguments.event) />
 		<cfset var cacheStrategies = "" />
 		<cfset var module = "" />
 		<cfset var cacheStrategyName = "" />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Flushed all cache strategies.") />
-		
+
 		<cfloop collection="#cacheStrategiesByModule#" item="module">
-		
+
 			<cfset cacheStrategies = cacheStrategiesByModule[module] />
-			
+
 			<cfloop collection="#cacheStrategies#" item="cacheStrategyName">
 				<cftry>
 					<cfset cacheStrategies[cacheStrategyName].flush() />
@@ -171,22 +171,22 @@ Notes:
 				</cftry>
 			</cfloop>
 		</cfloop>
-		
+
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="enableDisableCacheStrategy" access="public" returntype="void" output="false"
 		hint="Enables/disables a cache strategy.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var cacheStrategy = "" />
 		<cfset var strategyName = arguments.event.getArg("strategyName") />
-		<cfset var mode = arguments.event.getArg("mode") />	
-		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />	
+		<cfset var mode = arguments.event.getArg("mode") />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />
 
 		<cfset cacheStrategy = getCacheStrategyByModuleAndStrategyName(arguments.event.getArg("moduleName"), strategyName) />
-		
+
 		<cfif mode EQ "enable">
 			<cfset cacheStrategy.setCacheEnabled(true) />
 			<cfset message.setMessage("Enabled '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />
@@ -197,15 +197,15 @@ Notes:
 			<cfset arguments.event.setArg("message", message) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="reapCacheStrategy" access="public" returntype="void" output="false"
 		hint="Reaps a cache strategy.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var strategyName = arguments.event.getArg("strategyName") />
 		<cfset var cacheStrategy = getCacheStrategyByModuleAndStrategyName(arguments.event.getArg("moduleName"), strategyName) />
-		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reaped '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />		
-		
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Reaped '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />
+
 		<cftry>
 			<cfset cacheStrategy.reap() />
 			<cfcatch type="MachII.caching.strategies.NotImplemented">
@@ -218,19 +218,19 @@ Notes:
 				<cfset message.setCaughtException(cfcatch) />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="flushCacheStrategy" access="public" returntype="void" output="false"
 		hint="Flushes a cache strategy.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var strategyName = arguments.event.getArg("strategyName") />
 		<cfset var cacheStrategy = getCacheStrategyByModuleAndStrategyName(arguments.event.getArg("moduleName"), strategyName) />
-		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Flushed '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />		
-		
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("Flushed '#strategyName#' in module '#arguments.event.getArg("ModuleName")#'.") />
+
 		<cftry>
 			<cfset cacheStrategy.flush() />
 			<cfcatch type="MachII.caching.strategies.NotImplemented">
@@ -243,7 +243,7 @@ Notes:
 				<cfset message.setCaughtException(cfcatch) />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
@@ -255,46 +255,48 @@ Notes:
 		hint="Gets a cache strategy by module and strategy name.">
 		<cfargument name="moduleName" type="string" required="true" />
 		<cfargument name="strategyName" type="string" required="true" />
-		
+
 		<cfset var cacheStrategyManager = "" />
 		<cfset var cacheStrategy = "" />
-		
+
 		<cfif arguments.moduleName EQ "base">
 			<cfset cacheStrategyManager = getAppManager().getParent().getCacheManager().getCacheStrategyManager() />
 		<cfelse>
 			<cfset cacheStrategyManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getModuleAppManager().getCacheManager().getCacheStrategyManager() />
 		</cfif>
-				
+
 		<cfset cacheStrategy = cacheStrategyManager.getCacheStrategyByName(strategyName) />
-		
+
 		<cfreturn cacheStrategy />
 	</cffunction>
-	
+
 	<cffunction name="getModuleCacheStrategies" access="private" returntype="struct" output="false"
 		hint="Gets the data for all the modules.">
 		<cfargument name="cacheStrategies" type="struct" required="true" />
-		
+
 		<cfset var modules = getAppManager().getModuleManager().getModules() />
 		<cfset var cacheStrategyManager = "" />
 		<cfset var cacheStrategyNames = "" />
 		<cfset var key = "" />
 		<cfset var i = 0>
-		
-		<cfloop collection="#modules#" item="key">
-			<cfset cacheStrategyManager = modules[key].getModuleAppManager().getCacheManager().getCacheStrategyManager() />
-			<cfset cacheStrategyNames = cacheStrategyManager.getCacheStrategyNames() />
 
-			<cfif ArrayLen(cacheStrategyNames)>
-				<cfset arguments.cacheStrategies[key] = structNew() />
-				<cfloop from="1" to="#ArrayLen(cacheStrategyNames)#" index="i">
-					<cfset arguments.cacheStrategies[key][cacheStrategyNames[i]] = cacheStrategyManager.getCacheStrategyByName(cacheStrategyNames[i]) />
-				</cfloop>
+		<cfloop collection="#modules#" item="key">
+			<cfif modules[key].isLoaded()>
+				<cfset cacheStrategyManager = modules[key].getModuleAppManager().getCacheManager().getCacheStrategyManager() />
+				<cfset cacheStrategyNames = cacheStrategyManager.getCacheStrategyNames() />
+
+				<cfif ArrayLen(cacheStrategyNames)>
+					<cfset arguments.cacheStrategies[key] = structNew() />
+					<cfloop from="1" to="#ArrayLen(cacheStrategyNames)#" index="i">
+						<cfset arguments.cacheStrategies[key][cacheStrategyNames[i]] = cacheStrategyManager.getCacheStrategyByName(cacheStrategyNames[i]) />
+					</cfloop>
+				</cfif>
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn arguments.cacheStrategies />
 	</cffunction>
-	
+
 	<cffunction name="getBaseCacheStrategies" access="private" returntype="void" output="false"
 		hint="Gets the cache strategies for the base app.">
 		<cfargument name="cacheStrategies" type="struct" required="true" />

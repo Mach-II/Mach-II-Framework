@@ -301,7 +301,9 @@ Notes:
 			<cfset modules = variables.moduleManager.getModules() />
 
 			<cfloop collection="#modules#" item="key">
-				<cfset modules[key].getModuleAppManager().onSessionEnd(arguments.sessionScope) />
+				<cfif modules[key].isLoaded()>
+					<cfset modules[key].getModuleAppManager().onSessionEnd(arguments.sessionScope) />
+				</cfif>
 			</cfloop>
 		</cfif>
 	</cffunction>
