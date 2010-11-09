@@ -88,6 +88,7 @@ Notes:
 		<cfset var uri = "" />
 		<cfset var pattern = "" />
 		<cfset var httpMethod = "" />
+		<cfset var parameter = "" />
 
 		<cfset stcResult.methodMetadata = StructNew () />
 		
@@ -128,6 +129,26 @@ Notes:
 							<cfset stcTemp[httpMethod] = Duplicate(itemFunction) />
 							<cfset stcTemp[httpMethod].COMPONENT = item.component />
 							<cfset stcTemp[httpMethod].TOKENS = uri.getUriTokenNames() />
+							
+							<cfif NOT StructKeyExists(stcTemp[httpMethod], "REST:queryType")>
+								<cfif ListFindNoCase("POST,PUT", httpMethod)>
+									<cfset stcTemp[httpMethod]["REST:queryType"]  = "multipart/form-data" />
+								<cfelse>
+									<cfset stcTemp[httpMethod]["REST:queryType"]  = "application/x-www-form-urlencoded" />
+								</cfif>
+							</cfif>
+							
+							<!--- Look at the method parameters --->
+							<cfloop array="#stcTemp[httpMethod].parameters#" index="parameter">
+								<cfif NOT StructKeyExists(parameter, "REST:type")>
+									<cfif StructKeyExists(parameter, "type")>
+										<cfset parameter["REST:type"] = parameter.type />
+									<cfelse>
+										<cfset parameter["REST:type"] = "string" />
+									</cfif>
+								</cfif>	
+							</cfloop>
+							
 							<cfset stcResult.methodMetadata[item.component][pattern] = stcTemp />
 						</cfloop>
 					</cfloop>

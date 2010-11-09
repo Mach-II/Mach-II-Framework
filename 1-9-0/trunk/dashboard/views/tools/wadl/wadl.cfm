@@ -13,7 +13,8 @@
 <application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://wadl.dev.java.net/2009/02 wadl.xsd"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://wadl.dev.java.net/2009/02">
+	xmlns="http://wadl.dev.java.net/2009/02"
+	xmlns:html="http://www.w3.org/1999/xhtml">
 
 <cfif isDefined("application.applicationName")>
 	<doc title="#application.applicationName#" />
@@ -33,18 +34,23 @@
 			<cfloop collection="#restUriMethods#" item="restMethod">
 				<cfset restUriItem = StructFind(restUriMethods, restMethod) />
 				<method name="#restMethod#" id="#restUriItem.name#">
-					<cfif isDefined("restUriItem.hint")><doc>#restUriItem.hint#</doc></cfif>
+					<cfif isDefined("restUriItem.hint")>
+						<doc>
+							<html:p>#restUriItem.hint#</html:p>
+							<html:strong>Request Media Type</html:strong>
+							<html:p>#restUriItem["REST:queryType"]#</html:p>
+						</doc>
+					</cfif>
 					<request>
 						<cfset tokens = ArrayToList(restUriItem.tokens) />
 						<cfloop array="#restUriItem.parameters#" index="parameter">
-							<cfparam name="parameter.type" default="string">
-								<cfif NOT StructKeyExists(parameter, "rest:type")>
-									<cfset parameter["rest:type"] = parameter.type />
-							</cfif>
 							<cfif parameter.type NEQ "MachII.framework.Event">
 							<param name="#parameter.name#"
-								<cfif isDefined("parameter.type")>type="#parameter.type#"</cfif>
-								<cfif isDefined("parameter.required")>required="#parameter.required#"</cfif>
+								type="xsd:#parameter["rest:type"]#"
+								<cfif isDefined("parameter.required")>required="#parameter.required#"
+									<!--- If not required and a default is specified --->
+									<cfif NOT parameter.required AND isDefined("parameter.default")>default="#parameter.default#"</cfif>
+								</cfif>
 								<cfif ListFind(tokens, parameter.name)>style="template"<cfelse>style="query"</cfif>
 								>
 								<cfif isDefined("parameter.hint")><doc>#parameter.hint#</doc></cfif>
@@ -129,11 +135,13 @@
 				<cfset repid = ListGetAt(property.name, 2, ":") & ":" & ListGetAt(property.name, 4, ":") />
 				<representation id="#repid#" mediaType="#mediaType#">
 					<doc title="#repid#">
-					<cfif isValid("url", property.value)>
-						<a href="#property.value#">#property.value#</a>
-					<cfelse>
-						#property.value#
-					</cfif>
+						 <html:p>
+						<cfif isValid("url", property.value)>
+							<html:a href="#property.value#">#property.value#</html:a>
+						<cfelse>
+							#property.value#
+						</cfif>
+						</html:p>
 					</doc>
 				</representation>
 			</cfif>

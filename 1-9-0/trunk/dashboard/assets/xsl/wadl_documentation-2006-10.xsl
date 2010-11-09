@@ -467,6 +467,10 @@
     <xsl:template match="wadl:request">
         <xsl:apply-templates select="." mode="param-group">
             <xsl:with-param name="prefix">request</xsl:with-param>
+            <xsl:with-param name="style">template</xsl:with-param>
+        </xsl:apply-templates> 
+        <xsl:apply-templates select="." mode="param-group">
+            <xsl:with-param name="prefix">request</xsl:with-param>
             <xsl:with-param name="style">query</xsl:with-param>
         </xsl:apply-templates>
         <xsl:apply-templates select="." mode="param-group">
