@@ -95,32 +95,44 @@ Notes:
 			<cftry>
 				<cfset endpoint = allEndpoints[endpointKey]  />
 				<cfset restEndpoints[endpointKey] = endpoint />
-				<cfset restComponentMetadata = variables.introspector.getComponentDefinition(object:restEndpoints[endpointKey], walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
 				
-				<cfloop array="#restComponentMetadata#" index="item" >
-					<cfset stcResult.componentMetadata[item.component] = item />
-				</cfloop>
-				
-				<cfset restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:restEndpoints[endpointKey], namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
-				
-				<cfloop array="#restMethodMetadata#" index="item" >
-					<cfloop array="#item.functions#" index="itemFunction">
-						<cfset pattern = itemFunction["REST:URI"]/>
-						<cfset httpMethod = itemFunction["REST:METHOD"]/>
-						<cfset uri = endpoint.getRestUris().getUriByPattern(pattern, httpMethod) />
-
-						<cfif StructKeyExists(stcResult.methodMetadata, pattern)>
-							<cfset stcTemp = stcResult.methodMetadata[pattern] />
-						<cfelse>
-							<cfset stcTemp = StructNew() />
-						</cfif>
-
-						<cfset stcTemp[httpMethod] = Duplicate(itemFunction) />
-						<cfset stcTemp[httpMethod].COMPONENT = item.component />
-						<cfset stcTemp[httpMethod].TOKENS = uri.getUriTokenNames() />
-						<cfset stcResult.methodMetadata[pattern] = stcTemp />
+				<cfif variables.introspector.isObjectInstanceOf(endpoint, "MachII.endpoints.rest.BaseEndpoint")>
+					<cfset restComponentMetadata = variables.introspector.getComponentDefinition(object:endpoint, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
+					
+					<cfloop array="#restComponentMetadata#" index="item" >
+						<cfset stcResult.componentMetadata[item.component] = item />
 					</cfloop>
-				</cfloop>
+					
+					<cfset restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:endpoint, namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
+
+					<cfset stcResult.methodMetadata[item.component] = StructNew() />
+					
+					<cfloop array="#restMethodMetadata#" index="item" >
+						<cfloop array="#item.functions#" index="itemFunction">
+							<cfset pattern = itemFunction["REST:URI"]/>
+							
+							<cfset httpMethod = itemFunction["REST:METHOD"]/>
+							<cfset uri = endpoint.getRestUris().getUriByPattern(pattern, httpMethod) />
+	
+							<cfif StructKeyExists(stcResult.methodMetadata, pattern)>
+								<cfset stcTemp = stcResult.methodMetadata[pattern] />
+							<cfelse>
+								<cfset stcTemp = StructNew() />
+							</cfif>
+
+							<!--- If the pattern does not start with the REST name --->
+							<cfif NOT pattern.startsWith("/" & endpoint.getParameter("name"))>
+								<cfset pattern = "/" & endpoint.getParameter("name") & pattern />
+							</cfif>
+	
+							<cfset stcTemp[httpMethod] = Duplicate(itemFunction) />
+							<cfset stcTemp[httpMethod].COMPONENT = item.component />
+							<cfset stcTemp[httpMethod].TOKENS = uri.getUriTokenNames() />
+							<cfset stcResult.methodMetadata[item.component][pattern] = stcTemp />
+						</cfloop>
+					</cfloop>
+					
+				</cfif>
 				
 				<cfcatch type="Application">
 					<!--- This will fail for non-rest endpoints. --->
