@@ -55,9 +55,10 @@
 								>
 								<cfif isDefined("parameter.hint")><doc>#parameter.hint#</doc></cfif>
 								<cfif StructKeyExists(parameter, "rest:options")>
-									<cfloop list="#parameter["rest:options"]#" index="option" delimiters="|">
-									<option value="#ListGetAt(option, 1, "=")#"
-										<cfif ListLen(option, "=") EQ 2>mediaType="#ListGetAt(option, 2, "=")#"</cfif> />
+									<cfset variables.options =  getAppManager().getUtils().parseAttributesIntoStruct(parameter["rest:options"]) />
+									<cfloop collection="#variables.options#" item="option">
+										<option value="#option#"
+											<cfif Len(variables.options[option])>mediaType="#variables.options[option]#"</cfif> />
 									</cfloop>
 								</cfif>
 							</param>
