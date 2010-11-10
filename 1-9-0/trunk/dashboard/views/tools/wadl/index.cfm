@@ -98,7 +98,7 @@ Notes:
 </cfif>
 </table>
 
-<h2>Configuration Options</h2>
+<h2 style="margin:1em 0 3px 0;">Configuration Options</h2>
 <p class="right"><form:button name="view" value="View HTML" /><!---  <form:button name="pdf" value="Download PDF" /> ---> <form:button name="xml" value="Download WADL XML" /> </p>
 </form:form>
 </cfoutput>
