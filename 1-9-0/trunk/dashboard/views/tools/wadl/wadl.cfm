@@ -68,7 +68,9 @@ Notes:
 	xmlns:html="http://www.w3.org/1999/xhtml">
 
 <cfif isDefined("application.applicationName")>
-	<doc title="#application.applicationName#" />
+	<doc title="#application.applicationName#">
+	 temp temp
+	</doc>
 </cfif>
 
 <cfset endpoints = event.getArg('restEndpointMetadata') />

@@ -53,7 +53,7 @@ Notes:
 <cfoutput>
 <ul>
 	<li>
-		<view:a event="tools.wadl.doc" class="#getProperty("udfs").highlight("tools.wadl.doc")#">
+		<view:a event="tools.wadl" class="#getProperty("udfs").highlight("tools.wadl")#">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/information.png" alt="REST Endpoint Documentation" />
 			&nbsp;REST Endpoint Docs
 		</view:a>

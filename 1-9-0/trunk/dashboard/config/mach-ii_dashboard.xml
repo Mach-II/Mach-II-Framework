@@ -410,21 +410,25 @@ Notes:
 			<view-page name="tools.scribble.index" contentArg="layout.content"/>
 			<execute subroutine="doLayout"/>
 		</event-handler>
-
 		<event-handler event="js.tools.scribble.process" access="public">
 			<notify listener="tools.scribble" method="processInput"/>
 			<view-page name="tools.scribble.snip_output"/>
 			<notify listener="tools.scribble" method="cleanup"/>
 		</event-handler>
-
-		<event-handler event="tools.wadl.doc" access="public">
-			<notify listener="tools.wadl" method="getWadlDocumentation" />
-			<notify listener="tools.wadl" method="getRestEndpointMetadata" resultArg="restEndpointMetadata" />
-			<view-page name="tools.wadl.wadl" />
-		</event-handler>
-		
 		<event-handler event="js.tools.scribble.processPasteBin" access="public">
 			<notify listener="tools.scribble" method="processPasteBin"/>
+		</event-handler>
+
+		<event-handler event="tools.wadl" access="public">
+			<notify listener="tools.wadl" method="getRestEndpoints" resultArg="restEndpoints"/>
+			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="tools.wadl.index" contentArg="layout.content"/>
+			<execute subroutine="doLayout"/>
+		</event-handler>
+		<event-handler event="tools.wadl.process" access="public">
+			<execute subroutine="tools.wadl.doc_generate"/>
+			<notify listener="tools.wadl" method="process" />
+			<view-page name="tools.wadl.view" />
 		</event-handler>
 		
 		<!-- sys -->
@@ -447,6 +451,11 @@ Notes:
 	
 	<!-- SUBROUTINES -->
 	<subroutines>
+		<subroutine name="tools.wadl.doc_generate">
+			<notify listener="tools.wadl" method="getWadlDocumentation" />
+			<notify listener="tools.wadl" method="getRestEndpointMetadata" resultArg="restEndpointMetadata" />
+			<view-page name="tools.wadl.wadl" resultArg="wadlDoc" />
+		</subroutine>
 		<subroutine name="doLayout">
 			<view-page name="layout.header" contentArg="layout.header"/>
 			<view-page name="layout.footer" contentArg="layout.footer"/>

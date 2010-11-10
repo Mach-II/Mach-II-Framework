@@ -72,11 +72,15 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
+	<cffunction name="process" access="public" returntype="void" output="false">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+	</cffunction>
+	
 	<cffunction name="getRestEndpointMetaData" access="public" returntype="struct" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
-		<cfset var allEndpoints = getAppManager().getEndpointManager().getEndpoints() />
-		<cfset var restEndpoints = StructNew() />
+		<cfset var restEndpoints = getRestEndpoints(arguments.event) />
+		<cfset var requestedEndpoints = arguments.event.getArg("endpointNames") />
 		<cfset var endpoint = "" />
 		<cfset var endpointKey = "" />
 		<cfset var restComponentMetadata = "" />
@@ -92,12 +96,11 @@ Notes:
 
 		<cfset stcResult.methodMetadata = StructNew () />
 		
-		<cfloop collection="#allEndpoints#" item="endpointKey">
+		<cfloop collection="#restEndpoints#" item="endpointKey">
 			<cftry>
-				<cfset endpoint = allEndpoints[endpointKey]  />
-				<cfset restEndpoints[endpointKey] = endpoint />
+				<cfset endpoint = restEndpoints[endpointKey]  />
 				
-				<cfif variables.introspector.isObjectInstanceOf(endpoint, "MachII.endpoints.rest.BaseEndpoint")>
+				<cfif ListFindNoCase(requestedEndpoints, endpoint.getParameter("name"))>
 					<cfset restComponentMetadata = variables.introspector.getComponentDefinition(object:endpoint, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
 					
 					<cfloop array="#restComponentMetadata#" index="item" >
@@ -105,7 +108,7 @@ Notes:
 					</cfloop>
 					
 					<cfset restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:endpoint, namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
-
+	
 					<cfset stcResult.methodMetadata[item.component] = StructNew() />
 					
 					<cfloop array="#restMethodMetadata#" index="item" >
@@ -120,7 +123,7 @@ Notes:
 							<cfelse>
 								<cfset stcTemp = StructNew() />
 							</cfif>
-
+	
 							<!--- If the pattern does not start with the REST name --->
 							<cfif NOT pattern.startsWith("/" & endpoint.getParameter("name"))>
 								<cfset pattern = "/" & endpoint.getParameter("name") & pattern />
@@ -160,7 +163,6 @@ Notes:
 							<cfset stcResult.methodMetadata[item.component][pattern] = stcTemp />
 						</cfloop>
 					</cfloop>
-					
 				</cfif>
 				
 				<cfcatch type="Application">
@@ -172,7 +174,24 @@ Notes:
 		<cfreturn stcResult />
 	</cffunction>
 
-	<cffunction name="getWadlDocumentation" access="public" returntype="string" output="false">
+	<cffunction name="getRestEndpoints" access="public" returntype="struct" output="false"
+		hint="Gets all the REST based endpoints for this application.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />	
+		
+		<cfset var allEndpoints = getAppManager().getEndpointManager().getEndpoints() />
+		<cfset var restEndpoints = StructNew() />
+		<cfset var endpoint = "" />
+		
+		<cfloop collection="#allEndpoints#" item="endpoint">
+			<cfif variables.introspector.isObjectInstanceOf(allEndpoints[endpoint], "MachII.endpoints.rest.BaseEndpoint")>
+				<cfset restEndpoints[endpoint] = allEndpoints[endpoint] />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn restEndpoints />
+	</cffunction>
+
+	<cffunction name="getWadlDocumentation" access="public" returntype="void" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var strWadl = "" />
