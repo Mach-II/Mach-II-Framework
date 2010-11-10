@@ -58,12 +58,11 @@ Notes:
 </div>
 
 <form:form actionEvent="js.tools.scribble.process" id="processScribble">
-	<p>The scribble code is rendered within Mach-II. All function calls available in normal Mach-II views are available (e.g. <code>buildUrl()</code>, etc.).</p>
-	<div style="border: 1px solid black; padding: 6px;">
-		<form:textarea name="code"></form:textarea>
-	</div>
-	<p class="right"><form:button type="button" value="Share on PasteBin" id="promptPasteBin" /> <form:button value="Render" /></p>
-</form:form>
+<p>The scribble code is rendered within Mach-II. All function calls available in normal Mach-II views are available (e.g. <code>buildUrl()</code>, etc.).</p>
+<div style="border: 1px solid black; padding: 6px;">
+	<form:textarea name="code"></form:textarea>
+</div>
+<p class="right"><form:button type="button" value="Share on PasteBin" id="promptPasteBin" /> <form:button name="render1" value="Render" /></p>
 
 <view:script outputType="inline">
   editor = CodeMirror.fromTextArea('code', {
@@ -84,13 +83,17 @@ Notes:
 
 <p class="clear" />
 
-<h2 id="resultsTitle">Output</h2>
+<h2 id="resultsTitle" style="margin:1em 0 3px 0;">Output</h2>
 <div id="results" style="padding-bottom:24px;">
 </div>
 
+<p class="right"><form:button type="button" value="Back to Scribble" id="backToScribble" /><form:button name="render2" value="Render" /></p>
+</form:form>
+
 <view:script outputType="inline">
 		$('processScribble').observe('submit', myScribbleHandler.processScribble);
-		$('promptPasteBin').observe('click', myScribbleHandler.promptPasteBin)
+		$('promptPasteBin').observe('click', myScribbleHandler.promptPasteBin);
+		$('backToScribble').observe('click', function () { Effect.ScrollTo('processScribble', { duration:'0.2', offset:-20 }) });
 </view:script>
 <cfelse>
 	<h4>We are unable to write to a temp directory and therefore the scribble pad has been disabled.</h4>
