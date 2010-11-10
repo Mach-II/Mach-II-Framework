@@ -90,17 +90,19 @@ Notes:
 					<cfif isDefined("restUriItem.hint")>
 						<doc>
 							<html:h6>description</html:h6>
-							<html:p>#restUriItem.hint#</html:p>
+							<html:p>#XmlFormat(restUriItem.hint)#</html:p>
 							<html:h6>configuration</html:h6>
 							<html:table>
 								<html:tr>
 									<html:th>parameter</html:th>
 									<html:th>value</html:th>
 								</html:tr>
-								<html:tr>
-									<html:td><html:strong>authentication required</html:strong></html:td>
-									<html:td><html:em>#LCase(YesNoFormat(restUriItem["REST:authenticate"]))#</html:em></html:td>
-								</html:tr>
+								<cfif restUriItem["REST:authenticate"] NEQ "unknown">
+									<html:tr>
+										<html:td><html:strong>authentication required</html:strong></html:td>
+										<html:td><html:em>#LCase(YesNoFormat(restUriItem["REST:authenticate"]))#</html:em></html:td>
+									</html:tr>
+								</cfif>
 								<html:tr>
 									<html:td><html:strong>request media type</html:strong></html:td>
 									<html:td><html:em>#restUriItem["REST:queryType"]#</html:em></html:td>
@@ -120,7 +122,7 @@ Notes:
 								</cfif>
 								<cfif ListFind(tokens, parameter.name)>style="template"<cfelse>style="query"</cfif>
 								>
-								<cfif isDefined("parameter.hint")><doc>#parameter.hint#</doc></cfif>
+								<cfif isDefined("parameter.hint")><doc>#XmlFormat(parameter.hint)#</doc></cfif>
 								<cfif StructKeyExists(parameter, "rest:options")>
 									<cfset variables.options =  getAppManager().getUtils().parseAttributesIntoStruct(parameter["rest:options"]) />
 									<cfloop collection="#variables.options#" item="option">
@@ -172,7 +174,7 @@ Notes:
 							</cfloop>
 						</cfif>
 					</cfloop>
-	
+
 					<cfloop collection="#responseStatus#" item="statusKey">
 						<cfset status = StructFind(responseStatus, statusKey)>
 						<response status="#statusKey#" title="#getAppManager().getUtils().getHTTPHeaderStatusTextByStatusCode(statusKey)#">
