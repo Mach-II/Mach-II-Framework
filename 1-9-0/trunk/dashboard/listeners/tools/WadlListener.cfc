@@ -138,6 +138,14 @@ Notes:
 								</cfif>
 							</cfif>
 							
+							<cfif NOT StructKeyExists(stcTemp[httpMethod], "REST:authenticate")>
+								<cfif StructKeyExists(stcResult.componentMetadata[item.component], "REST:authenticate")>
+									<cfset stcTemp[httpMethod]["REST:authenticate"]  = stcResult.componentMetadata[item.component]["REST:authenticate"] />
+								<cfelse>
+									<cfset stcTemp[httpMethod]["REST:authenticate"]  = "unknown" />
+								</cfif>
+							</cfif>
+							
 							<!--- Look at the method parameters --->
 							<cfloop array="#stcTemp[httpMethod].parameters#" index="parameter">
 								<cfif NOT StructKeyExists(parameter, "REST:type")>

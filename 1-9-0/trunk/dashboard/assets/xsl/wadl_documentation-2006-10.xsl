@@ -486,7 +486,7 @@
     </xsl:template>
 
     <xsl:template match="wadl:response">
-        <xsl:if test="@status"><strong>Status Code <xsl:value-of select="@status"/></strong></xsl:if>
+        <xsl:if test="@status"><strong>Status Code <xsl:value-of select="@status"/> <xsl:if test="@title"> - <xsl:value-of select="@title"/></xsl:if></strong></xsl:if>
         <xsl:apply-templates select="." mode="param-group">
             <xsl:with-param name="prefix">response</xsl:with-param>
             <xsl:with-param name="style">header</xsl:with-param>
