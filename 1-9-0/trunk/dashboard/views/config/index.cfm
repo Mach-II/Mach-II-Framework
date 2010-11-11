@@ -323,7 +323,7 @@ Notes:
 		</a>
 	</li>
 	<li>
-		<form:form actionEvent="">
+		<form:form actionEvent="" autoFocus="false">
 			Check for Changed Components Every <form:select path="reloadAllChangedComponentsValue" items="0,3,6,9,12,15" checkValue="0" onchange="myConfigHandler.periodicUpdateChangedComponents();" /> Seconds
 		</form:form>
 	</li>
