@@ -93,7 +93,7 @@ Notes:
 <view:script outputType="inline">
 		$('processScribble').observe('submit', myScribbleHandler.processScribble);
 		$('promptPasteBin').observe('click', myScribbleHandler.promptPasteBin);
-		$('backToScribble').observe('click', function () { Effect.ScrollTo('processScribble', { duration:'0.2', offset:-20 }) });
+		$('backToScribble').observe('click', function () { Effect.ScrollTo('processScribble', { duration:'0.2' }) });
 </view:script>
 <cfelse>
 	<h4>We are unable to write to a temp directory and therefore the scribble pad has been disabled.</h4>

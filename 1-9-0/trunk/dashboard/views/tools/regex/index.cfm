@@ -90,12 +90,15 @@ Notes:
 	</tr>
 </table>
 <p class="right"><form:button /></p>
-</form:form>
+
 
 <p class="clear" style="padding-top:24px;" />
 <h2>RegEx Reference Guide</h2>
 
 #event.getArg("layout.snip_referenceGuide")#
+
+<p class="right"><form:button type="button" value="Back to Tests" id="backToTests" /></p>
+</form:form>
 
 <view:script outputType="inline">
 	Event.observe('processRegEx', 'submit', function(event) {
@@ -105,7 +108,7 @@ Notes:
 				evalJS: true
 			},
 			onCreate: function() {
-				$('resultsTitle').scrollTo();
+				Effect.ScrollTo('resultsTitle', { duration:'0.2'});
 			},
 	        onSuccess: function(transport) {
 	            $('results').update(transport.responseText);
@@ -128,5 +131,6 @@ Notes:
 	new TextAreaResize('replace1');
 	new TextAreaResize('replace2');
 	new TextAreaResize('replace3');
+	$('backToTests').observe('click', function () { Effect.ScrollTo('processRegEx', { duration:'0.2'}) });
 </view:script>
 </cfoutput>
