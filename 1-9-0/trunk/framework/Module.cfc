@@ -122,9 +122,6 @@ Notes:
 					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
 						<cfset setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
 						<cfset getAppManager().getModuleManager().disableModule(variables.moduleName) />
-						<cfthrow type="MachII.framework.ModuleFailedToLoad"
-							message="Module with name '#variables.moduleName#' failed to load."
-							extendedInfo="#getLoadException().getMessage()#" />
 					<cfelse>
 						<cfrethrow />
 					</cfif>

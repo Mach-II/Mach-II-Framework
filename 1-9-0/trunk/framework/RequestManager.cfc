@@ -351,13 +351,20 @@ Notes:
 		<cfset keyList = StructKeyList(params) />
 
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
-			<cfif Len(arguments.moduleName)>
-				<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
-			<cfelse>
-				<cfset eventManager = getAppManager().getEventManager() />
-			</cfif>
+			<cftry>
+				<cfif Len(arguments.moduleName)>
+					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
+				<cfelse>
+					<cfset eventManager = getAppManager().getEventManager() />
+				</cfif>
 
-			<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
+				<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
+				<cfcatch type="MachII.framework.ModuleFailedToLoad">
+					<!--- If module:disableOnFailure is turned on, we need to ignore this exception
+						and assume ambiguous secure type. This allows the url to build.  The exception
+						will be thrown later when an event for that module is requested   --->
+				</cfcatch>
+			</cftry>
 
 			<!--- If event handler secure type is ambiguous (-1), then default to the current secure type this request --->
 			<cfif secureType EQ -1>
@@ -442,14 +449,20 @@ Notes:
 		<cfset var secureType = -1 />
 
 		<cfif NOT StructKeyExists(arguments, "urlBase")>
-			<cfif Len(moduleName)>
-				<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
-			<cfelse>
-				<cfset eventManager = getAppManager().getEventManager() />
-			</cfif>
+			<cftry>
+				<cfif Len(moduleName)>
+					<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
+				<cfelse>
+					<cfset eventManager = getAppManager().getEventManager() />
+				</cfif>
 
-			<cfset secureType = eventManager.getEventSecureType(eventName) />
-
+				<cfset secureType = eventManager.getEventSecureType(eventName) />
+				<cfcatch type="MachII.framework.ModuleFailedToLoad">
+					<!--- If module:disableOnFailure is turned on, we need to ignore this exception
+						and assume ambiguous secure type. This allows the url to build.  The exception
+						will be thrown later when an event for that module is requested   --->
+				</cfcatch>
+			</cftry>
 			<!--- If event handler securt type is ambigous (-1), then default to the current secure type this request --->
 			<cfif secureType EQ -1>
 				<cfif cgi.SERVER_PORT_SECURE>

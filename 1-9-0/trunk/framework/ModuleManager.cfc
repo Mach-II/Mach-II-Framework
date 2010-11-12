@@ -179,7 +179,8 @@ Notes:
 			<cftry>
 				<cfset variables.enabledModules[key].configure(getDtdPath(), getValidateXML()) />
 				<cfcatch type="any">
-					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false) >
+					<cfif getAppManager().getPropertyManager().getProperty("modules:disableOnFailure", false)
+						AND isModuleEnabled(key)>  <!--- The module may have tried to load and disabled itself if lazy load is disabled --->
 						<cfset variables.enabledModules[key].setLoadException(CreateObject("component", "MachII.util.Exception").wrapException(cfcatch)) />
 						<cfset disableModule(key) />
 					<cfelse>
