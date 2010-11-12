@@ -452,7 +452,6 @@ Notes:
 	<!-- SUBROUTINES -->
 	<subroutines>
 		<subroutine name="tools.wadl.doc_generate">
-			<notify listener="tools.wadl" method="getWadlDocumentation" />
 			<notify listener="tools.wadl" method="getRestEndpointMetadata" resultArg="restEndpointMetadata" />
 			<view-page name="tools.wadl.wadl" contentArg="wadlDoc" />
 		</subroutine>

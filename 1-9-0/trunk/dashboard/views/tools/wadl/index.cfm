@@ -33,12 +33,9 @@ Notes:
 <cfoutput>
 <h1>REST Endpoint Documentation Generator</h1>
 
-
-
 <form:form actionEvent="tools.wadl.process" id="processRegEx">
 
 <h2>Select Available Endpoints</h2>
-
 <table>
 	<tr>
 		<th style="width:5%"><h3>&nbsp;</h3></th>
@@ -99,6 +96,11 @@ Notes:
 </table>
 
 <h2 style="margin:1em 0 3px 0;">Configuration Options</h2>
-<p class="right"><form:button name="view" value="View HTML" /><!---  <form:button name="pdf" value="Download PDF" /> ---> <form:button name="xml" value="Download WADL XML" /> </p>
+<p class="right">
+	<form:button name="view" value="View HTML" />
+	<form:button name="pdf" value="Download PDF^" />
+	<form:button name="xml" value="Download WADL XML" />
+</p>
 </form:form>
+<p class="clear right small">^ PDF generatation does not work on ACF7/8 due to an old XSLT processor that ships with the engine.</p>
 </cfoutput>

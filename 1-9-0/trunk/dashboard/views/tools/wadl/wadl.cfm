@@ -56,10 +56,7 @@ Notes:
 </cfif>
 <cfset baseUrl = "#protocol#://#CGI.HTTP_HOST#" />
 <cfoutput><?xml version="1.0"?>
-<cfset stylesheet = event.getArg('stylesheet') />
-<cfif  stylesheet NEQ "">
-<?xml-stylesheet type="text/xsl" href="#stylesheet#" ?>
-</cfif>
+<?xml-stylesheet type="text/xsl" href="#BuildEndpointUrl("dashboard.serveAsset", "file=/xsl/wadl_documentation-2006-10.xsl")#" ?>
 
 <application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://wadl.dev.java.net/2009/02 wadl.xsd"

@@ -1,8 +1,15 @@
+
 <cfif arguments.event.isArgDefined("view")>
+	<cfcontent reset="true" />
+	<cfset addHTTPHeaderByName("Content-Type", "application/xml") />
 	<cfoutput>#event.getArg("wadlDoc")#</cfoutput>
 <cfelseif arguments.event.isArgDefined("xml")>
-	<cfheader  name="Content-Disposition" value="attachment; filename=wadl.xml">
+	<cfcontent reset="true" />
+	<cfset addHTTPHeaderByName("Content-Type", "application/xml") />
+	<cfset addHTTPHeaderByName("Content-Disposition", "attachment; filename=wadl.xml") />
 	<cfoutput>#event.getArg("wadlDoc")#</cfoutput>
 <cfelseif arguments.event.isArgDefined("pdf")>
-	<cfabort showerror="Not implemented because I cannot get XMLParse() to parse the XML document and therefore I cannot get XMLTransform() to work so I can output HTML for a PDF function." />
+	<cfsavecontent variable="variables.xslt"><cfinclude template="/MachII/dashboard/assets/xsl/wadl_documentation-2006-10.xsl"></cfsavecontent>
+	<cfset variables.html = XmlTransform(XmlParse(event.getArg("wadlDoc")), variables.xslt) />
+	<cfdocument format="pdf"><cfoutput>#variables.html#</cfoutput></cfdocument>
 </cfif>

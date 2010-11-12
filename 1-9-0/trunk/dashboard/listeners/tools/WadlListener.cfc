@@ -190,16 +190,5 @@ Notes:
 		
 		<cfreturn restEndpoints />
 	</cffunction>
-
-	<cffunction name="getWadlDocumentation" access="public" returntype="void" output="false">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-
-		<cfset var strWadl = "" />
-		<cfset var stylesheet =  event.getArg('stylesheet', BuildEndpointUrl("dashboard.serveAsset", "file=/xsl/wadl_documentation-2006-10.xsl")) />
-
-		<cfcontent reset="true" />
-		<cfset addHTTPHeaderByName("Content-Type", "application/xml") />
-		<cfset event.setArg('stylesheet', stylesheet) />
-	</cffunction>
 	
 </cfcomponent>
