@@ -210,6 +210,13 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Improved performance of ViewContext
+This improvement can reduce the number of method calls when building urls.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/728
+(2010-11-15 peterfarrell)
+
 * Add ability to remove an route via the UrlRoutesProperty
 
 For more info see:

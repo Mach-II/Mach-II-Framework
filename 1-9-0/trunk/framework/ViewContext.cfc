@@ -58,6 +58,9 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.propertyManager = "" />
+	<cfset variables.requestManager = "" />
+	<cfset variables.m2Utils = "" />
+	<cfset variables.moduleName = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -67,9 +70,14 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 
 		<cfset setAppManager(arguments.appManager) />
-		<cfset setPropertyManager(getAppManager().getPropertyManager()) />
-		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.ViewContext")) />
+		<cfset setPropertyManager(arguments.appManager.getPropertyManager()) />
+		<cfset setLog(arguments.appManager.getLogFactory().getLog("MachII.framework.ViewContext")) />
 
+		<!--- These assignments are for performance and can reduce hundreds of method calls per request --->
+		<cfset variables.requestManager = arguments.appManager.getRequestManager() />
+		<cfset variables.m2Utils = arguments.appManager.getUtils() />
+		<cfset variables.moduleName = arguments.appManager.getModuleName() />
+		
 		<cfreturn this />
 	</cffunction>
 
@@ -116,7 +124,7 @@ Notes:
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occurred in a view named '#arguments.viewName#'. "
-								& getAppManager().getUtils().buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))
+								& variables.m2Utils.buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))
 								, cfcatch) />
 				</cfif>
 				<cfrethrow />
@@ -131,35 +139,54 @@ Notes:
 				<cfset log.warn("DEPRECATED: The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
 			</cfif>
 
-			<cfif arguments.append AND IsDefined(arguments.contentKey)>
-				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
-				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
-							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
-							, "Ensure that the contentKey is of a simple data type.") />
-				<cfset viewContent = resolvedContentData & viewContent />
+			<cfset resolvedContentData = Evaluate(arguments.contentKey) />
+			
+			<cfif arguments.append AND IsDefined(arguments.contentKey)>	
+				<cftry>
+					<cfset viewContent = resolvedContentData & viewContent />
+					<cfcatch type="any">
+						<cfthrow type="MachII.framework.ViewContext.cannotAppendComplexDatatypes"
+							message="Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							detail="Ensure that the contentKey is of a simple data type." />
+					</cfcatch>
+				</cftry>
+				
 			<cfelseif arguments.prepend AND IsDefined(arguments.contentKey)>
-				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
-				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
-							, "Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
-							, "Ensure that the contentKey is of a simple data type.") />
-				<cfset viewContent = viewContent & resolvedContentData />
+				<cftry>
+					<cfset viewContent = viewContent & resolvedContentData />
+					<cfcatch type="any">
+						<cfthrow type="MachII.framework.ViewContext.cannotAppendComplexDatatypes"
+							message="Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							detail="Ensure that the contentKey is of a simple data type." />
+					</cfcatch>
+				</cftry>
 			</cfif>
+			
 			<cfset SetVariable(arguments.contentKey, viewContent) />
 		</cfif>
 
 		<cfif arguments.contentArg NEQ ''>
+			<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
+
 			<cfif arguments.append>
-				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
-				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
-							, "Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'."
-							, "Ensure that the contentArg is of a simple data type.") />
-				<cfset viewContent = resolvedContentData & viewContent />
+				<cftry>
+					<cfset viewContent = resolvedContentData & viewContent />
+					<cfcatch type="any">
+						<cfthrow type="MachII.framework.ViewContext.cannotAppendComplexDatatypes"
+							message="Cannot append view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							detail="Ensure that the contentKey is of a simple data type." />
+					</cfcatch>
+				</cftry>				
+				
 			<cfelseif arguments.prepend>
-				<cfset resolvedContentData = arguments.event.getArg(arguments.contentArg, "") />
-				<cfset getAssert().isTrue(IsSimpleValue(resolvedContentData)
-							, "Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentArg '#arguments.contentArg#'."
-							, "Ensure that the contentArg is of a simple data type.") />
-				<cfset viewContent = viewContent & resolvedContentData />
+				<cftry>
+					<cfset viewContent = viewContent & resolvedContentData />
+					<cfcatch type="any">
+						<cfthrow type="MachII.framework.ViewContext.cannotAppendComplexDatatypes"
+							message="Cannot prepend view content on a complex data type for view '#arguments.viewName#' in ContentKey '#arguments.contentKey#'."
+							detail="Ensure that the contentKey is of a simple data type." />
+					</cfcatch>
+				</cftry>
 			</cfif>
 			<cfset arguments.event.setArg(arguments.contentArg, viewContent) />
 		</cfif>
@@ -182,9 +209,9 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		<cfset arguments.moduleName = variables.moduleName />
 
-		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
+		<cfreturn variables.m2Utils.escapeHtml(variables.requestManager.buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
@@ -195,9 +222,9 @@ Notes:
 			hint="Comma delimited list of url parameter names of items to remove from the current url" />
 
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		<cfset arguments.moduleName = variables.moduleName />
 
-		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments)) />
+		<cfreturn variables.m2Utils.escapeHtml(variables.requestManager.buildCurrentUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedCurrentUrl" access="public" returntype="string" output="false"
@@ -206,9 +233,9 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
 
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		<cfset arguments.moduleName = variables.moduleName />
 
-		<cfreturn getAppManager().getRequestManager().buildCurrentUrl(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.buildCurrentUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildRouteUrl" access="public" returntype="string" output="false"
@@ -222,7 +249,7 @@ Notes:
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
-		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments)) />
+		<cfreturn variables.m2Utils.escapeHtml(variables.requestManager.buildRouteUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedRouteUrl" access="public" returntype="string" output="false"
@@ -237,9 +264,9 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		<cfset arguments.moduleName = variables.moduleName />
 
-		<cfreturn getAppManager().getRequestManager().buildRouteUrl(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.buildRouteUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedUrl" access="public" returntype="string" output="false"
@@ -252,9 +279,9 @@ Notes:
 			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<!--- Grab the module name from the context of the currently executing request--->
-		<cfset arguments.moduleName = getAppManager().getModuleName() />
+		<cfset arguments.moduleName = variables.moduleName />
 
-		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
@@ -267,7 +294,7 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getRequestManager().buildUrl(argumentcollection=arguments)) />
+		<cfreturn variables.m2Utils.escapeHtml(variables.requestManager.buildUrl(argumentcollection=arguments)) />
 	</cffunction>
 
 	<cffunction name="buildUnescapedUrlToModule" access="public" returntype="string" output="false"
@@ -280,7 +307,7 @@ Notes:
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />
 		<cfargument name="urlBase" type="string" required="false"
 			hint="Base of the url. Defaults to the value of the urlBase property." />
-		<cfreturn getAppManager().getRequestManager().buildUrl(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.buildUrl(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
@@ -289,7 +316,7 @@ Notes:
 			hint="Name of the target endpoint." />
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to build the url with or a struct of data." />		
-		<cfreturn getAppManager().getUtils().escapeHtml(getAppManager().getEndpointManager().buildEndpointUrl(argumentcollection=arguments)) />
+		<cfreturn variables.m2Utils.escapeHtml(getAppManager().getEndpointManager().buildEndpointUrl(argumentcollection=arguments)) />
 	</cffunction>
 	
 	<cffunction name="buildUnescapedEndpointUrl" access="public" returntype="string" output="false"
@@ -323,7 +350,7 @@ Notes:
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" required="false"
 			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
-		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.getRequestHandler().getEventContext().addHTMLHeadElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTMLBodyElement" access="public" returntype="boolean" output="false"
@@ -334,7 +361,7 @@ Notes:
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" required="false"
 			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
-		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(argumentcollection=arguments) />
+		<cfreturn variables.requestManager.getRequestHandler().getEventContext().addHTMLBodyElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeader" access="public" returntype="void" output="false"
@@ -344,7 +371,7 @@ Notes:
 		<cfargument name="statusCode" type="numeric" required="false" />
 		<cfargument name="statusText" type="string" required="false" />
 		<cfargument name="charset" type="string" required="false" />
-		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
+		<cfset variables.requestManager.getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
@@ -373,7 +400,7 @@ Notes:
 			hint="A list of EL items to evaluate." />
 		<cfargument name="scopeReference" type="struct" required="false" default="#variables#"
 			hint="A reference to the scope to to place the copies into. Defaults to the variables scope." />
-		<cfset getAppManager().getUtils().copyToScope(arguments.evaluationString, arguments.scopeReference, getAppManager()) />
+		<cfset variables.m2Utils.copyToScope(arguments.evaluationString, arguments.scopeReference, getAppManager()) />
 	</cffunction>
 
 	<cffunction name="getAssert" access="public" returntype="MachII.util.Assert" output="false"
