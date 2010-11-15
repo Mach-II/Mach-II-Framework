@@ -198,6 +198,14 @@ See that file header for configuration of filter criteria.
 				, "This indicates the amount of time to wait while trying to deliver mail.")>
 			<cfset setTimeout(getParameter("timeout")) />
 		</cfif>
+		
+		<cftry>
+			<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
+			<cfcatch type="any">
+				<cfset this.arrayConcat = variables.arrayConcat_cfml />
+				<cfset variables.arrayConcat = variables.arrayConcat_cfml />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<!---
@@ -378,7 +386,7 @@ See that file header for configuration of filter criteria.
 		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
 	</cffunction>
 
-	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
+	<cffunction name="arrayConcat_cfml" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
 		<cfargument name="array2" type="array" required="true" />

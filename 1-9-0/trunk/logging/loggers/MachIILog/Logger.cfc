@@ -164,6 +164,14 @@ See that file header for configuration of filter criteria.
 		</cfif>
 
 		<cfset setOutputType(decideOutputType()) />
+		
+		<cftry>
+			<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
+			<cfcatch type="any">
+				<cfset this.arrayConcat = variables.arrayConcat_cfml />
+				<cfset variables.arrayConcat = variables.arrayConcat_cfml />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="decideOutputType" access="private" returntype="string" output="false"
@@ -270,10 +278,8 @@ See that file header for configuration of filter criteria.
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
 				<!--- OpenBD/Railo has ArrayConcat so we need to use "this" to call the local function --->
-				<cfset loggingData.data = this.arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
+				<cfset loggingData.data = this.ArrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
 				<cfcatch type="any">
-					<!--- Do nothing as the configuration may have changed between start of
-					the redirect and now --->
 				</cfcatch>
 			</cftry>
 		</cfif>
@@ -347,7 +353,7 @@ See that file header for configuration of filter criteria.
 		<cfreturn Left(arguments.version, Len(arguments.version) - Len(ListLast(arguments.version, ".")) - 1) & " " & release />
 	</cffunction>
 
-	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
+	<cffunction name="arrayConcat_cfml" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
 		<cfargument name="array2" type="array" required="true" />
