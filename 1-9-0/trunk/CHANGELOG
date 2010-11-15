@@ -89,6 +89,11 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Added support for redirect persis with route based urls
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/246
+(2010-11-15 peterfarrell)
 
 * Support for http/https Redirection and Secure URLS in BuildURL/BuildRouteUrl
 
