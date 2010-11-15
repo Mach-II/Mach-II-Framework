@@ -687,7 +687,7 @@ Notes:
 		<cfargument name="log" type="MachII.logging.Log" required="true" />
 		<cfset variables.log = arguments.log />
 	</cffunction>
-	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
+	<cffunction name="getLog" access="public" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
 		<cfreturn variables.log />
 	</cffunction>

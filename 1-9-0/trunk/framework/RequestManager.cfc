@@ -185,6 +185,8 @@ Notes:
 		<cfargument name="persist" type="boolean" required="false" default="false" />
 		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
 		<cfargument name="statusType" type="string" required="false" default="" />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<cfset var redirectToUrl =  ""/>
 		<cfset var persistId =  "" />
@@ -193,17 +195,18 @@ Notes:
 		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
 		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
 		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
-
+		
+		<!--- Build persist data and id if required --->
 		<cfif arguments.persist>
 			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+
+			<!--- Add the persistId parameter to the url args if persist is required --->
+			<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+				<cfset arguments.eventArgs[redirectPersistParam] = persistId />
+			</cfif>
 		</cfif>
 
-		<!--- Add the persistId parameter to the url args if persist is required --->
-		<cfif arguments.persist AND getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
-			<cfset arguments.eventArgs[redirectPersistParam] = persistId />
-		</cfif>
-
-		<cfset redirectToUrl = buildUrl(arguments.moduleName, arguments.eventName, arguments.eventArgs) />
+		<cfset redirectToUrl = buildUrl(arguments.moduleName, arguments.eventName, arguments.eventArgs, arguments.urlBase) />
 
 		<cfset redirectUrl(redirectToUrl, arguments.statusType) />
 	</cffunction>
@@ -215,19 +218,29 @@ Notes:
 		<cfargument name="persist" type="boolean" required="false" default="false" />
 		<cfargument name="persistArgs" type="struct" required="false" default="#StructNew()#" />
 		<cfargument name="statusType" type="string" required="false" default="" />
+		<cfargument name="urlBase" type="string" required="false" default=""
+			hint="Base of the url. Defaults to the value of the urlBase property." />
 
 		<cfset var redirectToUrl = "" />
 		<cfset var persistId = "" />
+		<cfset var queryStringParams = StructNew() />
+		<cfset var redirectPersistParam = getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
 
 		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
 		<cfset StructDelete(arguments.routeArgs, getEventParameter(), FALSE) />
 		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
 
+		<!--- Build persist data and id if required --->
 		<cfif arguments.persist>
 			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+
+			<!--- Add the persistId parameter to the url args if persist is required --->
+			<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
+				<cfset queryStringParams[redirectPersistParam] = persistId />
+			</cfif>
 		</cfif>
 
-		<cfset redirectToUrl = buildRouteUrl(arguments.routeName, arguments.routeArgs) />
+		<cfset redirectToUrl = buildRouteUrl(arguments.routeName, arguments.routeArgs, queryStringParams, arguments.urlBase) />
 
 		<cfset redirectUrl(redirectToUrl, arguments.statusType) />
 	</cffunction>
@@ -237,6 +250,8 @@ Notes:
 			hint="An URL to redirect to." />
 		<cfargument name="statusType" type="string" required="false" default="temporary"
 			hint="The status type to use. Valid option: 'permanent' (301), 'prg' (303 - See Other), 'temporary' (302) [default option]" />
+		
+		<cfset getRequestHandler().getLog().info("End processing request. Redirect sequence in progress.") />
 
 		<!--- Redirect based on the HTTP status type --->
 		<cfif arguments.statusType EQ "permanent">
@@ -350,7 +365,7 @@ Notes:
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset keyList = StructKeyList(params) />
 
-		<cfif NOT StructKeyExists(arguments, "urlBase")>
+		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
 			<cftry>
 				<cfif Len(arguments.moduleName)>
 					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
@@ -448,7 +463,7 @@ Notes:
 		<cfset var eventManager = "" />
 		<cfset var secureType = -1 />
 
-		<cfif NOT StructKeyExists(arguments, "urlBase")>
+		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
 			<cftry>
 				<cfif Len(moduleName)>
 					<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
@@ -730,7 +745,7 @@ Notes:
 		</cfif>
 
 		<cfset data = getRequestRedirectPersist().read(arguments.eventArgs) />
-
+		
 		<!--- If there is data, run post-redirect callbacks --->
 		<cfif StructCount(data)>
 
