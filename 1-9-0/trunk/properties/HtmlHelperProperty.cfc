@@ -139,6 +139,7 @@ from the parent application.
 	<cfset variables.mimeShortcutMap = StructNew() />
 	<cfset variables.httpEquivReferenceMap = StructNew() />
 	<cfset variables.assetPathsCache = StructNew() />
+	<cfset variables.requestManager = "" />
 
 	<!---
 	CONSTANTS
@@ -150,6 +151,8 @@ from the parent application.
 	<cfset variables.ASSET_PACKAGES_PROPERTY_NAME = "_HTMLHelper.assetPackages" />
 	<!--- Tabs, line feeds and carriage returns --->
 	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
+	<!--- Epoch timestamp in UTC --->
+	<cfset variables.EPOCH_TIMESTAMP = DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -214,6 +217,8 @@ from the parent application.
 
 		<!--- Add a reference of the helper in a known property location --->
 		<cfset setProperty(variables.HTML_HELPER_PROPERTY_NAME, this) />
+		
+		<cfset variables.requestManager = getAppManager().getRequestManager() />
 	</cffunction>
 
 	<cffunction name="configureAssetPackages" access="private" returntype="void" output="false"
@@ -819,9 +824,9 @@ from the parent application.
 
 		<!--- Output the code inline or append to HTML head --->
 		<cfif arguments.outputType EQ "head">
-			<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
+			<cfreturn variables.requestManager.getRequestHandler().getEventContext().addHTMLHeadElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
 		<cfelseif arguments.outputType EQ "body">
-			<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
+			<cfreturn variables.requestManager.getRequestHandler().getEventContext().addHTMLBodyElement(arguments.code, arguments.blockDuplicate, arguments.blockDuplicateCheckString) />
 		</cfif>
 	</cffunction>
 
@@ -955,23 +960,21 @@ from the parent application.
 			hint="This is the full resolved asset path from the webroot." />
 
 		<cfset var fullPath =  Replace(getWebrootBasePath() & "/" & arguments.resolvedPath, "//", "/", "all") />
-		<cfset var directoryResults = "" />
+		<cfset var fileResults = "" />
 
-		<cfdirectory name="directoryResults"
-			action="list"
-			directory="#GetDirectoryFromPath(fullPath)#"
-			filter="#GetFileFromPath(fullPath)#" />
+		<cftry>
+			<cfset fileResults = getFileInfo(fullPath) />
 
-		<!--- Convert current time to UTC because epoch is essentially UTC --->
-		<cfif directoryResults.recordcount EQ 1>
-			<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
-		
-		<!--- Log an exception if asset cannot be found --->
-		<cfelse>
-			<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
+			<!--- Convert current time to UTC because epoch is essentially UTC --->			
+			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileResults.lastModified)) />
 
-			<cfreturn 0 />
-		</cfif>
+			<!--- Log an exception if asset cannot be found and only soft fail --->
+			<cfcatch>
+				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
+	
+				<cfreturn 0 />			
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="getImageDimensions" access="private" returntype="struct" output="false"

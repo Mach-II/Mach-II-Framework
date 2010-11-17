@@ -105,10 +105,6 @@ Configuration Notes:
 	hint="Base endpoint for all file serve endpoints to be exposed directly by Mach-II.">
 
 	<!---
-	CONSTANTS
-	--->
-
-	<!---
 	PROPERTIES
 	--->
 	<cfset variables.basePath = "" />
@@ -121,6 +117,12 @@ Configuration Notes:
 	<cfset variables.timestampMap = StructNew() />
 	<cfset variables.cfmSafeMap = StructNew() />
 	<cfset variables.urlBase = "" />
+
+	<!---
+	CONSTANTS
+	--->
+	<!--- Epoch timestamp in UTC --->
+	<cfset variables.EPOCH_TIMESTAMP = DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -403,19 +405,20 @@ Configuration Notes:
 		<cfset var fileInfo = "" />
 		<cfset var output = "" />
 
-		<!--- Read file info for content-length and last-modified headers --->
-		<cfdirectory name="fileInfo" 
-			action="list" 
-			directory="#getDirectoryFromPath(ExpandPath(fileFullPath))#" 
-			filter="#getFileFromPath(ExpandPath(fileFullPath))#"
-			type="file" />
-
-		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
-		<cfif fileInfo.recordcount NEQ 1>
-			<cfthrow type="MachII.endpoints.file.notFound" 
-				message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				detail="File path: '#getFileFromPath(fileFullPath)#'." />
-		</cfif>
+		<!--- Read file info for last-modified headers --->
+		<cftry>
+			<cfset fileInfo = getFileInfo(fileFullPath) />
+			
+			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
+			<cfif fileInfo.type NEQ "file">
+				<cfthrow />
+			</cfif>
+			<cfcatch type="any">
+				<cfthrow type="MachII.endpoints.file.notFound" 
+					message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
+					detail="File path: '#getFileFromPath(fileFullPath)#'." />
+			</cfcatch>
+		</cftry>
 	
 		<cfset addHTTPHeaderByName("Content-Type", contentType) />
 
@@ -423,7 +426,7 @@ Configuration Notes:
 		<cfif arguments.expires.type EQ "access">
 			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(Now() + arguments.expires.amount)) />
 		<cfelseif arguments.expires.type EQ "modified">
-			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)) />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.lastModified + arguments.expires.amount)) />
 		</cfif>
 
 		<cfif Len(arguments.attachment)>
@@ -449,21 +452,20 @@ Configuration Notes:
 		<cfset var fileInfo = "" />
 		<cfset var httpRequestHeaders = getHttpRequestData().headers />
 
-		<!---
-		Read file info for content-length and last-modified headers
-		We cannot use type="file" as that does not work on OpenBD
-		--->
-		<cfdirectory name="fileInfo" 
-			action="list" 
-			directory="#getDirectoryFromPath(fileFullPath)#" 
-			filter="#getFileFromPath(fileFullPath)#" />
-		
-		<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
-		<cfif fileInfo.recordcount NEQ 1 OR (fileInfo.recordcount EQ 1 AND  fileInfo.type[1] NEQ "file")>
-			<cfthrow type="MachII.endpoints.file.notFound" 
-				message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
-				detail="File path: '#getFileFromPath(fileFullPath)#'." />
-		</cfif>
+		<!--- Read file info for content-length and last-modified headers --->
+		<cftry>
+			<cfset fileInfo = getFileInfo(fileFullPath) />
+			
+			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
+			<cfif fileInfo.type NEQ "file">
+				<cfthrow />
+			</cfif>
+			<cfcatch type="any">
+				<cfthrow type="MachII.endpoints.file.notFound" 
+					message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
+					detail="File path: '#getFileFromPath(fileFullPath)#'." />
+			</cfcatch>
+		</cftry>
 
 		<cfset addHTTPHeaderByName("Content-Length", fileInfo.size) />
 		
@@ -471,7 +473,7 @@ Configuration Notes:
 		<cfif arguments.expires.type EQ "access">
 			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(Now() + arguments.expires.amount)) />
 		<cfelseif arguments.expires.type EQ "modified">
-			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.dateLastModified + arguments.expires.amount)) />
+			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(fileInfo.lastModified + arguments.expires.amount)) />
 		</cfif>
 
 		<cfif Len(arguments.attachment)>
@@ -480,12 +482,12 @@ Configuration Notes:
 
 		<cfif getServiceEngineType() EQ "cfcontent">
 			<!--- Return a 304 No Modified if the passed header and file modified timestamp are not the same --->
-			<cfif StructKeyExists(httpRequestHeaders ,"If-Modified-Since") AND DateCompare(getUtils().createDatetimeFromHttpTimeString(httpRequestHeaders["If-Modified-Since"]), fileInfo.dateLastModified) NEQ 0>
+			<cfif StructKeyExists(httpRequestHeaders ,"If-Modified-Since") AND DateCompare(getUtils().createDatetimeFromHttpTimeString(httpRequestHeaders["If-Modified-Since"]), fileInfo.lastModified) NEQ 0>
 				<cfcontent reset="true" />
 				<cfset addHTTPHeaderByStatus(304) />
 			<!--- Serve the file using cfcontent --->
 			<cfelse>
-				<cfset addHTTPHeaderByName("Last-Modified", GetHttpTimeString(fileInfo.dateLastModified)) />
+				<cfset addHTTPHeaderByName("Last-Modified", GetHttpTimeString(fileInfo.lastModified)) />
 				<cfcontent file="#fullFilePath#" type="#contentType#" />
 			</cfif>
 		<cfelse>
@@ -546,22 +548,21 @@ Configuration Notes:
 		<cfset var fullPath = ReplaceNoCase(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
 		<cfset var directoryResults = "" />
 
-		<cfdirectory name="directoryResults"
-			action="list"
-			directory="#GetDirectoryFromPath(fullPath)#"
-			filter="#GetFileFromPath(fullPath)#"
-			type="file" />
-		
-		<!--- Convert current time to UTC because epoch is essentially UTC --->
-		<cfif directoryResults.recordcount EQ 1>
-			<cfreturn DateDiff("s", DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)), DateConvert("local2Utc", directoryResults.dateLastModified)) />
-		
-		<!--- Log an exception if asset cannot be found --->
-		<cfelse>
-			<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
+		<cfset var fileResults = "" />
 
-			<cfreturn 0 />
-		</cfif>
+		<cftry>
+			<cfset fileResults = getFileInfo(fullPath) />
+
+			<!--- Convert current time to UTC because epoch is essentially UTC --->			
+			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileResults.lastModified)) />
+
+			<!--- Log an exception if asset cannot be found and only soft fail --->
+			<cfcatch>
+				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
+	
+				<cfreturn 0 />			
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<!---

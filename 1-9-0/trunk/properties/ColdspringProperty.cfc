@@ -559,14 +559,13 @@ application.serviceFactory_account variable.
 		hint="Get the current reload hash of the bean factory config file and imports files.  The hash is based on dateLastModified and size of the file.">
 
 		<cfset var configFilePaths = getConfigFilePaths() />
-		<cfset var directoryResults = "" />
+		<cfset var fileInfo = "" />
 		<cfset var hashableString = "" />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
-			<cfdirectory action="LIST" directory="#GetDirectoryFromPath(configFilePaths[i])#"
-				name="directoryResults" filter="#GetFileFromPath(configFilePaths[i])#" />
-			<cfset hashableString = hashableString & directoryResults.dateLastModified & directoryResults.size />
+			<cfset fileInfo = getFileInfo(configFilePaths[i]) />
+			<cfset hashableString = hashableString & fileInfo.lastModified & fileInfo.size />
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />

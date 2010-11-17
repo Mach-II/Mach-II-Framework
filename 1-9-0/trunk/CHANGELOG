@@ -210,6 +210,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Improved performance by using getFileInfo() instead of cfdirectory action='list'
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/729
+(2010-11-16 peterfarrell)
+
 * Improved performance of ViewContext
 This improvement can reduce the number of method calls when building urls.
 

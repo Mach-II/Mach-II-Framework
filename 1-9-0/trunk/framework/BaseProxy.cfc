@@ -106,7 +106,7 @@ Notes:
 	<cffunction name="computeObjectReloadHash" access="public" returntype="string" output="false"
 		hint="Computes the current reload hash of the target object.">
 
-		<cfset var directoryResults = "" />
+		<cfset var fileInfo = "" />
 		<cfset var stringToHash = "" />
 		<cfset var i = 0 />
 
@@ -117,11 +117,8 @@ Notes:
 
 		<!--- The hash needs to be based off entire target object path hierarchy --->
 		<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
-			<cfdirectory action="LIST"
-				directory="#GetDirectoryFromPath(variables.targetObjectPaths[i])#"
-				name="directoryResults"
-				filter="#GetFileFromPath(variables.targetObjectPaths[i])#" />
-			<cfset stringToHash = stringToHash & directoryResults.dateLastModified & directoryResults.size />
+			<cfset fileInfo = getFileInfo(variables.targetObjectPaths[i]) />
+			<cfset stringToHash = stringToHash & fileInfo.lastModified & fileInfo.size />
 		</cfloop>
 
 		<cfreturn Hash(stringToHash) />

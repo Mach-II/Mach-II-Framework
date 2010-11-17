@@ -195,17 +195,16 @@ Notes:
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="getConfigFileReloadHash" access="private" returntype="string" output="false"
-		hint="Get the current reload hash of the master config file and any include files which is based on dateLastModified and size.">
+		hint="Get the current reload hash of the master config file and any include files which is based on lastModified and size.">
 
 		<cfset var configFilePaths = getAppFactory().getConfigFilePaths() />
-		<cfset var directoryResults = "" />
+		<cfset var fileInfo = "" />
 		<cfset var hashableString = "" />
 		<cfset var i = "" />
 
 		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
-			<cfdirectory action="LIST" directory="#GetDirectoryFromPath(configFilePaths[i])#"
-				name="directoryResults" filter="#GetFileFromPath(configFilePaths[i])#" />
-			<cfset hashableString = hashableString & directoryResults.dateLastModified & directoryResults.size />
+			<cfset fileInfo = getFileInfo(configFilePaths[i]) />
+			<cfset hashableString = hashableString & fileInfo.lastModified & fileInfo.size />
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />
