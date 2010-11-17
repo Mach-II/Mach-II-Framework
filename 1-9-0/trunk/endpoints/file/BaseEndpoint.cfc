@@ -407,7 +407,7 @@ Configuration Notes:
 
 		<!--- Read file info for last-modified headers --->
 		<cftry>
-			<cfset fileInfo = getFileInfo(fileFullPath) />
+			<cfset fileInfo = getFileInfo(ExpandPath(fileFullPath)) />
 			
 			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 			<cfif fileInfo.type NEQ "file">
@@ -546,15 +546,18 @@ Configuration Notes:
 			hint="This is the file path." />
 		
 		<cfset var fullPath = ReplaceNoCase(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
-		<cfset var directoryResults = "" />
-
-		<cfset var fileResults = "" />
+		<cfset var fileInfo = "" />
 
 		<cftry>
-			<cfset fileResults = getFileInfo(fullPath) />
+			<cfset fileInfo = getFileInfo(fullPath) />
+			
+			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
+			<cfif fileInfo.type NEQ "file">
+				<cfthrow />
+			</cfif>
 
 			<!--- Convert current time to UTC because epoch is essentially UTC --->			
-			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileResults.lastModified)) />
+			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileInfo.lastModified)) />
 
 			<!--- Log an exception if asset cannot be found and only soft fail --->
 			<cfcatch>
