@@ -258,6 +258,11 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			flags="igm">
 			<fileset dir="${dest}/MachII/framework" includes="BaseComponent.cfc"/>
 		</replaceregexp>
+			<replaceregexp match="(!variables\.appManager\.)([ ]*?)getEventContext\(\)[ ]*?"
+				replace="\1variables.eventContext"
+				flags="igm">
+				<fileset dir="${dest}/MachII/framework" includes="RequestHandler.cfc"/>
+			</replaceregexp>
 		<echo message="---------------------------------------------"/>
 		<echo message="Minimizing and Concatenating JS files"/>
 		<echo message="---------------------------------------------"/>
