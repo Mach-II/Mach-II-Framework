@@ -153,6 +153,10 @@ from the parent application.
 	<cfset variables.CLEANUP_CONTROL_CHARACTERS_REGEX =  Chr(9) & '|' & Chr(10) & '|' & Chr(13) />
 	<!--- Epoch timestamp in UTC --->
 	<cfset variables.EPOCH_TIMESTAMP = DateConvert("local2Utc", CreateDatetime(1970, 1, 1, 0, 0, 0)) />
+	<!--- Set mock dimensions --->
+	<cfset variables.MOCK_DIMENSIONS = StructNew() />
+	<cfset variables.MOCK_DIMENSIONS.width = -1 />
+	<cfset variables.MOCK_DIMENSIONS.height = -1 />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -914,9 +918,10 @@ from the parent application.
 
 		<cfset var path = arguments.assetPath />
 		<cfset var urlBase = getProperty("urlBase") />
+		<cfset var urlBaseSecure = getProperty("urlBaseSecure") />
 
 		<!--- Don't do resolution on assets that are dynamically served --->
-		<cfif NOT path.startsWith(urlBase) OR NOT Len(urlBase)>
+		<cfif NOT path.startsWith(urlBase) OR NOT path.startsWIth(urlBaseSecure) OR NOT Len(urlBase) OR NOT Len(urlBaseSecure)>
 			<!--- Get path if the asset path is not a full path from webroot --->
 			<cfif NOT path.startsWith("/")>
 				<cfif arguments.assetType EQ "js">
@@ -969,7 +974,7 @@ from the parent application.
 			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileResults.lastModified)) />
 
 			<!--- Log an exception if asset cannot be found and only soft fail --->
-			<cfcatch>
+			<cfcatch type="any">
 				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
 	
 				<cfreturn 0 />			
@@ -1010,13 +1015,7 @@ from the parent application.
 
 	<cffunction name="mock_getImageDimensions" access="private" returntype="struct" output="false"
 		hint="This mock function returns a struct with no image dimensions. This is used to dynamically replace getImageDimension() when the java.awt.* package is not supported by the host syste.">
-
-		<cfset var dimensions = StructNew() />
-
-		<cfset dimensions.width = -1 />
-		<cfset dimensions.height = -1 />
-
-		<cfreturn dimensions />
+		<cfreturn variables.MOCK_DIMENSIONS />
 	</cffunction>
 
 	 <cffunction name="computeTotalAscStringValue" access="private" returntype="numeric" output="false"
@@ -1083,7 +1082,7 @@ from the parent application.
 			<cfset fileName = ListFirst(fileName, "?") />
 			<cfset currentAssetType = ListLast(fileName, ".") />
 
-			<!--- We have nothing to match against yet on the first interation --->
+			<!--- We have nothing to match against yet on the first iteration --->
 			<cfif assetType EQ "">
 				<cfset assetType = currentAssetType />
 			<!---

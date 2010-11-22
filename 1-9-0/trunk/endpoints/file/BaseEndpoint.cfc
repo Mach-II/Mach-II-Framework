@@ -560,7 +560,7 @@ Configuration Notes:
 			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileInfo.lastModified)) />
 
 			<!--- Log an exception if asset cannot be found and only soft fail --->
-			<cfcatch>
+			<cfcatch type="any">
 				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
 	
 				<cfreturn 0 />			
