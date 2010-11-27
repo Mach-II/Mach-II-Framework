@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+ 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
+
+$Id: mach-ii_1_9_0.dtd 2553 2010-10-21 23:54:13Z peterjfarrell $
+
+Created version: 1.9.0
+Updated version: 1.9.0
+
+Notes:
+-->
+<dictionary xmlns="http://www.cfeclipse.org/version1/dictionary"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cfeclipse.org/version1/dictionary.xsd http://cfeclipse.tigris.org/version1/dictionary/dictionary.xsd"
+>
+			
+	<tags>
+			
+		<tag creator="8" name="form:button" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="submit" />
+			</parameter>
+			<parameter name="type" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="submit" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:radiogroup" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="delimiter" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="," />
+			</parameter>
+			<parameter name="valueCol" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="labelCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+			</parameter>
+			<parameter name="valueKey" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="value" />
+			</parameter>
+			<parameter name="labelKey" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+			</parameter>
+			<parameter name="displayOrder" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:bind" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+		</tag>
+			
+		<tag creator="8" name="form:textarea" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:file" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+
+			<parameter name="name" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.path#" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+		</tag>
+
+			
+		<tag creator="8" name="form:optgroup" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+		</tag>
+			
+		<tag creator="8" name="form:select" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+			<parameter name="delimiter" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="," />
+			</parameter>
+			<parameter name="checkValueCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:checkbox" single="true" xmlstyle="true">
+
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#_#createCleanId(attributes.value)#" />
+			</parameter>
+			<parameter name="defaultValue" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="delimiter" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="," />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:hidden" single="true" xmlstyle="true">
+
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:options" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="delimiter" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="," />
+			</parameter>
+			<parameter name="valueCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="labelCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+
+			</parameter>
+			<parameter name="valueKey" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="labelKey" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+			</parameter>
+
+			<parameter name="checkValueCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="displayOrder" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+		</tag>
+
+			
+		<tag creator="8" name="form:radio" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+
+			</parameter>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="1" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#_#createCleanId(attributes.value)#" />
+			</parameter>
+
+		</tag>
+			
+		<tag creator="8" name="form:input" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="#attributes.name#" />
+			</parameter>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:password" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+			</parameter>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="id" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.name#" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:checkboxgroup" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="checkValue" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#wrapResolvePath(attributes.path)#" />
+
+			</parameter>
+			<parameter name="checkValue" type="any" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="delimiter" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="," />
+			</parameter>
+
+			<parameter name="valueCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="labelCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+			</parameter>
+			<parameter name="valueKey" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="value" />
+			</parameter>
+			<parameter name="labelKey" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="label" />
+			</parameter>
+			<parameter name="checkValueCol" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+
+				<values default="value" />
+			</parameter>
+			<parameter name="displayOrder" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:form" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+
+			<parameter name="autoFocus" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+			</parameter>
+			<parameter name="enctype" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="multipart/form-data" />
+			</parameter>
+			<parameter name="method" type="string" required="false">
+
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="post" />
+			</parameter>
+		</tag>
+			
+		<tag creator="8" name="form:option" single="true" xmlstyle="true">
+			<help><![CDATA[
+				
+			]]></help>
+			<parameter name="value" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="" />
+
+			</parameter>
+			<parameter name="id" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#getParentTagAttribute(" />
+			</parameter>
+			<parameter name="label" type="string" required="false">
+				<help><![CDATA[
+					
+				]]></help>
+				<values default="#attributes.value#" />
+			</parameter>
+
+		</tag>
+	</tags>
+			
+	<functions>
+	</functions>
+	<scopes>
+	</scopes>
+</dictionary>
