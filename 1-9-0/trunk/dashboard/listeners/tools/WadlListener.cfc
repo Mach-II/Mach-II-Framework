@@ -75,10 +75,10 @@ Notes:
 	<cffunction name="process" access="public" returntype="void" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 	</cffunction>
-	
+
 	<cffunction name="getRestEndpointMetaData" access="public" returntype="struct" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var restEndpoints = getRestEndpoints(arguments.event) />
 		<cfset var requestedEndpoints = arguments.event.getArg("endpointNames") />
 		<cfset var endpoint = "" />
@@ -95,44 +95,45 @@ Notes:
 		<cfset var parameter = "" />
 
 		<cfset stcResult.methodMetadata = StructNew () />
-		
+
 		<cfloop collection="#restEndpoints#" item="endpointKey">
 			<cftry>
 				<cfset endpoint = restEndpoints[endpointKey]  />
-				
-				<cfif ListFindNoCase(requestedEndpoints, endpoint.getParameter("name"))>
+
+				<cfif ListFindNoCase(requestedEndpoints, endpoint.getParameter("name"))
+						OR ListLen(requestedEndpoints) EQ 0>
 					<cfset restComponentMetadata = variables.introspector.getComponentDefinition(object:endpoint, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
-					
+
 					<cfloop array="#restComponentMetadata#" index="item" >
 						<cfset stcResult.componentMetadata[item.component] = item />
 					</cfloop>
-					
+
 					<cfset restMethodMetadata = variables.introspector.findFunctionsWithAnnotations(object:endpoint, namespace:variables.ANNOTATION_REST_BASE, walkTree:true, walkTreeStopClass:'MachII.endpoints.rest.BaseEndpoint') />
-	
+
 					<cfset stcResult.methodMetadata[item.component] = StructNew() />
-					
+
 					<cfloop array="#restMethodMetadata#" index="item" >
 						<cfloop array="#item.functions#" index="itemFunction">
 							<cfset pattern = itemFunction["REST:URI"]/>
-							
+
 							<cfset httpMethod = itemFunction["REST:METHOD"]/>
 							<cfset uri = endpoint.getRestUris().getUriByPattern(pattern, httpMethod) />
-	
+
 							<cfif StructKeyExists(stcResult.methodMetadata, pattern)>
 								<cfset stcTemp = stcResult.methodMetadata[pattern] />
 							<cfelse>
 								<cfset stcTemp = StructNew() />
 							</cfif>
-	
+
 							<!--- If the pattern does not start with the REST name --->
 							<cfif NOT pattern.startsWith("/" & endpoint.getParameter("name"))>
 								<cfset pattern = "/" & endpoint.getParameter("name") & pattern />
 							</cfif>
-	
+
 							<cfset stcTemp[httpMethod] = Duplicate(itemFunction) />
 							<cfset stcTemp[httpMethod].COMPONENT = item.component />
 							<cfset stcTemp[httpMethod].TOKENS = uri.getUriTokenNames() />
-							
+
 							<cfif NOT StructKeyExists(stcTemp[httpMethod], "REST:queryType")>
 								<cfif ListFindNoCase("POST,PUT", httpMethod)>
 									<cfset stcTemp[httpMethod]["REST:queryType"]  = "multipart/form-data" />
@@ -140,7 +141,7 @@ Notes:
 									<cfset stcTemp[httpMethod]["REST:queryType"]  = "application/x-www-form-urlencoded" />
 								</cfif>
 							</cfif>
-							
+
 							<cfif NOT StructKeyExists(stcTemp[httpMethod], "REST:authenticate")>
 								<cfif StructKeyExists(stcResult.componentMetadata[item.component], "REST:authenticate")>
 									<cfset stcTemp[httpMethod]["REST:authenticate"]  = stcResult.componentMetadata[item.component]["REST:authenticate"] />
@@ -148,7 +149,7 @@ Notes:
 									<cfset stcTemp[httpMethod]["REST:authenticate"]  = "unknown" />
 								</cfif>
 							</cfif>
-							
+
 							<!--- Look at the method parameters --->
 							<cfloop array="#stcTemp[httpMethod].parameters#" index="parameter">
 								<cfif NOT StructKeyExists(parameter, "REST:type")>
@@ -157,14 +158,14 @@ Notes:
 									<cfelse>
 										<cfset parameter["REST:type"] = "string" />
 									</cfif>
-								</cfif>	
+								</cfif>
 							</cfloop>
-							
+
 							<cfset stcResult.methodMetadata[item.component][pattern] = stcTemp />
 						</cfloop>
 					</cfloop>
 				</cfif>
-				
+
 				<cfcatch type="Application">
 					<!--- This will fail for non-rest endpoints. --->
 				</cfcatch>
@@ -176,19 +177,19 @@ Notes:
 
 	<cffunction name="getRestEndpoints" access="public" returntype="struct" output="false"
 		hint="Gets all the REST based endpoints for this application.">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />	
-		
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
 		<cfset var allEndpoints = getAppManager().getEndpointManager().getEndpoints() />
 		<cfset var restEndpoints = StructNew() />
 		<cfset var endpoint = "" />
-		
+
 		<cfloop collection="#allEndpoints#" item="endpoint">
 			<cfif variables.introspector.isObjectInstanceOf(allEndpoints[endpoint], "MachII.endpoints.rest.BaseEndpoint")>
 				<cfset restEndpoints[endpoint] = allEndpoints[endpoint] />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn restEndpoints />
 	</cffunction>
-	
+
 </cfcomponent>
