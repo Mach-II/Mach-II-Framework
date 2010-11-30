@@ -139,7 +139,9 @@ Notes:
 				<cfset log.warn("DEPRECATED: The ContentKey attribute has been deprecated. This was called by view '#arguments.viewName#'.") />
 			</cfif>
 
-			<cfset resolvedContentData = Evaluate(arguments.contentKey) />
+			<cfif IsDefined(arguments.contentKey)>
+				<cfset resolvedContentData = Evaluate(arguments.contentKey) />
+			</cfif>
 			
 			<cfif arguments.append AND IsDefined(arguments.contentKey)>	
 				<cftry>
