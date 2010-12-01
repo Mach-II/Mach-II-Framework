@@ -154,7 +154,18 @@ Notes:
 			<cfelse>
 				<!--- Setup if configurable property --->
 				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
+				
 					<cfset propertyType = resolvePropertyTypeShortcut(propertyNodes[i].xmlAttributes["type"]) />
+
+					<!---
+						Ensure the configurable property CFC is not already defined if override is not allowed.
+						isPropertyDefined does not check the parent (which is exactly what we want to do)
+					--->
+					<cfif NOT arguments.override AND isPropertyDefined(propertyName)>
+						<cfthrow type="MachII.framework.PropertyNameConflict"
+							message="A configurable property CFC already exists in a property named '#propertyName#' in module named '#getAppManager().getModuleName()#'."
+							detail="Please check your base config file and any include files in the named module for duplicate property names. Overrided property CFCs can cause unintended side-effects." />
+					</cfif>
 
 					<!--- Set the Property's parameters. --->
 					<cfset propertyParams = StructNew() />
@@ -201,8 +212,14 @@ Notes:
 					<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(propertyValue, propertyType, propertyParams) />
 					<cfset propertyValue.setProxy(baseProxy) />
 
-					<!--- Add the property to the array of configurable properties so they can be configured --->
-					<cfset ArrayAppend(variables.configurablePropertyNames, propertyName) />
+					<!---
+						Add the property to the array of configurable properties so they can be configured. If the property already 
+						exists, then we should not add it to the array of configurable property names as it causes the configure() 
+						method to be called twice.
+					--->
+					<cfif NOT isPropertyDefined(propertyName)>
+						<cfset ArrayAppend(variables.configurablePropertyNames, propertyName) />
+					</cfif>
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
 					<cftry>
