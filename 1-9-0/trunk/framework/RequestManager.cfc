@@ -1099,7 +1099,12 @@ Notes:
 
 	<cffunction name="setDefaultUrlBase" access="private" returntype="void" output="false">
 		<cfargument name="defaultUrlBase" type="string" required="true" />
-		<cfset variables.defaultUrlBase = arguments.defaultUrlBase />
+		
+		<cfif arguments.defaultUrlBase NEQ "/">
+			<cfset variables.defaultUrlBase = arguments.defaultUrlBase />
+		<cfelse>
+			<cfset variables.defaultUrlBase = "" />
+		</cfif>
 	</cffunction>
 	<cffunction name="getDefaultUrlBase" access="private" returntype="string" output="false">
 		<cfreturn variables.defaultUrlBase />
@@ -1111,7 +1116,12 @@ Notes:
 
 	<cffunction name="setDefaultUrlSecureBase" access="private" returntype="void" output="false">
 		<cfargument name="defaultUrlSecureBase" type="string" required="true" />
-		<cfset variables.defaultUrlSecureBase = arguments.defaultUrlSecureBase />
+		
+		<cfif arguments.defaultUrlSecureBase NEQ "/">
+			<cfset variables.defaultUrlSecureBase = arguments.defaultUrlSecureBase />
+		<cfelse>
+			<cfset variables.defaultUrlSecureBase = "" />
+		</cfif>
 	</cffunction>
 	<cffunction name="getDefaultUrlSecureBase" access="private" returntype="string" output="false">
 		<cfreturn variables.defaultUrlSecureBase />
