@@ -210,6 +210,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Throw exception when any configurable property CFC is overrided by another during load
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/730
+(2010-12-01 peterfarrell)
+
 * Improved performance by using getFileInfo() instead of cfdirectory action='list'
 
 For more info see:
