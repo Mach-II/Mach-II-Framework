@@ -368,7 +368,7 @@ Notes:
 		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
 			<cftry>
 				<cfif Len(arguments.moduleName)>
-					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getAppManager().getEventManager() />
+					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
 				<cfelse>
 					<cfset eventManager = getAppManager().getEventManager() />
 				</cfif>
@@ -466,7 +466,7 @@ Notes:
 		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
 			<cftry>
 				<cfif Len(moduleName)>
-					<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getAppManager().getEventManager() />
+					<cfset eventManager = getAppManager().getModuleManager().getModule(moduleName).getModuleAppManager().getEventManager() />
 				<cfelse>
 					<cfset eventManager = getAppManager().getEventManager() />
 				</cfif>
