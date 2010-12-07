@@ -29,6 +29,15 @@ defects (in no particular order):
 * Joe Roberts
 * Doug Smith (The Lampo Group, Inc.)
 * Jason York (The Lampo Group, Inc.)
+* Thomas Ehardt (The Lamp Group, Inc.)
+* Brian Klaas (Johns Hopkins University - Bloomberg School of Public Health)
+* Brian Hendel (Splice Digital)
+* Adam Ness
+* Jorge Loyo
+* Sean Corfield
+* Jayel Villamin
+* Sumit Verma
+* Jeff Lucido
 
 A special thanks for people who have contributed to documentation on our wiki:
 
@@ -101,8 +110,10 @@ the GNU General Public License applies.
 	called via a direct API call.  These interfaces as follows:
 
 	- MachII.mach-ii
+	- MachII.endpoints.AbstractEndpoint
 	- MachII.endpoints.file.BaseEndpoint
 	- MachII.endpoints.rest.BaseEndpoint
+	- MachII.endpoints.task.BaseEndpoint
 	- MachII.framework.BaseComponent
 	- MachII.framework.Listener
 	- MachII.framework.Property
