@@ -125,6 +125,7 @@ Notes:
 
 		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->
 		<cfset variables.utils = appManager.getUtils() />
+		<cfset variable.engineInfo = variables.utils.getCfmlEngineInfo() />
 
 		<!--- Read the XML configuration file. --->
 		<cftry>
@@ -142,6 +143,9 @@ Notes:
 		<!--- Append the master config file to the file paths --->
 		<cfset appendConfigFilePath(arguments.configXmlPath) />
 
+		<!--- Validate the XML contents --->
+		<cfset validateConfigXml(arguments.validateXml, configXmlFile, arguments.configXmlPath, arguments.configDtdPath) />
+		
 		<!--- Parse the XML contents --->
 		<cftry>
 			<cfset temp.configXml = XmlParse(configXmlFile) />
@@ -152,9 +156,6 @@ Notes:
 					detail="#variables.utils.buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
-
-		<!--- Validate the XML contents --->
-		<cfset validateConfigXml(arguments.validateXml, temp.configXml, arguments.configXmlPath, arguments.configDtdPath) />
 
 		<!--- Added the base config to the array --->
 		<cfset ArrayAppend(configXmls, temp) />
@@ -368,6 +369,9 @@ Notes:
 			</cfcatch>
 		</cftry>
 
+		<!--- Validate the XML contents --->
+		<cfset validateConfigXml(arguments.validateXml, includeXMLFile, arguments.includeFilePath, arguments.configDtdPath) />
+
 		<!--- Parse the XML contents --->
 		<cftry>
 			<cfset temp.configXml = XmlParse(includeXmlFile) />
@@ -377,9 +381,6 @@ Notes:
 					detail="#variables.utils.buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
-
-		<!--- Validate the XML contents --->
-		<cfset validateConfigXml(arguments.validateXml, temp.configXml, arguments.includeFilePath, arguments.configDtdPath) />
 
 		<!--- Append the include config file to the file paths --->
 		<cfset appendConfigFilePath(arguments.includeFilePath) />
@@ -393,22 +394,25 @@ Notes:
 
 	<cffunction name="validateConfigXml" access="private" returntype="void" output="false"
 		hint="Validates an xml file.">
-		<cfargument name="validateXml" type="boolean" required="true" />
-		<cfargument name="configXml" type="any" required="true" />
-		<cfargument name="configXmlPath" type="string" required="true" />
-		<cfargument name="configDtdPath" type="string" required="true" />
+		<cfargument name="validateXml" type="boolean" required="true"
+			hint="A boolean if the XML string should be validated." />
+		<cfargument name="configXml" type="any" required="true"
+			hint="A string representing an XML document or a parsed XML document to be validated." />
+		<cfargument name="configXmlPath" type="string" required="true"
+			hint="The path to this config file." />
+		<cfargument name="configDtdPath" type="string" required="true"
+			hint="The path to the DTD to use for validation." />
 
 		<cfset var validationResult = "" />
 		<cfset var validationException = "" />
-		<cfset var engineInfo = variables.utils.getCfmlEngineInfo() />
 
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND (
-					(FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 7)
-					OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 1 AND engineInfo.productLevel EQ "GPL")
-					OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 7 AND engineInfo.productLevel NEQ "GPL")
-					OR (FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3)
-				)>
+					(FindNoCase("ColdFusion", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 7)
+					OR (FindNoCase("BlueDragon", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 1 AND variable.engineInfo.productLevel EQ "GPL")
+					OR (FindNoCase("BlueDragon", variable.engineInfo.Name) AND variable.engineInfonfo.majorVersion GTE 7 AND variable.engineInfo.productLevel NEQ "GPL")
+					OR (FindNoCase("Railo", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 3)
+			)>
 
 			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
 			<cfif NOT arguments.configDtdPath.startsWith("http://") 
