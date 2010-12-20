@@ -210,6 +210,13 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* AppKey in bootstrapper causes unexpected behavior
+This is an user reported improvement over what we fixed in 1.6.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/29
+(2010-12-20 peterfarrell)
+
 * Improved XML DTD validation order
 
 We now validate against the DTD (when the declared in the bootstrapper) before trying

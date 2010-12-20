@@ -322,7 +322,7 @@ framework to be loaded as they interact with framework components:
 
 	<cffunction name="getAppKey" access="public" returntype="string" output="false"
 		hint="Returns a clean AppKey.">
-		<cfreturn REReplaceNoCase(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
+		<cfreturn REReplaceNoCase(MACHII_APP_KEY, "[^A-Za-z0-9]", "", "all") />
 	</cffunction>
 
 </cfcomponent>
