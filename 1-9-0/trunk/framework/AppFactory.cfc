@@ -125,7 +125,7 @@ Notes:
 
 		<!--- Put a reference of the utils into the variables so loadIncludes can use it --->
 		<cfset variables.utils = appManager.getUtils() />
-		<cfset variable.engineInfo = variables.utils.getCfmlEngineInfo() />
+		<cfset variables.engineInfo = variables.utils.getCfmlEngineInfo() />
 
 		<!--- Read the XML configuration file. --->
 		<cftry>
@@ -408,10 +408,10 @@ Notes:
 
 		<!--- Validate if directed and CF version 7 or higher --->
 		<cfif arguments.validateXml AND (
-					(FindNoCase("ColdFusion", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 7)
-					OR (FindNoCase("BlueDragon", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 1 AND variable.engineInfo.productLevel EQ "GPL")
-					OR (FindNoCase("BlueDragon", variable.engineInfo.Name) AND variable.engineInfonfo.majorVersion GTE 7 AND variable.engineInfo.productLevel NEQ "GPL")
-					OR (FindNoCase("Railo", variable.engineInfo.Name) AND variable.engineInfo.majorVersion GTE 3)
+					(FindNoCase("ColdFusion", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 7)
+					OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 1 AND variables.engineInfo.productLevel EQ "GPL")
+					OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfonfo.majorVersion GTE 7 AND variables.engineInfo.productLevel NEQ "GPL")
+					OR (FindNoCase("Railo", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 3)
 			)>
 
 			<!--- Check to see if the dtd file exists if the dtd path is not a URL --->
