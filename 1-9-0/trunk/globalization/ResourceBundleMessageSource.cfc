@@ -49,7 +49,7 @@ Created version: 1.9.0
 <cfcomponent
 	displayname="ResourceBundleMessageSource"
 	output="false"
-	extends="MachII.globalization.BaseMessageSource"
+	extends="BaseMessageSource"
 	hint="Implementation of the resource bundle message source.">
 	
 	<!---

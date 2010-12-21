@@ -109,12 +109,18 @@ Notes:
 		<cfargument name="defaultString" type="string" required="true" />
 		
 		<cfset var currentLocale = arguments.locale/>
+		<cfset var glp = getGlobalizationLoaderProperty() />
+		
 		<!--- If the user doesn't specify a locale, use the one for the current request --->
 		<cfif currentLocale EQ "">
 			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()/>
 		</cfif>
 		
-		<cfreturn getGlobalizationLoaderProperty().getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
+		<cfif glp.isDebuggingEnabled()>	
+			<cfreturn glp.getDebugPrefix() & glp.getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) & glp.getDebugSuffix() />
+		<cfelse>
+			<cfreturn glp.getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
+		</cfif>
 	</cffunction>
 	
 	<cffunction name="persistLocale" access="public" returntype="void" output="false"

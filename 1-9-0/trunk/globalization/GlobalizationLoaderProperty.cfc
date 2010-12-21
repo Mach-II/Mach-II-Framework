@@ -57,7 +57,7 @@ Usage:
 		<!-- Configures a string that will be output after any rendered message format -->
 		<parameter name="debugSuffix" value="string"/>
 		<!-- Configures whether the debugging prefix and suffix will show up -->
-		<parameter name="debugEnabled" value="true|false"
+		<parameter name="debuggingEnabled" value="true|false"
 		<!-- The resource bundle declarations. -->
 		<parameter name="bundles">
 	  		<array>
@@ -84,7 +84,7 @@ is en_US.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.debugMode = false />
+	<cfset variables.debuggingEnabled = false />
 	<cfset variables.debugPrefix = "**" />
 	<cfset variables.debugSuffix = "**" />
 	<cfset variables.localeUrlParam = "_locale" />
@@ -101,7 +101,7 @@ is en_US.
 		<cfset var bundles = getParameter("bundles", ArrayNew(1)) />
 		<cfset var i = 0 />
 
-		<cfset setDebugEnabled(getParameter("debugEnabled", "false")) />
+		<cfset setDebugEnabled(getParameter("debuggingEnabled", "false")) />
 		<cfset setDebugPrefix(getParameter("debugPrefix", "**")) />
 		<cfset setDebugSuffix(getParameter("debugSuffix", "**")) />
 		
@@ -142,22 +142,23 @@ is en_US.
 		<cfreturn variables.debugSuffix />
 	</cffunction>
 
-	<cffunction name="setDebugEnabled" access="public" returntype="void" output="false">
-		<cfargument name="debugEnabled" type="any" required="true" />
+	<cffunction name="setDebuggingEnabled" access="public" returntype="void" output="false">
+		<cfargument name="debuggingEnabled" type="any" required="true" />
+		
 		<cftry>
-			<cfset getAssert().isTrue(IsBoolean(arguments.debugEnabled) OR IsStruct(arguments.debugEnabled), "The 'debugEnabled' parameter for 'CachingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
+			<cfset getAssert().isTrue(IsBoolean(arguments.debuggingEnabled) OR IsStruct(arguments.debuggingEnabled), "The 'debuggingEnabled' parameter for 'CachingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
 
 			<!--- Load caching enabled since this is a simple value (no environment names / group) --->
-			<cfif IsBoolean(arguments.debugEnabled)>
-				<cfset variables.debugEnabled = arguments.debugEnabled />
+			<cfif IsBoolean(arguments.debuggingEnabled)>
+				<cfset variables.debuggingEnabled = arguments.debuggingEnabled />
 				<!--- Load caching enabled by environment name / group --->
 			<cfelse>
-				<cfset variables.debugEnabled = resolveValueByEnvironment(arguments.debugEnabled, true) />
+				<cfset variables.debuggingEnabled = resolveValueByEnvironment(arguments.debuggingEnabled, true) />
 			</cfif>
 
 			<cfcatch type="MachII.util.IllegalArgument">
 				<cfthrow type="MachII.globalization.GlobalizationConfigProperty.invalidEnvironmentConfiguration"
-					message="This misconfiguration error is defined in the property-wide 'debugEnabled' parameter in the 'ResourceLoaderProperty' in module named '#getModuleName()#'."
+					message="This misconfiguration error is defined in the property-wide 'debuggingEnabled' parameter in the 'ResourceLoaderProperty' in module named '#getModuleName()#'."
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 			<cfcatch type="any">
@@ -165,8 +166,8 @@ is en_US.
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	<cffunction name="getDebugEnabled" access="public" returntype="boolean" output="false">
-		<cfreturn variables.debugEnabled />
+	<cffunction name="isDebuggingEnabled" access="public" returntype="boolean" output="false">
+		<cfreturn variables.debuggingEnabled />
 	</cffunction>
 
 	<cffunction name="setMessageSource" access="public" returntype="void" output="false">
