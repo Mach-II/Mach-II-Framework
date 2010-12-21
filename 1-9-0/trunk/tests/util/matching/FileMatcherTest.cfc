@@ -63,7 +63,7 @@ Notes:
 	--->
 	<cffunction name="setup" access="public" returntype="void" output="false"
 		hint="Logic to run to setup before each test case method.">
-		<cfset variables.pm = CreateObject("component", "MachII.util.matching.FileMatcher").init() />
+		<cfset variables.pm = CreateObject("component", "MachII.util.matching.FileMatcher") />
 	</cffunction>
 
 	<cffunction name="tearDown" access="public" returntype="void" output="false"
@@ -74,11 +74,15 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testMatchWithRootPathReplacement" access="public" returntype="void" output="false"
+	<cffunction name="testMatchWithRootPathReplacement_withListInfo" access="public" returntype="void" output="false"
 		hint="Tests match() with various coverage using root path replacement.">
 		
-		<cfset var pathResults = variables.pm.match("/views/**/*.cfm", ExpandPath("/MachII/dashboard"), ExpandPath("/MachII/dashboard")) />
+		<cfset var pathResults = "" />
 		<cfset var assertResults = "" />
+
+		<!--- Test using listInfo --->
+		<cfset variables.pm.init("/", true) />
+		<cfset pathResults = variables.pm.match("/views/**/*.cfm", ExpandPath("/MachII/dashboard"), ExpandPath("/MachII/dashboard")) />
 		
 		<cfset debug(pathResults) />
 		
@@ -99,14 +103,48 @@ Notes:
 		</cfquery>
 		
 		<cfset assertTrue(assertResults.recordCount EQ 1) />
-		
 	</cffunction>
-	
-	<cffunction name="testMatchWithoutRootPathReplacement" access="public" returntype="void" output="false"
+
+	<cffunction name="testMatchWithRootPathReplacement_withoutListInfo" access="public" returntype="void" output="false"
+		hint="Tests match() with various coverage using root path replacement.">
+		
+		<cfset var pathResults = "" />
+		<cfset var assertResults = "" />
+		
+		<!--- Test without using listInfo --->
+		<cfset variables.pm.init("/", false) />
+		<cfset pathResults = variables.pm.match("/views/**/*.cfm", ExpandPath("/MachII/dashboard"), ExpandPath("/MachII/dashboard")) />
+		
+		<cfset debug(pathResults) />
+		
+		<cfset assertIsQuery(pathResults) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '/views/tools/scribble/index.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '/views/sys/login.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />	
+	</cffunction>
+
+	<cffunction name="testMatchWithoutRootPathReplacement_withListInfo" access="public" returntype="void" output="false"
 		hint="Tests match() with various coverage without using root path replacement.">
 		
-		<cfset var pathResults = variables.pm.match(ExpandPath("/MachII/dashboard") & "/views/**/*.cfm", ExpandPath("/MachII/dashboard")) />
+		<cfset var pathResults = "" />
 		<cfset var assertResults = "" />
+		
+		<!--- Test using listInfo --->
+		<cfset variables.pm.init("/", true) />
+		<cfset pathResults = variables.pm.match(ExpandPath("/MachII/dashboard") & "/views/**/*.cfm", ExpandPath("/MachII/dashboard")) />
 		
 		<cfset debug(pathResults) />
 		
@@ -127,9 +165,39 @@ Notes:
 		</cfquery>
 		
 		<cfset assertTrue(assertResults.recordCount EQ 1) />
-		
 	</cffunction>
 	
+	<cffunction name="testMatchWithoutRootPathReplacement_withoutListInfo" access="public" returntype="void" output="false"
+		hint="Tests match() with various coverage without using root path replacement.">
+		
+		<cfset var pathResults = "" />
+		<cfset var assertResults = "" />
+
+		<!--- Test using without listInfo --->
+		<cfset variables.pm.init("/", false) />
+		<cfset pathResults = variables.pm.match(ExpandPath("/MachII/dashboard") & "/views/**/*.cfm", ExpandPath("/MachII/dashboard")) />
+		
+		<cfset debug(pathResults) />
+		
+		<cfset assertIsQuery(pathResults) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '#ExpandPath("/MachII/dashboard")#/views/tools/scribble/index.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />
+		
+		<cfquery dbtype="query" name="assertResults">
+			SELECT *
+			FROM pathResults
+			WHERE modifiedPath = '#ExpandPath("/MachII/dashboard")#/views/sys/login.cfm'
+		</cfquery>
+		
+		<cfset assertTrue(assertResults.recordCount EQ 1) />		
+	</cffunction>
+
 	<cffunction name="testMatchWithExcludePatterns" access="public" returntype="void" output="false"
 		hint="Tests match() with various coverage using exclude patterns.">
 		

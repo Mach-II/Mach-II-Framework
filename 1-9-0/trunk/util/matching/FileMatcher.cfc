@@ -57,6 +57,8 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.useListInfo = false />
+	<cfset variables.utils = "" />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -64,8 +66,12 @@ Notes:
 	<cffunction name="init" access="public" returntype="FileMatcher" output="false"
 		hint="Initializes the path pattern matcher.">
 		<cfargument name="pathSeparator" type="string" required="false" />
+		<cfargument name="useListInfo" type="boolean" required="false" />
 		
 		<cfset var temp = "" />
+		<cfset var engineInfo = "" />
+		
+		<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init("false") />
 		
 		<!--- Determine if _queryDeleteRow_java should be used and reassign to common function --->
 		<cftry>
@@ -80,6 +86,19 @@ Notes:
 				<cfset variables.queryDeleteRow = variables._queryDeleteRow_java />
 			</cfcatch>
 		</cftry>
+		
+		<!--- Determine if we should use cfdirectory listInfo --->
+		<cfif StructKeyExists(arguments, "useListInfo")>
+			<cfset variables.useListInfo = arguments.useListInfo />
+		<cfelse>
+			<cfset engineInfo = variables.utils.getCfmlEngineInfo() />
+			<cfif ((FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 7)
+				OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 1 AND engineInfo.minorVersion GTE 4 AND engineInfo.productLevel EQ "GPL")
+				OR (FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3)
+				)>
+				<cfset variables.useListInfo = true />
+			</cfif>
+		</cfif>
 		
 		<cfset super.init(argumentCollection=arguments) />
 
@@ -98,55 +117,18 @@ Notes:
 		
 		<cfset var pathResults = "" />
 		<cfset var pathResultsRecordCount = 0 />
-		<cfset var recurse = false />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
-		<!--- Clean up the pattern --->
+		<!--- Clean up the paths and pattern --->
+		<cfset arguments.path = pathClean(arguments.path) />
 		<cfset arguments.pattern = pathClean(arguments.pattern) />
 		<cfset arguments.removeRootPath = pathClean(arguments.removeRootPath) />
 		
-		<!--- Only recurse if there is a ** in the pattern to save on performance --->
-		<cfif FindNoCase("**", arguments.pattern)>
-			<cfset recurse = true />
-		</cfif>
-		
-		<!--- Find possible candidates --->
-		<cfdirectory name="pathResults" 
-			action="list" 
-			directory="#arguments.path#"
-			sort="name"
-			recurse="#recurse#" />
-		
-		<!--- Add modified path column --->
-		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
-		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
-
-		<!---
-		Build possible paths by removing the root path if requested. This option 
-		is offered because cfinclude cannot use absolute file paths
-		I know two loop that are similar is harder to maintain, but it's better performance
-		--->
-		<cfif Len(arguments.removeRootPath)>
-			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
-				<cfif pathResults.type[i] EQ "file">
-					<cfset pathResults.directory[i] =  ReplaceNoCase(pathResults.directory[i], "\", "/", "all") />
-					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
-					<cfset pathResults.modifiedPath[i] =  ReplaceNoCase(pathResults.directory[i], arguments.removeRootPath, "", "one") & "/" & pathResults.name[i] />
-				<cfelse>
-					<cfset queryDeleteRow(pathResults, i) />
-				</cfif>
-			</cfloop>
+		<cfif variables.useListInfo>
+			<cfset pathResults = findFilesWithListInfo(arguments.pattern, arguments.path, arguments.removeRootPath) />
 		<cfelse>
-			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
-				<cfif pathResults.type[i] EQ "file">
-					<cfset pathResults.directory[i] =  ReplaceNoCase(pathResults.directory[i], "\", "/", "all") />
-					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
-					<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
-				<cfelse>
-					<cfset queryDeleteRow(pathResults, i) />
-				</cfif>
-			</cfloop>
+			<cfset pathResults = findFiles(arguments.pattern, arguments.path, arguments.removeRootPath) />
 		</cfif>
 		
 		<!--- N.B. At this point, all paths use "/" as the path separator regardless of OS --->
@@ -163,7 +145,7 @@ Notes:
 						AND super.match(arguments.excludePatterns[j], pathResults.modifiedPath[i]))>
 						<!---
 						If a pattern is found, delete and break out of the inner loop (short-circuit)
-						We're using the underlying Java method
+						We're using the underlying Java method or built-in method if available
 						--->
 						<cfset queryDeleteRow(pathResults, i) />
 						<cfbreak />
@@ -207,7 +189,7 @@ Notes:
 	<cffunction name="pathClean" access="public" returntype="string" output="false"
 		hint="Cleans paths so all paths use a uniform delimiter.">
 		<cfargument name="path" type="string" required="true" />
-		<cfreturn ReplaceNoCase(arguments.path, "\", "/", "all") />
+		<cfreturn REReplaceNoCase(arguments.path, "(\\{1,}|\/{1,})", "/", "all") />
 	</cffunction>
 	
 	<cffunction name="extractPathWithoutPattern" access="public" returntype="string" output="false"
@@ -255,6 +237,103 @@ Notes:
 		</cfloop>
 		
 		<cfreturn cleanedExcludePatterns />
+	</cffunction>
+	
+	<cffunction name="findFiles" access="private" returntype="query" output="false"
+		hint="Finds all files by pattern without using 'listInfo'.">
+		<cfargument name="pattern" type="string" required="true" />
+		<cfargument name="path" type="string" required="true" />
+		<cfargument name="removeRootPath" type="string" required="true" />
+		
+		<cfset var pathResults = "" />
+		
+		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
+		<cfdirectory name="pathResults" 
+			action="list" 
+			directory="#arguments.path#"
+			recurse="#FindNoCase("**", arguments.pattern)#" />
+		
+		<!--- Add modified path columns --->
+		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
+		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
+		
+		<!---
+		Build possible paths by removing the root path if requested. This option 
+		is offered because cfinclude cannot use absolute file paths
+		I know two loop that are similar is harder to maintain, but it's better performance
+		--->
+		<cfif Len(arguments.removeRootPath)>
+			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
+				<cfif pathResults.type[i] EQ "file">
+					<cfset pathResults.directory[i] =  REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
+					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
+					<cfset pathResults.modifiedPath[i] =  ReplaceNoCase(pathResults.directory[i], arguments.removeRootPath, "", "one") & "/" & pathResults.name[i] />
+				<cfelse>
+					<cfset queryDeleteRow(pathResults, i) />
+				</cfif>
+			</cfloop>
+		<cfelse>
+			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
+				<cfif pathResults.type[i] EQ "file">
+					<cfset pathResults.directory[i] =  REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
+					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
+					<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
+				<cfelse>
+					<cfset queryDeleteRow(pathResults, i) />
+				</cfif>
+			</cfloop>
+		</cfif>
+		
+		<cfreturn pathResults />
+	</cffunction>
+
+	<cffunction name="findFilesWithListInfo" access="private" returntype="query" output="false"
+		hint="Finds all files by pattern without using 'listInfo'.">
+		<cfargument name="pattern" type="string" required="true" />
+		<cfargument name="path" type="string" required="true" />
+		<cfargument name="removeRootPath" type="string" required="true" />
+		
+		<cfset var pathResults = "" />
+		
+		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
+		<cfdirectory name="pathResults" 
+			action="list" 
+			directory="#arguments.path#"
+			listInfo="name"
+			type="file"
+			recurse="#FindNoCase("**", arguments.pattern)#" />
+
+		<!--- Add modified path columns --->
+		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
+		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
+
+		<!--- ACF does not include all the required columns while BD provided blanks --->
+		<cfif NOT ListFindNoCase(pathResults.columnList, "directory")>
+			<cfset QueryAddColumn(pathResults, "directory", "VarChar", ArrayNew(1)) />
+		</cfif>
+
+		<!---
+		Build possible paths by removing the root path if requested. This option 
+		is offered because cfinclude cannot use absolute file paths
+		I know two loop that are similar is harder to maintain, but it's better performance
+		--->
+		<cfif Len(arguments.removeRootPath)>
+			<cfloop from="1" to="#pathResults.recordcount#" index="i">
+				<cfset pathResults.directory[i] = REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
+				<cfset pathResults.name[i] = GetFileFromPath(pathResults.name[i]) />
+				<cfset pathResults.fullPath[i] = pathResults.directory[i] & pathResults.name[i] />
+				<cfset pathResults.modifiedPath[i] = ReplaceNoCase(pathResults.fullPath[i], arguments.removeRootPath, "", "one") />
+			</cfloop>
+		<cfelse>
+			<cfloop from="1" to="#pathResults.recordcount#" index="i">
+				<cfset pathResults.directory[i] = REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
+				<cfset pathResults.name[i] = GetFileFromPath(pathResults.name[i]) />
+				<cfset pathResults.fullPath[i] = pathResults.directory[i] & pathResults.name[i] />
+				<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
+			</cfloop>
+		</cfif>
+		
+		<cfreturn pathResults />
 	</cffunction>
 
 </cfcomponent>
