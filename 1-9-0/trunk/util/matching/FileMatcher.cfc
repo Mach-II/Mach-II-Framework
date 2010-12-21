@@ -246,6 +246,7 @@ Notes:
 		<cfargument name="removeRootPath" type="string" required="true" />
 		
 		<cfset var pathResults = "" />
+		<cfset var i = "" />
 		
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
 		<cfdirectory name="pathResults" 
@@ -294,6 +295,7 @@ Notes:
 		<cfargument name="removeRootPath" type="string" required="true" />
 		
 		<cfset var pathResults = "" />
+		<cfset var i = "" />
 		
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
 		<cfdirectory name="pathResults" 
