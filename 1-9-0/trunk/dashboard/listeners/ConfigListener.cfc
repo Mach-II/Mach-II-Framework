@@ -146,7 +146,7 @@ Notes:
 		<cfset var i = "" />
 
 		<cfloop collection="#modules#" item="i">
-			<cfif modules[i].isEnabled() AND NOT modules[i].getLazyLoad()>
+			<cfif modules[i].isEnabled() AND modules[i].isLoaded()>
 				<cfset data[modules[i].getModuleName()] = getComponentDataByAppManager(modules[i].getModuleAppManager()) />
 			</cfif>
 		</cfloop>
