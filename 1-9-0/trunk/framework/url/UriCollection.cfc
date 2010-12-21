@@ -72,11 +72,10 @@ associated Uri instances.
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="findUri" access="public" returntype="any" output="false"
-		hint="Tries to find an Uri that matches the incoming pathInfo and HttpMethod. Returns it if found, otherwise returns empty string.">
+		hint="Tries to find an Uri that matches the incoming pathInfo and HttpMethod. Returns it if found, otherwise returns list of available http methods or empty string.">
 		<cfargument name="pathInfo" type="string" required="true" />
 		<cfargument name="httpMethod" type="string" required="true" />
 
-		<cfset var uri = "" />
 		<cfset var currUriGroup = "" />
 		<cfset var currUriRegex = "" />
 
@@ -84,15 +83,18 @@ associated Uri instances.
 			<cfset currUriGroup = variables.uris[arguments.httpMethod] />
 
 			<cfloop collection="#currUriGroup#" item="currUriRegex">
-				<cfif ReFindNoCase(currUriRegex, arguments.pathInfo, 1, false)>
-					<!--- Found a match: get it, and bail out of loop --->
-					<cfset uri = currUriGroup[currUriRegex] />
-					<cfbreak />
+				<cfif REFindNoCase(currUriRegex, arguments.pathInfo, 1, false)>
+					<!--- Found a match: get it, and bail out of loop by returing the object --->
+					<cfreturn currUriGroup[currUriRegex] />
 				</cfif>
 			</cfloop>
 		</cfif>
-
-		<cfreturn uri />
+		
+		<!---
+			If no URI is found, return a list of HTTP methods allowed for this
+			pattern (zero-length string means not URI found by any HTTP method)
+		--->
+		<cfreturn findAvailbleMethodsByUri(arguments.pathInfo) />
 	</cffunction>
 
 	<cffunction name="addUri" access="public" returntype="void" output="false"
@@ -189,6 +191,30 @@ associated Uri instances.
 		hint="Resets the URI collection.">
 		<cfset variables.uris = StructNew() />
 	</cffunction>
+	
+	<cffunction name="findAvailbleMethodsByUri" access="public" returntype="string" output="false"
+		hint="Tries to find available HTTP methods by the an Uri that matches the incoming pathInfo. Returns a list of available HTTP methods if found, otherwise returns empty string.">
+		<cfargument name="pathInfo" type="string" required="true" />
+
+		<cfset var uriMethods = "" />
+		<cfset var currUriGroup = "" />
+		<cfset var currUriRegex = "" />
+		<cfset var currHttpMethod = "" />
+
+		<cfloop collection="#variables.uris#" item="currHttpMethod">
+			<cfset currUriGroup = variables.uris[currHttpMethod] />
+	
+			<cfloop collection="#currUriGroup#" item="currUriRegex">
+				<cfif REFindNoCase(currUriRegex, arguments.pathInfo, 1, false)>
+					<!--- Found a match: get it, and bail out of loop --->
+					<cfset uriMethods = ListAppend(uriMethods, currHttpMethod) />
+					<cfbreak />
+				</cfif>
+			</cfloop>
+		</cfloop>
+
+		<cfreturn uriMethods />
+	</cffunction>
 
 	<!---
 	ACCESSORS
@@ -198,7 +224,7 @@ associated Uri instances.
 		<cfreturn variables.uris />
 	</cffunction>
 
-	<cffunction name="getUriByPattern" access="public" returntype="any" output="false">
+	<cffunction name="getUriByPattern" access="public" returntype="any" output="false"
 		hint="Tries to find an Uri that matches the supplied pattern. Returns it if found, otherwise returns empty string.">
 		<cfargument name="pattern" type="string" required="true" />
 		<cfargument name="httpMethod" type="string" required="true" />
@@ -218,6 +244,6 @@ associated Uri instances.
 		</cfif>
 
 		<cfreturn uri />
-
 	</cffunction>
+	
 </cfcomponent>

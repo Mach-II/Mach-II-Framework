@@ -170,8 +170,13 @@ To Test it out, do the following:
 		<cfif IsObject(restUri)>
 			<cfset arguments.event.setArg("restUri", restUri) />
 		<cfelse>
-			<cfthrow type="MachII.endpoints.EndpointNotDefined"
-				message="No REST URI was found for '#pathInfo#', httpMethod='#httpMethod#'." />
+			<cfif Len(restUri)>
+				<cfthrow type="MachII.endpoints.rest.IncorrectHTTPMethod"
+					message="A request was made to a REST URI was found for '#pathInfo#' but the httpMethod='#httpMethod#' was incorrect. This resource can only be used with the following HTTP methods '#restUri#'." />
+			<cfelse>
+				<cfthrow type="MachII.endpoints.rest.NoURIMatch"
+					message="A request was made to a REST URI which cannot be found with '#pathInfo#' with httpMethod='#httpMethod#'. No resource can be found that matches with any other HTTP method type either." />
+			</cfif>
 		</cfif>
 	</cffunction>
 
@@ -191,6 +196,26 @@ To Test it out, do the following:
 
 		<!--- TODO: If callEndpointFunction() returns void, won't requestResponseBody be deleted as a var? This might need to be IsDefined() --->
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
+	</cffunction>
+	
+	
+	<cffunction name="onException" access="public" returntype="void" output="true"
+		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfargument name="exception" type="MachII.util.Exception" required="true"
+			hint="The Exception that was thrown/caught by the endpoint request processor." />
+		
+		<cfif exception.getType() EQ "MachII.endpoints.rest.IncorrectHTTPMethod">
+			<cfset addHTTPHeaderByStatus(405) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>405 Method Not Allowed - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<cfelseif exception.getType() EQ "MachII.endpoints.rest.NoURIMatch">
+			<cfset addHTTPHeaderByStatus(404) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<cfelse>
+			<cfset super.onException(arguments.event, arguments.exception) />
+		</cfif>
 	</cffunction>
 
 	<!---

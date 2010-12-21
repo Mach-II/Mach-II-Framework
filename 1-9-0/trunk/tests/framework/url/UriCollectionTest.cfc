@@ -94,6 +94,9 @@ Notes:
 		
 		<!--- Check for negative matches --->
 		<cfset assertFalse(IsObject(variables.uriCollection.findUri("/content/item/anb123", "POST"))) />
+		
+		<!--- Check for incorrect HTTP method usage (405 - Method Not Allowed) --->
+		<cfset assertEquals(variables.uriCollection.findUri("/content/item/anb123", "POST"), "GET") />
 	</cffunction>
 	
 	<cffunction name="testIsUriDefined" access="public" returntype="void" output="false"
