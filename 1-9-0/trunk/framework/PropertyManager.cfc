@@ -266,7 +266,21 @@ Notes:
 		<!--- Run configure on all configurable properties --->
 		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
 			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
-			<cfset aConfigurableProperty.deconfigure() />
+			<cftry>
+				<cfset aConfigurableProperty.deconfigure() />
+				<cfcatch type="any">
+					<!---
+						If the property is an object, then is a real exception. Otherwise,
+						somebody replaced a configurable property with another datatype during 
+						the lifetime of the application which we cannot deconfigure and therefore
+						ignore the exception.
+						See ticket 720
+					--->
+					<cfif IsObject(aConfigurableProperty)>
+						<cfrethrow />
+					</cfif>
+				</cfcatch>
+			</cftry>
 		</cfloop>
 	</cffunction>
 

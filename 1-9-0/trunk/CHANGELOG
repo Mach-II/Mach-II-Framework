@@ -218,6 +218,16 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Added try/catch around configureable property deconfigure()
+If a developer replaces a configurable property with another
+datatype, the framework will throw an exception saying deconfigure
+failed.  This is not a bug because developers really should not
+be doing this, however we added a fix so this does not happen.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/720
+(2010-12-21 peterfarrell)
+
 * AppKey in bootstrapper causes unexpected behavior
 This is an user reported improvement over what we fixed in 1.6.
 
