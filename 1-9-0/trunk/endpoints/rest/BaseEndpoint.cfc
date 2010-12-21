@@ -121,10 +121,13 @@ To Test it out, do the following:
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<!--- UriCollection of rest.Uris that match in this endpoint. --->
 	<cfset variables.restUris = CreateObject("component", "MachII.framework.url.UriCollection").init() />
-	<!--- The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
-	      it can be overridden in a subclass using setDefaultFormat(). --->
-	<cfset variables.defaultFormat = "html" />
+	<!---
+		The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
+	    it can be overridden by defining the "defaultFormat" parameter.
+	--->
+	<cfset variables.defaultFormat = "html" />	
 	<cfset variables.defaultCharset = "ISO-8859-1" />
+	<cfset variables.fileExtensionList = ".htm,.html,.json,.xml" />
 	<cfset variables.authenticateDefault = false />
 
 	<!---
@@ -136,6 +139,7 @@ To Test it out, do the following:
 		<!--- Configure any parameters --->
 		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", "ISO-8859-1")) />
+		<cfset setFileExtensionList(getParameter("fileExtensionList", ".htm,.html,.json,.xml")) />
 
 		<cfset setupRestComponent() />
 		<cfset setupRestMethods() />
@@ -468,6 +472,14 @@ To Test it out, do the following:
 	</cffunction>
 	<cffunction name="getDefaultCharset" access="public" returntype="string" output="false">
 		<cfreturn variables.defaultCharset />
+	</cffunction>
+
+	<cffunction name="setFileExtensionList" access="public" returntype="void" output="false">
+		<cfargument name="fileExtensionList" type="string" required="true" />
+		<cfset variables.fileExtensionList = arguments.fileExtensionList />
+	</cffunction>
+	<cffunction name="getFileExtensionList" access="public" returntype="string" output="false">
+		<cfreturn variables.fileExtensionList />
 	</cffunction>
 
 	<cffunction name="setAuthenticateDefault" access="public" returntype="void" output="false">

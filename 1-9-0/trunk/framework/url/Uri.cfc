@@ -92,7 +92,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfargument name="functionName" type="string" required="false" default=""
 			hint="The name of the function to call when this endpoint route is invoked" />
 		<cfargument name="uriPrefix" type="string" required="false" default=""
-			hint="The name of the URI prefiex." />
+			hint="The name of the URI prefix." />
 		<cfargument name="uriMetadataParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Any metadata for the URI being defined." />
 
@@ -186,7 +186,6 @@ For example, a uriPattern like "/service/doit/{value}"
 		hint="Returns a comma delimited list of URI metadata names.">
 		<cfreturn StructKeyList(variables.uriMetadataParameters) />
 	</cffunction>
-
 
 	<!---
 	PROTECTED FUNCTIONS
