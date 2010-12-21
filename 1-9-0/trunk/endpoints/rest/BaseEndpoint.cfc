@@ -66,6 +66,11 @@ To Test it out, do the following:
 					if not defined in the url (defaults to html if not defined)
 				-->
 				<parameter name="defaultFormat" value="json" />
+				<!--
+					Optionally sets the default return charset of the request. Defaults
+					to ISO-8859-1 if not defined (standard HTTP response charset).
+				-->
+				<parameter name="defaultCharset" value="" />
 			</parameters>
 		</endpoint>
 	</endpoints>
@@ -119,6 +124,7 @@ To Test it out, do the following:
 	<!--- The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
 	      it can be overridden in a subclass using setDefaultFormat(). --->
 	<cfset variables.defaultFormat = "html" />
+	<cfset variables.defaultCharset = "ISO-8859-1" />
 	<cfset variables.authenticateDefault = false />
 
 	<!---
@@ -129,6 +135,7 @@ To Test it out, do the following:
 
 		<!--- Configure any parameters --->
 		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
+		<cfset setDefaultCharset(getParameter("defaultCharset", "ISO-8859-1")) />
 
 		<cfset setupRestComponent() />
 		<cfset setupRestMethods() />
@@ -276,7 +283,7 @@ To Test it out, do the following:
 			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format, variables.customMimeTypeMap) />
 
 			<!--- Add the Content-Type header --->
-			<cfset addHTTPHeaderByName("Content-Type", contentType) />
+			<cfset addHTTPHeaderByName("Content-Type", contentType, getDefaultCharset()) />
 
 			<cfcatch type="any">
 				<!--- Log exception --->
@@ -453,6 +460,14 @@ To Test it out, do the following:
 	<cffunction name="getDefaultFormat" access="public" returntype="string" output="false"
 		hint="Gets the default format MIME type.">
 		<cfreturn variables.defaultFormat />
+	</cffunction>
+
+	<cffunction name="setDefaultCharset" access="public" returntype="void" output="false">
+		<cfargument name="defaultCharset" type="string" required="true" />
+		<cfset variables.defaultCharset = arguments.defaultCharset />
+	</cffunction>
+	<cffunction name="getDefaultCharset" access="public" returntype="string" output="false">
+		<cfreturn variables.defaultCharset />
 	</cffunction>
 
 	<cffunction name="setAuthenticateDefault" access="public" returntype="void" output="false">
