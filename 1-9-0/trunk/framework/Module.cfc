@@ -107,15 +107,17 @@ Notes:
 
 		<cfset var appLoader = "" />
 		<cfset var moduleAppManager = "" />
+		
 		<cfif NOT isLoaded()>
 			<cftry>
 				<cfset appLoader = CreateObject("component", "MachII.framework.AppLoader") />
 				<cfset appLoader.init(getFile(), getDtdPath(), getAppManager().getAppKey(),
 						getValidateXml(), getAppManager(), getOverrideXml(), getModuleName()) />
-				<cfset moduleAppManager = appLoader.getAppManager() />
 
+				<cfset moduleAppManager = appLoader.getAppManager() />
 				<cfset moduleAppManager.setAppLoader(appLoader) />
 				<cfset setModuleAppManager(moduleAppManager) />
+				
 				<cfset setLoaded(true) />
 
 				<cfcatch type="any">
@@ -142,6 +144,7 @@ Notes:
 			hint="Should the XML be validated before parsing." />
 
 		<cfset var oldModuleAppManager = getModuleAppManager() />
+		
 		<cftry>
 			<cfset clearLoadException() />
 			<cfset setLoaded(false) />
