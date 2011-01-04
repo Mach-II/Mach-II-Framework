@@ -76,7 +76,7 @@ Notes:
 	<cfset variables.majorVersion = "1.9.0" />
 	<cfset variables.minorVersion = "@minorVersion@" />
 	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
+		 "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlSecureEnabled,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -501,6 +501,9 @@ Notes:
 			<cfelseif NOT ListFindNoCase("cookie,url", getProperty("redirectPersistParameterLocation"))>
 				<cfthrow type="MachII.framework.invalidPropertyValue"
 					message="The 'redirectPersistParameterLocation' property must be an 'url' or 'cookie'." />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlSecureEnabled")>
+				<cfset setProperty("urlSecureEnabled", true) />
 			</cfif>
 			<cfif NOT isPropertyDefined("urlBase")>
 				<cfset setProperty("urlBase", "index.cfm") />

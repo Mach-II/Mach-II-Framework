@@ -210,17 +210,19 @@ Notes:
 					detail="Event-handlers with an access modifier of private cannot be requested via an URL and can only be programmatically announced from within the framework." />
 			</cfif>
 
-			<!--- Check if the event needs to be secure/unsecure --->
-			<cfset eventSecure = appManager.getEventManager().getEventSecureType(result.eventName) />
-			<cfif cgi.SERVER_PORT_SECURE GTE 1 OR cgi.SERVER_NAME EQ appManager.getPropertyManager().getProperty("urlSecureBaseCheckServerName")>
-				<cfset requestSecure = 1 />
-			</cfif>
-
-			<cfif eventSecure NEQ -1 AND eventSecure NEQ requestSecure>
-				<cfif Len(getCurrentRouteName())>
-					<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, true, eventArgs) />
-				<cfelse>
-					<cfset appManager.getRequestManager().redirectEvent(result.eventName, eventArgs, result.moduleName, true, eventArgs) />
+			<!--- Check if the event needs to be secure/unsecure and redirected--->
+			<cfif appManager.getPropertyManager().getProperty("urlSecureEnabled")>
+				<cfset eventSecure = appManager.getEventManager().getEventSecureType(result.eventName) />
+				<cfif cgi.SERVER_PORT_SECURE GTE 1 OR cgi.SERVER_NAME EQ appManager.getPropertyManager().getProperty("urlSecureBaseCheckServerName")>
+					<cfset requestSecure = 1 />
+				</cfif>
+	
+				<cfif eventSecure NEQ -1 AND eventSecure NEQ requestSecure>
+					<cfif Len(getCurrentRouteName())>
+						<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, true, eventArgs) />
+					<cfelse>
+						<cfset appManager.getRequestManager().redirectEvent(result.eventName, eventArgs, result.moduleName, true, eventArgs) />
+					</cfif>
 				</cfif>
 			</cfif>
 

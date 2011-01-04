@@ -119,7 +119,7 @@ Notes:
 
 		<!--- TODO:Check if the urlBase and urlSecureBase need to be dynamic server names --->
 
-		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBase")>
+		<cfif NOT getPropertyManager().isPropertyDefined("urlSecureBase")>
 			<cfset temp =  getPropertyManager().getProperty("urlBase") />
 
 			<!--- If urlBase is fully qualified URL --->
@@ -129,7 +129,7 @@ Notes:
 
 			<cfset getPropertyManager().setProperty("urlSecureBase", temp) />
 		</cfif>
-		<cfif NOT  getPropertyManager().isPropertyDefined("urlSecureBaseCheckServerName")>
+		<cfif NOT getPropertyManager().isPropertyDefined("urlSecureBaseCheckServerName")>
 			<cfset temp =  getPropertyManager().getProperty("urlSecureBase") />
 
 			<cfif ListLen(temp, "//") GTE 2>
@@ -365,7 +365,7 @@ Notes:
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset keyList = StructKeyList(params) />
 
-		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
+		<cfif getPropertyManager().getProperty("urlSecureEnabled") AND (NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase))>
 			<cftry>
 				<cfif Len(arguments.moduleName)>
 					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
@@ -393,6 +393,8 @@ Notes:
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
 			</cfif>
+		<cfelse>
+			<cfset arguments.urlBase = getDefaultUrlBase() />
 		</cfif>
 
 		<!--- Nested the appending of the event parameter inside the next block
