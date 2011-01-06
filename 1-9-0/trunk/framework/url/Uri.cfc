@@ -67,6 +67,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cfset variables.ONE_TOKEN_REGEX ="([^\/\?&\.]+)" />
 	<!--- HTTP_METHODS is the list of supported HTTP request methods. --->
 	<cfset variables.HTTP_METHODS = "GET,POST,PUT,DELETE" />
+	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml" />
 
 	<!---
 	PROPERTIES
@@ -95,11 +96,13 @@ For example, a uriPattern like "/service/doit/{value}"
 			hint="The name of the URI prefix." />
 		<cfargument name="uriMetadataParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Any metadata for the URI being defined." />
+		<cfargument name="possibleFormatList" type="string" required="false" default="#variables.DEFAULT_FORMAT_LIST#"
+			hint="A list of formats that this URL can respond to, in the file extension portion of the path info (like: 'html,json', etc.)" />
 
 		<cfset setHttpMethod(arguments.httpMethod) />
 		<cfset setFunctionName(arguments.functionName) />
 		<cfset setUriPrefix(arguments.uriPrefix) />
-		<cfset setUriPattern(arguments.uriPattern) />
+		<cfset setUriPattern(arguments.uriPattern, arguments.possibleFormatList) />
 		<cfset setUriMetadataParameters(arguments.uriMetadataParameters) />
 
 		<cfreturn this />
@@ -194,6 +197,8 @@ For example, a uriPattern like "/service/doit/{value}"
 		hint="Take an input URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
 		<cfargument name="uriPattern" type="string" required="true"
 			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
+		<cfargument name="possibleFormatList" type="string" required="true"
+			hint="A list of formats that this URL can respond to, in the file extension portion of the path info (like: 'html,json', etc.)." />
 
 		<!--- Going to turn a uriPattern like "/service/doit/{value}" into "^/service/doit/([^\/\?&]+)(\.[^\.\?]+)?$" --->
 		<cfset var stcOutput = StructNew() />
@@ -203,6 +208,8 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfset var currPosition = 1 />
 		<cfset var newElement = "" />
 		<cfset var stcMatches = "" />
+		<cfset var formatsForRegex = getFormatsForRegex(arguments.possibleFormatList) />
+		<cfset var currFormat = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
 
@@ -236,13 +243,37 @@ For example, a uriPattern like "/service/doit/{value}"
 			</cfif>
 		</cfloop>
 
-		<!--- If first element in URI prefix, add it --->
+		<!--- If first element is URI prefix, add it --->
 		<cfif NOT urlElements[1] EQ variables.uriPrefix>
 			<cfset ArrayInsertAt(urlElements, 1, variables.uriPrefix) />
 		</cfif>
 
 		<!--- Set instance variables --->
-		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(\.[^\.\?]+)?(?:/)?$" />
+ 		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(" & formatsForRegex & ")?(?:/)?$" />
+
+	</cffunction>
+
+	<cffunction name="getFormatsForRegex" access="private" returntype="string" output="false"
+		hint="Takes a list of formats intended to be possible formats used by this URI, validates them, and returns a string that can be used a regex to find the format.">
+		<cfargument name="possibleFormatList" type="string" required="true" />
+		<cfset var formatsForRegex = "" />
+		<cfset var currFormat = "" />
+
+		<cfif Trim(Len(arguments.possibleFormatList)) GT 0>
+			<cfloop list="#arguments.possibleFormatList#" index="currFormat" delimiters=",|">
+				<cfset currFormat = Trim(Replace(currFormat, ".", "")) />
+				<cfset formatsForRegex = ListAppend(formatsForRegex, "\.#currFormat#", "|") />
+			</cfloop>
+		</cfif>
+
+		<cfif Len(formatsForRegex) EQ 0>
+			<cfthrow
+				type="MachII.framework.url.NoFormatsProvided"
+				message="No valid formats were passed to this Uri. At least one possible format is required.">
+		</cfif>
+
+		<cfreturn formatsForRegex />
+
 	</cffunction>
 
 	<cffunction name="reEscape" access="private" returntype="string" output="false"
@@ -316,6 +347,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="setUriPattern" access="public" returntype="void" output="false"
 		hint="Calculates & sets uriRegex based on the input uriPattern.">
 		<cfargument name="uriPattern" type="string" required="true" />
+		<cfargument name="possibleFormatList" type="string" required="false" default="#variables.DEFAULT_FORMAT_LIST#" />
 
 		<!--- Require an appropriate URI pattern (pretty loose validation, just require initial slash and almost anything following) --->
 		<cfset arguments.uriPattern = Trim(arguments.uriPattern) />
@@ -327,7 +359,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		</cfif>
 
 		<cfset variables.uriPattern = arguments.uriPattern />
-		<cfset makeUriPatternIntoRegex(variables.uriPattern) />
+		<cfset makeUriPatternIntoRegex(variables.uriPattern, arguments.possibleFormatList) />
 	</cffunction>
 	<cffunction name="getUriPattern" access="public" returntype="string" output="false">
 		<cfreturn variables.uriPattern />

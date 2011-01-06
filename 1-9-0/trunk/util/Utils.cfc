@@ -155,7 +155,7 @@ Notes:
 
 		<cfreturn resolvedPath />
 	</cffunction>
-	
+
 	<cffunction name="loadResourceData" access="public" returntype="struct" output="false"
 		hint="Loads resource data by path and returns a struct.">
 		<cfargument name="resourcePath" type="string" required="true" />
@@ -205,7 +205,7 @@ Notes:
 
 		<cfreturn threadingAdapter />
 	</cffunction>
-	
+
 	<cffunction name="createAdminApiAdapter" access="public" returntype="MachII.util.cfmlEngine.AdminApiAdapter" output="false"
 		hint="Creates an admin api adapter for the CFML engine.">
 
@@ -232,13 +232,13 @@ Notes:
 
 		<cfreturn adminApiAdapter />
 	</cffunction>
-	
+
 	<cffunction name="getCfmlEngineInfo" access="public" returntype="struct" output="false"
 		hint="Gets normalized information of the CFML engine. Keys: 'name', 'majorVersion', 'minorVersion' and 'productLevel'.">
 
 		<cfset var rawProductVersion = server.coldfusion.productversion />
 		<cfset var minorVersionRegex = 0 />
-		<cfset var result = StructNew() />	
+		<cfset var result = StructNew() />
 
 		<cfset result.name = server.coldfusion.productname />
 		<cfset result.majorVersion = 0 />
@@ -246,18 +246,18 @@ Notes:
 		<cfset result.fullVersion = rawProductVersion />
 		<cfset result.productLevel = server.coldfusion.productlevel />
 		<cfset result.appServer = server.coldfusion.appServer />
-		
+
 		<!---
 			Railo puts a "fake" version number (e.g. 8,0,0,1) in product version number so we need
-			to get the real version number of Railo which 
+			to get the real version number of Railo which
 		--->
 		<cfif FindNoCase("Railo", result.name)>
 			<cfset rawProductVersion = server.railo.version />
 		</cfif>
-		
+
 		<!--- OpenBD and Railo use "." while CF uses "," as the delimiter for the product version so convert it for consistency --->
 		<cfset rawProductVersion = ListChangeDelims(rawProductVersion, ".", ",") />
-		
+
 		<!--- Get major product version --->
 		<cfset result.majorVersion = ListFirst(rawProductVersion, ".") />
 
@@ -268,15 +268,15 @@ Notes:
 		--->
 		<cfif ListLen(rawProductVersion, ".") GT 1>
 			<cfset result.minorVersion = ListGetAt(rawProductVersion, 2, ".") />
-			
+
 			<cfset minorVersionRegex = REFindNoCase("[[:alpha:]]", result.minorVersion) />
-			
+
 			<!--- Remove any trailing sub-number like 1.4a in OpenBD --->
 			<cfif minorVersionRegex GT 0>
 				<cfset result.minorVersion = Mid(result.minorVersion, 1, minorVersionRegex) />
 			</cfif>
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
 
@@ -557,11 +557,11 @@ Notes:
 		<cfset var output = "" />
 		<cfset var mimeTypes= StructNew() />
 		<cfset var i = 0 />
-		
+
 		<!--- Use StructAppend to not pollute base mime-type map via references when "mixing" custom mime types --->
 		<cfif StructKeyExists(arguments, "customMimeTypes")>
 			<cfset StructAppend(mimeTypes, variables.mimeTypeMap) />
-			<cfset StructAppend(mimeTypes, variables.mimeTypeMap) />
+			<cfset StructAppend(mimeTypes, arguments.customMimeTypes) />
 		<cfelse>
 			<cfset mimeTypes = variables.mimeTypeMap />
 		</cfif>
@@ -597,14 +597,14 @@ Notes:
 			hint="The script name to use usually the value from 'cgi.SCRIPT_NAME'. This is required to fix IIS6 goofiness with path info." />
 		<cfargument name="urlDecode" type="boolean" required="false" default="true"
 			hint="Decides if the path info should be Url decoded. Defaults to true." />
-	
+
 		<cfset var cleanPathInfo = arguments.pathInfo />
 
 		<!--- Remove script name from the path info since IIS6 breaks the RFC specification by prepending the script name --->
 		<cfif Len(arguments.scriptName) AND cleanPathInfo.toLowerCase().startsWith(arguments.scriptName.toLowerCase())>
 			<cfset cleanPathInfo = ReplaceNoCase(cleanPathInfo, arguments.scriptName, "", "one") />
 		</cfif>
-		
+
 		<cfif arguments.urlDecode>
 			<cfreturn UrlDecode(cleanPathInfo) />
 		<cfelse>
@@ -616,18 +616,18 @@ Notes:
 		hint="Creates an UTC datetime from an HTTP time string.">
 		<cfargument name="httpTimeString" type="string" required="true"
 			hint="An HTTP time string in the format of '11 Aug 2010 17:58:48 GMT'." />
-	
+
 		<cfset var rawArray = ListToArray(ListLast(arguments.httpTimeString, ","), " ") />
 		<cfset var rawTimePart = ListToArray(rawArray[4], ":") />
-		
+
 		<cfreturn CreateDatetime(rawArray[3], DateFormat("#rawArray[2]#/1/2000", "m"), rawArray[1], rawTimePart[1], rawTimePart[2], rawTimePart[3]) />
 	</cffunction>
-	
+
 	<cffunction name="convertTimespanStringToSeconds" access="public" returntype="numeric" output="false"
 		hint="Converts a timespan string (e.g. 0,0,0,0) into seconds.">
 		<cfargument name="timespanString" type="string" required="true"
 			hint="The input timespan string." />
-		
+
 		<cfset var timespan = CreateTimespan(ListGetAt(arguments.timespanString, 1), ListGetAt(arguments.timespanString, 2), ListGetAt(arguments.timespanString, 3), ListGetAt(arguments.timespanString, 4)) />
 
 		<cfreturn Round((timespan * 60) / 0.000694444444444) />
@@ -637,21 +637,21 @@ Notes:
 		hint="Clean the file path for directory transversal type attacks.">
 		<cfargument name="filePath" type="string" required="true"
 			hint="The 'dirty' file path to be cleaned."/>
-		
+
 		<cfset var fileParts = "" />
 		<cfset var i = 0 />
-		
+
 		<!---
 		Convert any "\" to  "/" which will work on any OS which allows us to not worry
 		about "./", "../", ".\" and "..\" types
 		--->
 		<cfset arguments.filePath = ReplaceNoCase(arguments.filePath, "\", "/") />
-		
+
 		<!--- Explode the file path into part --->
 		<cfset fileParts = ListToArray(arguments.filePath, "/") />
-		
+
 		<!---
-		Work through the file parts in reverse in case we have to delete empty parts 
+		Work through the file parts in reverse in case we have to delete empty parts
 		(such as /path/to//file.txt where // ends up being an empty array element) or
 		directory transversal indicators such as "." or ".."
 		--->
@@ -661,7 +661,7 @@ Notes:
 				<cfset ArrayDeleteAt(fileParts, i) />
 			</cfif>
 		</cfloop>
-		
+
 		<cfif arguments.filePath.startsWith("/")>
 			<cfreturn "/" & ArrayToList(fileParts, "/") />
 		<cfelse>

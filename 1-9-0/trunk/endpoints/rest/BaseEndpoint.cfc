@@ -113,21 +113,22 @@ To Test it out, do the following:
 	<cfset variables.ANNOTATION_REST_URI = variables.ANNOTATION_REST_BASE & ":URI" />
 	<cfset variables.ANNOTATION_REST_METHOD = variables.ANNOTATION_REST_BASE & ":METHOD" />
 	<cfset variables.ANNOTATION_REST_AUTHENTICATE = variables.ANNOTATION_REST_BASE & ":AUTHENTICATE" />
-
+	<!--- Other constants --->
+	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml,txt" />
 	<!---
 	PROPERTIES
 	--->
 	<!--- Introspector looks for REST:* annotations in child classes to find REST-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
-	<!--- UriCollection of rest.Uris that match in this endpoint. --->
+	<!--- UriCollection of REST Uris that match in this endpoint. --->
 	<cfset variables.restUris = CreateObject("component", "MachII.framework.url.UriCollection").init() />
 	<!---
 		The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
 	    it can be overridden by defining the "defaultFormat" parameter.
 	--->
-	<cfset variables.defaultFormat = "html" />	
+	<cfset variables.defaultFormat = "html" />
 	<cfset variables.defaultCharset = "ISO-8859-1" />
-	<cfset variables.fileExtensionList = ".htm,.html,.json,.xml" />
+	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
 
 	<!---
@@ -139,7 +140,7 @@ To Test it out, do the following:
 		<!--- Configure any parameters --->
 		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", "ISO-8859-1")) />
-		<cfset setFileExtensionList(getParameter("fileExtensionList", ".htm,.html,.json,.xml")) />
+		<cfset setPossibleFormatList(getParameter("possibleFormatList", variables.DEFAULT_FORMAT_LIST)) />
 
 		<cfset setupRestComponent() />
 		<cfset setupRestMethods() />
@@ -208,14 +209,14 @@ To Test it out, do the following:
 		<!--- TODO: If callEndpointFunction() returns void, won't requestResponseBody be deleted as a var? This might need to be IsDefined() --->
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
-	
-	
+
+
 	<cffunction name="onException" access="public" returntype="void" output="true"
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
-		
+
 		<cfif exception.getType() EQ "MachII.endpoints.rest.IncorrectHTTPMethod">
 			<cfset addHTTPHeaderByStatus(405) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
@@ -414,7 +415,8 @@ To Test it out, do the following:
 								, currHttpMethod
 								, currFunction.name
 								, getParameter("name")
-								, currRestUriMetadata) />
+								, currRestUriMetadata
+								, getPossibleFormatList()) />
 
 						<!---
 						Check for already added URI as we do not want to add in duplicates created by inheritance
@@ -474,12 +476,32 @@ To Test it out, do the following:
 		<cfreturn variables.defaultCharset />
 	</cffunction>
 
-	<cffunction name="setFileExtensionList" access="public" returntype="void" output="false">
-		<cfargument name="fileExtensionList" type="string" required="true" />
-		<cfset variables.fileExtensionList = arguments.fileExtensionList />
+	<cffunction name="setPossibleFormatList" access="public" returntype="void" output="false">
+		<cfargument name="possibleFormatList" type="string" required="true" />
+		<cfset var currFormat = "" />
+		<cfset var formatList = "" />
+
+		<!--- Validate possibleFormatList --->
+		<cfif Trim(Len(arguments.possibleFormatList)) GT 0>
+			<cftry>
+				<cfloop list="#arguments.possibleFormatList#" index="currFormat" delimiters=",|">
+					<cfset currFormat = Trim(Replace(currFormat, ".", "")) />
+					<!--- Call this to validate the format -- throws exception if not valid --->
+					<cfset getUtils().getMimeTypeByFileExtension("."&currFormat, variables.customMimeTypeMap)>
+					<cfset formatList = ListAppend(formatList, currFormat, ",") />
+				</cfloop>
+				<cfcatch type="any">
+					<cfthrow
+						type="MachII.framework.InvalidFileExtensionType"
+						message="URI could not be initialized because the format '#currFormat#' is invalid." />
+				</cfcatch>
+			</cftry>
+		</cfif>
+
+		<cfset variables.possibleFormatList = formatList />
 	</cffunction>
-	<cffunction name="getFileExtensionList" access="public" returntype="string" output="false">
-		<cfreturn variables.fileExtensionList />
+	<cffunction name="getPossibleFormatList" access="public" returntype="string" output="false">
+		<cfreturn variables.possibleFormatList />
 	</cffunction>
 
 	<cffunction name="setAuthenticateDefault" access="public" returntype="void" output="false">
