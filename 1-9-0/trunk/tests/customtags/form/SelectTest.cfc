@@ -93,7 +93,7 @@ Notes:
 		</cfsavecontent>
 		
 		<cfset xml = XmlParse(output) />
-		<cfset node = assertXPath('/root/form/select/option[@value="red" and @id="favoriteColor_red" and @selected="selected"]', xml, "Red") />
+		<cfset node = assertXPath('/root/form/select/option[@value="Red" and @id="favoriteColor_Red" and @selected="selected"]', xml, "Red") />
 		<cfset debug(node) />
 
 		<cfsavecontent variable="output">
@@ -107,7 +107,7 @@ Notes:
 		</cfsavecontent>
 
 		<cfset xml = XmlParse(output) />
-		<cfset node = assertXPath('/root/form/select/option[@value="red" and @id="favoriteColor_red" and @selected="selected"]', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/select/option[@value="Red" and @id="favoriteColor_Red" and @selected="selected"]', xml, "Big Red") />
 		<cfset debug(node) />
 
 		<cfsavecontent variable="output">
@@ -195,7 +195,7 @@ Notes:
 		</cfsavecontent>
 
 		<cfset xml = XmlParse(output) />
-		<cfset node = assertXPath('/root/form/select/option[@value="big red" and @id="favoriteColor_big_red" and @selected="selected"]', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/select/option[@value="Big Red" and @id="favoriteColor_Big_Red" and @selected="selected"]', xml, "Big Red") />
 		<cfset debug(node) />
 
 		<!--- Test with array of structs --->

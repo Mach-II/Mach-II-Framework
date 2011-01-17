@@ -109,7 +109,7 @@ Notes:
 		</cfif>
 
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
-			<cfset variables.value = LCase(Trim(ListGetAt(attributes.items, i, attributes.delimiter))) />
+			<cfset variables.value = Trim(ListGetAt(attributes.items, i, attributes.delimiter)) />
 
 			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
 			<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
@@ -141,7 +141,7 @@ Notes:
 			<cfif IsSimpleValue(attributes.items[1])>
 				<!--- this is an array of simple values, proceed as needed --->
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset variables.value = LCase(attributes.items[i]) />
+					<cfset variables.value = attributes.items[i] />
 
 					<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
 					<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />

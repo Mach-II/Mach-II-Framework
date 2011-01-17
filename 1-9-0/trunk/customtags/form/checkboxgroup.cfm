@@ -97,7 +97,7 @@ Notes:
 
 <cfelse>
 	<!--- Trim is used to control additional whitespace --->
-	<cfset variables.originalGeneratedContent = Trim(thisTag.GeneratedContent) />
+	<cfset variables.originalGeneratedContent = ReplaceNoCase(Trim(thisTag.GeneratedContent), "${output.id}", "#attributes.name#_${output.id}", "all") />
 	<cfset thisTag.GeneratedContent = "" />
 
 	<!--- Create a crazy outbuffer struct  so we can pass by reference --->
@@ -131,7 +131,7 @@ Notes:
 		outputBuffer="#variables.outputBuffer#" />
 
 	<!--- The line break is put here as to not reproduce it on each iteration therefore saving a small amount of clock cycles --->
-	<cfset variables.checkboxTemplate = variables.outputBuffer.content & Chr(13) />
+	<cfset variables.checkboxTemplate = ReplaceNoCase(variables.outputBuffer.content & Chr(13), "${output.id}", "#attributes.name#_${output.id}", "all") />
 	<cfset variables.hiddenCheckboxTemplate = REReplace(variables.checkboxTemplate, "<input.*?/>", "", "one") />
 	<cfset variables.checkboxTemplate = ReplaceNoCase(variables.checkboxTemplate, variables.hiddenCheckboxTemplate, "", "one") />
 	<cfset variables.outputBuffer.content = CreateObject("java", "java.lang.StringBuffer").init() />
@@ -153,7 +153,7 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", ListGetAt(attributes.labels, i, attributes.delimiter)) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
 
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
@@ -170,13 +170,13 @@ Notes:
 					</cfif>
 					
 					<cfif i EQ 1>
-						<cfset setFirstElementId(attributes.name & "_" & createCleanId(createCleanId(variables.value))) />
+						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.labels[i]) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(attributes.items[i]), "all") />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
 
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
@@ -197,7 +197,7 @@ Notes:
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
+					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
 
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
@@ -216,7 +216,7 @@ Notes:
 
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
-			<cfset variables.value = variables.sortedKeys[i] />
+			<cfset variables.value = LCase(variables.sortedKeys[i]) />
 
 			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
@@ -231,7 +231,7 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
 
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
@@ -252,7 +252,7 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", attributes.name & "_" & createCleanId(variables.value), "all") />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
 
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>

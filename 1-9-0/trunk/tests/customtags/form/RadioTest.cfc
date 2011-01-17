@@ -170,15 +170,14 @@ Notes:
 		</cfsavecontent>
 
 		<cfset xml = XmlParse(output) />
-		<cfset debug(node) />
 		<cfset debug(output) />
 
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="Red" and @id="favoriteColor_Red" and @checked="checked"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="Green" and @id="favoriteColor_Green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="Brown" and @id="favoriteColor_Brown"]', xml) />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Red"]/span', xml, "Big Red") />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Green"]/span', xml, "Giant Green") />
-		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_Brown"]/span', xml, "Bad Brown") />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="green" and @id="favoriteColor_green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="brown" and @id="favoriteColor_brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
+		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />
 	</cffunction>
 
 	<cffunction name="testRadiogroupWithArrays" access="public" returntype="void" output="false"
