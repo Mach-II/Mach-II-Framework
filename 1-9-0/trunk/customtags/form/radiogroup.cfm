@@ -121,6 +121,9 @@ Notes:
 	<cfset variables.outputBuffer.content = CreateObject("java", "java.lang.StringBuffer").init() />
 
 	<cfif IsSimpleValue(attributes.items)>
+		<!--- Setting of the first element ID is done outside of the loop for performance --->
+		<cfset setFirstElementId(attributes.name & "_" & createCleanId(ListGetAt(attributes.items, 1, attributes.delimiter))) />
+
 		<cfloop index="i" from="1" to="#ListLen(attributes.items, attributes.delimiter)#">
 			<cfset variables.value = ListGetAt(attributes.items, i, attributes.delimiter) />
 
@@ -128,10 +131,6 @@ Notes:
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
-			</cfif>
-			
-			<cfif i EQ 1>
-				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
@@ -144,6 +143,8 @@ Notes:
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() EQ 1>
 			<cfif IsSimpleValue(attributes.items[1])>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1])) />
+			
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
 
@@ -151,10 +152,6 @@ Notes:
 						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.radioTemplate />
-					</cfif>
-					
-					<cfif i EQ 1>
-						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
@@ -165,6 +162,8 @@ Notes:
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1][attributes.valueKey])) />
+				
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i][attributes.valueKey] />
 
@@ -172,10 +171,6 @@ Notes:
 						<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 					<cfelse>
 						<cfset variables.finalOutput = variables.radioTemplate />
-					</cfif>
-
-					<cfif i EQ 1>
-						<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 					</cfif>
 
 					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
@@ -197,7 +192,8 @@ Notes:
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
-
+		<cfset setFirstElementId(attributes.name & "_" & createCleanId(LCase(variables.sortedKeys[1]))) />
+		
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
 			<cfset variables.value = LCase(variables.sortedKeys[i]) />
@@ -208,10 +204,6 @@ Notes:
 				<cfset variables.finalOutput = variables.radioTemplate />
 			</cfif>
 
-			<cfif i EQ 1>
-				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
-			</cfif>
-
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
@@ -220,6 +212,8 @@ Notes:
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
+		<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
+		
 		<cfloop query="attributes.items">
 			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
 
@@ -227,10 +221,6 @@ Notes:
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 			<cfelse>
 				<cfset variables.finalOutput = variables.radioTemplate />
-			</cfif>
-
-			<cfif attributes.items.currentRow EQ 1>
-				<cfset setFirstElementId(attributes.name & "_" & createCleanId(variables.value)) />
 			</cfif>
 
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
