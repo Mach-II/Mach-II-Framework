@@ -89,15 +89,24 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Improve exception message with computed path when view page path is incorrect
+This would help people troubleshoot pathing problems related to view-pages. 
+
+Special thanks to Bill Peddy for suggesting this enhancement.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/743
+(2011-01-18 peterfarrell)
+
 * Allow for anonymous property CFCs
 Allow for anonymous property CFCs so you do not have to arbitrarily name
 property CFCs that are used for configuration (such as UrlRoutes).
 
-Special thanks to Brian Hendel for suggestion this enhancement.
+Special thanks to Brian Hendel for suggesting this enhancement.
 
 For more information see:
 https://trac.mach-ii.com/machii/ticket/742
-(2011-1-217 peterfarrell)
+(2011-01-17 peterfarrell)
 
 * Use listInfo attribute in cfdirectory (if available) in FileMatcher
 This dramatically increases the performance of the PatternViewLoader

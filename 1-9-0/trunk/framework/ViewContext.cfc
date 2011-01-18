@@ -121,6 +121,16 @@ Notes:
 		<!--- Include must be on same line as save content or an extra tab will occur --->
 		<cftry>
 			<cfsavecontent variable="viewContent"><cfsetting enablecfoutputonly="false" /><cfinclude template="#viewPath#" /><cfsetting enablecfoutputonly="true" /></cfsavecontent>
+			<cfcatch type="MissingInclude">
+				<cfif log.isErrorEnabled()>
+					<cfset log.error("Cannot find file for view '#arguments.viewName#'. We tried to use path '#viewPath#' which expands to '#ExpandPath(viewPath)#' on disk."
+								& variables.m2Utils.buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))
+								, cfcatch) />
+				</cfif>
+				<cfthrow type="MachII.framework.ViewContext.missingView"
+					message="Cannot find file for view '#arguments.viewName#'. We tried to use path '#viewPath#' which expands to '#ExpandPath(viewPath)#'."
+					detail="#variables.m2Utils.buildMessageFromCfCatch(cfcatch, getUnresolvedPath(arguments.viewName))#" />
+			</cfcatch>
 			<cfcatch type="any">
 				<cfif log.isErrorEnabled()>
 					<cfset log.error("An exception occurred in a view named '#arguments.viewName#'. "
