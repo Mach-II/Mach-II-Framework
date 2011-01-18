@@ -26,24 +26,38 @@ that helped us produce Mach-II Integrity by providing feedback, testing
 nightly / release candidate builds, test cases / application or finding 
 defects (in no particular order):
 
-* Joe Roberts
+
 * Doug Smith (The Lampo Group, Inc.)
 * Jason York (The Lampo Group, Inc.)
 * Thomas Ehardt (The Lamp Group, Inc.)
 * Brian Klaas (Johns Hopkins University - Bloomberg School of Public Health)
 * Brian Hendel (Splice Digital)
+* Bryan Memmelaar (Curaspan Health Group, Inc.)
+* Sami Hoda (eCivis, Inc.)
+* Bill Peddy (United States Environmental Protection Agency)
+* Derrick Jackson (United States Senate - Sergeant at Arms)
+* Sumit Verma (ten24 Web Solutions)
 * Adam Ness
 * Jorge Loyo
 * Sean Corfield
 * Jayel Villamin
-* Sumit Verma
+* Joe Roberts
 * Jeff Lucido
+* Tyson Vanek
 
 A special thanks for people who have contributed to documentation on our wiki:
 
 * Jeremy Shearer (The Lampo Group, Inc.)
 * Michael Votaw (University of Missouri - St. Louis)
 * Brian Hendel (Splice Digital)
+* Sumit Verma (ten24 Web Solutions)
+* Joseph Lamoree (eCivis, Inc.)
+* Bryan Memmelaar (Curaspan Health Group, Inc.)
+* Wouter Vandaele (Dexia Group)
+* Steve Rittler (CounterMarch Systems)
+* Brian Pickens (Forum Communications Company)
+* Brandon Culpepper
+* Joe Hayes 
 
 This list is by no means a complete list of people Team Mach-II would like to
 thank.  If you participated by filing a defect, patch, enhancement and have been 
