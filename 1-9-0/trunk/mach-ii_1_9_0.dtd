@@ -123,7 +123,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 -->
 <!ELEMENT property (parameters?, array?, struct?, value?)>
 <!ATTLIST property 
-	name CDATA #REQUIRED
+	name CDATA #IMPLIED
 	value CDATA #IMPLIED
 	type CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED

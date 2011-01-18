@@ -56,6 +56,9 @@ Notes:
 	<!---
 	CONSTANTS
 	--->
+	<cfset variables.VERSION_MAJOR = "1.9.0" />
+	<cfset variables.VERSION_MINOR = "@minorVersion@" />
+	<cfset variables.PROPS_NOT_ALLOWED_IN_MODULES = "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlSecureEnabled,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
 	<cfset variables.PROPERTY_SHORTCUTS = StructNew() />
 	<cfset variables.PROPERTY_SHORTCUTS["ColdspringProperty"] = "MachII.properties.ColdspringProperty" />
 	<cfset variables.PROPERTY_SHORTCUTS["EnvironmentProperty"] = "MachII.properties.EnvironmentProperty" />
@@ -66,17 +69,15 @@ Notes:
 	<cfset variables.PROPERTY_SHORTCUTS["LoggingProperty"] = "MachII.logging.LoggingProperty" />
 	<cfset variables.PROPERTY_SHORTCUTS["GlobalizationLoaderProperty"] = "MachII.globalization.GlobalizationLoaderProperty" />
 
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.properties = StructNew() />
 	<cfset variables.configurablePropertyNames = ArrayNew(1) />
-	<cfset variables.parentPropertyManager = "">
-	<cfset variables.majorVersion = "1.9.0" />
-	<cfset variables.minorVersion = "@minorVersion@" />
-	<cfset variables.propsNotAllowInModule =
-		 "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlSecureEnabled,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
+	<cfset variables.anonymousPropertyNames = StructNew() />
+	<cfset variables.parentPropertyManager = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -128,10 +129,11 @@ Notes:
 
 		<!--- Set the properties from the XML file. --->
 		<cfloop from="1" to="#ArrayLen(PropertyNodes)#" index="i">
-			<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
 
 			<!--- Override XML for Modules --->
 			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "overrideAction")>
+				<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
+			
 				<cfif propertyNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
 					<cfset removeProperty(propertyName) />
 				<cfelseif propertyNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
@@ -156,6 +158,12 @@ Notes:
 				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
 				
 					<cfset propertyType = resolvePropertyTypeShortcut(propertyNodes[i].xmlAttributes["type"]) />
+					
+					<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "name")>
+						<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
+					<cfelse>
+						<cfset propertyName = resolveAnonymousPropertyName(propertyType) />
+					</cfif>
 
 					<!---
 						Ensure the configurable property CFC is not already defined if override is not allowed.
@@ -222,6 +230,8 @@ Notes:
 					</cfif>
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
+					<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
+					
 					<cftry>
 						<cfset propertyValue = utils.recurseComplexValues(propertyNodes[i]) />
 						<cfcatch type="any">
@@ -330,7 +340,7 @@ Notes:
 			applicationRoot, eventParameter, parameterPredence, maxEvents, redirectPreists, redirectPeristscope,
 			moduleDelimiter, all url stuff. Can be overriden: defaultEvent, exceptionEvent
 		--->
-		<cfif IsObject(getParent()) AND listFindNoCase(propsNotAllowInModule, propertyName)>
+		<cfif IsObject(getParent()) AND listFindNoCase(variables.PROPS_NOT_ALLOWED_IN_MODULES, propertyName)>
 			<cfif NOT getAppManager().isLoading()>
 				<cfthrow type="MachII.framework.propertyNotAllowed"
 					message="The '#arguments.propertyName#' property cannot be set inside of a module." />
@@ -384,11 +394,11 @@ Notes:
 		<cfset var minorVersion = 0 />
 
 		<!--- Leave the string as-is or the build will fail --->
-		<cfif NOT variables.minorVersion IS "@" & "minorVersion" & "@">
-			<cfset minorVersion = variables.minorVersion />
+		<cfif NOT variables.VERSION_MINOR IS "@" & "minorVersion" & "@">
+			<cfset minorVersion = variables.VERSION_MINOR />
 		</cfif>
 
-		<cfreturn variables.majorVersion &  "." & minorVersion />
+		<cfreturn variables.VERSION_MAJOR &  "." & minorVersion />
 	</cffunction>
 
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
@@ -562,7 +572,7 @@ Notes:
 		<cfreturn configurable />
 	</cffunction>
 
-	<cffunction name="resolvePropertyTypeShortcut" access="public" returntype="string" output="false"
+	<cffunction name="resolvePropertyTypeShortcut" access="private" returntype="string" output="false"
 		hint="Resolves a property type shorcut and returns the passed value if no match is found.">
 		<cfargument name="propertyType" type="string" required="true"
 			hint="Dot path to the property." />
@@ -572,6 +582,22 @@ Notes:
 		<cfelse>
 			<cfreturn arguments.propertyType />
 		</cfif>
+	</cffunction>
+
+	<cffunction name="resolveAnonymousPropertyName" access="private" returntype="string" output="false"
+		hint="Resolves an anonymous property name.">
+		<cfargument name="propertyType" type="string" required="true"
+			hint="Dot path to the property." />
+		
+		<cfset var shortPropertyType = ListLast(arguments.propertyType, ".") />
+		
+		<cfif StructKeyExists(variables.anonymousPropertyNames, shortPropertyType)>
+			<cfset variables.anonymousPropertyNames["shortPropertyType"] = variables.anonymousPropertyNames["shortPropertyType"] + 1 />
+		<cfelse>
+			<cfset variables.anonymousPropertyNames["shortPropertyType"] = 1 />
+		</cfif>
+		
+		<cfreturn shortPropertyType & "_" & variables.anonymousPropertyNames["shortPropertyType"] />
 	</cffunction>
 
 	<!---
