@@ -101,7 +101,7 @@ is en_US.
 		<cfset var bundles = getParameter("bundles", ArrayNew(1)) />
 		<cfset var i = 0 />
 
-		<cfset setDebugEnabled(getParameter("debuggingEnabled", "false")) />
+		<cfset setDebuggingEnabled(getParameter("debuggingEnabled", "false")) />
 		<cfset setDebugPrefix(getParameter("debugPrefix", "**")) />
 		<cfset setDebugSuffix(getParameter("debugSuffix", "**")) />
 		
