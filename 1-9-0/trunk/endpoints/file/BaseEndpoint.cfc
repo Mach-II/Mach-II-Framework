@@ -238,9 +238,11 @@ Configuration Notes:
 		/index.cfm/dashboard.serveAsset/?file=/some/path/to/file.txt
 		--->
 		<cfif Len(pathInfo) AND ListLen(pathInfo, "/") GT 1>
+			<!--- By default, cleanPathInfo() uses URLDecode() which helps against directory transversal attacks using unicode --->
 			<cfset filePath = ListDeleteAt(pathInfo, 1, "/") />
 		<cfelse>
-			<cfset filePath = arguments.event.getArg("file") />
+			<!--- Manually decode the file argument to help protect against directory transversal attacks using unicode --->
+			<cfset filePath = URLDecode(arguments.event.getArg("file")) />
 		</cfif>
 		
 		<!--- Clean up the file path for directory transveral type attacks --->
