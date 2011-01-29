@@ -1,5 +1,4 @@
-<cfoutput>
-/*
+<cfoutput>/*
     Mach-II - A framework for object oriented MVC web applications in CFML
     Copyright (C) 2003-2010 GreatBizTools, LLC
 
@@ -554,5 +553,4 @@ div.line { /* DIV that wraps and replaces the HR */
 
 ##footer p img {
 	vertical-align: top;
-}
-</cfoutput>
+}</cfoutput>

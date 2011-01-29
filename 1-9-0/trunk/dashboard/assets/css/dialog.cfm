@@ -1,5 +1,4 @@
-<cfoutput>
-/*
+<cfoutput>/*
     Mach-II - A framework for object oriented MVC web applications in CFML
     Copyright (C) 2003-2010 GreatBizTools, LLC
 
@@ -93,5 +92,4 @@ Updated version: 1.0.0
 {
 padding-top: 1em;
 padding-bottom: 1em;
-}
-</cfoutput>
+}</cfoutput>
