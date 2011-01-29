@@ -136,13 +136,13 @@ Notes:
 						<!--- We can log all the errors, but only throw the first --->
 						<cfif log.isErrorEnabled()>
 							<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
-								<cfset log.error("#results[results.errors[i]].error.message#", results[results.errors[i]].error) />
+								<cfset log.error("#getUtils().buildMessageFromCfCatch(results[results.errors[i]].error)#", results[results.errors[i]].error) />
 							</cfloop>
 						</cfif>
 						<!--- We can only handle one exception at once so use the first error --->
 						<cfthrow type="#getUtils().translateExceptionType(results[results.errors[1]].error.type)#"
-								message="#results[results.errors[1]].error.message#"
-								detail="#results[results.errors[1]].error.detail#" />
+								message="An exception occurred while processing a published message named  '#getMessageName()#'."
+								detail="#getUtils().buildMessageFromCfCatch(results[results.errors[1]].error)#" />
 					</cfif>
 				<!--- Or set thread ids into the event --->
 				<cfelse>
