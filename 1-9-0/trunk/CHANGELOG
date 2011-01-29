@@ -89,6 +89,13 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Fixed BaseProxy exception if any target path of the object hierarchy 
+changes or gets deleted
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/746
+(2011-01-28 peterfarrell)
+
 * Improve exception message with computed path when view page path is incorrect
 This would help people troubleshoot pathing problems related to view-pages. 
 

@@ -116,10 +116,15 @@ Notes:
 		</cfif>
 
 		<!--- The hash needs to be based off entire target object path hierarchy --->
-		<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
-			<cfset fileInfo = getFileInfo(variables.targetObjectPaths[i]) />
-			<cfset stringToHash = stringToHash & fileInfo.lastModified & fileInfo.size />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
+				<cfset fileInfo = getFileInfo(variables.targetObjectPaths[i]) />
+				<cfset stringToHash = stringToHash & fileInfo.lastModified & fileInfo.size />
+			</cfloop>
+			<cfcatch type="any">
+				<!--- If a file path to a target object changes or moves, then trap and indicate a load is neccessary --->				
+			</cfcatch>
+		</cftry>
 
 		<cfreturn Hash(stringToHash) />
 	</cffunction>
