@@ -30,7 +30,7 @@ Notes:
 <cfoutput>
 <cfif variables.type EQ "refind">
 	<cfloop from="1" to="3" index="i">
-		<cfset variables.matches = variables.results[i] />
+		<cfset variables.matches = variables.results[i].matches />
 
 		<table style="padding-top:24px;">
 			<tr>
@@ -38,17 +38,23 @@ Notes:
 				<th style="width:10%;"><h3>Position</h3></th>
 				<th style="width:10%;"><h3>Length</h3></th>
 			</tr>
-		<cfif ArrayLen(variables.matches)>
-			<cfloop from="1" to="#ArrayLen(variables.matches)#" index="j">
-				<tr class="<view:flip value="#i#" items="shade" />">
-					<td><pre style="wrap">#HtmlEditFormat(variables.matches[j].text)#</pre></td>
-					<td><p>#variables.matches[j].position#</p></td>
-					<td><p>#variables.matches[j].length#</p></td>
+		<cfif NOT variables.results[i].exception>
+			<cfif ArrayLen(variables.matches)>
+				<cfloop from="1" to="#ArrayLen(variables.matches)#" index="j">
+					<tr class="<view:flip value="#i#" items="shade" />">
+						<td><pre style="wrap">#HtmlEditFormat(variables.matches[j].text)#</pre></td>
+						<td><p>#variables.matches[j].position#</p></td>
+						<td><p>#variables.matches[j].length#</p></td>
+					</tr>
+				</cfloop>
+			<cfelse>
+				<tr>
+					<td class="shade" colspan="3"><p><em>No matches for this pattern...</em></p></td>
 				</tr>
-			</cfloop>
+			</cfif>
 		<cfelse>
 			<tr>
-				<td class="shade" colspan="3"><p><em>No matches for this pattern...</em></p></td>
+				<td class="shade" colspan="3"><p class="red"><em>Exception: #variables.matches#</em></p></td>
 			</tr>
 		</cfif>
 		</table>
@@ -60,7 +66,11 @@ Notes:
 				<th style="width:100%;"><h3>Pattern #i# - '#event.getArg("pattern" & i)#' - Text Match</h3></th>
 			</tr>
 			<tr class="<view:flip value="#i#" items="shade" />">
-				<td><p><form:textarea name="pattern#i#" id="pattern#i#" value="#variables.results[i]#" style="width:100%;" /></p></td>
+			<cfif NOT variables.results[i].exception>
+				<td><p><form:textarea name="pattern#i#" id="pattern#i#" value="#variables.results[i].matches#" style="width:100%;" /></p></td>
+			<cfelse>
+				<td><p class="red"><em>Exception: #variables.results[i].matches#</em></p></td>
+			</cfif>
 			</tr>
 		</table>
 		<view:script outputType="inline">

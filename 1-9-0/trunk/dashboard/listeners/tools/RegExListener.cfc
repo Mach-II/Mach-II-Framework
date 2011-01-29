@@ -78,7 +78,7 @@ Notes:
 		<cfset var patterns = ArrayNew(1) />
 		<cfset var replaces = ArrayNew(1) />
 		<cfset var caseSensitive = arguments.event.getArg("caseSensitive") />
-		<cfset var results = "" />
+		<cfset var results = ArrayNew(1) />
 		
 		<cfset patterns[1] = arguments.event.getArg("pattern1") />
 		<cfset patterns[2] = arguments.event.getArg("pattern2") />
@@ -87,7 +87,6 @@ Notes:
 		<cfset replaces[1] = arguments.event.getArg("replace1") />
 		<cfset replaces[2] = arguments.event.getArg("replace2") />
 		<cfset replaces[3] = arguments.event.getArg("replace3") />
-
 		
 		<cfif type EQ "refind">
 			<cfset results = processREFind(input, patterns, caseSensitive) />
@@ -116,30 +115,38 @@ Notes:
 		<cfset var result = StructNew() />
 		
 		<cfloop from="1" to="3" index="i">
-			<cfset matches = ArrayNew(1) />
-			<cfif Len(arguments.patterns[i])>
-				<cfloop condition="pos LTE inputLen">
-					<cfif arguments.caseSensitive>
-						<cfset temp = REFInd(arguments.patterns[i], arguments.input, pos, true) />
-					<cfelse>
-						<cfset temp = REFIndNoCase(arguments.patterns[i], arguments.input, pos, true) />
-					</cfif>
+			<cfset results[i] = StructNew()>
+			<cfset results[i].exception = false />
+			<cfset results[i].matches = ArrayNew(1) />
 
-					<cfif temp.pos[1] NEQ 0>
-						<cfset result = StructNew() />
-						<cfset result.position = temp.pos[1] />
-						<cfset result.length = temp.len[1] />
-						<cfset result.text = arguments.input.substring(result.position -1, result.position -1 + result.length) />
-						
-						<cfset ArrayAppend(matches, result) />
-						<cfset pos = result.position + result.length />
-					<cfelse>
-						<cfbreak />
-					</cfif>
-				</cfloop>
-				<cfset results[i] = matches />
-			<cfelse>
-				<cfset results[i] = ArrayNew(1) />
+			<cfif Len(arguments.patterns[i])>
+				<cftry>
+					<cfloop condition="pos LTE inputLen">
+						<cfif arguments.caseSensitive>
+							<cfset temp = REFInd(arguments.patterns[i], arguments.input, pos, true) />
+						<cfelse>
+							<cfset temp = REFIndNoCase(arguments.patterns[i], arguments.input, pos, true) />
+						</cfif>
+	
+						<cfif temp.pos[1] NEQ 0>
+							<cfset result = StructNew() />
+							<cfset result.position = temp.pos[1] />
+							<cfset result.length = temp.len[1] />
+							<cfset result.text = arguments.input.substring(result.position -1, result.position -1 + result.length) />
+							
+							<cfset ArrayAppend(matches, result) />
+							<cfset pos = result.position + result.length />
+						<cfelse>
+							<cfbreak />
+						</cfif>
+					</cfloop>
+					<cfset results[i].matches = matches />
+				
+					<cfcatch type="any">
+						<cfset results[i].exception = true />
+						<cfset results[i].matches = cfcatch.message />
+					</cfcatch>
+				</cftry>
 			</cfif>
 		</cfloop>
 		
@@ -157,14 +164,22 @@ Notes:
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="3" index="i">
+			<cfset results[i] = StructNew() />
+			<cfset results[i].exception = false />
+			<cfset results[i].matches = "" />
+
 			<cfif Len(arguments.patterns[i])>
-				<cfif arguments.caseSensitive>
-					<cfset results[i] = REReplace(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
-				<cfelse>
-					<cfset results[i] = REReplaceNoCase(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
-				</cfif>
-			<cfelse>
-				<cfset results[i] = "" />
+				<cftry>
+					<cfif arguments.caseSensitive>
+						<cfset results[i] = REReplace(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
+					<cfelse>
+						<cfset results[i] = REReplaceNoCase(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
+					</cfif>
+					<cfcatch type="any">
+						<cfset results[i].exception = true />
+						<cfset results[i].matches = cfcatch.message />
+					</cfcatch>
+				</cftry>
 			</cfif>
 		</cfloop>
 		
