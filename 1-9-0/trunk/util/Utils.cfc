@@ -72,6 +72,18 @@ Notes:
 			<cfset variables.statusCodeShortcutMap = loadResourceData("/MachII/util/resources/data/httpStatuscodes.properties") />
 			<cfset variables.mimeTypeMap = loadResourceData("/MachII/util/resources/data/mimeTypes.properties") />
 		</cfif>
+		
+		<!--- Discover if native ListItemTrim() is available (OpenBD 1.4 and Railo 3.2) --->
+		<cftry>
+			<cfset ListItemTrim("temp, temp") />
+
+			<cfset variables.listTrim = variables.listTrim_native />
+			<cfset this.listTrim = this.listTrim_native />
+
+			<cfcatch type="any">
+				<!--- Any exception means the BIF is unavailable so ignore this exception --->
+			</cfcatch>
+		</cftry>
 
 		<cfreturn this />
 	</cffunction>
@@ -144,12 +156,12 @@ Notes:
 		<cfset resolvedPath = ArrayToList(pathCollection, "/") />
 
 		<!--- Reinsert the leading slash if *nix system --->
-		<cfif Left(arguments.baseDirectory, 1) IS "/">
+		<cfif arguments.baseDirectory.startsWith("/")>
 			<cfset resolvedPath = "/" & resolvedPath />
 		</cfif>
 
 		<!--- Reinsert the trailing slash if the relativePath was just a directory --->
-		<cfif Right(arguments.relativePath, 1) IS "/">
+		<cfif arguments.relativePath.endsWith("/")>
 			<cfset resolvedPath = resolvedPath & "/" />
 		</cfif>
 
@@ -165,7 +177,7 @@ Notes:
 
 		<cfloop file="#ExpandPath(arguments.resourcePath)#" index="line">
 			<cfif NOT line.startsWith("##") AND ListLen(line, "=") EQ 2 >
-				<cfset resourceMap[ListFirst(line, "=")] = ListLast(line, "=") />
+				<cfset resourceMap[ListFirst(line, "=")] = ListGetAt(line, 2, "=") />
 			</cfif>
 		</cfloop>
 
@@ -290,7 +302,7 @@ Notes:
 	</cffunction>
 
 	<cffunction name="trimList" access="public" returntype="string" output="false"
-		hint="Trims each list item using Trim() and returns a cleaned list.">
+		hint="Trims each list item using Trim() and returns a cleaned list using CFML code.">
 		<cfargument name="list" type="string" required="true"
 			hint="List to trim each item." />
 		<cfargument name="delimiters" type="string" required="false" default=","
@@ -304,6 +316,15 @@ Notes:
 		</cfloop>
 
 		<cfreturn trimmedList />
+	</cffunction>
+	
+	<cffunction name="trimList_native" access="public" returntype="string" output="false"
+		hint="Trims each list item and returns a cleaned list using the native ListItemTrim() BIF if available on this engine.">
+		<cfargument name="list" type="string" required="true"
+			hint="List to trim each item." />
+		<cfargument name="delimiters" type="string" required="false" default=","
+			hint="The delimiters of the list. Defaults to ',' when not defined." />
+		<cfreturn ListItemTrim(arguments.list, arguments.delimiters) />		
 	</cffunction>
 
 	<cffunction name="parseAttributesIntoStruct" access="public" returntype="struct" output="false"
