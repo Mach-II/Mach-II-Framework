@@ -285,7 +285,7 @@ Configuration Notes:
 		
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
 			<cfif matchCfmFile(arguments.event.getArg("file"))>
-				<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
+				<cfcontent reset="true"><cfsetting enablecfoutputonly="false" /><cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput><cfsetting enablecfoutputonly="true" />
 			<cfelse>
 				<cfthrow type="MachII.endpoints.file.cfmNotAuthorized" 
 					message="The file path '#arguments.event.getArg("file")#' is not an allowed .cfm file." />
