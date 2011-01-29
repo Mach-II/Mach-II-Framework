@@ -169,13 +169,14 @@ Notes:
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures all the endpoints.">
 
+		<cfset var anEndpoint = "" />
 		<cfset var key = "" />
 
 		<cfloop collection="#variables.localEndpointNames#" item="key">
-			<cfset getEndpointByName(key).deconfigure() />
+			<cfset endpoint = getEndpointByName(key) />
+			<cfset endpoint.deconfigure() />
+			<cfset removeEndpointByName(key) />
 		</cfloop>
-
-		<cfset variables.endpointContextPathMap = StructNew() />
 	</cffunction>
 
 	<cffunction name="buildEndpointContextPathMap" access="private" returntype="struct" output="false"
@@ -328,6 +329,17 @@ Notes:
 		<cfelse>
 			<cfset variables.endpoints[arguments.endpointName] = arguments.endpoint />
 			<cfset variables.localEndpointNames[arguments.endpointName] = ""  />
+		</cfif>
+	</cffunction>
+
+	<cffunction name="removeEndpointByName" access="public" returntype="void" output="false"
+		hint="Removes a endpoint with the specified name.">
+		<cfargument name="endpointName" type="string" required="true"
+			hint="The name of the endpoint to get." />
+		
+		<cfif isEndpointDefined(arguments.endpointName)>
+			<cfset StructDelete(variables.endpointContextPathMap, getEndpointByName(arguments.endpointName).getParameter("contextPath")) />
+			<cfset StructDelete(variables.endpoints, arguments.endpointName, false) />
 		</cfif>
 	</cffunction>
 
