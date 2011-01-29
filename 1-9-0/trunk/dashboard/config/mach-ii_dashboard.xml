@@ -154,7 +154,7 @@ Notes:
 						</key>
 					</struct>
 				</parameter>
-				<parameter name="cfmFiles" value="/css/basic.cfm,/css/dialog.cfm,/css/combined.cfm" />
+				<parameter name="cfmFiles" value="/css/*.cfm" />
 			</parameters>
 		</endpoint>
 		<endpoint name="dashboard.api" type="MachII.dashboard.endpoints.ApiEndpoint">

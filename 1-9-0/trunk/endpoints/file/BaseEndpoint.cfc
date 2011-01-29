@@ -115,8 +115,11 @@ Configuration Notes:
 	<cfset variables.expireMap = StructNew() />
 	<cfset variables.attachmentMap = StructNew() />
 	<cfset variables.timestampMap = StructNew() />
-	<cfset variables.cfmSafeMap = StructNew() />
+	<cfset variables.cfmSafePatterns = ArrayNew() />
+	<!--- We need case sensitive keys so fallback to Java Hash Map --->
+	<cfset variables.cfmFileMatchCache = CreateObject("java", "java.util.HashMap").init() />
 	<cfset variables.urlBase = "" />
+	<cfset variables.matcher = "" />
 
 	<!---
 	CONSTANTS
@@ -137,9 +140,11 @@ Configuration Notes:
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
 		<cfset setTimestampDefault(getParameter("timestampDefault", "true")) />
 		
+		<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
+		
 		<!--- Setup the lookup maps --->
 		<cfset buildFileSettingsMap() />
-		<cfset buildCfmSafeMap() />
+		<cfset buildCfmSafePatterns() />
 	</cffunction>
 	
 	<cffunction name="buildFileSettingsMap" access="private" returntype="void" output="false"
@@ -195,29 +200,17 @@ Configuration Notes:
 		<cfset variables.timestampMap = timestampMap />
 	</cffunction>
 	
-	<cffunction name="buildCfmSafeMap" access="private" returntyp="void" output="false"
-		hint="Builds the .cfm safe map.">
+	<cffunction name="buildCfmSafePatterns" access="private" returntyp="void" output="false"
+		hint="Builds the .cfm safe patterns.">
 		
 		<cfset var rawSettings = getParameter("cfmFiles", "") />
-		<cfset var cfmSafeMap = StructNew() />
-		<cfset var i = 0 />
 		
 		<!--- We allow lists or array --->
-		<cfif IsArray(rawSettings)>
-			<cfset rawSettings = ArrayToList(rawSettings) />
+		<cfif IsSimpleValue(rawSettings)>
+			<cfset rawSettings = ListToArray(rawSettings) />
 		</cfif>
-		
-		<cfloop list="#rawSettings#" index="i">
-			<!--- Check to see if we have a global allow --->
-			<cfif i EQ "*">
-				<cfset StructClear(cfmSafeMap) />
-				<cfset cfmSafeMap["*"] = "" />
-				<cfbreak />
-			</cfif>
-			<cfset cfmSafeMap[i] = "" />
-		</cfloop>
-		
-		<cfset variables.cfmSafeMap = cfmSafeMap />
+			
+		<cfset variables.cfmSafePatterns = rawSettings />
 	</cffunction>
 
 	<!---
@@ -291,7 +284,7 @@ Configuration Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
-			<cfif StructKeyExists(variables.cfmSafeMap, arguments.event.getArg("file")) OR StructKeyExists(variables.cfmSafeMap, "*")>
+			<cfif matchCfmFile(arguments.event.getArg("file"))>
 				<cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput>
 			<cfelse>
 				<cfthrow type="MachII.endpoints.file.cfmNotAuthorized" 
@@ -568,6 +561,30 @@ Configuration Notes:
 				<cfreturn 0 />			
 			</cfcatch>
 		</cftry>
+	</cffunction>
+	
+	<cffunction name="matchCfmFile" access="private" returntype="boolean" output="false"
+		hint="Finds a match CFML file in the patterns and manages a cache.">
+		<cfargument name="filePath" type="string" required="true"
+			hint="This is the file path." />
+		
+		<cfset var i = 0 />
+		<cfset var result = false />
+		
+		<!--- Check the cache first --->
+		<cfif variables.cfmFileMatchCache.containsKey(arguments.filePath)>
+			<cfreturn variables.cfmFileMatchCache.get(arguments.filePath) />
+		</cfif>
+		
+		<!--- If not cache value, then search for match (the matcher can take an array of patterns)--->
+		<cfif variables.matcher.match(variables.cfmSafePatterns, arguments.filePath)>
+			<cfset result = true />
+		</cfif>
+		
+		<!--- Set a cache value for the file path --->
+		<cfset variables.cfmFileMatchCache.put(arguments.filePath, result) />
+	
+		<cfreturn result />
 	</cffunction>
 
 	<!---
