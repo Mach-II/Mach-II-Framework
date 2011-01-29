@@ -106,6 +106,8 @@ Notes:
 		<cfset var log = getLog() />
 		<cfset var key = "" />
 		<cfset var i = 0 />
+		<cfset var builtMessage = "" />
+		<cfset var builtMessages = "" />
 
 		<!--- Don't run if there are nothing subscribed --->
 		<cfif StructCount(subscribers)>
@@ -133,16 +135,19 @@ Notes:
 					<!--- Create an exception --->
 					<cfif ArrayLen(results.errors)>
 						<cfset continue = false />
-						<!--- We can log all the errors, but only throw the first --->
-						<cfif log.isErrorEnabled()>
-							<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
-								<cfset log.error("#getUtils().buildMessageFromCfCatch(results[results.errors[i]].error)#", results[results.errors[i]].error) />
-							</cfloop>
-						</cfif>
+
+						<!--- Log all the errors and build an exception message with all the errors to thrown --->
+						<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
+							<cfset builtMessage = getUtils().buildMessageFromCfCatch(results[results.errors[i]].error) />
+							<cfset buildMessages = builtMessages & "***" &  i & ".*** " & builtMessage & " || " />
+							
+							<cfset log.error(builtMessage, results[results.errors[i]].error) />
+						</cfloop>
+
 						<!--- We can only handle one exception at once so use the first error --->
-						<cfthrow type="#getUtils().translateExceptionType(results[results.errors[1]].error.type)#"
-								message="An exception occurred while processing a published message named  '#getMessageName()#'."
-								detail="#getUtils().buildMessageFromCfCatch(results[results.errors[1]].error)#" />
+						<cfthrow type="application"
+								message="An exception occurred while processing a published message named  '#getMessageName()#'. See the list of exceptions below."
+								detail="#builtMessages#" />
 					</cfif>
 				<!--- Or set thread ids into the event --->
 				<cfelse>
