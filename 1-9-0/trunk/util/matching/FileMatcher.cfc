@@ -193,12 +193,17 @@ Notes:
 	</cffunction>
 	
 	<cffunction name="extractPathWithoutPattern" access="public" returntype="string" output="false"
-		hint="Extract the path base (the part before the pattern starts) from a string.">
+		hint="Extract the path base (the part before the pattern starts) from a string and automatically cleans the path via pathClean().">
 		<cfargument name="string" type="string" required="true" />
 		
-		<cfset var parts = ListToArray(arguments.string, "/") />
+		<cfset var parts = "" />
 		<cfset var result = "" />
 		<cfset var i = 0 />
+		
+		<!--- Ensure that the path has a uniform path separate to work with --->
+		<cfset arguments.string = pathClean(arguments.string) />
+
+		<cfset parts = ListToArray(arguments.string, "/") />
 		
 		<cfloop from="1" to="#ArrayLen(parts)#" index="i">
 			<cfif NOT isPattern(parts[i])>
