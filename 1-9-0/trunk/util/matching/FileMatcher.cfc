@@ -113,7 +113,7 @@ Notes:
 	<cffunction name="match" access="public" returntype="query" output="false"
 		hint="Matches the passed path against the pattern according to the matching strategy.">
 		<cfargument name="pattern" type="string" required="true"
-			hint="The pattern to use for the matching." />
+			hint="The pattern to use for the matching. Must be a full absolute path or use './' to be relative from the value in the path argument." />
 		<cfargument name="path" type="string" required="true" 
 			hint="The base path directory to run a cfdirectory call against. This path cannot have any patterns in it." />
 		<cfargument name="removeRootPath" type="string" required="false" default="" 
@@ -128,8 +128,13 @@ Notes:
 
 		<!--- Clean up the paths and pattern --->
 		<cfset arguments.path = pathClean(arguments.path) />
-		<cfset arguments.pattern = pathClean(arguments.pattern) />
 		<cfset arguments.removeRootPath = pathClean(arguments.removeRootPath) />
+		<cfset arguments.pattern = pathClean(arguments.pattern) />		
+		
+		<!--- If the pattern is relative, then resolve to an absolute path --->
+		<cfif arguments.pattern.startsWith(".")>
+			<cfset arguments.pattern = pathClean(arguments.path & "/" & Right(arguments.pattern, Len(arguments.pattern) - 1)) />
+		</cfif>
 		
 		<cfif variables.useListInfo>
 			<cfset pathResults = findFilesWithListInfo(arguments.pattern, arguments.path, arguments.removeRootPath) />
@@ -143,12 +148,13 @@ Notes:
 			(except go in reverse because we may delete from the query)--->
 		<cfif ArrayLen(arguments.excludePatterns)>
 			<cfset arguments.excludePatterns = cleanExcludePatterns(arguments.excludePatterns) />
+			
 			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
 				<cfloop from="1" to="#ArrayLen(arguments.excludePatterns)#" index="j">
 					<!--- If pattern and pattern matches or if exact path --->
-					<cfif arguments.excludePatterns[j] EQ pathResults.modifiedPath[i]
+					<cfif arguments.excludePatterns[j] EQ pathResults.fullPath[i]
 						OR (isPattern(arguments.excludePatterns[j]) 
-						AND super.match(arguments.excludePatterns[j], pathResults.modifiedPath[i]))>
+						AND super.match(arguments.excludePatterns[j], pathResults.fullPath[i]))>
 						<!---
 						If a pattern is found, delete and break out of the inner loop (short-circuit)
 						We're using the underlying Java method or built-in method if available
@@ -169,7 +175,7 @@ Notes:
 		--->
 		<cfif pathResults.recordCount GTE 2>
 			<cfloop from="#pathResults.recordCount#" to="2" index="i" step="-1">
-				<cfif NOT super.match(arguments.pattern, pathResults.modifiedPath[i])>
+				<cfif NOT super.match(arguments.pattern, pathResults.fullPath[i])>
 					<cfset queryDeleteRow(pathResults, i) />
 				</cfif>
 			</cfloop>
@@ -211,7 +217,7 @@ Notes:
 		<!--- Ensure that the path has a uniform path separate to work with --->
 		<cfset arguments.path = pathClean(arguments.path) />
 
-		<cfset parts = ListToArray(arguments.string, "/") />
+		<cfset parts = ListToArray(arguments.path, "/") />
 		
 		<cfloop from="1" to="#ArrayLen(parts)#" index="i">
 			<cfif NOT isPattern(parts[i])>
@@ -219,8 +225,8 @@ Notes:
 			</cfif>
 		</cfloop>
 		
-		<cfif arguments.string.startsWith("/")>
-			<cfset result = "/" & result>
+		<cfif arguments.path.startsWith("/")>
+			<cfset result = "/" & result />
 		</cfif>
 		
 		<cfreturn result />
@@ -241,12 +247,22 @@ Notes:
 		hint="Cleans the exclude pattern paths.">
 		<cfargument name="excludePatterns" type="array" required="true"
 			hint="The exclude patterns to clean." />
+		<cfargument name="path" type="string" required="true"
+			hint="The base path to use for relative path expanding" />
 			
 		<cfset var cleanedExcludePatterns = ArrayNew(1) />
+		<cfset var pattern = "" />
 		<cfset var i = 0 />
 		
 		<cfloop from="1" to="#ArrayLen(arguments.excludePatterns)#" index="i">
-			<cfset ArrayAppend(cleanedExcludePatterns, pathClean(arguments.excludePatterns[i])) />
+			<cfset pattern = pathClean(arguments.excludePatterns[i]) />
+			
+			<!--- If the pattern is relative, then resolve to an absolute path --->
+			<cfif temp.startsWith(".")>
+				<cfset pattern = pathClean(arguments.path & "/" & Right(pattern, Len(pattern) - 1)) />
+			</cfif>
+			
+			<cfset ArrayAppend(cleanedExcludePatterns, pattern) />
 		</cfloop>
 		
 		<cfreturn cleanedExcludePatterns />
