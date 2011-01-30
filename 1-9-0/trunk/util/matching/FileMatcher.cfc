@@ -65,8 +65,10 @@ Notes:
 	--->
 	<cffunction name="init" access="public" returntype="FileMatcher" output="false"
 		hint="Initializes the path pattern matcher.">
-		<cfargument name="pathSeparator" type="string" required="false" />
-		<cfargument name="useListInfo" type="boolean" required="false" />
+		<cfargument name="pathSeparator" type="string" required="false" default="/"
+			hint="The path separator to use. Defaults to '/'."/>
+		<cfargument name="useListInfo" type="boolean" required="false"
+			hint="Allows you to indicate if you want to use the listInfo attribute of cfdirectory for faster performance. listInfo does not return file size or date last modified." />
 		
 		<cfset var temp = "" />
 		<cfset var engineInfo = "" />
@@ -110,10 +112,14 @@ Notes:
 	--->
 	<cffunction name="match" access="public" returntype="query" output="false"
 		hint="Matches the passed path against the pattern according to the matching strategy.">
-		<cfargument name="pattern" type="string" required="true" />
-		<cfargument name="path" type="string" required="true" />
-		<cfargument name="removeRootPath" type="string" required="false" default="" />
-		<cfargument name="excludePatterns" type="array" required="false" default="#ArrayNew(1)#" />
+		<cfargument name="pattern" type="string" required="true"
+			hint="The pattern to use for the matching." />
+		<cfargument name="path" type="string" required="true" 
+			hint="The base path directory to run a cfdirectory call against. This path cannot have any patterns in it." />
+		<cfargument name="removeRootPath" type="string" required="false" default="" 
+			hint="A path to remove from the computed results. This is most useful when looking for .cfm files to be used with cfincludes as those paths cannot be absolute paths." />
+		<cfargument name="excludePatterns" type="array" required="false" default="#ArrayNew(1)#" 
+			hint="An array of patterns to exclude from the final results. This is useful if you want to cast a wide net with your pattern and filter those results further." />
 		
 		<cfset var pathResults = "" />
 		<cfset var pathResultsRecordCount = 0 />
@@ -187,21 +193,23 @@ Notes:
 	</cffunction>
 
 	<cffunction name="pathClean" access="public" returntype="string" output="false"
-		hint="Cleans paths so all paths use a uniform delimiter.">
-		<cfargument name="path" type="string" required="true" />
+		hint="Cleans paths so all paths use an uniform path separator.">
+		<cfargument name="path" type="string" required="true"
+			hint="The path to clean and convert to an uniform path separator."/>
 		<cfreturn REReplaceNoCase(arguments.path, "(\\{1,}|\/{1,})", "/", "all") />
 	</cffunction>
 	
 	<cffunction name="extractPathWithoutPattern" access="public" returntype="string" output="false"
 		hint="Extract the path base (the part before the pattern starts) from a string and automatically cleans the path via pathClean().">
-		<cfargument name="string" type="string" required="true" />
+		<cfargument name="path" type="string" required="true"
+			hint="The path to remove a pattern from."/>
 		
 		<cfset var parts = "" />
 		<cfset var result = "" />
 		<cfset var i = 0 />
 		
 		<!--- Ensure that the path has a uniform path separate to work with --->
-		<cfset arguments.string = pathClean(arguments.string) />
+		<cfset arguments.path = pathClean(arguments.path) />
 
 		<cfset parts = ListToArray(arguments.string, "/") />
 		
