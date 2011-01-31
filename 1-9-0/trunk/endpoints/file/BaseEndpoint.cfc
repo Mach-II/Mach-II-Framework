@@ -115,7 +115,7 @@ Configuration Notes:
 	<cfset variables.expireMap = StructNew() />
 	<cfset variables.attachmentMap = StructNew() />
 	<cfset variables.timestampMap = StructNew() />
-	<cfset variables.cfmSafePatterns = ArrayNew() />
+	<cfset variables.cfmSafePatterns = ArrayNew(1) />
 	<!--- We need case sensitive keys so fallback to Java Hash Map --->
 	<cfset variables.cfmFileMatchCache = CreateObject("java", "java.util.HashMap").init() />
 	<cfset variables.urlBase = "" />
