@@ -67,13 +67,15 @@ Notes:
 		hint="Initialization function called by the framework.">
 		<cfargument name="loadResources" type="boolean" required="false" default="true"
 			hint="Directive to load in resource files. Defaults to true." />
+		
+		<cfset var temp = "" />
 
 		<cfif arguments.loadResources>
 			<cfset variables.statusCodeShortcutMap = loadResourceData("/MachII/util/resources/data/httpStatuscodes.properties") />
 			<cfset variables.mimeTypeMap = loadResourceData("/MachII/util/resources/data/mimeTypes.properties") />
 		</cfif>
 		
-		<!--- Discover if native ListItemTrim() is available (OpenBD 1.4 and Railo 3.2) --->
+		<!--- Test if native ListItemTrim() is available (OpenBD 1.4 and Railo 3.2) --->
 		<cftry>
 			<cfset ListItemTrim("temp, temp") />
 
@@ -84,6 +86,14 @@ Notes:
 				<!--- Any exception means the BIF is unavailable so ignore this exception --->
 			</cfcatch>
 		</cftry>
+		
+		<!--- Test if native HtmlEditFormat() does not escape already escaped entities --->
+		<cfset temp = escapeHtml_native("&lt;&gt;&quot;&amp;") />
+		
+		<cfif temp EQ "&lt;&gt;&quot;&amp;">
+			<cfset variables.escapeHtml = variables.escapeHtml_native />
+			<cfset this.escapeHtml = this.escapeHtml_native />
+		</cfif>
 
 		<cfreturn this />
 	</cffunction>
@@ -494,6 +504,13 @@ Notes:
 		<!--- The & is a special case since could be part of an already escaped entity with the RegEx--->
 		<!--- Deal with the easy characters with the ReplaceList--->
 		<cfreturn ReplaceList(REReplaceNoCase(arguments.input, "&(?!([a-zA-Z][a-zA-Z0-9]*|(##\d+)){2,6};)", "&amp;", "all"), '<,>,"', "&lt;,&gt;,&quot;") />
+	</cffunction>
+
+	<cffunction name="escapeHtml_native" access="public" returntype="string" output="false"
+		hint="Escapes special characters '<', '>', '""' and '&' with the native HtmlEditFormat() - only use on CFML engines where the double encoding issue has been fixed.">
+		<cfargument name="input" type="string" required="true"
+			hint="String to escape." />
+		<cfreturn HtmlEditFormat(arguments.input) />
 	</cffunction>
 
 	<cffunction name="translateExceptionType" access="public" returntype="string" output="false"
