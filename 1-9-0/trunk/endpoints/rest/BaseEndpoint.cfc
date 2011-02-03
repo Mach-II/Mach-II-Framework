@@ -183,10 +183,10 @@ To Test it out, do the following:
 			<cfset arguments.event.setArg("restUri", restUri) />
 		<cfelse>
 			<cfif Len(restUri)>
-				<cfthrow type="MachII.endpoints.rest.IncorrectHTTPMethod"
+				<cfthrow type="MachII.endpoints.rest.MethodNotAllowed"
 					message="A request was made to a REST URI was found for '#pathInfo#' but the httpMethod='#httpMethod#' was incorrect. This resource can only be used with the following HTTP methods '#restUri#'." />
 			<cfelse>
-				<cfthrow type="MachII.endpoints.rest.NoURIMatch"
+				<cfthrow type="MachII.endpoints.rest.NoSuchResource"
 					message="A request was made to a REST URI which cannot be found with '#pathInfo#' with httpMethod='#httpMethod#'. No resource can be found that matches with any other HTTP method type either." />
 			</cfif>
 		</cfif>
@@ -206,7 +206,6 @@ To Test it out, do the following:
 
 		<cfset addContentTypeHeaderFromFormat(format) />
 
-		<!--- TODO: If callEndpointFunction() returns void, won't requestResponseBody be deleted as a var? This might need to be IsDefined() --->
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
@@ -217,11 +216,11 @@ To Test it out, do the following:
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 
-		<cfif exception.getType() EQ "MachII.endpoints.rest.IncorrectHTTPMethod">
+		<cfif exception.getType() EQ "MachII.endpoints.rest.MethodNotAllowed">
 			<cfset addHTTPHeaderByStatus(405) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>405 Method Not Allowed - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
-		<cfelseif exception.getType() EQ "MachII.endpoints.rest.NoURIMatch">
+		<cfelseif exception.getType() EQ "MachII.endpoints.rest.NoSuchResource">
 			<cfset addHTTPHeaderByStatus(404) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
@@ -478,6 +477,7 @@ To Test it out, do the following:
 
 	<cffunction name="setPossibleFormatList" access="public" returntype="void" output="false">
 		<cfargument name="possibleFormatList" type="string" required="true" />
+
 		<cfset var currFormat = "" />
 		<cfset var formatList = "" />
 
@@ -487,7 +487,7 @@ To Test it out, do the following:
 				<cfloop list="#arguments.possibleFormatList#" index="currFormat" delimiters=",|">
 					<cfset currFormat = Trim(Replace(currFormat, ".", "")) />
 					<!--- Call this to validate the format -- throws exception if not valid --->
-					<cfset getUtils().getMimeTypeByFileExtension("."&currFormat, variables.customMimeTypeMap)>
+					<cfset getUtils().getMimeTypeByFileExtension("." & currFormat, variables.customMimeTypeMap)>
 					<cfset formatList = ListAppend(formatList, currFormat, ",") />
 				</cfloop>
 				<cfcatch type="any">
