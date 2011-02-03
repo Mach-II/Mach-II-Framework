@@ -229,5 +229,30 @@ Notes:
 		<cfset assertEquals("Not Modified", variables.utils.getHTTPHeaderStatusTextByStatusCode(304)) />
 		<cfset assertEquals("", variables.utils.getHTTPHeaderStatusTextByStatusCode(999)) />
 	</cffunction>
+	
+	<cffunction name="testLoadResourceData" access="public" returntype="void" output="false"
+		hint="Test loadResourceData()">
+		
+		<cfset var results = "" />
+		
+		<cfset results = variables.utils.loadResourceData("/MachII/tests/dummy/resource/simple.properties") />
+		
+		<cfset debug(results) />
+		
+		<cfset assertEquals(1, results.a) />
+		<cfset assertEquals(2, results.b) />
+		<cfset assertEquals(3, results.c) />
+		
+		<cfset results = variables.utils.loadResourceData("/MachII/tests/dummy/resource/complexValues.properties", "first,second,third") />
+		
+		<cfset debug(results) />
+
+		<cfset assertEquals(1, results.a.first) />
+		<cfset assertEquals(5, results.b.second) />
+		<cfset assertEquals(9, results.c.third) />
+		<cfset assertEquals(10, results.d.first) />
+		<cfset assertEquals("", results.d.second) />
+		
+	</cffunction>
 
 </cfcomponent>

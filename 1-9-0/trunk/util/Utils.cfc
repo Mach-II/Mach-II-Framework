@@ -170,16 +170,50 @@ Notes:
 
 	<cffunction name="loadResourceData" access="public" returntype="struct" output="false"
 		hint="Loads resource data by path and returns a struct.">
-		<cfargument name="resourcePath" type="string" required="true" />
+		<cfargument name="resourcePath" type="string" required="true"
+			hint="A path to the resource." />
+		<cfargument name="expandValueKeys" type="string" required="false"
+			hint="A list of keys names to expand value to." />
+		<cfargument name="expandValueKeyDelimiters" type="string" required="false" default="|"
+			hint="The delimiters to use when expanding value keys." />
 
 		<cfset var resourceMap = StructNew() />
 		<cfset var line = "" />
+		<cfset var key = "" />
+		<cfset var valueKeys = "" />
+		<cfset var temp = "" />
+		<cfset var values = "" />
+		<cfset var i = 0 />
 
+		<!--- Parse the file --->
 		<cfloop file="#ExpandPath(arguments.resourcePath)#" index="line">
 			<cfif NOT line.startsWith("##") AND ListLen(line, "=") EQ 2 >
 				<cfset resourceMap[ListFirst(line, "=")] = ListGetAt(line, 2, "=") />
 			</cfif>
 		</cfloop>
+		
+		<!--- Explode value of the resouce into structs if we have value keys --->
+		<cfif StructKeyExists(arguments, "expandValueKeys")>
+			<cfset valueKeys = ListToArray(arguments.expandValueKeys) />
+			
+			<cfloop collection="#resourceMap#" item="key">
+				<cfset values = ListToArray(resourceMap[key], arguments.expandValueKeyDelimiters)  />
+				
+				<cfset temp = StructNew() />
+				
+				<cfloop from="1" to="#ArrayLen(valueKeys)#" index="i">
+				<!--- The values may not be of equal length to the number of value keys so check --->
+					<cfif i LTE ArrayLen(values)>
+						<cfset temp[valueKeys[i]] = values[i] />
+					<cfelse>
+						<cfset temp[valueKeys[i]] = "" />
+					</cfif>
+				</cfloop>
+				
+				<!--- Replace the value of the resource key with the exploded struct --->
+				<cfset resourceMap[key] = temp />
+			</cfloop>
+		</cfif>
 
 		<cfreturn resourceMap />
 	</cffunction>
