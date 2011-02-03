@@ -109,6 +109,7 @@ in the application scope.
 	<cfset variables.instance.strategyTypeName = "LRU" />
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
+	<cfset variables.system = CreateObject("java", "java.lang.System") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -322,15 +323,14 @@ in the application scope.
 			since they will run reap independently whereas reap 
 			done in the application or server scopes will only run once --->
 		<cfif getScope() EQ "session">
-			<!--- Cannot directly access session scope because most CFML
-			engine will throw an error if sessions are disabled --->
-			<!--- A StructClear(session) eliminates the sessionId needed
-				so only use it if it available, otherwise too bad for you
-				as all repeats will be single threaded because we have no 
-				unique identifier --->
-			<cfif StructKeyExists(StructGet("session"), "sessionId")>
-				<cfset name = name & "_" & StructGet("session").sessionId />
-			</cfif>
+			<!---
+			We used to use session.sessionId however that was problematic 
+			if StructClear() was ever used the on the session.
+			
+			We now use the system identity hash code on the data storage struct
+			as an unique id.
+			--->
+			<cfset name = name & "_" & variables.system.identityHashCode(getStorage()) />
 		</cfif>
 
 		<cfreturn name />
