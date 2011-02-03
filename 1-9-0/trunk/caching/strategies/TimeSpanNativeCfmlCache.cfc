@@ -120,6 +120,7 @@ via reap() which is run every 3 minutes.
 	<cfset variables.instance.idleTimespan = "" />
 	<cfset variables.instance.idleTimespanString = "" />
 	<cfset variables.instance.useNamedCache = false />
+	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init(false) />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -127,8 +128,7 @@ via reap() which is run every 3 minutes.
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the strategy. Override to provide custom functionality.">
 
-		<cfset var utils = CreateObject("component", "MachII.util.Utils").init(false) />
-		<cfset var engineInfo = utils.getCfmlEngineInfo() />
+		<cfset var engineInfo = "" />
 
 		<!--- Optional: Specify the name of which cache to use - not supported by all cfml engines. To disable named caches, either specify an empty string, or don't provide this parameter. --->
 		<cfif isParameterDefined("cacheName")>
@@ -154,6 +154,8 @@ via reap() which is run every 3 minutes.
 		<cfelse>
 			<cfset setIdleTimespanString("0,1,0,0") />
 		</cfif>
+
+		<cfset engineInfo = variables.utils.getCfmlEngineInfo() />
 
 		<!--- ACF9 does not support cacheClear() so replace flush with a special method --->
 		<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 9>
