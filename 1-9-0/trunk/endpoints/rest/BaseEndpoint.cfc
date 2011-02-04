@@ -115,6 +115,7 @@ To Test it out, do the following:
 	<cfset variables.ANNOTATION_REST_AUTHENTICATE = variables.ANNOTATION_REST_BASE & ":AUTHENTICATE" />
 	<!--- Other constants --->
 	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml,txt" />
+	
 	<!---
 	PROPERTIES
 	--->
@@ -130,6 +131,13 @@ To Test it out, do the following:
 	<cfset variables.defaultCharset = "ISO-8859-1" />
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
+	<cfset variables.enforceContentLengthDefault =  false />
+	
+	<cfset variables.exceptionTypes = StructNew() />
+	<cfset variables.exceptionTypes["IncompleteBody"] = "MachII.endpoints.rest.IncompleteBody" />
+	<cfset variables.exceptionTypes["MethodNotAllowed"] = "MachII.endpoints.rest.MethodNotAllowed" />
+	<cfset variables.exceptionTypes["MissingContentLength"] = "MachII.endpoints.rest.MissingContentLength" />
+	<cfset variables.exceptionTypes["NoSuchResource"] = "MachII.endpoints.rest.NoSuchResource" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -162,6 +170,7 @@ To Test it out, do the following:
 		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME, false) />
 		<cfset var httpMethod = discoverHttpMethod(arguments.event) />
 		<cfset var restUri = "" />
+		<cfset var headers = "" />
 
 		<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
 		<cfif NOT Len(pathInfo) AND arguments.event.isArgDefined("uri")>
@@ -172,21 +181,27 @@ To Test it out, do the following:
 
 		<cfset arguments.event.setArg("httpMethod", httpMethod) />
 
-		<cfif ListContainsNoCase("PUT,POST", httpMethod)>
-			<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
-		</cfif>
-
 		<!--- Find the REST URI --->
 		<cfset restUri = variables.restUris.findUri(pathInfo, httpMethod) />
 
 		<cfif IsObject(restUri)>
 			<cfset arguments.event.setArg("restUri", restUri) />
+			
+			<!--- Process data specific to PUT and POST type requests --->
+			<cfif ListContainsNoCase("PUT,POST", httpMethod)>
+				<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
+				
+				<!--- Perform content-length checks if required --->
+				<cfif variables.enforceContentLengthDefault>
+					<cfset performContentLengthChecks(arguments.event) />
+				</cfif>
+			</cfif>
 		<cfelse>
 			<cfif Len(restUri)>
-				<cfthrow type="MachII.endpoints.rest.MethodNotAllowed"
+				<cfthrow type="#variables.exceptionTypes["MethodNotAllowed"]#"
 					message="A request was made to a REST URI was found for '#pathInfo#' but the httpMethod='#httpMethod#' was incorrect. This resource can only be used with the following HTTP methods '#restUri#'." />
 			<cfelse>
-				<cfthrow type="MachII.endpoints.rest.NoSuchResource"
+				<cfthrow type="#variables.exceptionTypes["NoSuchResource"]#"
 					message="A request was made to a REST URI which cannot be found with '#pathInfo#' with httpMethod='#httpMethod#'. No resource can be found that matches with any other HTTP method type either." />
 			</cfif>
 		</cfif>
@@ -200,7 +215,7 @@ To Test it out, do the following:
 		<cfset var restResponseBody = callEndpointFunction(restUri, arguments.event) />
 		<cfset var format = arguments.event.getArg("format", "") />
 
-		<cfif format EQ "" AND restUri.getUriMetadataParameters().defaultReturnFormat NEQ "">
+		<cfif NOT Len(format) AND Len(restUri.getUriMetadataParameters().defaultReturnFormat)>
 			<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
 		</cfif>
 
@@ -209,18 +224,17 @@ To Test it out, do the following:
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
-
 	<cffunction name="onException" access="public" returntype="void" output="true"
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException() for basic error handling.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 
-		<cfif exception.getType() EQ "MachII.endpoints.rest.MethodNotAllowed">
+		<cfif exception.getType() EQ variables.exceptionTypes["MethodNotAllowed"]>
 			<cfset addHTTPHeaderByStatus(405) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>405 Method Not Allowed - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
-		<cfelseif exception.getType() EQ "MachII.endpoints.rest.NoSuchResource">
+		<cfelseif exception.getType() EQ variables.exceptionTypes["NoSuchResource"]>
 			<cfset addHTTPHeaderByStatus(404) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
@@ -294,7 +308,32 @@ To Test it out, do the following:
 				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
 			</cfcatch>
 		</cftry>
+	</cffunction>
 
+	<cffunction name="performContentLengthChecks" access="private" returntype="false" output="false"
+		hint="Performs content-length header and body checks.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
+		<cfset var headers = GetHttpRequestData().headers />
+		<cfset var contentType = "" />
+		<cfset var charset = "ISO-8859-1" />
+		
+		<cfif StructKeyExists(headers, "Content-Type")>
+			<cfset contentType = headers["ContentType"] />
+			
+			<!--- Find a charset in example "application/xml; charset=UTF-8"--->
+			<cfif ListLen(contentType, ";") GTE 2>
+				<cfset charset = Trim(ListGetAt(ListGetAt(contentType, 2, ";"), 2, "=")) />
+			</cfif>
+		</cfif>
+		
+		<!--- Check that the content-length header was sent --->
+		<cfif NOT StructKeyExists(headers, "Content-Length")>
+			<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#" />
+		<!--- Check that the number of bytes in the content-length header of the raw content equals the header value --->
+		<cfelseif headers["Content-Length"] NEQ Len(arguments.event.getArg("rawContent").getBytes(charset))>
+			<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#" />
+		</cfif>		
 	</cffunction>
 
 	<cffunction name="cleanRawContent" access="private" returntype="any" output="false"
