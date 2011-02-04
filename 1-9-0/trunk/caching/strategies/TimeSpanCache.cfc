@@ -116,8 +116,13 @@ via reap() which is run every 3 minutes.
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.SECOND = createBigInteger("1000") />
+	<cfset variables.MINUTE = createBigInteger("60000") />
+	<cfset variables.HOUR = createBigInteger("3600000") />
+	<cfset variables.DAY = createBigInteger("86400000") />
+	
 	<cfset variables.instance.strategyTypeName = "Time Span" />
-	<cfset variables.instance.timespan = createBigInteger("3600000") /><!--- Default to 1 hour --->
+	<cfset variables.instance.timespan = variables.HOUR /><!--- Default to 1 hour --->
 	<cfset variables.instance.timespanString =  "0,1,0,0" /><!--- Default to 1 hour --->
 	<cfset variables.instance.scope = "application" />
 	<cfset variables.instance.scopeKey = "" />
@@ -125,7 +130,7 @@ via reap() which is run every 3 minutes.
 	
 	<cfset variables.currentTickCount = "" />
 	<cfset variables.threadingAdapter = "" />
-	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init("false") />
+	<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init() />
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
 	
 	<!---
@@ -468,7 +473,36 @@ via reap() which is run every 3 minutes.
 		<cfif arguments.timespan EQ "forever">
 			<cfset offset = createBigInteger("1228000000000") />
 		<cfelse>
-			<cfset offset = createBigInteger(variables.utils.convertTimespanStringToSeconds(arguments.timespan)) />
+			<cfset offset = createBigInteger("0") />
+			<!--- Cannot multiply by zero otherwise an exception will occur --->
+			
+			<!--- Second --->
+			<cfif ListGetAt(timespan, 4) NEQ 0>
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 4)) />	
+				<cfset value = value.multiply(variables.SECOND) />
+				<cfset offset = offset.add(value) />
+			</cfif>
+			
+			<!--- Minute --->
+			<cfif ListGetAt(timespan, 3) NEQ 0>
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 3)) />
+				<cfset value = value.multiply(variables.MINUTE) />
+				<cfset offset = offset.add(value) />
+			</cfif>
+			
+			<!--- Hour --->
+			<cfif ListGetAt(timespan, 2) NEQ 0>
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 2)) />
+				<cfset value = value.multiply(variables.HOUR) />
+				<cfset offset = offset.add(value) />
+			</cfif>
+			
+			<!--- Day --->
+			<cfif ListGetAt(timespan, 1) NEQ 0>
+				<cfset value = createBigInteger(ListGetAt(arguments.timespan, 1)) />
+				<cfset value = value.multiply(variables.DAY) />
+				<cfset offset = offset.add(value) />
+			</cfif>
 		</cfif>
 				
 		<cfset variables.instance.timespan = offset />
