@@ -169,34 +169,50 @@ Notes:
 					</cfloop>
 				<cfelse>
 					<!--- either the valueCol or lableCol attributes were not found in the structure, throw an error --->
-					<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype"
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
 							message="Missing struct key values"
-							detail="The options form tag supports an array of struct elements, however the valueKey and labelKey attributes do not match the struct keys contained in the first array element." />
+							detail="The #getTagType()# form tag supports an array of struct elements, however the valueKey and labelKey attributes do not match the struct keys contained in the first array element." />
 				</cfif>
 			<cfelse>
 				<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype"
 						message="Unsupported Data Type in Array"
-						detail="The options form tag only supports simple values or structs as array elements." />
+						detail="The #getTagType()# form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
 			<!--- only single dimension arrays are support, throw an exception for the multi-dimensional array passed --->
-			<cfthrow type="MachII.customtags.form.options.unsupportedItemsDatatype"
-					message="Unsupported Number of Array Dimensions in Options Tag"
-					detail="The options form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the items attribute is #attributes.items.getDimension()# dimensions." />
+			<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
+					message="Unsupported Number of Array Dimensions"
+					detail="The #getTagType()# form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag as the items attribute is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsQuery(attributes.items)>
-		<cfloop query="attributes.items">
-			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.currentRow] />
-
-			<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
-			<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
-			<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
-			<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow], variables.checkValueDelimiter)>
-				<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
-			</cfif>
-
-			<cfset variables.outputBuffer.content.append(variables.option) />
-		</cfloop>
+		<cftry>
+			<cfloop query="attributes.items">
+				<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.currentRow] />
+	
+				<cfset variables.option = ReplaceNoCase(variables.optionTemplate, "${output.value}", variables.value, "all") />
+				<cfset variables.option = ReplaceNoCase(variables.option, "${output.id}", createCleanId(variables.value), "all") />
+				<cfset variables.option = ReplaceNoCase(variables.option, "${output.label}", variables.utils.escapeHtml(attributes.items[attributes.labelCol][attributes.items.currentRow]), "one") />
+				<cfif ListFindNoCase(variables.checkValues, attributes.items[attributes.valueCol][attributes.items.currentRow], variables.checkValueDelimiter)>
+					<cfset variables.option = ReplaceNoCase(variables.option, '>', ' selected="selected">', "one") />
+				</cfif>
+	
+				<cfset variables.outputBuffer.content.append(variables.option) />
+			</cfloop>
+			<cfcatch type="any">
+				<!--- Allow failure and check for type instead of pre-checking for possible exception before --->
+				<cfif NOT ListFindNoCase(attributes.items.columnList, attributes.valueCol)>
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsValueCol"
+							message="The query passed to the #getTagType()# Tag does not have a valueCol named '#attributes.valueCol#'."
+							detail="Available columns: #attributes.items.columnList#." />
+				<cfelseif NOT ListFindNoCase(attributes.items.columnList, attributes.labelCol)>
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsLabelCol"
+							message="The query passed to the #getTagType()# Tag does not have a labelCol named '#attributes.labelCol#'."
+							detail="Available columns: #attributes.items.columnList#." />				
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 	<cfelse>
 		<cfthrow type="MachII.customtags.form.#getTagType()#"
 			message="The 'items' attribute for #getTagType()# custom tag does not support the passed datatype."

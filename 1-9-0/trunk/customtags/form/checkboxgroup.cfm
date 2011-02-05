@@ -178,33 +178,41 @@ Notes:
 					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 				</cfloop>
 			<cfelseif IsStruct(attributes.items[1])>
-				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
-				
-				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
-					<cfset variables.value = attributes.items[i][attributes.valueKey] />
-
-					<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
-						<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
-					<cfelse>
-						<cfset variables.finalOutput = variables.checkboxTemplate />
-					</cfif>
-
-					<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-					<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
-
-					<cfset variables.outputBuffer.content.append(variables.finalOutput) />
-				</cfloop>
+				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
+				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
+					<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+					
+					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
+						<cfset variables.value = attributes.items[i][attributes.valueKey] />
+	
+						<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
+							<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
+						<cfelse>
+							<cfset variables.finalOutput = variables.checkboxTemplate />
+						</cfif>
+	
+						<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
+						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
+						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
+	
+						<cfset variables.outputBuffer.content.append(variables.finalOutput) />
+					</cfloop>
+				<cfelse>
+					<!--- either the valueCol or lableCol attributes were not found in the structure, throw an error --->
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
+							message="Missing struct key values"
+							detail="The #getTagType()# form tag supports an array of struct elements, however the valueKey and labelKey attributes do not match the struct keys contained in the first array element." />
+				</cfif>
 			<cfelse>
-				<cfthrow type="MachII.customtags.form.checkboxgroup"
+				<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
 					message="Unsupported Data Type in Array"
-					detail="The checkbox group form tag only supports simple values or structs as array elements." />
+					detail="The #getTagType()# form tag only supports simple values or structs as array elements." />
 			</cfif>
 		<cfelse>
-			<cfthrow type="MachII.customtags.form.checkboxgroup"
-				message="Unsupported Number of Array Dimensions in Checkbox Group Tag"
-				detail="The checkbox group form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
+			<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
+				message="Unsupported Number of Array Dimensions"
+				detail="The #getTagType()# form tag only supports arrays of 1 dimension. Array values may be either simple values or structs. The array you passed to the tag is #attributes.items.getDimension()# dimensions." />
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
@@ -230,26 +238,42 @@ Notes:
 	<cfelseif IsQuery(attributes.items)>
 		<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
 		
-		<cfloop query="attributes.items">
-			<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
-
-			<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
-				<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
-			<cfelse>
-				<cfset variables.finalOutput = variables.checkboxTemplate />
-			</cfif>
-
-			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
-
-			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
-		</cfloop>
+		<cftry>
+			<cfloop query="attributes.items">
+				<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
+	
+				<cfif ListFindNoCase(variables.checkValues, variables.value, attributes.delimiter)>
+					<cfset variables.finalOutput = ReplaceNoCase(variables.checkboxTemplate, "/>", ' checked="checked"/>') />
+				<cfelse>
+					<cfset variables.finalOutput = variables.checkboxTemplate />
+				</cfif>
+	
+				<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.checkbox}", variables.finalOutput) />
+				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
+				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
+				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
+	
+				<cfset variables.outputBuffer.content.append(variables.finalOutput) />
+			</cfloop>
+			<cfcatch type="any">
+				<!--- Allow failure and check for type instead of pre-checking for possible exception before --->
+				<cfif NOT ListFindNoCase(attributes.items.columnList, attributes.valueCol)>
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsValueCol"
+							message="The query passed to the #getTagType()# Tag does not have a valueCol named '#attributes.valueCol#'."
+							detail="Available columns: #attributes.items.columnList#." />
+				<cfelseif NOT ListFindNoCase(attributes.items.columnList, attributes.labelCol)>
+					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsLabelCol"
+							message="The query passed to the #getTagType()# Tag does not have a labelCol named '#attributes.labelCol#'."
+							detail="Available columns: #attributes.items.columnList#." />				
+				<cfelse>
+					<cfrethrow />
+				</cfif>
+			</cfcatch>
+		</cftry>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.checkboxgroup.unsupportedItemsDatatype"
+		<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsDatatype"
 			message="Unsupported datatype for the 'items' attribute."
-			detail="The checkbox group form tag only supports lists, arrays, structs, and queries." />
+			detail="The #getTagType()# form tag only supports lists, arrays, structs, and queries." />
 	</cfif>
 
 	<!--- Add in the hidden element --->
