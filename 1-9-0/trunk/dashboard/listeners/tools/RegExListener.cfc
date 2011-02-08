@@ -111,13 +111,15 @@ Notes:
 		<cfset var pos = 1 />
 		<cfset var inputLen = Len(arguments.input) />
 		<cfset var temp = "" />
-		<cfset var matches = "" />
+		<cfset var matches = ArrayNew(1) />
 		<cfset var result = StructNew() />
 		
 		<cfloop from="1" to="3" index="i">
 			<cfset results[i] = StructNew()>
 			<cfset results[i].exception = false />
 			<cfset results[i].matches = ArrayNew(1) />
+			<cfset matches = ArrayNew(1) />
+			<cfset pos = 1 />
 
 			<cfif Len(arguments.patterns[i])>
 				<cftry>
@@ -144,7 +146,7 @@ Notes:
 				
 					<cfcatch type="any">
 						<cfset results[i].exception = true />
-						<cfset results[i].matches = cfcatch.message />
+						<cfset results[i].matches = getUtils().buildMessageFromCfcatch(cfcatch) />
 					</cfcatch>
 				</cftry>
 			</cfif>
@@ -177,7 +179,7 @@ Notes:
 					</cfif>
 					<cfcatch type="any">
 						<cfset results[i].exception = true />
-						<cfset results[i].matches = cfcatch.message />
+						<cfset results[i].matches = getUtils().buildMessageFromCfcatch(cfcatch) />
 					</cfcatch>
 				</cftry>
 			</cfif>

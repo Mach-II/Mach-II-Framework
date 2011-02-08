@@ -39,7 +39,7 @@ Notes:
 				<th style="width:10%;"><h3>Length</h3></th>
 			</tr>
 		<cfif NOT variables.results[i].exception>
-			<cfif ArrayLen(variables.matches)>
+			<cfif ArrayLen(variables.results[i].matches)>
 				<cfloop from="1" to="#ArrayLen(variables.matches)#" index="j">
 					<tr class="<view:flip value="#i#" items="shade" />">
 						<td><pre style="wrap">#HtmlEditFormat(variables.matches[j].text)#</pre></td>
