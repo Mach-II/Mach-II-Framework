@@ -66,7 +66,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!--- The ONE_TOKEN_REGEX is what will be used to match an individual token in the URL. Used when generating the full uriRegex value. --->
 	<cfset variables.ONE_TOKEN_REGEX ="([^\/\?&\.]+)" />
 	<!--- HTTP_METHODS is the list of supported HTTP request methods. --->
-	<cfset variables.HTTP_METHODS = "GET,POST,PUT,DELETE" />
+	<cfset variables.HTTP_METHODS = "GET,POST,PUT,DELETE,HEAD" />
 	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml" />
 
 	<!---
@@ -193,7 +193,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="void" output="false"
+	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="string" output="false"
 		hint="Take an input URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
 		<cfargument name="uriPattern" type="string" required="true"
 			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
@@ -250,16 +250,16 @@ For example, a uriPattern like "/service/doit/{value}"
 
 		<!--- Set instance variables --->
  		<cfset variables.uriRegex = "^/" & ArrayToList(urlElements, "/") & "(" & formatsForRegex & ")?(?:/)?$" />
-
 	</cffunction>
 
 	<cffunction name="getFormatsForRegex" access="private" returntype="string" output="false"
 		hint="Takes a list of formats intended to be possible formats used by this URI, validates them, and returns a string that can be used a regex to find the format.">
 		<cfargument name="possibleFormatList" type="string" required="true" />
+		
 		<cfset var formatsForRegex = "" />
 		<cfset var currFormat = "" />
 
-		<cfif Trim(Len(arguments.possibleFormatList)) GT 0>
+		<cfif Len(Trim(arguments.possibleFormatList)) GT 0>
 			<cfloop list="#arguments.possibleFormatList#" index="currFormat" delimiters=",|">
 				<cfset currFormat = Trim(Replace(currFormat, ".", "")) />
 				<cfset formatsForRegex = ListAppend(formatsForRegex, "\.#currFormat#", "|") />
@@ -273,7 +273,6 @@ For example, a uriPattern like "/service/doit/{value}"
 		</cfif>
 
 		<cfreturn formatsForRegex />
-
 	</cffunction>
 
 	<cffunction name="reEscape" access="private" returntype="string" output="false"
@@ -283,7 +282,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	</cffunction>
 
 	<cffunction name="reFindAll" access="private" returntype="struct" output="false"
-		hint="Finds all regex matches and returns the position / length of each match.">
+		hint="Finds all regex matches (case-sensitive) and returns the position / length of each match.">
 		<cfargument name="regex" type="string" required="true"
 			hint="The regex pattern to use." />
 		<cfargument name="input" type="string" required="true"
@@ -352,7 +351,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		<!--- Require an appropriate URI pattern (pretty loose validation, just require initial slash and almost anything following) --->
 		<cfset arguments.uriPattern = Trim(arguments.uriPattern) />
 
-		<cfif REFind("^([\/]*)([^\/\?&]+)", arguments.uriPattern, 1, false) EQ 0>
+		<cfif NOT REFind("^([\/]*)([^\/\?&]+)", arguments.uriPattern, 1, false)>
 			<cfthrow type="MachII.framework.url.InvalidUriPattern"
 				message="Invalid uriPattern for this URI."
 				detail="The uriPattern must be an slash-delimited, valid URL string, with optional {} delimited tokens. '#arguments.uriPattern#' is invalid."  />
@@ -365,6 +364,10 @@ For example, a uriPattern like "/service/doit/{value}"
 		<cfreturn variables.uriPattern />
 	</cffunction>
 
+	<cffunction name="getUriRegex" access="public" returntype="string" output="false">
+		<cfreturn variables.uriRegex />
+	</cffunction>
+
 	<cffunction name="setHttpMethod" access="public" returntype="void" output="false">
 		<cfargument name="httpMethod" type="String" required="true" />
 		<!--- Validation --->
@@ -375,12 +378,8 @@ For example, a uriPattern like "/service/doit/{value}"
 					message="The input HTTP method #arguments.httpMethod# is not currently supported.">
 		</cfif>
 	</cffunction>
-
 	<cffunction name="getHttpMethod" access="public" returntype="string" output="false">
 		<cfreturn variables.httpMethod />
-	</cffunction>
-	<cffunction name="getUriRegex" access="public" returntype="string" output="false">
-		<cfreturn variables.uriRegex />
 	</cffunction>
 
 	<cffunction name="setUriMetadataParameters" access="public" returntype="void" output="false"

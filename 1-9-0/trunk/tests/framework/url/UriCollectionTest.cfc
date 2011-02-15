@@ -73,7 +73,7 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS - TEST CASES
 	--->
-	<cffunction name="testFindUri" access="public" returntype="void" output="false"
+	<cffunction name="testFindUriByPathInfo" access="public" returntype="void" output="false"
 		hint="Tests addUri() and findUri() method in the UriCollection.">
 		
 		<!--- Populate with some Uris --->
@@ -89,14 +89,37 @@ Notes:
 				, "content")) />
 		
 		<!--- Check for positive matches --->
-		<cfset assertTrue(IsObject(variables.uriCollection.findUri("/content/item", "POST"))) />
-		<cfset assertTrue(IsObject(variables.uriCollection.findUri("/content/item/anb123", "GET"))) />
+		<cfset assertTrue(IsObject(variables.uriCollection.findUriByPathInfo("/content/item", "POST"))) />
+		<cfset assertTrue(IsObject(variables.uriCollection.findUriByPathInfo("/content/item/anb123", "GET"))) />
 		
 		<!--- Check for negative matches --->
-		<cfset assertFalse(IsObject(variables.uriCollection.findUri("/content/item/anb123", "POST"))) />
+		<cfset assertFalse(IsObject(variables.uriCollection.findUriByPathInfo("/content/item/anb123", "POST"))) />
 		
 		<!--- Check for incorrect HTTP method usage (405 - Method Not Allowed) --->
-		<cfset assertEquals(variables.uriCollection.findUri("/content/item/anb123", "POST"), "GET") />
+		<cfset assertEquals(variables.uriCollection.findUriByPathInfo("/content/item/anb123", "POST"), "GET") />
+	</cffunction>
+	
+	<cffunction name="testFindUriByFunctionName" access="public" returntype="void" output="false"
+		hint="Tests addUri() and findUri() method in the UriCollection.">
+		
+		<!--- Populate with some Uris --->
+		<cfset variables.uriCollection.addUri(CreateObject("component", "MachII.framework.url.Uri").init(
+				"/content/item"
+				, "POST"
+				, "saveContent"
+				, "content")) />		
+		<cfset variables.uriCollection.addUri(CreateObject("component", "MachII.framework.url.Uri").init(
+				"/content/item/{key}"
+				, "GET"
+				, "getContent"
+				, "content")) />
+		
+		<!--- Check for positive matches --->
+		<cfset assertTrue(IsObject(variables.uriCollection.findUriByFunctionName("saveContent"))) />
+		<cfset assertTrue(IsObject(variables.uriCollection.findUriByFunctionName("getContent"))) />
+		
+		<!--- Check for negative matches --->
+		<cfset assertFalse(IsObject(variables.uriCollection.findUriByFunctionName("IShouldFail"))) />
 	</cffunction>
 	
 	<cffunction name="testIsUriDefined" access="public" returntype="void" output="false"

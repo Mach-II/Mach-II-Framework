@@ -146,6 +146,11 @@ To Test it out, do the following:
 		hint="Child endpoints must call this configure method [i.e. super.configure()] to setup the RESTful methods correctly.">
 
 		<!--- Configure any parameters --->
+		<cfif getParameter("secure", false)>
+			<cfset setUrlBase(getProperty("urlBaseSecure")) />
+		<cfelse>
+			<cfset setUrlBase(getProperty("urlBase")) />
+		</cfif>
 		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", "ISO-8859-1")) />
 		<cfset setPossibleFormatList(getParameter("possibleFormatList", variables.DEFAULT_FORMAT_LIST)) />
@@ -171,25 +176,42 @@ To Test it out, do the following:
 		<cfset var httpMethod = discoverHttpMethod(arguments.event) />
 		<cfset var restUri = "" />
 		<cfset var headers = "" />
+		<cfset var urlTokens = "" />
+		<cfset var currToken = "" />
+
+		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there --->
+		<cfloop collection="#urlTokens#" item="currToken">
+			<cfif NOT event.isArgDefined(currToken)>
+				<cfset event.setArg(currToken, urlTokens[currToken]) />
+			</cfif>
+		</cfloop>
 
 		<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
 		<cfif NOT Len(pathInfo) AND arguments.event.isArgDefined("uri")>
-			<cfset arguments.event.setArg("pathInfo", arguments.event.getArg("uri")) />
+			<cfset arguments.event.setArg("_requestPathInfo", arguments.event.getArg("uri")) />
 		<cfelse>
-			<cfset arguments.event.setArg("pathInfo", pathInfo) />
+			<cfset arguments.event.setArg("_requestPathInfo", pathInfo) />
 		</cfif>
 
-		<cfset arguments.event.setArg("httpMethod", httpMethod) />
+		<cfset arguments.event.setArg("_requestMethod", httpMethod) />
 
 		<!--- Find the REST URI --->
-		<cfset restUri = variables.restUris.findUri(pathInfo, httpMethod) />
+		<cfset restUri = variables.restUris.findUriByPathInfo(pathInfo, httpMethod) />
 
 		<cfif IsObject(restUri)>
 			<cfset arguments.event.setArg("restUri", restUri) />
+
+			<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there --->
+			<cfset urlTokens = arguments.restUri.getTokensFromUri(pathInfo) />
+			<cfloop collection="#urlTokens#" item="currToken">
+				<cfif NOT arguments.event.isArgDefined(currToken)>
+					<cfset arguments.event.setArg(currToken, urlTokens[currToken]) />
+				</cfif>
+			</cfloop>
 			
 			<!--- Process data specific to PUT and POST type requests --->
 			<cfif ListContainsNoCase("PUT,POST", httpMethod)>
-				<cfset arguments.event.setArg("rawContent", cleanRawContent()) />
+				<cfset arguments.event.setArg("_requestBody", cleanRawContent()) />
 				
 				<!--- Perform content-length checks if required --->
 				<cfif variables.enforceContentLengthDefault>
@@ -252,23 +274,14 @@ To Test it out, do the following:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 
 		<cfset var responseBody = "" />
-		<cfset var pathInfo = arguments.event.getArg("pathInfo") />
-		<cfset var urlTokens = arguments.restUri.getTokensFromUri(pathInfo) />
-		<cfset var currToken = "" />
+		<cfset var pathInfo = arguments.event.getArg("_requestPathInfo") />
 		<cfset var stcArgs = "" />
-
-		<!--- Add any parsed tokens from the input pathInfo to the event unless they're already there --->
-		<cfloop collection="#urlTokens#" item="currToken">
-			<cfif NOT event.isArgDefined(currToken)>
-				<cfset event.setArg(currToken, urlTokens[currToken]) />
-			</cfif>
-		</cfloop>
 
 		<cfif restUri.matchUri(pathInfo)>
 			<cfset stcArgs = arguments.event.getArgs() />
 			<cfset stcArgs.event = arguments.event />
+			
 			<!--- Call the function --->
-
 			<cfinvoke
 				component="#this#"
 				method="#restUri.getFunctionName()#"
@@ -277,6 +290,75 @@ To Test it out, do the following:
 		</cfif>
 
 		<cfreturn responseBody />
+	</cffunction>
+	
+	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
+		hint="Builds an endpoint specific URL.">
+		<cfargument name="method" type="string" required="true"
+			hint="The method name used as a reference for REST URI. This argument must be passed if not included in the 'parameters' arguments."/>
+
+		<cfset var restUri = "" />
+		<cfset var uriPattern = "" />
+		<cfset var uriTokenNames = "" />
+		
+		<cfset var builtUrl = getUrlBase() />
+		<cfset var params = arguments />
+		<cfset var sortedParams = "" />
+		<cfset var i = 0 />
+		
+		<cfset restUri = variables.restUris.findUriByFunctionName(arguments.method) />
+
+		<cfif IsObject(restUri)>
+			
+			<cfif NOT builtUrl.endsWith("/")>
+				<cfset builtUrl = builtUrl & "/" />
+			</cfif>
+			
+			<cfset builtUrl = builtUrl & getParameter("name") />
+
+			<cfset uriPattern = restUri.getUriPattern() />
+
+			<cfif NOT uriPattern.startsWith("/")>
+				<cfset builtUrl = builtUrl & "/" />
+			</cfif>
+			
+			<cfset builtUrl = builtUrl & uriPattern />
+			
+			<cfset uriTokenNames = restUri.getUriTokenNames() />
+			
+			<cfset StructDelete(params, "method", true) />
+			
+			<cftry>
+				<cfloop array="#uriTokenNames#" index="i">
+					<cfset builtUrl = ReplaceNoCase(builtUrl, "{#i#}",params[i], "one") />
+					<cfset StructDelete(params, i, false) />
+				</cfloop>
+				<cfcatch type="any">
+					<cfthrow type="MachII.endpoints.rest.MissingArgument"
+						message="The '#uriTokenNames[i]#' parameter cannot be found for this REST method." />
+				</cfcatch>
+			</cftry>
+			
+			<!--- Add additional query string parameters if there are remaining params --->
+			<cfif StructCount(params)>
+				<cfset sortedParams = StructSort(params, "textnocase", "ASC") />
+							
+				<cfif NOT builtUrl.endsWith("/")>
+					<cfset builtUrl = builtUrl & "/" />
+				</cfif>
+
+				<cfset builtUrl = builtUrl & "?" />
+				
+				<cfloop from="1" to="#ArrayLen(sortedParams)#" index="i">
+					<cfset builtUrl = builtUrl & LCase(sortedParams[i]) & "=" & params[sortedParams[i]] />
+				</cfloop>
+			</cfif>
+		<cfelse>
+			<cfthrow type="MachII.endpoints.rest.InvalidMethod"
+				message="The method named '#arguments.method#' is not defined in this REST implementation." />			
+		</cfif>
+		
+		<cfreturn builtUrl />
 	</cffunction>
 
 	<!---
@@ -290,15 +372,8 @@ To Test it out, do the following:
 		<cfset var contentType = "" />
 
 		<cftry>
-			<!--- Default content type: html --->
-			<cfif NOT Len(arguments.format)>
-				<cfset arguments.format = variables.defaultFormat />
-			</cfif>
-			<cfif NOT(arguments.format.startsWith("."))>
-				<cfset arguments.format = ".#arguments.format#" />
-			</cfif>
-			<!--- Leverage this nicely provided utility method --->
-			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format, variables.customMimeTypeMap) />
+			<!--- Leverage this nicely provided utility method and no need to prefix with '.' when using 'evaluateAllAsFileExtensions' set to true --->
+			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format, variables.customMimeTypeMap, true) />
 
 			<!--- Add the Content-Type header --->
 			<cfset addHTTPHeaderByName("Content-Type", contentType, getDefaultCharset()) />
@@ -316,7 +391,7 @@ To Test it out, do the following:
 
 		<cfset var headers = GetHttpRequestData().headers />
 		<cfset var contentType = "" />
-		<cfset var charset = "ISO-8859-1" />
+		<cfset var charset = variables.defaultCharset />
 		
 		<cfif StructKeyExists(headers, "Content-Type")>
 			<cfset contentType = headers["ContentType"] />
@@ -331,7 +406,7 @@ To Test it out, do the following:
 		<cfif NOT StructKeyExists(headers, "Content-Length")>
 			<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#" />
 		<!--- Check that the number of bytes in the content-length header of the raw content equals the header value --->
-		<cfelseif headers["Content-Length"] NEQ Len(arguments.event.getArg("rawContent").getBytes(charset))>
+		<cfelseif headers["Content-Length"] NEQ Len(arguments.event.getArg("_requestBody").getBytes(charset))>
 			<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#" />
 		</cfif>		
 	</cffunction>
@@ -479,6 +554,14 @@ To Test it out, do the following:
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
+		<cfargument name="urlBase" type="string" required="true" />
+		<cfset variables.urlBase = arguments.urlBase />
+	</cffunction>
+	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
+		<cfreturn variables.urlBase />
+	</cffunction>
+	
 	<cffunction name="getRestUris" access="public" returntype="struct" output="false"
 		hint="Gets the REST URIs collection object.">
 		<cfreturn variables.restUris />
@@ -498,7 +581,7 @@ To Test it out, do the following:
 			<cfset variables.defaultFormat = arguments.defaultFormat />
 		<cfelse>
 			<cfthrow type="MachII.framework.InvalidFormatType"
-				message="Cannot set the defaultFormat to '#arguments.defaultFormat#', not in the Mach-II mimeTypeMap." />
+				message="Cannot set the defaultFormat to '#arguments.defaultFormat#' and not in the Mach-II mimeTypeMap." />
 		</cfif>
 	</cffunction>
 	<cffunction name="getDefaultFormat" access="public" returntype="string" output="false"
@@ -516,28 +599,20 @@ To Test it out, do the following:
 
 	<cffunction name="setPossibleFormatList" access="public" returntype="void" output="false">
 		<cfargument name="possibleFormatList" type="string" required="true" />
-
-		<cfset var currFormat = "" />
-		<cfset var formatList = "" />
+		
+		<cfset arguments.possibleFormatList = ListToArray(getUtils().trimList(possibleFormatList, ",|"), ",|") />
 
 		<!--- Validate possibleFormatList --->
-		<cfif Trim(Len(arguments.possibleFormatList)) GT 0>
+		<cfif ArrayLen(arguments.possibleFormatList)>
 			<cftry>
-				<cfloop list="#arguments.possibleFormatList#" index="currFormat" delimiters=",|">
-					<cfset currFormat = Trim(Replace(currFormat, ".", "")) />
-					<!--- Call this to validate the format -- throws exception if not valid --->
-					<cfset getUtils().getMimeTypeByFileExtension("." & currFormat, variables.customMimeTypeMap)>
-					<cfset formatList = ListAppend(formatList, currFormat, ",") />
-				</cfloop>
-				<cfcatch type="any">
-					<cfthrow
-						type="MachII.framework.InvalidFileExtensionType"
-						message="URI could not be initialized because the format '#currFormat#' is invalid." />
+				<cfset variables.possibleFormatList = getUtils().getMimeTypeByFileExtension(arguments.possibleFormatList, variables.customMimeTypeMap, true) />
+				
+				<cfcatch type="MachII.framework.InvalidFileExtensionType">
+					<cfthrow type="MachII.framework.InvalidFileExtensionType"
+						message="URI could not be initialized because the format is invalid and not in the Mach-II mimeTypeMap." />
 				</cfcatch>
 			</cftry>
 		</cfif>
-
-		<cfset variables.possibleFormatList = formatList />
 	</cffunction>
 	<cffunction name="getPossibleFormatList" access="public" returntype="string" output="false">
 		<cfreturn variables.possibleFormatList />

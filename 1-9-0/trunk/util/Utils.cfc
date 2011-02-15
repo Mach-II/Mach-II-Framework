@@ -619,16 +619,21 @@ Notes:
 	</cffunction>
 
 	<cffunction name="getMimeTypeByFileExtension" access="public" returntype="string" output="false"
-		hint="Gets a MIME type(s) by file extension(s). Ignores any values that do not start with a '.'.">
-		<cfargument name="input" type="string" required="true"
-			hint="A single or list of file extensions.  Ignores any values that do not start with a '.' as a concrete MIME type which allows for mixed input of extensions and MIME types." />
+		hint="Gets a MIME type(s) by file extension(s). Ignores any values that do not start with a '.' unless instructed.">
+		<cfargument name="input" type="any" required="true"
+			hint="A list or array of file extensions.  Ignores any values that do not start with a '.' as a concrete MIME type which allows for mixed input of extensions and MIME types." />
 		<cfargument name="customMimeTypes" type="struct" required="false"
 			hint="Custom mime-type map (key=file extension, value=mime-type). Keys that conflict with the base mime-type map will be overridden." />
+		<cfargument name="evaluateAllAsFileExtensions" type="boolean" required="false" default="false"
+			hint="Allows you to evaluate a list as file extensions whether or not they start with '.'." />
 
-		<cfset var inputArray = ListToArray(trimList(arguments.input)) />
 		<cfset var output = "" />
 		<cfset var mimeTypes= StructNew() />
 		<cfset var i = 0 />
+		
+		<cfif NOT IsArray(arguments.input)>
+			<cfset arguments.input = ListToArray(trimList(arguments.input)) />		
+		</cfif>
 
 		<!--- Use StructAppend to not pollute base mime-type map via references when "mixing" custom mime types --->
 		<cfif StructKeyExists(arguments, "customMimeTypes")>
@@ -639,17 +644,19 @@ Notes:
 		</cfif>
 
 		<cftry>
-			<cfloop from="1" to="#ArrayLen(inputArray)#" index="i">
-				<cfif inputArray[i].startsWith(".")>
-					<cfset output = ListAppend(output, StructFind(mimeTypes, Right(inputArray[i], Len(inputArray[i]) -1))) />
-				<cfelse>
-					<cfset output = ListAppend(output, inputArray[i]) />
+			<cfloop from="1" to="#ArrayLen(arguments.input)#" index="i">
+				<cfif arguments.input[i].startsWith(".")>
+					<cfset output = ListAppend(output, StructFind(mimeTypes, Right(arguments.input[i], Len(arguments.input[i]) -1))) />
+				<cfelseif arguments.evaluateAllAsFileExtensions AND NOT arguments.input[i].startsWith(".")>
+					<cfset output = ListAppend(output, StructFind(mimeTypes, arguments.input[i])) />
+				<cfelseif NOT evaluateAllAsFileExtensions>
+					<cfset output = ListAppend(output, arguments.input[i]) />
 				</cfif>
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow
 					type="MachII.framework.InvalidFileExtensionType"
-					message="The 'getMimeTypeByFileExtension' method cannot find a valid MIME type conversion for a file extension of '#inputArray[i]#'." />
+					message="The 'getMimeTypeByFileExtension' method cannot find a valid MIME type conversion for a file extension of '#arguments.input[i]#' in the input '#arguments.input.toString()#'." />
 			</cfcatch>
 		</cftry>
 

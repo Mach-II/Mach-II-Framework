@@ -181,6 +181,12 @@ Notes:
 		
 		<!--- Test mixed file extensions and mime types --->
 		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,.zip,audio/x-wav"), "image/jpeg,image/gif,application/x-gzip,audio/x-wav") />
+
+		<!--- Test mixed file extensions as array and mime types --->
+		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(['.jpg','.gif','.zip','audio/x-wav']), "image/jpeg,image/gif,application/x-gzip,audio/x-wav") />
+
+		<!--- Test treat all as file extensions (with or without '.' dots) --->
+		<cfset assertEquals(variables.utils.getMimeTypeByFileExtension(".jpg,.gif,.zip,htm,html", StructNew(), true), "image/jpeg,image/gif,application/x-gzip,text/html,text/html") />
 	</cffunction>
 
 	<cffunction name="testCleanPathInfo" access="public" returntype="void" output="false"

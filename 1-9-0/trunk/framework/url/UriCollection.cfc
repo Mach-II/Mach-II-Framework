@@ -59,6 +59,7 @@ associated Uri instances.
 	--->
 	<!--- This is a struct of structs, where the outer key is the HTTP Method, and the inner key is the urlRegex that points to each Uri. --->
 	<cfset variables.uris = StructNew() />
+	<cfset variables.urisByFunctionName = StructNew() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -71,7 +72,7 @@ associated Uri instances.
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="findUri" access="public" returntype="any" output="false"
+	<cffunction name="findUriByPathInfo" access="public" returntype="any" output="false"
 		hint="Tries to find an Uri that matches the incoming pathInfo and HttpMethod. Returns it if found, otherwise returns list of available http methods or empty string.">
 		<cfargument name="pathInfo" type="string" required="true" />
 		<cfargument name="httpMethod" type="string" required="true" />
@@ -96,19 +97,34 @@ associated Uri instances.
 		--->
 		<cfreturn findAvailbleMethodsByUri(arguments.pathInfo) />
 	</cffunction>
+	
+	<cffunction name="findUriByFunctionName" access="public" returntype="any" output="false"
+		hint="Tries to find an Uri that matches the incoming function name.">
+		<cfargument name="functionName" type="string" required="true" />
+
+		<cfset var currHttpMethod = "" />
+		<cfset var currUri = "" />
+		
+		<cfif StructKeyExists(variables.urisByFunctionName, arguments.functionName)>
+			<cfreturn variables.urisByFunctionName[arguments.functionName] />
+		</cfif>
+		
+		<cfreturn "" />
+	</cffunction>
 
 	<cffunction name="addUri" access="public" returntype="void" output="false"
 		hint="Adds a Uri to the collection, throwing exception for duplicates or unsupported HTTP methods.">
 		<cfargument name="uri" type="MachII.framework.url.Uri" required="true" />
 
+		<!--- Create new inner struct for httpMethod if not present --->
 		<cfif NOT StructKeyExists(variables.uris, arguments.uri.getHttpMethod())>
-			<!--- Create new inner struct for httpMethod if not present --->
-			<cfset StructInsert(variables.uris, arguments.uri.getHttpMethod(), StructNew()) />
+			<cfset variables.uris[arguments.uri.getHttpMethod()] = StructNew() />
 		</cfif>
 
+		<!--- Add currRestUri to restUris structure, with uriRegex as the key, if not duplicate --->
 		<cfif NOT StructKeyExists(variables.uris[arguments.uri.getHttpMethod()], arguments.uri.getUriRegex())>
-			<!--- Add currRestUri to restUris structure, with uriRegex as the key, if not duplicate --->
-			<cfset StructInsert(variables.uris[arguments.uri.getHttpMethod()], arguments.uri.getUriRegex(), arguments.uri) />
+			<cfset variables.uris[arguments.uri.getHttpMethod()][arguments.uri.getUriRegex()] = arguments.uri />
+			<cfset variables.urisByFunctionName[arguments.uri.getFunctionName()] = arguments.uri />
 		<cfelse>
 			<!--- Throw exception if this Uri is already defined here. --->
 			<cfthrow type="MachII.framework.url.DuplicateUri"
