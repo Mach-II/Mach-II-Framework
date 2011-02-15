@@ -131,7 +131,7 @@ To Test it out, do the following:
 	<cfset variables.defaultCharset = "ISO-8859-1" />
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
-	<cfset variables.enforceContentLengthDefault =  false />
+	<cfset variables.enforceContentLengthDefault =  true />
 	
 	<cfset variables.exceptionTypes = StructNew() />
 	<cfset variables.exceptionTypes["IncompleteBody"] = "MachII.endpoints.rest.IncompleteBody" />
