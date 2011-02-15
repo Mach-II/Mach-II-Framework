@@ -55,6 +55,8 @@ Configuration Notes:
 <endpoints>
 	<endpoint name="dashboard.serveAsset" type="MachII.endpoints.file.BaseEndpoint">
 		<parameters>
+			<!-- Whether or not to use the urlBaseSecure value for HTTPS urls or normal urlBase value -->
+			<parameter name="secure" value="false"/>
 			<parameter name="basePath" value="/MachII/dashboard/assets"/>
 			<parameter name="servingEngineType" value="cfcontent|sendfile" />
 			<!--
@@ -133,8 +135,12 @@ Configuration Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the file serve endpoint. Override to provide custom functionality and call super.preProcess().">
 
+		<cfif getParameter("secure", false)>
+			<cfset setUrlBase(getProperty("urlBaseSecure")) />
+		<cfelse>
+			<cfset setUrlBase(getProperty("urlBase")) />
+		</cfif>
 		<cfset setBasePath(getParameter("basePath")) />
-		<cfset setUrlBase(getProperty("urlBase")) />
 		<cfset setServiceEngineType(getParameter("serviceEngineType", "cfcontent")) />
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
