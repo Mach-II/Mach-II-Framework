@@ -159,7 +159,7 @@ Notes:
 	<cfelseif IsArray(attributes.items)>
 		<cfif attributes.items.getDimension() eq 1>
 			<cfif IsSimpleValue(attributes.items[1])>
-				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i])) />
+				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1])) />
 				
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
@@ -180,7 +180,7 @@ Notes:
 			<cfelseif IsStruct(attributes.items[1])>
 				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
 				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
-					<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[i][attributes.valueKey])) />
+					<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1][attributes.valueKey])) />
 					
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 						<cfset variables.value = attributes.items[i][attributes.valueKey] />
@@ -216,7 +216,7 @@ Notes:
 		</cfif>
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
-		<cfset setFirstElementId(attributes.name & "_" & createCleanId(LCase(variables.sortedKeys[i]))) />
+		<cfset setFirstElementId(attributes.name & "_" & createCleanId(LCase(variables.sortedKeys[1]))) />
 		
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
