@@ -112,7 +112,7 @@ Notes:
 		<!--- Clear the event queue since we do not want to Application.cfc/cfm error
 			handling to catch a cfabort --->
 		<cfset arguments.eventContext.clearEventQueue() />
-		
+
 		<!--- Make the redirect --->
 		<cfset makeRedirect(arguments.event, arguments.eventContext) />
 
@@ -191,7 +191,7 @@ Notes:
 		<!--- Support redirect urls using a url route --->
 		<cfif Len(evaluatedRouteName)>
 			<cfset getLog().info("Redirecting to route '#evaluatedRouteName#' with '#statusType#' status code (persist='#getPersist()#').") />
-			
+
 			<cfset arguments.eventContext.getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
 					evaluatedRouteName
 					, params
@@ -206,7 +206,7 @@ Notes:
 			<cfif Len(evaluatedModuleName) AND expressionEvaluator.isExpression(evaluatedModuleName)>
 				<cfset evaluatedModuleName = expressionEvaluator.evaluateExpression(evaluatedModuleName, arguments.event, propertyManager) />
 			</cfif>
-			
+
 			<cfset getLog().info("Redirecting to event '#evaluatedEventName#' in module '#evaluatedModuleName#' with '#statusType#' status code (persist='#getPersist()#').") />
 
 			<cfset arguments.eventContext.getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
@@ -255,11 +255,10 @@ Notes:
 					<cfset args[i] = arg />
 				<cfelse>
 					<cfif expressionEvaluator.isExpression(i)>
-						<cfset arg = expressionEvaluator.evaluateExpression(i, arguments.event, propertyManager) />
+						<cfset args[i] = expressionEvaluator.evaluateExpression(i, arguments.event, propertyManager) />
 					<cfelseif arguments.event.isArgDefined(i)>
-						<cfset arg = arguments.event.getArg(i, "") />
+						<cfset args[i] = arguments.event.getArg(i, "") />
 					</cfif>
-					<cfset args[i] = arg />
 				</cfif>
 			</cfloop>
 		</cfif>
