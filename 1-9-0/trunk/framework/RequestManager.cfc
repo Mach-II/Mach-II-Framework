@@ -290,7 +290,7 @@ Notes:
 		<cfset var urlScopeNames = getPageContext().getRequest().getParameterNames() />
 		
 		<!--- Automatically remove the Mach II redirect persist id from the url params --->
-		<cfset arguments.urlParametersToRemove = ListAppend(arguments.urlParametersToRemove, getProperty("redirectPersistParameter")) />
+		<cfset arguments.urlParametersToRemove = ListAppend(arguments.urlParametersToRemove, getPropertyManager().getProperty("redirectPersistParameter")) />
 		
 		<cfloop condition="#urlScopeNames.hasMoreElements()#">
 			<cfset key = urlScopeNames.nextElement() />
