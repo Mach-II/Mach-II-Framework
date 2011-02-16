@@ -587,9 +587,10 @@ ACCESSORS
 		hint="Escapes special HTML characters." />
 
 	<cfif arguments.escapeHtml>
-		<cfset arguments.content = variables.utils.escapeHtml(arguments.content) />
+		<cfset variables.content = variables.utils.escapeHtml(arguments.content) />
+	<cfelse>
+		<cfset variables.content = arguments.content />
 	</cfif>
-	<cfset variables.content = arguments.content />
 </cffunction>
 <cffunction name="getContent" access="public" returntype="string" output="false">
 	<cfreturn variables.content />
