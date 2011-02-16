@@ -65,12 +65,13 @@ Updated version: 1.0.0
 
 .DlgHeader
 {
-	padding:		.125em .25em .25em .5em;
+	padding: .5em .25em .5em .5em;
 	font-weight:	bold;
 	-moz-border-radius-topleft:		5px;
 	-moz-border-radius-topright:	5px;
 	-webkit-border-top-left-radius:	5px;
 	-webkit-border-top-right-radius: 5px;
+	color: ##CC0000;
 }
 
 .DlgHeader>.DlgClosebox
