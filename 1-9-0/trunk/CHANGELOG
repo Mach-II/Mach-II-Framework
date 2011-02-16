@@ -244,6 +244,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Fixed defect when using structs for params with buildCurrentUrl()
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/750
+(2011-02-16 peterfarrell)
+
 * Add ability to get selected event args via event.getArgs()
 
 Special thanks to Joe Bodell for suggesting this enhancement and
