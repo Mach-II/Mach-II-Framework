@@ -244,6 +244,15 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Add ability to get selected event args via event.getArgs()
+
+Special thanks to Joe Bodell for suggesting this enhancement and
+providing a patch.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/749
+(2011-02-16 peterfarrell)
+
 * Added try/catch around configureable property deconfigure()
 If a developer replaces a configurable property with another
 datatype, the framework will throw an exception saying deconfigure

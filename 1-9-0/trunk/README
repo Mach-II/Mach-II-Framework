@@ -26,7 +26,6 @@ that helped us produce Mach-II Integrity by providing feedback, testing
 nightly / release candidate builds, test cases / application or finding 
 defects (in no particular order):
 
-
 * Doug Smith (The Lampo Group, Inc.)
 * Jason York (The Lampo Group, Inc.)
 * Thomas Ehardt (The Lamp Group, Inc.)
@@ -37,6 +36,7 @@ defects (in no particular order):
 * Bill Peddy (United States Environmental Protection Agency)
 * Derrick Jackson (United States Senate - Sergeant at Arms)
 * Sumit Verma (ten24 Web Solutions)
+* Joe Bodell (Pearson VUE)
 * Adam Ness
 * Jorge Loyo
 * Sean Corfield

@@ -69,6 +69,8 @@ Notes:
 		<!--- Test data to populate args --->
 		<cfset args.name = "Mach-II" />
 		<cfset args.version = 1234 />
+		<cfset args.city = "Minneapolis" />
+		<cfset args.state = "Minnesota" />
 
 		<cfset variables.event = CreateObject("component", "MachII.framework.Event").init("test", args, "test", "", "") />
 	</cffunction>
@@ -88,11 +90,46 @@ Notes:
 		<cfset assertEquals(variables.event.getArg("name"), "Mach-II") />
 		<cfset assertEquals(variables.event.getArg("version"), "1234") />
 
+		<!--- Test isArgDefined() --->
 		<cfset assertTrue(variables.event.isArgDefined("name")) />
 		<cfset assertTrue(variables.event.isArgDefined("version")) />
-
 		<cfset assertFalse(variables.event.isArgDefined("junkArg")) />
 
+		<!--- Test removeArg --->
+		<cfset variables.event.removeArg("name") />
+		<cfset assertFalse(variables.event.isArgDefined("name")) />
+		
+	</cffunction>
+	
+	<cffunction name="testGetArgs" access="public" returntype="void" output="false"
+		hint="Tests getArgs() method.">
+		
+		<cfset var temp = StructNew() />
+		
+		<!--- Test straight up get all args --->
+		<cfset assertEquals(StructCount(variables.event.getArgs()), 4) />
+		
+		<!--- Test getting some args with lists --->
+		<cfset temp = variables.event.getArgs("name,version") />
+		
+		<cfset assertEquals(StructCount(temp), 2) />
+		<cfset assertEquals(temp.name, "Mach-II") />
+		<cfset assertEquals(temp.version, 1234) />
+		
+		<!--- Test getting some args with arrays --->
+		<cfset temp = variables.event.getArgs(['name','version']) />
+		
+		<cfset assertEquals(StructCount(temp), 2) />
+		<cfset assertEquals(temp.name, "Mach-II") />
+		<cfset assertEquals(temp.version, 1234) />
+		
+		<!--- Test getting some args with arrays --->
+		<cfset temp = variables.event.getArgs(['name','version', 'nonExistentKey']) />
+		
+		<cfset assertEquals(StructCount(temp), 3) />
+		<cfset assertEquals(temp.name, "Mach-II") />
+		<cfset assertEquals(temp.version, 1234) />
+		<cfset assertEquals(temp.nonExistentKey, "") />
 	</cffunction>
 
 </cfcomponent>

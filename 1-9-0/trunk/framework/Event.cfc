@@ -181,15 +181,36 @@ Notes:
 		hint="Sets a structure of args to the event object.">
 		<cfargument name="args" type="struct" required="true"
 			hint="A structure of args to set." />
+
 		<cfset var key = "" />
 
 		<cfloop collection="#arguments.args#" item="key">
 			<cfset setArg(key, arguments.args[key]) />
 		</cfloop>
-	</cffunction>
+	</cffunction>	
 	<cffunction name="getArgs" access="public" returntype="struct" output="false"
-		hint="Returns all args in this event.">
-		<cfreturn variables.args />
+		hint="Returns all args in this event or optionally some args if list or array of args names are passed.">
+		<cfargument name="args" type="any" required="false"
+			hint="A comma-delimited list or an array of event-arg names."/>
+	
+		<cfset var returnArgs = StructNew() />
+		<cfset var i = 0 />
+	
+		<!--- Most likely senario is all args so put that first for performance --->
+		<cfif NOT StructKeyExists(arguments, "args")>
+			<cfset returnArgs = variables.args />
+		<!--- Return requested event-args --->
+		<cfelse>
+			<cfif NOT IsArray(arguments.args)>
+				<cfset arguments.args = ListToArray(arguments.args) />
+			</cfif>
+	
+			<cfloop from="1" to="#ArrayLen(arguments.args)#" index="i">
+				<cfset returnArgs[arguments.args[i]] = getArg(arguments.args[i]) />
+			</cfloop>
+		</cfif>
+	
+		<cfreturn returnArgs />
 	</cffunction>
 
 	<cffunction name="setArgType" access="public" returntype="void" output="false"
