@@ -1,4 +1,5 @@
 <cfoutput>
+<cfsetting showdebugoutput="false" />
 <div style="border:1px dotted ##CCC;padding:12px;margin-top:12px;">
 <cfset variables.tickStart = getTickCount() />
 	<cftry>
