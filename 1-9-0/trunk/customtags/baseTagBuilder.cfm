@@ -466,10 +466,12 @@ PUBLIC FUNCTIONS - UTIL
 	<cfargument name="attributeNameForModule" type="string" default="module" />
 	<cfargument name="attributeNameForRoute" type="string" default="route" />
 	<cfargument name="attributeNameForUrlParameters" type="string" default="p" />
+	<cfargument name="attributeNameForUrlParametersToRemove" type="string" default="urlParametersToRemove" />
 
 	<!--- Build url parameters --->
 	<cfset var urlParameters = normalizeStructByNamespace("p") />
 	<cfset var queryStringParameters = "" />
+	<cfset var urlParametersToRemove = "" />
 	<cfset var builtUrl = "" />
 
 	<!--- Convert and merge the "string" version of the URL parameters into a struct --->
@@ -509,10 +511,14 @@ PUBLIC FUNCTIONS - UTIL
 	<cfelse>
 		<cfif getTagLib() EQ "view" AND getTagType() EQ "a">
 			<cfif StructKeyExists(attributes, "useCurrentUrl")>
+				<cfif StructKeyExists(attributes, arguments.attributeNameForUrlParametersToRemove)>
+					<cfset urlParametersToRemove = attributes[arguments.attributeNameForUrlParametersToRemove] />
+				</cfif>
+				
 				<cfif StructKeyExists(attributes, arguments.attributeNameForModule)>
-					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(attributes[arguments.attributeNameForModule], urlParameters) />
+					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(attributes[arguments.attributeNameForModule], urlParameters, urlParametersToRemove) />
 				<cfelse>
-					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(getAppManager().getModuleName(), urlParameters) />
+					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(getAppManager().getModuleName(), urlParameters, urlParametersToRemove) />
 				</cfif>
 			<cfelse>
 				<cfthrow type="MachII.customtags.view.a.noEventRouteOrUseCurrentUrlAttribute"
