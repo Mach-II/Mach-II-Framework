@@ -93,7 +93,7 @@ Notes:
 						#strategy.getStrategyTypeName()# (#strategyType#)
 					</cfif>
 				</p>
-				
+
 				<cfif StructCount(configData)>
 					<hr />
 					<table class="small">
@@ -108,7 +108,7 @@ Notes:
 								<cfelse>
 									<p><em>[complex value]</em></p>
 								</cfif>
-								</td>							
+								</td>
 							</tr>
 						</cfif>
 					</cfloop>
@@ -162,15 +162,15 @@ Notes:
 				</cfif>
 				<cfif getProperty("chartProvider") EQ "cfchart">
 					<div style="width:450px;height:300px;">
-					<cfchart format="png" 
+					<cfchart format="png"
 						backgroundColor="###backgroundColor#"
 						chartWidth="450"
 						chartHeight="300"
-						show3D="true" 
-						tipstyle="none" 
-						fontsize="10" 
+						show3D="true"
+						tipstyle="none"
+						fontsize="10"
 						title="Stats Active for #getProperty("udfs").datetimeDifferenceString(cacheStats.getStatsActiveSince())#">
-						<cfchartseries type="bar" 
+						<cfchartseries type="bar"
 							colorList="green,red,blue,yellow,aqua"
 							paintstyle="light">
 							<cfchartdata item="Hits" value="#cacheStats.getCacheHits()#" />
@@ -180,7 +180,7 @@ Notes:
 							<cfchartdata item="Evictions" value="#cacheStats.getEvictions()#" />
 						</cfchartseries>
 					</cfchart>
-					</div>	
+					</div>
 				<cfelseif getProperty("chartProvider") EQ "googlecharts">
 					<cfset variables.stats = cacheStats.getAllStats() />
 					<cfset StructDelete(variables.stats, "statsActiveSince") />
@@ -219,7 +219,7 @@ Notes:
 					</li>
 				<cfelse>
 					<li class="red">
-						<view:a event="caching.enableDisableCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#" mode="enable">
+						<view:a event="caching.enableDisableCacheStrategy" p:moduleName="#module#" p:strategyName="#strategyName#" p:mode="enable">
 							<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/stop.png" width="16" height="16" alt="Disable" />
 							&nbsp;Disabled
 						</view:a>
