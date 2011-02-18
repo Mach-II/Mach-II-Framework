@@ -134,6 +134,8 @@ Notes:
 				file="#arguments.configXmlPath#"
 				variable="configXmlFile" />
 			<cfcatch type="any">
+				<cfdump var="#cfcatch#"/>
+				<cfabort>
 				<cfthrow type="MachII.framework.CannotFindBaseConfigFile"
 					message="Unable to find the base config file for module '#arguments.moduleName#'."
 					detail="configPath=#arguments.configXmlPath#" />
