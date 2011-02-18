@@ -308,6 +308,17 @@ application.serviceFactory_account variable.
 		<cfset var parentBeanFactoryKey = getParameter("parentBeanFactoryKey", "") />
 		<cfset var localBeanFactoryKey = getParameter("beanFactoryPropertyName", bfUtils.DEFAULT_FACTORY_KEY) />
 
+		<cfset var temp = "" />
+
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./ColdspringProperty.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.getConfigFileReloadHash = variables.getConfigFileReloadHash_cfdirectory />
+				<cfset this.getConfigFileReloadHash = variables.getConfigFileReloadHash_cfdirectory />
+			</cfcatch>
+		</cftry>
+
 		<!--- Set the autowire attribute name --->
 		<cfset setAutowireAttributeName(getParameter("autowireAttributeName", "depends")) />
 
@@ -566,6 +577,23 @@ application.serviceFactory_account variable.
 		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
 			<cfset fileInfo = getFileInfo(configFilePaths[i]) />
 			<cfset hashableString = hashableString & fileInfo.lastModified & fileInfo.size />
+		</cfloop>
+
+		<cfreturn Hash(hashableString) />
+	</cffunction>
+	
+	<cffunction name="getConfigFileReloadHash_cfdirectory" access="private" returntype="string" output="false"
+		hint="Get the current reload hash of the bean factory config file and imports files.  The hash is based on dateLastModified and size of the file.">
+
+		<cfset var configFilePaths = getConfigFilePaths() />
+		<cfset var fileInfo = "" />
+		<cfset var hashableString = "" />
+		<cfset var i = "" />
+
+		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
+			<cfdirectory action="LIST" directory="#GetDirectoryFromPath(configFilePaths[i])#"
+				name="fileInfo" filter="#GetFileFromPath(configFilePaths[i])#" />
+			<cfset hashableString = hashableString & fileInfo.datelastModified & fileInfo.size />
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />
