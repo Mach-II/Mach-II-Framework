@@ -88,6 +88,17 @@ Notes:
 
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
 
+		<cfset var temp = "" />
+
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./ColdspringProperty.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.getConfigFileReloadHash = variables.getConfigFileReloadHash_cfdirectory />
+				<cfset this.getConfigFileReloadHash = variables.getConfigFileReloadHash_cfdirectory />
+			</cfcatch>
+		</cftry>
+
 		<cfset setAppFactory(appFactory) />
 
 		<cfset setConfigPath(arguments.configPath) />
@@ -205,6 +216,23 @@ Notes:
 		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
 			<cfset fileInfo = getFileInfo(configFilePaths[i]) />
 			<cfset hashableString = hashableString & fileInfo.lastModified & fileInfo.size />
+		</cfloop>
+
+		<cfreturn Hash(hashableString) />
+	</cffunction>
+
+	<cffunction name="getConfigFileReloadHash_cfdirectory" access="private" returntype="string" output="false"
+		hint="Get the current reload hash of the master config file and any include files which is based on lastModified and size.">
+
+		<cfset var configFilePaths = getAppFactory().getConfigFilePaths() />
+		<cfset var fileInfo = "" />
+		<cfset var hashableString = "" />
+		<cfset var i = "" />
+
+		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
+			<cfdirectory action="LIST" directory="#GetDirectoryFromPath(configFilePaths[i])#"
+				name="fileInfo" filter="#GetFileFromPath(configFilePaths[i])#" />
+			<cfset hashableString = hashableString & fileInfo.dateLastModified & fileInfo.size />
 		</cfloop>
 
 		<cfreturn Hash(hashableString) />
