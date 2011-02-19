@@ -87,18 +87,7 @@ Notes:
 			hint="Optional argument for the name of a module. Defaults to empty string." />
 
 		<cfset var appFactory = CreateObject("component", "MachII.framework.AppFactory").init() />
-
-		<cfset var temp = "" />
-
-		<!--- Test for getFileInfo() --->
-		<cftry>
-			<cfset getFileInfo("ExpandPath(./ColdspringProperty.cfc)") />
-			<cfcatch type="any">
-				<cfset variables.getFileInfo = getUtils().getFileInfo_cfdirectory />
-				<cfset this.getFileInfo = getUtils().getFileInfo_cfdirectory />
-			</cfcatch>
-		</cftry>
-
+		
 		<cfset setAppFactory(appFactory) />
 
 		<cfset setConfigPath(arguments.configPath) />
@@ -212,6 +201,15 @@ Notes:
 		<cfset var fileInfo = "" />
 		<cfset var hashableString = "" />
 		<cfset var i = "" />
+		
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./AppLoader.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.getFileInfo = getAppManager().getUtils().getFileInfo_cfdirectory />
+				<cfset this.getFileInfo = getAppManager().getUtils().getFileInfo_cfdirectory />
+			</cfcatch>
+		</cftry>
 
 		<cfloop from="1" to="#ArrayLen(configFilePaths)#" index="i">
 			<cfset fileInfo = getFileInfo(configFilePaths[i]) />
