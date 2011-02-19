@@ -141,6 +141,8 @@ Wildcards for patterns:
 			<cfset searchPath = appRootPath & "/" & variables.pathMatcher.extractPathWithoutPattern(pattern) />
 		</cfif>
 		
+		<cfset searchPath = variables.pathMatcher.pathClean(searchPath) />
+		
 		<cfset pageViewPaths = variables.pathMatcher.match(pattern, searchPath, appRootPath, getExclude()) />
 
 		<!--- Build page-views that match patterns --->
@@ -156,7 +158,7 @@ Wildcards for patterns:
 		<cfif getThrowIfNoMatches() AND NOT StructCount(results)>
 			<cfthrow type="MachII.framework.viewLoaders.PatternViewLoader.noMatches"
 				message="No matches found for pattern '#getPattern()#' in module '#getAppManager().getModuleName()#'."
-				detail="App root '#appRoot#, App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#pageViewPaths.recordcount#'." />
+				detail="App root '#appRoot#', App root path '#appRootPath#, 'Search path '#searchPath#', Total view paths found '#pageViewPaths.recordcount#'." />
 		</cfif>
 		
 		<cfreturn results />
