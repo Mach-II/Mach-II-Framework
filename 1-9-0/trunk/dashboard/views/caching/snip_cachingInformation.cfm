@@ -160,28 +160,7 @@ Notes:
 				<cfelse>
 					<cfset backgroundColor ="FFFFFF" />
 				</cfif>
-				<cfif getProperty("chartProvider") EQ "cfchart">
-					<div style="width:450px;height:300px;">
-					<cfchart format="png"
-						backgroundColor="###backgroundColor#"
-						chartWidth="450"
-						chartHeight="300"
-						show3D="true"
-						tipstyle="none"
-						fontsize="10"
-						title="Stats Active for #getProperty("udfs").datetimeDifferenceString(cacheStats.getStatsActiveSince())#">
-						<cfchartseries type="bar"
-							colorList="green,red,blue,yellow,aqua"
-							paintstyle="light">
-							<cfchartdata item="Hits" value="#cacheStats.getCacheHits()#" />
-							<cfchartdata item="Misses" value="#cacheStats.getCacheMisses()#" />
-							<cfchartdata item="Active Elements" value="#cacheStats.getActiveElements()#" />
-							<cfchartdata item="Total Elements" value="#cacheStats.getTotalElements()#" />
-							<cfchartdata item="Evictions" value="#cacheStats.getEvictions()#" />
-						</cfchartseries>
-					</cfchart>
-					</div>
-				<cfelseif getProperty("chartProvider") EQ "googlecharts">
+				<cfif getProperty("chartProvider") EQ "googlecharts">
 					<cfset variables.stats = cacheStats.getAllStats() />
 					<cfset StructDelete(variables.stats, "statsActiveSince") />
 					<cfset variables.highest = StructSort(variables.stats, "numeric", "desc") />

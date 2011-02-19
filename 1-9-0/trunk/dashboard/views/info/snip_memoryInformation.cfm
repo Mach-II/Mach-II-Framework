@@ -58,28 +58,7 @@ Notes:
 	</tr>
 	<tr>
 		<td colspan="3">
-		<cfif getProperty("chartProvider") EQ "cfchart">
-			<div style="width:435px;height:435px;">
-			<cfchart format="png" 
-				show3d="true" 
-				chartwidth="435" 
-				chartheight="435" 
-				pieslicestyle="sliced"
-				tipstyle="none"  
-				title="Memory Usage (in MB)">
-				<cfchartseries type="pie" 
-					colorList="green,red,blue" 
-					paintstyle="light">
-					<cfchartdata item="Free Memory" 
-						value="#getProperty("udfs").byteConvert(memoryData["JVM - Free Memory"], "MB", false)#" />
-					<cfchartdata item="Used Memory" 
-						value="#getProperty("udfs").byteConvert(memoryData["JVM - Used Memory"], "MB", false)#" />
-					<cfchartdata item="Unallocated Memory" 
-						value="#getProperty("udfs").byteConvert(memoryData["JVM - Unallocated Memory"], "MB", false)#" />
-				</cfchartseries>
-			</cfchart>
-			</div>
-		<cfelseif getProperty("chartProvider") EQ "googlecharts">
+		<cfif getProperty("chartProvider") EQ "googlecharts">
 			<view:img src="http://chart.apis.google.com/chart?cht=p3&chd=t:#memoryData["JVM - Free Memory"]#,#memoryData["JVM - Used Memory"]#,#memoryData["JVM - Unallocated Memory"]#&chds=0,#memoryData["JVM - Max Memory"]#&chs=435x250&chl=#getProperty("udfs").byteConvert(memoryData["JVM - Free Memory"], "MB", false)# MB|#getProperty("udfs").byteConvert(memoryData["JVM - Used Memory"], "MB", false)# MB|#getProperty("udfs").byteConvert(memoryData["JVM - Unallocated Memory"], "MB", false)# MB&chco=0000FF,FF0000,00FF00&chtt=Memory%20Usage&chdl=Free|Used|Unallocated&chdlp=b&chts=000000"
 				width="435"
 				height="250" />
