@@ -59,6 +59,8 @@ Notes:
 	--->
 	<cfset variables.useListInfo = false />
 	<cfset variables.utils = "" />
+	<cfset variables.engineInfo = "" />
+	<cfset variables.isGAE = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -71,9 +73,9 @@ Notes:
 			hint="Allows you to indicate if you want to use the listInfo attribute of cfdirectory for faster performance. listInfo does not return file size or date last modified." />
 		
 		<cfset var temp = "" />
-		<cfset var engineInfo = "" />
 		
 		<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init("false") />
+		<cfset variables.engineInfo = variables.utils.getCfmlEngineInfo() />
 		
 		<!--- Determine if _queryDeleteRow_java should be used and reassign to common function --->
 		<cftry>
@@ -93,13 +95,16 @@ Notes:
 		<cfif StructKeyExists(arguments, "useListInfo")>
 			<cfset variables.useListInfo = arguments.useListInfo />
 		<cfelse>
-			<cfset engineInfo = variables.utils.getCfmlEngineInfo() />
-			<cfif ((FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 7)
-				OR (FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.majorVersion GTE 1 AND engineInfo.minorVersion GTE 4 AND engineInfo.productLevel EQ "GPL")
-				OR (FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3)
+			<cfif ((FindNoCase("ColdFusion", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 7)
+				OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 1 AND variables.engineInfo.minorVersion GTE 4 AND variables.engineInfo.productLevel EQ "GPL")
+				OR (FindNoCase("Railo", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 3)
 				)>
 				<cfset variables.useListInfo = true />
 			</cfif>
+		</cfif>
+		
+		<cfif FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.productLevel EQ "Google App Engine">
+			<cfset variables.isGAE = true />
 		</cfif>
 		
 		<cfset super.init(argumentCollection=arguments) />
@@ -261,6 +266,7 @@ Notes:
 		
 		<cfset var pathResults = "" />
 		<cfset var i = "" />
+		<cfset var rootFix = "" />
 		
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
 		<cfdirectory name="pathResults" 
@@ -272,6 +278,10 @@ Notes:
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
 		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
 		
+		<cfif variables.isGAE>
+			<cfset rootFix = "/" />
+		</cfif>
+		
 		<!---
 		Build possible paths by removing the root path if requested. This option 
 		is offered because cfinclude cannot use absolute file paths
@@ -280,7 +290,7 @@ Notes:
 		<cfif Len(arguments.removeRootPath)>
 			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
 				<cfif pathResults.type[i] EQ "file">
-					<cfset pathResults.directory[i] =  REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
+					<cfset pathResults.directory[i] =  rootFix & REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
 					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
 					<cfset pathResults.modifiedPath[i] =  ReplaceNoCase(pathResults.directory[i], arguments.removeRootPath, "", "one") & "/" & pathResults.name[i] />
 				<cfelse>
@@ -290,7 +300,7 @@ Notes:
 		<cfelse>
 			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
 				<cfif pathResults.type[i] EQ "file">
-					<cfset pathResults.directory[i] =  REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
+					<cfset pathResults.directory[i] =  rootFix & REReplaceNoCase(pathResults.directory[i], "(\\{1,}|\/{1,})", "/", "all") />
 					<cfset pathResults.fullPath[i] = pathResults.directory[i] & "/" & pathResults.name[i] />
 					<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
 				<cfelse>
@@ -310,6 +320,7 @@ Notes:
 		
 		<cfset var pathResults = "" />
 		<cfset var i = "" />
+		<cfset var rootFix = "" />
 		
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
 		<cfdirectory name="pathResults" 
@@ -318,6 +329,10 @@ Notes:
 			listInfo="name"
 			type="file"
 			recurse="#FindNoCase("**", arguments.pattern)#" />
+
+		<cfif variables.isGAE>
+			<cfset rootFix = "/" />
+		</cfif>
 
 		<!--- Add modified path columns --->
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
@@ -335,14 +350,14 @@ Notes:
 		--->
 		<cfif Len(arguments.removeRootPath)>
 			<cfloop from="1" to="#pathResults.recordcount#" index="i">
-				<cfset pathResults.directory[i] = REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
+				<cfset pathResults.directory[i] = rootFix & REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
 				<cfset pathResults.name[i] = GetFileFromPath(pathResults.name[i]) />
 				<cfset pathResults.fullPath[i] = pathResults.directory[i] & pathResults.name[i] />
 				<cfset pathResults.modifiedPath[i] = ReplaceNoCase(pathResults.fullPath[i], arguments.removeRootPath, "", "one") />
 			</cfloop>
 		<cfelse>
 			<cfloop from="1" to="#pathResults.recordcount#" index="i">
-				<cfset pathResults.directory[i] = REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
+				<cfset pathResults.directory[i] = rootFix & REReplaceNoCase(arguments.path & "/" & GetDirectoryFromPath(pathResults.name[i]), "(\\{1,}|\/{1,})", "/", "all") />
 				<cfset pathResults.name[i] = GetFileFromPath(pathResults.name[i]) />
 				<cfset pathResults.fullPath[i] = pathResults.directory[i] & pathResults.name[i] />
 				<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
