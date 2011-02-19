@@ -33,6 +33,10 @@ Notes:
 <cfoutput>
 <h1>REST Endpoint Documentation Generator</h1>
 
+<div class="info">
+	<h3>This feature is experimental.</h3>
+</div>
+
 <form:form actionEvent="tools.wadl.process" id="processRegEx">
 
 <h2>Select Available Endpoints</h2>
