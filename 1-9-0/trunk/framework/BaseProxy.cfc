@@ -80,6 +80,17 @@ Notes:
 		<cfargument name="originalParameters" type="struct" required="false" default="#StructNew()#"
 			hint="The original set of parameters."/>
 
+		<cfset var temp = "" />
+
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./BaseProxy.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.computeObjectReloadHash = variables.computeObjectReloadHash_cfdirectory />
+				<cfset this.computeObjectReloadHash = variables.computeObjectReloadHash_cfdirectory />
+			</cfcatch>
+		</cftry>
+
 		<!--- Run setters --->
 		<cfset setObject(arguments.object) />
 		<cfset setType(arguments.type) />
@@ -120,6 +131,33 @@ Notes:
 			<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
 				<cfset fileInfo = getFileInfo(variables.targetObjectPaths[i]) />
 				<cfset stringToHash = stringToHash & fileInfo.lastModified & fileInfo.size />
+			</cfloop>
+			<cfcatch type="any">
+				<!--- If a file path to a target object changes or moves, then trap and indicate a load is neccessary --->				
+			</cfcatch>
+		</cftry>
+
+		<cfreturn Hash(stringToHash) />
+	</cffunction>
+
+	<cffunction name="computeObjectReloadHash_cfdirectory" access="public" returntype="string" output="false"
+		hint="Computes the current reload hash of the target object.">
+
+		<cfset var fileInfo = "" />
+		<cfset var stringToHash = "" />
+		<cfset var i = 0 />
+
+		<!--- Ensure we have paths to compute reload hash off of --->
+		<cfif NOT ArrayLen(variables.targetObjectPaths)>
+			<cfset buildTargetObjectPaths() />
+		</cfif>
+
+		<!--- The hash needs to be based off entire target object path hierarchy --->
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(variables.targetObjectPaths)#" index="i">
+				<cfdirectory action="LIST" directory="#GetDirectoryFromPath(variables.targetObjectPaths[i])#"
+					name="fileInfo" filter="#GetFileFromPath(variables.targetObjectPaths[i])#" />
+				<cfset stringToHash = stringToHash & fileInfo.dateLastModified & fileInfo.size />
 			</cfloop>
 			<cfcatch type="any">
 				<!--- If a file path to a target object changes or moves, then trap and indicate a load is neccessary --->				

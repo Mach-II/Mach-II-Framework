@@ -155,6 +155,7 @@ Notes:
 					</struct>
 				</parameter>
 				<parameter name="cfmFiles" value="/css/*.cfm" />
+				<parameter name="enableThrow" value="false" />
 			</parameters>
 		</endpoint>
 		<endpoint name="dashboard.api" type="MachII.dashboard.endpoints.ApiEndpoint">

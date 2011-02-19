@@ -167,6 +167,15 @@ from the parent application.
 		<cfset var cacheAssetPaths = StructNew() />
 		<cfset var webrootBasePath  = "" />
 		<cfset var engineInfo = getUtils().getCfmlEngineInfo() />
+		
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./HtmlHelperProperty.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.getFileInfo = getUtils().getFileInfo_cfdirectory />
+				<cfset this.getFileInfo = getUtils().getFileInfo_cfdirectory />
+			</cfcatch>
+		</cftry>
 
 		<!--- Configure auto-dimensions for addImage() --->
 		<cftry>

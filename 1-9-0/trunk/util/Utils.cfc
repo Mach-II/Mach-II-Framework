@@ -512,6 +512,24 @@ Notes:
 			hint="String to escape." />
 		<cfreturn HtmlEditFormat(arguments.input) />
 	</cffunction>
+	
+	<cffunction name="getFileInfo_cfdirectory" access="public" returntype="any" output="false"
+		hint="Mocks the getFileInfo() BIF for CFML engines that don't already support it.">
+		<cfargument name="path" type="string" required="true" />
+		
+		<cfset var fileInfo = "" />
+		
+		<cfdirectory action="LIST" directory="#GetDirectoryFromPath(arguments.path)#"
+			name="fileInfo" filter="#GetFileFromPath(arguments.path)#" />
+		
+		<cfset QueryAddColumn(fileInfo, "lastModified", "varchar", ArrayNew(1)) />
+		
+		<cfif fileInfo.recordcount EQ 1>
+			<cfset fileInfo.lastModified[1] = fileInfo.dateLastModified[1] />
+		</cfif>
+		
+		<cfreturn fileInfo />
+	</cffunction>
 
 	<cffunction name="translateExceptionType" access="public" returntype="string" output="false"
 		hint="Translations exception types into something that can be rethrown.">

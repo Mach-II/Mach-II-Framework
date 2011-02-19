@@ -135,6 +135,17 @@ Configuration Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the file serve endpoint. Override to provide custom functionality and call super.preProcess().">
 
+		<cfset var temp = "" />
+
+		<!--- Test for getFileInfo() --->
+		<cftry>
+			<cfset getFileInfo("ExpandPath(./BaseEndpoint.cfc)") />
+			<cfcatch type="any">
+				<cfset variables.getFileInfo = getUtils().getFileInfo_cfdirectory />
+				<cfset this.getFileInfo = getUtils().getFileInfo_cfdirectory />
+			</cfcatch>
+		</cftry>
+
 		<cfif getParameter("secure", false)>
 			<cfset setUrlBase(getProperty("urlBaseSecure")) />
 		<cfelse>
@@ -308,12 +319,12 @@ Configuration Notes:
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
 		
 		<!--- Handle notFound --->
-		<cfif arguments.exception.getType() EQ "MachII.endpoints.file.notFound">
+		<cfif arguments.exception.getType() EQ "MachII.endpoints.file.notFound" AND NOT (arguments.event.isArgDefined("throw") AND getEnableThrow())>
 			<cfset addHTTPHeaderByStatus(404) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Handle cfmNotAuthorized --->
-		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.file.cfmNotAuthorized">
+		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.file.cfmNotAuthorized" AND NOT (arguments.event.isArgDefined("throw") AND getEnableThrow())>
 			<cfset addHTTPHeaderByStatus(401) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>401 Not Authorized- #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
