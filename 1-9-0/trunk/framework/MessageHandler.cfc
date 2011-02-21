@@ -139,7 +139,7 @@ Notes:
 						<!--- Log all the errors and build an exception message with all the errors to thrown --->
 						<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
 							<cfset builtMessage = getUtils().buildMessageFromCfCatch(results[results.errors[i]].error) />
-							<cfset buildMessages = builtMessages & "***" &  i & ".*** " & builtMessage & " || " />
+							<cfset builtMessages = builtMessages & "***" &  i & ".*** " & builtMessage & " || " />
 							
 							<cfset log.error(builtMessage, results[results.errors[i]].error) />
 						</cfloop>

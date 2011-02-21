@@ -173,8 +173,8 @@ Notes:
 		<cfset var key = "" />
 
 		<cfloop collection="#variables.localEndpointNames#" item="key">
-			<cfset endpoint = getEndpointByName(key) />
-			<cfset endpoint.deconfigure() />
+			<cfset anEndpoint = getEndpointByName(key) />
+			<cfset anEndpoint.deconfigure() />
 			<cfset removeEndpointByName(key) />
 		</cfloop>
 	</cffunction>

@@ -226,8 +226,6 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<echo message="---------------------------------------------"/>
 		<echo message="Built as version '${buildVersion}'"/>
 		<echo message="---------------------------------------------"/>
-		<antcall target="optimizeBuild"/>
-		<antcall target="testReport"/>
 		<antcall target="varScopeCheck"/>
 	</target>
 	
