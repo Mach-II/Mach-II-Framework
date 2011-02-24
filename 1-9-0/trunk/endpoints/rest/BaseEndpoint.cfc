@@ -179,13 +179,12 @@ To Test it out, do the following:
 		<cfset var urlTokens = "" />
 		<cfset var currToken = "" />
 
-		<!--- Support URI without pathInfo, but with query string of ?endpoint=<name>&uri=<restUri> --->
-		<cfif NOT Len(pathInfo) AND arguments.event.isArgDefined("uri")>
-			<cfset arguments.event.setArg("_requestPathInfo", arguments.event.getArg("uri")) />
-		<cfelse>
-			<cfset arguments.event.setArg("_requestPathInfo", pathInfo) />
+		<!--- Support query string of ?endpoint=<name>&uri=<restUri> --->
+		<cfif arguments.event.isArgDefined("uri")>
+			<cfset pathInfo = arguments.event.getArg("uri") />
 		</cfif>
 
+		<cfset arguments.event.setArg("_requestPathInfo", pathInfo) />
 		<cfset arguments.event.setArg("_requestMethod", httpMethod) />
 
 		<!--- Find the REST URI --->
