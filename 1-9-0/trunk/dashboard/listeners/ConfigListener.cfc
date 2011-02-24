@@ -95,7 +95,7 @@ Notes:
 			<cfelse>
 				<cfset moduleData[modules[i].getModuleName()]["showInDashboard"]= false />
 			</cfif>
-			
+
 			<!--- Only grab this data if this module has a dependency injection engine property --->
 			<cfif IsObject(dependencyInjectionEngineProperty)>
 				<cfset moduleData[modules[i].getModuleName()]["lastDependencyInjectionEngineReloadDateTime"] = dependencyInjectionEngineProperty.getLastReloadDatetime() />
@@ -104,7 +104,7 @@ Notes:
 		</cfloop>
 
 		<cfif hasModuleErrors>
-			<cfset arguments.event.setArg("message", 
+			<cfset arguments.event.setArg("message",
 					CreateObject("component", "MachII.dashboard.model.sys.Message").init("One or more modules contain a load error.", "exception")) />
 		</cfif>
 		<cfreturn moduleData />
@@ -200,7 +200,7 @@ Notes:
 					<cfset moduleManager.enableModule(moduleName) />
 				<cfelse>
 					<cfset moduleManager.disableModule(moduleName) />
-				</cfif>				
+				</cfif>
 				<cfset tickEnd = getTickcount() />
 				<cfset message.setMessage("#mode#d module '#moduleName#' in #NumberFormat(tickEnd - tickStart)#ms.") />
 				<cfcatch type="any">
@@ -214,7 +214,7 @@ Notes:
 			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="reloadBaseApp" access="public" returntype="void" output="false"
 		hint="Reload the base app.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -222,13 +222,18 @@ Notes:
 		<cfset var tickStart = 0 />
 		<cfset var tickEnd = 0 />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("", "success") />
+		<cfset var appKey = "" />
 
 		<cftry>
 			<cfset tickStart = getTickcount() />
+			<cfset appKey = getAppManager().getParent().getAppLoader().getAppKey() />
+			<cfset application[appKey].loading = true />
 			<cfset getAppManager().getParent().getAppLoader().reloadConfig() />
+			<cfset application[appKey].loading = false />
 			<cfset tickEnd = getTickcount() />
 			<cfset message.setMessage("Reloaded base application in #NumberFormat(tickEnd - tickStart)#ms.") />
 			<cfcatch type="any">
+				<cfset application[appKey].loading = false />
 				<cfset message.setMessage("Exception occurred during the reload of the base application.") />
 				<cfset message.setType("exception") />
 				<cfset message.setCaughtException(cfcatch) />
@@ -382,14 +387,14 @@ Notes:
 			<cfset OrmReload() />
 			<cfset tickEnd = getTickCount() />
 			<cfset message.setMessage("Reloaded all ORM Components in #NumberFormat(tickEnd - tickStart)#ms.") />
-			
+
 			<cfcatch type="any">
 				<cfset message.setMessage("Exception occurred during the reload of the ORM.") />
 				<cfset message.setType("exception") />
 				<cfset message.setCaughtException(cfcatch) />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
@@ -493,7 +498,7 @@ Notes:
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="reloadEndpoint" access="public" returntype="void" output="false"
 		hint="Reloads an endpoint.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -518,7 +523,7 @@ Notes:
 		<cfset arguments.event.setArg("message", message) />
 		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
-	
+
 	<cffunction name="reloadViewLoader" access="public" returntype="void" output="false"
 		hint="Reloads a view-loader.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -692,7 +697,7 @@ Notes:
 
 			<cfset ArrayAppend(data.properties, temp) />
 		</cfloop>
-		
+
 		<!--- Endpoints --->
 		<cfset objectNames = moduleAppManager.getEndpointManager().getLocalEndpointNames() />
 		<cfset ArraySort(objectNames, "textnocase", "asc") />
@@ -709,7 +714,7 @@ Notes:
 
 			<cfset ArrayAppend(data.endpoints, temp) />
 		</cfloop>
-		
+
 		<!--- View-Loaders --->
 		<cfset objectNames = moduleAppManager.getViewManager().getViewLoaders() />
 
