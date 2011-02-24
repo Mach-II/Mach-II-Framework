@@ -195,9 +195,13 @@ Notes:
 		hint="Preforms deconfiguration logic in each of the registered modules.">
 
 		<cfset var key = "" />
+		<cfset var module = "" />
 
 		<cfloop collection="#variables.enabledModules#" item="key">
-			<cfset variables.enabledModules[key].getModuleAppManager().deconfigure() />
+			<cfset module = variables.enabledModules[key] />
+			<cfif module.isLoaded()>
+				<cfset module.getModuleAppManager().deconfigure() />
+			</cfif>
 		</cfloop>
 	</cffunction>
 
