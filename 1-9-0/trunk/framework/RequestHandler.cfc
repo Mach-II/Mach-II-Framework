@@ -107,8 +107,8 @@ Notes:
 	--->
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Handles all requests made to the framework. Checks for endpoint match first, and if no endpoint then go through handleEventRequest.">
-		<cfargument name="eventArgs" type="struct" required="false" default="#getRequestEventArgs()#"
-			hint="The event args to be used or the framweork will automatically use the results from getRequestEventArgs()." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#initRequestEventArgs()#"
+			hint="The event args to be used or the framework will automatically use the results from getRequestEventArgs()." />
 
 		<cfset var endpointManager = getAppManager().getEndpointManager() />
 		<cfset var log = getLog() />
@@ -127,8 +127,8 @@ Notes:
 
 	<cffunction name="handleEventRequest" access="private" returntype="void" output="true"
 		hint="Handles a normal module/event or route request made to the framework.">
-		<cfargument name="eventArgs" type="struct" required="true"
-			hint="The parsed event args." />
+		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
+			hint="The event args." />
 
 		<cfset var result = StructNew() />
 		<cfset var appManager = getAppManager() />
@@ -151,12 +151,13 @@ Notes:
 
 		<!---
 		We have to default the module and event name in case the call to
-		getRequestEventArgs() throws a UrlRouteNotDefined exception
+		processRequestEventArgs() throws a UrlRouteNotDefined exception
 		--->
 		<cfset result.eventName = "" />
 		<cfset result.moduleName = "" />
 
 		<cftry>
+			<cfset processRequestEventArgs(arguments.eventArgs) />
 			<cfset result = parseEventParameter(arguments.eventArgs) />
 
 			<!--- Set the module and name for now (in case module not found we need the original event name) --->
@@ -216,7 +217,7 @@ Notes:
 				<cfif cgi.SERVER_PORT_SECURE GTE 1 OR cgi.SERVER_NAME EQ appManager.getPropertyManager().getProperty("urlSecureBaseCheckServerName")>
 					<cfset requestSecure = 1 />
 				</cfif>
-	
+
 				<cfif eventSecure NEQ -1 AND eventSecure NEQ requestSecure>
 					<cfif Len(getCurrentRouteName())>
 						<cfset appManager.getRequestManager().redirectRoute(getCurrentRouteName(), eventArgs, true, eventArgs) />
@@ -517,28 +518,39 @@ Notes:
 		<cfreturn result />
 	</cffunction>
 
-	<cffunction name="getRequestEventArgs" access="private" returntype="struct" output="false"
+	<cffunction name="initRequestEventArgs" access="private" returntype="struct" output="false"
 		hint="Builds a struct of incoming event args.">
 
 		<cfset var eventArgs = StructNew() />
 		<cfset var overwriteFormParams = (getParameterPrecedence() EQ "url") />
-		<cfset var requestManager = getAppManager().getRequestManager() />
-		<cfset var key = "" />
-		<cfset var locale = "" />
 
 		<!--- Build event args from form/url/SES --->
 		<cfset StructAppend(eventArgs, form) />
 		<cfset StructAppend(eventArgs, url, overwriteFormParams) />
+
+		<cfreturn eventArgs />
+
+	</cffunction>
+
+	<cffunction name="processRequestEventArgs" access="private" returntype="void" output="false"
+		hint="Further processing of request event args for event requests (not endpoint requests).">
+		<cfargument name="eventArgs" type="struct" required="true" />
+
+		<cfset var requestManager = getAppManager().getRequestManager() />
+		<cfset var overwriteFormParams = (getParameterPrecedence() EQ "url") />
+		<cfset var key = "" />
+		<cfset var locale = "" />
+
 		<!--- requestManager.parseSesParameters() could throw a UrlRouteNotDefined exception --->
-		<cfset StructAppend(eventArgs, requestManager.parseSesParameters(getCleanedPathInfo()), overwriteFormParams) />
+		<cfset StructAppend(arguments.eventArgs, requestManager.parseSesParameters(getCleanedPathInfo()), overwriteFormParams) />
 
 		<!--- Get redirect persist data and overwrite other args if conflct --->
-		<cfset StructAppend(eventArgs, requestManager.readPersistEventData(eventArgs), true) />
+		<cfset StructAppend(arguments.eventArgs, requestManager.readPersistEventData(arguments.eventArgs), true) />
 
 		<!--- Cleanup missing checkboxes which are indicated by incoming event args starting with '_-_keyNameHere' --->
-		<cfloop collection="#eventArgs#" item="key">
-			<cfif key.startsWith("_-_") AND NOT StructKeyExists(eventArgs, Right(key, Len(key) - 3))>
-				<cfset eventArgs[Right(key, Len(key) - 3)] = eventArgs[key] />
+		<cfloop collection="#arguments.eventArgs#" item="key">
+			<cfif key.startsWith("_-_") AND NOT StructKeyExists(arguments.eventArgs, Right(key, Len(key) - 3))>
+				<cfset arguments.eventArgs[Right(key, Len(key) - 3)] = arguments.eventArgs[key] />
 			</cfif>
 		</cfloop>
 
@@ -546,12 +558,11 @@ Notes:
 			persist the new locale --->
 		<cfif IsObject(getAppManager().getGlobalizationManager()) AND
 			  IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty()) AND
-			  StructKeyExists(eventArgs, getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam())>
-			<cfset locale = eventArgs[getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam()]>
+			  StructKeyExists(arguments.eventArgs, getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam())>
+			<cfset locale = arguments.eventArgs[getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam()]>
 			<cfset setCurrentLocale(locale) />
 		</cfif>
 
-		<cfreturn eventArgs />
 	</cffunction>
 	<!---
 	ACCESSORS
