@@ -35,10 +35,22 @@
 	    		<action name="Test File Open" handlerid="fileOpen" showResponse="true" />
 			</menu>
 		</contribution>
-
+		
+		<contribution target="projectview">
+			<menu name="MachIIBuilder">
+				<filters>
+					<filter type="folder" />
+					<filter type="project" />
+				</filters>
+				<action name="Generate Mach-II App Skeleton" handlerid="skeletonConfig" showResponse="true">
+				</action>
+			</menu>
+		</contribution>
+		
 	</menucontributions>
 	
 	<handlers>
+		<handler id="skeletonConfig" type="CFM" filename="skeletonConfig.cfm" />
 		<handler id="fileOpen" type="CFM" filename="fileopen.cfm" />
 	</handlers>
 	
