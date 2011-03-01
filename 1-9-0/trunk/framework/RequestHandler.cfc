@@ -127,8 +127,8 @@ Notes:
 
 	<cffunction name="handleEventRequest" access="private" returntype="void" output="true"
 		hint="Handles a normal module/event or route request made to the framework.">
-		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
-			hint="The event args." />
+		<cfargument name="eventArgs" type="struct" required="true"
+			hint="The parsed event args." />
 
 		<cfset var result = StructNew() />
 		<cfset var appManager = getAppManager() />
