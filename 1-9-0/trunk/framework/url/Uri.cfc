@@ -193,7 +193,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="string" output="false"
+	<cffunction name="makeUriPatternIntoRegex" access="private" returntype="void" output="false"
 		hint="Take an input URI with optional {tokens} and set the uriRegex and uriTokenNames instance variables.">
 		<cfargument name="uriPattern" type="string" required="true"
 			hint="The URI pattern convert into a regex for matching. The URI will be matched against incoming PATH_INFO, can only be slash delimited, and a token can be used to link a variable to a position in the URI path, e.g. '/service/doit/{value}'" />
