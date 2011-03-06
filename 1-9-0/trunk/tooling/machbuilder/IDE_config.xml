@@ -3,7 +3,11 @@
     <author>Team Mach II</author> 
     <version>1.0</version> 
     <email>team@mach-ii.com</email> 
-    <description>Handy tools to help you build Mach II applications with CF Builder</description> 
+    <description>Handy tools to help you build Mach II applications with CF Builder. 
+    	Includes the ability to create a new Mach II app using a configurable application skeleton.
+    	This extension also integrates with the Mach II dashboard to provide handy access to all your Mach II components as well
+    	as allowing you to reload them.
+    </description> 
     <!-- <license>license.html</license>  -->
 	
 	<!--
@@ -31,19 +35,18 @@
 	<menucontributions>
 	
 		<contribution target="projectview" >
-			<menu name="MachBuilder">
-	    		<action name="Test File Open" handlerid="fileOpen" showResponse="true" />
+			<menu name="Mach Builder">
+				<filters> 
+					<filter type="file" pattern="*" /> 
+				</filters>
+	    		<action name="Display Dashboard" handlerid="dashboard" showResponse="true" />
 			</menu>
-		</contribution>
-		
-		<contribution target="projectview">
-			<menu name="MachIIBuilder">
+			<menu name="Mach Builder">
 				<filters>
 					<filter type="folder" />
 					<filter type="project" />
 				</filters>
-				<action name="Generate Mach-II App Skeleton" handlerid="skeletonConfig" showResponse="true">
-				</action>
+				<action name="Generate Mach-II App Skeleton" handlerid="skeletonConfig" showResponse="true" />
 			</menu>
 		</contribution>
 		
@@ -51,7 +54,7 @@
 	
 	<handlers>
 		<handler id="skeletonConfig" type="CFM" filename="skeletonConfig.cfm" />
-		<handler id="fileOpen" type="CFM" filename="fileopen.cfm" />
+		<handler id="dashboard" type="CFM" filename="dashboard.cfm" />
 	</handlers>
 	
 </application>

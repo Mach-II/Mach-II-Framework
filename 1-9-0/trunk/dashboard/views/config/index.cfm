@@ -58,7 +58,8 @@ Notes:
 
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/config.js">
 		<cfoutput>
-			myConfigHandler = new ConfigHandler('#BuildUnescapedUrl("config.reloadAllChangedComponents")#', '#BuildUnescapedUrl("config.refreshAllChangedComponents")#');
+			myConfigHandler = new ConfigHandler('#BuildUnescapedUrl("config.reloadAllChangedComponents")#', 
+				'#BuildUnescapedUrl("config.refreshAllChangedComponents")#', '#buildUnescapedUrl("builder.openfile")#');
 		</cfoutput>
 	</view:script>
 </cfsilent>
@@ -66,6 +67,11 @@ Notes:
 
 <dashboard:displayMessage />
 
+<!--- TODO: remove dumps
+<cfdump var="#url#" label="url">
+<cfdump var="#CGI#" label="cgi">
+ --->
+ 
 <h1>Configuration File Status</h1>
 
 <ul class="pageNavTabs">

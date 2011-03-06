@@ -176,6 +176,7 @@ Notes:
 		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
 		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
 		<listener name="tools.wadl" type="MachII.dashboard.listeners.tools.WadlListener"/>
+		<listener name="builder" type="MachII.dashboard.listeners.BuilderListener"/>
 	</listeners>
 	
 	<!-- SUBSCRIBERS -->
@@ -432,6 +433,18 @@ Notes:
 			<view-page name="tools.wadl.view" />
 		</event-handler>
 		
+		<!-- CF Builder -->
+		<event-handler event="builder.index" access="public">
+			<publish message="needConfigData" />
+			<view-page name="config.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
+			<view-page name="config.snip_components" contentArg="layout.snip_components"/>	
+			<view-page name="config.index" contentArg="layout.content"/>
+			<execute subroutine="doBuilderLayout"/>
+		</event-handler>
+		<event-handler event="builder.openfile" access="public">
+			<notify listener="builder" method="openFile" />
+		</event-handler>
+		
 		<!-- sys -->
 		<event-handler event="sys.login" access="private">
 			<event-arg name="suppressHeadElements" value="true"/>
@@ -457,6 +470,12 @@ Notes:
 			<view-page name="tools.wadl.wadl" contentArg="wadlDoc" />
 		</subroutine>
 		<subroutine name="doLayout">
+			<view-page name="layout.header" contentArg="layout.header"/>
+			<view-page name="layout.footer" contentArg="layout.footer"/>
+			<view-page name="layout.wrapper"/>
+		</subroutine>
+		<subroutine name="doBuilderLayout">
+			<event-arg name="suppressHeadElements" value="1" />
 			<view-page name="layout.header" contentArg="layout.header"/>
 			<view-page name="layout.footer" contentArg="layout.footer"/>
 			<view-page name="layout.wrapper"/>

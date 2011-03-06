@@ -642,6 +642,7 @@ Notes:
 			<cfset temp = StructNew() />
 
 			<cfset temp.name = objectNames[i] />
+			<cfset temp.type = objectProxy.getType() />
 			<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
 
 			<cfset ArrayAppend(data.listeners, temp) />

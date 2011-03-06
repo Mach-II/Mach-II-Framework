@@ -170,7 +170,7 @@ from the parent application.
 		
 		<!--- Test for getFileInfo() --->
 		<cftry>
-			<cfset getFileInfo("ExpandPath(./HtmlHelperProperty.cfc)") />
+			<cfset getFileInfo(ExpandPath("/MachII/properties/HtmlHelperProperty.cfc")) />
 			<cfcatch type="any">
 				<cfset variables.getFileInfo = getUtils().getFileInfo_cfdirectory />
 				<cfset this.getFileInfo = getUtils().getFileInfo_cfdirectory />

@@ -150,6 +150,23 @@ Notes:
 				detail="Please enabled session or client scope in your Application.cfc." />
 		</cfif>
 	</cffunction>
+	
+	<cffunction name="isSessionItemDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="key" type="string" required="true" />
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+		<cfreturn structKeyExists(scope, "_MachIIDashboard_" & arguments.key)>
+	</cffunction>
+	<cffunction name="getSessionItem" access="public" returntype="any" output="false"> 
+		<cfargument name="key" type="string" required="true" />   
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+    	<cfreturn scope["_MachIIDashboard_" & arguments.key] />    
+    </cffunction>    
+    <cffunction name="setSessionItem" access="public" returntype="void" output="false">    
+    	<cfargument name="key" type="string" required="true" />    
+		<cfargument name="item" type="any" required="true" /> 
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+    	<cfset scope["_MachIIDashboard_" & arguments.key] = arguments.item />
+    </cffunction>
 
 	<cffunction name="discoverEnableLoginByEnvironment" access="private" returntype="void" output="false"
 		hint="Decides of login should be enabled by environment.">

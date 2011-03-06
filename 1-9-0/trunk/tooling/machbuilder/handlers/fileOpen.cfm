@@ -12,10 +12,10 @@
     <ide> 
         <commands> 
             <command name="openfile"> 
-            <params> 
-            <param key="filename" value="[valid file name/location]" /> 
-            <param key="projectname" value="[valid project name/location]" /> 
-            </params> 
+	            <params> 
+	            	<param key="filename" value="[valid file name/location]" /> 
+	            	<param key="projectname" value="[valid project name/location]" /> 
+	            </params> 
             </command> 
         </commands> 
     </ide> 
@@ -33,13 +33,8 @@
 <cflog file="machbuilder" type="information" text="#ideEventInfo#">
 <cflog file="machbuilder" type="information" text="file: '#myFile#', project: '#projectName#'">
  
- 
- <!--- /Users/kurt/Projects/DW Sites/cfdev/machbolt/test.cfm
- 	cfdev
-  --->
- 
- <cfoutput>
- <response> 
+<cfoutput>
+<response> 
     <ide> 
         <commands> 
             <command type="openfile"> 
