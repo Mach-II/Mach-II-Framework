@@ -187,7 +187,7 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfoutput><cfinclude template="#getThrowTemplate()#" /></cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
-			<cfset variables.log.error(getAppManager().getUtils().buildMessageFromCfCatch(arguments.exception.getCaughtException()), arguments.exception.getCaughtException()) />
+			<cfset variables.log.error(getUtils().buildMessageFromCfCatch(arguments.exception.getCaughtException()), arguments.exception.getCaughtException()) />
 			<cfset addHTTPHeaderByStatus(500) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", "Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.") />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
