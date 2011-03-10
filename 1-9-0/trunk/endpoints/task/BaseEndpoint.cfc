@@ -449,7 +449,7 @@ Custom Configuration:
 		<cfif NOT getUrlBase().startsWith("http://") OR NOT getUrlBase().startsWith("https://")>
 			<!--- Ensure an absolute path if to route bootstrapper file --->
 			<cfif NOT getUrlBase().startsWith("/")>
-				<cfset arguments.server = arguments.server & getDirectoryFromPath(cgi.scriptName) />
+				<cfset arguments.server = arguments.server & getUtils().filePathClean(getDirectoryFromPath(cgi.scriptName)) />
 			</cfif>
 			<cfset variables.server = arguments.server />
 		</cfif>
