@@ -233,6 +233,11 @@ To Test it out, do the following:
 			<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
 		</cfif>
 
+		<cfif format EQ 'json' AND arguments.event.isArgDefined(getProperty('jsonpArgName', 'jsonp'))>
+			<cfset restResponseBody = "#arguments.event.getArg(getProperty('jsonpArgName', 'jsonp'))#(#restResponseBody#)" />
+			<cfset format = 'jsonp'>
+		</cfif>
+
 		<cfset addContentTypeHeaderFromFormat(format) />
 
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
