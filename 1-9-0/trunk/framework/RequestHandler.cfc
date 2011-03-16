@@ -303,7 +303,7 @@ Notes:
 		<cfset var locale = "" />
 
 		<!--- If the current stored locale is empty, return the default locale --->
-		<cfif IsObject(getAppManager().getGlobalizationManager())>
+		<cfif IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty())>
 			<cfset locale = getAppManager().getGlobalizationManager().retrieveLocale() />
 			<cfset getLog().debug("Retrieving locale from GlobalizationManager: #locale#") />
 		</cfif>
@@ -319,7 +319,7 @@ Notes:
 		hint="Sets the current Locale for this request (and session).">
 		<cfargument name="locale" type="string" required="true" />
 
-		<cfif IsObject(getAppManager().getGlobalizationManager())>
+		<cfif IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty())>
 			<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
 
 		<cfelse>
