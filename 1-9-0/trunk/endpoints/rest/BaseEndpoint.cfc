@@ -128,7 +128,7 @@ To Test it out, do the following:
 	    it can be overridden by defining the "defaultFormat" parameter.
 	--->
 	<cfset variables.defaultFormat = "html" />
-	<cfset variables.defaultCharset = "ISO-8859-1" />
+	<cfset variables.defaultCharset = "" />
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
 	<cfset variables.enforceContentLengthDefault =  true />
@@ -151,8 +151,8 @@ To Test it out, do the following:
 		<cfelse>
 			<cfset setUrlBase(getProperty("urlBase")) />
 		</cfif>
-		<cfset setDefaultFormat(getParameter("defaultFormat", "html")) />
-		<cfset setDefaultCharset(getParameter("defaultCharset", "ISO-8859-1")) />
+		<cfset setDefaultFormat(getParameter("defaultFormat", variables.defaultFormat)) />
+		<cfset setDefaultCharset(getParameter("defaultCharset", variables.defaultCharset)) />
 		<cfset setPossibleFormatList(getParameter("possibleFormatList", variables.DEFAULT_FORMAT_LIST)) />
 
 		<cfset setupRestComponent() />
@@ -190,6 +190,7 @@ To Test it out, do the following:
 		<!--- Find the REST URI --->
 		<cfset restUri = variables.restUris.findUriByPathInfo(pathInfo, httpMethod) />
 
+		<!--- Handle REST object request if we have a URI to process --->
 		<cfif IsObject(restUri)>
 			<cfset arguments.event.setArg("restUri", restUri) />
 
@@ -210,6 +211,8 @@ To Test it out, do the following:
 					<cfset performContentLengthChecks(arguments.event) />
 				</cfif>
 			</cfif>
+		
+		<!--- No URI object for REST request so handle exception --->
 		<cfelse>
 			<cfif Len(restUri)>
 				<cfthrow type="#variables.exceptionTypes["MethodNotAllowed"]#"
@@ -227,18 +230,21 @@ To Test it out, do the following:
 
 		<cfset var restUri =  arguments.event.getArg("restUri") />
 		<cfset var restResponseBody = callEndpointFunction(restUri, arguments.event) />
-		<cfset var format = arguments.event.getArg("format", getDefaultFormat()) />
+		<cfset var format = arguments.event.getArg("format") />
 
 		<cfif NOT Len(format) AND Len(restUri.getUriMetadataParameters().defaultReturnFormat)>
 			<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
+		<cfelse>
+			<cfset format = getDefaultFormat() />
 		</cfif>
 
-		<cfif format EQ 'json' AND arguments.event.isArgDefined(getProperty('jsonpArgName', 'jsonp'))>
-			<cfset restResponseBody = "#arguments.event.getArg(getProperty('jsonpArgName', 'jsonp'))#(#restResponseBody#)" />
-			<cfset format = 'jsonp'>
+		<cfif format EQ "json" AND arguments.event.isArgDefined(getProperty("jsonpArgName", "jsonp"))>
+			<cfset restResponseBody = "#arguments.event.getArg(getProperty("jsonpArgName", "jsonp"))#(#restResponseBody#)" />
+			<cfset format = "jsonp" />
 		</cfif>
-
-		<cfset addContentTypeHeaderFromFormat(format) />
+		
+		<cfset arguments.event.setArg("_responseFormat", format) />
+		<cfset arguments.event.setArg("_responseContentType", addContentTypeHeaderFromFormat(format)) />
 
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
@@ -361,7 +367,7 @@ To Test it out, do the following:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="addContentTypeHeaderFromFormat" access="private" returntype="void" output="false"
+	<cffunction name="addContentTypeHeaderFromFormat" access="private" returntype="string" output="false"
 		hint="Adds a Content-Type response header based on the input format.">
 		<cfargument name="format" type="string" required="true"
 			hint="The incoming format type to add as header." />
@@ -373,13 +379,18 @@ To Test it out, do the following:
 			<cfset contentType = getUtils().getMimeTypeByFileExtension(arguments.format, variables.customMimeTypeMap, true) />
 
 			<!--- Add the Content-Type header --->
-			<cfset addHTTPHeaderByName("Content-Type", contentType, getDefaultCharset()) />
+			<cfif Len(variables.defaultCharset)>
+				<cfset contentType = contentType & ";charset=" & getDefaultCharset() />
+			</cfif>
+			<cfset addHTTPHeaderByName("Content-Type", contentType ) />
 
 			<cfcatch type="any">
 				<!--- Log exception --->
 				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
 			</cfcatch>
 		</cftry>
+		
+		<cfreturn contentType />
 	</cffunction>
 
 	<cffunction name="performContentLengthChecks" access="private" returntype="void" output="false"
