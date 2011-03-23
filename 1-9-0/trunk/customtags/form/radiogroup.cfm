@@ -178,7 +178,7 @@ Notes:
 						<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
-						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
+						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(LCase(variables.value)), "all") />
 	
 						<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 					</cfloop>
@@ -204,7 +204,7 @@ Notes:
 		
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
-			<cfset variables.value = LCase(variables.sortedKeys[i]) />
+			<cfset variables.value = variables.sortedKeys[i] />
 
 			<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 				<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
@@ -215,7 +215,7 @@ Notes:
 			<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[variables.value]) />
-			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
+			<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(LCase(variables.value)), "all") />
 
 			<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 		</cfloop>

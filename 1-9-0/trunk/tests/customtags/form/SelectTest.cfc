@@ -149,7 +149,7 @@ Notes:
 		<cfset colors.Pink =  "Precious Pink" />
 
 		<!--- Add data to the the bean and set to the event so we can do binding --->
-		<cfset bean.setFavoriteColor("red") />
+		<cfset bean.setFavoriteColor("Red") />
 		<cfset event.setArg("user", bean) />
 
 		<cfsavecontent variable="output">
@@ -161,7 +161,9 @@ Notes:
 		</cfsavecontent>
 
 		<cfset xml = XmlParse(output) />
-		<cfset node = assertXPath('/root/form/select/option[@value="red" and @id="favoriteColor_red" and @selected="selected"]', xml, "Big Red") />
+		<cfset debug(output) />
+		
+		<cfset node = assertXPath('/root/form/select/option[@value="#convertKeyCaseForComparison("Red")#" and @id="favoriteColor_red" and @selected="selected"]', xml, "Big Red") />
 		<cfset debug(node) />
 	</cffunction>
 
@@ -305,8 +307,8 @@ Notes:
 		<cfset xml = XmlParse(output) />
 		<cfset debug(output) />
 		
-		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="red" and @id="favoriteColor_red" and @selected="selected"]', xml, "Big Red") />
-		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="pink" and @id="favoriteColor_pink"]', xml, "Precious Pink") />
+		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="#convertKeyCaseForComparison("Red")#" and @id="favoriteColor_red" and @selected="selected"]', xml, "Big Red") />
+		<cfset node = assertXPath('/root/form/select/optgroup/option[@value="#convertKeyCaseForComparison("Pink")#" and @id="favoriteColor_pink"]', xml, "Precious Pink") />
 		<cfset node = assertXPath('/root/form/select/optgroup[@label="Primary Colors"]', xml) />
 	</cffunction>
 

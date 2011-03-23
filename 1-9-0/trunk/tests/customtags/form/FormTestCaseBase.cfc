@@ -60,6 +60,8 @@ Notes:
 	<!--- This is a fake attributes scope --->
 	<cfset variables.attributes = StructNew() />
 	<cfset variables.included = false />
+	<cfset variables.structKeyNamesCaseInsensitive = false />
+	<cfset checkStructKeyNamesCaseInsensitive() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -135,6 +137,36 @@ Notes:
 		hint="Logic to run to tear down after each test case method.">
 		<!--- Reset the fake attributes struct --->
 		<cfset variables.attributes = StructNew() />
+	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="checkStructKeyNamesCaseInsensitive" access="private" returntype="void" output="false"
+		hint="Checks if the current CFML engine has case insensitive structs.">
+		
+		<cfset var testStruct = StructNew() />
+		
+		<!--- ACF8/9 uppercases all struct key names that are not created with bracket notation  --->
+		<cfset testStruct.green = "good" />
+		
+		<!--- Compare --->
+		<cfif Compare(StructKeyList(testStruct), "green") NEQ 0>
+			<cfset variables.structKeyNamesCaseInsensitive = true />
+		<cfelse>
+			<cfset variables.structKeyNamesCaseInsensitive = false />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="convertKeyCaseForComparison" access="private" returntype="string" output="false"
+		hint="Converts a value to the correct case for comparision.">
+		<cfargument name="input" type="string" required="true" />
+		
+		<cfif variables.structKeyNamesCaseInsensitive>
+			<cfreturn UCase(arguments.input) />
+		<cfelse>
+			<cfreturn arguments.input />
+		</cfif>
 	</cffunction>
 
 </cfcomponent>

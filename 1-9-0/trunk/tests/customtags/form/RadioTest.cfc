@@ -172,9 +172,9 @@ Notes:
 		<cfset xml = XmlParse(output) />
 		<cfset debug(output) />
 
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="red" and @id="favoriteColor_red" and @checked="checked"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="green" and @id="favoriteColor_green"]', xml) />
-		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="brown" and @id="favoriteColor_brown"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="#convertKeyCaseForComparison("Red")#" and @id="favoriteColor_red" and @checked="checked"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="#convertKeyCaseForComparison("Green")#" and @id="favoriteColor_green"]', xml) />
+		<cfset node = assertXPath('/root/form/label/input[@type="radio" and @value="#convertKeyCaseForComparison("Brown")#" and @id="favoriteColor_brown"]', xml) />
 		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_red"]/span', xml, "Big Red") />
 		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_green"]/span', xml, "Giant Green") />
 		<cfset node = assertXPath('/root/form/label[@for="favoriteColor_brown"]/span', xml, "Bad Brown") />
