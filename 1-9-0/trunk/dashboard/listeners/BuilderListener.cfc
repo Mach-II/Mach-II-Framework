@@ -44,7 +44,10 @@ Updated version: 1.9.0
 
 Notes:
 --->
-<cfcomponent extends="MachII.framework.Listener" output="false">
+<cfcomponent 
+	displayname="BuilderListener"
+	extends="MachII.framework.Listener" 
+	output="false">
 	
 	<!---
 	PROPERTIES
@@ -54,6 +57,7 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="config" access="public" output="false" returntype="void">
+		<!--- Does nothing --->
 	</cffunction>
 	
 	<!---
@@ -65,7 +69,8 @@ Notes:
 		
 		<cfset var commandXML = "" />
 		<cfset var fullFilePath = convertCFCPathToFilePath(event.getArg("fileName")) />
-		<cfset var callbackUrl = getProperty("application").getSessionItem("callbackurl") />
+		<cfset var callbackUrl = cleanCallbackUrl(getProperty("application").getSessionItem("callbackurl")) />
+		<cfset var callbackResult = "" />
 		
 		<cfsavecontent variable="commandXML">
 			<cfoutput>
@@ -84,14 +89,17 @@ Notes:
 			</cfoutput>
 		</cfsavecontent>
 		
-		<cflog file="machbuilder" text="callbackurl: #replaceNoCase(callbackurl, " ", "%20", "ALL")#" />
-		<cflog file="machbuilder" text="command: #commandxml#" />
-		<cfhttp result="callbackResult" url="#replaceNoCase(callbackurl, " ", "%20", "ALL")#" method="post">
+		<cflog file="machbuilder" text="CallbackUrl: #callbackUrl#" />
+		<cflog file="machbuilder" text="Command: #commandxml#" />
+		
+		<cfhttp result="callbackResult" 
+			url="#callbackUrl#" 
+			method="post">
 			<cfhttpparam type="body" value="#commandXML#" />
 			<cfhttpparam type="header" name="mimetype" value="text/xml" />
 		</cfhttp>
-		<cflog file="machbuilder" text="callbackResult: #serializeJSON(callbackResult)#" />
 		
+		<cflog file="machbuilder" text="CallbackResult: #serializeJSON(callbackResult)#" />
 	</cffunction>
 	
 	<!--- 
@@ -99,8 +107,12 @@ Notes:
 	 --->
 	 <cffunction name="convertCFCPathToFilePath" access="private" returntype="string" output="false">
 	 	<cfargument name="cfcPath" type="string" required="true" />
-		 <cfset var filePath = "/" & replaceNoCase(arguments.cfcPath, ".", "/", "ALL") & ".cfc" />
-		 <cfreturn expandPath(filePath) />
+		<cfreturn ExpandPath("/" & ReplaceNoCase(arguments.cfcPath, ".", "/", "ALL") & ".cfc") />
+	 </cffunction>
+
+	 <cffunction name="cleanCallbackUrl" access="private" returntype="string" output="false">
+	 	<cfargument name="callbackUrl" type="string" required="true" />
+		<cfreturn ReplaceNoCase(arguments.callbackurl, " ", "%20", "ALL") />
 	 </cffunction>
 
 </cfcomponent>
