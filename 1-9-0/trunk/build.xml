@@ -85,9 +85,9 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
 	<property name="debug" value="false"/>
 	
-	<property name="ftp.server" value="mach-ii.com"/>
-	<property name="ftp.user" value="machii"/>
-	<property name="ftp.webroot" value="/var/www/machii/m2website/public"/>
+	<property name="scp.server" value="mach-ii.com"/>
+	<property name="scp.user" value="root"/>
+	<property name="scp.webroot" value="/var/www/machii/m2website/public"/>
 	
 	<property name="mxunit.server" value="localhost"/>
 	<property name="mxunit.port" value="8080"/>
@@ -114,8 +114,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			<pathelement location="${tasks.classpath}/svnkit.jar"/>
 		</classpath>
 	</taskdef>
-	<classloader loader="project" classpath="${tasks.classpath}/commons-net-1.4.1.jar"/>
-	<taskdef name="ftp" classname="org.apache.tools.ant.taskdefs.optional.net.FTP"/>
+	<classloader loader="project" classpath="${tasks.classpath}/jsch-0.1.44.jar"/>
 	<taskdef name="jsmin"
         classname="net.matthaynes.jsmin.JSMin_Task"
         classpath="${tasks.classpath}/jsmin.jar"/>
@@ -227,6 +226,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<echo message="Built as version '${buildVersion}'"/>
 		<echo message="---------------------------------------------"/>
 		<antcall target="varScopeCheck"/>
+		<antcall target="test"/>
 	</target>
 	
 	<target name="optimizeBuild">
@@ -492,51 +492,39 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<echo message="---------------------------------------------"/>
 	</target>
 	
-	<target name="ftp-init" description="Provides initialization for ftp targets.">
-		<input addProperty="ftp.password"
-			message="Please enter the password for FTP user named '${ftp.user}':"/>
-		<fail unless="ftp.password">You must set the ftp.password property for ftp as command line arg (e.g. -Dftp.password=YOURPWD) or input the password if you have manually run this target.</fail>
+	<target name="scp-init" description="Provides initialization for scp targets.">
+		<input addProperty="scp.password"
+			message="Please enter the password for SCP user named '${scp.user}':"/>
+		<fail unless="scp.password">You must set the scp.password property for SCP as command line arg (e.g. -Dscp.password=YOURPWD) or input the password if you have manually run this target.</fail>
 		<input addProperty="autoUpdate.password"
 			message="Please enter the password for auto updater:"/>
 		<fail unless="autoUpdate.password">You must set the autoUpdate.password property as command line arg (e.g. -DautoUpdate.password=YOURPWD) or input the password if you have manually run this target.</fail>
 	</target>
 	
-	<target name="ftp-zipNightly" depends="ftp-init,zipNightly" description="Creates a nightly build zip and uploads it to nightly directory on mach-ii.com">
+	<target name="scp-zipNightly" depends="scp-init,zipNightly" description="Creates a nightly build zip and uploads it to nightly directory on mach-ii.com">
 		<echo message="---------------------------------------------"/>
-		<echo message="FTP-ing nightly build" />
+		<echo message="SCP-ing nightly build" />
 		<echo message="---------------------------------------------"/>
-		<ftp server="${ftp.server}"
-			userid="${ftp.user}"
-			password="${ftp.password}"
-			action="put"
-			remotedir="${ftp.webroot}/nightly/"
-			verbose="${debug}">
+		<scp todir="${scp.user}:${scp.password}@${scp.server}:${scp.webroot}/nightly" 
+			verbose="${debug}"  >
 			<fileset dir="${zip}">
 				<include name="*.zip"/>
 				<include name="*.zip.MD5"/>
 			</fileset>
-		</ftp>
-		<ftp server="${ftp.server}"
-			userid="${ftp.user}"
-			password="${ftp.password}"
-			action="put"
-			remotedir="${ftp.webroot}/nightly/older/${majorVersion}/"
-			verbose="${debug}">
+		</scp>
+		<scp todir="${scp.user}:${scp.password}@${scp.server}:${scp.webroot}/nightly/older/${majorVersion}/" 
+			verbose="${debug}"  >
 			<fileset dir="${zip}/older/">
 				<include name="*.zip"/>
 				<include name="*.zip.MD5"/>
 			</fileset>
-		</ftp>
-		<ftp server="${ftp.server}"
-			userid="${ftp.user}"
-			password="${ftp.password}"
-			action="put"
-			remotedir="${ftp.webroot}/dtds/"
-			verbose="${debug}" >
+		</scp>
+		<scp todir="${scp.user}:${scp.password}@${scp.server}:${scp.webroot}/dtds/" 
+			verbose="${debug}"  >
 			<fileset dir="${dest}/MachII/">
 				<include name="*.dtd"/>
 			</fileset>
-		</ftp>
+		</scp>
 		<tempfile property="tempFile" suffix=".tmp" destdir="${dest}"/>
 		<get dest="${tempFile}" src="http://www.mach-ii.com/index.cfm?go=admin.updatePackage&amp;package=framework&amp;versionNumber=1.8.0.${buildVersion}&amp;fileLocation=http://www.mach-ii.com/nightly/older/${majorVersion}/MachII_${majorVersion}_nightly_${formattedDatetime}.zip&amp;password=${autoUpdate.password}"/>
 	</target>
