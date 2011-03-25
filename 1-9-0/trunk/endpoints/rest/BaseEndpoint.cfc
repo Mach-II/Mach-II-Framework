@@ -62,15 +62,25 @@ To Test it out, do the following:
 		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint">
 			<parameters>
 				<!--
+					Sets whether to use the value from urlBase or urlBaseSecure which 
+					indicates HTTPS/SSL URL base. Defaults to value from property.urlBase
+				-->
+				<parameter name="secure" value="false" />
+				<!--
 					Optionally sets the default return format (MIME type) of the request
 					if not defined in the url (defaults to html if not defined)
 				-->
-				<parameter name="defaultFormat" value="json" />
+				<parameter name="defaultFormat" value="html" />
 				<!--
 					Optionally sets the default return charset of the request. Defaults
 					to ISO-8859-1 if not defined (standard HTTP response charset).
 				-->
 				<parameter name="defaultCharset" value="" />
+				<!--
+					Optionally sets the event arg name to use as the value to wrap
+					JsonP requests. Defaults to 'jsonp'
+				-->
+				<parameter name="jsonpArgName" value="jsonp" />
 			</parameters>
 		</endpoint>
 	</endpoints>
@@ -132,6 +142,7 @@ To Test it out, do the following:
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
 	<cfset variables.enforceContentLengthDefault =  true />
+	<cfset variables.jsonpArgName = "jsonp" />
 
 	<cfset variables.exceptionTypes = StructNew() />
 	<cfset variables.exceptionTypes["IncompleteBody"] = "MachII.endpoints.rest.IncompleteBody" />
@@ -153,6 +164,7 @@ To Test it out, do the following:
 		</cfif>
 		<cfset setDefaultFormat(getParameter("defaultFormat", variables.defaultFormat)) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", variables.defaultCharset)) />
+		<cfset setJsonpArgName(getParameter("jsonpArgName", variables.jsonpArgName)) />
 		<cfset setPossibleFormatList(getParameter("possibleFormatList", variables.DEFAULT_FORMAT_LIST)) />
 
 		<cfset setupRestComponent() />
@@ -238,8 +250,8 @@ To Test it out, do the following:
 			<cfset format = getDefaultFormat() />
 		</cfif>
 
-		<cfif format EQ "json" AND arguments.event.isArgDefined(getProperty("jsonpArgName", "jsonp"))>
-			<cfset restResponseBody = "#arguments.event.getArg(getProperty("jsonpArgName", "jsonp"))#(#restResponseBody#)" />
+		<cfif format EQ "json" AND arguments.event.isArgDefined(getJsonpArgName())>
+			<cfset restResponseBody = arguments.event.getArg(getJsonpArgName()) & "(" & restResponseBody & ")" />
 			<cfset format = "jsonp" />
 		</cfif>
 		
@@ -625,6 +637,14 @@ To Test it out, do the following:
 	</cffunction>
 	<cffunction name="getPossibleFormatList" access="public" returntype="string" output="false">
 		<cfreturn variables.possibleFormatList />
+	</cffunction>
+	
+	<cffunction name="setJsonpArgName" access="public" returntype="void" output="false">
+		<cfargument name="jsonpArgName" type="string" required="true" />
+		<cfset variables.jsonpArgName = arguments.jsonpArgName />
+	</cffunction>
+	<cffunction name="getJsonpArgName" access="public" returntype="string" output="false">
+		<cfreturn variables.jsonpArgName />
 	</cffunction>
 
 	<cffunction name="setAuthenticateDefault" access="public" returntype="void" output="false">
