@@ -98,10 +98,7 @@ Notes:
 		<cfif IsObject(arguments.currentEvent)>
 			<cfset setCurrentEvent(arguments.currentEvent) />
 		</cfif>
-
-		<!--- Set the exception event --->
-		<cfset setExceptionEventName(getAppManager().getPropertyManager().getProperty("exceptionEvent")) />
-
+		
 		<!--- (re)init the ViewContext. --->
 		<cfset getViewContext().init(getAppManager()) />
 
@@ -483,8 +480,6 @@ Notes:
 		<cfset var result = StructNew() />
 		<cfset var log = getLog() />
 
-		<cfset result.eventName = getExceptionEventName() />
-
 		<cftry>
 			<!--- Create eventArg data --->
 			<cfset eventArgs.exception = arguments.exception />
@@ -500,7 +495,27 @@ Notes:
 				<cfset variables.clearEventQueue() />
 			</cfif>
 
-			<!--- Check for an event-mapping. --->
+			<!---
+				There are three situations on how we can handle exception event/module handling
+				1. In module with exception event and exception module
+				2. In module with exception event and no exception module defined
+				3. Base app
+			--->
+			<cfif appManager.inModule() AND appManager.getPropertyManager().isPropertyDefined("exceptionEvent")>
+				<cfset result.eventName = appManager.getPropertyManager().getProperty("exceptionEvent") />
+				
+				<!--- Use the exceptionModule property if defined otherwise fall back to the module name --->
+				<cfif appManager.getPropertyManager().isPropertyDefined("exceptionModule")>
+					<cfset result.moduleName = appManager.getPropertyManager().getProperty("exceptionModule") />
+				<cfelse>
+					<cfset result.moduleName = appManager.getModuleName() />
+				</cfif>
+			<cfelse>
+				<cfset result.eventName = appManager.getPropertyManager().getProperty("exceptionEvent") />
+				<cfset result.moduleName = appManager.getPropertyManager().getProperty("exceptionModule") />
+			</cfif>
+
+			<!--- Check for an event-mapping. --->			
 			<cfif isEventMappingDefined(result.eventName)>
 				<cfset result = getEventMapping(exceptionEventName) />
 				<cfif Len(result.moduleName)>
@@ -508,11 +523,6 @@ Notes:
 				<cfelse>
 					<cfset appManager = appManager.getModuleManager().getAppManager() />
 				</cfif>
-			<!--- If the exception event is not defined, then we know it's in the parent --->
-			<cfelseif appManager.getPropertyManager().isPropertyDefined("exceptionEvent")>
-				<cfset result.moduleName = appManager.getModuleName() />
-			<cfelse>
-				<cfset result.moduleName = "" />
 			</cfif>
 
 			<cfif log.isInfoEnabled()>
@@ -874,14 +884,6 @@ Notes:
 	</cffunction>
 	<cffunction name="getViewContext" access="private" type="MachII.framework.ViewContext" output="false">
 		<cfreturn variables.viewContext />
-	</cffunction>
-
-	<cffunction name="setExceptionEventName" access="public" returntype="void" output="false">
-		<cfargument name="exceptionEventName" type="string" required="true" />
-		<cfset variables.exceptionEventName = arguments.exceptionEventName />
-	</cffunction>
-	<cffunction name="getExceptionEventName" access="public" returntype="string" output="false">
-		<cfreturn variables.exceptionEventName />
 	</cffunction>
 
 	<cffunction name="setLog" access="private" returntype="void" output="false"

@@ -191,6 +191,8 @@ Notes:
 				<cfthrow type="MachII.framework.noDefaultEvent"
 					message="A default event named '#defaultEvent#' has been not defined in the base app, but is required. Please create one." />				
 			</cfif>
+			
+			<!--- No need to check for exceptionModule because it defaults to th current module / base app if not defined--->
 			<cfset exceptionEvent = propertyManager.getProperty("exceptionEvent") />
 			<cfif NOT isEventDefined(exceptionEvent, false)>
 				<cfthrow type="MachII.framework.noExceptionEvent"

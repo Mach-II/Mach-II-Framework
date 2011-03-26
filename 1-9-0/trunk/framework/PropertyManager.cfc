@@ -479,6 +479,9 @@ Notes:
 			<cfif NOT isPropertyDefined("exceptionEvent")>
 				<cfset setProperty("exceptionEvent", "exceptionEvent") />
 			</cfif>
+			<cfif NOT isPropertyDefined("exceptionModule")>
+				<cfset setProperty("exceptionModule", "") />
+			</cfif>
 			<cfif NOT isPropertyDefined("applicationRoot")>
 				<cfset setProperty("applicationRoot", "") />
 			</cfif>

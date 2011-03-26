@@ -89,6 +89,17 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Allow the ability to set a module for default exception event
+via the exceptionModule property.
+
+Special thanks to Andrew Leaf for suggesting this enhancement
+and providing a patch.
+
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/751
+(2011-01-28 peterfarrell)
+
 * Fixed BaseProxy exception if any target path of the object hierarchy 
 changes or gets deleted
 
