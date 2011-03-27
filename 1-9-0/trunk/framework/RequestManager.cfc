@@ -373,36 +373,39 @@ Notes:
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset keyList = StructKeyList(params) />
 
-		<cfif getPropertyManager().getProperty("urlSecureEnabled") AND (NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase))>
-			<cftry>
-				<cfif Len(arguments.moduleName)>
-					<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
-				<cfelse>
-					<cfset eventManager = getAppManager().getEventManager() />
-				</cfif>
 
-				<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
-				<cfcatch type="MachII.framework.ModuleFailedToLoad">
-					<!--- If module:disableOnFailure is turned on, we need to ignore this exception
-						and assume ambiguous secure type. This allows the url to build.  The exception
-						will be thrown later when an event for that module is requested   --->
-				</cfcatch>
-			</cftry>
-
-			<!--- If event handler secure type is ambiguous (-1), then default to the current secure type this request --->
-			<cfif secureType EQ -1>
-				<cfif cgi.SERVER_PORT_SECURE>
+		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
+			<cfif getPropertyManager().getProperty("urlSecureEnabled")>
+				<cftry>
+					<cfif Len(arguments.moduleName)>
+						<cfset eventManager = getAppManager().getModuleManager().getModule(arguments.moduleName).getModuleAppManager().getEventManager() />
+					<cfelse>
+						<cfset eventManager = getAppManager().getEventManager() />
+					</cfif>
+	
+					<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
+					<cfcatch type="MachII.framework.ModuleFailedToLoad">
+						<!--- If module:disableOnFailure is turned on, we need to ignore this exception
+							and assume ambiguous secure type. This allows the url to build.  The exception
+							will be thrown later when an event for that module is requested   --->
+					</cfcatch>
+				</cftry>
+	
+				<!--- If event handler secure type is ambiguous (-1), then default to the current secure type this request --->
+				<cfif secureType EQ -1>
+					<cfif cgi.SERVER_PORT_SECURE>
+						<cfset arguments.urlBase = getDefaultUrlSecureBase() />
+					<cfelse>
+						<cfset arguments.urlBase = getDefaultUrlBase() />
+					</cfif>
+				<cfelseif secureType EQ 1>
 					<cfset arguments.urlBase = getDefaultUrlSecureBase() />
 				<cfelse>
 					<cfset arguments.urlBase = getDefaultUrlBase() />
 				</cfif>
-			<cfelseif secureType EQ 1>
-				<cfset arguments.urlBase = getDefaultUrlSecureBase() />
 			<cfelse>
 				<cfset arguments.urlBase = getDefaultUrlBase() />
 			</cfif>
-		<cfelse>
-			<cfset arguments.urlBase = getDefaultUrlBase() />
 		</cfif>
 
 		<!--- Nested the appending of the event parameter inside the next block
