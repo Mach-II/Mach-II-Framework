@@ -94,7 +94,7 @@ Notes:
 		<cfset var event = arguments.eventContext.getNextEvent() />
 		<cfset var requestEventName = event.getRequestName() />
 		<cfset var message = "" />
-		<cfset var httpRequestData = "" />
+		<cfset var httpRequestData = GetHttpRequestData() />
 
 		<cfif event.isArgDefined("logout")>
 			<cfset setLoggedIn(false) />
@@ -110,6 +110,11 @@ Notes:
 		<!--- Check if this event even exists --->
 		<cfif NOT getAppManager().getEventManager().isEventDefined(requestEventName)>
 			<cfset redirectEvent("info.index") />
+		</cfif>
+		
+		<!--- Disable CFML debugging out for AJAX requests --->
+		<cfif StructKeyExists(httpRequestData.headers, "X-Prototype-Version")>
+			<cfsetting showdebugoutput="false" />
 		</cfif>
 
 		<!--- Check if login is restricted by IP --->
@@ -134,8 +139,6 @@ Notes:
 					</cfif>
 				<cfelse>
 					<cfset arguments.eventContext.clearEventQueue() />
-
-					<cfset httpRequestData = GetHttpRequestData() />
 
 					<!--- Check to see if this is an AJAX request --->
 					<cfif StructKeyExists(httpRequestData.headers, "X-Prototype-Version")>
