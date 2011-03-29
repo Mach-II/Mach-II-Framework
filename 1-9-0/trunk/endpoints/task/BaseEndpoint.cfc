@@ -104,6 +104,7 @@ Custom Configuration:
 	--->
 	<!--- Constants for the annotations we allow in ScheduledTask sub-classes --->
 	<cfset variables.ANNOTATION_TASK_BASE = "TASK" />
+	<cfset variables.ANNOTATION_TASK_ENABLED = variables.ANNOTATION_TASK_BASE & ":ENABLED" />
 	<cfset variables.ANNOTATION_TASK_INTERVAL = variables.ANNOTATION_TASK_BASE & ":INTERVAL" />
 	<cfset variables.ANNOTATION_TASK_STARTDATE = variables.ANNOTATION_TASK_BASE & ":STARTDATE" />
 	<cfset variables.ANNOTATION_TASK_ENDDATE = variables.ANNOTATION_TASK_BASE & ":ENDDATE" />
@@ -138,6 +139,11 @@ Custom Configuration:
 		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.applicationName & "_" & getParameter("name")) & "_") />
 		<cfset setUrlBase(getProperty("urlBase")) />
 		<cfset setServer(getParameter("server", cgi.server_name)) />
+		
+		<!--- Only create a URLBase if the properties.urlBase doesn't start with https:// or http:// --->
+		<cfif NOT getUrlBase().toLowerCase().startsWith("http://") AND NOT getUrlBase().toLowerCase().startsWith("https://")>
+			<cfset setUrlBase("http://" & getServer() & getUrlBase()) />
+		</cfif>
 
 		<!--- Setup default in parameters so if the endpoint is reloaded by dashboard they don't change --->
 		<cfif NOT IsParameterDefined("authUsername")>
@@ -363,6 +369,12 @@ Custom Configuration:
 						<cfelse>
 							<cfset taskMetadata.retryOnFailure = 0 />
 						</cfif>
+						
+						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ENABLED)>
+							<cfset taskMetadata.enabled = currFunction[variables.ANNOTATION_TASK_ENABLED] />
+						<cfelse>
+							<cfset taskMetadata.enabled = true />
+						</cfif>
 
 						<cfset variables.tasks[taskMetadata.name] = taskMetadata />
 					</cfif>
@@ -392,15 +404,18 @@ Custom Configuration:
 			<cfloop collection="#variables.tasks#" item="key">
 				<cfset task = variables.tasks[key] />
 				
-				<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
-													, getServer() & BuildEndpointUrl(task.name)
-													, task.interval
-													, task.startDate
-													, task.endDate
-													, task.timePeriod
-													, getAuthUsername()
-													, getAuthPassword()
-													, task.requestTimeout) />
+				<!--- Only define tasks that are enabled --->
+				<cfif task.enabled>
+					<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
+														, BuildEndpointUrl(task.name)
+														, task.interval
+														, task.startDate
+														, task.endDate
+														, task.timePeriod
+														, getAuthUsername()
+														, getAuthPassword()
+														, task.requestTimeout) />
+				</cfif>
 			</cfloop>
 		</cfif>
 	</cffunction>
