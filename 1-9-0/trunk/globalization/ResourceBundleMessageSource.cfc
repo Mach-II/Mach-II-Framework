@@ -168,38 +168,38 @@ Created version: 1.9.0
 		<cfset var messageFormat = "" />
 	
 		<cflock name="cachedMessageFormats" timeout="30">
-			<cfset codeStruct = variables.cachedMessageFormats.get(arguments.resourceBundle)/>
+			<cfset codeStruct = variables.cachedMessageFormats.get(arguments.resourceBundle) />
 			
 			<cfif IsDefined("codeStruct")>
 				<cfif StructKeyExists(codeStruct, arguments.code)>
-					<cfset localeStruct = codeStruct[arguments.code]/>
+					<cfset localeStruct = codeStruct[arguments.code] />
 					<cfif StructKeyExists(codeStruct[arguments.code], arguments.locale.toString())>
-						<cfset getLog().trace("Cache hit, returning preconfigured message format object")/>
-						<cfreturn codeStruct[arguments.code][arguments.locale.toString()]/>
+						<cfset getLog().trace("Cache hit, returning preconfigured message format object") />
+						<cfreturn codeStruct[arguments.code][arguments.locale.toString()] />
 					</cfif>
 				</cfif>
 			</cfif>
 			
-			<cfset message = getStringOrEmpty(arguments.resourceBundle, arguments.code)/>
+			<cfset message = getStringOrEmpty(arguments.resourceBundle, arguments.code) />
 
 			<cfif Len(message)>
 				<cfset getLog().trace("Cache not hit; creating and caching new messageFormat object") />
 				<cfif not IsDefined("codeStruct")>
-					<cfset codeStruct = StructNew()/>
+					<cfset codeStruct = StructNew() />
 					<cfset variables.cachedMessageFormats.put(arguments.resourceBundle, codeStruct) />
 				</cfif>
 				<cfif not IsStruct(localeStruct)>
-					<cfset localeStruct = StructNew()/>
-					<cfset codeStruct[arguments.code] = localeStruct/>
+					<cfset localeStruct = StructNew() />
+					<cfset codeStruct[arguments.code] = localeStruct />
 				</cfif>
-				<cfset messageFormat = createMessageFormat(message, arguments.locale)/>
-				<cfset localeStruct[arguments.locale.toString()] = messageFormat/>
-				<cfreturn messageFormat/>
+				<cfset messageFormat = createMessageFormat(message, arguments.locale) />
+				<cfset localeStruct[arguments.locale.toString()] = messageFormat />
+				<cfreturn messageFormat />
 			</cfif>
 
 		</cflock>
 		
-		<cfreturn ""/>
+		<cfreturn "" />
 	</cffunction>
 	
 	<cffunction name="getStringOrEmpty" access="private" returntype="string" output="false">
@@ -207,28 +207,28 @@ Created version: 1.9.0
 		<cfargument name="code" type="string" required="true"/>
 		
 		<cftry>
-			<cfreturn arguments.resourceBundle.getString(arguments.code)/>
+			<cfreturn arguments.resourceBundle.getString(arguments.code) />
 			
 			<cfcatch type="any">
-				<cfreturn ""/>
+				<cfreturn "" />
 			</cfcatch>
 		</cftry>
 	</cffunction>
 	
 	<cffunction name="doGetBundle" access="private" returntype="any" output="false">
-		<cfargument name="basename" type="string" required="true"/>
-		<cfargument name="locale" type="any" required="true"/>
+		<cfargument name="basename" type="string" required="true" />
+		<cfargument name="locale" type="any" required="true" />
 		
 		<cftry>
-			<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties")/>
+			<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties") />
 			<cfcatch type="any">
 				<cftry>
-					<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties")/>
+					<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties") />
 					<cfcatch type="any">
 						<cftry>
-							<cfreturn doGetBundleInternal("#arguments.basename#.properties")/>
+							<cfreturn doGetBundleInternal("#arguments.basename#.properties") />
 							<cfcatch type="any">
-								<cfrethrow/>
+								<cfrethrow />
 							</cfcatch>
 						</cftry>
 					</cfcatch>
@@ -241,38 +241,39 @@ Created version: 1.9.0
 		<cfargument name="filename" type="string" required="true"/>
 		
 		<!--- Cannot initialize Java objects in the var block because we need a try/catch around it --->
-		<cfset var inputStream = ""/>
-		<cfset var resourceBundle = ""/>
+		<cfset var inputStream = "" />
+		<cfset var resourceBundle = "" />
 
 		<cftry>
 			<cfset inputStream = CreateObject("java", "java.io.FileInputStream").init(ExpandPath(arguments.filename)) />
-			<cfset resourceBundle = CreateObject("java", "java.util.PropertyResourceBundle").init(inputStream)/>
-			<cfset inputStream.close()/>
+			<cfset resourceBundle = CreateObject("java", "java.util.PropertyResourceBundle").init(inputStream) />
+			<cfset inputStream.close() />
 
 			<!--- If anything goes wrong, close the file input stream or we will have a memory leak --->
 			<cfcatch type="any">
 				<!--- Only close the inputStream if it exists --->
 				<cfif IsObject(inputStream)>
-					<cfset inputStream.close()/>
+					<cfset inputStream.close() />
 				</cfif>
 				
-				<cfset getLog().trace("Unable to open file: #cfcatch.message#")/>
+				<cfset getLog().trace("Unable to open file: #cfcatch.message#", cfcatch) />
 
-				<cfrethrow/>
+				<cfrethrow />
 			</cfcatch>
 		</cftry>
 
-		<cfreturn resourceBundle/>
-	</cffunction>	
+		<cfreturn resourceBundle />
+	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="setBasenames" access="public" returntype="void" output="false">
 		<cfargument name="basenames" type="Array" required="true"/>
-		<cfset variables.basenames = arguments.basenames/>
+		<cfset variables.basenames = arguments.basenames />
 	</cffunction>
 	<cffunction name="getBasenames" access="public" returntype="Array" output="false">
-		<cfreturn variables.basenames/>
+		<cfreturn variables.basenames />
 	</cffunction>
 
 </cfcomponent>
