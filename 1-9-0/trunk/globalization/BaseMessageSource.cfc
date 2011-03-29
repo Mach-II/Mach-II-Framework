@@ -73,23 +73,24 @@ Created version: 1.9.0
 		hint="Gets a message with args and locale.">
 		<cfargument name="code" type="string" required="true"
 			hint="The message code key." />
-		<cfargument name="args" type="array" required="true"
-			hint="An array of message format arguments." />
+		<cfargument name="args" type="any" required="true"
+			hint="A list or array of message format arguments." />
 		<cfargument name="locale" type="any" required="true"
 			hint="The locale of the message to retrieve." />
 		<cfargument name="defaultMessage" type="string" required="false" default=""
 			hint="The default message if the message does not exist." />
 
-		<cfset var message = getInternalMessage(code, args, locale) />
+		<cfset var message = getMessageInternal(arguments.code, arguments.args, arguments.locale) />
 		
-		<cfif NOT Len(message)>
+		<cfif Len(message)>
+			<cfset getLog().debug("Globalization lookup complete for code '#arguments.code#' (localization: '#arguments.locale.toString()#') with return message: '#message#'") />
+			
+			<cfreturn message />
+		<cfelse>
 			<cfset getLog().debug("Message determined to be empty; returning default message: '#arguments.defaultMessage#'") />
+			
 			<cfreturn defaultMessage />
 		</cfif>
-		
-		<cfset getLog().debug("Globalization lookup complete for code '#arguments.code#' (localization: '#arguments.locale.toString()#') with return message: '#message#'") />
-
-		<cfreturn message />
 	</cffunction>
 	
 	<!---
@@ -100,18 +101,24 @@ Created version: 1.9.0
 		<cfreturn Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
 	</cffunction>
 	
-	<cffunction name="getInternalMessage" access="private" returntype="string" output="false"
+	<cffunction name="getMessageInternal" access="private" returntype="string" output="false"
 		hint="Gets an internal message.">
 		<cfargument name="code" type="string" required="true"
 			hint="The message code key." />
-		<cfargument name="args" type="array" required="true"
-			hint="An array of message format arguments." />
+		<cfargument name="args" type="any" required="true"
+			hint="A list or array of message format arguments." />
 		<cfargument name="locale" type="any" required="true"
 			hint="The locale of the message to retrieve." />
 		
 		<cfset var messageFormat = "" />
-		<cfset var argsToUse = JavaCast("String[]", arguments.args) />
+		<cfset var argsToUse = "" />
 		<cfset var localeArray = "" />
+
+		<cfif NOT IsArray(arguments.args)>
+			<cfset arguments.args = ListToArray(arguments.args) />
+		</cfif>
+
+		<cfset argsToUse = JavaCast("String[]", arguments.args) />
 		
 		<cfif NOT Len(arguments.code)>
 			<cfset getLog().trace("No code given, returning empty string") />
@@ -119,7 +126,7 @@ Created version: 1.9.0
 		</cfif>
 		
 		<cfif NOT IsObject(arguments.locale)>
-			<cfif Len(arguments.locale) GT 0>
+			<cfif Len(arguments.locale)>
 				<cfset localeArray = ListToArray(arguments.locale, "_") />
 				<cfif ArrayLen(localeArray) EQ 1>
 					<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1]) />
@@ -149,12 +156,14 @@ Created version: 1.9.0
 		<cfif IsObject(messageFormat)>
 			<cflock name="_MachIIResourceBundleMessageSource_messageFormat_#variables.uniqueId#" type="readonly" timeout="30">
 				<cfset getLog().trace("MessageFormat object found and resolving.") />
+
 				<cfreturn messageFormat.format(argsToUse) />
 			</cflock>
 		</cfif>
 		
 		<!--- Unable to find suitable match; return empty string --->
 		<cfset getLog().trace("Unable to find suitable MessageFormat object; returning empty string") />
+
 		<cfreturn "" />
 	</cffunction>
 	
@@ -178,6 +187,7 @@ Created version: 1.9.0
 		</cfif>
 		
 		<cfset getLog().trace("Unable to find suitable MessageFormat object; returning empty string") />
+
 		<cfreturn "" />
 	</cffunction>
 	
@@ -186,6 +196,7 @@ Created version: 1.9.0
 		<cfargument name="locale" type="any" required="true" />
 		
 		<cfset getLog().trace("Creating MessageFormat object for message '#arguments.message#', locale '#arguments.locale.toString()#'") />
+
 		<cfreturn CreateObject("java", "java.text.MessageFormat").init(arguments.message, arguments.locale) />
 	</cffunction>
 	
