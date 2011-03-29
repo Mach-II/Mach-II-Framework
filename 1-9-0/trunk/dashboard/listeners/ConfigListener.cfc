@@ -566,7 +566,7 @@ Notes:
 				<cfset tickEnd = getTickcount() />
 				<cfset message.setMessage("Reloaded dependency injection engine for module '#moduleName#' in #NumberFormat(tickEnd - tickStart)#ms.") />
 				<cfcatch type="any">
-					<cfset message.setMessage("Exception occurred during the reload of dependency injection engine in module '#moduleName#'.") />\
+					<cfset message.setMessage("Exception occurred during the reload of dependency injection engine in module '#moduleName#'.") />
 					<cfset message.setType("exception") />
 					<cfset message.setCaughtException(cfcatch) />
 				</cfcatch>
@@ -636,51 +636,72 @@ Notes:
 
 		<cfset data.listeners = ArrayNew(1) />
 
-		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<cfset objectProxy = moduleAppManager.getListenerManager().getListener(objectNames[i]).getProxy() />
-
-			<cfset temp = StructNew() />
-
-			<cfset temp.name = objectNames[i] />
-			<cfset temp.type = objectProxy.getType() />
-			<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
-
-			<cfset ArrayAppend(data.listeners, temp) />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+				<cfset objectProxy = moduleAppManager.getListenerManager().getListener(objectNames[i]).getProxy() />
+	
+				<cfset temp = StructNew() />
+	
+				<cfset temp.name = objectNames[i] />
+				<cfset temp.type = objectProxy.getType() />
+				<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
+	
+				<cfset ArrayAppend(data.listeners, temp) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.dashboard.config.ListenerInfoNotAvailable"
+					message="Unabled to obtain information for a listener named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Listener'."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Plugins --->
 		<cfset objectNames = moduleAppManager.getPluginManager().getPluginNames() />
 		<cfset ArraySort(objectNames, "textnocase", "asc") />
 
 		<cfset data.plugins = ArrayNew(1) />
-
-		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<cfset objectProxy = moduleAppManager.getPluginManager().getPlugin(objectNames[i]).getProxy() />
-
-			<cfset temp = StructNew() />
-
-			<cfset temp.name = objectNames[i] />
-			<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
-
-			<cfset ArrayAppend(data.plugins, temp) />
-		</cfloop>
+		
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+				<cfset objectProxy = moduleAppManager.getPluginManager().getPlugin(objectNames[i]).getProxy() />
+	
+				<cfset temp = StructNew() />
+	
+				<cfset temp.name = objectNames[i] />
+				<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
+	
+				<cfset ArrayAppend(data.plugins, temp) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.dashboard.config.PluginInfoNotAvailable"
+					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Property'."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Filters --->
 		<cfset objectNames = moduleAppManager.getFilterManager().getFilterNames() />
 		<cfset ArraySort(objectNames, "textnocase", "asc") />
 
 		<cfset data.filters = ArrayNew(1) />
-
-		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<cfset objectProxy = moduleAppManager.getFilterManager().getFilter(objectNames[i]).getProxy() />
-
-			<cfset temp = StructNew() />
-
-			<cfset temp.name = objectNames[i] />
-			<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
-
-			<cfset ArrayAppend(data.filters, temp) />
-		</cfloop>
+		
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+				<cfset objectProxy = moduleAppManager.getFilterManager().getFilter(objectNames[i]).getProxy() />
+	
+				<cfset temp = StructNew() />
+	
+				<cfset temp.name = objectNames[i] />
+				<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
+	
+				<cfset ArrayAppend(data.filters, temp) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.dashboard.config.EventFilterInfoNotAvailable"
+					message="Unabled to obtain information for an event-filter named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.EventFilter'."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Configurable Properties --->
 		<cfset objectNames = moduleAppManager.getPropertyManager().getConfigurablePropertyNames() />
@@ -688,16 +709,23 @@ Notes:
 
 		<cfset data.properties = ArrayNew(1) />
 
-		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<cfset objectProxy = moduleAppManager.getPropertyManager().getProperty(objectNames[i]).getProxy() />
-
-			<cfset temp = StructNew() />
-
-			<cfset temp.name = objectNames[i] />
-			<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
-
-			<cfset ArrayAppend(data.properties, temp) />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+				<cfset objectProxy = moduleAppManager.getPropertyManager().getProperty(objectNames[i]).getProxy() />
+	
+				<cfset temp = StructNew() />
+	
+				<cfset temp.name = objectNames[i] />
+				<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() />
+	
+				<cfset ArrayAppend(data.properties, temp) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.dashboard.config.PropertyInfoNotAvailable"
+					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Listener'."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- Endpoints --->
 		<cfset objectNames = moduleAppManager.getEndpointManager().getLocalEndpointNames() />
@@ -705,16 +733,23 @@ Notes:
 
 		<cfset data.endpoints = ArrayNew(1) />
 
-		<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
-			<cfset objectProxy = moduleAppManager.getEndpointManager().getEndpointByName(objectNames[i]).getProxy() />
-
-			<cfset temp = StructNew() />
-
-			<cfset temp.name = objectNames[i] />
-			<<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
-
-			<cfset ArrayAppend(data.endpoints, temp) />
-		</cfloop>
+		<cftry>
+			<cfloop from="1" to="#ArrayLen(objectNames)#" index="i">
+				<cfset objectProxy = moduleAppManager.getEndpointManager().getEndpointByName(objectNames[i]).getProxy() />
+	
+				<cfset temp = StructNew() />
+	
+				<cfset temp.name = objectNames[i] />
+				<<cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
+	
+				<cfset ArrayAppend(data.endpoints, temp) />
+			</cfloop>
+			<cfcatch type="any">
+				<cfthrow type="MachII.dashboard.config.EndpointInfoNotAvailable"
+					message="Unabled to obtain information for an endpoint named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'."
+					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 
 		<!--- View-Loaders --->
 		<cfset objectNames = moduleAppManager.getViewManager().getViewLoaders() />
@@ -727,7 +762,6 @@ Notes:
 
 			<cfset temp.name = i />
 			<cfset temp.shouldReloadObject = false />
-			<!--- <cfset temp.shouldReloadObject = objectProxy.shouldReloadObject() /> --->
 
 			<cfset ArrayAppend(data.viewLoaders, temp) />
 		</cfloop>
