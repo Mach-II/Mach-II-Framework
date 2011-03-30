@@ -66,6 +66,10 @@ Notes:
 				<td valign="top"><p>#getParameter("name")#</p></td>
 			</tr>
 			<tr>
+				<td valign="top"><h4>Type</h4></td>
+				<td valign="top"><p>#variables.exception.getType()#</p></td>
+			</tr>
+			<tr>
 				<td valign="top"><h4>Message</h4></td>
 				<td valign="top"><p>#variables.exception.getMessage()#</p></td>
 			</tr>
