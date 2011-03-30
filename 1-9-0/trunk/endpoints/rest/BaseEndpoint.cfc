@@ -492,10 +492,11 @@ To Test it out, do the following:
 		<cfset var currMetadata = "" />
 		<cfset var currFunction = "" />
 		<cfset var currRestUri = "" />
-		<cfset var currHttpMethod = "" />
+		<cfset var currHttpMethods = "" />
 		<cfset var currRestUriMetadata = StructNew() />
 		<cfset var parameter = "" />
 		<cfset var i = 0 />
+		<cfset var j = 0 />
 		<cfset var key = "" />
 
 		<cfif ArrayLen(arguments.restMethodMetadata)>
@@ -519,9 +520,9 @@ To Test it out, do the following:
 
 						<!--- Default to GET method --->
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_REST_METHOD)>
-							<cfset currHttpMethod = currFunction[variables.ANNOTATION_REST_METHOD] />
+							<cfset currHttpMethods = ListToArray(currFunction[variables.ANNOTATION_REST_METHOD]) />
 						<cfelse>
-							<cfset currHttpMethod = "GET" />
+							<cfset currHttpMethods = "GET" />
 						</cfif>
 
 						<!--- Default to global setting --->
@@ -541,25 +542,27 @@ To Test it out, do the following:
 								<cfbreak/>
 							</cfif>
 						</cfloop>
-
-						<!--- Create instance of Uri and add it to the UriCollection. --->
-						<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
-								currFunction[variables.ANNOTATION_REST_URI]
-								, currHttpMethod
-								, currFunction.name
-								, getParameter("name")
-								, currRestUriMetadata
-								, getPossibleFormatList()) />
-
-						<!---
-						Check for already added URI as we do not want to add in duplicates created by inheritance
-						We loop from top level object first so super class are of a lesser importance
-						Our duplicate check looks at the regex, http method and function name as there could
-						easily be duplicate uriRegex and http method with different function names.
-						--->
-						<cfif NOT variables.restUris.isUriDefined(currRestUri, "uriRegex,httpMethod,functionName")>
-							<cfset variables.restUris.addUri(currRestUri) />
-						</cfif>
+						
+						<cfloop from="1" to="#ArrayLen(currHttpMethods)#" index="j">
+							<!--- Create instance of Uri and add it to the UriCollection. --->
+							<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
+									currFunction[variables.ANNOTATION_REST_URI]
+									, currHttpMethods[j]
+									, currFunction.name
+									, getParameter("name")
+									, currRestUriMetadata
+									, getPossibleFormatList()) />
+	
+							<!---
+							Check for already added URI as we do not want to add in duplicates created by inheritance
+							We loop from top level object first so super class are of a lesser importance
+							Our duplicate check looks at the regex, http method and function name as there could
+							easily be duplicate uriRegex and http method with different function names.
+							--->
+							<cfif NOT variables.restUris.isUriDefined(currRestUri, "uriRegex,httpMethod,functionName")>
+								<cfset variables.restUris.addUri(currRestUri) />
+							</cfif>
+						</cfloop>
 					</cfif>
 				</cfloop>
 			</cfif>
