@@ -49,36 +49,53 @@ Updated version: 1.9.0
 Notes:
 --->
 <cfset variables.exception = event.getArg("exception") />
-
-<h3>Mach-II Endpoint Exception</h3>
-
 <cfoutput>
-<table>
-	<tr>
-		<td valign="top"><h4>Message</h4></td>
-		<td valign="top"><p>#variables.exception.getMessage()#</p></td>
-	</tr>
-	<tr>
-		<td valign="top"><h4>Detail</h4></td>
-		<td valign="top"><p>#variables.exception.getDetail()#</p></td>
-	</tr>
-	<tr>
-		<td valign="top"><h4>Extended Info</h4></td>
-		<td valign="top"><p>#variables.exception.getExtendedInfo()#</p></td>
-	</tr>
-	<tr>
-		<td valign="top"><h4>Tag Context</h4></td>
-		<td valign="top">
-			<cfset variables.tagCtxArr = variables.exception.getTagContext() />
-			<cfloop index="i" from="1" to="#ArrayLen(variables.tagCtxArr)#">
-				<cfset variables.tagCtx = variables.tagCtxArr[i] />
-				<p>#variables.tagCtx['template']# (#variables.tagCtx['line']#)</p>
-			</cfloop>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top"><h4>Caught Exception</h4></td>
-		<td valign="top"><cfdump var="#variables.exception.getCaughtException()#" expand="false" /></td>
-	</tr>
-</table>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html>
+	<head>
+		<title>Mach-II Endpoint Exception</title>
+    	<meta http-equiv="Content-Type" content="text/html" />
+	</head>
+	<body>
+		<h3>Mach-II Endpoint Exception</h3>
+		
+		<table>
+			<tr>
+				<td valign="top"><h4>Endpoint</h4></td>
+				<td valign="top"><p>#getParameter("name")#</p></td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Message</h4></td>
+				<td valign="top"><p>#variables.exception.getMessage()#</p></td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Detail</h4></td>
+				<td valign="top"><p>#variables.exception.getDetail()#</p></td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Extended Info</h4></td>
+				<td valign="top"><p>#variables.exception.getExtendedInfo()#</p></td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Tag Context</h4></td>
+				<td valign="top">
+					<cfset variables.tagCtxArr = variables.exception.getTagContext() />
+					<cfloop index="i" from="1" to="#ArrayLen(variables.tagCtxArr)#">
+						<cfset variables.tagCtx = variables.tagCtxArr[i] />
+						<p>#variables.tagCtx['template']# (#variables.tagCtx['line']#)</p>
+					</cfloop>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Caught Exception</h4></td>
+				<td valign="top"><cfdump var="#variables.exception.getCaughtException()#" expand="false" /></td>
+			</tr>
+			<tr>
+				<td valign="top"><h4>Event</h4></td>
+				<td valign="top"><cfdump var="#event.getArgs()#" expand="false" /></td>
+			</tr>
+		</table>
+	</body>
+</html>
 </cfoutput>
