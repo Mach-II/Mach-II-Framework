@@ -104,14 +104,15 @@ Custom Configuration:
 	--->
 	<!--- Constants for the annotations we allow in ScheduledTask sub-classes --->
 	<cfset variables.ANNOTATION_TASK_BASE = "TASK" />
-	<cfset variables.ANNOTATION_TASK_ENABLED = variables.ANNOTATION_TASK_BASE & ":ENABLED" />
-	<cfset variables.ANNOTATION_TASK_INTERVAL = variables.ANNOTATION_TASK_BASE & ":INTERVAL" />
-	<cfset variables.ANNOTATION_TASK_STARTDATE = variables.ANNOTATION_TASK_BASE & ":STARTDATE" />
-	<cfset variables.ANNOTATION_TASK_ENDDATE = variables.ANNOTATION_TASK_BASE & ":ENDDATE" />
-	<cfset variables.ANNOTATION_TASK_TIMEPERIOD = variables.ANNOTATION_TASK_BASE & ":TIMEPERIOD" />
-	<cfset variables.ANNOTATION_TASK_REQUESTTIMEOUT = variables.ANNOTATION_TASK_BASE & ":REQUESTTIMEOUT" />
-	<cfset variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS = variables.ANNOTATION_TASK_BASE & ":ALLOWCONCURRENTEXECUTIONS" />
-	<cfset variables.ANNOTATION_TASK_RETRYONFAILURE = variables.ANNOTATION_TASK_BASE & ":RETRYONFAILURE" />
+	<cfset variables.ANNOTATION_TASK_DELIM = ":" />
+	<cfset variables.ANNOTATION_TASK_ENABLED = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "ENABLED" />
+	<cfset variables.ANNOTATION_TASK_INTERVAL = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "INTERVAL" />
+	<cfset variables.ANNOTATION_TASK_STARTDATE = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "STARTDATE" />
+	<cfset variables.ANNOTATION_TASK_ENDDATE = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "ENDDATE" />
+	<cfset variables.ANNOTATION_TASK_TIMEPERIOD = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "TIMEPERIOD" />
+	<cfset variables.ANNOTATION_TASK_REQUESTTIMEOUT = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "REQUESTTIMEOUT" />
+	<cfset variables.ANNOTATION_TASK_ALLOWCONCURRENTEXECUTIONS = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "ALLOWCONCURRENTEXECUTIONS" />
+	<cfset variables.ANNOTATION_TASK_RETRYONFAILURE = variables.ANNOTATION_TASK_BASE & variables.ANNOTATION_TASK_DELIM & "RETRYONFAILURE" />
 	<cfset variables.STARTDATE_DEFAULT = "8/1/03" /><!--- The date of our first release which is sufficiently enough in the past --->
 	<cfset variables.REQUESTTIMEOUT_DEFAULT = 180 />
 

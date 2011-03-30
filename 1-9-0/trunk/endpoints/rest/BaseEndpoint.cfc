@@ -120,9 +120,10 @@ To Test it out, do the following:
 	--->
 	<!--- Constants for the annotations we allow in RestEndpoint sub-classes --->
 	<cfset variables.ANNOTATION_REST_BASE = "REST" />
-	<cfset variables.ANNOTATION_REST_URI = variables.ANNOTATION_REST_BASE & ":URI" />
-	<cfset variables.ANNOTATION_REST_METHOD = variables.ANNOTATION_REST_BASE & ":METHOD" />
-	<cfset variables.ANNOTATION_REST_AUTHENTICATE = variables.ANNOTATION_REST_BASE & ":AUTHENTICATE" />
+	<cfset variables.ANNOTATION_REST_DELIM = ":" />
+	<cfset variables.ANNOTATION_REST_URI = variables.ANNOTATION_REST_BASE & variables.ANNOTATION_REST_DELIM & "URI" />
+	<cfset variables.ANNOTATION_REST_METHOD = variables.ANNOTATION_REST_BASE & variables.ANNOTATION_REST_DELIM & "METHOD" />
+	<cfset variables.ANNOTATION_REST_AUTHENTICATE = variables.ANNOTATION_REST_BASE & variables.ANNOTATION_REST_DELIM & "AUTHENTICATE" />
 	<!--- Other constants --->
 	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml,txt" />
 
