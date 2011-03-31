@@ -103,9 +103,9 @@ Notes:
 			hint="The data to end the task. Use '0' for infinity." />
 		<cfargument name="timePeriod" type="string" required="false"
 			hint="The time perdiod to run the task. Use 24 hour time (ex. run only between 5-7pm 17:00-19:00)" />
-		<cfargument name="username"  type="string" required="false"
+		<cfargument name="username" type="string" required="false" default=""
 			hint="The username for basic HTTP access authentication." />
-		<cfargument name="password" type="string" required="false"
+		<cfargument name="password" type="string" required="false" default=""
 			hint="The password for basic HTTP access authentication." />
 		<cfargument name="requestTimeout" type="numeric" required="false"
 			default="90"
@@ -116,9 +116,14 @@ Notes:
 			<cfset arguments.interval = convertTimespanStringToSeconds(arguments.interval) />
 		</cfif>
 		
+		<!--- Convert the dates OpenBD requires dates to be in the mm/dd/yyyy where ACF is more forgiving --->
+		<cfset arguments.startDate = DateFormat(arguments.startDate, "mm/dd/yyyy") />
+				
 		<!--- Use "text" comparison since this could be 0 or a date --->
 		<cfif StructKeyExists(arguments, "endDate") AND arguments.endDate IS "0">
 			<cfset StructDelete(arguments, "endDate", false) />
+		<cfelseif StructKeyExists(arguments, "endDate") AND arguments.endDate.toLowerCase().startsWith("ts {'")>
+			<cfset arguments.endDate = DateFormat(arguments.endDate, "mm/dd/yyyy") />
 		</cfif>
 		
 		<!--- Convert time period into start/EndTime keys (if required) --->
@@ -132,10 +137,35 @@ Notes:
 				<cfthrow type="MachII.util.cfmlEngine.InvalidTimePeriodFormat" />
 			</cfif>
 		<cfelse>
-			<cfset arguments.startTime = "00:00" />
+			<cfset arguments.startTime = "00:00:00" />
+			<cfset arguments.endTime = "23:59:00" />
 		</cfif>
 		
-		<cfschedule action="update" operation="HTTPRequest" attributeCollection="#arguments#" />
+		<cfif StructKeyExists(arguments, "endDate")>
+			<cfschedule action="update" 
+				task="#arguments.task#" 
+				interval="#arguments.interval#"
+				operation="HTTPRequest" 
+				url="#arguments.url#" 
+				startDate="#arguments.startDate#"
+				startTime="#arguments.startTime#"
+				endDate="#arguments.endDate#"
+				endTime="#arguments.endTime#"
+				username="#arguments.username#"
+				password="#arguments.password#"
+				requestTimeout="#arguments.requestTimeout#" />
+		<cfelse>
+			<cfschedule action="update" 
+				task="#arguments.task#" 
+				interval="#arguments.interval#"
+				operation="HTTPRequest" 
+				url="#arguments.url#" 
+				startDate="#arguments.startDate#"
+				startTime="#arguments.startTime#"
+				username="#arguments.username#"
+				password="#arguments.password#"
+				requestTimeout="#arguments.requestTimeout#" />
+		</cfif>
 	</cffunction>
 	
 	<!---
