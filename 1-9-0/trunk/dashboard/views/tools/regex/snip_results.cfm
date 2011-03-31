@@ -42,10 +42,13 @@ Notes:
 			<cfif ArrayLen(variables.results[i].matches)>
 				<cfloop from="1" to="#ArrayLen(variables.matches)#" index="j">
 					<tr class="<view:flip value="#i#" items="shade" />">
-						<td><pre style="wrap">#HtmlEditFormat(variables.matches[j].text)#</pre></td>
+						<td><p><form:textarea name="pattern_#i#_#j#" id="pattern_#i#_#j#" value="#variables.matches[j].text#" style="width:100%;" /></p></td>
 						<td><p>#variables.matches[j].position#</p></td>
 						<td><p>#variables.matches[j].length#</p></td>
 					</tr>
+					<view:script outputType="inline">
+						new TextAreaResize('pattern_#i#_#j#');
+					</view:script>
 				</cfloop>
 			<cfelse>
 				<tr>
@@ -54,7 +57,7 @@ Notes:
 			</cfif>
 		<cfelse>
 			<tr>
-				<td class="shade" colspan="3"><p class="red"><em>Exception: #variables.matches#</em></p></td>
+				<td class="shade" colspan="3"><p class="red"><em>Exception: #variables[i].matches#</em></p></td>
 			</tr>
 		</cfif>
 		</table>

@@ -173,9 +173,9 @@ Notes:
 			<cfif Len(arguments.patterns[i])>
 				<cftry>
 					<cfif arguments.caseSensitive>
-						<cfset results[i] = REReplace(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
+						<cfset results[i].matches = REReplace(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
 					<cfelse>
-						<cfset results[i] = REReplaceNoCase(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
+						<cfset results[i].matches = REReplaceNoCase(arguments.input, arguments.patterns[i], arguments.replaces[i], "all") />
 					</cfif>
 					<cfcatch type="any">
 						<cfset results[i].exception = true />
