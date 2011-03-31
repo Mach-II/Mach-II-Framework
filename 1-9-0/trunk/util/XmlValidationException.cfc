@@ -82,6 +82,7 @@ Notes:
 		<cfset setFatalErrors(arguments.validationResult.fatalErrors) />
 		<cfset setErrors(arguments.validationResult.errors) />
 		<cfset setWarnings(arguments.validationResult.warnings) />
+		<cfset setExceptionStatus(NOT arguments.validationResult.status) />
 		<cfset setXmlPath(arguments.xmlPath) />
 		<cfset setDtdPath(arguments.dtdPath) />
 
@@ -90,31 +91,23 @@ Notes:
 	
 	<cffunction name="getFormattedMessage" access="public" returntype="string" output="false"
 		hint="Gets a message from the errors/warnings for display.">
-		<cfargument name="rawMessage" type="string" required="false"
+		<cfargument name="rawMessage" type="string" required="false" default="#findMostSevereMessage()#"
 			hint="A raw message or this method will select the most severe message available." />
 
-		<cfset var formattedMessage = "" />
-		
-		<cfif NOT StructKeyExists(arguments, "rawMessage")>
-			<cfset arguments.rawMessage = findMostSevereMessage() />
-		</cfif>
+		<cfset var formattedMessage = "Error validating XML file: " />
+		<cfset var partedMessage = getPartedMessage(arguments.rawMessage)/>
 
-		<cfset formattedMessage = "Error validating XML file: " />
 		<cfif getXmlPath() NEQ ''>
 			<cfset formattedMessage = formattedMessage & getXmlPath() & ": " />
+		</cfif>		
+
+		<cfset formattedMessage = formattedMessage & "Line " & partedMessage.line & ", " />
+		<cfset formattedMessage = formattedMessage & "Column " & partedMessage.column />
+		<cfif Len(partedMessage.message)>
+			<cfset formattedMessage = formattedMessage & ": " & partedMessage.message />
 		</cfif>
-		
-		<cfif ListLen(arguments.rawMessage, ":") GTE 2>
-			<cfset formattedMessage = formattedMessage & "Line " & ListGetAt(arguments.rawMessage, 2, ':') & ", " />
-		</cfif>
-		<cfif ListLen(arguments.rawMessage, ":") GTE 3>
-			<cfset formattedMessage = formattedMessage & "Column " & ListGetAt(arguments.rawMessage, 3, ':') & ": " />
-		</cfif>
-		<cfif ListLen(arguments.rawMessage, ":") GTE 4>
-			<cfset formattedMessage = formattedMessage & Trim(ListGetAt(arguments.rawMessage, 4, ':')) />
-		</cfif>
-		<cfif ListLen(arguments.rawMessage, ":") GTE 5>
-			<cfset formattedMessage = formattedMessage & " - " & Trim(ListGetAt(arguments.rawMessage, 5, ':')) />
+		<cfif Len(partedMessage.detail)>
+			<cfset formattedMessage = formattedMessage & " - " & partedMessage.detail />
 		</cfif>
 
 		<cfreturn formattedMessage />
@@ -122,19 +115,24 @@ Notes:
 	
 	<cffunction name="getPartedMessage" access="public" returntype="struct" output="false"
 		hint="Takes a message breaks it into a parted message struct.">
-		<cfargument name="rawMessage" type="string" required="false"
+		<cfargument name="rawMessage" type="string" required="false" default="#findMostSevereMessage()#"
 			hint="A raw message or this method will select the most severe message available." />
 
 		<cfset var partedMessage = StructNew() />
+		
+		<!---
+			ACF stupidly uses ":" for list when namespaces are being used.
+			This causes issues because ";" is the list delim. Change all:
+			'{"": to '{"";;;;
+			'{namespace; to '{namespace;;;;
+			Then we convert back.
+		--->
+		<cfset arguments.rawMessage = REReplaceNoCase(arguments.rawMessage, "\'\{(""|.*):(.*?)}", "'{\1;;;;\2?}", "all") />
 		
 		<cfset partedMessage.line = "" />
 		<cfset partedMessage.column = "" />
 		<cfset partedMessage.message = "" />
 		<cfset partedMessage.detail = "" />
-		
-		<cfif NOT StructKeyExists(arguments, "rawMessage")>
-			<cfset arguments.rawMessage = findMostSevereMessage() />
-		</cfif>
 		
 		<cfset partedMessage.severity = REReplaceNoCase(ListGetAt(arguments.rawMessage, 1, ":"), "\[(.*)\]", "\1", "all") />
 		
@@ -145,10 +143,10 @@ Notes:
 			<cfset partedMessage.column = ListGetAt(arguments.rawMessage, 3, ':')/>
 		</cfif>
 		<cfif ListLen(arguments.rawMessage, ":") GTE 4>
-			<cfset partedMessage.message = Trim(ListGetAt(arguments.rawMessage, 4, ':')) />
+			<cfset partedMessage.message = REReplaceNoCase(Trim(ListGetAt(arguments.rawMessage, 4, ':')), "\'\{(""|.*?);;;;(.*?)}", "'{\1:.\2}", "all") />
 		</cfif>
 		<cfif ListLen(arguments.rawMessage, ":") GTE 5>
-			<cfset partedMessage.detail = Trim(ListGetAt(arguments.rawMessage, 5, ':')) />
+			<cfset partedMessage.detail = REReplaceNoCase(Trim(ListGetAt(arguments.rawMessage, 5, ':')), "\'\{(""|.*?);;;;(.*?)}", "'{\1:.\2}", "all") />
 		</cfif>
 		
 		<cfreturn partedMessage />
@@ -190,6 +188,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getDtdPath" access="public" returntype="string" output="false">
 		<cfreturn variables.dtdPath />
+	</cffunction>
+
+	<cffunction name="setExceptionStatus" access="public" returntype="void" output="false">
+		<cfargument name="exceptionStatus" type="boolean" required="false" />
+		<cfset variables.exceptionStatus = arguments.exceptionStatus />
+	</cffunction>
+	<cffunction name="getExceptionStatus" access="public" returntype="boolean" output="false">
+		<cfreturn variables.exceptionStatus />
 	</cffunction>
 
 	<cffunction name="setErrors" access="public" returntype="void" output="false">
