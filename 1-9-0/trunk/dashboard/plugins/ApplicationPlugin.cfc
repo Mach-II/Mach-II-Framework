@@ -112,10 +112,8 @@ Notes:
 			<cfset redirectEvent("info.index") />
 		</cfif>
 		
-		<!--- Disable CFML debugging out for AJAX requests --->
-		<cfif StructKeyExists(httpRequestData.headers, "X-Prototype-Version")>
-			<cfsetting showdebugoutput="false" />
-		</cfif>
+		<!--- Disable CFML debugging output for all requests --->
+		<cfsetting showdebugoutput="false" />
 
 		<!--- Check if login is restricted by IP --->
 		<cfif getLoginIPsEnabled() AND NOT isLoginIP() AND isProtectedEvent(requestEventName)>
