@@ -65,6 +65,11 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
+	<!--- Inherited from base class --->
+
+	<!---
+	PUBLIC FUNCTIONS
+	--->
 	<cffunction name="wrapValidationResult" access="public" returntype="XmlValidationException" output="false"
 		hint="Wraps the result of a failed XML validation.">
 		<cfargument name="validationResult" type="struct" required="true"
@@ -82,26 +87,16 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
-
-	<!---
-	PUBLIC FUNCTIONS
-	--->
+	
 	<cffunction name="getFormattedMessage" access="public" returntype="string" output="false"
 		hint="Gets a message from the errors/warnings for display.">
+		<cfargument name="rawMessage" type="string" required="false"
+			hint="A raw message or this method will select the most severe message available." />
 
-		<cfset var rawMessage = "" />
 		<cfset var formattedMessage = "" />
-
-		<!--- Display error messages in order of important: fatal, error and warning --->
-		<cfif ArrayLen(variables.fatalErrors) GT 0>
-			<cfset rawMessage = variables.fatalErrors[1] />
-		<cfelseif ArrayLen(variables.errors) GT 0>
-			<cfset rawMessage = variables.errors[1] />
-		<cfelseif ArrayLen(variables.warnings) GT 0>
-			<cfset rawMessage = variables.warnings[1] />
-		<cfelse>
-			<cfthrow type="MachII.framework.NoMessagesDefined"
-				message="There are no XML validation error messages defined. Cannot display a formatted message." />
+		
+		<cfif NOT StructKeyExists(arguments, "rawMessage")>
+			<cfset arguments.rawMessage = findMostSevereMessage() />
 		</cfif>
 
 		<cfset formattedMessage = "Error validating XML file: " />
@@ -109,20 +104,73 @@ Notes:
 			<cfset formattedMessage = formattedMessage & getXmlPath() & ": " />
 		</cfif>
 		
-		<cfif ListLen(rawMessage, ":") GTE 2>
-			<cfset formattedMessage = formattedMessage & "Line " & ListGetAt(rawMessage,2,':') & ", " />
+		<cfif ListLen(arguments.rawMessage, ":") GTE 2>
+			<cfset formattedMessage = formattedMessage & "Line " & ListGetAt(arguments.rawMessage, 2, ':') & ", " />
 		</cfif>
-		<cfif ListLen(rawMessage, ":") GTE 3>
-			<cfset formattedMessage = formattedMessage & "Column " & ListGetAt(rawMessage,3,':') & ": " />
+		<cfif ListLen(arguments.rawMessage, ":") GTE 3>
+			<cfset formattedMessage = formattedMessage & "Column " & ListGetAt(arguments.rawMessage, 3, ':') & ": " />
 		</cfif>
-		<cfif ListLen(rawMessage, ":") GTE 4>
-			<cfset formattedMessage = formattedMessage & ListGetAt(rawMessage,4,':') />
+		<cfif ListLen(arguments.rawMessage, ":") GTE 4>
+			<cfset formattedMessage = formattedMessage & Trim(ListGetAt(arguments.rawMessage, 4, ':')) />
 		</cfif>
-		<cfif ListLen(rawMessage, ":") GTE 5>
-			<cfset formattedMessage = formattedMessage & " - " & ListGetAt(rawMessage,5,':') />
+		<cfif ListLen(arguments.rawMessage, ":") GTE 5>
+			<cfset formattedMessage = formattedMessage & " - " & Trim(ListGetAt(arguments.rawMessage, 5, ':')) />
 		</cfif>
 
 		<cfreturn formattedMessage />
+	</cffunction>
+	
+	<cffunction name="getPartedMessage" access="public" returntype="struct" output="false"
+		hint="Takes a message breaks it into a parted message struct.">
+		<cfargument name="rawMessage" type="string" required="false"
+			hint="A raw message or this method will select the most severe message available." />
+
+		<cfset var partedMessage = StructNew() />
+		
+		<cfset partedMessage.line = "" />
+		<cfset partedMessage.column = "" />
+		<cfset partedMessage.message = "" />
+		<cfset partedMessage.detail = "" />
+		
+		<cfif NOT StructKeyExists(arguments, "rawMessage")>
+			<cfset arguments.rawMessage = findMostSevereMessage() />
+		</cfif>
+		
+		<cfset partedMessage.severity = REReplaceNoCase(ListGetAt(arguments.rawMessage, 1, ":"), "\[(.*)\]", "\1", "all") />
+		
+		<cfif ListLen(arguments.rawMessage, ":") GTE 2>
+			<cfset partedMessage.line = ListGetAt(arguments.rawMessage, 2, ':') />
+		</cfif>
+		<cfif ListLen(arguments.rawMessage, ":") GTE 3>
+			<cfset partedMessage.column = ListGetAt(arguments.rawMessage, 3, ':')/>
+		</cfif>
+		<cfif ListLen(arguments.rawMessage, ":") GTE 4>
+			<cfset partedMessage.message = Trim(ListGetAt(arguments.rawMessage, 4, ':')) />
+		</cfif>
+		<cfif ListLen(arguments.rawMessage, ":") GTE 5>
+			<cfset partedMessage.detail = Trim(ListGetAt(arguments.rawMessage, 5, ':')) />
+		</cfif>
+		
+		<cfreturn partedMessage />
+	</cffunction>
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="findMostSevereMessage" access="private" returntype="string" output="false"
+		hint="Find most severe message available.">
+
+		<!--- Display error messages in order of important: fatal, error and warning --->
+		<cfif ArrayLen(variables.fatalErrors) GT 0>
+			<cfreturn variables.fatalErrors[1] />
+		<cfelseif ArrayLen(variables.errors) GT 0>
+			<cfreturn variables.errors[1] />
+		<cfelseif ArrayLen(variables.warnings) GT 0>
+			<cfreturn variables.warnings[1] />
+		<cfelse>
+			<cfthrow type="MachII.framework.NoMessagesDefined"
+				message="There are no XML validation error messages defined." />
+		</cfif>		
 	</cffunction>
 
 	<!---
