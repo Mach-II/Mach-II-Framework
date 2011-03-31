@@ -140,7 +140,7 @@ Notes:
 			<cfset partedMessage.line = ListGetAt(arguments.rawMessage, 2, ':') />
 		</cfif>
 		<cfif ListLen(arguments.rawMessage, ":") GTE 3>
-			<cfset partedMessage.column = ListGetAt(arguments.rawMessage, 3, ':')/>
+			<cfset partedMessage.column = ListGetAt(arguments.rawMessage, 3, ':') />
 		</cfif>
 		<cfif ListLen(arguments.rawMessage, ":") GTE 4>
 			<cfset partedMessage.message = REReplaceNoCase(Trim(ListGetAt(arguments.rawMessage, 4, ':')), "\'\{(""|.*?);;;;(.*?)}", "'{\1:.\2}", "all") />
