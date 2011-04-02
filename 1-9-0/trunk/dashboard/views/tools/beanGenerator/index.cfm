@@ -63,6 +63,7 @@ Notes:
 </cfsavecontent>
 
 <cfhtmlhead text="#beanHeaderData#" />
+<dashboard:displayMessage />
 <h1>Bean Generator</h1>
 
 <table border="0">
@@ -90,7 +91,7 @@ Notes:
 							</tr>
 							<tr>
 								<td colspan="2">
-									<label>Extends<br/><form:input name="cfcextends" size="40" /></label>
+									<label>Extends<br/><form:input name="cfcextends" size="50" /></label>
 								</td>
 							</tr>
 							<tr>
@@ -125,7 +126,7 @@ Notes:
 									<form:checkbox name="generateLTO" value="y" />Generate LTO?&nbsp;&nbsp;
 									<form:checkbox name="createLTOMethods" value="y" />LTO methods<br/>
 									<span style="margin-left:8px;">
-										Path to LTO<br/><input name="toName" type="text" id="toPath" size="40" />
+										Path to LTO<br/><input name="toName" type="text" id="toPath" size="50" />
 									</span>
 								</td>
 							</tr>
@@ -140,7 +141,7 @@ Notes:
 								<td>
 									<label><form:checkbox name="generateStub" value="y" />Generate Flex stub?</label>
 									<label><form:checkbox  name="createProperties" value="y" />Create cfproperties?</label> 
-									<label>Flex AS Package<br/><form:input  name="flexAlias" size="40" /></label>
+									<label>Flex AS Package<br/><form:input  name="flexAlias" size="50" /></label>
 								</td>
 							</tr>
 						</table>
@@ -161,9 +162,11 @@ Notes:
 			<table border="0">
 				<tr>
 					<td>
-						<form:form name="beanResults" action="rooibos.htm" method="post">
+						<form:form name="beanResults" action="#BuildURL('tools.beanGenerator.saveGeneratedBean')#" method="post">
 							<h2 style="margin-bottom:5px;">Generated Bean</h2>
 							<form:textarea name="results" rows="30" cols="110" class="beanResults" onclick="javascript:this.focus();this.select()" />
+							Write CFC to file?<br/>Enter full path and file name in relation to: #ExpandPath('/')#<br/><form:input name="fileLocation" size="75" value="" /><br/>
+							<form:button name="save" value="Create Bean CFC" />
 						</form:form>
 					</td>
 				</tr>
@@ -171,7 +174,7 @@ Notes:
 					<td>
 						<form:form name="transferObjectResults" action="rooibos.htm" method="post">
 						<h2 style="margin-bottom:5px;">Generated Lightweight Tranfer Object</h2>
-						<form:textarea name="results" rows="15" cols="110" class="ltoResults" onclick="javascript:this.focus();this.select()" />
+						<form:textarea name="results" rows="21" cols="110" class="ltoResults" onclick="javascript:this.focus();this.select()" />
 					</form:form>
 					</td>
 				</tr>
@@ -179,7 +182,7 @@ Notes:
 					<td>
 						<form:form name="stubResults" action="rooibos.htm" method="post">
 						<h2 style="margin-bottom:5px;">Generated Stub</h2>
-						<form:textarea name="results" rows="15" cols="110" class="stubResults" onclick="javascript:this.focus();this.select()"/>
+						<form:textarea name="results" rows="21" cols="110" class="stubResults" onclick="javascript:this.focus();this.select()"/>
 					</form:form>
 					</td>
 				</tr>

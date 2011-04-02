@@ -173,6 +173,7 @@ Notes:
 		<listener name="debugging" type="MachII.dashboard.listeners.DebuggingListener"/>
 		<listener name="info" type="MachII.dashboard.listeners.InfoListener"/>
 		<listener name="logging" type="MachII.dashboard.listeners.LoggingListener"/>
+		<listener name="tools.beanGenerator" type="MachII.dashboard.listeners.tools.BeanGeneratorListener" />
 		<listener name="tools.regex" type="MachII.dashboard.listeners.tools.RegExListener"/>
 		<listener name="tools.scribble" type="MachII.dashboard.listeners.tools.ScribbleListener"/>
 		<listener name="tools.wadl" type="MachII.dashboard.listeners.tools.WadlListener"/>
@@ -405,6 +406,11 @@ Notes:
 			<view-page name="tools.snip_pageNavTabs" contentArg="layout.snip_pageNavTabs"/>
 			<view-page name="tools.beanGenerator.index" contentArg="layout.content"/>
 			<execute subroutine="doLayout"/>
+		</event-handler>
+		
+		<event-handler event="tools.beanGenerator.saveGeneratedBean" access="public">
+			<notify listener="tools.beanGenerator" method="saveBeanCFC"/>
+			<redirect event="tools.beanGenerator" persist="true"/>
 		</event-handler>
 		
 		<event-handler event="tools.scribble" access="public">
