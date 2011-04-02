@@ -49,12 +49,145 @@ Updated version: 1.1.0
 Notes:
 --->
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
+	<cfimport prefix="form" taglib="/MachII/customtags/form" />
 	<view:meta type="title" content="Tools - Bean Generator" />
 </cfsilent>
 <cfoutput>
+
+<cfsavecontent variable="beanHeaderData">
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/rooibos.js" outputType="inline" />
+	<style>
+		table { font-size: 100%; /* another IE hack */ }
+		input, textarea, select {	font-size: 90%;	font-family: Arial, Helvetica, sans-serif;}
+	</style>
+</cfsavecontent>
+
+<cfhtmlhead text="#beanHeaderData#" />
 <h1>Bean Generator</h1>
 
-<!--- Output the pageNavTabs --->
-#event.getArg("layout.snip_pageNavTabs")#
+<table border="0">
+	<tr>
+		<td width="40%">
+			<form:form name="configureForm" id="configureForm" action="rooibos.htm" method="post">
+			<table border="0">
+				<tr>
+					<td>
+						<h2 style="margin-bottom:5px;"><label id="propertyInfo">Bean Template</label></h2>
+						<form:textarea name="propertyInfo" rows="30" cols="70" />
+					</td>
+				</tr>
+				<tr class="shade">
+					<td>
+						<h2>Bean Options</h2>
+						<table border="0">
+							<tr>
+								<td colspan="2"><label>Bean Name<br/><form:input name="beanName" size="50" /></label></td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<label>Path to Bean (full path if generating flex stub)<br/><form:input name="beanPath" size="50" /></label>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<label>Extends<br/><form:input name="cfcextends" size="40" /></label>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label><form:checkbox name="callSuper" value="y" />Call super.init()?</label>
+									<label><form:checkbox name="comments" value="y" />Template code in bean?</label> 
+									<label><form:checkbox name="setMemento" value="y" />setMemento()</label> 
+									<label><form:checkbox name="getMemento" value="y" />getMemento()</label>
+									<label><form:checkbox name="setStepInstance" value="y" />setStepInstance()</label>
+								</td>
+								<td>
+									<label><form:checkbox name="addTrim" value="y" />Add trim() in setters?</label>
+									<label><form:checkbox name="validate" value="y" />validate()</label> 
+									<label><form:checkbox name="validateInterior" value="y" />Create boilerplate validate interior?</label>
+									<label><form:checkbox name="dump" value="y" />Add dump()</label>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<label>Date Format<br/><form:input name="dateFormat" value="MM/DD/YYYY" size="15" onclick="javascript:clearText(this)" /></label>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<h2 style="margin-bottom:5px;">LTO Options</h2>
+						<table border="1">
+							<tr class="shade">
+								<td>
+									<form:checkbox name="generateLTO" value="y" />Generate LTO?&nbsp;&nbsp;
+									<form:checkbox name="createLTOMethods" value="y" />LTO methods<br/>
+									<span style="margin-left:8px;">
+										Path to LTO<br/><input name="toName" type="text" id="toPath" size="40" />
+									</span>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<h2>Flex Options</h2>
+						<table border="1">
+							<tr class="shade">
+								<td>
+									<label><form:checkbox name="generateStub" value="y" />Generate Flex stub?</label>
+									<label><form:checkbox  name="createProperties" value="y" />Create cfproperties?</label> 
+									<label>Flex AS Package<br/><form:input  name="flexAlias" size="40" /></label>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input onclick="javascript:executeRooibos();" type="button" value="Execute" name="Execute" class="button" />
+						<input onclick="javascript:executeExample();" type="button" value="Example" name="Example" class="button" />
+						<input onclick="javascript:document.beanResults.results.value='';document.transferObjectResults.results.value='';document.stubResults.results.value='';" type="reset" value="Reset" name="reset" class="button" />
+						<input onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" type="button" value="Help"  class="button" />
+					</td>
+				</tr>
+			</table>
+			</form:form>
+		</td>
+		<td valign="top" width="60%">
+			<table border="0">
+				<tr>
+					<td>
+						<form:form name="beanResults" action="rooibos.htm" method="post">
+							<h2 style="margin-bottom:5px;">Generated Bean</h2>
+							<form:textarea name="results" rows="30" cols="110" class="beanResults" onclick="javascript:this.focus();this.select()" />
+						</form:form>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<form:form name="transferObjectResults" action="rooibos.htm" method="post">
+						<h2 style="margin-bottom:5px;">Generated Lightweight Tranfer Object</h2>
+						<form:textarea name="results" rows="15" cols="110" class="ltoResults" onclick="javascript:this.focus();this.select()" />
+					</form:form>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<form:form name="stubResults" action="rooibos.htm" method="post">
+						<h2 style="margin-bottom:5px;">Generated Stub</h2>
+						<form:textarea name="results" rows="15" cols="110" class="stubResults" onclick="javascript:this.focus();this.select()"/>
+					</form:form>
+					</td>
+				</tr>
+			</table>
+		</td>	
+	</tr>
+</table>
+
+
 
 </cfoutput>

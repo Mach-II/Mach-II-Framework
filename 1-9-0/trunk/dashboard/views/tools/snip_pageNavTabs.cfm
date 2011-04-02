@@ -64,12 +64,12 @@ Notes:
 			&nbsp;RegEx Tester
 		</view:a>
 	</li>
-<!--- 	<li>
+<li>
 		<view:a event="tools.beanGenerator">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/arrow_rotate_clockwise.png" alt="Use Bean Generator Tool" />
 			&nbsp;Bean Generator
 		</view:a>
-	</li> --->
+	</li>
 	<li>
 		<view:a event="tools.scribble" class="#getProperty("udfs").highlight("tools.scribble")#">
 			<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/page_gear.png" alt="Use Scribble Pad" />
