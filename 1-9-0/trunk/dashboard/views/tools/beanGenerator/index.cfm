@@ -148,10 +148,10 @@ Notes:
 				</tr>
 				<tr>
 					<td>
-						<input onclick="javascript:executeRooibos();" type="button" value="Execute" name="Execute" class="button" />
-						<input onclick="javascript:executeExample();" type="button" value="Example" name="Example" class="button" />
+						<form:button onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
+						<form:button onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
 						<input onclick="javascript:document.beanResults.results.value='';document.transferObjectResults.results.value='';document.stubResults.results.value='';" type="reset" value="Reset" name="reset" class="button" />
-						<input onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" type="button" value="Help"  class="button" />
+						<form:button onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" value="Help"  class="button" />
 					</td>
 				</tr>
 			</table>
