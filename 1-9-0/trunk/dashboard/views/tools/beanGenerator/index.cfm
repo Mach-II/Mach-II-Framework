@@ -119,36 +119,6 @@ Notes:
 				</tr>
 				<tr>
 					<td>
-						<h2 style="margin-bottom:5px;">LTO Options</h2>
-						<table border="1">
-							<tr class="shade">
-								<td>
-									<form:checkbox name="generateLTO" value="y" />Generate LTO?&nbsp;&nbsp;
-									<form:checkbox name="createLTOMethods" value="y" />LTO methods<br/>
-									<span style="margin-left:8px;">
-										Path to LTO<br/><input name="toName" type="text" id="toPath" size="50" />
-									</span>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<h2>Flex Options</h2>
-						<table border="1">
-							<tr class="shade">
-								<td>
-									<label><form:checkbox name="generateStub" value="y" />Generate Flex stub?</label>
-									<label><form:checkbox  name="createProperties" value="y" />Create cfproperties?</label> 
-									<label>Flex AS Package<br/><form:input  name="flexAlias" size="50" /></label>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-				<tr>
-					<td>
 						<input type="button" onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
 						<input type="button" onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
 						<input onclick="javascript:document.beanResults.results.value='';document.transferObjectResults.results.value='';document.stubResults.results.value='';" type="reset" value="Reset" name="reset" class="button" />
@@ -168,22 +138,6 @@ Notes:
 							Write CFC to file?<br/>Enter full path and file name in relation to: #ExpandPath('/')#<br/><form:input name="fileLocation" size="75" value="" /><br/>
 							<form:button name="save" value="Create Bean CFC" />
 						</form:form>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<form:form name="transferObjectResults" action="rooibos.htm" method="post">
-						<h2 style="margin-bottom:5px;">Generated Lightweight Tranfer Object</h2>
-						<form:textarea name="results" rows="21" cols="110" class="ltoResults" onclick="javascript:this.focus();this.select()" />
-					</form:form>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<form:form name="stubResults" action="rooibos.htm" method="post">
-						<h2 style="margin-bottom:5px;">Generated Stub</h2>
-						<form:textarea name="results" rows="21" cols="110" class="stubResults" onclick="javascript:this.focus();this.select()"/>
-					</form:form>
 					</td>
 				</tr>
 			</table>
