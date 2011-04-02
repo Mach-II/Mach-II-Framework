@@ -68,7 +68,7 @@ Notes:
 <table border="0">
 	<tr>
 		<td width="40%">
-			<form:form name="configureForm" id="configureForm" action="rooibos.htm" method="post">
+			<form:form name="configureForm" id="configureForm" autoFocus="propertyInfo" method="post">
 			<table border="0">
 				<tr>
 					<td>
@@ -148,10 +148,10 @@ Notes:
 				</tr>
 				<tr>
 					<td>
-						<form:button onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
-						<form:button onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
+						<input type="button" onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
+						<input type="button" onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
 						<input onclick="javascript:document.beanResults.results.value='';document.transferObjectResults.results.value='';document.stubResults.results.value='';" type="reset" value="Reset" name="reset" class="button" />
-						<form:button onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" value="Help"  class="button" />
+						<input type="button" onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" value="Help"  class="button" />
 					</td>
 				</tr>
 			</table>
