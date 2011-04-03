@@ -7,8 +7,6 @@ This file is subject to license in index file.
 function executeRooibos() {
 	var data = configure();
 	document.beanResults.results.value = createBean(data);
-	document.transferObjectResults.results.value = createLTO(data);
-	document.stubResults.results.value = createStub(data);
 } // END executeRooibos()
 
 function executeExample() {
@@ -16,7 +14,6 @@ function executeExample() {
 	dataForm.beanName.value = "testBean";
 	dataForm.beanPath.value = "com.maestropublishing.testBean";
 	dataForm.cfcextends.value = "com.maestropublishing.beanBase";
-	dataForm.flexAlias.value = "com.maestropublishing.testVO";
 	dataForm.propertyInfo.value = "color \nproduct_line string brightColor\namount numeric 0\ndate_created date #dateConvert('local2UTC',now())#";
 	dataForm.callSuper.checked = "y";
 	dataForm.addTrim.checked = "y";
@@ -26,12 +23,7 @@ function executeExample() {
 	dataForm.setStepInstance.checked = "y";
 	dataForm.validate.checked = "y";
 	dataForm.validateInterior.checked = "y";
-	dataForm.createLTOMethods.checked = "y";
 	dataForm.dump.checked = "y";
-	dataForm.generateLTO.checked = "y";
-	dataForm.createProperties.checked = "y";
-	dataForm.generateStub.checked = "y";
-	dataForm.toPath.value = "com.maestropublishing.testTO";
 	dataForm.dateFormat.value = "YYYY/MM/DD";
 	// dataForm.generateDao.checked = "y";
 	// dataForm.daoDisplayName.value = "testDao";
@@ -47,7 +39,6 @@ function configure() {
 	data.beanName = trim(form.beanName.value);
 	data.beanPath = trim(form.beanPath.value);
 	data.cfcextends = trim(form.cfcextends.value);
-	data.flexAlias = trim(form.flexAlias.value);
 	data.callSuper = form.callSuper.checked;
 	data.properties = computeProperties(form.propertyInfo.value);
 	data.addTrim = form.addTrim.checked;
@@ -57,12 +48,7 @@ function configure() {
 	data.setStepInstance = form.setStepInstance.checked;
 	data.validate = form.validate.checked;
 	data.validateInterior = form.validateInterior.checked;
-	data.createLTOMethods = form.createLTOMethods.checked;
 	data.dump = form.dump.checked;
-	data.createProperties = form.createProperties.checked;
-	data.generateStub = form.generateStub.checked;
-	data.toPath = trim(form.toPath.value);
-	data.generateLTO = form.generateLTO.checked;
 	data.dateFormat = trim(form.dateFormat.value);
 	data.dateFormat = data.dateFormat.toUpperCase();
 	// beanPath defaults to beanName
@@ -180,15 +166,10 @@ function createBean(data) {
 	if (data.cfcextends!=="") {
 		results = results + '	extends="' + data.cfcextends + '"\n';
 	} // END IF
-	if (data.flexAlias!=="") {
-		results = results + '	alias="' + data.beanPath + '"\n';
-	} // END IF
 	results = results + '	output="false"\n';
 	results = results + '	hint="A bean which models the ' + data.beanName + ' form.">\n\n';
 	// Write Comments if defined
 	results = results + writeComments(data);
-	// Write cfproperties
-	results = results + writeCfproperties(data);
 	// Write properties
 	results = results + writeProperties(data);
 	// Write init
@@ -205,8 +186,6 @@ function createBean(data) {
 	results = results + writeValidate(data);
 	// Write gets/sets
 	results = results + writeGetSetMethods(data);
-	// Write LTOMethods if defined
-	results = results + writeLTOMethods(data);
 	// Write dump if defined
 	results = results + writeDump(data);
 	// Write out the final closing cfcomponent tag.
@@ -224,7 +203,6 @@ function writeComments(data) {
 		results = results + 'Path to Bean: ' + data.beanPath + '\n';
 		results = results + 'Extends: ' + data.cfcextends + '\n';
 		results = results + 'Call super.init(): ' + data.callSuper + '\n';
-		results = results + 'Create cfproperties: ' + data.createProperties + '\n';
 		results = results + 'Bean Template:\n';
 		for (i=0; i < data.properties.aPropertyNames.length; i++) {
 			results = results + '	' + data.properties.aPropertyNames[i] + ' ' + data.properties.aPropertyTypes[i] + ' ' + data.properties.aPropertyDefaults[i] + '\n';
@@ -239,46 +217,6 @@ function writeComments(data) {
 	} // END IF
 	return results;
 } // END writeComments()
-
-function writeCfproperties(data) {
-	var results = "";
-	var i = 0;
-	if (data.createProperties==1) {
-		// Write cfproperties
-		for (i=0; i < data.properties.aPropertyNames.length; i++) {
-			results = results + '	<cfproperty name="' + data.properties.aPropertyNames[i] + '" type="' + data.properties.aPropertyTypes[i] + '"';
-			switch (data.properties.aPropertyTypes[i]) {
-				case "string":
-					results = results + ' default="' + data.properties.aPropertyDefaults[i] + '" />';
-					break;
-				case "boolean":
-					results = results + ' default="' + data.properties.aPropertyDefaults[i] + '" />';
-					break;
-				case "numeric":
-					results = results + ' default="' + data.properties.aPropertyDefaults[i] + '" />';
-					break;
-				case "struct":
-					results = results + ' />';
-					break;
-				case "array":
-					results = results + ' />';
-					break;
-				case "date":
-					results = results + ' default="' + data.properties.aPropertyDefaults[i] + '" />';
-					break;
-				case "query":
-					results = results + ' />';
-					break;
-				default:
-					results = results + ' />';
-					break;
-			} // END SWITCH
-			results = results + '\n';
-		} // END FOR
-	} // END IF
-	results = results + '\n';
-	return results;
-} // END writeCfproperties
 
 function writeProperties(data) {
 	var results = "";
@@ -474,45 +412,6 @@ function writeGetSetMethods(data) {
 	return results;
 } // END writeGetMethods()
 
-function writeLTOMethods(data) {
-	results = "";
-	i = "";
-	if (data.createLTOMethods==1) {
-		// Add comment
-		results = results + '\n	<!---\n';
-		results = results + '	LTO FUNCTIONS\n';
-		results = results + '	--->\n';
-		// Create a getTO method.
-		results = results + '	<cffunction name="getTO" access="public" return="' + data.toPath + '" output="false">\n';
-		results = results + '		<cfreturn createTO() />\n';
-		results = results + '	</'+'cffunction>\n';
-		// Add a carriage return.
-		results = results + '\n';
-		// Create setFromTO method.
-		results = results + '	<cffunction name="setFromTO" access="public" return="void" output="false">\n';
-		results = results + '		<cfargument name="TO" required="yes" type="' + data.toPath + '" />\n';
-		results = results + '		<cfscript>\n';
-		// Call the setters.
-		for (i=0; i<data.properties.aPropertyNames.length; i++) {
-			results = results + '			set' + capFirstLetter(data.properties.aPropertyNames[i]) + '(arguments.TO.' + data.properties.aPropertyNames[i] + ');\n';
-		} // END FOR
-		// Close out setFromTo method
-		results = results + '		</'+'cfscript>\n';
-		results = results + '	</'+'cffunction>\n';
-		// Add a carriage return.
-		results = results + '\n';
-		// Create createTO method
-		results = results + '	<cffunction name="createTO" access="private" return="' + data.toPath + '" output="false">\n';
-		results = results + '		<cfreturn createObject("component", "' + data.toPath + '").init(argumentcollection=variables.instance) />\n';
-		results = results + '	</'+'cffunction>\n';	
-	} // end TO if block
-	return results;
-} // END writeLTOMethods
-
-function writeRTOMethods() {
-	// UN-IMPLEMENTED AT THIS POINT
-} // END writeTOMethods()
-
 function writeDump(data) {
 	var results = "";
 	if (data.dump==1) {
@@ -529,85 +428,6 @@ function writeDump(data) {
 	} // END IF
 	return results;
 } // END writeDumo()
-
-// Transfer Object Functions
-function createLTO(data) {
-	var results = "";
-	var i = "";
-	if (data.createLTOMethods==1) {
-		// write component header
-		results = results + '<cfcomponent\n';
-		results = results + '	displayname="' + data.beanName + 'TO"\n';
-		results = results + '	output="false"\n';
-		results = results + '	hint="A LTO which models the ' + data.beanName + ' form.">\n';
-		// write init method
-		results = results + '\n	<cffunction name="init" access="public" returntype="' + data.toPath + '" output="false">\n';
-		// loop for cfagruments
-		for (i=0; i < data.properties.aPropertyNames.length; i++) {
-		type = data.properties.aPropertyTypes[i];
-		if (type=="date") {
-			type = "string";
-		} // END IF 		
-			results = results + '		<cfargument name="' + data.properties.aPropertyNames[i] + '" type="' + type + '" required="false" default="' + data.properties.aPropertyDefaults[i] + '" />\n';
-		} // END FOR
-		// set public properties
-		for (i=0; i < data.properties.aPropertyNames.length; i++) {
-			results = results + '		<cfset this.' + data.properties.aPropertyNames[i] + ' = arguments.' + data.properties.aPropertyNames[i] + ' />\n';
-		} // END FOR
-		results = results + '		<cfreturn this />\n';
-		// close init method
-		results = results + '	</'+'cffunction>\n';
-		// close component
-		results = results + '\n</'+'cfcomponent>';
-	} // END IF
-	return results;
-} // END writeLTO()
-
-function createRTO() {
-	// UN-IMPLEMENTED AT THIS POINT
-} // END createRTO()
-
-function createStub(data) {
-	var results = "";
-	var i = "";
-	var asClass = "";
-	if (data.generateStub==1) {
-		// Compute class
-		asClass = explode(data.flexAlias, '.');
-		results = results + 'package ' + data.beanPath + '\n';
-		results = results + '}\n';
-		results = results + '	[Bindable]\n';
-		results = results + '	[RemoteClass(alias="' + data.flexAlias + '")]\n';
-		results = results + '	public class ' + asClass[asClass.length - 1] + '\n';
-		results = results + '	{\n';
-		for (i=0; i < data.properties.aPropertyNames.length; i++) {
-			results = results + '		public var ' + data.properties.aPropertyNames[i] + ':';
-			switch (data.properties.aPropertyTypes[i]) {
-				case "numeric":
-					results = results + 'Number = ' + data.properties.aPropertyDefaults[i] + ';\n';
-					break;
-				case "string":
-					results = results + 'String = "' + data.properties.aPropertyDefaults[i] + '";\n';
-					break;
-				case "date":
-					results = results + 'Date = "";\n';
-					break;
-				case "array":
-					results = results + 'Array = null;\n';
-					break;
-				case "struct":
-					results = results + 'Struct = null;\n';
-					break;
-				default:
-					results = results + capFirstLetter(data.properties.aPropertyDefaults[i]) + ' = null;\n';
-					break;
-			} // END SWITCH
-		} // END FOR
-		results = results + '	}\n';
-		results = results + '}';
-	} // END IF
-	return results;
-} // END createStub()
 
 function createDAO(data) {
 	var results = "";

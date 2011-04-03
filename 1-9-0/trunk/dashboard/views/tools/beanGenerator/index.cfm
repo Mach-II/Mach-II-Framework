@@ -55,7 +55,7 @@ Notes:
 <cfoutput>
 
 <cfsavecontent variable="beanHeaderData">
-	<view:script endpoint="dashboard.serveAsset" p:file="/js/rooibos.js" outputType="inline" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/beangenerator.js" outputType="inline" />
 	<style>
 		table { font-size: 100%; /* another IE hack */ }
 		input, textarea, select {	font-size: 90%;	font-family: Arial, Helvetica, sans-serif;}
@@ -66,85 +66,65 @@ Notes:
 <dashboard:displayMessage />
 <h1>Bean Generator</h1>
 
-<table border="0">
+<table>
+	<form:form name="configureForm" id="configureForm" autoFocus="propertyInfo" method="post">
 	<tr>
-		<td width="40%">
-			<form:form name="configureForm" id="configureForm" autoFocus="propertyInfo" method="post">
+		<td width="50%">
+			<h2 style="margin-bottom:5px;"><label id="propertyInfo">Bean Template</label></h2>
+			<form:textarea name="propertyInfo" rows="30" cols="90" /><br/>
+			<input type="button" onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
+			<input type="button" onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
+			<input onclick="javascript:document.beanResults.results.value=''" type="reset" value="Reset" name="reset" class="button" />
+		</td>
+		<td width="50%">
+			<h2>Bean Options</h2>
 			<table border="0">
 				<tr>
-					<td>
-						<h2 style="margin-bottom:5px;"><label id="propertyInfo">Bean Template</label></h2>
-						<form:textarea name="propertyInfo" rows="30" cols="70" />
-					</td>
+					<td>Bean Name:  </td>
+					<td><form:input name="beanName" size="50" /></td>
 				</tr>
-				<tr class="shade">
-					<td>
-						<h2>Bean Options</h2>
-						<table border="0">
-							<tr>
-								<td colspan="2"><label>Bean Name<br/><form:input name="beanName" size="50" /></label></td>
-							</tr>
-							<tr>
-								<td colspan="2">
-									<label>Path to Bean (full path if generating flex stub)<br/><form:input name="beanPath" size="50" /></label>
-								</td>
-							</tr>
-							<tr>
-								<td colspan="2">
-									<label>Extends<br/><form:input name="cfcextends" size="50" /></label>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<label><form:checkbox name="callSuper" value="y" />Call super.init()?</label>
-									<label><form:checkbox name="comments" value="y" />Template code in bean?</label> 
-									<label><form:checkbox name="setMemento" value="y" />setMemento()</label> 
-									<label><form:checkbox name="getMemento" value="y" />getMemento()</label>
-									<label><form:checkbox name="setStepInstance" value="y" />setStepInstance()</label>
-								</td>
-								<td>
-									<label><form:checkbox name="addTrim" value="y" />Add trim() in setters?</label>
-									<label><form:checkbox name="validate" value="y" />validate()</label> 
-									<label><form:checkbox name="validateInterior" value="y" />Create boilerplate validate interior?</label>
-									<label><form:checkbox name="dump" value="y" />Add dump()</label>
-								</td>
-							</tr>
-							<tr>
-								<td colspan="2">
-									<label>Date Format<br/><form:input name="dateFormat" value="MM/DD/YYYY" size="15" onclick="javascript:clearText(this)" /></label>
-								</td>
-							</tr>
-						</table>
-					</td>
+				<tr>
+					<td>Path to Bean:  </td>
+					<td><form:input name="beanPath" size="50" /></td>
+				</tr>
+				<tr>
+					<td>Extends:  </td>
+					<td><form:input name="cfcextends" size="50" /></td>
+				</tr>
+				<tr>
+					<td>Date Format:  </td>
+					<td><form:input name="dateFormat" value="MM/DD/YYYY" size="15" onclick="javascript:clearText(this)" /></td>
 				</tr>
 				<tr>
 					<td>
-						<input type="button" onclick="javascript:executeRooibos();" value="Execute" name="Execute" class="button" />
-						<input type="button" onclick="javascript:executeExample();" value="Example" name="Example" class="button" />
-						<input onclick="javascript:document.beanResults.results.value='';document.transferObjectResults.results.value='';document.stubResults.results.value='';" type="reset" value="Reset" name="reset" class="button" />
-						<input type="button" onclick="javascript:alert('Please view the source of this page and read the HTML comments. Your ad clicks support my involement in free software projects like Rooibos Generator and Mach-II.');" value="Help"  class="button" />
+						<label><form:checkbox name="callSuper" value="y" />Call super.init()?</label>
+						<label><form:checkbox name="comments" value="y" />Template code in bean?</label> 
+						<label><form:checkbox name="setMemento" value="y" />setMemento()</label> 
+						<label><form:checkbox name="getMemento" value="y" />getMemento()</label>
+						<label><form:checkbox name="setStepInstance" value="y" />setStepInstance()</label>
+					</td>
+					<td>
+						<label><form:checkbox name="addTrim" value="y" />Add trim() in setters?</label>
+						<label><form:checkbox name="validate" value="y" />validate()</label> 
+						<label><form:checkbox name="validateInterior" value="y" />Create boilerplate validate interior?</label>
+						<label><form:checkbox name="dump" value="y" />Add dump()</label><br/>
 					</td>
 				</tr>
 			</table>
+		</td>
+	</tr>
+	</form:form>
+</table>
+<table>
+	<tr>
+		<td valign="top" colspan="2">
+			<form:form name="beanResults" action="#BuildURL('tools.beanGenerator.saveGeneratedBean')#" method="post">
+				<h2 style="margin-bottom:5px;">Generated Bean</h2>
+				<form:textarea name="results" rows="30" cols="188" class="beanResults" onclick="javascript:this.focus();this.select()" />
+				Write CFC to file?<br/>Enter full path and file name in relation to: #ExpandPath('/')#<br/><form:input name="fileLocation" size="75" value="" /><br/>
+				<form:button name="save" value="Create Bean CFC" />
 			</form:form>
 		</td>
-		<td valign="top" width="60%">
-			<table border="0">
-				<tr>
-					<td>
-						<form:form name="beanResults" action="#BuildURL('tools.beanGenerator.saveGeneratedBean')#" method="post">
-							<h2 style="margin-bottom:5px;">Generated Bean</h2>
-							<form:textarea name="results" rows="30" cols="110" class="beanResults" onclick="javascript:this.focus();this.select()" />
-							Write CFC to file?<br/>Enter full path and file name in relation to: #ExpandPath('/')#<br/><form:input name="fileLocation" size="75" value="" /><br/>
-							<form:button name="save" value="Create Bean CFC" />
-						</form:form>
-					</td>
-				</tr>
-			</table>
-		</td>	
 	</tr>
 </table>
-
-
-
 </cfoutput>
