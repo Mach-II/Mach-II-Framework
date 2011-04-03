@@ -67,7 +67,7 @@ Notes:
 <h1>Bean Generator</h1>
 
 <table>
-	<form:form name="configureForm" id="configureForm" autoFocus="propertyInfo" method="post">
+	<form:form name="configureForm" id="configureForm" autoFocus="false" method="post">
 	<tr>
 		<td width="50%">
 			<h2 style="margin-bottom:5px;"><label id="propertyInfo">Bean Template</label></h2>
@@ -118,7 +118,7 @@ Notes:
 <table>
 	<tr>
 		<td valign="top" colspan="2">
-			<form:form name="beanResults" action="#BuildURL('tools.beanGenerator.saveGeneratedBean')#" method="post">
+			<form:form name="showBeanResults" action="#BuildURL('tools.beanGenerator.saveGeneratedBean')#" method="post" autoFocus="false">
 				<h2 style="margin-bottom:5px;">Generated Bean</h2>
 				<form:textarea name="results" rows="30" cols="188" class="beanResults" onclick="javascript:this.focus();this.select()" />
 				Write CFC to file?<br/>Enter full path and file name in relation to: #ExpandPath('/')#<br/><form:input name="fileLocation" size="75" value="" /><br/>
