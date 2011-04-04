@@ -6,7 +6,7 @@ This file is subject to license in index file.
 <!-- 
 function executeRooibos() {
 	var data = configure();
-	document.beanResults.results.value = createBean(data);
+	return createBean(data);
 } // END executeRooibos()
 
 function executeExample() {
@@ -30,7 +30,7 @@ function executeExample() {
 	// dataForm.daoPath.value = "com.maestropublishing.testDao";
 	// dataForm.daocfcextends.value = "com.maestropublishing.daoBase";
 	// dataForm.daoCallSuper.checked = "y";
-	executeRooibos();
+	return executeRooibos();
 } // END executeExample()
 
 function configure() {
