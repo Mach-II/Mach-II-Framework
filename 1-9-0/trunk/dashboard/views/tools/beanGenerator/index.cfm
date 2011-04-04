@@ -72,15 +72,15 @@ Notes:
 				<table>
 					<tr>
 						<th style="width:25%;"><h3>Bean Name</h3></th>
-						<td style="width:75%;"><p><form:input name="beanName" size="40" /></p></td>
+						<td style="width:75%;"><p><form:input name="beanName" size="35" /></p></td>
 					</tr>
 					<tr>
 						<th><h3>Path to Bean</h3></th>
-						<td><p><form:input name="beanPath" size="40" /></p></td>
+						<td><p><form:input name="beanPath" size="35" /></p></td>
 					</tr>
 					<tr>
 						<th><h3>Extends</h3></td>
-						<td><p><form:input name="cfcextends" size="40" /></p></td>
+						<td><p><form:input name="cfcextends" size="35" /></p></td>
 					</tr>
 					<tr>
 						<th><h3>Date Format</h3></td>
