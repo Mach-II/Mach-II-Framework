@@ -66,6 +66,13 @@ Notes:
 	INITIALIZATION / CONFIGURATION
 	--->
 	<!--- Inherited from base class --->
+	<cftry>
+		<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
+		<cfcatch type="any">
+			<cfset this.arrayConcat = variables.arrayConcat_cfml />
+			<cfset variables.arrayConcat = variables.arrayConcat_cfml />
+		</cfcatch>
+	</cftry>
 
 	<!---
 	PUBLIC FUNCTIONS
@@ -152,23 +159,49 @@ Notes:
 		<cfreturn partedMessage />
 	</cffunction>
 
+	<cffunction name="findMostSevereMessage" access="public" returntype="string" output="false"
+		hint="Find most severe message available by the provided position.">
+		<cfargument name="position" type="numeric" required="false" default="1" />
+		
+		<cfset var exceptionStack = getOrderedMessages() />		
+		
+		<cfif arguments.position LTE ArrayLen(exceptionStack)>
+			<cfreturn exceptionStack[arguments.position] />
+		<cfelse>
+			<cfthrow type="MachII.framework.NoMessagesDefined"
+				message="There are no XML validation error messages defined that are located in position '#arguments.position#'. There are '#ArrayLen(exceptionStack)#' items in the exception array." />
+		</cfif>
+	</cffunction>
+	
+	<cffunction name="getOrderedMessages" access="public" returntype="array" output="false"
+		hint="Gets a stack of messages.">
+		
+		<cfset var exceptionStack = ArrayNew(1) />
+
+		<!--- Display error messages in order of important: fatal, error and warning --->
+		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.fatalErrors) />
+		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.errors) />
+		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.warnings) />
+		
+		<cfreturn exceptionStack />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="findMostSevereMessage" access="private" returntype="string" output="false"
-		hint="Find most severe message available.">
+	<cffunction name="arrayConcat_cfml" access="private" returntype="array" output="false"
+		hint="Concats two arrays together.">
+		<cfargument name="array1" type="array" required="true" />
+		<cfargument name="array2" type="array" required="true" />
 
-		<!--- Display error messages in order of important: fatal, error and warning --->
-		<cfif ArrayLen(variables.fatalErrors) GT 0>
-			<cfreturn variables.fatalErrors[1] />
-		<cfelseif ArrayLen(variables.errors) GT 0>
-			<cfreturn variables.errors[1] />
-		<cfelseif ArrayLen(variables.warnings) GT 0>
-			<cfreturn variables.warnings[1] />
-		<cfelse>
-			<cfthrow type="MachII.framework.NoMessagesDefined"
-				message="There are no XML validation error messages defined." />
-		</cfif>		
+		<cfset var result = arguments.array1 />
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(arguments.array2)#" index="i">
+			<cfset ArrayAppend(result, arguments.array2[i]) />
+		</cfloop>
+
+		<cfreturn result />
 	</cffunction>
 
 	<!---
