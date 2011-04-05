@@ -81,7 +81,12 @@ Notes:
 				"/content/item"
 				, "POST"
 				, "saveContent"
-				, "content")) />		
+				, "content")) />
+		<cfset variables.uriCollection.addUri(CreateObject("component", "MachII.framework.url.Uri").init(
+				"/content/item"
+				, "PUT"
+				, "saveContent"
+				, "content")) />	
 		<cfset variables.uriCollection.addUri(CreateObject("component", "MachII.framework.url.Uri").init(
 				"/content/item/{key}"
 				, "GET"
@@ -90,6 +95,7 @@ Notes:
 		
 		<!--- Check for positive matches --->
 		<cfset assertTrue(IsObject(variables.uriCollection.findUriByPathInfo("/content/item", "POST"))) />
+		<cfset assertTrue(IsObject(variables.uriCollection.findUriByPathInfo("/content/item", "PUT"))) />
 		<cfset assertTrue(IsObject(variables.uriCollection.findUriByPathInfo("/content/item/anb123", "GET"))) />
 		
 		<!--- Check for negative matches --->
