@@ -103,7 +103,7 @@ wire in plain text.
 		<cfargument name="event" type="MachII.framework.Event" required="false"
 			hint="Optionally an event object to use." />
 		
-		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders))>
+		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders)))>
 			<cfreturn true />
 		<cfelse>
 			<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
