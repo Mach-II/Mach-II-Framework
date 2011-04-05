@@ -99,9 +99,11 @@ wire in plain text.
 	<cffunction name="authenticate" access="public" returntype="boolean" output="false"
 		hint="Authenticates a request.">
 		<cfargument name="httpHeaders" type="struct" required="true"
-			hint="The HTTP request data to use.">
+			hint="The HTTP request data to use." >
+		<cfargument name="event" type="MachII.framework.Event" required="false"
+			hint="Optionally an event object to use." />
 		
-		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=decodeAuthorizationHeader(arguments.httpHeaders))>
+		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders))>
 			<cfreturn true />
 		<cfelse>
 			<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
@@ -161,12 +163,14 @@ wire in plain text.
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="checkCredentials" access="private" returntype="boolean" output="true"
+	<cffunction name="checkCredentials" access="private" returntype="boolean" output="false"
 		hint="Checks the HTTP basic credentials. Override if using other authentication strategies like a database.">
 		<cfargument name="username" type="string" required="true"
 			hint="The user name." />
 		<cfargument name="password" type="string" required="true"
 			hint="The password." />
+		<cfargument name="event" type="MachII.framework.Event" required="false"
+			hint="Optionally an event object to use." />
 		
 		<cfif StructKeyExists(variables.credentials, arguments.username) AND Hash(arguments.password, "sha") EQ variables.credentials[arguments.username]>
 			<cfreturn true />
