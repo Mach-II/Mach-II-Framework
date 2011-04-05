@@ -103,15 +103,19 @@ wire in plain text.
 		<cfargument name="event" type="MachII.framework.Event" required="false"
 			hint="Optionally an event object to use." />
 		
-		<cfif StructKeyExists(arguments.httpHeaders, "Authorization") AND checkCredentials(argumentcollection=StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders)))>
-			<cfreturn true />
-		<cfelse>
-			<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
-			<cfheader name="WWW-Authenticate" value='Basic realm="#getRealm()#"' />
-			<cfheader statuscode="401" statustext="Authorization Required" />
+		<cfif StructKeyExists(arguments.httpHeaders, "Authorization")>
+			<cfset StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders)) />
 			
-			<cfreturn false />
+			<cfif checkCredentials(argumentcollection=arguments)>
+				<cfreturn true />
+			</cfif>
 		</cfif>
+		
+		<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
+		<cfheader name="WWW-Authenticate" value='Basic realm="#getRealm()#"' />
+		<cfheader statuscode="401" statustext="Authorization Required" />
+		
+		<cfreturn false />
 	</cffunction>
 	
 	<cffunction name="decodeAuthorizationHeader" access="public" returntype="struct" output="false"
