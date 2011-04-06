@@ -63,7 +63,14 @@ To Test it out, do the following:
 			<parameters>
 				<!--
 					Sets whether to use the value from urlBase or urlBaseSecure which 
-					indicates HTTPS/SSL URL base. Defaults to value from property.urlBase
+					indicates HTTPS/SSL URL base. Defaults to value from property.urlBase.
+					This parameter also accepts environment structs.
+				-->
+				<parameter name="secure" value="false" />
+				<!--
+					Enforces whether the request is HTTP or HTTPS. Defaults to the value
+					of the "secure" parameter unless defined.
+					This parameter also accepts environment structs.
 				-->
 				<parameter name="secure" value="false" />
 				<!--
@@ -143,9 +150,11 @@ To Test it out, do the following:
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
 	<cfset variables.enforceContentLengthDefault =  true />
+	<cfset variables.enforceSecure = false />
 	<cfset variables.jsonpArgName = "jsonp" />
 
 	<cfset variables.exceptionTypes = StructNew() />
+	<cfset variables.exceptionTypes["InvalidProtocol"] = "MachII.endpoints.rest.InvalidProtocol" />
 	<cfset variables.exceptionTypes["IncompleteBody"] = "MachII.endpoints.rest.IncompleteBody" />
 	<cfset variables.exceptionTypes["MethodNotAllowed"] = "MachII.endpoints.rest.MethodNotAllowed" />
 	<cfset variables.exceptionTypes["MissingContentLength"] = "MachII.endpoints.rest.MissingContentLength" />
@@ -157,12 +166,27 @@ To Test it out, do the following:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Child endpoints must call this configure method [i.e. super.configure()] to setup the RESTful methods correctly.">
 
+		<cfset var secure = getParameter("secure", false) />
+		<cfset var enforceSecure = getParameter("enforceSecure", getParameter("secure", false)) />
+
 		<!--- Configure any parameters --->
-		<cfif getParameter("secure", false)>
+		<cfif IsStruct(secure)>
+			<cfset secure = resolveValueByEnvironment(secure, true) />
+		</cfif>
+
+		<cfif secure>
 			<cfset setUrlBase(getProperty("urlBaseSecure")) />
 		<cfelse>
 			<cfset setUrlBase(getProperty("urlBase")) />
 		</cfif>
+		
+		<!--- Defaults to value from "secure" unless otherwise defined --->	
+		<cfif IsStruct(enforceSecure)>
+			<cfset enforceSecure = resolveValueByEnvironment(enforceSecure, true) />
+		</cfif>
+		
+		<cfset setEnforceSecure(enforceSecure) />
+		
 		<cfset setDefaultFormat(getParameter("defaultFormat", variables.defaultFormat)) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", variables.defaultCharset)) />
 		<cfset setJsonpArgName(getParameter("jsonpArgName", variables.jsonpArgName)) />
@@ -191,6 +215,12 @@ To Test it out, do the following:
 		<cfset var headers = "" />
 		<cfset var urlTokens = "" />
 		<cfset var currToken = "" />
+		
+		<!--- Enforce SSL if required --->
+		<cfif getEnforceSecure() AND NOT cgi.SERVER_PORT_SECURE>
+			<cfthrow type="#variables.exceptionTypes["InvalidProtocol"]#"
+				message="The request must be made over SSL."/>
+		</cfif>
 
 		<!--- Support query string of ?endpoint=<name>&uri=<restUri> --->
 		<cfif arguments.event.isArgDefined("uri")>
@@ -276,6 +306,10 @@ To Test it out, do the following:
 			<cfset addHTTPHeaderByStatus(404) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>404 Not Found - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
+		<cfelseif exception.getType() EQ variables.exceptionTypes["InvalidProtocol"]>
+			<cfset addHTTPHeaderByStatus(403) />
+			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
+			<cfsetting enablecfoutputonly="false" /><cfoutput>403 Forbidden - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<cfelse>
 			<cfset super.onException(arguments.event, arguments.exception) />
 		</cfif>
@@ -652,7 +686,15 @@ To Test it out, do the following:
 	<cffunction name="getPossibleFormatList" access="public" returntype="string" output="false">
 		<cfreturn variables.possibleFormatList />
 	</cffunction>
-	
+
+	<cffunction name="setEnforceSecure" access="public" returntype="void" output="false">
+		<cfargument name="enforceSecure" type="boolean" required="true" />
+		<cfset variables.enforceSecure = arguments.enforceSecure />
+	</cffunction>
+	<cffunction name="getEnforceSecure" access="public" returntype="boolean" output="false">
+		<cfreturn variables.enforceSecure />
+	</cffunction>
+
 	<cffunction name="setJsonpArgName" access="public" returntype="void" output="false">
 		<cfargument name="jsonpArgName" type="string" required="true" />
 		<cfset variables.jsonpArgName = arguments.jsonpArgName />
