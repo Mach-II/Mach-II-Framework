@@ -64,7 +64,9 @@ Custom Configuration:
 			<!--
 			Optional: Enables (boolean) the registeration of scheduled tasks in the CFML engine if set to
 				false the endpoint will be available, but no tasks will be registered in the CFML engine
-				and any tasks in the CFML engine that start with the taskNamePrefix will be removed
+				and any tasks in the CFML engine that start with the taskNamePrefix will be removed. Also,
+				accepts a struct of environment groups or specific environment names to enabled/disable
+				this endpoint.
 			Default: true
 			-->
 			<parameter name="enabled" value="" />
