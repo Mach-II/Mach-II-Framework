@@ -321,7 +321,7 @@ To Test it out, do the following:
 		<cfset var params = arguments />
 		<cfset var sortedParams = "" />
 		<cfset var i = 0 />
-
+		
 		<cfset restUri = variables.restUris.findUriByFunctionName(arguments.method) />
 
 		<cfif IsObject(restUri)>
@@ -342,32 +342,42 @@ To Test it out, do the following:
 
 			<cfset uriTokenNames = restUri.getUriTokenNames() />
 
+			<!--- Clean up the params --->
 			<cfset StructDelete(params, "method", true) />
 
 			<cftry>
-				<cfloop array="#uriTokenNames#" index="i">
-					<cfset builtUrl = ReplaceNoCase(builtUrl, "{#i#}",params[i], "one") />
-					<cfset StructDelete(params, i, false) />
+				<cfloop from="1" to="#ArrayLen(uriTokenNames)#" index="i">
+					<!--- Resolve by name otherwise resolve by position --->
+					<cfif StructKeyExists(params, uriTokenNames[i])>
+						<cfset builtUrl = ReplaceNoCase(builtUrl, "{#uriTokenNames[i]#}", params[uriTokenNames[i]], "one") />
+						<cfset StructDelete(params, uriTokenNames[i], false) />					
+					<cfelse>
+						<cfset builtUrl = ReplaceNoCase(builtUrl, "{#uriTokenNames[i]#}", params[i + 1], "one") />
+						<cfset StructDelete(params, i + 1, false) />
+					</cfif>
 				</cfloop>
 				<cfcatch type="any">
 					<cfthrow type="MachII.endpoints.rest.MissingArgument"
-						message="The '#uriTokenNames[i]#' parameter cannot be found for this REST method." />
+						message="The '#uriTokenNames[i]#' parameter cannot be found for this REST method."
+						detail="Available parameters: '#StructKeyList(params)#'" />
 				</cfcatch>
 			</cftry>
+
+			<cfif NOT builtUrl.endsWith("/")>
+				<cfset builtUrl = builtUrl & "/" />
+			</cfif>
 
 			<!--- Add additional query string parameters if there are remaining params --->
 			<cfif StructCount(params)>
 				<cfset sortedParams = StructSort(params, "textnocase", "ASC") />
-
-				<cfif NOT builtUrl.endsWith("/")>
-					<cfset builtUrl = builtUrl & "/" />
+				
+				<cfif ArrayLen(sortedParams)>
+					<cfset builtUrl = builtUrl & "?" />
+	
+					<cfloop from="1" to="#ArrayLen(sortedParams)#" index="i">
+						<cfset builtUrl = builtUrl & LCase(sortedParams[i]) & "=" & params[sortedParams[i]] />
+					</cfloop>
 				</cfif>
-
-				<cfset builtUrl = builtUrl & "?" />
-
-				<cfloop from="1" to="#ArrayLen(sortedParams)#" index="i">
-					<cfset builtUrl = builtUrl & LCase(sortedParams[i]) & "=" & params[sortedParams[i]] />
-				</cfloop>
 			</cfif>
 		<cfelse>
 			<cfthrow type="MachII.endpoints.rest.InvalidMethod"
