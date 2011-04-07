@@ -62,22 +62,22 @@ Custom Configuration:
 	<endpoint name="scheduledTasks" type="path.to.you.TaskEndpoint">
 		<parameters>
 			<!--
-			Optional: Enables (boolean) the registeration of scheduled tasks in the CFML engine if set to
+			Optional: taskEnabled (boolean) the registeration of scheduled tasks in the CFML engine if set to
 				false the endpoint will be available, but no tasks will be registered in the CFML engine
 				and any tasks in the CFML engine that start with the taskNamePrefix will be removed. Also,
 				accepts a struct of environment groups or specific environment names to enabled/disable
 				this endpoint.
 			Default: true
 			-->
-			<parameter name="enabled" value="" />
+			<parameter name="taskEnabled" value="" />
 			<!--
 			Optional: The prefix to use in front of the task name when registering it with cfschedule
 			Default:  "{application.applicationName}_{endpointName}"
 			-->
 			<parameter name="taskNamePrefix" value="" />
 			<!--
-			Optional: THe base server and protocol to use for task url.
-			Default:  http://{cgi.server_name}
+			Optional: The base server and protocol to use for task url.
+			Default to value that resolves as:  http://{cgi.server_name}
 			-->
 			<parameter name="server" value="" />
 			<!--
@@ -124,6 +124,7 @@ Custom Configuration:
 	<!--- Introspector looks for TASK:* annotations in child classes to find TASK-enabled methods. --->
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.authentication = "" />
+	<cfset variables.enabled = true />
 	<cfset variables.urlBase = "" />
 	<cfset variables.server = "" />
 	<cfset variables.authUsername = "" />
@@ -159,10 +160,10 @@ Custom Configuration:
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
 		
-		<cfif IsStruct(getParameter("enabled"))>
-			<cfset setEnabled(resolveValueByEnvironment(getParameter("enabled"), true)) />
+		<cfif IsStruct(getParameter("taskEnabled"))>
+			<cfset setEnabled(resolveValueByEnvironment(getParameter("taskEnabled"), true)) />
 		<cfelse>
-			<cfset setEnabled(getParameter("enabled", true)) />
+			<cfset setEnabled(getParameter("taskEnabled", true)) />
 		</cfif>
 		
 		<!--- Setup authentication services --->
