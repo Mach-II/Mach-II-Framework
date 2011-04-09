@@ -141,6 +141,8 @@ To Test it out, do the following:
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<!--- UriCollection of REST Uris that match in this endpoint. --->
 	<cfset variables.restUris = CreateObject("component", "MachII.framework.url.UriCollection").init() />
+	<!--- ParseUtils is used to parse request body content for other HTTP methods other than POST --->
+	<cfset variables.parserUtils = CreateObject("component", "MachII.util.parsing.ParserUtils").init() />
 	<!---
 		The default format returned by an endpoint. Overridden by file extension in URL (/url.json), or
 	    it can be overridden by defining the "defaultFormat" parameter.
@@ -152,6 +154,7 @@ To Test it out, do the following:
 	<cfset variables.enforceContentLengthDefault =  true />
 	<cfset variables.enforceSecure = false />
 	<cfset variables.jsonpArgName = "jsonp" />
+	<cfset variables.parseRequestBodyParametersMethods = "" />
 
 	<cfset variables.exceptionTypes = StructNew() />
 	<cfset variables.exceptionTypes["InvalidProtocol"] = "MachII.endpoints.rest.InvalidProtocol" />
@@ -212,14 +215,15 @@ To Test it out, do the following:
 		<cfset var pathInfo = getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME, false) />
 		<cfset var httpMethod = discoverHttpMethod(arguments.event) />
 		<cfset var restUri = "" />
-		<cfset var headers = "" />
 		<cfset var urlTokens = "" />
 		<cfset var currToken = "" />
+		<cfset var requestBodyParsed = "" />
+		<cfset var headers = getHttpRequestData().headers />
 		
 		<!--- Enforce SSL if required --->
 		<cfif getEnforceSecure() AND NOT cgi.SERVER_PORT_SECURE>
 			<cfthrow type="#variables.exceptionTypes["InvalidProtocol"]#"
-				message="The request must be made over SSL."/>
+				message="The request must be made over SSL." />
 		</cfif>
 
 		<!--- Support query string of ?endpoint=<name>&uri=<restUri> --->
@@ -253,6 +257,15 @@ To Test it out, do the following:
 				<cfif variables.enforceContentLengthDefault>
 					<cfset performContentLengthChecks(arguments.event) />
 				</cfif>
+			</cfif>
+			
+			<!--- Parse the request body for alternate HTTP methods --->
+			<cfif ListContainsNoCase(variables.parseRequestBodyParametersMethods, httpMethod) AND StructKeyExists(headers, "content-type") AND headers["content-type"].startsWith("application/x-www-form-urlencoded")>
+				<cfset requestBodyParsed = variables.parserUtils.parseRequestBodyParameters(arguments.event.getArg("_requestBody"), true) />
+				<!--- Place a reference to what was parsed --->
+				<cfset arguments.event.setArg("_requestBodyParsed", requestBodyParsed) />
+				<!--- Append the parsed struct to the event object --->
+				<cfset arguments.event.setArgs(requestBodyParsed) />
 			</cfif>
 		
 		<!--- No URI object for REST request so handle exception --->
