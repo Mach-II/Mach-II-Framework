@@ -117,7 +117,7 @@ Notes:
 <h2>Generated Bean</h2>
 <form:form name="showBeanResults" actionEvent="tools.beanGenerator.saveGeneratedBean" autoFocus="false">
 	<p style="margin-top:24px;margin-bottom:24px;">
-		<form:textarea name="results" style="width:100%;height:400px;" class="beanResults" onclick="javascript:this.focus();this.select()" />
+		<form:textarea name="results" style="width:100%;height:400px;" class="beanResults" />
 	</p>
 	<table>
 		<tr>
