@@ -76,7 +76,7 @@ Notes:
 
 <cfoutput>  
 <response showresponse="true"> 
-	<ide url="http://#hostname#/#path#/index.cfm/event/dashboard:builder.index/?callbackurl=#urlencodedFormat(data.event.ide.callbackurl.xmlText)#/"> 
+	<ide url="http://#hostname#/#path#/index.cfm/event/dashboard:builder.index/?agent=machbuilder&amp;callbackurl=#urlencodedFormat(data.event.ide.callbackurl.xmlText)#/"> 
 		<view id="machiiDashboard" title="Mach II Dashboard" /> 
 	</ide> 
 </response> 

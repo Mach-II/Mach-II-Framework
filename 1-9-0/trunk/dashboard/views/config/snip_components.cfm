@@ -84,27 +84,13 @@ Notes:
 							</span>
 						</cfif>
 						</view:a></p>
-						<p><a href="##dummy" onclick="openFile('#variables.baseComponentData.listeners[i].type#');" 
-								>Open in CF Builder</a></p>
-						<!--- For some reason I couldn't get the JS below to run in CFBuilder 2.0
- 							 myConfigHandler.openInCFBuilder('#variables.baseComponentData.listeners[i].type#'); --->
+						<cfif event.getArg("agent") EQ "machbuilder">
+						<p><a href="##" onclick="openFile('#variables.baseComponentData.listeners[i].type#');">Open in CF Builder</a></p>
+						</cfif>
 					</td>
 				</tr>
 			</table>
 			</cfloop>
-			<script language="JavaScript">
-				function openFile(cfctype) {
-					alert(cfctype);
-					var currentObject = this;
-					var arequest = new Ajax.Request('#buildUnescapedUrl("builder.openfile")#', {
-						method: 'post',
-						parameters: { filename: cfctype },
-						onSuccess: function(transport) {
-							// empty for now
-						}
-					});
-				}
-			</script>
 		</td>
 		<td style="padding:0;">
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.filters)#" index="i">
@@ -399,4 +385,21 @@ Notes:
 		</table>
 	</cfif>
 </cfloop>
+
+<!--- For some reason I couldn't get the JS below to run in CFBuilder 2.0
+		 myConfigHandler.openInCFBuilder('#variables.baseComponentData.listeners[i].type#'); --->
+<view:script>
+	function openFile(cfctype) {
+		alert(cfctype);
+		var currentObject = this;
+		var arequest = new Ajax.Request('#buildUnescapedUrl("builder.openfile")#', {
+			method: 'post',
+			parameters: { filename: cfctype },
+			onSuccess: function(transport) {
+				// empty for now
+			}
+		});
+	}
+</view:script>
+
 </cfoutput>
