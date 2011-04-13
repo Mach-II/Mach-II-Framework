@@ -118,7 +118,7 @@ ConfigHandler.prototype = {
 		
 		new Ajax.Updater('changedComponents'
 			, this.reloadAllChangedComponentsUrl
-			, {}
+			, { evalScripts: true}
 		);
 		
 		this.periodicUpdateChangedComponents();

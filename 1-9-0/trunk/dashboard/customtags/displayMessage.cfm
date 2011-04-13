@@ -105,11 +105,39 @@ Notes:
 					</td>
 				</tr>
 			</table>
-	
 		</cfif>
 		</div>
+
+		<view:script outputType="inline">
+			var oldTitle;
+			
+			function flashTitle(newTitle) {
+				var state = false;
+				originalTitle = document.title;  // save old title
+				titleTimerId = setInterval(flash, 1500);
+			
+				function flash() {
+					// switch between old and new titles
+			   		document.title = state ? originalTitle : newTitle;
+					state = !state;
+			  	}
+			}
+			
+			function clearTitleFlash() {
+				if (typeof titleTimerId !== 'undefined') {
+					clearInterval(titleTimerId);
+					document.title = originalTitle;
+				}
+			}
+			
+			clearTitleFlash();
+
+			<cfif variables.message.isExceptionOfType("exception")>
+				flashTitle('Exception Occurred');
+			</cfif>
+		</view:script>
 	
-		<cfif variables.message.getType() NEQ "exception" AND attributes.refresh>
+		<cfif NOT variables.message.isExceptionOfType("exception") AND  attributes.refresh>
 			<view:script outputType="inline">
 				timeoutId = setInterval(function() { new Effect.BlindUp('messageBox_#variables.unique#', { queue: 'end' }); clearTimeout(timeoutId);}, 5000);
 			</view:script>

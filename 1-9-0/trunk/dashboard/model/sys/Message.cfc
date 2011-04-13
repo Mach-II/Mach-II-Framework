@@ -82,6 +82,23 @@ Notes:
 		hint="Checks if there is a caught exception.">
 		<cfreturn StructCount(getCaughtException()) />
 	</cffunction>
+	
+	<cffunction name="isExceptionOfType" access="public" returntype="boolean" output="false"
+		hint="Checks if the current exception type is specified type.">
+		<cfargument name="types" type="any" required="true" />
+		
+		<cfset var i = 0 />
+		
+		<cfif NOT IsSimplevalue(arguments.types)>
+			<cfset arguments.types = ArrayTolist(arguments.types) />
+		</cfif>
+		
+		<cfif ListFindNoCase(arguments.types, getType())>
+			<cfreturn true />
+		</cfif>
+		
+		<cfreturn false />
+	</cffunction>
 
 	<!---
 	ACCESSORS
