@@ -109,8 +109,6 @@ Notes:
 		</div>
 
 		<view:script outputType="inline">
-			var oldTitle;
-			
 			function flashTitle(newTitle) {
 				var state = false;
 				originalTitle = document.title;  // save old title
