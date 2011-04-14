@@ -48,6 +48,8 @@ Updated version: 1.9.0
 
 Notes:
  - Leave cfcontent reset next to DocType to remove a line break that cause some browsers to go into quirks mode
+ - The 'dashboardCssStart/End' and 'dashboardJsStart/End' are used as placeholder bookends for our ANT build
+	to replace multiple files with a concatenated file.
 --->
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 </cfsilent>

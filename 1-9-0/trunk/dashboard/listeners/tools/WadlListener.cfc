@@ -57,7 +57,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.introspector = "" />
+	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	<cfset variables.ANNOTATION_REST_BASE = "REST" />
 
 	<!---
@@ -66,16 +66,11 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Initializes the listener.">
 		<!--- Does nothing --->
-		<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
 	</cffunction>
 
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="process" access="public" returntype="void" output="false">
-		<cfargument name="event" type="MachII.framework.Event" required="true" />
-	</cffunction>
-
 	<cffunction name="getRestEndpointMetaData" access="public" returntype="struct" output="false">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 

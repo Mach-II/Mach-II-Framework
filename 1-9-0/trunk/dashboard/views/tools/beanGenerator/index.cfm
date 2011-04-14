@@ -53,7 +53,7 @@ Notes:
 	<cfimport prefix="form" taglib="/MachII/customtags/form" />
 	<view:meta type="title" content="Tools - Bean Generator" />
 	<!--- By default, all script and style are put in the head --->
-	<view:script endpoint="dashboard.serveAsset" p:file="/js/beangenerator.js" />
+	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/tools/beangenerator.js" />
 </cfsilent>
 <cfoutput>
 <dashboard:displayMessage />

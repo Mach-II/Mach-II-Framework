@@ -214,6 +214,7 @@ Notes:
 			<!--- Check if the event needs to be secure/unsecure and redirected--->
 			<cfif appManager.getPropertyManager().getProperty("urlSecureEnabled")>
 				<cfset eventSecure = appManager.getEventManager().getEventSecureType(result.eventName) />
+				<!--- TODO: Something needs to be done about this because an infinite loop occurs with the unsecure and urlSecureBaseCheckServerName are the same --->
 				<cfif cgi.SERVER_PORT_SECURE GTE 1 OR cgi.SERVER_NAME EQ appManager.getPropertyManager().getProperty("urlSecureBaseCheckServerName")>
 					<cfset requestSecure = 1 />
 				</cfif>

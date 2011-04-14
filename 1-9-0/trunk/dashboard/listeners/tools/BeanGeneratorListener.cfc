@@ -41,10 +41,10 @@
 	interfaces).
 
 Copyright: GreatBizTools, LLC
-$Id: RegExListener.cfc 2722 2011-03-31 08:07:04Z peterjfarrell $
+$Id$
 
-Created version: 1.0.0
-Updated version: 1.0.0
+Created version: 1.9.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -74,11 +74,12 @@ Notes:
 
 		<cfset var results = arguments.event.getArg("results") />
 		<cfset var fileLocation = arguments.event.getArg("fileLocation") />
-		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("", "success") />
+		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init("", "info") />
 		
 		<cftry>
 			<cffile action="write" file="#ExpandPath('/#fileLocation#')#" output="#results#" />
 			<cfset message.setMessage("Created CFC #ExpandPath('/#fileLocation#')#") />
+			
 			<cfcatch type="any">
 				<cfset message.setMessage("Exception occurred during the saving of the generated bean CFC.") />
 				<cfset message.setType("exception") />
@@ -87,6 +88,7 @@ Notes:
 		</cftry>
 		
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />		
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />		
 	</cffunction>
+	
 </cfcomponent>

@@ -144,16 +144,25 @@ Notes:
 		<cfset var pasteBinUrl = "" />
 		
 		<cfhttp result="pasteBinUrl" url="http://pastebin.com/api_public.php" method="post">
-			<cfhttpparam name="paste_code"  value="#event.getArg('paste_code')#" type="formfield" />
-			<cfhttpparam name="paste_name"  value="#event.getArg('paste_code')#" type="formfield" />
-			<cfhttpparam name="paste_email"  value="#event.getArg('paste_code')#" type="formfield" />
-			<cfhttpparam name="paste_format"  value="cfm" type="formfield" />
+			<cfhttpparam name="paste_code" 
+				value="#event.getArg('paste_code')#" 
+				type="formfield" />
+			<cfhttpparam name="paste_name" 
+				value="#event.getArg('paste_name')#" 
+				type="formfield" />
+			<cfhttpparam name="paste_email" 
+				value="#event.getArg('paste_email')#" 
+				type="formfield" />
+			<cfhttpparam name="paste_format" 
+				value="cfm" 
+				type="formfield" />
 		</cfhttp>
 		
 		<cfif Len(pasteBinUrl.fileContent)>
-			<cfheader name="pasteBinUrl" value="#Trim(pasteBinUrl.fileContent)#" />
+			<cfset addHttpHeaderByName("pasteBinUrl", Trim(pasteBinUrl.fileContent)) />
 		<cfelse>
-			<cfheader statuscode="400" statustext="Bad Request" />
+			<!--- Bad Request --->
+			<cfset addHTTPHeaderByStatus(400) />
 		</cfif>
 	</cffunction>
 	
