@@ -177,7 +177,7 @@ Notes:
 			</cftry>
 
 			<cfset arguments.event.setArg("message", message) />
-			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+			<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 		</cfif>
 	</cffunction>
 
@@ -211,7 +211,7 @@ Notes:
 			</cftry>
 
 			<cfset arguments.event.setArg("message", message) />
-			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+			<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 		</cfif>
 	</cffunction>
 
@@ -241,7 +241,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadAllChangedComponents" access="public" returntype="void" output="false"
@@ -370,7 +370,7 @@ Notes:
 
 		<cfif count>
 			<cfset arguments.event.setArg("message", message) />
-			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+			<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 		</cfif>
 	</cffunction>
 
@@ -396,7 +396,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadListener" access="public" returntype="void" output="false"
@@ -421,7 +421,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadFilter" access="public" returntype="void" output="false"
@@ -446,7 +446,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadPlugin" access="public" returntype="void" output="false"
@@ -471,7 +471,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadProperty" access="public" returntype="void" output="false"
@@ -496,7 +496,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadEndpoint" access="public" returntype="void" output="false"
@@ -521,7 +521,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadViewLoader" access="public" returntype="void" output="false"
@@ -546,7 +546,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<cffunction name="reloadModuleDependencyInjectionEngine" access="public" returntype="void" output="false"
@@ -573,7 +573,7 @@ Notes:
 			</cftry>
 
 			<cfset arguments.event.setArg("message", message) />
-			<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+			<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 		</cfif>
 	</cffunction>
 
@@ -614,7 +614,7 @@ Notes:
 		</cftry>
 
 		<cfset arguments.event.setArg("message", message) />
-		<cfset getLog().info(message.getMessage(), message.getCaughtException()) />
+		<cfset getLog().debug(message.getMessage(), message.getCaughtException()) />
 	</cffunction>
 
 	<!---
