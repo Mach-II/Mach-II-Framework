@@ -65,14 +65,6 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<!--- Inherited from base class --->
-	<cftry>
-		<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
-		<cfcatch type="any">
-			<cfset this.arrayConcat = variables.arrayConcat_cfml />
-			<cfset variables.arrayConcat = variables.arrayConcat_cfml />
-		</cfcatch>
-	</cftry>
 
 	<!---
 	PUBLIC FUNCTIONS
@@ -179,9 +171,9 @@ Notes:
 		<cfset var exceptionStack = ArrayNew(1) />
 
 		<!--- Display error messages in order of important: fatal, error and warning --->
-		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.fatalErrors) />
-		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.errors) />
-		<cfset exceptionStack = ArrayConcat(exceptionStack, variables.warnings) />
+		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.fatalErrors) />
+		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.errors) />
+		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.warnings) />
 		
 		<cfreturn exceptionStack />
 	</cffunction>
@@ -189,7 +181,7 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="arrayConcat_cfml" access="private" returntype="array" output="false"
+	<cffunction name="arrayConcat" access="private" returntype="array" output="false"
 		hint="Concats two arrays together.">
 		<cfargument name="array1" type="array" required="true" />
 		<cfargument name="array2" type="array" required="true" />
