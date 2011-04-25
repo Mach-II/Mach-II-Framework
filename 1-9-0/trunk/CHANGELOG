@@ -61,6 +61,12 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Optional params with value of '' in routes are incorrectly built 
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/773
+(2011-04-25 peterfarrell)
+
 * Redirect command did not obey event-mappings
 
 For more information see:

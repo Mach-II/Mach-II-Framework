@@ -150,7 +150,11 @@ Notes:
 					<cfset totalRequiredParametersProcessed = totalRequiredParametersProcessed + 1 />
 				<!--- Continues to build with optional parameters from the remaining known URL elements --->
 				<cfelseif optionalParametersCount GTE (i - requiredParametersCount)>
-					<cfset params[optionalParameters[i - requiredParametersCount].name] = arguments.urlElements[i] />
+					<cfif arguments.urlElements[i] NEQ "_-_NULL_-_">
+						<cfset params[optionalParameters[i - requiredParametersCount].name] = arguments.urlElements[i] />
+					<cfelse>
+						<cfset params[optionalParameters[i - requiredParametersCount].name] = "" />
+					</cfif>
 					<cfset totalOptionalParametersProcessed = totalOptionalParametersProcessed + 1 />
 				</cfif>
 				
@@ -288,7 +292,7 @@ Notes:
 			<cfif StructKeyExists(optionalParameters[i], "default")>
 				<cfset defaultValue = optionalParameters[i].default />
 				<cfif defaultValue EQ "''">
-					<cfset defaultValue = "" />
+					<cfset defaultValue = "_-_NULL_-_" />
 				</cfif>
 				<cfset isDefaultValueDefined = true />
 			</cfif>
