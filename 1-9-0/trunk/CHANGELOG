@@ -255,6 +255,12 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Added Event object to the EventArgsInvoker
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/7772
+(2011-04-25 peterfarrell)
+
 * Fixed defect when using structs for params with buildCurrentUrl()
 
 For more info see:

@@ -44,12 +44,12 @@ Author: Ben Edwards (ben@ben-edwards.com)
 $Id$
 
 Created version: 1.1.0
-Update version: 1.8.0
+Update version: 1.9.0
 
 Notes:
 --->
 <cfcomponent
-	displayname="EventArgsInvoker"
+	displayname="EventArgsWithEventInvoker"
 	output="false"
 	extends="MachII.framework.ListenerInvoker"
 	hint="ListenerInvoker that invokes a Listener's method passing the Event's args as an argument collection.">
@@ -61,7 +61,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="EventArgsInvoker" output="false"
+	<cffunction name="init" access="public" returntype="EventArgsWithEventInvoker" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfreturn this />
 	</cffunction>
@@ -96,6 +96,7 @@ Notes:
 				component="#arguments.listener#"
 				method="#arguments.method#"
 				argumentcollection="#arguments.event.getArgs()#"
+				event="#arguments.event#"
 				returnvariable="resultValue" /><cfsetting enablecfoutputonly="true" />
 
 			<!--- resultKey --->
