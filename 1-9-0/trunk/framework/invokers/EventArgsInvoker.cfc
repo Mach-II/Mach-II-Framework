@@ -49,7 +49,7 @@ Update version: 1.9.0
 Notes:
 --->
 <cfcomponent
-	displayname="EventArgsWithEventInvoker"
+	displayname="EventArgsInvoker"
 	output="false"
 	extends="MachII.framework.ListenerInvoker"
 	hint="ListenerInvoker that invokes a Listener's method passing the Event's args as an argument collection.">
@@ -61,7 +61,7 @@ Notes:
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="EventArgsWithEventInvoker" output="false"
+	<cffunction name="init" access="public" returntype="EventArgsInvoker" output="false"
 		hint="Used by the framework for initialization. Do not override.">
 		<cfreturn this />
 	</cffunction>
