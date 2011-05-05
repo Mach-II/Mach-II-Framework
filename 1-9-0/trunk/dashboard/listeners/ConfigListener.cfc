@@ -255,10 +255,13 @@ Notes:
 		<cfset var i = 0 />
 		<cfset var temp = StructNew() />
 		<cfset var message = CreateObject("component", "MachII.dashboard.model.sys.Message").init() />
+		<cfset var subMessageText = "" />
+		<cfset var reloadedNamesText = "" />
 		<cfset var type = "" />
 		<cfset var name = "" />
 		<cfset var module = "" />
 		<cfset var count = 0 />
+		<cfset var reloadedNames = "" />
 		<cfset var tickStart = getTickCount() />
 		<cfset var tickEnd = 0 />
 
@@ -270,6 +273,7 @@ Notes:
 					<cfset name = baseComponentData.listeners[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
+					<cfset reloadedNames = ListAppend(reloadedNames, name)>
 					<cfset reloadListenerByModuleName(baseComponentData.listeners[i].name) />/
 				</cfif>
 			</cfloop>
@@ -279,6 +283,7 @@ Notes:
 					<cfset name = baseComponentData.filters[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
+					<cfset reloadedNames = ListAppend(reloadedNames, name)>
 					<cfset reloadFilterByModuleName(baseComponentData.filters[i].name) />
 				</cfif>
 			</cfloop>
@@ -296,6 +301,7 @@ Notes:
 					<cfset name = baseComponentData.properties[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
+					<cfset reloadedNames = ListAppend(reloadedNames, name)>
 					<cfset reloadPropertyByModuleName(baseComponentData.properties[i].name) />
 				</cfif>
 			</cfloop>
@@ -305,6 +311,7 @@ Notes:
 					<cfset name = baseComponentData.endpoints[i].name />
 					<cfset module = "" />
 					<cfset count = count + 1 />
+					<cfset reloadedNames = ListAppend(reloadedNames, name)>
 					<cfset reloadEndpointByModuleName(baseComponentData.endpoints[i].name) />
 				</cfif>
 			</cfloop>
@@ -317,6 +324,7 @@ Notes:
 						<cfset name = moduleComponentData[key].listeners[i].name />
 						<cfset module = key />
 						<cfset count = count + 1 />
+						<cfset reloadedNames = ListAppend(reloadedNames, name)>
 						<cfset reloadListenerByModuleName(moduleComponentData[key].listeners[i].name, key) />
 					</cfif>
 				</cfloop>
@@ -326,6 +334,7 @@ Notes:
 						<cfset name = moduleComponentData[key].filters[i].name />
 						<cfset module = key />
 						<cfset count = count + 1 />
+						<cfset reloadedNames = ListAppend(reloadedNames, name)>
 						<cfset reloadFilterByModuleName(moduleComponentData[key].filters[i].name, key) />
 					</cfif>
 				</cfloop>
@@ -335,6 +344,7 @@ Notes:
 						<cfset name = moduleComponentData[key].plugins[i].name />
 						<cfset module = key />
 						<cfset count = count + 1 />
+						<cfset reloadedNames = ListAppend(reloadedNames, name)>
 						<cfset reloadPluginByModuleName(moduleComponentData[key].plugins[i].name, key) />
 					</cfif>
 				</cfloop>
@@ -344,6 +354,7 @@ Notes:
 						<cfset name = moduleComponentData[key].properties[i].name />
 						<cfset module = key />
 						<cfset count = count + 1 />
+						<cfset reloadedNames = ListAppend(reloadedNames, name)>
 						<cfset reloadPropertyByModuleName(moduleComponentData[key].properties[i].name, key) />
 					</cfif>
 				</cfloop>
@@ -353,13 +364,25 @@ Notes:
 						<cfset name = moduleComponentData[key].endpoints[i].name />
 						<cfset module = "" />
 						<cfset count = count + 1 />
+						<cfset reloadedNames = ListAppend(reloadedNames, name)>
 						<cfset reloadEndpointByModuleName(moduleComponentData[key].endpoints[i].name) />
 					</cfif>
 				</cfloop>
 			</cfloop>
 
 			<cfset tickEnd = getTickCount() />
-			<cfset message.setMessage("Reloaded #count# changed components in base and all modules in #NumberFormat(tickEnd - tickStart)#ms.") />
+
+			<cfif count GT 1>
+				<cfset subMessageText = "components" />
+			<cfelse>
+				<cfset subMessageText = "component" />
+			</cfif>
+			<cfset reloadedNamesText = "<ul>" />
+			<cfloop list="#reloadedNames#" index="i">
+				<cfset reloadedNamesText = reloadedNamesText & "<li>" & i & "</li>" />
+			</cfloop>
+			<cfset reloadedNamesText = reloadedNamesText & "</ul>" />
+			<cfset message.setMessage("<a href=""javascript:void(0)"" onclick=""$('messageDetails_#tickstart#').toggle();"">" & getProperty("html").addImage(BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/information.png")) & " Details</a> #TimeFormat(Now(), "medium")#: Reloaded #count# changed #subMessageText# in base and all modules in #NumberFormat(tickEnd - tickStart)#ms. <span id=""messageDetails_#tickstart#"" style=""display:none;""><br/>#reloadedNamesText#</span>") />
 
 			<cfcatch type="any">
 				<cfset message.setMessage("Exception occurred during the reload of #type# named '#name#' in module '#module#'.") />

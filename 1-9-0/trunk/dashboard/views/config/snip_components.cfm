@@ -56,7 +56,9 @@ Notes:
 </cfsilent>
 <cfoutput>
 
-<dashboard:displayMessage />
+<div id="changedComponentsMessage" style="display: none;">
+	<dashboard:displayMessage />
+</div>
 
 <h2 style="margin:1em 0 3px 0;">Base Module</h2>
 <table>

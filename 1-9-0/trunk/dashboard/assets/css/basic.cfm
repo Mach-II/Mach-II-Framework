@@ -131,7 +131,7 @@ input { margin: 0.5em; padding: 0.5em; }
 
 label { cursor: pointer; display:block; }
 
-pre, code {
+pre, code, .console {
 	font-size: 150%;
 	font-family: "Courier New", "Andale Mono", "Bitstream Vera Sans Mono", monospace;
 	white-space: pre-wrap; /* css-3 */
@@ -331,6 +331,7 @@ pre.bold, code.bold {
 	padding: 9px 9px 9px .5em;
 	font-variant: small-caps;
 	border: 1px solid ##000;
+	border-radius: 6px;
 	-moz-border-radius:	6px;
 	-webkit-border-radius: 6px;
 }
@@ -344,6 +345,7 @@ pre.bold, code.bold {
 	color: ##0971AF;
 	padding: 6px 3px 6px .5em;
 	border: 1px solid ##0971AF;
+	border-radius: 6px;
 	-moz-border-radius:	6px;
 	-webkit-border-radius: 6px;
 }
@@ -388,6 +390,12 @@ pre.bold, code.bold {
 	background: ##FFE6E6 url(#getProperty("urlBase")#/dashboard.serveAsset/img/icons/exclamation.png) 0.5em center no-repeat;
 	border: 1px solid ##CC0000;
 	border-top: 6px solid ##CC0000;
+}
+
+##content div.logOutput {
+	margin-top: 1em;
+	border: 1px solid black;
+	padding: 6px;
 }
 
 ##content .twoColumn {

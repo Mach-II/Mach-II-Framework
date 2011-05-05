@@ -63,7 +63,7 @@ Notes:
 		<cfparam name="attributes.refresh" default="true" />
 	
 		<cfoutput>
-		<div id="messageBox_#variables.unique#">
+		<div id="messageBox_#variables.unique#" class="messageBox">
 		<div class="#variables.message.getType()#">
 			<p>#variables.message.getMessage()#</p>
 		</div>

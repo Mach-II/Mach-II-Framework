@@ -66,11 +66,6 @@ Notes:
 <cfoutput>
 
 <dashboard:displayMessage />
-
-<!--- TODO: remove dumps
-<cfdump var="#url#" label="url">
-<cfdump var="#CGI#" label="cgi">
- --->
  
 <h1>Configuration File Status</h1>
 
@@ -325,6 +320,15 @@ Notes:
 </table>
 
 <h1>Component Status</h1>
+
+<div <cfif event.isArgDefined('message') AND NOT Len(event.getArg('message').getMessage())> style="display: none;"</cfif>>
+	<h2>Reload Log</h2>
+	<div id="changedComponentsLog" class="logOutput">
+		<div id="changedComponentsLogDetails"><cfif event.isArgDefined('message')>#event.getArg('message').getMessage()#<cfelse>none</cfif></div>
+	</div>
+</div>
+
+
 <ul class="pageNavTabs">
 	<li>
 		<a onclick="myConfigHandler.reloadAllChangedComponents();">
