@@ -249,8 +249,8 @@ To Test it out, do the following:
 				</cfif>
 			</cfloop>
 
-			<!--- Process data specific to PUT and POST type requests --->
-			<cfif ListContainsNoCase("PUT,POST", httpMethod)>
+			<!--- Process data specific to PUT, POST and DELETE type requests --->
+			<cfif ListContainsNoCase("PUT,POST,DELETE", httpMethod)>
 				<cfset arguments.event.setArg("_requestBody", cleanRawContent()) />
 
 				<!--- Perform content-length checks if required --->
