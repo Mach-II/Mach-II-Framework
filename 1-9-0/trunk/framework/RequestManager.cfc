@@ -68,7 +68,8 @@ Notes:
 	<cfset variables.queryStringDelimiter = "" />
 	<cfset variables.seriesDelimiter ="" />
 	<cfset variables.pairDelimiter = "" />
-	<cfset varibales.moduleDelimiter = "" />
+	<cfset variables.moduleDelimiter = "" />
+	<cfset variables.urlZeroLengthStringRepresentation = "" />
 	<cfset variables.maxEvents = 0 />
 	<cfset variables.onRequestEndCallbacks = ArrayNew(1) />
 	<cfset variables.preRedirectCallbacks = ArrayNew(1) />
@@ -113,6 +114,7 @@ Notes:
 		<cfset setParameterPrecedence(getPropertyManager().getProperty("parameterPrecedence")) />
 		<cfset setParseSES(getPropertyManager().getProperty("urlParseSES")) />
 		<cfset setUrlExcludeEventParameter(getPropertyManager().getProperty("urlExcludeEventParameter")) />
+		<cfset setUrlZeroLengthStringRepresentation(getPropertyManager().getProperty("urlZeroLengthStringRepresentation")) />
 		<cfset setModuleDelimiter(getPropertyManager().getProperty("moduleDelimiter")) />
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		<cfset setModuleNames(getAppManager().getModuleManager().getModuleNames()) />
@@ -438,7 +440,7 @@ Notes:
 					<cfset params[i] = Replace(params[i], ";", "U_03B", "all") />
 				</cfif>
 				<cfif NOT Len(params[i]) AND seriesDelimiter EQ pairDelimiter AND parseSes>
-					<cfset params[i] = "_-_NULL_-_" />
+					<cfset params[i] = variables.urlZeroLengthStringRepresentation />
 				</cfif>
 				<cfset queryString = queryString & seriesDelimiter & i & pairDelimiter & URLEncodedFormat(params[i]) />
 			</cfif>
@@ -926,7 +928,7 @@ Notes:
 
 		<cfif getSeriesDelimiter() EQ pairDelimiter>
 			<cfloop from="1" to="#ArrayLen(elements)#" index="i" step="2">
-				<cfif i + 1 LTE ArrayLen(elements) AND elements[i+1] NEQ "_-_NULL_-_">
+				<cfif i + 1 LTE ArrayLen(elements) AND elements[i+1] NEQ variables.urlZeroLengthStringRepresentation>
 					<cfset value = elements[i+1] />
 				<cfelse>
 					<cfset value = "" />
@@ -1174,6 +1176,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getModuleDelimiter" access="private" returntype="string" output="false">
 		<cfreturn variables.moduleDelimiter />
+	</cffunction>
+
+	<cffunction name="setUrlZeroLengthStringRepresentation" access="private" returntype="void" output="false">
+		<cfargument name="urlZeroLengthStringRepresentation" type="string" required="true" />
+		<cfset variables.urlZeroLengthStringRepresentation = arguments.urlZeroLengthStringRepresentation />
+	</cffunction>
+	<cffunction name="getUrlZeroLengthStringRepresentation" access="private" returntype="string" output="false">
+		<cfreturn variables.urlZeroLengthStringRepresentation />
 	</cffunction>
 
 	<cffunction name="setModuleNames" access="private" returntype="void" output="false">

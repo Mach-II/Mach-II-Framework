@@ -238,6 +238,7 @@ index.cfm/product/A12345/fancy/
 
 		<cfset route.setEventName(arguments.event) />
 		<cfset route.setUrlParameterFormatters(getUrlParameterFormatters()) />
+		<cfset route.setZeroLengthStringRepresentation(getProperty("urlZeroLengthStringRepresentation")) />
 
 		<cfif  StructKeyExists(arguments, "module")>
 			<cfset route.setModuleName(arguments.module) />
@@ -253,7 +254,7 @@ index.cfm/product/A12345/fancy/
 			<cfset route.setRequiredParameters(evaluateParameters(arguments.requiredParameters)) />
 		</cfif>
 
-		<cfif  StructKeyExists(arguments, "optionalParameters")>
+		<cfif StructKeyExists(arguments, "optionalParameters")>
 			<cfset route.setOptionalParameters(evaluateParameters(arguments.optionalParameters)) />
 		</cfif>
 

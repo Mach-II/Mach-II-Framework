@@ -95,12 +95,19 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Make empty URL string placeholder to be configurable for framework built URLs
+
+Special thanks to Brian Hendel for suggesting this enhancement.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/774
+(2011-05-06 peterfarrell)
+
 * Allow the ability to set a module for default exception event
 via the exceptionModule property.
 
 Special thanks to Andrew Leaf for suggesting this enhancement
 and providing a patch.
-
 
 For more information see:
 https://trac.mach-ii.com/machii/ticket/751

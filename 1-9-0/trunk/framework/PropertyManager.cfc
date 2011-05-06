@@ -58,7 +58,7 @@ Notes:
 	--->
 	<cfset variables.VERSION_MAJOR = "1.9.0" />
 	<cfset variables.VERSION_MINOR = "@minorVersion@" />
-	<cfset variables.PROPS_NOT_ALLOWED_IN_MODULES = "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlSecureEnabled,urlDelimiters,urlParseSES,urlExcludeEventParameter,defaultModule" />
+	<cfset variables.PROPS_NOT_ALLOWED_IN_MODULES = "eventParameter,parameterPrecedence,endpointParameter,maxEvents,redirectPersistParameter,redirectPersistScope,redirectPersistParameterLocation,moduleDelimiter,urlBase,urlSecureBase,urlSecureEnabled,urlDelimiters,urlParseSES,urlExcludeEventParameter,urlZeroLengthStringRepresentation,defaultModule" />
 	<cfset variables.PROPERTY_SHORTCUTS = StructNew() />
 	<cfset variables.PROPERTY_SHORTCUTS["ColdspringProperty"] = "MachII.properties.ColdspringProperty" />
 	<cfset variables.PROPERTY_SHORTCUTS["EnvironmentProperty"] = "MachII.properties.EnvironmentProperty" />
@@ -540,6 +540,9 @@ Notes:
 			<cfelseif NOT IsBoolean(getProperty("urlParseSES"))>
 				<cfthrow type="MachII.framework.invalidPropertyValue"
 					message="The 'urlParseSES' property must be a boolean." />
+			</cfif>
+			<cfif NOT isPropertyDefined("urlZeroLengthStringRepresentation")>
+				<cfset setProperty("urlZeroLengthStringRepresentation", "_-_NULL_-_") />
 			</cfif>
 			<cfif NOT isPropertyDefined("moduleDelimiter")>
 				<cfset setProperty("moduleDelimiter", ":") />

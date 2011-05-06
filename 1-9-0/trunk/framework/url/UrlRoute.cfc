@@ -63,6 +63,7 @@ Notes:
 	<cfset variables.requiredParameters = "" />
 	<cfset variables.optionalParameters = "" />
 	<cfset variables.ownerId = "" />
+	<cfset variables.zeroLengthStringRepresentation = "_-_NULL_-_" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -76,6 +77,7 @@ Notes:
 		<cfargument name="requiredParameters" type="array" required="false" default="#ArrayNew(1)#" />
 		<cfargument name="optionalParameters" type="array" required="false" default="#ArrayNew(1)#" />
 		<cfargument name="urlParameterFormatters" type="struct" required="false" default="#StructNew()#" />
+		<cfargument name="zeroLengthStringRepresentation" type="string" required="false" default="_-_NULL_-_" />
 		
 		<cfset setName(arguments.name) />
 		<cfset setModuleName(arguments.moduleName) />
@@ -84,6 +86,7 @@ Notes:
 		<cfset setRequiredParameters(arguments.requiredParameters) />
 		<cfset setOptionalParameters(arguments.optionalParameters) />
 		<cfset setUrlParameterFormatters(arguments.urlParameterFormatters) />
+		<cfset setZeroLengthStringRepresentation(arguments.zeroLengthStringRepresentation) />
 		
 		<cfreturn this />
 	</cffunction>
@@ -150,7 +153,7 @@ Notes:
 					<cfset totalRequiredParametersProcessed = totalRequiredParametersProcessed + 1 />
 				<!--- Continues to build with optional parameters from the remaining known URL elements --->
 				<cfelseif optionalParametersCount GTE (i - requiredParametersCount)>
-					<cfif arguments.urlElements[i] NEQ "_-_NULL_-_">
+					<cfif arguments.urlElements[i] NEQ variables.zeroLengthStringRepresentation>
 						<cfset params[optionalParameters[i - requiredParametersCount].name] = arguments.urlElements[i] />
 					<cfelse>
 						<cfset params[optionalParameters[i - requiredParametersCount].name] = "" />
@@ -292,7 +295,7 @@ Notes:
 			<cfif StructKeyExists(optionalParameters[i], "default")>
 				<cfset defaultValue = optionalParameters[i].default />
 				<cfif defaultValue EQ "''">
-					<cfset defaultValue = "_-_NULL_-_" />
+					<cfset defaultValue = variables.zeroLengthStringRepresentation />
 				</cfif>
 				<cfset isDefaultValueDefined = true />
 			</cfif>
@@ -503,6 +506,14 @@ Notes:
 	</cffunction>
 	<cffunction name="getUrlParameterFormatters" access="public" returntype="struct" output="false">
 		<cfreturn variables.urlParameterFormatters />
+	</cffunction>
+
+	<cffunction name="setZeroLengthStringRepresentation" access="public" returntype="void" output="false">
+		<cfargument name="zeroLengthStringRepresentation" type="string" required="true" />
+		<cfset variables.zeroLengthStringRepresentation = arguments.zeroLengthStringRepresentation />
+	</cffunction>	
+	<cffunction name="getZeroLengthStringRepresentation" access="public" returntype="string" output="false">
+		<cfreturn variables.zeroLengthStringRepresentation />
 	</cffunction>
 
 </cfcomponent>
