@@ -228,6 +228,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
         <deleletFromZip zipSrc="${basedir}/tooling/machbuilder/includes/skeleton.zip" 
         	zipDest="${dest}/MachII/tooling/machbuilder/includes/skeleton.zip"
 			deleteDirs="/__MACOSX">
+        	<exclude name="**/*"/>
         </deleletFromZip>
 		<echo message="---------------------------------------------"/>
 		<echo message="Built as version '${buildVersion}'"/>
