@@ -83,7 +83,7 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 	<property name="zip" location="./zip"/>
 	<property name="majorVersion" value="1-9-0"/>
 	<property name="baseSvnUrl" value="http://greatbiztools-svn.cvsdude.com/mach-ii/framework/${majorVersion}/"/>
-	<property name="debug" value="false"/>
+	<property name="debug" value="true"/>
 	
 	<property name="scp.server" value="mach-ii.com"/>
 	<property name="scp.user" value="root"/>
@@ -222,6 +222,13 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 			tofile="${dest}/MachII/dashboard/README.txt"
 			preservelastmodified="true"
 			verbose="${debug}"/>
+		<echo message="---------------------------------------------"/>
+		<echo message="Clean up zip files (remove __MACOSX)"/>
+		<echo message="---------------------------------------------"/>
+        <deleletFromZip zipSrc="${basedir}/tooling/machbuilder/includes/skeleton.zip" 
+        	zipDest="${dest}/MachII/tooling/machbuilder/includes/skeleton.zip"
+			deleteDirs="/__MACOSX">
+        </deleletFromZip>
 		<echo message="---------------------------------------------"/>
 		<echo message="Built as version '${buildVersion}'"/>
 		<echo message="---------------------------------------------"/>
@@ -535,5 +542,28 @@ DO NOT ADD THESE PROPERTIES TO THIS FILE AS THIS FILE IS PUBLIC!
 		<input addproperty="svn.pwd"
 			message="SVN password:"/>		
 	</target>
+
+	<!--
+	MACROS
+	-->
+	<macrodef name="deleletFromZip">
+		<attribute name="zipSrc"/>
+		<attribute name="zipDest"/>
+		<attribute name="deleteDirs"/>
+		<element name="selectors" implicit="true" optional="true"/>
+		<sequential>
+			<mkdir dir="${dest}/__tmp__"/>
+			<unzip dest="${dest}/__tmp__" src="@{zipSrc}"/>
+			<delete verbose="${debug}">
+				<fileset dir="${dest}/__tmp__">
+					<selectors/>
+				</fileset>
+			</delete>
+			<delete verbose="${debug}" dir="${dest}/__tmp__/@{deleteDirs}" failonerror="false"/>
+			<delete file="@{zipDest}"/>
+			<zip destfile="@{zipDest}" basedir="${dest}/__tmp__" />
+			<delete dir="${dest}/__tmp__"/>
+		</sequential>
+	</macrodef>
 	
 </project>
