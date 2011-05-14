@@ -94,7 +94,7 @@ Notes:
 		<cfset setOnRequestEndCallbacks(arguments.onRequestEndCallbacks) />
 
 		<!--- Cleanup the path info since IIS6  "can" butcher the path info --->
-		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME)) />
+		<cfset setCleanedPathInfo(getAppManager().getUtils().cleanPathInfo(cgi.PATH_INFO, cgi.SCRIPT_NAME, false)) />
 
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
