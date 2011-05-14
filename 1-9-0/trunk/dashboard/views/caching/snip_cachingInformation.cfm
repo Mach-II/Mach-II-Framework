@@ -103,11 +103,13 @@ Notes:
 								<td style="width:35%;"><h4>#propName#</h4></td>
 								<td style="width:65%;">
 								<cfset propValue = variables.configData[propName] />
+									<p class="right">
 								<cfif IsSimpleValue(propValue)>
-									<p>#propValue#</p>
+									#propValue#
 								<cfelse>
-									<p><em>[complex value]</em></p>
+									<em>[complex value]</em>
 								</cfif>
+									</p>
 								</td>
 							</tr>
 						</cfif>
@@ -118,37 +120,36 @@ Notes:
 				<table class="small">
 					<tr>
 						<td style="width:35%;"><h4>Hit Ratio</h4></td>
-						<td style="width:65%;"><p>#getProperty("udfs").decimalRound(cacheStats.getCacheHitRatio() * 100, 2)#%</p></td>
+						<td style="width:65%;"><p class="right">#getProperty("udfs").decimalRound(cacheStats.getCacheHitRatio() * 100, 2)#%</p></td>
 					</tr>
 					<tr>
 						<td><h4>Hits</h4></td>
-						<td><p>#cacheStats.getCacheHits()#</p></td>
+						<td><p class="right">#NumberFormat(cacheStats.getCacheHits(), "___,___,___,___")#</p></td>
 					</tr>
 					<tr>
 						<td><h4>Misses</h4></td>
-						<td><p>#cacheStats.getCacheMisses()#</p></td>
+						<td><p class="right">#NumberFormat(cacheStats.getCacheMisses(), "___,___,___,___")#</p></td>
 					</tr>
 					<tr>
 						<td><h4>Active Elements</h4></td>
-						<td><p>#cacheStats.getActiveElements()#</p></td>
+						<td><p class="right">#NumberFormat(cacheStats.getActiveElements(), "___,___,___,___")#</p></td>
 					</tr>
 					<tr>
 						<td><h4>Total Elements</h4></td>
-						<td><p>#cacheStats.getTotalElements()#</p></td>
+						<td><p class="right">#NumberFormat(cacheStats.getTotalElements(), "___,___,___,___")#</p></td>
 					</tr>
 					<tr>
 						<td><h4>Evictions</h4></td>
-						<td><p>#cacheStats.getEvictions()#</p></td>
+						<td><p class="right">#NumberFormat(cacheStats.getEvictions(), "___,___,___,___")#</p></td>
 					</tr>
 				</table>
-
 				<cfif StructCount(customStats)>
 					<hr />
 					<table class="small">
 						<cfloop collection="#customStats#" item="customStatName">
 							<tr>
 								<td style="width:35%;"><h4>#customStatName#</h4></td>
-								<td style="width:65%;"><p>#customStats[customStatName]#</p></td>
+								<td style="width:65%;"><p class="right">#customStats[customStatName]#</p></td>
 							</tr>
 						</cfloop>
 					</table>
