@@ -324,7 +324,7 @@ Notes:
 <div <cfif event.isArgDefined('message') AND NOT Len(event.getArg('message').getMessage())> style="display: none;"</cfif>>
 	<h2>Reload Log</h2>
 	<div id="changedComponentsLog" class="logOutput">
-		<div id="changedComponentsLogDetails"><cfif event.isArgDefined('message')>#event.getArg('message').getMessage()#<cfelse>none</cfif></div>
+		<div id="changedComponentsLogDetails"><cfif event.isArgDefined('message')>#event.getArg('message').getMessage()#<cfelse>#TimeFormat(Now(), "medium")#: No actions</cfif></div>
 	</div>
 </div>
 

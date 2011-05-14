@@ -382,7 +382,7 @@ Notes:
 				<cfset reloadedNamesText = reloadedNamesText & "<li>" & i & "</li>" />
 			</cfloop>
 			<cfset reloadedNamesText = reloadedNamesText & "</ul>" />
-			<cfset message.setMessage("<a href=""javascript:void(0)"" onclick=""$('messageDetails_#tickstart#').toggle();"">" & getProperty("html").addImage(BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/information.png")) & " Details</a> #TimeFormat(Now(), "medium")#: Reloaded #count# changed #subMessageText# in base and all modules in #NumberFormat(tickEnd - tickStart)#ms. <span id=""messageDetails_#tickstart#"" style=""display:none;""><br/>#reloadedNamesText#</span>") />
+			<cfset message.setMessage("<a href=""javascript:void(0)"" onclick=""$('messageDetails_#tickstart#').toggle();"">" & getProperty("html").addImage("external:" & BuildEndpointUrl("dashboard.serveAsset", "file=/img/icons/information.png")) & " Details</a> #TimeFormat(Now(), "medium")#: Reloaded #count# changed #subMessageText# in base and all modules in #NumberFormat(tickEnd - tickStart)#ms. <span id=""messageDetails_#tickstart#"" style=""display:none;""><br/>#reloadedNamesText#</span>") />
 
 			<cfcatch type="any">
 				<cfset message.setMessage("Exception occurred during the reload of #type# named '#name#' in module '#module#'.") />
