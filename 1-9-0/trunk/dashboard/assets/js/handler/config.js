@@ -127,7 +127,7 @@ ConfigHandler.prototype = {
 	
 	updateChangeLog: function() {
 		$$("div##changedComponentsMessage div.messageBox div p").each(function(node) {
-			$("changedComponentsLogDetails").insert({'before': node.innerHTML + '<br/>'})
+			$("changedComponentsLogDetails").insert({'before': '<div id="changedComponentsLogDetails">' + node.innerHTML + '</div>'})
 			$("changedComponentsLog").show();
 		});
 	},
