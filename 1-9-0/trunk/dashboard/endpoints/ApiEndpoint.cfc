@@ -52,7 +52,7 @@ Notes:
 	extends="MachII.endpoints.rest.BaseEndpoint"
 	hint="An endpoint that provides a REST API to dashboard functionality."
 	output="false"
-	rest:authenticate="true">
+	rest:authenticate="false">
 
 	<!---
 	PROPERTIES
@@ -108,10 +108,11 @@ Notes:
 	--->
 	<cffunction name="temp" access="public" returntype="string" output="false"
 		hint="Temp testing method. To be removed"
-		rest:uri="/temp"
-		rest:method="PUT">
+		rest:uri="/temp/{email}"
+		rest:method="GET">
+		<cfargument name="event">
 		
-		<cfreturn "temp" />
+		<cfreturn event.getArg("email") />
 	</cffunction>
 
 </cfcomponent>

@@ -98,7 +98,6 @@ Notes:
 		hint="Peforms the saving of data for this logger.">
 		
 		<cfset var requestInfo = StructNew() />
-		<cfset var dataStorage = StructNew() />
 		<cfset var snapshotLevelNumber = getSnapshotLevelNumber() />
 		<cfset var i = 0 />
 		
@@ -108,21 +107,24 @@ Notes:
 
 			<!--- Do not save exceptions that happen in the dashboard module --->
 			<cfif arguments.appManager.getRequestHandler().getRequestModuleName() NEQ getDashboardModuleName()>
-				<cfset dataStorage = getDataStorage() />
 				<cfset requestInfo.messages = getLogAdapter().getLoggingData().data />
 				
 				<cfloop from="1" to="#ArrayLen(requestInfo.messages)#" index="i">
 					<cfif requestInfo.messages[i].logLevel GTE snapshotLevelNumber>
-						<cfset requestInfo.timestamp = Now() />
-						<cfset requestInfo.requestEventName = arguments.appManager.getRequestHandler().getRequestEventName() />
+						
+						<!--- Build up snapshot --->
 						<cfif Len(arguments.appManager.getRequestHandler().getRequestModuleName())>
 							<cfset requestInfo.requestModuleName = arguments.appManager.getRequestHandler().getRequestModuleName() />
 						<cfelse>
 							<cfset requestInfo.requestModuleName = "base" />
 						</cfif>
+						<cfset requestInfo.requestEventName = arguments.appManager.getRequestHandler().getRequestEventName() />
+						<cfset requestInfo.timestamp = Now() />
 						<cfset requestInfo.requestIpAddress = cgi.REMOTE_ADDR />
 						<cfset requestInfo.logLevelName = requestInfo.messages[i].logLevelName />
-						<cfset ArrayPrepend(dataStorage.data, requestInfo) />
+						
+						
+						<cfset ArrayPrepend(getDataStorage().data, requestInfo) />
 						<cfbreak />
 					</cfif>
 				</cfloop>
@@ -183,7 +185,6 @@ Notes:
 		
 		<cfif NOT StructKeyExists(application, "#getAppKey()#._MachIIExceptionLoggerData") 
 			OR arguments.flush>
-			<cfset application[getAppKey()]._MachIIExceptionLoggerData = StructNew() />
 			<cfset application[getAppKey()]._MachIIExceptionLoggerData.data = ArrayNew(1) />
 		</cfif>
 		
