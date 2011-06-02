@@ -40,9 +40,11 @@
 	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
+Author: Jason York (jason.york@gmail.com)
 $Id$
 
 Created version: 1.9.0
+Updated version: 1.9.0
 
 --->
 <cfcomponent
@@ -96,14 +98,16 @@ Created version: 1.9.0
 			</cfif>
 		</cfif>
 
-		<cfif getConfigFile() NEQ "">
+		<!--- Setup a configurator for Log4J if defined otherwise use the default --->
+		<cfif Len(getConfigFile())>
 			<cfif FileExists(getConfigFile())>
-				<cfif Right(getConfigFile(), 11) EQ ".properties" >
+				<cfif getConfigFile().toLowerCase().endsWith(".properties")>
 					<cfset configurator = CreateObject("java", "org.apache.log4j.PropertyConfigurator") />
-				<cfelseif Right(getConfigFile(), 4) EQ ".xml" >
+				<cfelseif getConfigFile().toLowerCase().endsWith(".xml")>
 					<cfset configurator = CreateObject("java", "org.apache.log4j.xml.DOMConfigurator") />
 				<cfelse>
-					<cfthrow type="MachII.logging.adapters.Log4jAdapter" message="Config file must end in either '.properties' or '.xml'" />
+					<cfthrow type="MachII.logging.adapters.Log4jAdapter" 
+						message="Config file must end in either '.properties' or '.xml'" />
 				</cfif>
 				<cfset configurator.configure(getConfigFile()) />
 			<cfelse>
