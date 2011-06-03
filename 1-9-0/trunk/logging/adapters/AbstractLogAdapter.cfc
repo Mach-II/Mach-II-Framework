@@ -56,6 +56,16 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
+
+	<cfset variables.LOG_LEVEL_TRACE = 1 />
+	<cfset variables.LOG_LEVEL_DEBUG = 2 />
+	<cfset variables.LOG_LEVEL_INFO = 3 />
+	<cfset variables.LOG_LEVEL_WARN = 4 />
+	<cfset variables.LOG_LEVEL_ERROR = 5 />
+	<cfset variables.LOG_LEVEL_FATAL = 6 />
+	<cfset variables.LOG_LEVEL_ALL = 0 />
+	<cfset variables.LOG_LEVEL_OFF = 7 />
+
 	<cfset variables.instance = StructNew() />
 	<cfset variables.instance.loggingEnabled = true />
 
@@ -93,7 +103,14 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isDebugEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_DEBUG, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_DEBUG, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="error" access="public" returntype="void" output="false"
@@ -101,7 +118,14 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isErrorEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_ERROR, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_ERROR, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="fatal" access="public" returntype="void" output="false"
@@ -109,7 +133,14 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isFatalEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_FATAL, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="info" access="public" returntype="void" output="false"
@@ -117,7 +148,14 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isInfoEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_INFO, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="trace" access="public" returntype="void" output="false"
@@ -125,7 +163,14 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isTraceEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_TRACE, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_TRACE, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="warn" access="public" returntype="void" output="false"
@@ -133,38 +178,64 @@ Notes:
 		<cfargument name="channel" type="string" required="true" />
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="additionalInformation" type="any" required="false" />
-		<cfabort showerror="This method is abstract and must be overrided." />
+
+		<cfif isWarnEnabled()>
+			<cfif StructKeyExists(arguments, "additionalInformation")>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_WARN, arguments.message, arguments.additionalInformation) />
+			<cfelse>
+				<cfset logMessage(arguments.channel, variables.LOG_LEVEL_WARN, arguments.message) />
+			</cfif>
+		</cfif>
 	</cffunction>
+
 
 	<cffunction name="isDebugEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if debug level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_DEBUG) />
 	</cffunction>
 
 	<cffunction name="isErrorEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if error level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_ERROR) />
 	</cffunction>
 
 	<cffunction name="isFatalEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if fatal level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_FATAL) />
 	</cffunction>
 
 	<cffunction name="isInfoEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if info level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_INFO) />
 	</cffunction>
 
 	<cffunction name="isTraceEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if trace level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_TRACE) />
 	</cffunction>
 
 	<cffunction name="isWarnEnabled" access="public" returntype="boolean" output="false"
 		hint="Checks if warn level logging is enabled.">
-		<cfabort showerror="This method is abstract and must be overrided." />
+		<cfreturn isLevelEnabled(variables.LOG_LEVEL_WARN) />
 	</cffunction>
+
+	<cffunction name="isLevelEnabled" access="private" returntype="boolean" output="false"
+		hint="Checks if the passed log level is enabled.">
+		<cfargument name="logLevel" type="numeric" required="true" />
+
+		<cfabort showerror="This method is abstract and must be overridden." />
+	</cffunction>
+
+	<cffunction name="logMessage" access="private" returntype="void" output="false"
+		hint="Logs a message.">
+		<cfargument name="channel" type="string" required="true" />
+		<cfargument name="logLevel" type="numeric" required="true" />
+		<cfargument name="message" type="string" required="true" />
+		<cfargument name="additionalInformation" type="any" required="false" />
+
+		<cfabort showerror="This method is abstract and must be overridden." />
+	</cffunction>
+
 
 	<!---
 	PUBLIC FUNCTIONS - UTILS
