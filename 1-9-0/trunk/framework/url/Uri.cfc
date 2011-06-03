@@ -64,7 +64,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	CONSTANTS
 	--->
 	<!--- The ONE_TOKEN_REGEX is what will be used to match an individual token in the URL. Used when generating the full uriRegex value. --->
-	<cfset variables.ONE_TOKEN_REGEX ="([^\/\?&\.]+)" />
+	<cfset variables.ONE_TOKEN_REGEX ="([^\/\?&]+?)" />
 	<!--- HTTP_METHODS is the list of supported HTTP request methods. --->
 	<cfset variables.HTTP_METHODS = "GET,POST,PUT,DELETE,HEAD,PATCH" />
 	<cfset variables.DEFAULT_FORMAT_LIST = "htm,html,json,xml" />
@@ -255,7 +255,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="getFormatsForRegex" access="private" returntype="string" output="false"
 		hint="Takes a list of formats intended to be possible formats used by this URI, validates them, and returns a string that can be used a regex to find the format.">
 		<cfargument name="possibleFormatList" type="string" required="true" />
-		
+
 		<cfset var formatsForRegex = "" />
 		<cfset var currFormat = "" />
 
