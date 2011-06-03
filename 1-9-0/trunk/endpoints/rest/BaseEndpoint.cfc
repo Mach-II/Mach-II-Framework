@@ -62,7 +62,7 @@ To Test it out, do the following:
 		<endpoint name="test" type" value="MachII.tests.dummy.DummyRestEndpoint">
 			<parameters>
 				<!--
-					Sets whether to use the value from urlBase or urlBaseSecure which 
+					Sets whether to use the value from urlBase or urlBaseSecure which
 					indicates HTTPS/SSL URL base. Defaults to value from property.urlBase.
 					This parameter also accepts environment structs.
 				-->
@@ -182,14 +182,14 @@ To Test it out, do the following:
 		<cfelse>
 			<cfset setUrlBase(getProperty("urlBase")) />
 		</cfif>
-		
-		<!--- Defaults to value from "secure" unless otherwise defined --->	
+
+		<!--- Defaults to value from "secure" unless otherwise defined --->
 		<cfif IsStruct(enforceSecure)>
 			<cfset enforceSecure = resolveValueByEnvironment(enforceSecure, true) />
 		</cfif>
-		
+
 		<cfset setEnforceSecure(enforceSecure) />
-		
+
 		<cfset setDefaultFormat(getParameter("defaultFormat", variables.defaultFormat)) />
 		<cfset setDefaultCharset(getParameter("defaultCharset", variables.defaultCharset)) />
 		<cfset setJsonpArgName(getParameter("jsonpArgName", variables.jsonpArgName)) />
@@ -219,7 +219,7 @@ To Test it out, do the following:
 		<cfset var currToken = "" />
 		<cfset var requestBodyParsed = "" />
 		<cfset var headers = getHttpRequestData().headers />
-		
+
 		<!--- Enforce SSL if required --->
 		<cfif getEnforceSecure() AND NOT cgi.SERVER_PORT_SECURE>
 			<cfthrow type="#variables.exceptionTypes["InvalidProtocol"]#"
@@ -249,8 +249,8 @@ To Test it out, do the following:
 				</cfif>
 			</cfloop>
 
-			<!--- Process data specific to PUT, POST and DELETE type requests --->
-			<cfif ListContainsNoCase("PUT,POST,DELETE", httpMethod)>
+			<!--- Process data specific to PUT and POST type requests --->
+			<cfif ListContainsNoCase("PUT,POST", httpMethod)>
 				<cfset arguments.event.setArg("_requestBody", cleanRawContent()) />
 
 				<!--- Perform content-length checks if required --->
@@ -258,7 +258,7 @@ To Test it out, do the following:
 					<cfset performContentLengthChecks(arguments.event) />
 				</cfif>
 			</cfif>
-			
+
 			<!--- Parse the request body for alternate HTTP methods --->
 			<cfif ListContainsNoCase(variables.parseRequestBodyParametersMethods, httpMethod) AND StructKeyExists(headers, "content-type") AND headers["content-type"].startsWith("application/x-www-form-urlencoded")>
 				<cfset requestBodyParsed = variables.parserUtils.parseRequestBodyParameters(arguments.event.getArg("_requestBody"), true) />
@@ -267,7 +267,7 @@ To Test it out, do the following:
 				<!--- Append the parsed struct to the event object --->
 				<cfset arguments.event.setArgs(requestBodyParsed) />
 			</cfif>
-		
+
 		<!--- No URI object for REST request so handle exception --->
 		<cfelse>
 			<cfif Len(restUri)>
@@ -298,7 +298,7 @@ To Test it out, do the following:
 			<cfset restResponseBody = arguments.event.getArg(getJsonpArgName()) & "(" & restResponseBody & ")" />
 			<cfset format = "jsonp" />
 		</cfif>
-		
+
 		<cfset arguments.event.setArg("_responseFormat", format) />
 		<cfset arguments.event.setArg("_responseContentType", addContentTypeHeaderFromFormat(format)) />
 
@@ -368,7 +368,7 @@ To Test it out, do the following:
 		<cfset var params = arguments />
 		<cfset var sortedParams = "" />
 		<cfset var i = 0 />
-		
+
 		<cfset restUri = variables.restUris.findUriByFunctionName(arguments.method) />
 
 		<cfif IsObject(restUri)>
@@ -397,7 +397,7 @@ To Test it out, do the following:
 					<!--- Resolve by name otherwise resolve by position --->
 					<cfif StructKeyExists(params, uriTokenNames[i])>
 						<cfset builtUrl = ReplaceNoCase(builtUrl, "{#uriTokenNames[i]#}", params[uriTokenNames[i]], "one") />
-						<cfset StructDelete(params, uriTokenNames[i], false) />					
+						<cfset StructDelete(params, uriTokenNames[i], false) />
 					<cfelse>
 						<cfset builtUrl = ReplaceNoCase(builtUrl, "{#uriTokenNames[i]#}", params[i + 1], "one") />
 						<cfset StructDelete(params, i + 1, false) />
@@ -417,10 +417,10 @@ To Test it out, do the following:
 			<!--- Add additional query string parameters if there are remaining params --->
 			<cfif StructCount(params)>
 				<cfset sortedParams = StructSort(params, "textnocase", "ASC") />
-				
+
 				<cfif ArrayLen(sortedParams)>
 					<cfset builtUrl = builtUrl & "?" />
-	
+
 					<cfloop from="1" to="#ArrayLen(sortedParams)#" index="i">
 						<cfset builtUrl = builtUrl & LCase(sortedParams[i]) & "=" & params[sortedParams[i]] />
 					</cfloop>
@@ -459,7 +459,7 @@ To Test it out, do the following:
 				<cfset getLog().error("MachII.endpoints.rest.BaseEndpoint: Could not find Content-Type for input format: '#arguments.format#'.", cfcatch) />
 			</cfcatch>
 		</cftry>
-		
+
 		<cfreturn contentType />
 	</cffunction>
 
@@ -600,7 +600,7 @@ To Test it out, do the following:
 								<cfbreak/>
 							</cfif>
 						</cfloop>
-						
+
 						<cfloop from="1" to="#ArrayLen(currHttpMethods)#" index="j">
 							<!--- Create instance of Uri and add it to the UriCollection. --->
 							<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
@@ -610,7 +610,7 @@ To Test it out, do the following:
 									, getParameter("name")
 									, currRestUriMetadata
 									, getPossibleFormatList()) />
-	
+
 							<!---
 							Check for already added URI as we do not want to add in duplicates created by inheritance
 							We loop from top level object first so super class are of a lesser importance
