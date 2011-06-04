@@ -65,7 +65,7 @@ supports Adobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_9_0.dtd')#" />
 <!--- Set the request timeout for loading of the framework. Defaults to 120 --->
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
-<!--- Set if the framework should reset the response body should be reset before framework out --->
+<!--- Set if the framework should reset the response body should be reset before framework outputs --->
 <cfparam name="MACHII_ONREQUESTSTART_CONTENT_RESET" type="boolean" default="true" />
 
 <!--- Clean the AppKey --->

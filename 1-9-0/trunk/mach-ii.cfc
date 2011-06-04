@@ -97,7 +97,7 @@ framework to be loaded as they interact with framework components:
 	<cfparam name="MACHII_HANDLE_ONLOAD" type="boolean" default="true" />
 	<!--- Set the template to show for loading of the framework. Defaults to Mach-II default template. --->
 	<cfparam name="MACHII_ONLOAD_TEMPLATE" type="string" default="/MachII/bootstrapper/defaultLoadingTemplate.cfm" />
-	<!--- Set if the framework should reset the response body should be reset before framework out --->
+	<!--- Set if the framework should reset the response body should be reset before framework outputs --->
 	<cfparam name="MACHII_ONREQUESTSTART_CONTENT_RESET" type="boolean" default="true" />
 
 	<!---
