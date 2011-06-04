@@ -70,10 +70,10 @@ not been forgotten and please consider yourself thanked!
 | o _ _ ._  _ _ 
 |_|(_(/_| |_>(/_
 ------------------------------------------------
-Mach-II Integrity (1.9.0) is released under the GPL v3.0 license.  You can 
-use Mach-II on any commercial application as long as you abide by the license. 
-For more details, please see the NOTICE, LICENSE and COPYING files that are 
-shipped with the package. More information including FAQs on the license
+Mach-II Integrity (1.9.0) is released under the GPL v3.0 license with a classpath 
+exception.  You can use Mach-II on any commercial application as long as you abide 
+by the license. For more details, please see the NOTICE, LICENSE and COPYING files 
+that are shipped with the package. More information including FAQs on the license
 can be found here:
 
 http://trac.mach-ii.com/machii/wiki/FAQHowIsMachIILicensed
@@ -151,7 +151,7 @@ the GNU General Public License applies.
 	- Any Mach-II custom tag that is extended through <cfinclude>
 
 Mach-II's documentation and logos are *not* licensed under the GPL v3.0 license:
-Copyright 2007-2010 GreatBizTools, LLC All rights reserved.
+Copyright 2007-2011 GreatBizTools, LLC All rights reserved.
 
 ------------------------------------------------
 ___                            

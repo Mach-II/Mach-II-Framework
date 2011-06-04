@@ -73,7 +73,8 @@ For more information see:
 https://trac.mach-ii.com/machii/ticket/727
 (2010-11-15 peterfarrell)
 
-* File tag does not compute tag "name" from path and 
+* File tag does not compute tag "name" from path 
+and add ability to set enctype if file tag exists
 
 For more information see:
 https://trac.mach-ii.com/machii/ticket/707
@@ -85,8 +86,8 @@ For more information see:
 https://trac.mach-ii.com/machii/ticket/706
 (2010-09-06 peterfarrell)
 
-* Redirect command incorrectly computer event-arg name in "args" and "persistArgs" 
-with expression
+* Redirect command incorrectly computer event-arg name in 
+"args" and "persistArgs" with expression
 
 For more information see:
 https://trac.mach-ii.com/machii/ticket/546
@@ -95,6 +96,15 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Allow request content reset to be configurable for bootstrappers
+
+Special thanks to Dave Shuck and Kurt Wiersma for suggesting this
+enhancement.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/784
+(2011-06-04 peterfarrell)
+
 * Make empty URL string placeholder to be configurable for framework built URLs
 
 Special thanks to Brian Hendel for suggesting this enhancement.

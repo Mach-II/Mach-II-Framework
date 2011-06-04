@@ -97,6 +97,8 @@ framework to be loaded as they interact with framework components:
 	<cfparam name="MACHII_HANDLE_ONLOAD" type="boolean" default="true" />
 	<!--- Set the template to show for loading of the framework. Defaults to Mach-II default template. --->
 	<cfparam name="MACHII_ONLOAD_TEMPLATE" type="string" default="/MachII/bootstrapper/defaultLoadingTemplate.cfm" />
+	<!--- Set if the framework should reset the response body should be reset before framework out --->
+	<cfparam name="MACHII_ONREQUESTSTART_CONTENT_RESET" type="boolean" default="true" />
 
 	<!---
 	APPLICATION SPECIFIC EVENTS
@@ -227,7 +229,7 @@ framework to be loaded as they interact with framework components:
 			so turn it back on for trailing whitespace. All these tags must be on the
 			same line or additional whitespace may be introduced.
 		--->
-		<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+		<cfprocessingdirective suppresswhitespace="true"><cfif MACHII_ONREQUESTSTART_CONTENT_RESET><cfcontent reset="true" /></cfif><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
 	</cffunction>
 
 	<cffunction name="handleOnLoadTemplate" access="public" returntype="void" output="true"

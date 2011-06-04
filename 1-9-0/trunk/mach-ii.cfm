@@ -43,11 +43,11 @@
 $Id$
 
 Created version: 1.0.1
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 This bootstrapper is DEPRECATED since Mach-II no longer officially
-supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
+supports Adobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 --->
 
 <!--- Set the path to the application's mach-ii.xml file. Default to ./config/mach-ii.xml. --->
@@ -65,6 +65,8 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 <cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_9_0.dtd')#" />
 <!--- Set the request timeout for loading of the framework. Defaults to 120 --->
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="120" />
+<!--- Set if the framework should reset the response body should be reset before framework out --->
+<cfparam name="MACHII_ONREQUESTSTART_CONTENT_RESET" type="boolean" default="true" />
 
 <!--- Clean the AppKey --->
 <cfset MACHII_APP_KEY = REReplaceNoCase(MACHII_APP_KEY, "[[:punct:]|[:cntrl:]]", "", "all") />
@@ -127,4 +129,4 @@ supports Aobe ColdFusion 6.1. Use Application.cfc by extending MachII.mach-ii.
 	so turn it back on for trailing whitespace. All these tags must be on the
 	same line or additional whitespace may be introduced.
 --->
-<cfprocessingdirective suppresswhitespace="true"><cfcontent reset="true" /><cfsetting enablecfoutputonly="true" /><cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+<cfprocessingdirective suppresswhitespace="true"><cfif MACHII_ONREQUESTSTART_CONTENT_RESET><cfcontent reset="true" /></cfif><cfsetting enablecfoutputonly="true" /><cfset application[MACHII_APP_KEY].appLoader.getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
