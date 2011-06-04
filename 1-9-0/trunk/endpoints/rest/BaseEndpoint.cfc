@@ -80,9 +80,9 @@ To Test it out, do the following:
 				<parameter name="defaultFormat" value="html" />
 				<!--
 					Optionally sets the default return charset of the request. Defaults
-					to ISO-8859-1 if not defined (standard HTTP response charset).
+					to ISO-8859-1 if not defined per the HTTP 1.1 specification
 				-->
-				<parameter name="defaultCharset" value="" />
+				<parameter name="defaultCharset" value=ISO-8859-1" />
 				<!--
 					Optionally sets the event arg name to use as the value to wrap
 					JsonP requests. Defaults to 'jsonp'
@@ -148,7 +148,7 @@ To Test it out, do the following:
 	    it can be overridden by defining the "defaultFormat" parameter.
 	--->
 	<cfset variables.defaultFormat = "html" />
-	<cfset variables.defaultCharset = "" />
+	<cfset variables.defaultCharset = "ISO-8859-1" />
 	<cfset variables.possibleFormatList = variables.DEFAULT_FORMAT_LIST />
 	<cfset variables.authenticateDefault = false />
 	<cfset variables.enforceContentLengthDefault =  true />
@@ -161,6 +161,7 @@ To Test it out, do the following:
 	<cfset variables.exceptionTypes["IncompleteBody"] = "MachII.endpoints.rest.IncompleteBody" />
 	<cfset variables.exceptionTypes["MethodNotAllowed"] = "MachII.endpoints.rest.MethodNotAllowed" />
 	<cfset variables.exceptionTypes["MissingContentLength"] = "MachII.endpoints.rest.MissingContentLength" />
+	<cfset variables.exceptionTypes["MissingContentLengthCharset"] = "MachII.endpoints.rest.MissingContentLengthCharset" />
 	<cfset variables.exceptionTypes["NoSuchResource"] = "MachII.endpoints.rest.NoSuchResource" />
 
 	<!---
@@ -469,12 +470,13 @@ To Test it out, do the following:
 
 		<cfset var headers = GetHttpRequestData().headers />
 		<cfset var contentType = "" />
+		<cfset var contentLength = "" />
 		<cfset var charset = variables.defaultCharset />
 
 		<cfif StructKeyExists(headers, "Content-Type")>
 			<cfset contentType = headers["Content-Type"] />
 
-			<!--- Find a charset in example "application/xml; charset=UTF-8"--->
+			<!--- Find a charset in example "application/xml; charset=UTF-8" --->
 			<cfif ListLen(contentType, ";") GTE 2>
 				<cfset charset = Trim(ListGetAt(ListGetAt(contentType, 2, ";"), 2, "=")) />
 			</cfif>
@@ -482,10 +484,25 @@ To Test it out, do the following:
 
 		<!--- Check that the content-length header was sent --->
 		<cfif NOT StructKeyExists(headers, "Content-Length")>
-			<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#" />
+			<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#"
+				message="The 'content-length' header is missing and required to perform content length checks for this request." />
 		<!--- Check that the number of bytes in the content-length header of the raw content equals the header value --->
-		<cfelseif headers["Content-Length"] NEQ Len(arguments.event.getArg("_requestBody").getBytes(charset))>
-			<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#" />
+		<cfelse>
+			<cftry>
+				<cfset contentLength = Len(arguments.event.getArg("_requestBody").getBytes(charset)) />
+				
+				<cfcatch type="java.io.UnsupportedEncodingException">
+					<cfthrow type="#variables.exceptionTypes["MissingContentLengthCharset"]#"
+						message="Unable to decode the request body due to a invalid charset." 
+						detail="Used charset '#charset#', default charset in endpoint '#variables.defaultCharset#" />
+				</cfcatch>
+			</cftry>
+			
+			<cfif headers["Content-Length"] NEQ contentLength>
+				<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#"
+					message="Invalid length of content body. Check that the requestor is sending the complete request body." 
+					detail="Reported request 'Content-Length': #headers["Content-Length"]#, Actual received body length: #contentLength# using charset '#charset#'" />
+			</cfif>
 		</cfif>
 	</cffunction>
 
