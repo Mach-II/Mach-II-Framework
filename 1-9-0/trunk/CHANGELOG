@@ -278,10 +278,19 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Refactored bootstrapper common functionality into common.cfm
+
+This was part of the process to simplify our bootstrapping process
+so we could easily add in plugins to other projects like Mura.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/790
+(2011-06-01 peterfarrell)
+
 * Added Event object to the EventArgsInvoker
 
 For more info see:
-http://trac.mach-ii.com/machii/ticket/7772
+http://trac.mach-ii.com/machii/ticket/772
 (2011-04-25 peterfarrell)
 
 * Fixed defect when using structs for params with buildCurrentUrl()
