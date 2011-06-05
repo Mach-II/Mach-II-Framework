@@ -85,6 +85,7 @@ framework to be loaded as they interact with framework components:
 	--->
 	<cffunction name="onApplicationStart" access="public" returntype="boolean" output="false"
 		hint="Handles the application start event. Override to provide customized functionality.">
+
 		<!--- Load up the framework --->
 		<cfset LoadFramework() />
 
@@ -92,9 +93,11 @@ framework to be loaded as they interact with framework components:
 	</cffunction>
 
 	<cffunction name="onApplicationEnd" access="public" returntype="void" output="false"
-		hint="Handles the application start event. Override to provide customized functionality.">
+		hint="Handles the application end event. Override to provide customized functionality.">
 		<cfargument name="applicationScope" type="struct" required="true">
-		<cfset getAppManager().onApplicationEnd() />
+
+		<!--- Access to the application and session scopes are passed in so you cannot use 'getAppManager()' --->
+		<cfset arguments.applicationScope[getAppKey()].appLoader.getAppManager().onApplicationEnd() />
 	</cffunction>
 
 	<cffunction name="onRequestStart" access="public" returntype="void" output="true"
@@ -117,6 +120,7 @@ framework to be loaded as they interact with framework components:
 		hint="Handles on session end event if sessions are enabled for this application.">
 		<cfargument name="sessionScope" type="struct" required="true" />
 		<cfargument name="applicationScope" type="struct" required="true" />
+
 		<!--- Access to the application and session scopes are passed in so you cannot use 'getAppManager()' --->
 		<cfset arguments.applicationScope[getAppKey()].appLoader.getAppManager().onSessionEnd(arguments.sessionScope) />
 	</cffunction>
