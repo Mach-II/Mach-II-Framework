@@ -565,6 +565,7 @@ Notes:
 		</cfif>
 
 	</cffunction>
+	
 	<!---
 	ACCESSORS
 	--->
