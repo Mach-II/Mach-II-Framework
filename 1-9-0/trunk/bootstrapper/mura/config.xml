@@ -1,0 +1,148 @@
+<plugin>
+	<name>MachII</name>
+	<package>MachII</package>
+	<directoryFormat>packageOnly</directoryFormat>
+	<loadPriority>5</loadPriority>
+	<version>1.9.0.@minorVersion@</version>
+	<provider>Team Mach-II</provider>
+	<providerURL>http://www.mach-ii.com</providerURL>
+	<category>Application</category>
+	<settings>
+		<setting>
+			<name>muraScopeNamespace</name>
+			<label>Mura Scope Namespace</label>
+			<hint>The namespace is the key you will use to access your Mach-II application from the Mura scope. (i.e. $.{muraScopeNamespace}.methodName(argumentCollection=args).someMethod)</hint>
+			<type>text</type>
+			<required>true</required>
+			<validation></validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>machii</defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_CONFIG_PATH</name>
+			<label>Mach-II Config Path</label>
+			<hint>Set the path to the application's mach-ii.xml file.</hint>
+			<type>text</type>
+			<required>true</required>
+			<validation></validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue></defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_CONFIG_MODE</name>
+			<label>Mach-II Config Mode</label>
+			<hint>Set the configuration mode (when to reload): -1=never, 0=dynamic, 1=always</hint>
+			<type>select</type>
+			<required>false</required>
+			<validation></validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>0</defaultvalue>
+			<optionlist>-1^0^1</optionlist>
+			<optionlabellist>Never^Dynamic^Always</optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_APP_KEY</name>
+			<label>Mach-II App Key</label>
+			<hint>Set the app key for sub-applications within a single cf-application.</hint>
+			<type>text</type>
+			<required>false</required>
+			<validation></validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue></defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_VALIDATE_XML</name>
+			<label>Mach-II Validate XML</label>
+			<hint>Set the app key for sub-applications within a single cf-application.</hint>
+			<type>select</type>
+			<required>false</required>
+			<validation>boolean</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>false</defaultvalue>
+			<optionlist>false^true</optionlist>
+			<optionlabellist>False^True</optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_DTD_PATH</name>
+			<label>Mach-II Validate XML</label>
+			<hint>Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_9_0.dtd if left as "".</hint>
+			<type>text</type>
+			<required>false</required>
+			<validation>boolean</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue></defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_ONLOAD_REQUEST_TIMEOUT</name>
+			<label>Mach-II On Load Request Timeout</label>
+			<hint>Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_Set the request timeout for loading of the framework. Defaults to 240.</hint>
+			<type>text</type>
+			<required>false</required>
+			<validation>numeric</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>240</defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_HANDLE_ONLOAD</name>
+			<label>Mach-II Handle On Load</label>
+			<hint> Set if the framework should serve a "loading" template.</hint>
+			<type>select</type>
+			<required>false</required>
+			<validation>boolean</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>false</defaultvalue>
+			<optionlist>false^true</optionlist>
+			<optionlabellist>False^True</optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_ONLOAD_TEMPLATE</name>
+			<label>Mach-II On Load Template</label>
+			<hint>- Set the template to show for loading of the framework. Defaults to Mach-II default template if left as "".</hint>
+			<type>text</type>
+			<required>false</required>
+			<validation>numeric</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue></defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+		<setting>
+			<name>MACHII_ONLOAD_REQUEST_TIMEOUT</name>
+			<label>Mach-II On Load Request Timeout</label>
+			<hint>Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_Set the request timeout for loading of the framework. Defaults to 240.</hint>
+			<type>text</type>
+			<required>false</required>
+			<validation>numeric</validation>
+			<regex></regex>
+			<message></message>
+			<defaultvalue>240</defaultvalue>
+			<optionlist></optionlist>
+			<optionlabellist></optionlabellist>
+		</setting>
+	</settings>
+	<eventHandlers>
+		<eventHandler event="onApplicationLoad" component="PluginEventHandler" persist="false" />
+	</eventHandlers>
+	<displayobjects location="global">
+		<displayobject name="MachII" displaymethod="handleRequest" component="PluginEventHandler" persist="false" />
+	</displayobjects>
+</plugin>

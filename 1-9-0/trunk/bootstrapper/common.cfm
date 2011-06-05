@@ -63,7 +63,7 @@ PROPERTIES - DEFAULTS
 <cfparam name="MACHII_APP_KEY" type="string" default="#ListLast(ReplaceNoCase(GetDirectoryFromPath(GetCurrentTemplatePath()), "\", "/", "all"), "/")#" />
 <!--- Whether or not to validate the configuration XML before parsing. Default to false. --->
 <cfparam name="MACHII_VALIDATE_XML" type="boolean" default="false" />
-<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_8_0.dtd. --->
+<!--- Set the path to the Mach-II's DTD file. Default to /MachII/mach-ii_1_9_0.dtd. --->
 <cfparam name="MACHII_DTD_PATH" type="string" default="#ExpandPath('/MachII/mach-ii_1_9_0.dtd')#" />
 <!--- Set the request timeout for loading of the framework. Defaults to 240 --->
 <cfparam name="MACHII_ONLOAD_REQUEST_TIMEOUT" type="numeric" default="240" />
@@ -154,7 +154,9 @@ PUBLIC FUNCTIONS
 
 <cffunction name="handleRequest" access="public" returntype="void" output="true"
 	hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
-
+	<cfargument name="eventArgs" type="struct" required="false"
+		hint="The event args to be used or the framework will automatically use the results from getRequestEventArgs()." />
+			
 	<cfset ensureLoadedFramework() />
 
 	<!---
@@ -162,7 +164,7 @@ PUBLIC FUNCTIONS
 		so turn it back on for trailing whitespace. All these tags must be on the
 		same line or additional whitespace may be introduced.
 	--->
-	<cfprocessingdirective suppresswhitespace="true"><cfif MACHII_ONREQUESTSTART_CONTENT_RESET><cfcontent reset="true" /></cfif><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest() /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
+	<cfprocessingdirective suppresswhitespace="true"><cfif MACHII_ONREQUESTSTART_CONTENT_RESET><cfcontent reset="true" /></cfif><cfsetting enablecfoutputonly="true" /><cfset getAppManager().getRequestHandler().handleRequest(argumentCollection=arguments) /><cfsetting enablecfoutputonly="true" /></cfprocessingdirective>
 </cffunction>
 
 <cffunction name="handleOnLoadTemplate" access="public" returntype="void" output="true"
