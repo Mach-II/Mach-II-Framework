@@ -70,8 +70,7 @@ Notes:
 	<cfset variables.isPreProcessDefined = false />
 	<cfset variables.isPostProcessDefined = false />
 	<cfset variables.isOnAuthenticateDefined = false />
-	<!--- This is set when a status is added by the addHTTPHeaderByStatus method.  --->
-	<cfset variables.httpStatusCode = 0 />
+	<cfset variables.isAuthenticationRequiredDefined = false />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -190,12 +189,24 @@ Notes:
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfset variables.log.error(getUtils().buildMessageFromCfCatch(arguments.exception.getCaughtException()), arguments.exception.getCaughtException()) />
-			<cfif getHttpStatusCode() EQ 0>
+
+			<!--- Do not override last HTTP status code if set by previous code --->
+			<cfif NOT getLastHttpStatusCode()>
 				<cfset addHTTPHeaderByStatus(500) />
 			</cfif>
+
 			<cfset addHTTPHeaderByName("machii.endpoint.error", "Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.") />
 			<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
 		</cfif>
+	</cffunction>
+	
+	<!---
+	PUBLIC FUNCTIONS - ENDPOINT REQUEST HANDLING UTILS
+	---->
+	<cffunction name="isAuthenticationRequired" access="public" returntype="boolean" output="false"
+		hint="Checks if endpoint authentication is required for this request. Override to provide custom functionality.">
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+		<cfabort showerror="This method is abstract and must be overridden." />
 	</cffunction>
 
 	<!---
@@ -489,6 +500,7 @@ Notes:
 					value="#arguments.value#" />
 			</cfif>
 		<cfelseif arguments.statusCode NEQ 0>
+			<cfset setLastHttpStatusCode(arguments.statusCode) />
 			<cfif NOT Len(arguments.statusText)>
 				<cfset arguments.statusText = getUtils().getHTTPHeaderStatusTextByStatusCode(arguments.statusCode) />
 
@@ -526,7 +538,6 @@ Notes:
 		hint="Adds a HTTP header by statusCode/statusText.">
 		<cfargument name="statuscode" type="numeric" required="true" />
 		<cfargument name="statustext" type="string" required="false" />
-		<cfset variables.httpStatusCode = arguments.statuscode />
 		<cfset addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
@@ -667,9 +678,21 @@ Notes:
 	<cffunction name="isOnAuthenticateDefined" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isOnAuthenticateDefined />
 	</cffunction>
+	
+	<cffunction name="setIsAuthenticationRequiredDefined" access="public" returntype="void" output="false">
+		<cfargument name="isAuthenticationRequiredDefined" type="boolean" required="true" />
+		<cfset variables.isAuthenticationRequiredDefined = arguments.isAuthenticationRequiredDefined />
+	</cffunction>
+	<cffunction name="isAuthenticationRequiredDefined" access="public" returntype="boolean" output="false">
+		<cfreturn variables.isAuthenticationRequiredDefined />
+	</cffunction>
 
-	<cffunction name="getHttpStatusCode" access="public" returntype="numeric" output="false">
-		<cfreturn variables.httpStatusCode />
+	<cffunction name="setLastHttpStatusCode" access="public" returntype="numeric" output="false">
+		<cfargument name="lastHttpStatusCode" type="boolean" required="true" />
+		<cfset request.event.setArg("_responseLastHttpStatusCode", arguments.lastHttpStatusCode) />
+	</cffunction>
+	<cffunction name="getLastHttpStatusCode" access="public" returntype="numeric" output="false">
+		<cfreturn request.event.getArg("_responseLastHttpStatusCode", 0) />
 	</cffunction>
 
 </cfcomponent>

@@ -247,7 +247,15 @@ Notes:
 			</cfif>
 
 			<cfif endpoint.isOnAuthenticateDefined()>
-				<cfset endpoint.onAuthenticate(event) />
+				<!--- Only run onAuthenticate() if the endpoint defines an isAuthentionRequired() method and returns true --->
+				<cfif endpoint.isAuthenticationRequiredDefined()>
+					<cfif endpoint.isAuthenticationRequired(event)>
+						<cfset endpoint.onAuthenticate(event) />
+					</cfif>
+				<!--- isAuthenticationRequired() is not definedso by default run the onAuthenticate method because we don't know --->
+				<cfelse>
+					<cfset endpoint.onAuthenticate(event) />
+				</cfif>
 			</cfif>
 
 			<cfset endpoint.handleRequest(event) />
@@ -396,6 +404,7 @@ Notes:
 		<cfset endpoint.setIsPreProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="preProcess"', true, variables.ENDPOINT_STOP_CLASS))) />
 		<cfset endpoint.setIsPostProcessDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="postProcess"', true, variables.ENDPOINT_STOP_CLASS))) />
 		<cfset endpoint.setIsOnAuthenticateDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onAuthenticate"', true, variables.ENDPOINT_STOP_CLASS))) />
+		<cfset endpoint.setIsAuthenticationRequiredDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="isAuthenticationRequired"', true, variables.ENDPOINT_STOP_CLASS))) />
 
 		<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(endpoint, arguments.endpointType, arguments.endpointParameters) />
 		<cfset endpoint.setProxy(baseProxy) />

@@ -330,38 +330,23 @@ To Test it out, do the following:
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS
-	--->
-	<cffunction name="callEndpointFunction" access="public" returntype="string" output="false"
-		hint="Calls the endpoint function linked to the input RestUri (in event arg), passing the parsed URI tokens as arguments to the function.">
-		<cfargument name="restUri" type="MachII.framework.url.Uri" required="true" />
+	PUBLIC FUNCTIONS - ENDPOINT REQUEST HANDLING UTILS
+	---->
+	<cffunction name="isAuthenticationRequired" access="public" returntype="boolean" output="false"
+		hint="Checks if endpoint authentication is required for this request. Override to provide custom functionality.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-
-		<cfset var responseBody = "" />
-		<cfset var pathInfo = arguments.event.getArg("_requestPathInfo") />
-		<cfset var stcArgs = "" />
-
-		<cfif restUri.matchUri(pathInfo)>
-			<cfset stcArgs = arguments.event.getArgs() />
-			<cfset stcArgs.event = arguments.event />
-
-			<!--- Call the function --->
-			<cfinvoke
-				component="#this#"
-				method="#restUri.getFunctionName()#"
-				returnVariable="responseBody"
-				argumentCollection="#stcArgs#" />
-		</cfif>
-
-		<cfreturn responseBody />
+		<cfreturn arguments.event.getArg("restUri").getUriMetadataParameter("authenticate", getAuthenticateDefault()) />
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - GENERAL
+	--->
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
 		hint="Builds an endpoint specific URL.">
 		<cfargument name="method" type="string" required="true"
 			hint="The method name used as a reference for REST URI. This argument must be passed if not included in the 'parameters' arguments."/>
 
-		<cfset var restUri = "" />
+		<cfset var restUri = variables.restUris.findUriByFunctionName(arguments.method) />
 		<cfset var uriPattern = "" />
 		<cfset var uriTokenNames = "" />
 
@@ -369,8 +354,6 @@ To Test it out, do the following:
 		<cfset var params = arguments />
 		<cfset var sortedParams = "" />
 		<cfset var i = 0 />
-
-		<cfset restUri = variables.restUris.findUriByFunctionName(arguments.method) />
 
 		<cfif IsObject(restUri)>
 
@@ -438,6 +421,30 @@ To Test it out, do the following:
 	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="callEndpointFunction" access="private" returntype="string" output="false"
+		hint="Calls the endpoint function linked to the input RestUri (in event arg), passing the parsed URI tokens as arguments to the function.">
+		<cfargument name="restUri" type="MachII.framework.url.Uri" required="true" />
+		<cfargument name="event" type="MachII.framework.Event" required="true" />
+
+		<cfset var responseBody = "" />
+		<cfset var pathInfo = arguments.event.getArg("_requestPathInfo") />
+		<cfset var stcArgs = "" />
+
+		<cfif restUri.matchUri(pathInfo)>
+			<cfset stcArgs = arguments.event.getArgs() />
+			<cfset stcArgs.event = arguments.event />
+
+			<!--- Call the function --->
+			<cfinvoke
+				component="#this#"
+				method="#restUri.getFunctionName()#"
+				returnVariable="responseBody"
+				argumentCollection="#stcArgs#" />
+		</cfif>
+
+		<cfreturn responseBody />
+	</cffunction>
+	
 	<cffunction name="addContentTypeHeaderFromFormat" access="private" returntype="string" output="false"
 		hint="Adds a Content-Type response header based on the input format.">
 		<cfargument name="format" type="string" required="true"
