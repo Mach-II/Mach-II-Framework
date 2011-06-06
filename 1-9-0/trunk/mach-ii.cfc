@@ -94,7 +94,7 @@ framework to be loaded as they interact with framework components:
 
 	<cffunction name="onApplicationEnd" access="public" returntype="void" output="false"
 		hint="Handles the application end event. Override to provide customized functionality.">
-		<cfargument name="applicationScope" type="struct" required="true">
+		<cfargument name="applicationScope" type="struct" required="true" />
 
 		<!--- Access to the application and session scopes are passed in so you cannot use 'getAppManager()' --->
 		<cfset arguments.applicationScope[getAppKey()].appLoader.getAppManager().onApplicationEnd() />

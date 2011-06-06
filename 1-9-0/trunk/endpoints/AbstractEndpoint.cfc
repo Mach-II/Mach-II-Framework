@@ -72,6 +72,7 @@ Notes:
 	<cfset variables.isOnAuthenticateDefined = false />
 	<!--- This is set when a status is added by the addHTTPHeaderByStatus method.  --->
 	<cfset variables.httpStatusCode = 0 />
+	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -313,6 +314,7 @@ Notes:
 		<!--- No environment to resolve, return default value if provided --->
 		<cfset assert.isTrue(StructKeyExists(arguments, "defaultValue")
 					, "Cannot resolve value by environment name or group and no default value was provided. Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'") />
+		
 		<cfreturn arguments.defaultValue />
 	</cffunction>
 
@@ -669,4 +671,5 @@ Notes:
 	<cffunction name="getHttpStatusCode" access="public" returntype="numeric" output="false">
 		<cfreturn variables.httpStatusCode />
 	</cffunction>
+
 </cfcomponent>

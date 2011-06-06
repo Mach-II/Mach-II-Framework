@@ -50,12 +50,6 @@ Notes:
 
 Configuration parameters
 
-Scope
-- The scope that the cache should be placed in.
-- The default setting for "scope" is "application".
-- Valid values are "application", "server" and "session".
-
-
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
             <!-- Naming a default cache name is not required, but required if you do not want 
@@ -63,10 +57,7 @@ Scope
             <parameter name="defaultCacheName" value="default" />
             <parameter name="default">
                   <struct>
-                        <key name="type" value="MachII.caching.strategies.TimeSpanCache" />
-                        <key name="scope" value="application" />
-                        <key name="timespan" value="0,1,0,0"/><!-- Cache for 1 hour -->
-						<key name="cleanupIntervalInMinutes" value="3" />
+                        <key name="type" value="MachII.caching.strategies.MemCahedCache" />
 						<key name="cachingEnabled" value="true|false" />
 						- OR - 
 			            <key name="cachingEnabled">
