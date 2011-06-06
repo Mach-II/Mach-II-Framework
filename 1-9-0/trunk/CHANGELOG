@@ -96,6 +96,16 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Enable EnvironmentProperty.cfc to get server name using other "scopes"
+like properties.*, headers.* or cgi.*
+
+Special thanks to Joseph Lamoree for suggesting and writing a patch
+for this enhancement.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/775
+(2011-06-06 peterfarrell)
+
 * Allow request content reset to be configurable for bootstrappers
 
 Special thanks to Dave Shuck and Kurt Wiersma for suggesting this
