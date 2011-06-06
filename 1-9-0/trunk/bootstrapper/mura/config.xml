@@ -140,7 +140,11 @@
 		</setting>
 	</settings>
 	<eventHandlers>
-		<eventHandler event="onApplicationLoad" component="PluginEventHandler" persist="false" />
+		<eventHandler event="onApplicationLoad" component="PluginEventHandler" persist="true" />
+		<eventHandler event="onSiteRequestStart" component="PluginEventHandler" persist="true"/>
+		<eventHandler event="onRenderStart" component="PluginEventHandler" persist="true"/>
+		<eventHandler event="onGlobalSessionStart" component="PluginEventHandler" persist="true"/>
+		<eventHandler event="onGlobalSessionEnd" component="PluginEventHandler" persist="true"/>
 	</eventHandlers>
 	<displayobjects location="global">
 		<displayobject name="MachII" displaymethod="handleRequest" component="PluginEventHandler" persist="false" />

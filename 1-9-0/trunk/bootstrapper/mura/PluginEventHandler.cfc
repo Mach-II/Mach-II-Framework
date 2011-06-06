@@ -97,6 +97,22 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 		<!--- Add this event handler to this Mura instance --->
 		<cfset variables.pluginConfig.addEventHandler(this) />
 	</cffunction>
+	
+	<!--- 
+	An onApplicationUnload() method is not currently supported in Mura, but has been requested:
+	http://www.getmura.com/forum/messages.cfm?threadid=292D1591-93B5-47BD-A5905DCF36625EC0
+	
+	<cffunction name="onApplicationUnload" access="public" returntype="void" output="false"
+		hint="Unloads the Mach-II application when Mura unloads.">
+		<cfargument name="$" type="any" required="true" 
+			hint="Contains the Mura event." />
+
+		<!--- Access to the application and session scopes are in the Mura scope in so you cannot use 'getAppManager()' --->
+		<cfset var applicationScope = arguments.$.getValue("applicationScope") />
+
+		<cfset applicationScope[getAppKey()].appLoader.getAppManager().onApplicationEnd() />
+	</cffunction>
+	--->
 
 	<cffunction name="onSiteRequestStart" access="public" returntype="void" output="false"
 		hint="Sets a reference to this Mach-II application into the Mura scope for use. Such as $.{muraScopeNamespace}.methodName(argumentCollection=args)">
