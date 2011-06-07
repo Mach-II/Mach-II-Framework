@@ -964,7 +964,7 @@ Notes:
 			</cfloop>
 		<cfelse>
 			<cfloop from="1" to="#ArrayLen(elements)#" index="i">
-				<cfif ListLen(elements[i], pairDelimiter) EQ 2>
+				<cfif ListLen(elements[i], pairDelimiter) EQ 2 AND ListGetAt(elements[i], 2, pairDelimiter) NEQ variables.urlZeroLengthStringRepresentation>
 					<cfset value = ListGetAt(elements[i], 2, pairDelimiter) />
 				<cfelse>
 					<cfset value = "" />
@@ -972,6 +972,7 @@ Notes:
 				<cfset params[ListGetAt(elements[i], 1, pairDelimiter)] =  value />
 			</cfloop>
 		</cfif>
+		
 		<cfreturn params />
 	</cffunction>
 
