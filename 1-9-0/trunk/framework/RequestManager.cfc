@@ -86,6 +86,7 @@ Notes:
 	<cfset variables.currentThreads = StructNew() />
 	<cfset variables.trackCurrentThreads = false />
 	<cfset variables.thread = CreateObject("java", "java.lang.Thread") />
+	<cfset variables.id = CreateUUID() />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -177,7 +178,8 @@ Notes:
 
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfif variables.trackCurrentThreads>
-				<cfset currentThread = variables.thread.currentThread() />			
+				<cfset currentThread = variables.thread.currentThread() />
+				<cfset currentThread.setName(variables.id) />		
 				<cfset variables.currentThreads[currentThread.getId()] = currentThread />
 			</cfif>
 			
@@ -383,7 +385,6 @@ Notes:
 		<!--- This was moved out the var block to pass the bug in var scope that is getting fixed --->
 		<cfset params = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
 		<cfset keyList = StructKeyList(params) />
-
 
 		<cfif NOT StructKeyExists(arguments, "urlBase") OR NOT Len(arguments.urlBase)>
 			<cfif getPropertyManager().getProperty("urlSecureEnabled")>
@@ -926,7 +927,9 @@ Notes:
 		<cfset var result = 0 />
 		
 		<cfloop collection="#variables.currentThreads#" item="key">
-			<cfif IsObject(variables.currentThreads[key]) AND NOT ListFindNoCase("RUNNABLE,TERMINATED", variables.currentThreads[key].getState().toString())>
+			<cfif IsObject(variables.currentThreads[key]) 
+				AND variables.currentThreads[key].getName() EQ variables.id
+				AND NOT ListFindNoCase("RUNNABLE,TERMINATED", variables.currentThreads[key].getState().toString())>
 				<cfset result = result + 1 />
 			</cfif>
 		</cfloop>
@@ -1287,9 +1290,8 @@ Notes:
 	<cffunction name="getTrackCurrentThreads" access="public" returntype="boolean" output="false">
 		<cfreturn variables.trackCurrentThreads />
 	</cffunction>
-	
-	<cffunction name="getCurrentThreads" access="public" returntype="struct" output="false"
-		hint="Gets the current threads.">
+
+	<cffunction name="getCurrentThreads" access="public" returntype="struct" output="false">
 		<cfreturn variables.currentThreads />
 	</cffunction>
 

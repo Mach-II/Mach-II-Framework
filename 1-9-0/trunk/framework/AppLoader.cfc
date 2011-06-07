@@ -170,6 +170,7 @@ Notes:
 			<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(),
 					getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
 			<cfset getAppManager().setAppLoader(this) />
+			<cfset getAppManager().getRequestManager().setTrackCurrentThreads(true) />
 			<cfset setLastReloadHash(getConfigFileReloadHash()) />
 			<cfset setLog(getAppManager().getLogFactory()) />
 			
@@ -178,11 +179,13 @@ Notes:
 				<cfif IsObject(oldAppManager)>
 					<cfset oldAppManager.getRequestManager().setTrackCurrentThreads(false) />
 				</cfif>
+				<cfrethrow />
 			</cfcatch>
 		</cftry>
 
 		<!--- Deconfigure by using a thread --->
 		<cfif IsObject(oldAppManager)>
+			<cfset parameters.newAppManager = variables.appManager />
 			<cfset parameters.oldAppManager = oldAppManager />
 			<cfset oldAppManager.getUtils().createThreadingAdapter().run(this, "waitForActiveThreadsToFinishAndDeconfigure", parameters) />
 		</cfif>
@@ -210,6 +213,7 @@ Notes:
 	
 	<cffunction name="waitForActiveThreadsToFinishAndDeconfigure" access="public" returntype="void" output="false"
 		hint="Waits for all active threads to finish and deconfigure.">
+		<cfargument name="newAppManager" type="MachII.framework.AppManager" required="true" />
 		<cfargument name="oldAppManager" type="MachII.framework.AppManager" required="true" />
 
 		<cfset var activeThreadCount = 0 />
@@ -231,6 +235,8 @@ Notes:
 		</cfloop>
 		
 		<!--- <cflog text="Running deconfigure" file="threads" /> --->
+		
+		<cfset arguments.newAppManager.getRequestManager().setTrackCurrentThreads(false) />
 		
 		<cfset arguments.oldAppManager.deconfigure() />
 	</cffunction>
