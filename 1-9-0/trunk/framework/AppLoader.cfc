@@ -158,16 +158,33 @@ Notes:
 			hint="Optional argument for a parent app manager. If there isn't one default to empty string." />
 
 		<cfset var oldAppManager = variables.appManager />
-
-		<cfset updateLastReloadDatetime() />
-		<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(),
-				getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
-		<cfset getAppManager().setAppLoader(this) />
-		<cfset setLastReloadHash(getConfigFileReloadHash()) />
-		<cfset setLog(getAppManager().getLogFactory()) />
-
+		<cfset var parameters = StructNew() />
+		
+		<!--- Start tracking threads so we can wait for them to finish --->
 		<cfif IsObject(oldAppManager)>
-			<cfset oldAppManager.deconfigure() />
+			<cfset oldAppManager.getRequestManager().setTrackCurrentThreads(true) />
+		</cfif>
+
+		<cftry>
+			<cfset updateLastReloadDatetime() />
+			<cfset setAppManager(getAppFactory().createAppManager(getConfigPath(), getDtdPath(),
+					getAppKey(), getValidateXml(), arguments.parentAppManager, getOverrideXml(), getModuleName())) />
+			<cfset getAppManager().setAppLoader(this) />
+			<cfset setLastReloadHash(getConfigFileReloadHash()) />
+			<cfset setLog(getAppManager().getLogFactory()) />
+			
+			<!--- If anything went wrong, the old AppManager will still respond so stop tracking threads --->
+			<cfcatch type="any">
+				<cfif IsObject(oldAppManager)>
+					<cfset oldAppManager.getRequestManager().setTrackCurrentThreads(false) />
+				</cfif>
+			</cfcatch>
+		</cftry>
+
+		<!--- Deconfigure by using a thread --->
+		<cfif IsObject(oldAppManager)>
+			<cfset parameters.oldAppManager = oldAppManager />
+			<cfset oldAppManager.getUtils().createThreadingAdapter().run(this, "waitForActiveThreadsToFinishAndDeconfigure", parameters) />
 		</cfif>
 	</cffunction>
 
@@ -189,6 +206,33 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfif>
+	</cffunction>
+	
+	<cffunction name="waitForActiveThreadsToFinishAndDeconfigure" access="public" returntype="void" output="false"
+		hint="Waits for all active threads to finish and deconfigure.">
+		<cfargument name="oldAppManager" type="MachII.framework.AppManager" required="true" />
+
+		<cfset var activeThreadCount = 0 />
+		<cfset var i = 0 />
+		
+		<!--- <cflog text="Started waiting for threads." file="threads" /> --->
+
+		<!--- Wait until all threads have finished or 60 seconds whichever is earlier--->
+		<cfloop from="1" to="120" index="i">
+			<cfset activeThreadCount = arguments.oldAppManager.getRequestManager().activeCurrentThreadCount() />
+			
+			<!--- <cflog text="Waiting for threads. Iteration: #i# Active Thread Count: #activeThreadCount#" file="threads" /> --->
+			
+			<cfif activeThreadCount>
+				<cfset sleep(500) />
+			<cfelse>
+				<cfbreak />
+			</cfif>
+		</cfloop>
+		
+		<!--- <cflog text="Running deconfigure" file="threads" /> --->
+		
+		<cfset arguments.oldAppManager.deconfigure() />
 	</cffunction>
 
 	<!---

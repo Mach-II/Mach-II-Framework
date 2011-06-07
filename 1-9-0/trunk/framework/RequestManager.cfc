@@ -83,6 +83,9 @@ Notes:
 	<cfset variables.routes = StructNew() />
 	<cfset variables.routeAliases = StructNew() />
 	<cfset variables.moduleNames = "" />
+	<cfset variables.currentThreads = StructNew() />
+	<cfset variables.trackCurrentThreads = false />
+	<cfset variables.thread = CreateObject("java", "java.lang.Thread") />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -170,8 +173,14 @@ Notes:
 		hint="Returns a new or cached instance of a RequestHandler.">
 
 		<cfset var appKey = getAppManager().getAppKey() />
+		<cfset var currentThread = "" />
 
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
+			<cfif variables.trackCurrentThreads>
+				<cfset currentThread = variables.thread.currentThread() />			
+				<cfset variables.currentThreads[currentThread.getId()] = currentThread />
+			</cfif>
+			
 			<cfset request["_MachIIRequestHandler_" & appKey] =
 					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents(), getOnRequestEndCallbacks()) />
 		</cfif>
@@ -909,6 +918,21 @@ Notes:
 		hint="Get all registered url routes.">
 		<cfreturn variables.routes />
 	</cffunction>
+	
+	<cffunction name="activeCurrentThreadCount" access="public" returntype="numeric" output="false"
+		hint="Counts active current threads.">
+		
+		<cfset var key = "" />
+		<cfset var result = 0 />
+		
+		<cfloop collection="#variables.currentThreads#" item="key">
+			<cfif IsObject(variables.currentThreads[key]) AND NOT ListFindNoCase("RUNNABLE,TERMINATED", variables.currentThreads[key].getState().toString())>
+				<cfset result = result + 1 />
+			</cfif>
+		</cfloop>
+		
+		<cfreturn result />
+	</cffunction>
 
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
@@ -1249,6 +1273,24 @@ Notes:
 	<cffunction name="getLog" access="private" returntype="MachII.logging.Log" output="false"
 		hint="Gets the log.">
 		<cfreturn variables.log />
+	</cffunction>
+	
+	<cffunction name="setTrackCurrentThreads" access="public" returntype="void" output="false">
+		<cfargument name="trackCurrentThreads" type="boolean" required="true" />
+		
+		<cfif NOT arguments.trackCurrentThreads>
+			<cfset StructClear(variables.currentThreads) />
+		</cfif>
+		
+		<cfset variables.trackCurrentThreads = arguments.trackCurrentThreads />
+	</cffunction>
+	<cffunction name="getTrackCurrentThreads" access="public" returntype="boolean" output="false">
+		<cfreturn variables.trackCurrentThreads />
+	</cffunction>
+	
+	<cffunction name="getCurrentThreads" access="public" returntype="struct" output="false"
+		hint="Gets the current threads.">
+		<cfreturn variables.currentThreads />
 	</cffunction>
 
 </cfcomponent>

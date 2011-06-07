@@ -323,6 +323,10 @@ Notes:
 			</cfinvoke>
 		</cfloop>
 	</cffunction>
+	
+	<!---
+	PROTECTED FUNCTIONS
+	--->
 
 	<!---
 	ACCESSORS
