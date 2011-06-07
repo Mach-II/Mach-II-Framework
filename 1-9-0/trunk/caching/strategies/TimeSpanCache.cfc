@@ -173,7 +173,11 @@ via reap() which is run every 3 minutes.
 		<cfset setThreadingAdapter(variables.utils.createThreadingAdapter()) />
 		
 		<!--- Setup the cache by running a flush() --->
-		<cfset flush() />
+		<cfif getParameter("enableInitialFlush", true)>
+			<cfset flush() />
+		<cfelse>
+			<cfset getStorage() />
+		</cfif>
 	</cffunction>
 	
 	<!---

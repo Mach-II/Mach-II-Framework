@@ -93,6 +93,7 @@ machinery.
 		<cfset parameters.scope = getAppManager().getPropertyManager().getProperty("redirectPersistScope") />
 		<cfset parameters.scopeKey = getAppManager().getAppKey() & "._MachIIRequestRedirectPersistStorage" />
 		<cfset parameters.cleanupIntervalInMinutes = 1 />
+		<cfset parameters.enableInitialFlush = false />
 
 		<cfset variables.timeSpanCache = CreateObject("component", "MachII.caching.strategies.TimeSpanCache").init(parameters) />
 

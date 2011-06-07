@@ -297,6 +297,14 @@ https://trac.mach-ii.com/machii/ticket/527
 ------------------------------------------------
 Internal Framework Improvements / Enhancements / Other Changes
 ------------------------------------------------
+* Enable redirect persist data to live across requests when MACHII CONFIG MODE is 1
+
+Thanks to Brian Hendel for suggesting this improvement.
+
+For more info see:
+http://trac.mach-ii.com/machii/ticket/793
+(2011-06-07 peterfarrell)
+
 * Refactored bootstrapper common functionality into common.cfm
 
 This was part of the process to simplify our bootstrapping process
