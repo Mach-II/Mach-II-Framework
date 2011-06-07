@@ -61,6 +61,15 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* AppLoader occationally deconfigured the old AppManager before 
+all the running requests were completed
+
+Thanks to Jason York for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/726
+(2011-06-07 peterfarrell)
+
 * Optional params with value of '' in routes are incorrectly built 
 
 For more information see:
