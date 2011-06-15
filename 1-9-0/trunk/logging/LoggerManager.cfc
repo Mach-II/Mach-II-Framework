@@ -108,6 +108,11 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		<cfset var key = "" />
 		
 		<cfloop collection="#loggers#" item="key">
+			<!---
+			We need to remove the LogAdapter from the LogFactory before deconfiguring it
+			as the process needs to be in reverse over of the configure() process
+			--->
+			<!--- <cfset logFactory.removeLogAdapter(loggers[key].getLogAdapter()) /> --->
 			<cfset loggers[key].deconfigure() />
 		</cfloop>
 	</cffunction>
