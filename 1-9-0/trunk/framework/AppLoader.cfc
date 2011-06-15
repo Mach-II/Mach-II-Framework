@@ -159,6 +159,7 @@ Notes:
 
 		<cfset var oldAppManager = variables.appManager />
 		<cfset var parameters = StructNew() />
+		<cfset var threadingAdapter = "" />
 		
 		<!--- Start tracking threads so we can wait for them to finish --->
 		<cfif IsObject(oldAppManager)>
@@ -185,9 +186,17 @@ Notes:
 
 		<!--- Deconfigure by using a thread --->
 		<cfif IsObject(oldAppManager)>
-			<cfset parameters.newAppManager = variables.appManager />
-			<cfset parameters.oldAppManager = oldAppManager />
-			<cfset oldAppManager.getUtils().createThreadingAdapter().run(this, "waitForActiveThreadsToFinishAndDeconfigure", parameters) />
+			<cfset threadingAdapter = oldAppManager.getUtils().createThreadingAdapter() />
+			
+			<!--- Check if we can thread out the deconfigure() otherwise run in serial (may cause concurrency issues on production) --->
+			<cfif threadingAdapter.allowThreading()>
+				<cfset parameters.newAppManager = variables.appManager />
+				<cfset parameters.oldAppManager = oldAppManager />
+
+				<cfset threadingAdapter.run(this, "waitForActiveThreadsToFinishAndDeconfigure", parameters) />
+			<cfelse>
+				<cfset oldAppManager.deconfigure() />
+			</cfif>
 		</cfif>
 	</cffunction>
 
