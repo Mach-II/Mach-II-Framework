@@ -89,31 +89,43 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures all the loggers.">
+		hint="Configures all the loggers (or ones passed in).">
+		<cfargument name="loggers" type="struct" required="false" default="#getLoggers()#"
+			hint="A struct of loggers to configure or defaults to all loggers registered in the manager." />
 		
 		<cfset var logFactory = getLogFactory() />
-		<cfset var loggers = getLoggers() />
+		<cfset var thisLogger = "" />
 		<cfset var key = "" />
 		
 		<cfloop collection="#loggers#" item="key">
-			<cfset loggers[key].configure() />
-			<cfset logFactory.addLogAdapter(loggers[key].getLogAdapter()) />
+			<cfset thisLogger = arguments.loggers[key] />
+			
+			<cfset thisLogger.configure() />
+			<cfset logFactory.addLogAdapter(thisLogger.getLogAdapter()) />
 		</cfloop>
 	</cffunction>
 	
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
-		hint="Deconfigures all the loggers.">
+		hint="Deconfigures all the loggers (or ones passed in).">
+		<cfargument name="loggers" type="struct" required="false" default="#getLoggers()#"
+			hint="A struct of loggers to deconfigure or defaults to all loggers registered in the manager."/>
 		
-		<cfset var loggers = getLoggers() />
+		<cfset var logFactory = getLogFactory() />
+		<cfset var thisLogger = "" />
 		<cfset var key = "" />
-		
-		<cfloop collection="#loggers#" item="key">
-			<!---
-			We need to remove the LogAdapter from the LogFactory before deconfiguring it
-			as the process needs to be in reverse over of the configure() process
-			--->
-			<!--- <cfset logFactory.removeLogAdapter(loggers[key].getLogAdapter()) /> --->
-			<cfset loggers[key].deconfigure() />
+
+		<!---
+		We need to remove the LogAdapter from the LogFactory before deconfiguring it
+		as the process needs to be in reverse over of the configure() process
+		--->		
+		<cfloop collection="#arguments.loggers#" item="key">
+			<cfset thisLogger = arguments.loggers[key] />
+			
+			<cfset logFactory.removeLogAdapter(thisLogger.getLogAdapter()) />
+			<cfset thisLogger.deconfigure() />
+			
+			<!--- Once we've deconfigued a logger, we need to remove it from the LoggerManager --->
+			<cfset removeLoggerByName(key) />
 		</cfloop>
 	</cffunction>
 	
@@ -147,8 +159,21 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 			<cfthrow type="MachII.logging.LoggerAlreadyDefined"
 				message="A logger with name '#arguments.loggerName#' is already registered." />
 		<cfelse>
-			<cfset variables.Loggers[arguments.LoggerName] = Logger />
+			<cfset variables.loggers[arguments.LoggerName] = arguments.logger />
 		</cfif>
+	</cffunction>
+
+	<cffunction name="removeLoggerByName" access="public" returntype="void" output="false"
+		hint="Removes a logger with the specified name. Does NOT remove from parent.">
+		<cfargument name="loggerName" type="string" required="true" />
+		
+		<cftry>
+			<cfset StructDelete(variables.loggers, arguments.loggerName, true) />
+			<cfcatch type="any">
+				<cfthrow type="MachII.logging.LoggerNotRemove"
+					message="A logger with name '#arguments.loggerName#' cannot be found and therefore it was not removed." /> 
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="isLoggerDefined" access="public" returntype="boolean" output="false"
