@@ -251,7 +251,7 @@ To Test it out, do the following:
 			</cfloop>
 
 			<!--- Process data specific to PUT and POST type requests --->
-			<cfif ListContainsNoCase("PUT,POST", httpMethod)>
+			<cfif ListContainsNoCase("PUT,POST,DELETE", httpMethod)>
 				<cfset arguments.event.setArg("_requestBody", cleanRawContent()) />
 
 				<!--- Perform content-length checks if required --->
@@ -289,10 +289,12 @@ To Test it out, do the following:
 		<cfset var restResponseBody = callEndpointFunction(restUri, arguments.event) />
 		<cfset var format = arguments.event.getArg("format") />
 
-		<cfif NOT Len(format) AND Len(restUri.getUriMetadataParameters().defaultReturnFormat)>
-			<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
-		<cfelse>
-			<cfset format = getDefaultFormat() />
+		<cfif NOT Len(format)>
+			<cfif Len(restUri.getUriMetadataParameters().defaultReturnFormat)>
+				<cfset format = restUri.getUriMetadataParameters().defaultReturnFormat />
+			<cfelse>
+				<cfset format = getDefaultFormat() />
+			</cfif>
 		</cfif>
 
 		<cfif format EQ "json" AND arguments.event.isArgDefined(getJsonpArgName())>
@@ -302,7 +304,6 @@ To Test it out, do the following:
 
 		<cfset arguments.event.setArg("_responseFormat", format) />
 		<cfset arguments.event.setArg("_responseContentType", addContentTypeHeaderFromFormat(format)) />
-
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
@@ -444,7 +445,7 @@ To Test it out, do the following:
 
 		<cfreturn responseBody />
 	</cffunction>
-	
+
 	<cffunction name="addContentTypeHeaderFromFormat" access="private" returntype="string" output="false"
 		hint="Adds a Content-Type response header based on the input format.">
 		<cfargument name="format" type="string" required="true"
@@ -479,6 +480,7 @@ To Test it out, do the following:
 		<cfset var contentType = "" />
 		<cfset var contentLength = "" />
 		<cfset var charset = variables.defaultCharset />
+		<cfset var requestBody = arguments.event.getArg("_requestBody", "") />
 
 		<cfif StructKeyExists(headers, "Content-Type")>
 			<cfset contentType = headers["Content-Type"] />
@@ -490,25 +492,27 @@ To Test it out, do the following:
 		</cfif>
 
 		<!--- Check that the content-length header was sent --->
-		<cfif NOT StructKeyExists(headers, "Content-Length")>
-			<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#"
-				message="The 'content-length' header is missing and required to perform content length checks for this request." />
-		<!--- Check that the number of bytes in the content-length header of the raw content equals the header value --->
-		<cfelse>
-			<cftry>
-				<cfset contentLength = Len(arguments.event.getArg("_requestBody").getBytes(charset)) />
-				
-				<cfcatch type="java.io.UnsupportedEncodingException">
-					<cfthrow type="#variables.exceptionTypes["MissingContentLengthCharset"]#"
-						message="Unable to decode the request body due to a invalid charset." 
-						detail="Used charset '#charset#', default charset in endpoint '#variables.defaultCharset#" />
-				</cfcatch>
-			</cftry>
-			
-			<cfif headers["Content-Length"] NEQ contentLength>
-				<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#"
-					message="Invalid length of content body. Check that the requestor is sending the complete request body." 
-					detail="Reported request 'Content-Length': #headers["Content-Length"]#, Actual received body length: #contentLength# using charset '#charset#'" />
+		<cfif Len(requestBody) >
+			<cfif NOT StructKeyExists(headers, "Content-Length") >
+				<cfthrow type="#variables.exceptionTypes["MissingContentLength"]#"
+					message="The 'content-length' header is missing and required to perform content length checks for this request." />
+			<!--- Check that the number of bytes in the content-length header of the raw content equals the header value --->
+			<cfelse>
+				<cftry>
+					<cfset contentLength = Len(requestBody.getBytes(charset)) />
+
+					<cfcatch type="java.io.UnsupportedEncodingException">
+						<cfthrow type="#variables.exceptionTypes["MissingContentLengthCharset"]#"
+							message="Unable to decode the request body due to a invalid charset."
+							detail="Used charset '#charset#', default charset in endpoint '#variables.defaultCharset#" />
+					</cfcatch>
+				</cftry>
+
+				<cfif headers["Content-Length"] NEQ contentLength>
+					<cfthrow type="#variables.exceptionTypes["IncompleteBody"]#"
+						message="Invalid length of content body. Check that the requestor is sending the complete request body."
+						detail="Reported request 'Content-Length': #headers["Content-Length"]#, Actual received body length: #contentLength# using charset '#charset#'" />
+				</cfif>
 			</cfif>
 		</cfif>
 	</cffunction>
