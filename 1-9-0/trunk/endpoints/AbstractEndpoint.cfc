@@ -71,7 +71,7 @@ Notes:
 	<cfset variables.isPostProcessDefined = false />
 	<cfset variables.isOnAuthenticateDefined = false />
 	<cfset variables.isAuthenticationRequiredDefined = false />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -199,7 +199,7 @@ Notes:
 			<cfsetting enablecfoutputonly="false" /><cfoutput>Endpoint named '#event.getArg(getProperty("endpointParameter"))#' encountered an unhandled exception.</cfoutput><cfsetting enablecfoutputonly="true" />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - ENDPOINT REQUEST HANDLING UTILS
 	---->
@@ -325,7 +325,7 @@ Notes:
 		<!--- No environment to resolve, return default value if provided --->
 		<cfset assert.isTrue(StructKeyExists(arguments, "defaultValue")
 					, "Cannot resolve value by environment name or group and no default value was provided. Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'") />
-		
+
 		<cfreturn arguments.defaultValue />
 	</cffunction>
 
@@ -678,7 +678,7 @@ Notes:
 	<cffunction name="isOnAuthenticateDefined" access="public" returntype="boolean" output="false">
 		<cfreturn variables.isOnAuthenticateDefined />
 	</cffunction>
-	
+
 	<cffunction name="setIsAuthenticationRequiredDefined" access="public" returntype="void" output="false">
 		<cfargument name="isAuthenticationRequiredDefined" type="boolean" required="true" />
 		<cfset variables.isAuthenticationRequiredDefined = arguments.isAuthenticationRequiredDefined />
@@ -687,8 +687,8 @@ Notes:
 		<cfreturn variables.isAuthenticationRequiredDefined />
 	</cffunction>
 
-	<cffunction name="setLastHttpStatusCode" access="public" returntype="numeric" output="false">
-		<cfargument name="lastHttpStatusCode" type="boolean" required="true" />
+	<cffunction name="setLastHttpStatusCode" access="public" returntype="void" output="false">
+		<cfargument name="lastHttpStatusCode" type="numeric" required="true" />
 		<cfset request.event.setArg("_responseLastHttpStatusCode", arguments.lastHttpStatusCode) />
 	</cffunction>
 	<cffunction name="getLastHttpStatusCode" access="public" returntype="numeric" output="false">
