@@ -658,13 +658,15 @@ from the parent application.
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
+		<cfargument name="attribute" type="string" required="false" default="name"
+			hint="Force usage of http-equiv attribute" />
 
 		<cfset var code = "" />
 		<cfset var key = "" />
 
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & getUtils().escapeHtml(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
-		<cfelseif StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
+		<cfelseif arguments.attribute EQ 'http-equiv' OR StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
 			<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		<cfelse>
 			<cfset code = '<meta name="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
