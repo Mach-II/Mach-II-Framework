@@ -131,6 +131,7 @@ See that file header for configuration of filter criteria.
 	<cfset variables.instance.charset = "utf-8" />
 	<cfset variables.instance.spoolEnable = true />
 	<cfset variables.instance.timeout = 60 />
+	<cfset variables.instance.appendMessageToSubject = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -177,6 +178,7 @@ See that file header for configuration of filter criteria.
 		<cfset setMailType(getParameter("mailType", "text/html")) />
 		<cfset setUsername(getParameter("username", "")) />
 		<cfset setPassword(getParameter("password", "")) />
+		<cfset setAppendMessageToSubject(getParameter("appendMessageToSubject", false)) />
 
 		<cfif isParameterDefined("charset")
 			AND getAssert().hasLength(getParameter("charset")
@@ -198,7 +200,7 @@ See that file header for configuration of filter criteria.
 				, "This indicates the amount of time to wait while trying to deliver mail.")>
 			<cfset setTimeout(getParameter("timeout")) />
 		</cfif>
-		
+
 		<cftry>
 			<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
 			<cfcatch type="any">
@@ -419,6 +421,24 @@ See that file header for configuration of filter criteria.
 		<cfreturn result />
 	</cffunction>
 
+	<cffunction name="getMessageCausingTrigger" access="private" returntype="struct" output="false"
+		hint="Returns the message that caused the email to be triggered.  Returns empty struct if message is not triggered">
+
+		<cfset var data = getLogAdapter().getLoggingData().data />
+		<cfset var triggerLevel = getLevelEmailTrigger() />
+		<cfset var i = 0 />
+		<cfset var result = StructNew() />
+
+		<cfloop from="1" to="#ArrayLen(data)#" index="i">
+			<cfif data[i].logLevel GTE triggerLevel>
+				<cfset result = data[i] />
+				<cfbreak />
+			</cfif>
+		</cfloop>
+
+		<cfreturn result />
+	</cffunction>
+
 	<cffunction name="hasSpecifiedAuthCredentials" access="private" returntype="boolean" output="false"
 		hint="Determines if user correctly specified a username and password in the loggers xml configuration file">
 
@@ -486,7 +506,15 @@ See that file header for configuration of filter criteria.
 		<cfset variables.instance.subject = arguments.subject />
 	</cffunction>
 	<cffunction name="getSubject" access="public" returntype="string" output="false">
-		<cfreturn variables.instance.subject />
+		<cfset var subject = variables.instance.subject />
+		<cfset var triggeredMessage = "" />
+		<cfif getAppendMessageToSubject() >
+			<cfset triggeredMessage = getMessageCausingTrigger() />
+			<cfif NOT StructIsEmpty(triggeredMessage)>
+				<cfset subject = "#subject# : #triggeredMessage.channel# [#triggeredMessage.logLevelName#] : #triggeredMessage.message#" />
+			</cfif>
+		</cfif>
+		<cfreturn Left(subject, 255) />
 	</cffunction>
 
 	<cffunction name="setServers" access="private" returntype="void" output="false">
@@ -543,6 +571,14 @@ See that file header for configuration of filter criteria.
 	</cffunction>
 	<cffunction name="getMailType" access="public" returntype="string" output="false">
 		<cfreturn variables.instance.mailType />
+	</cffunction>
+
+	<cffunction name="setAppendMessageToSubject" access="private" returntype="void" output="false">
+		<cfargument name="appendMessageToSubject" type="boolean" required="true" />
+		<cfset variables.instance.appendMessageToSubject = arguments.appendMessageToSubject />
+	</cffunction>
+	<cffunction name="getAppendMessageToSubject" access="public" returntype="boolean" output="false">
+		<cfreturn variables.instance.appendMessageToSubject />
 	</cffunction>
 
 </cfcomponent>
