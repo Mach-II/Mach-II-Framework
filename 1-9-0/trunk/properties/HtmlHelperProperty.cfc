@@ -167,7 +167,7 @@ from the parent application.
 		<cfset var cacheAssetPaths = StructNew() />
 		<cfset var webrootBasePath  = "" />
 		<cfset var engineInfo = getUtils().getCfmlEngineInfo() />
-		
+
 		<!--- Test for getFileInfo() --->
 		<cftry>
 			<cfset getFileInfo(ExpandPath("/MachII/properties/HtmlHelperProperty.cfc")) />
@@ -184,19 +184,19 @@ from the parent application.
 				<!--- We must explicitly throw an exception because the GAE version silently fails --->
 				<cfthrow type="MachII.framework.AWTNotSupportedOnThisEngine" />
 			</cfif>
-			
+
 			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
-			
+
 			<!---
-			AWT may not be supported if the server is running in headless. Try adding 
+			AWT may not be supported if the server is running in headless. Try adding
 			"-Djava.awt.headless=true" without the quotes to your JAVA_OPTS for your application engine
 			--->
 			<cfcatch type="any">
 				<cfset variables.getImageDimensions = variables.mock_getImageDimensions />
-				<cfset this.getImageDimensions = this.mock_getImageDimensions />				
+				<cfset this.getImageDimensions = this.mock_getImageDimensions />
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- Assert and set parameters --->
 		<cfset setMetaTitleSuffix(getParameter("metaTitleSuffix")) />
 
@@ -230,7 +230,7 @@ from the parent application.
 
 		<!--- Add a reference of the helper in a known property location --->
 		<cfset setProperty(variables.HTML_HELPER_PROPERTY_NAME, this) />
-		
+
 		<cfset variables.requestManager = getAppManager().getRequestManager() />
 	</cffunction>
 
@@ -658,18 +658,23 @@ from the parent application.
 			hint="The content of the meta tag." />
 		<cfargument name="outputType" type="string" required="false" default="head"
 			hint="Indicates the output type for the generated HTML code ('head', 'body', 'inline'). Meta tags must be in the HTML head section according to W3C specification. Use the value of inline with caution." />
-		<cfargument name="attribute" type="string" required="false" default="name"
-			hint="Force usage of http-equiv attribute" />
 
 		<cfset var code = "" />
 		<cfset var key = "" />
+		<cfset var attribute = "name" />
+		<cfset var value = arguments.type />
+
+		<cfif ListLen(arguments.type, "=") GT 1>
+			<cfset attribute = ListGetAt(arguments.type, 1, '=' ) />
+			<cfset value = ListGetAt(arguments.type, 2, '=' ) />
+		<cfelseif StructKeyExists(getHttpEquivReferenceMap(), arguments.type) >
+			<cfset attribute = 'http-equiv' />
+		</cfif>
 
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & getUtils().escapeHtml(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
-		<cfelseif arguments.attribute EQ 'http-equiv' OR StructKeyExists(getHttpEquivReferenceMap(), arguments.type)>
-			<cfset code = '<meta http-equiv="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		<cfelse>
-			<cfset code = '<meta name="' & arguments.type & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
+			<cfset code = '<meta ' & attribute & '="' & value & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		</cfif>
 
 		<cfif arguments.outputType EQ "inline">
@@ -981,14 +986,14 @@ from the parent application.
 		<cftry>
 			<cfset fileResults = getFileInfo(fullPath) />
 
-			<!--- Convert current time to UTC because epoch is essentially UTC --->			
+			<!--- Convert current time to UTC because epoch is essentially UTC --->
 			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileResults.lastModified)) />
 
 			<!--- Log an exception if asset cannot be found and only soft fail --->
 			<cfcatch type="any">
 				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
-	
-				<cfreturn 0 />			
+
+				<cfreturn 0 />
 			</cfcatch>
 		</cftry>
 	</cffunction>
