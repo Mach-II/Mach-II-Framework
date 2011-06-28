@@ -83,7 +83,7 @@ Notes:
 		<resource path="#restUri#">
 			<cfloop collection="#restUriMethods#" item="restMethod">
 				<cfset restUriItem = StructFind(restUriMethods, restMethod) />
-				<method name="#restMethod#" id="#restUriItem.name#">
+				<method name="#restUriItem["REST:method"]#" id="#restUriItem.name#">
 					<cfif isDefined("restUriItem.hint")>
 						<doc>
 							<html:h6>description</html:h6>
@@ -110,7 +110,7 @@ Notes:
 					<request>
 						<cfset tokens = ArrayToList(restUriItem.tokens) />
 						<cfloop array="#restUriItem.parameters#" index="parameter">
-							<cfif parameter.type NEQ "MachII.framework.Event">
+							<cfif parameter["rest:type"] NEQ "MachII.framework.Event">
 							<param name="#parameter.name#"
 								type="xsd:#parameter["rest:type"]#"
 								<cfif isDefined("parameter.required")>required="#parameter.required#"

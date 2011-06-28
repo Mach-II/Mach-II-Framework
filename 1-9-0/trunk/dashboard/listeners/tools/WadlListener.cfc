@@ -109,9 +109,9 @@ Notes:
 
 					<cfloop array="#restMethodMetadata#" index="item" >
 						<cfloop array="#item.functions#" index="itemFunction">
-							<cfset pattern = itemFunction["REST:URI"]/>
-
-							<cfset httpMethod = itemFunction["REST:METHOD"]/>
+							<cfset pattern = itemFunction["REST:URI"] />
+							<!--- We allow multiple HTTP methods to be defined, but we only need one for this process --->
+							<cfset httpMethod = ListFirst(itemFunction["REST:METHOD"]) />
 							<cfset uri = endpoint.getRestUris().getUriByPattern(pattern, httpMethod) />
 
 							<cfif StructKeyExists(stcResult.methodMetadata, pattern)>
