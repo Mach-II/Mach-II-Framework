@@ -671,7 +671,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.dashboard.config.ListenerInfoNotAvailable"
-					message="Unabled to obtain information for a listener named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Listener'."
+					message="Unabled to obtain information for a listener named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends 'MachII.framework.Listener'."
 					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
@@ -695,7 +695,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.dashboard.config.PluginInfoNotAvailable"
-					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Property'."
+					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends 'MachII.framework.Plugin'."
 					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
@@ -719,7 +719,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.dashboard.config.EventFilterInfoNotAvailable"
-					message="Unabled to obtain information for an event-filter named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.EventFilter'."
+					message="Unabled to obtain information for an event-filter named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends 'MachII.framework.EventFilter'."
 					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
@@ -743,7 +743,7 @@ Notes:
 			</cfloop>
 			<cfcatch type="any">
 				<cfthrow type="MachII.dashboard.config.PropertyInfoNotAvailable"
-					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends ''MachII.framework.Listener'."
+					message="Unabled to obtain information for a property named '#objectNames[i]#' in module '#arguments.moduleAppManager.getModuleName()#'. Please ensure that your listener extends 'MachII.framework.Property'."
 					detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
