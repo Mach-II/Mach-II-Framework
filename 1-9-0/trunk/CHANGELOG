@@ -61,7 +61,13 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
-* AppLoader occationally deconfigured the old AppManager before 
+* HtmlHelper does not HTML escape scr/html for addScript/Style
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/797
+(2011-06-29 peterfarrell)
+
+* AppLoader occasionally deconfigured the old AppManager before 
 all the running requests were completed
 
 Thanks to Jason York for reporting this issue.
@@ -105,6 +111,17 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Add a way to override the "magic" type for addMeta() in HtmlHelper
+
+Use type="name:nameOfMeta" or type="http-equiv:nameOfHttpEquiv".
+
+Special thanks to Jason York for suggesting and writing a patch
+for this enhancement.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/798
+(2011-06-29 peterfarrell)
+
 * Enable EnvironmentProperty.cfc to get server name using other "scopes"
 like properties.*, headers.* or cgi.*
 

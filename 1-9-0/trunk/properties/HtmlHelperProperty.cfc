@@ -391,7 +391,6 @@ from the parent application.
 
 		<cfset var code = "" />
 		<cfset var i = 0 />
-		<cfset var assetPath = "" />
 		<cfset var temp = "" />
 
 		<!--- Explode the list to an array --->
@@ -400,13 +399,7 @@ from the parent application.
 		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(arguments.src)#" index="i">
-			<cfif NOT arguments.src[i].startsWith("external:")>
-				<cfset assetPath = computeAssetPath("js", arguments.src[i]) />
-			<cfelse>
-				<cfset assetPath = Replace(arguments.src[i], "external:", "", "one") />
-			</cfif>
-
-			<cfset temp = '<script type="text/javascript" src="' & assetPath & '"></script>' & Chr(13) />
+			<cfset temp = '<script type="text/javascript" src="' & computeAssetPath("js", arguments.src[i]) & '"></script>' & Chr(13) />
 
 			<!--- Enclose in an IE conditional comment if available --->
 			<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
@@ -467,7 +460,6 @@ from the parent application.
 		<cfset var attributesCode = "" />
 		<cfset var i = 0 />
 		<cfset var key = "" />
-		<cfset var assetPath = "" />
 		<cfset var temp = "" />
 
 		<!--- Explode the list to an array --->
@@ -484,13 +476,7 @@ from the parent application.
 		</cfloop>
 
 		<cfloop from="1" to="#ArrayLen(arguments.href)#" index="i">
-			<cfif NOT arguments.href[i].startsWith("external:")>
-				<cfset assetPath = computeAssetPath("css", arguments.href[i]) />
-			<cfelse>
-				<cfset assetPath = Replace(arguments.href[i], "external:", "", "one") />
-			</cfif>
-
-			<cfset temp = '<link type="text/css" href="' & assetPath & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
+			<cfset temp = '<link type="text/css" href="' & computeAssetPath("css", arguments.href[i]) & '" rel="stylesheet"' & attributesCode & ' />' & Chr(13) />
 
 			<!--- Enclose in an IE conditional comment if available --->
 			<cfif StructKeyExists(arguments, "forIEVersion") AND Len(arguments.forIEVersion)>
@@ -664,16 +650,17 @@ from the parent application.
 		<cfset var attribute = "name" />
 		<cfset var value = arguments.type />
 
-		<cfif ListLen(arguments.type, "=") GT 1>
-			<cfset attribute = ListGetAt(arguments.type, 1, '=' ) />
-			<cfset value = ListGetAt(arguments.type, 2, '=' ) />
-		<cfelseif StructKeyExists(getHttpEquivReferenceMap(), arguments.type) >
-			<cfset attribute = 'http-equiv' />
-		</cfif>
-
 		<cfif arguments.type EQ "title">
 			<cfset code = '<title>' & getUtils().escapeHtml(cleanupContent(arguments.content) & getMetaTitleSuffix()) & '</title>' & Chr(13) />
 		<cfelse>
+			<!--- Get the correct type if it is first in the string (do not use ListLen as it could be a false positive) --->
+			<cfif FindNoCase("http-equiv:", arguments.type) EQ 1 OR FindNoCase("name:", arguments.type) EQ 1>
+				<cfset attribute = ListGetAt(arguments.type, 1, ":") />
+				<!--- Use ListRest in case the "value" has a ":" colon in it --->
+				<cfset value = ListRest(arguments.type, ":") />
+			<cfelseif StructKeyExists(getHttpEquivReferenceMap(), arguments.type) >
+				<cfset attribute = 'http-equiv' />
+			</cfif>
 			<cfset code = '<meta ' & attribute & '="' & value & '" content="' & getUtils().escapeHtml(cleanupContent(arguments.content)) & '" />' & Chr(13) />
 		</cfif>
 
@@ -724,7 +711,9 @@ from the parent application.
 		<!--- Check for external path --->
 		<cfif arguments.assetPath.toLowercase().startsWith("http://")
 			OR arguments.assetPath.toLowercase().startsWith("https://")>
-			<cfreturn arguments.assetPath />
+			<cfreturn getUtils().escapeHtml(arguments.assetPath) />
+		<cfelseif arguments.assetPath.toLowercase().startsWith("external:")>
+			<cfreturn getUtils().escapeHtml(Replace(arguments.assetPath, "external:", "", "one")) />
 		<!--- Resolve local path --->
 		<cfelse>
 			<cfset resolvedPath = buildAssetPath(arguments.assetType, arguments.assetPath) />
