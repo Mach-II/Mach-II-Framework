@@ -301,7 +301,7 @@ via reap() which is run every 3 minutes.
 	</cffunction>
 
 	<!---
-	PRIVATE FUNCTIONS - UTILS
+	PROTECTED FUNCTIONS - UTILS
 	--->
 	<cffunction name="hashKey" access="private" returntype="string" output="false"
 		hint="Creates a hash from a key name.">

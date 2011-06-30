@@ -169,7 +169,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PROTECTED METHODS
+	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="convertTimespanStringToSeconds" access="private" returntype="numeric" output="false"
 		hint="Converts a timespan string (e.g. 0,0,0,0) into seconds.">

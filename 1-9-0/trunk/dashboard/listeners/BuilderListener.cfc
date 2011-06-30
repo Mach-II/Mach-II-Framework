@@ -103,7 +103,7 @@ Notes:
 	</cffunction>
 	
 	<!--- 
-	PRIVATE FUNCTIONS	
+	PROTECTED FUNCTIONS	
 	 --->
 	 <cffunction name="convertCFCPathToFilePath" access="private" returntype="string" output="false">
 	 	<cfargument name="cfcPath" type="string" required="true" />

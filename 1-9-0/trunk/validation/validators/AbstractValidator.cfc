@@ -72,7 +72,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PUBLIC METHODS
+	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="validate" access="public" returntype="void" output="false"
 		hint="Validates a value based on the current context.">
@@ -84,7 +84,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PROTECTED METHODS
+	PROTECTED FUNCTIONS
 	--->
 	
 	<!---

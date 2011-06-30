@@ -64,7 +64,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PUBLIC METHODS
+	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="testEventInvoker" access="public" returntype="any" output="false">
 		<cfargument name="Event" type="MachII.framework.Event" required="true" />

@@ -64,7 +64,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC METHODS
+	PUBLIC FUNCTIONS
 	--->
 
 	<cffunction name="myBaseAnnotatedMethod"

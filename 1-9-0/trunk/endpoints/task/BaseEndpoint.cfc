@@ -179,7 +179,7 @@ Custom Configuration:
 	</cffunction>
 
 	<!---
-	PUBLIC METHODS - REQUEST
+	PUBLIC FUNCTIONS - REQUEST
 	--->
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Authenticates the scheduled task request. Do not override this method.">
@@ -271,7 +271,7 @@ Custom Configuration:
 	</cffunction>
 	
 	<!---
-	PROTECTED METHODS
+	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="invokeTask" access="private" returntype="string" output="false"
 		hint="Invokes a task. This method is recursive if retry on failure is enabled for this task.">

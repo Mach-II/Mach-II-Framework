@@ -185,7 +185,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PRIVATE FUNCTIONS - UTILITIES
+	PROTECTED FUNCTIONS - UTILITIES
 	--->
 	<cffunction name="commonInvalidMatches" access="private" returntype="void" output="false"
 		hint="Tests the URI matching code against URLs with two tokens.">

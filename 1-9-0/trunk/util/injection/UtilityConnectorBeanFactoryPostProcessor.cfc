@@ -67,7 +67,7 @@ Notes:
 	</cffunction>
 	
 	<!---
-	PUBLIC METHODS
+	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="postProcessBeanFactory" access="public" returntype="void" output="false"
 		hint="Configures utility connectors.">

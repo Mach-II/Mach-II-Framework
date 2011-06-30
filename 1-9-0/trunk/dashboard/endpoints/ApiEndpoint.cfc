@@ -71,7 +71,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC METHODS - REQUEST
+	PUBLIC FUNCTIONS - REQUEST
 	--->
 	<cffunction name="onAuthenticate" access="public" returntype="void" output="false"
 		hint="Runs authentication.">
@@ -104,7 +104,7 @@ Notes:
 	</cffunction>
 
 	<!---
-	PUBLIC METHODS - REST
+	PUBLIC FUNCTIONS - REST
 	--->
 	<cffunction name="temp" access="public" returntype="string" output="false"
 		hint="Temp testing method. To be removed"

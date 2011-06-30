@@ -89,7 +89,7 @@ Created version: 1.9.0
 	</cffunction>
 	
 	<!---
-	PRIVATE FUNCTIONS
+	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="resolveCode" access="private" returntype="any" output="false"
 		hint="Resolves a message code by code name and locale.">
