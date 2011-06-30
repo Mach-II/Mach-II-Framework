@@ -89,7 +89,7 @@ All user-defined listeners extend this base listener component.
 		<cfargument name="invoker" type="MachII.framework.ListenerInvoker" required="true" />
 		<cfset variables.invoker = arguments.invoker />
 	</cffunction>
-	<cffunction name="getInvoker" access="public" type="MachII.framework.ListenerInvoker" output="false"
+	<cffunction name="getInvoker" access="public" returntype="MachII.framework.ListenerInvoker" output="false"
 		hint="Gets the ListenerInvoker to use when invoking methods for this Listener.">
 		<cfreturn variables.invoker />
 	</cffunction>
