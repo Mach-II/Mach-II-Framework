@@ -341,9 +341,22 @@ application.serviceFactory_account variable.
 				<cfset defaultProperties[i] = Evaluate(Mid(defaultProperties[i], 3, Len(defaultProperties[i]) -3)) />
 			</cfif>
 		</cfloop>
+		
+		<!--- Add in a reference to AppManager for the UtilityConnectBeanFactoryPostProcessor --->
+		<cfset defaultProperties["_MachIIAppManager"] = getAppManager() />
 
 		<!--- Create a new bean factory --->
 		<cfset bf = CreateObject("component", "coldspring.beans.DefaultXmlBeanFactory").init(defaultAttributes, defaultProperties) />
+
+		<!--- Put a bean factory reference into Mach-II property manager --->
+		<cfset setProperty("beanFactoryName", localBeanFactoryKey) />
+		<cfset setProperty(localBeanFactoryKey, bf) />
+
+		<!---
+			Inject a bean factory post processor to aid in the wiring of the UtilityConnector (Tickets 540 and 799)
+			wich must be done before the BF is loaded due to non-lazy load beans possibly requiring the UtilityConnector
+		--->
+		<cfset injectUtilityConnectorBeanFactoryPostProcessorDefinition() />
 
 		<!--- If necessary setup the parent bean factory using the new ApplicationContextUtils --->
 		<cfif Len(parentBeanFactoryKey) AND bfUtils.namedFactoryExists(parentBeanFactoryScope, parentBeanFactoryKey)>
@@ -355,9 +368,6 @@ application.serviceFactory_account variable.
 			<cfset serviceDefXmlLocation = ExpandPath(serviceDefXmlLocation) />
 		</cfif>
 
-		<!--- Place a temporary reference of the AppManager into the request scope for the UtilityConnector --->
-		<cfset request._MachIIAppManager = getAppManager() />
-
 		<!--- Load the bean defs --->
 		<cftry>
 			<cfset bf.loadBeansFromXmlFile(serviceDefXmlLocation, true) />
@@ -367,10 +377,6 @@ application.serviceFactory_account variable.
 					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
 			</cfcatch>
 		</cftry>
-
-		<!--- Put a bean factory reference into Mach-II property manager --->
-		<cfset setProperty("beanFactoryName", localBeanFactoryKey) />
-		<cfset setProperty(localBeanFactoryKey, bf) />
 
 		<!--- Figure out application/server key --->
 		<cfset factoryKey = localBeanFactoryKey />
@@ -387,9 +393,6 @@ application.serviceFactory_account variable.
 		<cfif getParameter("placeFactoryInServerScope", false)>
 			<cfset bfUtils.setNamedFactory("server", factoryKey, bf) />
 		</cfif>
-
-		<!--- Configure any utility connector --->
-		<cfset configureUtilityConnector() />
 
 		<!--- Resolve Mach-II dependences if required and application is not
 			loading (because during load Mach-II will call onObjectReload and
@@ -812,17 +815,26 @@ application.serviceFactory_account variable.
 		</cfloop>
 	</cffunction>
 
-	<cffunction name="configureUtilityConnector" access="private" returntype="void" output="false"
-		hint="Configures utility connectors.">
+	<cffunction name="injectUtilityConnectorBeanFactoryPostProcessorDefinition" access="private" returntype="void" output="false"
+		hint="Injects an UtilityConnectorBeanFactoryPostProcessor definition into the local bean factory.">
 
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
-		<cfset var utilityConnectorBeanName = beanFactory.findBeanNameByType("MachII.util.UtilityConnector") />
-		<cfset var utilityConnector = "" />
-
-		<cfif Len(utilityConnectorBeanName)>
-			<cfset utilityConnector = beanFactory.getBean(utilityConnectorBeanName) />
-			<cfset utilityConnector.setAppManager(getAppManager()) />
-		</cfif>
+		
+		<!--- This definition is used to wire in the correct AppManager into any UtilityConnector definition --->
+		<cfset beanFactory.createBeanDefinition("_MachIIUtilityConnectorBeanFactoryPostProcessor"
+			, "MachII.util.injection.UtilityConnectorBeanFactoryPostProcessor"
+			, ArrayNew(1)
+			, true
+			, false
+			, true
+			, ""
+			, ""
+			, ""
+			, false
+			, true
+			, false
+			, false
+			, "") />
 	</cffunction>
 
 	<cffunction name="referenceBeansToMachIIProperties" access="private" returntype="void" output="false"

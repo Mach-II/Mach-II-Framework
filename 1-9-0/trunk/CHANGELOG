@@ -61,6 +61,14 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* UtilityConnector does not have access to AppManager if non-lazy loaded beans are present
+
+Thanks to Adam Ness for reporting this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/799
+(2011-06-29 peterfarrell)
+
 * HtmlHelper does not HTML escape scr/html for addScript/Style
 
 For more information see:
