@@ -304,6 +304,7 @@ To Test it out, do the following:
 
 		<cfset arguments.event.setArg("_responseFormat", format) />
 		<cfset arguments.event.setArg("_responseContentType", addContentTypeHeaderFromFormat(format)) />
+		<cfset arguments.event.setArg("_responseBody", restResponseBody) />
 		<cfsetting enablecfoutputonly="false" /><cfoutput>#restResponseBody#</cfoutput><cfsetting enablecfoutputonly="true" />
 	</cffunction>
 
@@ -485,9 +486,10 @@ To Test it out, do the following:
 		<cfif StructKeyExists(headers, "Content-Type")>
 			<cfset contentType = headers["Content-Type"] />
 
-			<!--- Find a charset in example "application/xml; charset=UTF-8" --->
+			<!--- Find if there is a charset available the Content-Type header (e.x. "application/xml; charset=UTF-8") --->
 			<cfif ListLen(contentType, ";") GTE 2>
 				<cfset charset = Trim(ListGetAt(ListGetAt(contentType, 2, ";"), 2, "=")) />
+				<cfset arguments.event.setArg("_requestCharset", charset) />
 			</cfif>
 		</cfif>
 
