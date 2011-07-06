@@ -55,6 +55,7 @@ Updated version: 1.8.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.parseRuntimeParameters = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION

@@ -486,6 +486,7 @@ Notes:
 		<cfset var command = "" />
 		<cfset var filterName = arguments.commandNode.xmlAttributes["name"] />
 		<cfset var filterParams = StructNew() />
+		<cfset var parseFilterParams = false />
 		<cfset var paramNodes = arguments.commandNode.xmlChildren />
 		<cfset var paramName = "" />
 		<cfset var paramValue = "" />
@@ -501,8 +502,15 @@ Notes:
 			</cfif>
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
+		
+		<!--- Check if the runtime parameters need to be parsed for M2EL expressions at runtime --->
+		<cfif REFindNoCase("\${(.)*?}", paramNodes.toString())>
+			<cfset parseFilterParams = true />
+		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filterProxy, filterParams) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filterProxy, filterParams, parseFilterParams) />
+		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setUtils(variables.utils) />
 
 		<cfreturn command />
 	</cffunction>
