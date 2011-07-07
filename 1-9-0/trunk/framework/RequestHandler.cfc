@@ -298,16 +298,14 @@ Notes:
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
 	--->
-	<cffunction name="getWorkingLocale" access="private" returntype="string" output="false"
+	<cffunction name="getWorkingLocale" access="private" returntype="any" output="false"
 		hint="Returns the current Locale for this request">
 
 		<cfset var locale = "" />
 
 		<!--- If the current stored locale is empty, return the default locale --->
-		<cfif IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty())>
-			<cfset locale = getAppManager().getGlobalizationManager().retrieveLocale() />
-			<cfset getLog().debug("Retrieving locale from GlobalizationManager: #locale#") />
-		</cfif>
+		<cfset locale = getAppManager().getGlobalizationManager().retrieveLocale() />
+		<cfset getLog().debug("Retrieving locale from GlobalizationManager: #locale#") />
 
 		<cfif locale EQ "">
 			<cfset locale = getPageContext().getRequest().getLocale() />
@@ -318,15 +316,9 @@ Notes:
 
 	<cffunction name="setWorkingLocale" access="private" returntype="void" output="false"
 		hint="Sets the current Locale for this request (and session).">
-		<cfargument name="locale" type="string" required="true" />
-
-		<cfif IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty())>
-			<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
-
-		<cfelse>
-			<!--- I'm pretty ambivalent about the existence of this error message. --->
-			<cfabort showerror="GlobalizationManager not configured for attempt to set a locale. Please add a Globalization property to your configuration file."/>
-		</cfif>
+		<cfargument name="locale" type="any" required="true" />
+		
+		<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
 
 		<cfset getLog().debug("Current locale set to #arguments.locale#") />
 	</cffunction>
@@ -343,7 +335,6 @@ Notes:
 
 		<cfset var pluginManager = "" />
 		<cfset var exception = "" />
-		<cfset var onRequestEndCallbacks = getOnRequestEndCallbacks() />
 		<cfset var i = "" />
 
 		<cfif getIsProcessing()>
@@ -392,9 +383,9 @@ Notes:
 		<cfset log.info("End processing request.") />
 
 		<!--- Run On-Request-End callbacks --->
-		<cfloop from="1" to="#ArrayLen(onRequestEndCallbacks)#" index="i">
-			<cfinvoke component="#onRequestEndCallbacks[i].callback#"
-				method="#onRequestEndCallbacks[i].method#">
+		<cfloop from="1" to="#ArrayLen(variables.onRequestEndCallbacks)#" index="i">
+			<cfinvoke component="#variables.onRequestEndCallbacks[i].callback#"
+				method="#variables.onRequestEndCallbacks[i].method#">
 				<cfinvokeargument name="appManager" value="#getAppManager()#" />
 				<cfinvokeargument name="event" value="#getEventContext().getCurrentEvent()#" />
 			</cfinvoke>
@@ -555,15 +546,12 @@ Notes:
 			</cfif>
 		</cfloop>
 
-		<!--- If there is an incoming eventArg that matches the globalization locale key,
-			persist the new locale --->
-		<cfif IsObject(getAppManager().getGlobalizationManager()) AND
-			  IsObject(getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty()) AND
-			  StructKeyExists(arguments.eventArgs, getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam())>
-			<cfset locale = arguments.eventArgs[getAppManager().getGlobalizationManager().getGlobalizationLoaderProperty().getLocaleUrlParam()]>
+		<!--- If there is an incoming eventArg that matches the globalization locale key, persist the new locale --->
+		<cfif IsObject(getAppManager().getGlobalizationManager()) 
+			AND StructKeyExists(arguments.eventArgs, getAppManager().getGlobalizationManager().getLocaleUrlParam())>
+			<cfset locale = arguments.eventArgs[getAppManager().getGlobalizationManager().getLocaleUrlParam()]>
 			<cfset setCurrentLocale(locale) />
 		</cfif>
-
 	</cffunction>
 	
 	<!---
@@ -709,12 +697,12 @@ Notes:
 
 	<cffunction name="setCurrentLocale" access="public" returntype="void" output="false"
 		hint="Sets the current locale for a request">
-		<cfargument name="locale" type="string" required="true" />
-		<cfset setWorkingLocale(arguments.locale)/>
+		<cfargument name="locale" type="any" required="true" />
+		<cfset setWorkingLocale(arguments.locale) />
 	</cffunction>
-	<cffunction name="getCurrentLocale" access="public" returntype="string" output="false"
+	<cffunction name="getCurrentLocale" access="public" returntype="any" output="false"
 		hint="Gets the current locale for a request">
-		<cfreturn getWorkingLocale()/>
+		<cfreturn getWorkingLocale() />
 	</cffunction>
 
 </cfcomponent>

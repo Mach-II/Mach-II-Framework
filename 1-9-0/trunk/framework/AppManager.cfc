@@ -313,12 +313,11 @@ Notes:
 		<cfargument name="targetObject" type="any" required="true"
 			hint="The target object that is the subject of the application reload event." />
 
-		<cfset var onObjectReloadCallbacks = getOnObjectReloadCallbacks() />
-		<cfset var i = 0 />
+		<cfset var i = 0 />		
 
-		<cfloop from="1" to="#ArrayLen(onObjectReloadCallbacks)#" index="i">
-			<cfinvoke component="#onObjectReloadCallbacks[i].callback#"
-				method="#onObjectReloadCallbacks[i].method#">
+		<cfloop from="1" to="#ArrayLen(variables.onObjectReloadCallbacks)#" index="i">
+			<cfinvoke component="#variables.onObjectReloadCallbacks[i].callback#"
+				method="#variables.onObjectReloadCallbacks[i].method#">
 				<cfinvokeargument name="targetObject" value="#arguments.targetObject#" />
 			</cfinvoke>
 		</cfloop>

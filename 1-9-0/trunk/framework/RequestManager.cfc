@@ -732,12 +732,11 @@ Notes:
 
 		<cfset var persistId = "" />
 		<cfset var data = StructNew() />
-		<cfset var preRedirectCallbacks = getPreRedirectCallbacks() />
 		<cfset var i = "" />
 
-		<cfloop from="1" to="#ArrayLen(preRedirectCallbacks)#" index="i">
-			<cfinvoke component="#preRedirectCallbacks[i].callback#"
-				method="#preRedirectCallbacks[i].method#">
+		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
+			<cfinvoke component="#variables.preRedirectCallbacks[i].callback#"
+				method="#variables.preRedirectCallbacks[i].method#">
 				<cfinvokeargument name="data" value="#data#" />
 			</cfinvoke>
 		</cfloop>
@@ -758,7 +757,6 @@ Notes:
 			hint="The current eventArgs to append the redirect persist event args to via a reference." />
 
 		<cfset var data = "" />
-		<cfset var postRedirectCallbacks = getPostRedirectCallbacks() />
 		<cfset var i = "" />
 		<cfset var parameterId = getPropertyManager().getProperty("redirectPersistParameter") />
 
@@ -774,9 +772,9 @@ Notes:
 		<!--- If there is data, run post-redirect callbacks --->
 		<cfif StructCount(data)>
 
-			<cfloop from="1" to="#ArrayLen(postRedirectCallbacks)#" index="i">
-				<cfinvoke component="#postRedirectCallbacks[i].callback#"
-					method="#postRedirectCallbacks[i].method#">
+			<cfloop from="1" to="#ArrayLen(variables.postRedirectCallbacks)#" index="i">
+				<cfinvoke component="#variables.postRedirectCallbacks[i].callback#"
+					method="#variables.postRedirectCallbacks[i].method#">
 					<cfinvokeargument name="data" value="#data#" />
 				</cfinvoke>
 			</cfloop>

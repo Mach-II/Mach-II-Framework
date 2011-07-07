@@ -216,8 +216,6 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Prepares the manager for use.">
 
-		<cfset var viewLoaders = variables.viewLoaders />
-		<cfset var views = StructNew() />
 		<cfset var viewData = "" />
 		<cfset var i = 0 />
 		<cfset var key = "" />
@@ -241,10 +239,9 @@ Notes:
 		</cfloop>
 
 		<!--- Configure and resolve view loaders --->
-		<cfloop from="1" to="#ArrayLen(viewLoaders)#" index="i">
-			<cfset viewLoaders[i].configure() />
-			<cfset views = viewLoaders[i].discoverViews() />
-			<cfset StructAppend(variables.viewData, views, false) />
+		<cfloop from="1" to="#ArrayLen(variables.viewLoaders)#" index="i">
+			<cfset variables.viewLoaders[i].configure() />
+			<cfset StructAppend(variables.viewData, variables.viewLoaders[i].discoverViews(), false) />
 		</cfloop>
 	</cffunction>
 
