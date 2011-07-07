@@ -58,12 +58,23 @@ Usage:
 		<parameter name="debugSuffix" value="string"/>
 		<!-- Configures whether the debugging prefix and suffix will show up -->
 		<parameter name="debuggingEnabled" value="true|false"
-		<!-- The resource bundle declarations. -->
+
+		<!-- The resource bundle declarations as list -->
+		<parameter name="bundles" value="./config/resources/test,./config/resources/temp" />
+		<!--- OR as an array --->
 		<parameter name="bundles">
 	  		<array>
-	    		<element value="./config/resources/test"/>
+	  			<!--- Defaults the charset to the one set in `bundleCharset` --->
+	    		<element value="./config/resources/test" />
+	    		<element>
+	    			<struct>
+	    				<key name="bundle" value="./config/resources/test" />
+	    				<key name="charset" value="UTF-8" />
+	    			</struct>
+	    		</element>
 	  		</array>
 		</parameter>
+		<parameter name="bundleCharset" value="ISO-8859-1" />
 	</parameters>
 </property>
 
@@ -84,13 +95,7 @@ is en_US.
 	<!---
 	PROPERTIES
 	--->
-	<cfset variables.debuggingEnabled = false />
-	<cfset variables.debugPrefix = "**" />
-	<cfset variables.debugSuffix = "**" />
-	<cfset variables.localeUrlParam = "_locale" />
-	<cfset variables.localePersistenceClass = "MachII.globalization.persistence.SessionPersistenceMethod" />
-
-	<cfset variables.messageSource = "" />
+	<cfset variables.defaultCharset = "ISO-8859-1" />
 
 	<!---
 	INITIALIZATION/CONFIGURATION
@@ -99,23 +104,37 @@ is en_US.
 		hint="Configures the property.">
 
 		<cfset var bundles = getParameter("bundles", ArrayNew(1)) />
+		<cfset var modifiedBundles = ArrayNew(1) />
+		<cfset var tempBundle = "" />
+		<cfset var defaultCharset = getParameter("defaultCharset", variables.defaultCharset) />
 		<cfset var i = 0 />
+		<cfset var globalizationManager = getAppManager().getGlobalizationManager() />
 
-		<cfset setDebuggingEnabled(getParameter("debuggingEnabled", "false")) />
-		<cfset setDebugPrefix(getParameter("debugPrefix", "**")) />
-		<cfset setDebugSuffix(getParameter("debugSuffix", "**")) />
+		<cfset globalizationManager.setDebuggingEnabled(decideDebuggingEnabled(getParameter("debuggingEnabled", "false"))) />
+		<cfset globalizationManager.setDebugPrefix(getParameter("debugPrefix", "**")) />
+		<cfset globalizationManager.setDebugSuffix(getParameter("debugSuffix", "**")) />
 		
-		<cfset setLocaleUrlParam(getParameter("localeUrlParam", "_locale")) />
-		<cfset setLocalePersistenceClass(getParameter("localePersistenceClass", "MachII.globalization.persistence.SessionPersistenceMethod")) />
+		<cfset globalizationManager.setLocaleUrlParam(getParameter("localeUrlParam", "_locale")) />
+		<cfset globalizationManager.setLocalePersistenceClass(getParameter("localePersistenceClass", "MachII.globalization.persistence.SessionPersistenceMethod")) />
 		
 		<cfif IsSimpleValue(bundles)>
 			<cfset bundles = ListToArray(bundles) />
 		</cfif>
 
-		<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(bundles) />
-		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
+		<!--- Add in charset if available --->
+		<cfloop from="1" to="#ArrayLen(bundles)#" index="i">
+			<cfif IsSimpleValue(bundles[i])>
+				<cfset tempBundle = StructNew() />
+				<cfset tempBundle.bundle = bundles[i] />
+				<cfset tempBundle.charset = defaultCharset />
+				
+				<cfset modifiedBundles[i] = tempBundle />
+			<cfelse>
+				<cfset modifiedBundles[i] = bundle[i] />
+			</cfif>
+		</cfloop>
 
-		<cfset getAppManager().getGlobalizationManager().setGlobalizationLoaderProperty(this) />
+		<cfset globalizationManager.appendBasenames(modifiedBundles) />
 	</cffunction>
 	
 	<cffunction name="deconfigure" access="public" output="false" returntype="void"
@@ -124,74 +143,26 @@ is en_US.
 	</cffunction>
 	
 	<!---
-	ACCESSORS
+	PROTECTED METHODS
 	--->
-	<cffunction name="setDebugPrefix" access="public" returntype="void" output="false">
-		<cfargument name="debugPrefix" type="string" required="true" />
-		<cfset variables.debugPrefix = arguments.debugPrefix />
-	</cffunction>
-	<cffunction name="getDebugPrefix" access="public" returntype="string" output="false">
-		<cfreturn variables.debugPrefix />
-	</cffunction>
-
-	<cffunction name="setDebugSuffix" access="public" returntype="void" output="false">
-		<cfargument name="debugSuffix" type="string" required="true" />
-		<cfset variables.debugSuffix = arguments.debugSuffix />
-	</cffunction>
-	<cffunction name="getDebugSuffix" access="public" returntype="string" output="false">
-		<cfreturn variables.debugSuffix />
-	</cffunction>
-
-	<cffunction name="setDebuggingEnabled" access="public" returntype="void" output="false">
+	<cffunction name="decideDebuggingEnabled" access="private" returntype="boolean" output="false"
+		hint="Decides if debugging is enabled.">
 		<cfargument name="debuggingEnabled" type="any" required="true" />
 		
-		<cftry>
-			<cfset getAssert().isTrue(IsBoolean(arguments.debuggingEnabled) OR IsStruct(arguments.debuggingEnabled), "The 'debuggingEnabled' parameter for 'CachingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
+		<cfset var result = false />
+		
+		<cfset getAssert().isTrue(IsBoolean(arguments.debuggingEnabled) 
+			OR IsStruct(arguments.debuggingEnabled), "The 'debuggingEnabled' parameter for 'GlobalizationLoaderProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
 
-			<!--- Load caching enabled since this is a simple value (no environment names / group) --->
-			<cfif IsBoolean(arguments.debuggingEnabled)>
-				<cfset variables.debuggingEnabled = arguments.debuggingEnabled />
-				<!--- Load caching enabled by environment name / group --->
-			<cfelse>
-				<cfset variables.debuggingEnabled = resolveValueByEnvironment(arguments.debuggingEnabled, true) />
-			</cfif>
-
-			<cfcatch type="MachII.util.IllegalArgument">
-				<cfthrow type="MachII.globalization.GlobalizationConfigProperty.invalidEnvironmentConfiguration"
-					message="This misconfiguration error is defined in the property-wide 'debuggingEnabled' parameter in the 'ResourceLoaderProperty' in module named '#getModuleName()#'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
-			</cfcatch>
-			<cfcatch type="any">
-				<cfrethrow />
-			</cfcatch>
-		</cftry>
-	</cffunction>
-	<cffunction name="isDebuggingEnabled" access="public" returntype="boolean" output="false">
-		<cfreturn variables.debuggingEnabled />
-	</cffunction>
-
-	<cffunction name="setMessageSource" access="public" returntype="void" output="false">
-		<cfargument name="messageSource" type="MachII.globalization.BaseMessageSource" required="true"/>
-		<cfset variables.messageSource = arguments.messageSource />
-	</cffunction>
-	<cffunction name="getMessageSource" access="public" returntype="MachII.globalization.BaseMessageSource"  output="false">
-		<cfreturn variables.messageSource />
-	</cffunction>
-	
-	<cffunction name="setLocaleUrlParam" access="public" returntype="void" output="false">
-		<cfargument name="localeUrlParam" type="string" required="true"/>
-		<cfset variables.localeUrlParam = arguments.localeUrlParam />
-	</cffunction>
-	<cffunction name="getLocaleUrlParam" access="public" returntype="string" output="false">
-		<cfreturn variables.localeUrlParam />
-	</cffunction>
-	
-	<cffunction name="setLocalePersistenceClass" access="public" returntype="void" output="false">
-		<cfargument name="localePersistenceClass" type="string" required="true"/>
-		<cfset variables.localePersistenceClass = arguments.localePersistenceClass />
-	</cffunction>
-	<cffunction name="getLocalePersistenceClass" access="public" returntype="string" output="false">
-		<cfreturn variables.localePersistenceClass />
+		<!--- Load caching enabled since this is a simple value (no environment names / group) --->
+		<cfif IsBoolean(arguments.debuggingEnabled)>
+			<cfset result = arguments.debuggingEnabled />
+			<!--- Load caching enabled by environment name / group --->
+		<cfelse>
+			<cfset result = resolveValueByEnvironment(arguments.debuggingEnabled, false) />
+		</cfif>
+		
+		<cfreturn result />
 	</cffunction>
 	
 </cfcomponent>

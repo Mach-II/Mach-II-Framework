@@ -54,15 +54,22 @@ Created version: 1.9.0
 	<!---
 	PROPERTIES
 	--->
+	<cfset variables.parent = "" />
 	<cfset variables.log = "" />
 	<cfset variables.uniqueId = createRandomKey() />
-	
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="BaseMessageSource" output="false"
 		hint="Initializes the base class for message sources.">
+		<cfargument name="parentMessageSource" type="any" required="false" 
+			hint="The parent message source if available." />
+		
+		<cfif StructKeyExists(arguments, "parentMessageSource")>
+			<cfset setParent(arguments.parentMessageSource) />
+		</cfif>
+		
 		<cfreturn this />
 	</cffunction>
 	
@@ -118,7 +125,7 @@ Created version: 1.9.0
 			<cfset arguments.args = ListToArray(arguments.args) />
 		</cfif>
 
-		<cfset argsToUse = JavaCast("String[]", arguments.args) />
+		<cfset argsToUse = JavaCast("string[]", arguments.args) />
 		
 		<cfif NOT Len(arguments.code)>
 			<cfset getLog().trace("No code given, returning empty string") />
@@ -203,6 +210,14 @@ Created version: 1.9.0
 	<!---
 	ACCESSORS
 	--->
+	<cffunction name="setParent" access="public" returntype="void" output="false">
+		<cfargument name="parent" type="MachII.globalization.BaseMessageSource" required="true" />
+		<cfset variables.parent = arguments.parent />
+	</cffunction>
+	<cffunction name="getParent" access="public" returntype="any" output="false">
+		<cfreturn variables.parent />
+	</cffunction>
+	
 	<cffunction name="setLog" access="public" returntype="void" output="false"
 		hint="Uses the log factory to create a log.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="true" />

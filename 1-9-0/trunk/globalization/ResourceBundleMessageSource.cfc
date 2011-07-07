@@ -79,19 +79,40 @@ Created version: 1.9.0
 	INITIALIZATION/CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="ResourceBundleMessageSource" output="false"
-		hint="Initializes the message source.">
-		<cfargument name="basenames" type="array" required="true"
+		hint="Initializes the message source.">			
+		<cfargument name="parentMessageSource" type="any" required="false"
+			hint="The parent message source if available."/>
+		<cfargument name="basenames" type="array" required="false" default="#ArrayNew(1)#"
 			hint="An array of base names to use for this message source." />
 		
 		<cfset setBasenames(arguments.basenames) />
+		
+		<cfif StructKeyExists(arguments, "parentMessageSource")>
+			<cfset super.init(arguments.parentMessageSource) />
+		<cfelse>
+			<cfset super.init() />
+		</cfif>
 		
 		<cfreturn this />
 	</cffunction>
 	
 	<!---
-	PROTECTED FUNCTIONS
+	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="resolveCode" access="private" returntype="any" output="false"
+	<cffunction name="appendBasenames" access="public" returntype="void" output="false">
+		<cfargument name="basenames" type="array" required="true"/>
+		
+		<cfset var i = 0 />
+		
+		<cfloop from="1" to="#ArrayLen(arguments.basenames)#" index="i">
+			<cfset ArrayAppend(variables.basenames, arguments.basenames[i]) />
+		</cfloop>
+	</cffunction>
+	
+	<!---
+	PACKAGE FUNCTIONS
+	--->
+	<cffunction name="resolveCode" access="package" returntype="any" output="false"
 		hint="Resolves a message code by code name and locale.">
 		<cfargument name="code" type="string" required="true"
 			hint="Name of message code to resolve." />
@@ -105,7 +126,8 @@ Created version: 1.9.0
 		<cfset getLog().trace("Resolving code for #ArrayLen(getBasenames())# basenames", getBasenames()) />
 		
 		<cfloop from="1" to="#ArrayLen(variables.basenames)#" index="i">
-			<cfset resourceBundle = getResourceBundle(variables.basenames[i], locale) />
+			<cfset resourceBundle = getResourceBundle(variables.basenames[i].bundle, variables.basenames[i].charset, locale) />
+
 			<cfif IsObject(resourceBundle)>
 				<cfset messageFormat = getMessageFormat(resourceBundle, code, locale) />
 				<cfif IsObject(messageFormat)>
@@ -114,13 +136,22 @@ Created version: 1.9.0
 			</cfif>
 		</cfloop>
 		
+		<cfif IsObject(getParent())>
+			<cfreturn getParent().resolveCode(arguments.code, arguments.locale) />
+		</cfif>
+		
 		<cfreturn "" />
 	</cffunction>
-	
-	<cffunction name="getResourceBundle" access="private" returntype="any" output="false"
+
+	<!---
+	PROTECTED FUNCTIONS
+	--->
+	<cffunction name="getResourceBundle" access="package" returntype="any" output="false"
 		hint="Gets a resource bundle by base name and locale.">
 		<cfargument name="basename" type="string" required="true"
 			hint="The base name of the resource bundle." />
+		<cfargument name="charset" type="string" required="true"
+			hint="The charset encoding of the resource bundle." />
 		<cfargument name="locale" type="any" required="true"
 			hint="The locale to use to get the resource bundle." />
 
@@ -139,7 +170,7 @@ Created version: 1.9.0
 		
 			<cftry>
 				<cfset getLog().trace("Cache not hit; creating and caching new resource bundle for #arguments.basename#") />
-				<cfset bundle = doGetBundle(arguments.basename, arguments.locale) />
+				<cfset bundle = doGetBundle(arguments.basename, arguments.charset, arguments.locale) />
 				<cfif NOT IsStruct(localeStruct)>
 					<cfset localeStruct = StructNew() />
 					<cfset variables.cachedResourceBundles[arguments.basename] = localeStruct />
@@ -149,10 +180,14 @@ Created version: 1.9.0
 				<cfreturn bundle />
 				
 				<cfcatch type="any">
-					<cfset getLog().warn("ResourceBundle #arguments.basename# not found. Please check that you have the correct basename.", cfcatch) />
+					<cfset getLog().warn("ResourceBundle '#arguments.basename#' not found. Please check that you have the correct basename.", cfcatch) />
 				</cfcatch>
 			</cftry>
 		</cflock>
+		
+		<cfif IsObject(getParent())>
+			<cfreturn getParent().getResourceBundle() />
+		</cfif>
 		
 		<cfreturn "" />
 	</cffunction>
@@ -217,16 +252,17 @@ Created version: 1.9.0
 	
 	<cffunction name="doGetBundle" access="private" returntype="any" output="false">
 		<cfargument name="basename" type="string" required="true" />
+		<cfargument name="charset" type="string" required="true" />
 		<cfargument name="locale" type="any" required="true" />
 		
 		<cftry>
-			<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties") />
+			<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties", arguments.charset) />
 			<cfcatch type="any">
 				<cftry>
-					<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties") />
+					<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties", arguments.charset) />
 					<cfcatch type="any">
 						<cftry>
-							<cfreturn doGetBundleInternal("#arguments.basename#.properties") />
+							<cfreturn doGetBundleInternal("#arguments.basename#.properties", arguments.charset) />
 							<cfcatch type="any">
 								<cfrethrow />
 							</cfcatch>
@@ -238,22 +274,32 @@ Created version: 1.9.0
 	</cffunction>
 	
 	<cffunction name="doGetBundleInternal" access="private" returntype="any" output="false">
-		<cfargument name="filename" type="string" required="true"/>
+		<cfargument name="fileName" type="string" required="true" />
+		<cfargument name="charset" type="string" required="true" />
 		
 		<!--- Cannot initialize Java objects in the var block because we need a try/catch around it --->
 		<cfset var inputStream = "" />
+		<Cfset var inputReader = "" />
 		<cfset var resourceBundle = "" />
 
 		<cftry>
-			<cfset inputStream = CreateObject("java", "java.io.FileInputStream").init(ExpandPath(arguments.filename)) />
-			<cfset resourceBundle = CreateObject("java", "java.util.PropertyResourceBundle").init(inputStream) />
+			<!--- Use a file reader to support UTF-8 and other encoding for .properties files (see ticket 763) --->
+			<cfset inputStream = CreateObject("java", "java.io.FileInputStream").init(ExpandPath(arguments.fileName)) />
+			<cfset inputReader = CreateObject("java", "java.io.InputStreamReader").init(inputStream, arguments.charset) />
+			<cfset resourceBundle = CreateObject("java", "java.util.PropertyResourceBundle").init(inputReader) />
 			<cfset inputStream.close() />
+			<cfset inputReader.close() />
 
-			<!--- If anything goes wrong, close the file input stream or we will have a memory leak --->
+			<!--- If anything goes wrong, close the file input stream and input stream reader or we will have a memory leak --->
 			<cfcatch type="any">
 				<!--- Only close the inputStream if it exists --->
 				<cfif IsObject(inputStream)>
 					<cfset inputStream.close() />
+				</cfif>
+				
+				<!--- Only close the inputReader if it exists --->
+				<cfif IsObject(inputReader)>
+					<cfset inputReader.close() />
 				</cfif>
 				
 				<cfset getLog().trace("Unable to open file: #cfcatch.message#", cfcatch) />
@@ -269,7 +315,7 @@ Created version: 1.9.0
 	ACCESSORS
 	--->
 	<cffunction name="setBasenames" access="public" returntype="void" output="false">
-		<cfargument name="basenames" type="Array" required="true"/>
+		<cfargument name="basenames" type="array" required="true"/>
 		<cfset variables.basenames = arguments.basenames />
 	</cffunction>
 	<cffunction name="getBasenames" access="public" returntype="Array" output="false">

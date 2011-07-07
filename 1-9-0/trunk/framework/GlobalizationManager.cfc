@@ -57,8 +57,15 @@ Notes:
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentGlobalizationManager = "" />
-	<cfset variables.globalizationLoaderProperty = "" />
+	<cfset variables.messageSource = "" />
 	<cfset variables.localePersistenceObject = "" />
+	<cfset variables.debuggingEnabled = false />
+	<cfset variables.debugPrefix = "**" />
+	<cfset variables.debugSuffix = "**" />
+	<cfset variables.localeUrlParam = "_locale" />
+	<cfset variables.localePersistenceClass = "MachII.globalization.persistence.SessionPersistenceMethod" />
+	<cfset variables.numberFormatter = CreateObject("java", "java.text.NumberFormat") />
+	<cfset variables.dateFormatter = CreateObject("java", "java.text.DateFormat") />
 	
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -72,29 +79,36 @@ Notes:
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getGlobalizationManager()) />
 		</cfif>
+
+		<cfif getAppManager().inModule()>
+			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(getParent().getMessageSource()) />
+		<cfelse>
+			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init() />
+		</cfif>
+		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
 		
 		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the manager.">
+
+		<cftry>
+			<cfset setLocalePersistenceObject(CreateObject("component", getLocalePersistenceClass())) />
+			<cfset getLocalePersistenceObject().configure() />
 		
-		<cfif IsObject(getGlobalizationLoaderProperty())>
-			<cftry>
-				<cfset setLocalePersistenceObject(CreateObject("component", getGlobalizationLoaderProperty().getLocalePersistenceClass())) />
-				<cfset getLocalePersistenceObject().configure() />
-			
-				<cfcatch type="Any">
-					<cfabort showerror="Unable to create LocalePersistenceObject of type #getGlobalizationLoaderProperty().getLocalePersistenceClass()#. Please check that #getGlobalizationLoaderProperty().getLocalePersistenceClass()# is extended from MachII.globalization.persistence.AbstractPersistenceMethod: #cfcatch.message#" />
-				</cfcatch>
-			</cftry>
-		</cfif>
+			<cfcatch type="any">
+				<cfthrow type="MachII.framework.GlobalizationManager.InvalidLocalePersistenceObject"
+					message="Unable to create LocalePersistenceObject of type '#getLocalePersistenceClass()#'. Please check that this type is extended from 'MachII.globalization.persistence.AbstractPersistenceMethod'."
+					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+			</cfcatch>
+		</cftry>
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures the manager.">
 
-		<cfif IsObject(getGlobalizationLoaderProperty()) AND IsObject(getLocalePersistenceObject())>
+		<cfif IsObject(getLocalePersistenceObject())>
 			<cfset getLocalePersistenceObject().deconfigure() />
 		</cfif>
 	</cffunction>
@@ -102,38 +116,42 @@ Notes:
 	<!---
 	PUBLIC FUNCTIONS
 	--->
-	<cffunction name="getString" access="public" returntype="string" output="false">
+	<cffunction name="getString" access="public" returntype="string" output="false"
+		hint="">
 		<cfargument name="code" type="string" required="true" />
 		<cfargument name="locale" type="any" required="true" />
 		<cfargument name="args" type="array" required="true" />
 		<cfargument name="defaultString" type="string" required="true" />
 		
-		<cfset var currentLocale = arguments.locale/>
-		<cfset var glp = getGlobalizationLoaderProperty() />
+		<cfset var currentLocale = arguments.locale />
 		
 		<!--- If the user doesn't specify a locale, use the one for the current request --->
-		<cfif currentLocale EQ "">
-			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()/>
+		<cfif NOT IsObject(currentLocale) AND NOT Len(currentLocale)>
+			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getCurrentLocale() />
 		</cfif>
 		
-		<cfif glp.isDebuggingEnabled()>	
-			<cfreturn glp.getDebugPrefix() & glp.getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) & glp.getDebugSuffix() />
+		<cfif isDebuggingEnabled()>	
+			<cfreturn getDebugPrefix() & getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) & getDebugSuffix() />
 		<cfelse>
-			<cfreturn glp.getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
+			<cfreturn getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="persistLocale" access="public" returntype="void" output="false"
 		hint="Persists the passed locale as the user's current locale for this 'session'.">
 		<cfargument name="locale" type="string" required="true" />
-		
 		<cfset getLocalePersistenceObject().storeLocale(arguments.locale) />
 	</cffunction>
 	
 	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"
 		hint="Retrieves the current locale as set by the user.">
-		
 		<cfreturn getLocalePersistenceObject().retrieveLocale() />
+	</cffunction>
+	
+	<cffunction name="appendBasenames" access="public" returntype="void" output="false"
+		hint="Appends base names to the message source.">
+		<cfargument name="basenames" type="array" required="true" />
+		<cfset getMessageSource().appendBasenames(arguments.basenames) />
 	</cffunction>
 	
 	<!---
@@ -151,16 +169,8 @@ Notes:
 		<cfargument name="parentManager" type="MachII.framework.GlobalizationManager" required="true" />
 		<cfset variables.parentGlobalizationManager = arguments.parentManager />
 	</cffunction>
-	<cffunction name="getParent" access="public" returntype="MachII.framework.AppManager" output="false">
+	<cffunction name="getParent" access="public" returntype="MachII.framework.GlobalizationManager" output="false">
 		<cfreturn variables.parentGlobalizationManager />
-	</cffunction>
-	
-	<cffunction name="setGlobalizationLoaderProperty" access="public" returntype="void" output="false">
-		<cfargument name="globalizationLoaderProperty" type="MachII.globalization.GlobalizationLoaderProperty" required="true" />
-		<cfset variables.globalizationLoaderProperty = arguments.globalizationLoaderProperty />
-	</cffunction>
-	<cffunction name="getGlobalizationLoaderProperty" access="public" returntype="any" output="true">
-		<cfreturn variables.globalizationLoaderProperty />
 	</cffunction>
 	
 	<cffunction name="setLocalePersistenceObject" access="public" returntype="void" output="false">
@@ -170,5 +180,53 @@ Notes:
 	<cffunction name="getLocalePersistenceObject" access="public" returntype="MachII.globalization.persistence.AbstractPersistenceMethod" output="false">
 		<cfreturn variables.localePersistenceObject />
 	</cffunction>
+
+	<cffunction name="setDebugPrefix" access="public" returntype="void" output="false">
+		<cfargument name="debugPrefix" type="string" required="true" />
+		<cfset variables.debugPrefix = arguments.debugPrefix />
+	</cffunction>
+	<cffunction name="getDebugPrefix" access="public" returntype="string" output="false">
+		<cfreturn variables.debugPrefix />
+	</cffunction>
+
+	<cffunction name="setDebugSuffix" access="public" returntype="void" output="false">
+		<cfargument name="debugSuffix" type="string" required="true" />
+		<cfset variables.debugSuffix = arguments.debugSuffix />
+	</cffunction>
+	<cffunction name="getDebugSuffix" access="public" returntype="string" output="false">
+		<cfreturn variables.debugSuffix />
+	</cffunction>
+
+	<cffunction name="setDebuggingEnabled" access="public" returntype="void" output="false">
+		<cfargument name="debuggingEnabled" type="boolean" required="true" />
+		<cfset variables.debuggingEnabled />
+	</cffunction>
+	<cffunction name="isDebuggingEnabled" access="public" returntype="boolean" output="false">
+		<cfreturn variables.debuggingEnabled />
+	</cffunction>
+
+	<cffunction name="setMessageSource" access="public" returntype="void" output="false">
+		<cfargument name="messageSource" type="MachII.globalization.BaseMessageSource" required="true"/>
+		<cfset variables.messageSource = arguments.messageSource />
+	</cffunction>
+	<cffunction name="getMessageSource" access="public" returntype="MachII.globalization.BaseMessageSource"  output="false">
+		<cfreturn variables.messageSource />
+	</cffunction>
 	
+	<cffunction name="setLocaleUrlParam" access="public" returntype="void" output="false">
+		<cfargument name="localeUrlParam" type="string" required="true"/>
+		<cfset variables.localeUrlParam = arguments.localeUrlParam />
+	</cffunction>
+	<cffunction name="getLocaleUrlParam" access="public" returntype="string" output="false">
+		<cfreturn variables.localeUrlParam />
+	</cffunction>
+	
+	<cffunction name="setLocalePersistenceClass" access="public" returntype="void" output="false">
+		<cfargument name="localePersistenceClass" type="string" required="true"/>
+		<cfset variables.localePersistenceClass = arguments.localePersistenceClass />
+	</cffunction>
+	<cffunction name="getLocalePersistenceClass" access="public" returntype="string" output="false">
+		<cfreturn variables.localePersistenceClass />
+	</cffunction>
+
 </cfcomponent>

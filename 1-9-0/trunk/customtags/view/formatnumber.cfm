@@ -53,6 +53,15 @@ Notes:
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("formatnumber", true) />
+	
+	<!--- Use nested content if no "value" is defined --->
+	<cfif NOT StructKeyExists(attributes, "value")>
+		<cfset attributes.value = thisTag.GeneratedContent />
+	</cfif>
+	
+	<cfset ensureByName("value") />
+	
 <cfelse>
+	
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
