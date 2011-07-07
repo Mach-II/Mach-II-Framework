@@ -73,7 +73,7 @@ Notes:
 	<cfparam name="attributes.var" type="string" 
 		default="" />
 	<cfparam name="attributes.display" type="boolean" 
-		default="#attributes.var EQ ''#" />
+		default="#NOT Len(attributes.var)#" />
 	<cfparam name="attributes.arguments" type="any"
 		default="#ArrayNew(1)#" />
 	
