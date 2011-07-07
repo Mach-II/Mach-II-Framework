@@ -84,7 +84,7 @@ Notes:
 
 		<!--- Test for getFileInfo() --->
 		<cftry>
-			<cfset getFileInfo("ExpandPath(./BaseProxy.cfc)") />
+			<cfset getFileInfo(ExpandPath("./BaseProxy.cfc")) />
 			<cfcatch type="any">
 				<cfset variables.computeObjectReloadHash = variables.computeObjectReloadHash_cfdirectory />
 				<cfset this.computeObjectReloadHash = variables.computeObjectReloadHash_cfdirectory />
