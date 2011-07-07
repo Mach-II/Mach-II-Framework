@@ -79,8 +79,8 @@ Notes:
 		<cftry>
 			<cfset ListItemTrim("temp, temp") />
 
-			<cfset variables.listTrim = variables.listTrim_native />
-			<cfset this.listTrim = this.listTrim_native />
+			<cfset variables.listTrim = variables.trimList_native />
+			<cfset this.listTrim = this.trimList_native />
 
 			<cfcatch type="any">
 				<!--- Any exception means the BIF is unavailable so ignore this exception --->
