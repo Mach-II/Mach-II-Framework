@@ -312,7 +312,7 @@ application.serviceFactory_account variable.
 
 		<!--- Test for getFileInfo() --->
 		<cftry>
-			<cfset getFileInfo("ExpandPath(./ColdspringProperty.cfc)") />
+			<cfset getFileInfo(ExpandPath("./ColdspringProperty.cfc")) />
 			<cfcatch type="any">
 				<cfset variables.getFileInfo = getUtils().getFileInfo_cfdirectory />
 				<cfset this.getFileInfo = getUtils().getFileInfo_cfdirectory />
