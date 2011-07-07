@@ -73,42 +73,47 @@ Notes:
 	<cffunction name="init" access="public" returntype="GlobalizationManager" output="false"
 		hint="Initialization function called by the framework.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+
+		<cfset var localePersistenceObject = "" />
 		
 		<cfset setAppManager(arguments.appManager) />
-		
-		<cfif getAppManager().inModule()>
-			<cfset setParent(getAppManager().getParent().getGlobalizationManager()) />
-		</cfif>
 
 		<cfif getAppManager().inModule()>
+			<cfset setParent(getAppManager().getParent().getGlobalizationManager()) />
+
+			<cfset localePersistenceObject = getParent().getLocalePersistenceObject() />
 			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(getParent().getMessageSource()) />
 		<cfelse>
+			<cftry>			
+				<cfset localePersistenceObject = CreateObject("component", getLocalePersistenceClass()).init(arguments.appManager) />
+
+				<cfcatch type="any">
+					<cfthrow type="MachII.framework.GlobalizationManager.InvalidLocalePersistenceObject"
+						message="Unable to create LocalePersistenceObject of type '#getLocalePersistenceClass()#'. Please check that this type is extended from 'MachII.globalization.persistence.AbstractPersistenceMethod'."
+						detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
+				</cfcatch>
+			</cftry>
+
 			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init() />
 		</cfif>
-		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
+		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />		
+		<cfset setLocalePersistenceObject(localePersistenceObject) />
 		
 		<cfreturn this />
 	</cffunction>
 	
 	<cffunction name="configure" access="public" returntype="void" output="false"
-		hint="Configures the manager.">
+		hint="Configures the manager and related functionality.">
 
-		<cftry>
-			<cfset setLocalePersistenceObject(CreateObject("component", getLocalePersistenceClass())) />
+		<cfif NOT IsObject(getParent())>
 			<cfset getLocalePersistenceObject().configure() />
-		
-			<cfcatch type="any">
-				<cfthrow type="MachII.framework.GlobalizationManager.InvalidLocalePersistenceObject"
-					message="Unable to create LocalePersistenceObject of type '#getLocalePersistenceClass()#'. Please check that this type is extended from 'MachII.globalization.persistence.AbstractPersistenceMethod'."
-					detail="#getAppManager().getUtils().buildMessageFromCfCatch(cfcatch)#" />
-			</cfcatch>
-		</cftry>
+		</cfif>
 	</cffunction>
 
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
-		hint="Deconfigures the manager.">
+		hint="Deconfigures the manager and related functionality.">
 
-		<cfif IsObject(getLocalePersistenceObject())>
+		<cfif NOT IsObject(getParent())>
 			<cfset getLocalePersistenceObject().deconfigure() />
 		</cfif>
 	</cffunction>
@@ -169,7 +174,7 @@ Notes:
 		<cfargument name="parentManager" type="MachII.framework.GlobalizationManager" required="true" />
 		<cfset variables.parentGlobalizationManager = arguments.parentManager />
 	</cffunction>
-	<cffunction name="getParent" access="public" returntype="MachII.framework.GlobalizationManager" output="false">
+	<cffunction name="getParent" access="public" returntype="any" output="false">
 		<cfreturn variables.parentGlobalizationManager />
 	</cffunction>
 	

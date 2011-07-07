@@ -78,7 +78,7 @@ the user's locale in the user's cookie.
 	<cffunction name="storeLocale" access="public" returntype="void" output="false"
 		hint="Stores a locale in the cookie.">
 		<cfargument name="locale" type="string" required="true" />
-		<cfcookie name="#variables.instance.cookieVariable#" value="#arguments.locale#" expires="never"/>
+		<cfcookie name="#variables.instance.cookieVariable#" value="#arguments.locale#" expires="never" />
 	</cffunction>
 	
 	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"

@@ -547,9 +547,8 @@ Notes:
 		</cfloop>
 
 		<!--- If there is an incoming eventArg that matches the globalization locale key, persist the new locale --->
-		<cfif IsObject(getAppManager().getGlobalizationManager()) 
-			AND StructKeyExists(arguments.eventArgs, getAppManager().getGlobalizationManager().getLocaleUrlParam())>
-			<cfset locale = arguments.eventArgs[getAppManager().getGlobalizationManager().getLocaleUrlParam()]>
+		<cfif StructKeyExists(arguments.eventArgs, getAppManager().getGlobalizationManager().getLocaleUrlParam())>
+			<cfset locale = arguments.eventArgs[getAppManager().getGlobalizationManager().getLocaleUrlParam()] />
 			<cfset setCurrentLocale(locale) />
 		</cfif>
 	</cffunction>
