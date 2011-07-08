@@ -158,19 +158,29 @@ Created version: 1.9.0
 		<cfset var localeStruct = "" />
 		<cfset var bundle = "" />
 
-		<cflock name="_MachIIResourceBundleMessageSource_cachedResourceBundles_#variables.uniqueId#" type="readonly" timeout="30">
+		<cfif StructKeyExists(variables.cachedResourceBundles, arguments.basename)>
+			<cfset localeStruct = variables.cachedResourceBundles[arguments.basename] />
+			<cfif StructKeyExists(variables.cachedResourceBundles[arguments.basename], arguments.locale.toString())>
+				<cfset getLog().trace("Globalization resource bundle cache hit for '#arguments.basename#' and '#arguments.locale.toString()#'; returning preconfigured resource bundle") />
+				<cfreturn variables.cachedResourceBundles[arguments.basename][arguments.locale.toString()] />
+			</cfif>
+		</cfif>
 
+		<cflock name="_MachIIResourceBundleMessageSource_cachedResourceBundles_#variables.uniqueId#_#arguments.basename#_#arguments.charset#_#arguments.locale.toString()#" type="readonly" timeout="30">
+
+			<!--- Check again to see if some other thread beat us to it --->
 			<cfif StructKeyExists(variables.cachedResourceBundles, arguments.basename)>
 				<cfset localeStruct = variables.cachedResourceBundles[arguments.basename] />
 				<cfif StructKeyExists(variables.cachedResourceBundles[arguments.basename], arguments.locale.toString())>
-					<cfset getLog().trace("Cache hit, returning preconfigured resource bundle") />
+					<cfset getLog().trace("Globalization resource bundle cache hit for '#arguments.basename#' and '#arguments.locale.toString()#'; returning preconfigured resource bundle") />
 					<cfreturn variables.cachedResourceBundles[arguments.basename][arguments.locale.toString()] />
 				</cfif>
 			</cfif>
-		
-			<cftry>
-				<cfset getLog().trace("Cache not hit; creating and caching new resource bundle for #arguments.basename#") />
-				<cfset bundle = doGetBundle(arguments.basename, arguments.charset, arguments.locale) />
+
+			<cfset getLog().trace("Globalization resource bundle cache not hit; creating and caching new resource bundle for #arguments.basename#") />
+			<cfset bundle = doGetBundle(arguments.basename, arguments.charset, arguments.locale) />
+
+			<cfif IsObject(bundle)>
 				<cfif NOT IsStruct(localeStruct)>
 					<cfset localeStruct = StructNew() />
 					<cfset variables.cachedResourceBundles[arguments.basename] = localeStruct />
@@ -178,11 +188,9 @@ Created version: 1.9.0
 				<cfset localeStruct[arguments.locale.toString()] = bundle />
 
 				<cfreturn bundle />
-				
-				<cfcatch type="any">
-					<cfset getLog().warn("ResourceBundle '#arguments.basename#' not found. Please check that you have the correct basename.", cfcatch) />
-				</cfcatch>
-			</cftry>
+			<cfelse>
+				<cfset getLog().warn("Resource bundle '#arguments.basename#' and '#arguments.locale.toString()#' not found. Please check that you have the correct basename.", cfcatch) />
+			</cfif>
 		</cflock>
 		
 		<cfif IsObject(getParent())>
@@ -255,22 +263,27 @@ Created version: 1.9.0
 		<cfargument name="charset" type="string" required="true" />
 		<cfargument name="locale" type="any" required="true" />
 		
-		<cftry>
-			<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties", arguments.charset) />
-			<cfcatch type="any">
-				<cftry>
-					<cfreturn doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties", arguments.charset) />
-					<cfcatch type="any">
-						<cftry>
-							<cfreturn doGetBundleInternal("#arguments.basename#.properties", arguments.charset) />
-							<cfcatch type="any">
-								<cfrethrow />
-							</cfcatch>
-						</cftry>
-					</cfcatch>
-				</cftry>
-			</cfcatch>
-		</cftry>
+		<cfset var bundle = "" />
+		
+		<cfset bundle = doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#_#arguments.locale.getCountry()#.properties", arguments.charset) />
+		
+		<cfif IsObject(bundle)>
+			<cfreturn bundle />
+		</cfif>
+
+		<cfset bundle = doGetBundleInternal("#arguments.basename#_#arguments.locale.getLanguage()#.properties", arguments.charset) />
+		
+		<cfif IsObject(bundle)>
+			<cfreturn bundle />
+		</cfif>
+		
+		<cfset bundle = doGetBundleInternal("#arguments.basename#.properties", arguments.charset) />
+		
+		<cfif IsObject(bundle)>
+			<cfreturn bundle />
+		</cfif>		
+
+		<cfreturn bundle/>
 	</cffunction>
 	
 	<cffunction name="doGetBundleInternal" access="private" returntype="any" output="false">
@@ -302,9 +315,7 @@ Created version: 1.9.0
 					<cfset inputReader.close() />
 				</cfif>
 				
-				<cfset getLog().trace("Unable to open file: #cfcatch.message#", cfcatch) />
-
-				<cfrethrow />
+				<cfset getLog().trace("Globalization unable to open resource bundle file '#arguments.fileName#' with charset '#arguments.charset#': #cfcatch.message#", cfcatch) />
 			</cfcatch>
 		</cftry>
 
