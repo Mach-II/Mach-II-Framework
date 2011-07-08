@@ -100,6 +100,25 @@ Created version: 1.9.0
 		</cfif>
 	</cffunction>
 	
+	<cffunction name="resolveLocaleStringToLocaleObject" access="public" returntype="any" output="false"
+		hint="Resolves a locale string to a Java locale object.">
+		<cfargument name="locale" type="string" required="true" />
+		
+		<cfset var localeArray = ListToArray(arguments.locale, "_") />
+
+		<cfif ArrayLen(localeArray) EQ 1>
+			<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1]) />
+		<cfelseif ArrayLen(localeArray) EQ 2>
+			<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1], localeArray[2]) />
+		<cfelse>
+			<!--- This seems like a sensible default to me; if there is a better default, feel free to use it here --->
+			<cfset getLog().warn("No locale or invalid locale given; using default locale")/>
+			<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
+		</cfif>
+		
+		<cfreturn arguments.locale />
+	</cffunction>
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -133,22 +152,7 @@ Created version: 1.9.0
 		</cfif>
 		
 		<cfif NOT IsObject(arguments.locale)>
-			<cfif Len(arguments.locale)>
-				<cfset localeArray = ListToArray(arguments.locale, "_") />
-				<cfif ArrayLen(localeArray) EQ 1>
-					<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1]) />
-				<cfelseif ArrayLen(localeArray) EQ 2>
-					<cfset arguments.locale = CreateObject("java", "java.util.Locale").init(localeArray[1], localeArray[2]) />
-				<cfelse>
-					<!--- This seems like a sensible default to me; if there is a better default,
-						feel free to use it here --->
-					<cfset getLog().warn("Invalid locale given; using default locale")/>
-					<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
-				</cfif>
-			<cfelse>
-				<cfset getLog().trace("No locale given, creating default locale") />
-				<cfset arguments.locale = CreateObject("java", "java.util.Locale").getDefault() />
-			</cfif>
+			<cfset arguments.locale = resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
 		
 		<!--- If the arguments array is empty, assume there is no messageFormat necessary --->

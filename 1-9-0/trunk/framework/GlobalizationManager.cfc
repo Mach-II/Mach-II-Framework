@@ -158,7 +158,130 @@ Notes:
 		<cfargument name="basenames" type="array" required="true" />
 		<cfset getMessageSource().appendBasenames(arguments.basenames) />
 	</cffunction>
-	
+
+	<cffunction name="getFormatNumberInstance" access="public" returntype="any" output="false"
+		hint="Gets a number instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+
+		<cfreturn variables.numberFormatter.getNumberInstance(arguments.locale) />	
+	</cffunction>
+
+	<cffunction name="getFormatDecimalInstance" access="public" returntype="any" output="false"
+		hint="Gets a number instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		<cfargument name="pattern" type="string" required="true" />
+		
+		<cfset var formatter = "" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+		
+		<!--- Set the pattern --->
+		<cfif Len(arguments.pattern)>
+			<cfset formatter = CreateObject("java", "java.text.DecimalFormat").init(arguments.pattern, CreateObject("java", "java.text.DecimalFormatSymbols").init(arguments.locale)) />
+		<!--- Use the default pattern however since there is no contructor to set the format symbols we have to use the mutator --->
+		<cfelse>
+			<cfset formatter = CreateObject("java", "java.text.DecimalFormat").init() />
+			<cfset formatter.setDecimalFormatSymbols(CreateObject("java", "java.text.DecimalFormatSymbols").init(arguments.locale)) />
+		</cfif>
+		
+		<cfreturn formatter />
+	</cffunction>
+
+	<cffunction name="getFormatPercentInstance" access="public" returntype="any" output="false"
+		hint="Gets a percent instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+		
+		<cfreturn variables.numberFormatter.getPercentInstance(arguments.locale) />	
+	</cffunction>
+
+	<cffunction name="getFormatCurrencyInstance" access="public" returntype="any" output="false"
+		hint="Gets a currency instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+		
+		<cfreturn variables.numberFormatter.getCurrencyInstance(arguments.locale) />	
+	</cffunction>
+
+	<cffunction name="getFormatDateTimeInstance" access="public" returntype="any" output="false"
+		hint="Gets a date/time instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		<cfargument name="pattern" type="any" required="true" />
+		
+		<cfset var formatter = "" />
+		<cfset var patterns = "" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+		
+		<cfif ListFindNoCase("SHORT,MEDIUM,LONG,FULL", arguments.pattern)>
+			<!--- Convert pattern into an array for easier use --->
+			<cfif NOT IsArray(arguments.pattern)>
+				<cfset arguments.pattern = ListToArray(arguments.pattern) />
+			</cfif>
+			
+			<!--- If only only pattern in the array, use the same pattern for for the time as the date--->
+			<cfif ArrayLen(arguments.pattern) EQ 1>
+				<cfset arguments.pattern[2] = arguments.pattern[1] />
+			</cfif>
+			
+			<cfset formatter = variables.dateFormatter.getDateTimeInstance(variables.dateFormatter[arguments.pattern[1]], variables.dateFormatter[arguments.pattern[2]], arguments.locale) />
+		<cfelse>
+			<cfset formatter = CreateObject("java", "java.text.SimpleDateFormatter").init(arguments.pattern, arguments.locale) />
+		</cfif>
+		
+		<cfreturn formatter />
+	</cffunction>
+
+	<cffunction name="getFormatDateInstance" access="public" returntype="any" output="false"
+		hint="Gets a date instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		<cfargument name="pattern" type="string" required="true" />
+		
+		<cfset var formatter = "" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+		
+		<cfif ListFindNoCase("SHORT,MEDIUM,LONG,FULL", arguments.pattern)>
+			<cfset formatter = variables.dateFormatter.getDateInstance(variables.dateFormatter[arguments.pattern], arguments.locale) />
+		<cfelse>
+			<cfset formatter = CreateObject("java", "java.text.SimpleDateFormatter").init(arguments.pattern, arguments.locale) />
+		</cfif>
+		
+		<cfreturn formatter />
+	</cffunction>
+
+	<cffunction name="getFormatTimeInstance" access="public" returntype="any" output="false"
+		hint="Gets a time instance based off the passed locale.">
+		<cfargument name="locale" type="any" required="true" />
+		<cfargument name="pattern" type="string" required="true" />
+		
+		<cfset var formatter = "" />
+		
+		<cfif NOT IsObject(arguments.locale)>
+			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
+		</cfif>
+
+		<cfset formatter = variables.dateFormatter.getTimeInstance(variables.dateFormatter[arguments.pattern], arguments.locale) />
+		
+		<cfreturn formatter />
+	</cffunction>
+
 	<!---
 	ACCESSORS
 	--->

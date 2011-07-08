@@ -97,5 +97,4 @@ Notes:
 		<cfset ThisTag.GeneratedContent = "" />
 	</cfif>
 </cfif>
-
 </cfsilent><cfsetting enablecfoutputonly="false" />

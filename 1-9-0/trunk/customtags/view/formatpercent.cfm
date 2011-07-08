@@ -50,9 +50,46 @@ Updated version: 1.9.0
 Notes:
 --->
 <cfif thisTag.ExecutionMode IS "start">
+
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
-	<cfset setupTag("formatpercent", true) />
+	<cfset setupTag("formatpercent", false) />
+
+	<!--- Setup defaults --->
+	<cfparam name="attributes.var" type="string" 
+		default="" />
+	<cfparam name="attributes.display" type="boolean" 
+		default="#NOT Len(attributes.var)#" />
+	<cfparam name="attributes.locale"
+		default="#getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()#" />
+
+	<!--- Get formatter --->
+	<cfset variables.formatter = getAppManager().getGlobalizationManager().getFormatPercentInstance(attributes.locale) />
+
 <cfelse>
+	<!--- Use nested content if no "value" is defined --->
+	<cfif NOT StructKeyExists(attributes, "value")>
+		<cfset attributes.value = Trim(thisTag.GeneratedContent) />
+	</cfif>
+	<cfset ensureByName("value") />
+
+	<cfif Len(attributes.value)>
+		<!--- Perform formatting --->
+		<cfset variables.output = variables.formatter.format(JavaCast("double", attributes.value)) />
+	<cfelseif StructKeyExists(attributes, "defaultValue")>
+		<cfset variables.output = attributes.defaultValue />
+	</cfif>
+	
+	<!--- Store the output to whatever variable 'var' is pointing to --->
+	<cfif Len(attributes.var)>
+		<cfset SetVariable(attributes.var, variables.output) />
+	</cfif>
+	
+	<!--- Output the label message or reset the output buffer if nothing is to be outputted --->
+	<cfif attributes.display>
+		<cfset ThisTag.GeneratedContent = variables.output />
+	<cfelse>
+		<cfset ThisTag.GeneratedContent = "" />
+	</cfif>
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />
