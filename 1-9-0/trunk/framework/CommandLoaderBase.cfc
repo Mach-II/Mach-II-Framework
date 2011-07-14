@@ -313,7 +313,7 @@ Notes:
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg, overwrite) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
-		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setExpressionEvaluator(variables.ExpressionEvaluator) />
 		<cfset command.setUtils(variables.utils) />
 		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
 		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
@@ -509,7 +509,7 @@ Notes:
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filterProxy, filterParams, parseFilterParams) />
-		<cfset command.setExpressionEvaluator(getAppManager().getExpressionEvaluator()) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setUtils(variables.utils) />
 
 		<cfreturn command />
@@ -757,11 +757,23 @@ Notes:
 		<cfset var argVariable = "" />
 		<cfset var overwrite = true />
 		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
+		<cfset var parse = false />
+		
 
 		<cfif NOT StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
 			<cfset argValue = variables.utils.recurseComplexValues(arguments.commandNode) />
+
+			<!--- Check if the arg need to be parsed for M2EL expressions at runtime --->
+			<cfif REFindNoCase("\${(.)*?}", arguments.commandNode.xmlChildren.toString())>
+				<cfset parse = true />
+			</cfif>
 		<cfelse>
 			<cfset argValue = arguments.commandNode.xmlAttributes["value"] />
+			
+			<!--- Check if the arg need to be parsed for M2EL expressions at runtime --->
+			<cfif REFindNoCase("\${(.)*?}", argValue)>
+				<cfset parse = true />
+			</cfif>
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "variable")>
 			<cfset argVariable = arguments.commandNode.xmlAttributes["variable"] />
@@ -770,8 +782,10 @@ Notes:
 			<cfset overwrite = arguments.commandNode.xmlAttributes["overwrite"] />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite) />
+		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite, parse) />
 
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
+		<cfset command.setUtils(variables.utils) />
 		<cfset command.setLog(variables.eventArgCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setParentHandlerName(arguments.parentHandlerName) />

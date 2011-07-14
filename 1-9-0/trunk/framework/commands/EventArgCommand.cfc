@@ -62,6 +62,7 @@ Notes:
 	<cfset variables.argValue = "" />
 	<cfset variables.argVariable = "" />
 	<cfset variables.overwrite = true />
+	<cfset variables.parse = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -72,11 +73,13 @@ Notes:
 		<cfargument name="argValue" type="any" required="false" default="" />
 		<cfargument name="argVariable" type="string" required="false" default="" />
 		<cfargument name="overwrite" type="boolean" required="false" default="true" />
+		<cfargument name="parse" type="boolean" required="false" default="false" />
 
 		<cfset setArgName(arguments.argName) />
 		<cfset setArgValue(arguments.argValue) />
 		<cfset setArgVariable(arguments.argVariable) />
 		<cfset setOverwrite(arguments.overwrite) />
+		<cfset setParse(arguments.parse) />
 
 		<cfreturn this />
 	</cffunction>
@@ -90,23 +93,28 @@ Notes:
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 
 		<cfset var value = "" />
-		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
 		<cfset var log = getLog() />
+		<cfset var argValueType = "[complex value]" />
 
 		<!--- Get value (variable attribute and then event-arg) --->
 		<cfif isArgVariableDefined()>
 			<cfset value = getArgVariableValue() />
 		<cfelseif isArgValueDefined()>
-			<cfif getExpressionEvaluator().isExpression(getArgValue())>
+			<cfif getParse()>
 				<cftry>
-					<cfset value = getExpressionEvaluator().evaluateExpression(getArgValue(), arguments.event, propertyManager) />
+					<cfset value = resolveParameters(getArgValue(), arguments.event, arguments.eventContext) />
 					<cfcatch type="any">
+						<cfif IsSimpleValue(getArgValue())>
+							<cfset argValueType = getArgValue() />
+						</cfif>
+
 						<cfif log.isErrorEnabled()>
-							<cfset log.error("An exception has occurred while trying to evaluate an value expression '#getArgValue()#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.", cfcatch) />
+							<cfset log.error("An exception has occurred while trying to evaluate an value expression '#argValueType#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'.", cfcatch) />
 						</cfif>
 						<cfthrow type="MachII.framework.commands.InvalidExpression"
-							message="An exception has occurred while trying to evaluate an value expression '#getArgValue()#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
-							detail="#cfcatch.message# || #cfcatch.detail#" />
+							message="An exception has occurred while trying to evaluate an value expression '#argValueType#' in an event-arg command in #getParentHandlerType()# named '#getParentHandlerName()#' in module '#arguments.eventContext.getAppManager().getModuleName()#'. See details for more information."
+							detail="#getUtils().buildMessageFromCfCatch(cfcatch)#" />
+								
 					</cfcatch>
 				</cftry>
 			<cfelse>
@@ -120,7 +128,7 @@ Notes:
 			<cfif IsSimpleValue(value)>
 				<cfset log.debug("Set event-arg named '#getArgName()#' with a value of '#value#'.") />
 			<cfelse>
-				<cfset log.debug("Set event-arg named '#getArgName()#' with a value of:", value) />
+				<cfset log.debug("Set event-arg named '#getArgName()#' (parse='#getParse()#') with a value of:", value) />
 			</cfif>
 
 			<cfset arguments.event.setArg(getArgName(), value) />
@@ -193,6 +201,16 @@ Notes:
 	</cffunction>
 	<cffunction name="getOverwrite" access="private" returntype="boolean" output="false">
 		<cfreturn variables.overwrite />
+	</cffunction>
+
+	<cffunction name="setParse" access="private" returntype="void" output="false"
+		hint="Sets if the arg should be parsed because it contains M2EL syntax.">
+		<cfargument name="parse" type="boolean" required="true" />
+		<cfset variables.parse = arguments.parse />
+	</cffunction>
+	<cffunction name="getParse" access="private" returntype="boolean" output="false"
+		hint="Gets if the arg should be parsed because it contains M2EL syntax.">
+		<cfreturn variables.parse />
 	</cffunction>
 
 </cfcomponent>
