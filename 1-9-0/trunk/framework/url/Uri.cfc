@@ -153,7 +153,7 @@ For example, a uriPattern like "/service/doit/{value}"
 	<cffunction name="matchUri" access="public" returntype="boolean" output="false"
 		hint="Returns true if the input pathInfo matches the uriPattern of this RestUri, false otherwise.">
 		<cfargument name="pathInfo" type="string" required="true" />
-		<cfreturn REFind(variables.uriRegex, arguments.pathInfo, 1, false) />
+		<cfreturn REFindNoCase(variables.uriRegex, arguments.pathInfo, 1, false) />
 	</cffunction>
 
 	<!---
@@ -189,7 +189,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		hint="Returns a comma delimited list of URI metadata names.">
 		<cfreturn StructKeyList(variables.uriMetadataParameters) />
 	</cffunction>
-
+	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
