@@ -117,7 +117,7 @@ For example, a uriPattern like "/service/doit/{value}"
 			hint="The current path info to parse for tokens." />
 
 		<cfset var stcTokens = StructNew() />
-		<cfset var stcMatches = REFind(variables.uriRegex, arguments.pathInfo, 1, true) />
+		<cfset var stcMatches = REFindNoCase(variables.uriRegex, arguments.pathInfo, 1, true) />
 		<cfset var intMatchCount = ArrayLen(stcMatches.LEN) />
 		<cfset var key = "" />
 		<cfset var i = 0 />
@@ -189,7 +189,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		hint="Returns a comma delimited list of URI metadata names.">
 		<cfreturn StructKeyList(variables.uriMetadataParameters) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
