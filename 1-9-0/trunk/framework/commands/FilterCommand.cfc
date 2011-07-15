@@ -93,7 +93,7 @@ Notes:
 			<!--- Resolve runtime parameters for M2EL syntax if defined --->
 			<cfif getParseRuntimeParameters()>
 				<cftry>
-					<cfset paramArgs = resolveParameters(paramArgs, arguments.event, arguments.eventContext) />
+					<cfset paramArgs = resolveExpressions(paramArgs, arguments.event, arguments.eventContext) />
 					<cfcatch type="any">
 						<cfif log.isErrorEnabled()>
 							<cfset log.error("Event-filter '#filter.getComponentNameForLogging()#' has caused an exception. Unable to properly resolve the runtime parameters for M2EL syntax."

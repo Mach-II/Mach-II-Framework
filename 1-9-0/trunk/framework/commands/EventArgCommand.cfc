@@ -102,7 +102,7 @@ Notes:
 		<cfelseif isArgValueDefined()>
 			<cfif getParse()>
 				<cftry>
-					<cfset value = resolveParameters(getArgValue(), arguments.event, arguments.eventContext) />
+					<cfset value = resolveExpressions(getArgValue(), arguments.event, arguments.eventContext) />
 					<cfcatch type="any">
 						<cfif IsSimpleValue(getArgValue())>
 							<cfset argValueType = getArgValue() />

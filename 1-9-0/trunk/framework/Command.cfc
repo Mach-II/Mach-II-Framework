@@ -103,24 +103,28 @@ Notes:
 		</cfloop>
 	</cffunction>
 	
-	<cffunction name="resolveParameters" access="public" returntype="struct" output="false"
+	<cffunction name="resolveExpressions" access="public" returntype="any" output="false"
 		hint="Resolves M2EL a struct of parameters.">
-		<cfargument name="parameters" type="struct" required="true" />
+		<cfargument name="expressions" type="any" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 		
-		<cfset var resolvedParameters = StructNew() />
+		<cfset var resolvedExpressions = StructNew() />
 		
-		<!--- Append the current parameters to the resolved version so the original values are not corrupted --->
-		<cfset StructAppend(resolvedParameters, arguments.parameters) />
+		<cfif IsSimpleValue(arguments.expressions)>
+			<cfreturn recurseResolveExpressions(arguments.expressions, arguments.event, arguments.eventContext.getAppManager().getPropertyManager(), getExpressionEvaluator()) />
+		<cfelse>
+			<!--- Append the current parameters to the resolved version so the original values are not corrupted --->
+			<cfset StructAppend(resolvedExpressions, arguments.expressions) />
 		
-		<cfreturn recurseResolveParameters(resolvedParameters, arguments.event, arguments.eventContext.getAppManager().getPropertyManager(), getExpressionEvaluator()) />
+			<cfreturn recurseResolveExpressions(resolvedExpressions, arguments.event, arguments.eventContext.getAppManager().getPropertyManager(), getExpressionEvaluator()) />
+		</cfif>
 	</cffunction>
 	
 	<!---
 	PROTECTED FUNCTIONS
 	--->
-	<cffunction name="recurseResolveParameters" access="private" returntype="any" output="false"
+	<cffunction name="recurseResolveExpressions" access="private" returntype="any" output="false"
 		hint="Recurses through an incoming parameters for resolution.">
 		<cfargument name="node" type="any" required="true" />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -139,12 +143,12 @@ Notes:
 		<cfelseif IsStruct(arguments.node)>
 			<cfset value = StructNew() />
 			<cfloop collection="#arguments.node#" item="i">
-				<cfset value[i] = recurseResolveParameters(arguments.node[i], arguments.event, arguments.propertyManager, arguments.expressionEvaluator) />
+				<cfset value[i] = recurseResolveExpressions(arguments.node[i], arguments.event, arguments.propertyManager, arguments.expressionEvaluator) />
 			</cfloop>
 		<cfelseif IsArray(arguments.node)>
 			<cfset value = ArrayNew(1) />
 			<cfloop from="1" to="#ArrayLen(arguments.node)#" index="i">
-				<cfset value[i] = recurseResolveParameters(arguments.node[i], arguments.event, arguments.propertyManager, arguments.expressionEvaluator) />
+				<cfset value[i] = recurseResolveExpressions(arguments.node[i], arguments.event, arguments.propertyManager, arguments.expressionEvaluator) />
 			</cfloop>
 		<cfelse>
 			<cfset value = arguments.node />
