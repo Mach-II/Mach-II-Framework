@@ -171,9 +171,9 @@ Notes:
 		<cfset var exceptionStack = ArrayNew(1) />
 
 		<!--- Display error messages in order of important: fatal, error and warning --->
-		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.fatalErrors) />
-		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.errors) />
-		<cfset exceptionStack = this.ArrayConcat(exceptionStack, variables.warnings) />
+		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.fatalErrors) />
+		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.errors) />
+		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.warnings) />
 		
 		<cfreturn exceptionStack />
 	</cffunction>
