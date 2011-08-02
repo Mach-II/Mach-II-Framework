@@ -68,7 +68,7 @@ Notes:
 	<cfset variables.PROPERTY_SHORTCUTS["CachingProperty"] = "MachII.caching.CachingProperty" />
 	<cfset variables.PROPERTY_SHORTCUTS["LoggingProperty"] = "MachII.logging.LoggingProperty" />
 	<cfset variables.PROPERTY_SHORTCUTS["GlobalizationLoaderProperty"] = "MachII.globalization.GlobalizationLoaderProperty" />
-
+	<cfset variables.PROPERTY_LOAD_ORDER = "MachII.properties.EnvironmentProperty,MachII.properties.ColdspringProperty" />
 
 	<!---
 	PROPERTIES
@@ -133,7 +133,7 @@ Notes:
 			<!--- Override XML for Modules --->
 			<cfif hasParent AND arguments.override AND StructKeyExists(propertyNodes[i].xmlAttributes, "overrideAction")>
 				<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
-			
+
 				<cfif propertyNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
 					<cfset removeProperty(propertyName) />
 				<cfelseif propertyNodes[i].xmlAttributes["overrideAction"] EQ "addFromParent">
@@ -156,9 +156,9 @@ Notes:
 			<cfelse>
 				<!--- Setup if configurable property --->
 				<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "type")>
-				
+
 					<cfset propertyType = resolvePropertyTypeShortcut(propertyNodes[i].xmlAttributes["type"]) />
-					
+
 					<cfif StructKeyExists(propertyNodes[i].xmlAttributes, "name")>
 						<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
 					<cfelse>
@@ -221,17 +221,17 @@ Notes:
 					<cfset propertyValue.setProxy(baseProxy) />
 
 					<!---
-						Add the property to the array of configurable properties so they can be configured. If the property already 
-						exists, then we should not add it to the array of configurable property names as it causes the configure() 
+						Add the property to the array of configurable properties so they can be configured. If the property already
+						exists, then we should not add it to the array of configurable property names as it causes the configure()
 						method to be called twice.
 					--->
 					<cfif NOT isPropertyDefined(propertyName)>
-						<cfset ArrayAppend(variables.configurablePropertyNames, propertyName) />
+						<cfset addConfigurableProperty(propertyName, propertyType) />
 					</cfif>
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
 					<cfset propertyName = propertyNodes[i].xmlAttributes["name"] />
-					
+
 					<cftry>
 						<cfset propertyValue = utils.recurseComplexValues(propertyNodes[i]) />
 						<cfcatch type="any">
@@ -259,8 +259,8 @@ Notes:
 		<cfset ensureBasePropertyDefaults() />
 
 		<!--- Run configure on all configurable properties --->
-		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
-			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
+		<cfloop from="1" to="#ArrayLen(configurablePropertyNames)#" index="i">
+			<cfset aConfigurableProperty = getProperty(configurablePropertyNames[i]) />
 			<cfset appManager.onObjectReload(aConfigurableProperty) />
 			<cfset aConfigurableProperty.configure() />
 		</cfloop>
@@ -275,17 +275,17 @@ Notes:
 
 		<!---
 			Run deconfigure on all configurable properties. This should be done in reverse order
-			of the way things were configured since configurable properties are loaded in the order 
+			of the way things were configured since configurable properties are loaded in the order
 			they are defined in the XML.
 		--->
-		<cfloop from="#ArrayLen(variables.configurablePropertyNames)#" to="1" step="-1" index="i">
-			<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
+		<cfloop from="#ArrayLen(configurablePropertyNames)#" to="1" step="-1" index="i">
+			<cfset aConfigurableProperty = getProperty(configurablePropertyNames[i]) />
 			<cftry>
 				<cfset aConfigurableProperty.deconfigure() />
 				<cfcatch type="any">
 					<!---
 						If the property is an object, then is a real exception. Otherwise,
-						somebody replaced a configurable property with another datatype during 
+						somebody replaced a configurable property with another datatype during
 						the lifetime of the application which we cannot deconfigure and therefore
 						ignore the exception. See ticket 720.
 					--->
@@ -402,6 +402,39 @@ Notes:
 		</cfif>
 
 		<cfreturn variables.VERSION_MAJOR &  "." & minorVersion />
+	</cffunction>
+
+	<cffunction name="addConfigurableProperty" access="private" returntype="void" output="false"
+		hint="Adds a property name that we can call a configure() method on.">
+		<cfargument name="configurablePropertyName" type="string" required="true" />
+		<cfargument name="configurablePropertyType" type="string" required="true" />
+
+		<cfset var i = 0 />
+		<cfset var pos = 1 />
+		<cfset var insertAt = 1 />
+		<cfset var propertyName = "" />
+		<cfset var aConfigurableProperty = "" />
+
+		<cfset pos = ListContainsNoCase(variables.PROPERTY_LOAD_ORDER, arguments.configurablePropertyType)>
+		<cfif pos GT 0 AND ArrayLen(variables.configurablePropertyNames) GT 0>
+			<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
+				<cfif i EQ pos>
+					<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
+					<cfbreak />
+				<cfelse>
+					<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
+					<cfif ListFindNoCase(variables.PROPERTY_LOAD_ORDER, GetMetaData(aConfigurableProperty).name) >
+						<cfset insertAt++ />
+					<cfelseif insertAt GTE i>
+						<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
+						<cfbreak />
+					</cfif>
+				</cfif>
+			</cfloop>
+		<cfelse>
+			<cfset ArrayAppend(variables.configurablePropertyNames, arguments.configurablePropertyName)>
+		</cfif>
+
 	</cffunction>
 
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"
@@ -597,15 +630,15 @@ Notes:
 		hint="Resolves an anonymous property name.">
 		<cfargument name="propertyType" type="string" required="true"
 			hint="Dot path to the property." />
-		
+
 		<cfset var shortPropertyType = ListLast(arguments.propertyType, ".") />
-		
+
 		<cfif StructKeyExists(variables.anonymousPropertyNames, shortPropertyType)>
 			<cfset variables.anonymousPropertyNames["shortPropertyType"] = variables.anonymousPropertyNames["shortPropertyType"] + 1 />
 		<cfelse>
 			<cfset variables.anonymousPropertyNames["shortPropertyType"] = 1 />
 		</cfif>
-		
+
 		<cfreturn shortPropertyType & "_" & variables.anonymousPropertyNames["shortPropertyType"] />
 	</cffunction>
 
