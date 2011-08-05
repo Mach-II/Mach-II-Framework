@@ -135,8 +135,12 @@ Notes:
 			--->
 			<cfoutput><script type="text/javascript">
 				if (window._MachIIFormLib_autoFocusOccurred !== 'undefined') {
-					document.getElementById('#attributes.autoFocus#').focus();
-					window._MachIIFormLib_autoFocusOccurred = true;
+					try {
+						document.getElementById('#attributes.autoFocus#').focus();
+						window._MachIIFormLib_autoFocusOccurred = true;
+					} catch(e) {
+						// Do nothing. Element is hidden and not focusable.
+					}
 				}
 			</script></cfoutput>
 		</cfif>
