@@ -131,7 +131,7 @@ Special thanks to Jason York for suggestion and committing
 the fix for this issue.
 
 For more information see:
-https://trac.mach-ii.com/machii/ticket/804
+https://trac.mach-ii.com/machii/ticket/805
 (2011-08-04 jasonyork)
 
 * Add M2EL support for complex datatypes in event-arg command
