@@ -308,7 +308,7 @@ Notes:
 			<cfset resultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
 		<cfif StructKeyExists(arguments.commandNode.xmlAttributes, "args")>
-			<cfset args = arguments.commandNode.xmlAttributes["args"] />
+			<cfset args = variables.utils.trimList(arguments.commandNode.xmlAttributes["args"]) />
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg, overwrite) />

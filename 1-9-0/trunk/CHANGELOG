@@ -61,6 +61,14 @@ using a  bleeding edge release (BER) of the framework.
 ------------------------------------------------
 Fixed Defects
 ------------------------------------------------
+* Comma delimited 'args' for Call-Method includes spaces in key if included
+
+Thanks to Scott Smith for reporting and fixing this issue.
+
+For more information see:
+http://trac.mach-ii.com/machii/ticket/804
+(2011-08-17 peterfarrell)
+
 * Form auto-focus on field not displayed or hidden throws JS error
 
 For more information see:
