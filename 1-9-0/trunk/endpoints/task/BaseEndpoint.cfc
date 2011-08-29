@@ -460,10 +460,10 @@ Custom Configuration:
 				<cfset environmentValues[ListFirst(enabledArray[i], "=")] = ListLast(enabledArray[i], "=") />
 			</cfloop>
 			
-			<cfset resolvedEnabled = getAppManager().resolveValueByEnvironment(environmentValues, true) />
+			<cfset resolvedEnabled = resolveValueByEnvironment(environmentValues, true) />
 		<!--- Struct --->
 		<cfelse>
-			<cfset resolvedEnabled = getAppManager().resolveValueByEnvironment(arguments.enabledRaw, true) />
+			<cfset resolvedEnabled = resolveValueByEnvironment(arguments.enabledRaw, true) />
 		</cfif>
 		
 		<cfreturn resolvedEnabled />

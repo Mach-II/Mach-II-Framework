@@ -265,68 +265,7 @@ Notes:
 			hint="A struct of environment values. Key prefixed with 'group:' are treated as groups and keys can contain ',' to indicate multiple environments names or groups." />
 		<cfargument name="defaultValue" type="any" required="false"
 			hint="A default value to provide if no environment is found. An exception will be thrown if no 'defaultValue' is provide and no value can be resolved." />
-
-		<cfset var currentEnvironmentName = getAppManager().getEnvironmentName() />
-		<cfset var currentEnvironmentGroup = getAppManager().getEnvironmentGroup() />
-		<cfset var valuesByEnvironmentName = StructNew() />
-		<cfset var valuesByEnvironmentGroup = StructNew() />
-		<cfset var validEnvironmentGroupNames = getAppManager().getEnvironmentGroupNames() />
-		<cfset var scrubbedEnvironmentGroups = "" />
-		<cfset var scrubbedEnvironmentNames = "" />
-		<cfset var i = "" />
-		<cfset var key = "" />
-		<cfset var assert = getAssert() />
-		<cfset var utils = getUtils() />
-
-		<!--- Build values by name and group --->
-		<cfloop collection="#arguments.environmentValues#" item="key">
-			<!--- An environment group if it is prefixed with 'group:' --->
-			<cfif key.toLowerCase().startsWith("group:")>
-				<!--- Removed 'group:' and trim each list element --->
-				<cfset scrubbedEnvironmentGroups = utils.trimList(Right(key, Len(key) - 6)) />
-
-				<cfloop list="#scrubbedEnvironmentGroups#" index="i">
-					<cfset assert.isTrue(ListFindNoCase(validEnvironmentGroupNames, i)
-							, "An environment group named '#i#' is not a valid environment group name. Valid environment group names: '#validEnvironmentGroupNames#'.") />
-					<cfset valuesByEnvironmentGroup[i] = arguments.environmentValues[key] />
-				</cfloop>
-			<!--- An explicit environment name if it does not have a prefix --->
-			<cfelse>
-				<!--- Trim each list element --->
-				<cfset scrubbedEnvironmentNames = utils.trimList(key) />
-
-				<cfloop list="#scrubbedEnvironmentNames#" index="i">
-					<cfset valuesByEnvironmentName[i] = arguments.environmentValues[key] />
-				</cfloop>
-			</cfif>
-		</cfloop>
-
-		<!---
-			Typically, we prefer to only have one return, however in this case
-			it is easier to just short-ciruit the process.
-
-			Resolution order:
-			 * by explicit environment name
-			 * by environment group
-			 * by default value (if provided)
-			 * throw exception
-		--->
-
-		<!--- Resolve value by explicit environment name --->
-		<cfif StructKeyExists(valuesByEnvironmentName, currentEnvironmentName)>
-			<cfreturn valuesByEnvironmentName[currentEnvironmentName] />
-		</cfif>
-
-		<!--- Resolve value by explicit environment group --->
-		<cfif StructKeyExists(valuesByEnvironmentGroup, currentEnvironmentGroup)>
-			<cfreturn valuesByEnvironmentGroup[currentEnvironmentGroup] />
-		</cfif>
-
-		<!--- No environment to resolve, return default value if provided --->
-		<cfset assert.isTrue(StructKeyExists(arguments, "defaultValue")
-					, "Cannot resolve value by environment name or group and no default value was provided. Provide an explicit value by environment name, environment group or provide a default value. Current environment name: '#currentEnvironmentName#' Current environment group: '#currentEnvironmentGroup#'") />
-
-		<cfreturn arguments.defaultValue />
+		<cfreturn getAppManager().resolveValueByEnvironment(arguments.environmentValues, arguments.defaultValue) />
 	</cffunction>
 
 	<cffunction name="setParameter" access="public" returntype="void" output="false"
