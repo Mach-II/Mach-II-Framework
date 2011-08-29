@@ -43,6 +43,9 @@
 Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
+
+$Id$
+
 Created version: 1.9.0
 
 Notes:
@@ -375,7 +378,7 @@ Custom Configuration:
 						</cfif>
 						
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ENABLED)>
-							<cfset taskMetadata.enabled = currFunction[variables.ANNOTATION_TASK_ENABLED] />
+							<cfset taskMetadata.enabled = resolveEnabledByEnvironments(currFunction[variables.ANNOTATION_TASK_ENABLED]) />
 						<cfelse>
 							<cfset taskMetadata.enabled = true />
 						</cfif>
@@ -432,6 +435,38 @@ Custom Configuration:
 		<cfset credentials[getAuthUsername()] = Hash(getAuthPassword(), "sha") />
 		
 		<cfreturn credentials />
+	</cffunction>
+	
+	<cffunction name="resolveEnabledByEnvironments" access="private" returntype="boolean" output="false"
+		hint="Resolves">
+		<cfargument name="enabledRaw" type="any" required="true"
+			hint="Accepts boolean, struct of environment groups/names or string ('group:development=false|group:production,staging=true')."/>
+		
+		<cfset var resolvedEnabled = true />
+		<cfset var enabledArray = "" />
+		<cfset var environmentValues = StructNew() />
+		<cfset var i = 0 />
+		
+		<!--- Boolean --->
+		<cfif IsBoolean(arguments.enabledRaw)>
+			<cfset resolvedEnabled = arguments.enabledRaw />
+			
+		<!--- String to Struct --->
+		<cfelseif IsSimpleValue(arguments.enabledRaw)>
+			<!--- Format 'group:development=false|group:production,staging=true' into struct--->
+			<cfset enabledArray = ListToArray(arguments.enabledRaw, "|") />
+			
+			<cfloop from="1" to="#ArrayLen(enabledArray)#" index="i">
+				<cfset environmentValues[ListFirst(enabledArray[i], "=")] = ListLast(enabledArray[i], "=") />
+			</cfloop>
+			
+			<cfset resolvedEnabled = getAppManager().resolveValueByEnvironment(environmentValues, true) />
+		<!--- Struct --->
+		<cfelse>
+			<cfset resolvedEnabled = getAppManager().resolveValueByEnvironment(arguments.enabledRaw, true) />
+		</cfif>
+		
+		<cfreturn resolvedEnabled />
 	</cffunction>
 	
 	<!---
