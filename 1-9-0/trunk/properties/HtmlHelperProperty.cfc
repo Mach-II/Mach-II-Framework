@@ -720,6 +720,7 @@ from the parent application.
 
 			<!--- Check if we are caching asset paths --->
 			<cfif getCacheAssetPaths()>
+				<!--- Include the query string if any otherwise the hash may not update if only the QS is updated --->
 				<cfset assetPathHash = createAssetPathHash(resolvedPath) />
 
 				<cfif StructKeyExists(variables.assetPathsCache, assetPathHash)>
@@ -728,8 +729,12 @@ from the parent application.
 					<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
 					<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
 				</cfif>
-
-				<cfreturn resolvedPath & "?" & assetPathTimestamp />
+				
+				<cfif FindNoCase("?", resolvedPath)>
+					<cfreturn resolvedPath & "&amp;" & assetPathTimestamp />
+				<cfelse>
+					<cfreturn resolvedPath & "?" & assetPathTimestamp />
+				</cfif>
 			<cfelse>
 				<cfreturn resolvedPath />
 			</cfif>
@@ -955,9 +960,10 @@ from the parent application.
 			hint="The asset path to append the file extension to." />
 
 		<cfset var file = ListLast(arguments.assetPath, "/") />
-		<cfset var fileExt = ListLast(arguments.assetPath, ".") />
-
-		<cfif fileExt NEQ arguments.assetType AND fileExt NEQ "cfm">
+		<cfset var fileExt = ListLast(file, ".") />
+	
+		<!--- Files with ? query string data must have an file extension already --->
+		<cfif NOT FindNoCase("?", file) AND fileExt NEQ arguments.assetType AND fileExt NEQ "cfm">
 			<cfreturn arguments.assetPath & "." & arguments.assetType />
 		<cfelse>
 			<cfreturn arguments.assetPath />
@@ -969,7 +975,8 @@ from the parent application.
 		<cfargument name="resolvedPath" type="string" required="true"
 			hint="This is the full resolved asset path from the webroot." />
 
-		<cfset var fullPath =  Replace(getWebrootBasePath() & "/" & arguments.resolvedPath, "//", "/", "all") />
+		<!--- Remove the query string if any --->
+		<cfset var fullPath =  Replace(getWebrootBasePath() & "/" & ListFirst(arguments.resolvedPath, "?"), "//", "/", "all") />
 		<cfset var fileResults = "" />
 
 		<cftry>

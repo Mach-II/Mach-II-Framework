@@ -133,9 +133,17 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Allow Url Parameters in View Tag Library Style and Script Tags
+
+Special thanks to Brian Fitzgerald for suggeting this issue.
+
+For more information see:
+https://trac.mach-ii.com/machii/ticket/807
+(2011-08-04 jasonyork)
+
 * Enforce a known loading order for configurable properties
 
-Special thanks to Jason York for suggestion and committing 
+Special thanks to Jason York for suggesting and committing 
 the fix for this issue.
 
 For more information see:
