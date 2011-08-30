@@ -335,13 +335,14 @@ Configuration Notes:
 	</cffunction>
 	
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
-		hint="Builds an URL formatted for file server endpoint.">
+		hint="Builds an URL formatted for file server endpoint. Arguments that are passed that do not match the method signature will be appended to the query string of this URL.">
 		<cfargument name="file" type="string" required="true"
 			hint="The path to the file." />
 		<cfargument name="pipe" type="string" required="false"
 			hint="The pipe extension for the URL (e.g. css, js, etc.)." />
 		<cfargument name="attachment" type="string" required="false"
 			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pipe extension if applicable." />
+		<!--- Any other arugments will be appended as query string params --->
 		
 		<cfset var builtUrl = "" />
 		<cfset var urlBase = getUrlBase() />
@@ -349,6 +350,7 @@ Configuration Notes:
 		<cfset var fileExtension = ListFirst(ListLast(arguments.file, "."), ":") />
 		<cfset var queryString = "" />
 		<cfset var assetTimestamp = "" />
+		<cfset var key = "" />
 
 		<cfif NOT getProperty("urlParseSES")>
 			<cfset builtUrl = urlBase />
@@ -383,14 +385,23 @@ Configuration Notes:
 			
 			<cfset queryString = ListAppend(queryString, "attachment=" & arguments.attachment, "&") />
 		</cfif>
+
+		<!--- Append additional developer passed query string params --->
+		<cfloop collection="#arguments#" item="key">
+			<!--- Append if the argument isn't one in the block list because they are preprocessed differently --->
+			<cfif NOT ListFindNoCase("endpoint,file,pipe,attachment", key)>
+				<cfset queryString = ListAppend(queryString, key & "=" & arguments[key], "&") />
+			</cfif>
+		</cfloop>
 		
+		<!--- Alwasy append the asset timestamp on to the query string last --->
 		<cfif (StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR (NOT StructKeyExists(variables.timestampMap, fileExtension) AND getTimestampDefault())>
 			<cfset assetTimestamp = fetchAssetTimestamp(ListFirst(arguments.file, ":")) />
 			<cfif assetTimestamp NEQ 0>
 				<cfset queryString = ListAppend(queryString, assetTimestamp, "&") />
 			</cfif>
 		</cfif>
-
+		
 		<!--- Append query string if any optional parameters were construct --->
 		<cfif Len(queryString)>
 			<cfset builtUrl = builtUrl & "?" & queryString />
