@@ -179,10 +179,10 @@ Notes:
 		<cfif NOT StructKeyExists(request, "_MachIIRequestHandler_" & appKey)>
 			<cfif variables.trackCurrentThreads>
 				<cfset currentThread = variables.thread.currentThread() />
-				<cfset currentThread.setName(variables.id) />		
+				<cfset currentThread.setName(variables.id) />
 				<cfset variables.currentThreads[currentThread.getId()] = currentThread />
 			</cfif>
-			
+
 			<cfset request["_MachIIRequestHandler_" & appKey] =
 					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents(), getOnRequestEndCallbacks()) />
 		</cfif>
@@ -203,15 +203,18 @@ Notes:
 
 		<cfset var redirectToUrl =  ""/>
 		<cfset var persistId =  "" />
+		<cfset var data =  StructNew() />
 		<cfset var redirectPersistParam = getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
 
 		<!--- Delete the event name from the args if it exists so a redirect loop doesn't occur --->
 		<cfset StructDelete(arguments.eventArgs, getEventParameter(), FALSE) />
 		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
-		
+
+		<cfset data = invokePreRedirectCallbacks(arguments.persist) />
+
 		<!--- Build persist data and id if required --->
 		<cfif arguments.persist>
-			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+			<cfset persistId = savePersistEventData(arguments.persistArgs, data) />
 
 			<!--- Add the persistId parameter to the url args if persist is required --->
 			<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
@@ -236,6 +239,7 @@ Notes:
 
 		<cfset var redirectToUrl = "" />
 		<cfset var persistId = "" />
+		<cfset var data = StructNew() />
 		<cfset var queryStringParams = StructNew() />
 		<cfset var redirectPersistParam = getPropertyManager().getProperty("redirectPersistParameter", "persistId") />
 
@@ -243,9 +247,11 @@ Notes:
 		<cfset StructDelete(arguments.routeArgs, getEventParameter(), FALSE) />
 		<cfset StructDelete(arguments.persistArgs, getEventParameter(), FALSE) />
 
+		<cfset data = invokePreRedirectCallbacks(arguments.persist) />
+
 		<!--- Build persist data and id if required --->
 		<cfif arguments.persist>
-			<cfset persistId = savePersistEventData(arguments.persistArgs) />
+			<cfset persistId = savePersistEventData(arguments.persistArgs, data) />
 
 			<!--- Add the persistId parameter to the url args if persist is required --->
 			<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") NEQ "cookie">
@@ -263,7 +269,7 @@ Notes:
 			hint="An URL to redirect to." />
 		<cfargument name="statusType" type="string" required="false" default="temporary"
 			hint="The status type to use. Valid option: 'permanent' (301), 'prg' (303 - See Other), 'temporary' (302) [default option]" />
-		
+
 		<cfset getRequestHandler().getLog().info("End processing request. Redirect sequence in progress.") />
 
 		<!--- Redirect based on the HTTP status type --->
@@ -303,10 +309,10 @@ Notes:
 		<cfset var urlScopeNames = getPageContext().getRequest().getParameterNames() />
 
 		<cfset arguments.urlParameters = getUtils().parseAttributesIntoStruct(arguments.urlParameters) />
-		
+
 		<!--- Automatically remove the Mach II redirect persist id from the url params --->
 		<cfset arguments.urlParametersToRemove = ListAppend(arguments.urlParametersToRemove, getPropertyManager().getProperty("redirectPersistParameter")) />
-		
+
 		<!--- Use the iterator so the url key names are in the right case --->
 		<cfloop condition="#urlScopeNames.hasMoreElements()#">
 			<cfset key = urlScopeNames.nextElement() />
@@ -315,11 +321,11 @@ Notes:
 				<cfset arguments.urlParameters[key] = url[key] />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- Build route --->
 		<cfif Len(routeName)>
 			<cfreturn buildRouteUrl(routeName, getRequestHandler().getCurrentRouteParams(), arguments.urlParameters) />
-		
+
 		<!--- Build normal event with SES --->
 		<cfelseif StructCount(currentSESParams)>
 			<cfloop collection="#currentSESParams#" item="key">
@@ -338,7 +344,7 @@ Notes:
 			</cfloop>
 
 			<cfreturn buildUrl(parsedModuleName, eventName, arguments.urlParameters) />
-		
+
 		<!--- Build normal event without SES --->
 		<cfelse>
 			<cfif isDefined("url.#eventParameterName#")>
@@ -394,7 +400,7 @@ Notes:
 					<cfelse>
 						<cfset eventManager = getAppManager().getEventManager() />
 					</cfif>
-	
+
 					<cfset secureType = eventManager.getEventSecureType(arguments.eventName) />
 					<cfcatch type="MachII.framework.ModuleFailedToLoad">
 						<!--- If module:disableOnFailure is turned on, we need to ignore this exception
@@ -402,7 +408,7 @@ Notes:
 							will be thrown later when an event for that module is requested   --->
 					</cfcatch>
 				</cftry>
-	
+
 				<!--- If event handler secure type is ambiguous (-1), then default to the current secure type this request --->
 				<cfif secureType EQ -1>
 					<cfif cgi.SERVER_PORT_SECURE>
@@ -725,25 +731,18 @@ Notes:
 	<!---
 	REDIRECT PERSIST
 	--->
-	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
+	<cffunction name="savePersistEventData" access="private" returntype="string" output="false"
 		hint="Saves persisted event data and returns the persistId.">
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="A struct of event-args to persist." />
+		<cfargument name="data" type="struct" required="true"
+			hint="A struct of data to persist." />
 
 		<cfset var persistId = "" />
-		<cfset var data = StructNew() />
-		<cfset var i = "" />
 
-		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
-			<cfinvoke component="#variables.preRedirectCallbacks[i].callback#"
-				method="#variables.preRedirectCallbacks[i].method#">
-				<cfinvokeargument name="data" value="#data#" />
-			</cfinvoke>
-		</cfloop>
+		<cfset arguments.data.eventArgs = arguments.eventArgs />
 
-		<cfset data.eventArgs = arguments.eventArgs />
-
-		<cfset persistId = getRequestRedirectPersist().save(data) />
+		<cfset persistId = getRequestRedirectPersist().save(arguments.data) />
 
 		<cfif getPropertyManager().getProperty("redirectPersistParameterLocation") EQ "cookie">
 			<cfcookie name="#getPropertyManager().getProperty("redirectPersistParameter")#" value="#persistId#" />
@@ -768,7 +767,7 @@ Notes:
 		</cfif>
 
 		<cfset data = getRequestRedirectPersist().read(arguments.eventArgs) />
-		
+
 		<!--- If there is data, run post-redirect callbacks --->
 		<cfif StructCount(data)>
 
@@ -917,21 +916,21 @@ Notes:
 		hint="Get all registered url routes.">
 		<cfreturn variables.routes />
 	</cffunction>
-	
+
 	<cffunction name="activeCurrentThreadCount" access="public" returntype="numeric" output="false"
 		hint="Counts active current threads.">
-		
+
 		<cfset var key = "" />
 		<cfset var result = 0 />
-		
+
 		<cfloop collection="#variables.currentThreads#" item="key">
-			<cfif IsObject(variables.currentThreads[key]) 
+			<cfif IsObject(variables.currentThreads[key])
 				AND variables.currentThreads[key].getName() EQ variables.id
 				AND NOT ListFindNoCase("RUNNABLE,TERMINATED", variables.currentThreads[key].getState().toString())>
 				<cfset result = result + 1 />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn result />
 	</cffunction>
 
@@ -970,7 +969,7 @@ Notes:
 				<cfset params[ListGetAt(elements[i], 1, pairDelimiter)] =  value />
 			</cfloop>
 		</cfif>
-		
+
 		<cfreturn params />
 	</cffunction>
 
@@ -1060,6 +1059,26 @@ Notes:
 		</cfloop>
 	</cffunction>
 
+	<cffunction name="invokePreRedirectCallbacks" access="private" returntype="struct" output="false"
+		hint="Executes all of the preRedirectCallbacks">
+		<cfargument name="persist" type="boolean" required="true" />
+
+		<cfset var data = StructNew() />
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
+			<cfinvoke component="#variables.preRedirectCallbacks[i].callback#"
+				method="#variables.preRedirectCallbacks[i].method#">
+				<cfinvokeargument name="data" value="#data#" />
+				<cfinvokeargument name="persist" value="#arguments.persist#" />
+				<cfinvokeargument name="appManager" value="#getAppManager()#" />
+				<cfinvokeargument name="event" value="#getRequestHandler().getEventContext().getCurrentEvent()#" />
+			</cfinvoke>
+		</cfloop>
+
+		<cfreturn data />
+	</cffunction>
+
 	<!---
 	PROTECTED FUNCTIONS - UTILS
 	--->
@@ -1140,7 +1159,7 @@ Notes:
 
 	<cffunction name="setDefaultUrlBase" access="private" returntype="void" output="false">
 		<cfargument name="defaultUrlBase" type="string" required="true" />
-		
+
 		<cfif arguments.defaultUrlBase NEQ "/">
 			<cfset variables.defaultUrlBase = arguments.defaultUrlBase />
 		<cfelse>
@@ -1157,7 +1176,7 @@ Notes:
 
 	<cffunction name="setDefaultUrlSecureBase" access="private" returntype="void" output="false">
 		<cfargument name="defaultUrlSecureBase" type="string" required="true" />
-		
+
 		<cfif arguments.defaultUrlSecureBase NEQ "/">
 			<cfset variables.defaultUrlSecureBase = arguments.defaultUrlSecureBase />
 		<cfelse>
@@ -1276,14 +1295,14 @@ Notes:
 		hint="Gets the log.">
 		<cfreturn variables.log />
 	</cffunction>
-	
+
 	<cffunction name="setTrackCurrentThreads" access="public" returntype="void" output="false">
 		<cfargument name="trackCurrentThreads" type="boolean" required="true" />
-		
+
 		<cfif NOT arguments.trackCurrentThreads>
 			<cfset StructClear(variables.currentThreads) />
 		</cfif>
-		
+
 		<cfset variables.trackCurrentThreads = arguments.trackCurrentThreads />
 	</cffunction>
 	<cffunction name="getTrackCurrentThreads" access="public" returntype="boolean" output="false">

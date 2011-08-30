@@ -290,9 +290,19 @@ See that file header for configuration of filter criteria.
 		hint="Pre-redirect logic for this logger.">
 		<cfargument name="data" type="struct" required="true"
 			hint="Redirect persist data struct." />
+		<cfargument name="persist" type="boolean" required="false" default="true"
+			hint="Specifies if the redirect is going to persist the data argument." />
+		<cfargument name="appManager" type="any" required="false" />
+		<cfargument name="event" type="any" required="false" />
 
-		<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
-			<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
+		<cfif arguments.persist>
+			<cfif getLogAdapter().getLoggingEnabled() AND getLogAdapter().isLoggingDataDefined()>
+				<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
+			</cfif>
+		<cfelse>
+			<!--- If we're not persisting data, then we need to behave as if the request is
+			      ending and handle sending an email, if needed --->
+			<cfset onRequestEnd(appManager = arguments.appManager, event = arguments.event) />
 		</cfif>
 	</cffunction>
 
