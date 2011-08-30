@@ -235,7 +235,7 @@ See that file header for configuration of filter criteria.
 			<!--- Everything needs to be one line or any extra tab / space may be produced on certain CFML engines --->
 			<cfsavecontent variable="body"><cfinclude template="#getEmailTemplateFile()#" /></cfsavecontent>
 
-			<!--- Send the email --->
+			<!--- Send the email. We must use nested cfmail tags because not all target engines support attributeCollection yet? --->
 			<cfif Len(getServers())>
 
 				<cfif hasSpecifiedAuthCredentials()>
@@ -300,8 +300,10 @@ See that file header for configuration of filter criteria.
 				<cfset arguments.data[getLoggerId()] = getLogAdapter().getLoggingData() />
 			</cfif>
 		<cfelse>
-			<!--- If we're not persisting data, then we need to behave as if the request is
-			      ending and handle sending an email, if needed --->
+			<!---
+			If we're not persisting data, then we need to behave as if the request is
+			ending and handle sending an email if needed
+			--->
 			<cfset onRequestEnd(appManager = arguments.appManager, event = arguments.event) />
 		</cfif>
 	</cffunction>
@@ -316,11 +318,12 @@ See that file header for configuration of filter criteria.
 		<cfif getLogAdapter().getLoggingEnabled()>
 			<cftry>
 				<cfset loggingData = getLogAdapter().getLoggingData() />
+
 				<!--- OpenBD/Railo has ArrayConcat so we need to use "this" to call the local function --->
 				<cfset loggingData.data = this.arrayConcat(arguments.data[getLoggerId()].data, loggingData.data) />
+
 				<cfcatch type="any">
-					<!--- Do nothing as the configuration may have changed between start of
-					the redirect and now --->
+					<!--- Do nothing as the configuration may have changed between start of the redirect and now --->
 				</cfcatch>
 			</cftry>
 		</cfif>
