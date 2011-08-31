@@ -43,7 +43,7 @@
 $Id$
 
 Created version: 1.0.0
-Updated version: 1.1.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -63,33 +63,17 @@ Notes:
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Performs on module start operations.">
 
-		<cfset var serverInfo = server.coldfusion />
+		<cfset var engineInfo = getUtils().getCfmlEngineInfo() />
 
-		<cfif getAppManager().getPropertyManager().getVersion() LT "1.8.0.0">
-			<cfthrow type="MachII.dashboard.unsupportedFrameworkVersion"
-				message="The Mach-II Dashboard supports Mach-II 1.8.0 and higher. The current version is reported as: '#getAppManager().getPropertyManager().getVersion()#'" />
-		</cfif>
-
-		<!--- Setup if we use sessions or client --->
+		<cfset setupPassword() />
 		<cfset discoverSessionManagement() />
-		<!--- Setup if login should be disabled on this environment --->
 		<cfset discoverEnableLoginByEnvironment() />
-		<!--- Setup if Orm Integration is available for this app --->
 		<cfset discoverOrmIntegration() />
-
-		<!--- Ensure that the password has been set if login is enabled --->
-		<cfif getProperty("enableLogin")
-			AND (NOT getPropertyManager().isPropertyDefined("password")
-			OR NOT Len(getProperty("password")))>
-			<cfthrow type="MachII.dashboard.ApplicationProperty.noPasswordSet"
-				message="You must set a password when defining the dashboard module. See README." />
-		</cfif>
-
 		<cfset discoverLogoutPromptTimeoutByEnvironment() />
 
 		<!--- Set charting provider --->
-		<cfif StructKeyExists(serverInfo, "productLevel") AND serverInfo.productLevel EQ "Google App Engine">
-			<cfset setProperty("chartProvider", "googlecharts")>
+		<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
+			<cfset setProperty("chartProvider", "googlecharts") />
 		</cfif>
 
 		<!--- Set module name to the properties for use by the exception viewer --->
@@ -100,8 +84,47 @@ Notes:
 	</cffunction>
 
 	<!---
+	PUBLIC FUNCTIONS
+	--->
+	<cffunction name="isSessionItemDefined" access="public" returntype="boolean" output="false">
+		<cfargument name="key" type="string" required="true" />
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+		<cfreturn structKeyExists(scope, "_MachIIDashboard_" & arguments.key)>
+	</cffunction>
+	<cffunction name="getSessionItem" access="public" returntype="any" output="false"> 
+		<cfargument name="key" type="string" required="true" />   
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+    	<cfreturn scope["_MachIIDashboard_" & arguments.key] />    
+    </cffunction>    
+    <cffunction name="setSessionItem" access="public" returntype="void" output="false">    
+    	<cfargument name="key" type="string" required="true" />    
+		<cfargument name="item" type="any" required="true" /> 
+		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
+    	<cfset scope["_MachIIDashboard_" & arguments.key] = arguments.item />
+    </cffunction>
+
+	<!---
 	PROTECTED FUNCTIONS
 	--->
+	<cffunction name="setupPassword" access="private" returntype="void" output="false"
+		hint="Sets up the password and checks for validity.">
+
+		<!--- Ensure that the password has been set and valid if login is enabled --->
+		<cfif getProperty("enableLogin")>
+		
+			<!--- Ensure a password was set. --->
+			<cfif NOT getPropertyManager().isPropertyDefined("password") OR NOT Len(getProperty("password"))>
+				<cfthrow type="MachII.dashboard.ApplicationProperty.noPasswordSet"
+					message="You must set a password when defining the dashboard module. See README." />
+			
+			<!--- Ensure that the default password wasn't left in --->
+			<cfelseif getProperty("password").startsWith("%") OR getProperty("password").endssWith("%")>
+				<cfthrow type="MachII.dashboard.ApplicationProperty.noPasswordSet"
+					message="You must set a valid password when defining the dashboard module. It appears you have the default password set or are using a password that starts/ends with a '%' which is not allowed. See README." />
+			</cfif>
+		</cfif>
+	</cffunction>
+	
 	<cffunction name="discoverSessionManagement" access="private" returntype="void" output="false"
 		hint="Discovers how the session management is setup for this application.">
 
@@ -150,23 +173,6 @@ Notes:
 				detail="Please enabled session or client scope in your Application.cfc." />
 		</cfif>
 	</cffunction>
-	
-	<cffunction name="isSessionItemDefined" access="public" returntype="boolean" output="false">
-		<cfargument name="key" type="string" required="true" />
-		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
-		<cfreturn structKeyExists(scope, "_MachIIDashboard_" & arguments.key)>
-	</cffunction>
-	<cffunction name="getSessionItem" access="public" returntype="any" output="false"> 
-		<cfargument name="key" type="string" required="true" />   
-		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
-    	<cfreturn scope["_MachIIDashboard_" & arguments.key] />    
-    </cffunction>    
-    <cffunction name="setSessionItem" access="public" returntype="void" output="false">    
-    	<cfargument name="key" type="string" required="true" />    
-		<cfargument name="item" type="any" required="true" /> 
-		<cfset var scope = StructGet(getProperty("sessionManagementScope")) />
-    	<cfset scope["_MachIIDashboard_" & arguments.key] = arguments.item />
-    </cffunction>
 
 	<cffunction name="discoverEnableLoginByEnvironment" access="private" returntype="void" output="false"
 		hint="Decides of login should be enabled by environment.">
@@ -200,10 +206,8 @@ Notes:
 	<cffunction name="discoverOrmIntegration" access="private" returntype="void" output="false"
 		hint="Discovers if ORM integration is enabled for the application.">
 
-		<cfset var OrmSessionFactory = "" />
 		<cftry>
-			<cfset OrmSessionFactory = ORMGetSessionFactory() />
-			<cfif isObject(OrmSessionFactory)>
+			<cfif isObject(ORMGetSessionFactory())>
 				<cfset setProperty("OrmEnabled", true) />
 			</cfif>
 			<cfcatch type="any">
