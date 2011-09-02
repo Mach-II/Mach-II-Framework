@@ -731,7 +731,7 @@ Notes:
 	<!---
 	REDIRECT PERSIST
 	--->
-	<cffunction name="savePersistEventData" access="private" returntype="string" output="false"
+	<cffunction name="savePersistEventData" access="public" returntype="string" output="false"
 		hint="Saves persisted event data and returns the persistId.">
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="A struct of event-args to persist." />
