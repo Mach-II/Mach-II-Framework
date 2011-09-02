@@ -65,11 +65,11 @@ Notes:
 
 		<cfset var engineInfo = getUtils().getCfmlEngineInfo() />
 
-		<cfset setupPassword() />
 		<cfset discoverSessionManagement() />
 		<cfset discoverEnableLoginByEnvironment() />
 		<cfset discoverOrmIntegration() />
 		<cfset discoverLogoutPromptTimeoutByEnvironment() />
+		<cfset setupPassword() />
 
 		<!--- Set charting provider --->
 		<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
@@ -111,24 +111,26 @@ Notes:
 
 		<!--- Ensure that the password has been set and valid if login is enabled --->
 		<cfif getProperty("enableLogin")>
-		
+			<cftry>
 			<!--- Ensure a password was set. --->
 			<cfif NOT getPropertyManager().isPropertyDefined("password") OR NOT Len(getProperty("password"))>
 				<cfthrow type="MachII.dashboard.ApplicationProperty.noPasswordSet"
 					message="You must set a password when defining the dashboard module. See README." />
-			
+
 			<!--- Ensure that the default password wasn't left in --->
 			<cfelseif getProperty("password").startsWith("%") OR getProperty("password").endssWith("%")>
 				<cfthrow type="MachII.dashboard.ApplicationProperty.noPasswordSet"
 					message="You must set a valid password when defining the dashboard module. It appears you have the default password set or are using a password that starts/ends with a '%' which is not allowed. See README." />
 			</cfif>
+			<cfcatch type="any"><cfdump var="#getProperty("password")#"><cfdump var="#cfcatch#"></cfcatch>
+			</cftry>
 		</cfif>
 	</cffunction>
 	
 	<cffunction name="discoverSessionManagement" access="private" returntype="void" output="false"
 		hint="Discovers how the session management is setup for this application.">
-
 		<cfset var scope = "" />
+
 		<cfset var foundScope = false />
 
 		<cfif NOT foundScope>
