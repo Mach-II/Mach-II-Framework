@@ -813,37 +813,68 @@ Notes:
 
 	<cffunction name="uploadFile" access="public" returntype="struct" output="false"
 		hint="Wrapper for CFFILE action=upload to better integrate uploading files">
-		<cfargument name="fileField" type="string" required="true" />
-		<cfargument name="destination" type="string" required="true" />
-		<cfargument name="nameConflict" type="string" required="false" default="error" />
-		<cfargument name="accept" type="string" required="false" default="*"
-			hint="Accepts a list of mixed MIME types or file extensions (which must start with a'.')." />
-		<cfargument name="mode" type="string" required="false" />
-		<cfargument name="fileAttributes" type="string" required="false" />
+		<cfargument name="fileField" type="string" required="true"
+			hint="The name of the field in the 'form' scope. This cannot be the name in the Event object due to how CFFILE works on CFML engines." />
+		<cfargument name="destination" type="string" required="true" 
+			hint="The full destination path to store the uploaded file. This must be a full path." />
+		<cfargument name="nameConflict" type="string" required="false" default="error"
+			hint="The action to take if there is a file name conflict (error, skip, override, makeUnique)." />
+		<cfargument name="accept" type="any" required="false" default="*"
+			hint="Accepts a list or array of mixed MIME types or file extensions (which must start with a'.')." />
+		<cfargument name="mode" type="string" required="false"
+			hint="For *nix operating systems only, the octal value to apply to the file for file permissiones such as read, write and execute." />
+		<cfargument name="fileAttributes" type="string" required="false"
+			hint="For Windows operatins systems only, the file attributes to set for the file (comma-delimited)." />
 
 		<cfset var uploadResult = StructNew() />
 		<cfset var convertedAccept = getAppManager().getUtils().getMimeTypeByFileExtension(arguments.accept) />
 
-		<!--- mode and attributes are mutually exclusive (mode = *nix only, attributes = Windows only),
-				but I suppose if someone was writing code that they wanted to have one apply on *nix
-				and the other on Windows they could potentially provide both, so we better
-				account for that --->
+		<!---
+			Mode and attributes are mutually exclusive (mode = *nix only, attributes = Windows only),
+			but I suppose if someone was writing code that they wanted to have one apply on *nix
+			and the other on Windows they could potentially provide both, so we better
+			account for that. This can be replaced with attributeCollection when all engines support it.
+		--->
+		
+		<!--- Windows and *nix --->
 		<cfif StructKeyExists(arguments, "fileAttributes") and StructKeyExists(arguments, "mode")>
-			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#"
-					nameconflict="#arguments.nameConflict#" accept="#arguments.accept#"
-					mode="#arguments.mode#" attributes="#arguments.fileAttributes#"
-					result="uploadResult" />
+			<cffile action="upload" 
+				filefield="#arguments.fileField#" 
+				destination="#arguments.destination#"
+				nameconflict="#arguments.nameConflict#" 
+				accept="#arguments.accept#"
+				mode="#arguments.mode#" 
+				attributes="#arguments.fileAttributes#"
+				result="uploadResult" />
+		
+		<!--- *nix only --->
 		<cfelseif StructKeyExists(arguments, "mode")>
-			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#"
-					nameconflict="#arguments.nameConflict#" accept="#aconvertedAccept#" mode="#arguments.mode#"
-					result="uploadResult" />
+			<cffile action="upload" 
+				filefield="#arguments.fileField#" 
+				destination="#arguments.destination#"
+				nameconflict="#arguments.nameConflict#" 
+				accept="#aconvertedAccept#" 
+				mode="#arguments.mode#"
+				result="uploadResult" />
+		
+		<!--- Windows only --->
 		<cfelseif StructKeyExists(arguments, "fileAttributes")>
-			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#"
-					nameconflict="#arguments.nameConflict#" accept="#convertedAccept#"
-					attributes="#arguments.fileAttributes#" result="uploadResult" />
+			<cffile action="upload" 
+				filefield="#arguments.fileField#" 
+				destination="#arguments.destination#"
+				nameconflict="#arguments.nameConflict#" 
+				accept="#convertedAccept#"
+				attributes="#arguments.fileAttributes#" 
+				result="uploadResult" />
+		
+		<!--- Generic --->
 		<cfelse>
-			<cffile action="upload" filefield="#arguments.fileField#" destination="#arguments.destination#"
-					nameconflict="#arguments.nameConflict#" accept="#convertedAccept#" result="uploadResult" />
+			<cffile action="upload" 
+				filefield="#arguments.fileField#" 
+				destination="#arguments.destination#"
+				nameconflict="#arguments.nameConflict#" 
+				accept="#convertedAccept#" 
+				result="uploadResult" />
 		</cfif>
 
 		<cfreturn uploadResult />

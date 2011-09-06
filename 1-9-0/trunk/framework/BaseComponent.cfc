@@ -151,7 +151,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="persistArgs" type="any" required="false" default=""
 			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
-			hint="String that represent which http status type to use in the redirect.">
+			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG).">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
 				arguments.eventName, arguments.args,
 				getAppManager().getRequestManager().getRequestHandler().getEventContext().getAppManager().getModuleName(),
@@ -171,7 +171,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="persistArgs" type="any" required="false" default=""
 			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
-			hint="String that represent which http status type to use in the redirect.">
+			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG).">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectEvent(
 			arguments.eventName, arguments.args, arguments.moduleName, arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
@@ -187,7 +187,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="persistArgs" type="any" required="false" default=""
 			hint="You can pass in either an Event object, a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
-			hint="String that represent which http status type to use in the redirect.">
+			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG).">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectRoute(
 			arguments.routeName, arguments.routeArgs, arguments.persist, arguments.persistArgs, arguments.statusType) />
 	</cffunction>
@@ -197,7 +197,7 @@ quick access to things such as announcing a new event or getting/setting propert
 		<cfargument name="redirectUrl" type="string" required="true"
 			hint="The full url to redirect to. Should be in the form of 'http://www.mach-ii.com'." />
 		<cfargument name="statusType" type="string" required="false" default=""
-			hint="String that represent which http status type to use in the redirect.">
+			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG).">
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().redirectUrl(
 			arguments.redirectUrl, arguments.statusType) />
 	</cffunction>
@@ -224,7 +224,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 
 	<cffunction name="buildUrlToModule" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url. Does not escape entities.">
+		hint="Builds a framework specific url using a module. Does not escape entities.">
 		<cfargument name="moduleName" type="string" required="true"
 			hint="Name of the module to build the url with. Defaults to base module if empty string." />
 		<cfargument name="eventName" type="string" required="true"
@@ -250,11 +250,11 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 
 	<cffunction name="buildCurrentUrl" access="public" returntype="string" output="false"
-		hint="Builds a framework specific url and automatically escapes entities for html display.">
+		hint="Builds a framework specific url based off the current URL and automatically escapes entities for html display.">
 		<cfargument name="urlParameters" type="any" required="false" default=""
 			hint="Name/value pairs (urlArg1=value1|urlArg2=value2) to replace or add into the current url with or a struct of data." />
 		<cfargument name="urlParametersToRemove" type="string" required="false" default=""
-			hint="Comma delimited list of url parameter names of items to remove from the current url" />
+			hint="Comma delimited list of url parameter names of items to remove from the current url." />
 
 		<!--- Grab the module name from the context of the currently executing request--->
 		<cfset arguments.moduleName = getAppManager().getModuleName() />
@@ -283,41 +283,49 @@ quick access to things such as announcing a new event or getting/setting propert
 	</cffunction>
 
 	<cffunction name="addHTMLBodyElement" access="public" returntype="boolean" output="false"
-		hint="Adds a HTML body element.">
+		hint="Adds a HTML body element. Returns a boolean if the element was appened to body (always returns true unless you allow duplicates).">
 		<cfargument name="text" type="string" required="true"
 			hint="Text to add to the HTML body section." />
 		<cfargument name="blockDuplicate" type="boolean" required="false"
 			hint="Checks for *exact* duplicates using the text if true. Does not check if false (default behavior)." />
 		<cfargument name="blockDuplicateCheckString" type="string" required="false"
-			hint="The check string to use if blocking duplicates is selected. Default to 'arguments.text' if not defined" />
+			hint="The check string to use if blocking duplicates is selected. Defaults to 'arguments.text' if not defined." />
 		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTMLBodyElement(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByName" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header by name/value.">
-		<cfargument name="name" type="string" required="true" />
-		<cfargument name="value" type="string" required="true" />
+		<cfargument name="name" type="string" required="true"
+			hint="The name of the header." />
+		<cfargument name="value" type="string" required="true"
+			hint="The value of the header." />
 		<cfargument name="charset" type="string" required="false" />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="addHTTPHeaderByStatus" access="public" returntype="void" output="false"
 		hint="Adds a HTTP header by statusCode/statusText.">
-		<cfargument name="statuscode" type="string" required="true" />
-		<cfargument name="statustext" type="string" required="false" />
+		<cfargument name="statuscode" type="string" required="true"
+			hint="The numeric statuscode to send as a header. Standard status codes do not need text as the framework will look them up." />
+		<cfargument name="statustext" type="string" required="false"
+			hint="The text for this statuscode." />
 		<cfset getAppManager().getRequestManager().getRequestHandler().getEventContext().addHTTPHeader(argumentcollection=arguments) />
 	</cffunction>
 
 	<cffunction name="uploadFile" access="public" returntype="struct" output="false"
-		hint="Wrapper for CFFILE action=upload to better integrate uploading files">
-		<cfargument name="fileField" type="string" required="true" />
-		<cfargument name="destination" type="string" required="true" />
-		<cfargument name="nameConflict" type="string" required="false" default="error" />
-		<cfargument name="accept" type="string" required="false" default="*"
-			hint="Accepts a list of mixed MIME types or file extensions (which must start with a'.')." />
-		<cfargument name="mode" type="string" required="false" />
-		<cfargument name="fileAttributes" type="string" required="false" />
-
+		hint="Wrapper for CFFILE action=upload to better integrate uploading files.">
+		<cfargument name="fileField" type="string" required="true"
+			hint="The name of the field in the 'form' scope. This cannot be the name in the Event object due to how CFFILE works on CFML engines." />
+		<cfargument name="destination" type="string" required="true"
+			hint="The full destination path to store the uploaded file. This must be a full path." />
+		<cfargument name="nameConflict" type="string" required="false" default="error"
+			hint="The action to take if there is a file name conflict (error, skip, override, makeUnique)." />
+		<cfargument name="accept" type="any" required="false" default="*"
+			hint="Accepts a list or array of mixed MIME types or file extensions (which must start with an '.')." />
+		<cfargument name="mode" type="string" required="false"
+			hint="For *nix operating systems only, the octal value to apply to the file for file permissiones such as read, write and execute." />
+		<cfargument name="fileAttributes" type="string" required="false"
+			hint="For Windows operatins systems only, the file attributes to set for the file (comma-delimited)." />
 		<cfreturn getAppManager().getRequestManager().getRequestHandler().getEventContext().uploadFile(argumentcollection=arguments) />
 	</cffunction>
 
@@ -489,7 +497,7 @@ quick access to things such as announcing a new event or getting/setting propert
 	<cffunction name="setParameters" access="public" returntype="void" output="false"
 		hint="Sets the full set of configuration parameters for the component.">
 		<cfargument name="parameters" type="struct" required="true"
-			hint="Struct to set as parameters" />
+			hint="Struct to set as parameters." />
 
 		<cfset var key = "" />
 
