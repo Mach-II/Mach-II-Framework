@@ -116,6 +116,15 @@ quick access to things such as announcing a new event or getting/setting propert
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
+	
+	<!---
+	DOCUMENTATION
+	
+	If you update or add methods to this component, please update the corresponding CFEclipse
+	context help file at:
+	
+	/tooling/cfeclipse/baseComponentDictionary.xml
+	--->
 
 	<!---
 	PUBLIC FUNCTIONS
