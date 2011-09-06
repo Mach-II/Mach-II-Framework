@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2010 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+ 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
+	independent module, the terms and conditions of the license of that
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
+	delete this exception statement from your version.
+
+
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
+	interfaces).
+
+$Id$
+
+Created version: 1.9.0
+Updated version: 1.9.0
+
+Notes:
+-->
+<dictionary xmlns="http://www.cfeclipse.org/version1/dictionary"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.cfeclipse.org/version1/dictionary http://cfeclipse.tigris.org/version1/dictionary/dictionary.xsd"
+>
+	<tags>	
+	</tags>
+	
+	<functions>
+	
+		<function creator="8" name="announceEvent" returns="void">
+			<help><![CDATA[
+				Announces a new event to the framework.
+			]]></help>
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					The name of the event to announce.
+				]]></help>
+			</parameter>
+			<parameter name="eventArgs" type="Any" required="false">
+				<help><![CDATA[
+					A struct of arguments or an entire Event 
+					object to set as the event's args.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="announceEventInModule" returns="void">
+			<help><![CDATA[
+				Announces a new event to the framework.
+			]]></help>
+			<parameter name="moduleName" type="String" required="true">
+				<help><![CDATA[
+					The name of the module in which event exists.
+				]]></help>
+			</parameter>
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					The name of the event to announce.
+				]]></help>
+			</parameter>
+			<parameter name="eventArgs" type="Any" required="false">
+				<help><![CDATA[
+					A struct of arguments or an entire Event object 
+					to set as the event's args.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="redirectEvent" returns="void">
+			<help><![CDATA[
+				Triggers a server side redirect to an event.
+			]]></help>
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					The name of the event to redirect to.
+				]]></help>
+			</parameter>
+			<parameter name="args" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either a struct of arguments or 
+					a list of event args names from the current event 
+					to place in the url.
+				]]></help>
+			</parameter>
+			<parameter name="persist" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Choose whether or not to sort any of the persistArgs 
+					into the session scope.
+				]]></help>
+				<values>
+					<value option="false"/>
+					<value option="true"/>
+				</values>
+			</parameter>		
+			<parameter name="persistArgs" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either an Event object, a struct of 
+					items or a list of event args to persist.
+				]]></help>
+			</parameter>
+			<parameter name="statusType" type="String" required="false" default="">
+				<help><![CDATA[
+					The HTTP status type to use for the redirect.
+				]]></help>
+				<values>
+					<value option="temporary"/>
+					<value option="permanent"/>
+					<value option="PRG"/>
+				</values>
+			</parameter>
+		</function>
+
+		<function creator="8" name="redirectEventInModule" returns="void">
+			<help><![CDATA[
+				Triggers a server side redirect to an event.
+			]]></help>
+			<parameter name="moduleName" type="String" required="true">
+				<help><![CDATA[
+					The name of the module in which event exists.
+				]]></help>
+			</parameter>
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					The name of the event to redirect to.
+				]]></help>
+			</parameter>
+			<parameter name="args" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either a struct of arguments or 
+					a list of event args names from the current event 
+					to place in the url.
+				]]></help>
+			</parameter>
+			<parameter name="persist" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Choose whether or not to sort any of the persistArgs 
+					into the session scope.
+				]]></help>
+				<values>
+					<value option="false"/>
+					<value option="true"/>
+				</values>
+			</parameter>		
+			<parameter name="persistArgs" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either an Event object, a struct of 
+					items or a list of event args to persist.
+				]]></help>
+			</parameter>
+			<parameter name="statusType" type="String" required="false" default="">
+				<help><![CDATA[
+					The HTTP status type to use for the redirect.
+				]]></help>
+				<values>
+					<value option="temporary"/>
+					<value option="permanent"/>
+					<value option="PRG"/>
+				</values>
+			</parameter>
+		</function>
+
+		<function creator="8" name="redirectRoute" returns="void">
+			<help><![CDATA[
+				Triggers a server side redirect to a route.
+			]]></help>
+			<parameter name="routeName" type="String" required="true">
+				<help><![CDATA[
+					The name of the route to redirect to.
+				]]></help>
+			</parameter>
+			<parameter name="routeArgs" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either a struct of arguments or 
+					a list of event args names from the current event 
+					to place in the url.
+				]]></help>
+			</parameter>
+			<parameter name="persist" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Choose whether or not to sort any of the persistArgs 
+					into the session scope.
+				]]></help>
+				<values>
+					<value option="false"/>
+					<value option="true"/>
+				</values>
+			</parameter>		
+			<parameter name="persistArgs" type="Any" required="false">
+				<help><![CDATA[
+					You can pass in either an Event object, a struct of 
+					items or a list of event args to persist.
+				]]></help>
+			</parameter>
+			<parameter name="statusType" type="String" required="false" default="">
+				<help><![CDATA[
+					The HTTP status type to use for the redirect.
+				]]></help>
+				<values>
+					<value option="temporary"/>
+					<value option="permanent"/>
+					<value option="PRG"/>
+				</values>
+			</parameter>
+		</function>
+
+		<function creator="8" name="redirectUrl" returns="void">
+			<help><![CDATA[
+				Triggers a server side redirect to a specific url. This 
+				method acts as a wrapper for a cflocation with optional 
+				HTTP status type.
+			]]></help>
+			<parameter name="redirectUrl" type="String" required="true">
+				<help><![CDATA[
+					The full url to redirect to. Should be in the form 
+					of 'http://www.mach-ii.com'.
+				]]></help>
+			</parameter>
+			<parameter name="statusType" type="String" required="false" default="">
+				<help><![CDATA[
+					The HTTP status type to use for the redirect.
+				]]></help>
+				<values>
+					<value option="temporary"/>
+					<value option="permanent"/>
+					<value option="PRG"/>
+				</values>
+			</parameter>
+		</function>		
+
+		<function creator="8" name="buildUrl" returns="String">
+			<help><![CDATA[
+				Builds a framework specific url without specifying a 
+				module name. Does not escape entities.
+			]]></help>
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					Name of the event to build the url with.
+				]]></help>
+			</parameter>
+			<parameter name="urlParameters" type="Any" required="true" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to 
+					build the url with or a struct of data.
+				]]></help>
+			</parameter>
+			<parameter name="urlBase" type="String" required="false" default="">
+				<help><![CDATA[
+					Base of the url. Defaults to the value of the urlBase 
+					property.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="buildUrlToModule" returns="String">
+			<help><![CDATA[
+				Builds a framework specific url using a module. Does 
+				not escape entities.
+			]]></help>
+			<parameter name="moduleName" type="String" required="true">
+				<help><![CDATA[
+					Name of the module to build the url with. Defaults 
+					to base module if empty string.
+				]]></help>
+			</parameter>			
+			<parameter name="eventName" type="String" required="true">
+				<help><![CDATA[
+					Name of the event to build the url with.
+				]]></help>
+			</parameter>
+			<parameter name="urlParameters" type="Any" required="true" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to 
+					build the url with or a struct of data.
+				]]></help>
+			</parameter>
+			<parameter name="urlBase" type="String" required="false" default="">
+				<help><![CDATA[
+					Base of the url. Defaults to the value of the urlBase 
+					property.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="buildRouteUrl" returns="String">
+			<help><![CDATA[
+				Builds a framework specific url and automatically escapes 
+				entities for html display.
+			]]></help>
+			<parameter name="routeName" type="String" required="true">
+				<help><![CDATA[
+					Name of the route to build the url with.
+				]]></help>
+			</parameter>			
+			<parameter name="urlParameters" type="Any" required="true" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to 
+					build the url with or a struct of data.
+				]]></help>
+			</parameter>
+			<parameter name="queryStringParameters" type="Any" required="true" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to 
+					build the url with or a struct of query string 
+					parameters to append to end of the route.
+				]]></help>
+			</parameter>
+			<parameter name="urlBase" type="String" required="false" default="">
+				<help><![CDATA[
+					Base of the url. Defaults to the value of the urlBase 
+					property.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="buildCurrentUrl" returns="String">
+			<help><![CDATA[
+				Builds a framework specific url based off the current URL 
+				and automatically escapes entities for html display.
+			]]></help>	
+			<parameter name="urlParameters" type="Any" required="false" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to replace 
+					or add into the current url with or a struct of data.
+				]]></help>
+			</parameter>
+			<parameter name="urlParametersToRemove" type="String" required="false" default="">
+				<help><![CDATA[
+					Comma delimited list of url parameter names of items to remove from the current url
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="buildCurrentUrl" returns="String">
+			<help><![CDATA[
+				Builds a framework specific url based off the current URL 
+				and automatically escapes entities for html display.
+			]]></help>	
+			<parameter name="urlParameters" type="Any" required="false" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to replace 
+					or add into the current url with or a struct of data.
+				]]></help>
+			</parameter>
+			<parameter name="urlParametersToRemove" type="String" required="false" default="">
+				<help><![CDATA[
+					Comma delimited list of url parameter names of items to remove 
+					from the current url.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="buildEndpointUrl" returns="String">
+			<help><![CDATA[
+				Builds an endpoint specific url.
+			]]></help>	
+			<parameter name="endpointName" type="String" required="true">
+				<help><![CDATA[
+					Name of the target endpoint.
+				]]></help>
+			</parameter>
+			<parameter name="urlParameters" type="String" required="false" default="">
+				<help><![CDATA[
+					Name/value pairs (urlArg1=value1|urlArg2=value2) to build 
+					the url with or a struct of data.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="addHTMLHeadElement" returns="boolean">
+			<help><![CDATA[
+				Adds a HTML head element. Returns a boolean if the element 
+				was appened to head (always returns true unless you allow duplicates).
+			]]></help>	
+			<parameter name="text" type="String" required="true">
+				<help><![CDATA[
+					Text to add to the HTML head section.
+				]]></help>
+			</parameter>
+			<parameter name="blockDuplicate" type="boolean" required="false">
+				<help><![CDATA[
+					Checks for *exact* duplicates using the text if true. Does 
+					not check if false (default behavior).
+				]]></help>
+				<values>
+					<value option="false"/>
+					<value option="true"/>
+				</values>
+			</parameter>
+			<parameter name="blockDuplicateCheckString" type="String" required="false">
+				<help><![CDATA[
+					The check string to use if blocking duplicates is selected. 
+					Defaults to 'arguments.text' if not defined.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="addHTMLBodyElement" returns="boolean">
+			<help><![CDATA[
+				Adds a HTML body element. Returns a boolean if the element 
+				was appened to boyd (always returns true unless you allow duplicates).
+			]]></help>	
+			<parameter name="text" type="String" required="true">
+				<help><![CDATA[
+					Text to add to the HTML body section.
+				]]></help>
+			</parameter>
+			<parameter name="blockDuplicate" type="boolean" required="false">
+				<help><![CDATA[
+					Checks for *exact* duplicates using the text if true. Does 
+					not check if false (default behavior).
+				]]></help>
+				<values>
+					<value option="false"/>
+					<value option="true"/>
+				</values>
+			</parameter>
+			<parameter name="blockDuplicateCheckString" type="String" required="false">
+				<help><![CDATA[
+					The check string to use if blocking duplicates is selected. 
+					Defaults to 'arguments.text' if not defined.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="addHTTPHeaderByName" returns="boolean">
+			<help><![CDATA[
+				Adds a HTTP header by name/value.
+			]]></help>	
+			<parameter name="name" type="String" required="true">
+				<help><![CDATA[
+					The name for the header.
+				]]></help>
+			</parameter>
+			<parameter name="value" type="String" required="true">
+				<help><![CDATA[
+					The value for the header.
+				]]></help>
+			</parameter>
+			<parameter name="charset" type="String" required="false">
+				<help><![CDATA[
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="addHTTPHeaderByStatus" returns="boolean">
+			<help><![CDATA[
+				Adds a HTTP header by statusCode/statusText.
+			]]></help>	
+			<parameter name="statuscode" type="String" required="true">
+				<help><![CDATA[
+					The numeric statuscode to send as a header. Standard status 
+					codes do not need text as the framework will look them up.
+				]]></help>
+			</parameter>
+			<parameter name="statustext" type="String" required="false">
+				<help><![CDATA[
+					The text for this statuscode.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="uploadFile" returns="Struct">
+			<help><![CDATA[
+				Wrapper for CFFILE action=upload to better integrate uploading files.
+			]]></help>	
+			<parameter name="fileField" type="String" required="true">
+				<help><![CDATA[
+					The name of the field in the 'form' scope. This cannot be the 
+					name in the Event object due to how CFFILE works on CFML engines.
+				]]></help>
+			</parameter>
+			<parameter name="destination" type="String" required="true">
+				<help><![CDATA[
+					The full destination path to store the uploaded file. This 
+					must be a full path.
+				]]></help>
+			</parameter>
+			<parameter name="nameConflict" type="String" required="false">
+				<help><![CDATA[
+					The action to take if there is a file name conflict.
+				]]></help>
+				<values>
+					<value option="error" />
+					<value option="skip" />
+					<value option="override" />
+					<value option="makeUnique" />
+				</values>
+			</parameter>
+			<parameter name="accept" type="String" required="false" default="error">
+				<help><![CDATA[
+					Accepts a list or array of mixed MIME types or file 
+					extensions (which must start with an '.').
+				]]></help>
+				<values>
+					<value option="error" />
+					<value option="skip" />
+					<value option="override" />
+					<value option="makeUnique" />
+				</values>
+			</parameter>
+			<parameter name="mode" type="String" required="false">
+				<help><![CDATA[
+					For *nix operating systems only, the octal value to apply 
+					to the file for file permissiones such as read, write and 
+					execute.
+				]]></help>
+			</parameter>
+			<parameter name="fileAttributes" type="String" required="false">
+				<help><![CDATA[
+					For Windows operatins systems only, the file attributes to 
+					set for the file (comma-delimited).
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="resolveValueByEnvironment" returns="Any">
+			<help><![CDATA[
+				Resolves a value by deployed environment name or group (explicit 
+				environment names are searched first then groups then default).
+			]]></help>	
+			<parameter name="environmentValues" type="Struct" required="true">
+				<help><![CDATA[
+					A struct of environment values. Key prefixed with 'group:' 
+					are treated as groups and keys can contain ',' to indicate 
+					multiple environments names or groups.
+				]]></help>
+			</parameter>
+			<parameter name="defaultValue" type="Any" required="false">
+				<help><![CDATA[
+					A default value to provide if no environment is found. An 
+					exception will be thrown if no 'defaultValue' is provide 
+					and no value can be resolved.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="setParameter" returns="void">
+			<help><![CDATA[
+				Sets a configuration parameter.
+			]]></help>	
+			<parameter name="name" type="String" required="true">
+				<help><![CDATA[
+					The parameter name.
+				]]></help>
+			</parameter>
+			<parameter name="value" type="Any" required="true">
+				<help><![CDATA[
+					The parameter value.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="getParameter" returns="Any">
+			<help><![CDATA[
+				Gets a configuration parameter value, or a default 
+				value if not defined.
+			]]></help>	
+			<parameter name="name" type="String" required="true">
+				<help><![CDATA[
+					The parameter name.
+				]]></help>
+			</parameter>
+			<parameter name="defaultValue" type="Any" required="false">
+				<help><![CDATA[
+					The default value to return if the parameter is not 
+					defined. Defaults to a blank string.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="isParameterDefined" returns="Any">
+			<help><![CDATA[
+				Checks to see whether or not a configuration parameter 
+				is defined.
+			]]></help>	
+			<parameter name="name" type="String" required="true">
+				<help><![CDATA[
+					The parameter name.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="setParameters" returns="void">
+			<help><![CDATA[
+				Sets the full set of configuration parameters for the 
+				component.
+			]]></help>	
+			<parameter name="parameters" type="Struct" required="true">
+				<help><![CDATA[
+					Struct to set as parameters.
+				]]></help>
+			</parameter>
+		</function>
+
+
+		<function creator="8" name="getParameters" returns="Struct">
+			<help><![CDATA[
+				Gets the full set of configuration parameters for the 
+				component.
+			]]></help>	
+		</function>	
+
+		<function creator="8" name="getParameterNames" returns="String">
+			<help><![CDATA[
+				Returns a comma delimited list of parameter names.
+			]]></help>
+		</function>
+		
+		<function creator="8" name="setProperty" returns="String">
+			<help><![CDATA[
+				Sets the specified property - this is just a shortcut for 
+				getPropertyManager().setProperty()
+			]]></help>
+			<parameter name="propertyName" type="String" required="true">
+				<help><![CDATA[
+					The name of the property to set.
+				]]></help>
+			</parameter>
+			<parameter name="propertyValue" type="Any" required="true">
+				<help><![CDATA[
+					The value to store in the property.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="getProperty" returns="Any">
+			<help><![CDATA[
+				Gets the specified property - this is just a shortcut for 
+				getPropertyManager().getProperty()
+			]]></help>	
+			<parameter name="propertyName" type="String" required="true">
+				<help><![CDATA[
+					The name of the property to return.
+				]]></help>
+			</parameter>
+			<parameter name="defaultValue" type="Any" required="false">
+				<help><![CDATA[
+					The default value to use if the requested property is 
+					not defined.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="isPropertyDefined" returns="Any">
+			<help><![CDATA[
+				Checks if property name is defined in the properties - this is 
+				just a shortcutfor getPropertyManager().isPropertyDefined(). 
+				Does NOT check a parent.
+			]]></help>	
+			<parameter name="name" type="String" required="true">
+				<help><![CDATA[
+					The named of the property to check if it is defined.
+				]]></help>
+			</parameter>
+		</function>
+
+		<function creator="8" name="getPropertyManager" returns="Object">
+			<help><![CDATA[
+				Gets the components PropertyManager instance.
+			]]></help>
+		</function>
+
+		<function creator="8" name="getUtils" returns="Object">
+			<help><![CDATA[
+				Gets the Utils component.
+			]]></help>
+		</function>
+
+		<function creator="8" name="getAssert" returns="Object">
+			<help><![CDATA[
+				Gets the Assert component.
+			]]></help>
+		</function>
+
+		<function creator="8" name="getAppManager" returns="Object">
+			<help><![CDATA[
+				Gets the components AppManager instance.
+			]]></help>
+		</function>
+	
+	</functions>
+
+</dictionary>
