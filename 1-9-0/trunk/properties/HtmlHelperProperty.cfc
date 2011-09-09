@@ -729,7 +729,7 @@ from the parent application.
 					<cfset assetPathTimestamp = fetchAssetTimestamp(resolvedPath) />
 					<cfset variables.assetPathsCache[assetPathHash] = assetPathTimestamp />
 				</cfif>
-				
+
 				<cfif FindNoCase("?", resolvedPath)>
 					<cfreturn resolvedPath & "&amp;" & assetPathTimestamp />
 				<cfelse>
@@ -961,7 +961,7 @@ from the parent application.
 
 		<cfset var file = ListLast(arguments.assetPath, "/") />
 		<cfset var fileExt = ListLast(file, ".") />
-	
+
 		<!--- Files with ? query string data must have an file extension already --->
 		<cfif NOT FindNoCase("?", file) AND fileExt NEQ arguments.assetType AND fileExt NEQ "cfm">
 			<cfreturn arguments.assetPath & "." & arguments.assetType />

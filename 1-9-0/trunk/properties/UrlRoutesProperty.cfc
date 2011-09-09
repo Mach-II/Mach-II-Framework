@@ -21,23 +21,23 @@
     conditions of the GNU General Public License cover the whole
     combination.
 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -107,7 +107,7 @@ index.cfm/product/A12345/fancy/
 		<cfset var i = 0 />
 		<cfset var route = 0 />
 		<cfset var currentModuleName = getAppManager().getModuleName() />
-		
+
 		<!--- Use StructAppend() we don't delete directly from the parameters --->
 		<cfset StructAppend(parameters, getParameters()) />
 
@@ -135,19 +135,19 @@ index.cfm/product/A12345/fancy/
 				</cfif>
 			</cfif>
 		</cfif>
-	
+
 		<!--- Setup default url parameter formatter --->
 		<cfset loadUrlParameterFormatter("default", "MachII.framework.url.DefaultUrlParameterFormatter") />
-		
+
 		<!--- Load url parameter formatters if any are defined --->
 		<cfif isParameterDefined("urlParameterFormatters")>
 			<cfset parameters = getParameter("urlParameterFormatters") />
-			
+
 			<cfloop collection="#parameters#" item="parameterName">
 				<cfset loadUrlParameterFormatter(parameterName, parameters[parameterName]) />
 			</cfloop>
 		</cfif>
-		
+
 		<!--- Remove all reserved parameter names from our local reference of parameters --->
 		<cfloop list="#variables.RESERVED_PARAMETER_NAMES#" index="i">
 			<cfset StructDelete(parameters, i, false) />
@@ -213,11 +213,11 @@ index.cfm/product/A12345/fancy/
 
 		<cfset getAppManager().getRequestManager().addRoute(arguments.routeName, arguments.route, true) />
 	</cffunction>
-	
+
 	<cffunction name="removeRoute" access="public" returntype="void" output="false"
 		hint="Removes a route by name.">
 		<cfargument name="routeName" type="string" required="true" />
-		
+
 		<cfset variables.routeNames.remove(arguments.routeName) />
 
 		<cfset getAppManager().getRequestManager().removeRoute(arguments.routeName) />
@@ -307,9 +307,9 @@ index.cfm/product/A12345/fancy/
 			hint="The name of the formatter." />
 		<cfargument name="type" type="string" required="true"
 			hint="The type of the formatter." />
-		
+
 		<cfset var formatter = CreateObject("component", arguments.type).init() />
-		
+
 		<cfset variables.urlParameterFormatters[arguments.name] = formatter />
 	</cffunction>
 

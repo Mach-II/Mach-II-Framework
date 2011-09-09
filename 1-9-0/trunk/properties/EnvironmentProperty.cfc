@@ -162,6 +162,13 @@ properties struct can take complex datatypes like structs and arrays.
 	hint="Sets environment mode and properties based on the where the application is deployed.">
 
 	<!---
+	CONSTANTS
+	--->
+	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironmentName,serverPropertyName,serverNameKey" />
+	<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = "environmentGroup,servers,properties" />
+	<cfset variables.ENVIRONMENT_GROUP_NAMES = "" />
+
+	<!---
 	PROPERTIES
 	--->
 	<cfset variables.defaultEnvironment = "" />
@@ -172,10 +179,6 @@ properties struct can take complex datatypes like structs and arrays.
 	<cfset variables.serverMap = StructNew() />
 	<cfset variables.environments = StructNew() />
 	<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
-
-	<cfset variables.RESERVED_PARAMETER_NAMES = "defaultEnvironmentName,serverPropertyName,serverNameKey" />
-	<cfset variables.REQUIRED_ENVIRONMENT_KEY_NAMES = "environmentGroup,servers,properties" />
-	<cfset variables.ENVIRONMENT_GROUP_NAMES = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -402,7 +405,7 @@ properties struct can take complex datatypes like structs and arrays.
 
 	<cffunction name="resolveServerName" access="private" returntype="void" output="false"
 		hint="Resolves the server name from either properties.*, headers.* or cgi.* based data.">
-			
+
 		<cfset var key = getServerNameKey() />
 		<cfset var name = "" />
 		<cfset var parsedKeyName = "" />
@@ -428,7 +431,7 @@ properties struct can take complex datatypes like structs and arrays.
 				<cfset name = cgi[parsedKeyName] />
 			</cfif>
 		</cfif>
-		
+
 		<cfset setServerName(name) />
 	</cffunction>
 

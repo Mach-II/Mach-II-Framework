@@ -58,15 +58,15 @@ encoded in base64 and can be easily decoded back into plain text. This encoding
 is not used for security but to encode non-ASCII characters in an username or
 password into a string that can be passed in an HTTP header.
 
-Team Mach-II highly recommends that you use SSL (https) in conjunction with 
+Team Mach-II highly recommends that you use SSL (https) in conjunction with
 basic access authorization because the authorization header is sent over the
 wire in plain text.
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="Authentication"
 	output="false"
 	hint="Performs HTTP basic access authentication.">
-		
+
 	<!---
 	PROPERTIES
 	--->
@@ -84,7 +84,7 @@ wire in plain text.
 			hint="The file path to the credential file. Must use SHA hash format (does not support DES)." />
 
 		<cfset setRealm(arguments.realm) />
-		
+
 		<!--- Conditionally load in the credentials --->
 		<cfif StructKeyExists(arguments, "credentialFilePath") AND Len(arguments.credentialFilePath)>
 			<cfset variables.credentials = loadCredentialFile(arguments.credentialFilePath) />
@@ -92,7 +92,7 @@ wire in plain text.
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -102,30 +102,30 @@ wire in plain text.
 			hint="The HTTP request data to use." >
 		<cfargument name="event" type="MachII.framework.Event" required="false"
 			hint="Optionally an event object to use." />
-		
+
 		<cfif StructKeyExists(arguments.httpHeaders, "Authorization")>
 			<cfset StructAppend(arguments, decodeAuthorizationHeader(arguments.httpHeaders)) />
-			
+
 			<cfif checkCredentials(argumentcollection=arguments)>
 				<cfreturn true />
 			</cfif>
 		</cfif>
-		
+
 		<!--- Must use "Basic" with correct casing and double quotes for realm attribute --->
 		<cfheader name="WWW-Authenticate" value='Basic realm="#getRealm()#"' />
 		<cfheader statuscode="401" statustext="Authorization Required" />
-		
+
 		<cfreturn false />
 	</cffunction>
-	
+
 	<cffunction name="decodeAuthorizationHeader" access="public" returntype="struct" output="false"
 		hint="Decodes ann authorization header into realm, username and password.">
 		<cfargument name="value" type="any" required="true"
 			hint="The authorization header value or a struct of headers with an 'Authorization' key." />
-		
+
 		<cfset var tempUsernamePassword = "" />
 		<cfset var result = StructNew() />
-		
+
 		<!--- Convert headers struct into a value we can decode --->
 		<cfif IsStruct(arguments.value)>
 			<cftry>
@@ -136,24 +136,24 @@ wire in plain text.
 				</cfcatch>
 			</cftry>
 		</cfif>
-		
+
 		<!--- Setup a default result --->
 		<cfset result.username = "" />
 		<cfset result.password = "" />
-		
+
 		<!--- Check that we have the realm and the encoded username:password --->
 		<cfif ListLen(arguments.value, " ") EQ 2 AND ListFirst(arguments.value, " ") EQ "Basic">
 			<!--- Decode the username:password --->
 			<cfset tempUsernamePassword = ListLast(arguments.value, " ") />
 			<cfset tempUsernamePassword = ToString(ToBinary(tempUsernamePassword)) />
-			
+
 			<cfset result.username = ListFirst(tempUsernamePassword, ":") />
-			<cfset result.password = ListLast(tempUsernamePassword, ":") />			
+			<cfset result.password = ListLast(tempUsernamePassword, ":") />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<cffunction name="encodeAuthorizationHeader" access="public" returntype="string" output="false"
 		hint="Encodes an authorization header value in the proper format.">
 		<cfargument name="username" type="string" required="true"
@@ -163,7 +163,7 @@ wire in plain text.
 		<!--- Authorization header is of format: "Basic Base64(username:password)" --->
 		<cfreturn "Basic " & ToBase64(arguments.username & ":" & arguments.password) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -175,30 +175,30 @@ wire in plain text.
 			hint="The password." />
 		<cfargument name="event" type="MachII.framework.Event" required="false"
 			hint="Optionally an event object to use." />
-		
+
 		<cfif StructKeyExists(variables.credentials, arguments.username) AND Hash(arguments.password, "sha") EQ variables.credentials[arguments.username]>
 			<cfreturn true />
 		<cfelse>
 			<cfreturn false />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="loadCredentialFile" access="private" returntype="struct" output="false"
 		hint="Loads a credential file into memory.">
 		<cfargument name="credentialFilePath" type="string" required="true" />
-		
+
 		<cfset var line = "" />
 		<cfset var credentials = StructNew() />
-		
+
 		<cfloop file="#ExpandPath(arguments.credentialFilePath)#" index="line">
 			<cfif NOT line.startsWith("##") AND ListLen(line, ":") EQ 2 >
 				<cfset credentials[ListFirst(line, ":")] = ListLast(line, ":") />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn credentials />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -209,13 +209,13 @@ wire in plain text.
 	<cffunction name="getRealm" access="public" returntype="string" output="false">
 		<cfreturn variables.realm />
 	</cffunction>
-	
+
 	<cffunction name="setCredentials" access="public" returntype="void" output="false">
 		<cfargument name="credentials" type="struct" required="true" />
 		<cfset variables.credentials = arguments.credentials />
 	</cffunction>
 	<cffunction name="getCredentials" access="public" returntype="struct" output="false">
 		<cfreturn variables.credentials />
-	</cffunction>	
+	</cffunction>
 
 </cfcomponent>

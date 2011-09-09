@@ -341,7 +341,7 @@ application.serviceFactory_account variable.
 				<cfset defaultProperties[i] = Evaluate(Mid(defaultProperties[i], 3, Len(defaultProperties[i]) -3)) />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- Add in a reference to AppManager for the UtilityConnectBeanFactoryPostProcessor --->
 		<cfset defaultProperties["_MachIIAppManager"] = getAppManager() />
 
@@ -819,7 +819,7 @@ application.serviceFactory_account variable.
 		hint="Injects an UtilityConnectorBeanFactoryPostProcessor definition into the local bean factory.">
 
 		<cfset var beanFactory = getProperty(getProperty("beanFactoryName")) />
-		
+
 		<!--- This definition is used to wire in the correct AppManager into any UtilityConnector definition --->
 		<cfset beanFactory.createBeanDefinition("_MachIIUtilityConnectorBeanFactoryPostProcessor"
 			, "MachII.util.injection.UtilityConnectorBeanFactoryPostProcessor"
