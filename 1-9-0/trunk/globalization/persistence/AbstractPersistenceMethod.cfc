@@ -56,22 +56,25 @@ locale; that change needs to be persisted through the rest of that user's
 	displayname="AbstractPersistenceMethod"
 	output="false"
 	hint="Base class for various locale persistence methods.">
-	
+
+	<!---
+	PROPERTIES
+	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.instance = StructNew() />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="AbstractPersistenceMethod" output="false"
 		hint="Initializes the persistence method.">
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
-		
+
 		<cfset setAppManager(arguments.appManager) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Override to provide custom configuration logic. Called after init().">
 		<!--- Does nothing --->
@@ -81,7 +84,7 @@ locale; that change needs to be persisted through the rest of that user's
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -90,12 +93,12 @@ locale; that change needs to be persisted through the rest of that user's
 		<cfargument name="locale" type="string" required="true" />
 		<cfabort showerror="This method is abstract and must be overrided if storeLocale functionality is required." />
 	</cffunction>
-	
+
 	<cffunction name="retrieveLocale" access="public" returntype="void" output="false"
 		hint="The method to be overriden in order to retrieve the current locale.">
 		<cfabort showerror="This method is abstract and must be overriden if retrieveLocale functionality is required." />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -106,5 +109,5 @@ locale; that change needs to be persisted through the rest of that user's
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 </cfcomponent>

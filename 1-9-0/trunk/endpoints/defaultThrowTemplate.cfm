@@ -59,7 +59,7 @@ Notes:
 	</head>
 	<body>
 		<h3>Mach-II Endpoint Exception</h3>
-		
+
 		<table>
 			<tr>
 				<td valign="top"><h4>Endpoint</h4></td>

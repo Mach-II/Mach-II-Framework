@@ -55,10 +55,13 @@ the user's locale in the user's cookie.
 	extends="MachII.globalization.persistence.AbstractPersistenceMethod"
 	output="false"
 	hint="Persistence method for storing locales in cookies">
-	
+
+	<!---
+	PROPERTIES
+	--->
 	<cfset variables.instance.persistenceType = "Cookie" />
 	<cfset variables.instance.cookieVariable = "__LOCALE__" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -71,7 +74,7 @@ the user's locale in the user's cookie.
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -80,15 +83,15 @@ the user's locale in the user's cookie.
 		<cfargument name="locale" type="string" required="true" />
 		<cfcookie name="#variables.instance.cookieVariable#" value="#arguments.locale#" expires="never" />
 	</cffunction>
-	
+
 	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"
 		hint="Retrieves a locale from the cookie, or an empty string if one doesn't exist.">
-		
+
 		<cfif NOT StructKeyExists(cookie, variables.instance.cookieVariable)>
 			<cfreturn "" />
 		</cfif>
-		
+
 		<cfreturn cookie[variables.instance.cookieVariable] />
 	</cffunction>
-	
+
 </cfcomponent>

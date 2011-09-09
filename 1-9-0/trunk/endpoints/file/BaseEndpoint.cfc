@@ -61,7 +61,7 @@ Configuration Notes:
 			<parameter name="servingEngineType" value="cfcontent|sendfile" />
 			<!--
 			Uses Apache "style" syntax which supports "access" or "modified" with
-			days,hours,minutes,seconds timespan format or the value of "none" if 
+			days,hours,minutes,seconds timespan format or the value of "none" if
 			no expires header should be used.
 			-->
 			<parameter name="expiresDefault" value="access plus 365,0,0,0" />
@@ -156,18 +156,18 @@ Configuration Notes:
 		<cfset setExpiresDefault(getParameter("expiresDefault", "access plus 365,0,0,0")) />
 		<cfset setAttachmentDefault(getParameter("attachmentDefault", "false")) />
 		<cfset setTimestampDefault(getParameter("timestampDefault", "true")) />
-		
+
 		<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
-		
+
 		<!--- Setup the lookup maps --->
 		<cfset buildFileSettingsMap() />
 		<cfset buildCfmSafePatterns() />
 	</cffunction>
-	
+
 	<cffunction name="buildFileSettingsMap" access="private" returntype="void" output="false"
 		hint="Builds the file settings map for expire and attachment settings by file type.">
-		
-		<cfset var rawSettings = getParameter("fileTypeSettings", StructNew()) />	
+
+		<cfset var rawSettings = getParameter("fileTypeSettings", StructNew()) />
 		<cfset var expireMap = StructNew() />
 		<cfset var attachmentMap = StructNew() />
 		<cfset var timestampMap = StructNew() />
@@ -179,17 +179,17 @@ Configuration Notes:
 		<cfset var attachment = "" />
 		<cfset var timestamp = "" />
 		<cfset var i = 0 />
-		
+
 		<cfloop collection="#rawSettings#" item="key">
-			
+
 			<cfset temp = StructFind(rawSettings, key) />
-			
+
 			<cfif StructKeyExists(temp, "expires")>
 				<cfset expires = parseExpiresLanguage(temp.expires) />
 			<cfelse>
 				<cfset expires = getExpiresDefault() />
 			</cfif>
-			
+
 			<cfif StructKeyExists(temp, "attachment")>
 				<cfset attachment = temp.attachment />
 			<cfelse>
@@ -203,7 +203,7 @@ Configuration Notes:
 			</cfif>
 
 			<cfset fileExtensionsArray = ListToArray(key) />
-			
+
 			<cfloop from="1" to="#ArrayLen(fileExtensionsArray)#" index="i">
 				<cfset fileExtension = ReplaceNoCase(fileExtensionsArray[i], ".", "", "all") />
 				<cfset expireMap[fileExtension] = expires />
@@ -211,22 +211,22 @@ Configuration Notes:
 				<cfset timestampMap[fileExtension] = timestamp />
 			</cfloop>
 		</cfloop>
-		
+
 		<cfset variables.expireMap = expireMap />
 		<cfset variables.attachmentMap = attachmentMap />
 		<cfset variables.timestampMap = timestampMap />
 	</cffunction>
-	
+
 	<cffunction name="buildCfmSafePatterns" access="private" returntyp="void" output="false"
 		hint="Builds the .cfm safe patterns.">
-		
+
 		<cfset var rawSettings = getParameter("cfmFiles", "") />
-		
+
 		<!--- We allow lists or array --->
 		<cfif IsSimpleValue(rawSettings)>
 			<cfset rawSettings = ListToArray(rawSettings) />
 		</cfif>
-			
+
 		<cfset variables.cfmSafePatterns = rawSettings />
 	</cffunction>
 
@@ -254,14 +254,14 @@ Configuration Notes:
 			<!--- Manually decode the file argument to help protect against directory transversal attacks using unicode --->
 			<cfset filePath = URLDecode(arguments.event.getArg("file")) />
 		</cfif>
-		
+
 		<!--- Clean up the file path for directory transveral type attacks --->
 		<cfset filePath = getUtils().filePathClean(filePath) />
-		
+
 		<!--- Setup the file extension and any piping extension --->
 		<cfset fileExtension = ListFirst(ListLast(filePath, "."), ":") />
 		<cfset arguments.event.setArg("fileExtension", fileExtension) />
-		
+
 		<!--- Clean up any piping extension on the file path --->
 		<cfset arguments.event.setArg("file", ListFirst(filePath, ":")) />
 		<cfif fileExtension EQ "cfm">
@@ -287,7 +287,7 @@ Configuration Notes:
 		<cfelse>
 			<cfset arguments.event.setArg("expires", getExpiresDefault()) />
 		</cfif>
-		
+
 		<!--- Process attachment type --->
 		<cfif NOT arguments.event.isArgDefined("attachment")>
 			<cfif StructKeyExists(variables.attachmentMap, arguments.event.getArg("pipe", fileExtension)) AND variables.attachmentMap[arguments.event.getArg("pipe", fileExtension)]>
@@ -295,29 +295,29 @@ Configuration Notes:
 			</cfif>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Serves the file request.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfif arguments.event.getArg("fileExtension") EQ "cfm">
 			<cfif matchCfmFile(arguments.event.getArg("file"))>
 				<cfcontent reset="true"><cfsetting enablecfoutputonly="false" /><cfoutput>#serveCfmFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment"), arguments.event.getArg("pipe", "htm"))#</cfoutput><cfsetting enablecfoutputonly="true" />
 			<cfelse>
-				<cfthrow type="MachII.endpoints.file.cfmNotAuthorized" 
+				<cfthrow type="MachII.endpoints.file.cfmNotAuthorized"
 					message="The file path '#arguments.event.getArg("file")#' is not an allowed .cfm file." />
 			</cfif>
 		<cfelse>
 			<cfset serveStaticFile(arguments.event.getArg("fileFullPath"), arguments.event.getArg("expires"), arguments.event.getArg("attachment")) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="onException" access="public" returntype="void" output="true"
 		hint="Runs when an exception occurs in the endpoint.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
-		
+
 		<!--- Handle notFound --->
 		<cfif arguments.exception.getType() EQ "MachII.endpoints.file.notFound" AND NOT (arguments.event.isArgDefined("throw") AND getEnableThrow())>
 			<cfset addHTTPHeaderByStatus(404) />
@@ -333,7 +333,7 @@ Configuration Notes:
 			<cfset super.onException(arguments.event, arguments.exception) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
 		hint="Builds an URL formatted for file server endpoint. Arguments that are passed that do not match the method signature will be appended to the query string of this URL.">
 		<cfargument name="file" type="string" required="true"
@@ -343,7 +343,7 @@ Configuration Notes:
 		<cfargument name="attachment" type="string" required="false"
 			hint="The file name to use if an attachment download is requested. If boolean 'true', the file name is be computed using the pipe extension if applicable." />
 		<!--- Any other arugments will be appended as query string params --->
-		
+
 		<cfset var builtUrl = "" />
 		<cfset var urlBase = getUrlBase() />
 		<cfset var fileName = "" />
@@ -366,12 +366,12 @@ Configuration Notes:
 			</cfif>
 			<cfset builtUrl = builtUrl & arguments.file />
 		</cfif>
-		
+
 		<!--- Add in pipe if availanble --->
 		<cfif StructKeyExists(arguments, "pipe")>
 			<cfset builtUrl = builtUrl & ":" & arguments.pipe />
 		</cfif>
-		
+
 		<!---
 		Build optional query string parameters
 		* Attachment
@@ -382,7 +382,7 @@ Configuration Notes:
 				<cfset fileName = getFileFromPath(arguments.file) />
 				<cfset arguments.attachment = ReplaceNoCase(getFileFromPath(fileName), "." & fileExtension, "." & arguments.pipe) />
 			</cfif>
-			
+
 			<cfset queryString = ListAppend(queryString, "attachment=" & arguments.attachment, "&") />
 		</cfif>
 
@@ -393,7 +393,7 @@ Configuration Notes:
 				<cfset queryString = ListAppend(queryString, key & "=" & arguments[key], "&") />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- Alwasy append the asset timestamp on to the query string last --->
 		<cfif (StructKeyExists(variables.timestampMap, fileExtension) AND variables.timestampMap[fileExtension]) OR (NOT StructKeyExists(variables.timestampMap, fileExtension) AND getTimestampDefault())>
 			<cfset assetTimestamp = fetchAssetTimestamp(ListFirst(arguments.file, ":")) />
@@ -401,15 +401,15 @@ Configuration Notes:
 				<cfset queryString = ListAppend(queryString, assetTimestamp, "&") />
 			</cfif>
 		</cfif>
-		
+
 		<!--- Append query string if any optional parameters were construct --->
 		<cfif Len(queryString)>
 			<cfset builtUrl = builtUrl & "?" & queryString />
-		</cfif>		
-		
+		</cfif>
+
 		<cfreturn builtUrl />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS - GENERAL
 	--->
@@ -423,7 +423,7 @@ Configuration Notes:
 			hint="The name of the file if an attachment. Zero-length string means not to send as attachment." />
 		<cfargument name="pipeExtension" type="string" required="true"
 			hint="The file extension type to pipe the output to (.cfm -> .css)." />
-		
+
 		<cfset var contentType = getContentTypeFromFilePath(arguments.pipeExtension) />
 		<cfset var fileInfo = "" />
 		<cfset var output = "" />
@@ -431,18 +431,18 @@ Configuration Notes:
 		<!--- Read file info for last-modified headers --->
 		<cftry>
 			<cfset fileInfo = getFileInfo(ExpandPath(fileFullPath)) />
-			
+
 			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 			<cfif fileInfo.type NEQ "file">
 				<cfthrow />
 			</cfif>
 			<cfcatch type="any">
-				<cfthrow type="MachII.endpoints.file.notFound" 
+				<cfthrow type="MachII.endpoints.file.notFound"
 					message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
 					detail="File path: '#getFileFromPath(fileFullPath)#'." />
 			</cfcatch>
 		</cftry>
-	
+
 		<cfset addHTTPHeaderByName("Content-Type", contentType) />
 
 		<!--- Set the expires header using either access or modified --->
@@ -457,10 +457,10 @@ Configuration Notes:
 		</cfif>
 
 		<cfsavecontent variable="output"><cfinclude template="#arguments.fileFullPath#" /></cfsavecontent>
-		
+
 		<cfreturn output />
 	</cffunction>
-	
+
 	<cffunction name="serveStaticFile" access="private" returntype="void" output="false"
 		hint="Serves a static file via cfcontent or mod x-sendfile.">
 		<cfargument name="fileFullPath" type="string" required="true"
@@ -469,7 +469,7 @@ Configuration Notes:
 			hint="The expires struct." />
 		<cfargument name="attachment" type="string" required="true"
 			hint="The name of the file if an attachment. Zero-length string menas not to send as attachment." />
-		
+
 		<cfset var fullFilePath =  arguments.fileFullPath />
 		<cfset var contentType = getContentTypeFromFilePath(arguments.fileFullPath) />
 		<cfset var fileInfo = "" />
@@ -478,20 +478,20 @@ Configuration Notes:
 		<!--- Read file info for content-length and last-modified headers --->
 		<cftry>
 			<cfset fileInfo = getFileInfo(fileFullPath) />
-			
+
 			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 			<cfif fileInfo.type NEQ "file">
 				<cfthrow />
 			</cfif>
 			<cfcatch type="any">
-				<cfthrow type="MachII.endpoints.file.notFound" 
+				<cfthrow type="MachII.endpoints.file.notFound"
 					message="Cannot fetch file information for the request file path because it cannot be located. Check for your file path."
 					detail="File path: '#getFileFromPath(fileFullPath)#'." />
 			</cfcatch>
 		</cftry>
 
 		<cfset addHTTPHeaderByName("Content-Length", fileInfo.size) />
-		
+
 		<!--- Set the expires header using either access or modified --->
 		<cfif arguments.expires.type EQ "access">
 			<cfset addHTTPHeaderByName("Expires", GetHttpTimeString(Now() + arguments.expires.amount)) />
@@ -518,7 +518,7 @@ Configuration Notes:
 			<cfset addHTTPHeaderByName("X-Sendfile", arguments.fullFilePath) />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS - UTILS
 	--->
@@ -526,30 +526,30 @@ Configuration Notes:
 		hint="Reuturns the MIME type from a file path.">
 		<cfargument name="filePath" type="string" required="true"
 			hint="The full path to the file." />
-		
+
 		<cfset var fileName = getFileFromPath(arguments.filePath) />
 		<cfset var fileExtension = "." & ListLast(arguments.filePath, ".") />
-		
+
 		<!--- Get MIME type only if we have an extension --->
 		<cfif ListLen(fileName, ".")>
-			<cfreturn getUtils().getMimeTypeByFileExtension("." & ListLast(fileName, "."), variables.customMimeTypeMap) />	
+			<cfreturn getUtils().getMimeTypeByFileExtension("." & ListLast(fileName, "."), variables.customMimeTypeMap) />
 		<!--- If no file extension, then serve as plain text --->
 		<cfelse>
 			<cfreturn getUtils().getMimeTypeByFileExtension(".txt", variables.customMimeTypeMap) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="parseExpiresLanguage" access="private" returntype="struct" output="false"
 		hint="Parses expires language into an uniform structure with keys of 'type' and 'amount' (via createTimespan() BIF).">
 		<cfargument name="inputString" type="string" required="true" />
-		
+
 		<cfset var amountRaw = "" />
 		<cfset var result = StructNew() />
-		
+
 		<cfif REFindNoCase("^((access|modified) plus ([0-9]{1,}\,){3}[0-9]{1,})$", arguments.inputString)>
-		
+
 			<cfset amountRaw = ListToArray(ListGetAt(arguments.inputString, 3, " ")) />
-			
+
 			<cfset result.type = ListGetAt(arguments.inputString, 1, " ") />
 			<cfset result.amount = CreateTimespan(amountRaw[1], amountRaw[2], amountRaw[3], amountRaw[4]) />
 		<cfelseif arguments.inputString EQ "none">
@@ -559,7 +559,7 @@ Configuration Notes:
 			<cfthrow type="MachII.endpoint.file.UnableToParseExpiresString"
 				message="Unable to parse expires string of '#arguments.inputString#'." />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
 
@@ -567,51 +567,51 @@ Configuration Notes:
 		hint="Fetches the asset timestamp (seconds from epoch) from the passed target asset path.">
 		<cfargument name="filePath" type="string" required="true"
 			hint="This is the file path." />
-		
+
 		<cfset var fullPath = ReplaceNoCase(ExpandPath(getBasePath()) & arguments.filePath, "//", "/", "all") />
 		<cfset var fileInfo = "" />
 
 		<cftry>
 			<cfset fileInfo = getFileInfo(fullPath) />
-			
+
 			<!--- Assert the requested file was found (only throw the relative path for security reasons) --->
 			<cfif fileInfo.type NEQ "file">
 				<cfthrow />
 			</cfif>
 
-			<!--- Convert current time to UTC because epoch is essentially UTC --->			
+			<!--- Convert current time to UTC because epoch is essentially UTC --->
 			<cfreturn DateDiff("s", variables.EPOCH_TIMESTAMP, DateConvert("local2Utc", fileInfo.lastModified)) />
 
 			<!--- Log an exception if asset cannot be found and only soft fail --->
 			<cfcatch type="any">
 				<cfset getLog().warn("Cannot fetch a timestamp for an asset because it cannot be located. Check for your asset path. Resolved asset path: '#fullPath#'") />
-	
-				<cfreturn 0 />			
+
+				<cfreturn 0 />
 			</cfcatch>
 		</cftry>
 	</cffunction>
-	
+
 	<cffunction name="matchCfmFile" access="private" returntype="boolean" output="false"
 		hint="Finds a match CFML file in the patterns and manages a cache.">
 		<cfargument name="filePath" type="string" required="true"
 			hint="This is the file path." />
-		
+
 		<cfset var i = 0 />
 		<cfset var result = false />
-		
+
 		<!--- Check the cache first --->
 		<cfif variables.cfmFileMatchCache.containsKey(arguments.filePath)>
 			<cfreturn variables.cfmFileMatchCache.get(arguments.filePath) />
 		</cfif>
-		
+
 		<!--- If not cache value, then search for match (the matcher can take an array of patterns)--->
 		<cfif variables.matcher.match(variables.cfmSafePatterns, arguments.filePath)>
 			<cfset result = true />
 		</cfif>
-		
+
 		<!--- Set a cache value for the file path --->
 		<cfset variables.cfmFileMatchCache.put(arguments.filePath, result) />
-	
+
 		<cfreturn result />
 	</cffunction>
 
@@ -649,7 +649,7 @@ Configuration Notes:
 	<cffunction name="getExpiresDefault" access="public" returntype="struct" output="false">
 		<cfreturn variables.expiresDefault />
 	</cffunction>
-	
+
 	<cffunction name="setExpiresDefaultAsString" access="public" returntype="void" output="false">
 		<cfargument name="expiresDefaultAsString" type="string" required="true" />
 		<cfset variables.expiresDefaultAsString = arguments.expiresDefaultAsString />
@@ -666,7 +666,7 @@ Configuration Notes:
 	<cffunction name="getAttachmentDefault" access="public" returntype="boolean" output="false">
 		<cfreturn variables.attachmentDefault />
 	</cffunction>
-	
+
 	<cffunction name="setTimestampDefault" access="private" returntype="void" output="false">
 		<cfargument name="timestampDefault" type="boolean" required="true" />
 		<cfset variables.timestampDefault = arguments.timestampDefault />

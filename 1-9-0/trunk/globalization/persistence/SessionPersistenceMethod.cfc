@@ -55,10 +55,13 @@ the user's locale in the session variable.
 	extends="MachII.globalization.persistence.AbstractPersistenceMethod"
 	output="false"
 	hint="Persistence method for storing locales in the session variable.">
-	
+
+	<!---
+	PROPERTIES
+	--->
 	<cfset variables.instance.persistenceType = "Session" />
 	<cfset variables.instance.sessionVariable = "__locale__" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -71,7 +74,7 @@ the user's locale in the session variable.
 		hint="Override to provide custom deconfiguration logic. Also called when target object is reloaded.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -80,15 +83,15 @@ the user's locale in the session variable.
 		<cfargument name="locale" type="string" required="true" />
 		<cfset session[variables.instance.sessionVariable] = arguments.locale />
 	</cffunction>
-	
+
 	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"
 		hint="Retrieves a locale from the session variable, or the empty string if one doesn't exist.">
-		
+
 		<cfif NOT StructKeyExists(session, variables.instance.sessionVariable)>
 			<cfreturn "" />
 		</cfif>
-		
+
 		<cfreturn session[variables.instance.sessionVariable] />
 	</cffunction>
-	
+
 </cfcomponent>

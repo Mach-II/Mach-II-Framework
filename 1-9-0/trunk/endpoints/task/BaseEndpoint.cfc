@@ -141,12 +141,12 @@ Custom Configuration:
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the scheduled task endpoint. Override to provide custom functionality and call super.preProcess() last.">
-		
+
 		<!--- Default is "{applicationName}_{endpointName}" or "{userDefinedPrefix}" --->
 		<cfset setTaskNamePrefix(getParameter("taskNamePrefix", application.applicationName & "_" & getParameter("name")) & "_") />
 		<cfset setUrlBase(getProperty("urlBase")) />
 		<cfset setServer(getParameter("server", cgi.server_name)) />
-		
+
 		<!--- Only create a URLBase if the properties.urlBase doesn't start with https:// or http:// --->
 		<cfif NOT getUrlBase().toLowerCase().startsWith("http://") AND NOT getUrlBase().toLowerCase().startsWith("https://")>
 			<cfset setUrlBase("http://" & getServer() & getUrlBase()) />
@@ -158,24 +158,24 @@ Custom Configuration:
 		</cfif>
 		<cfif NOT IsParameterDefined("authPassword")>
 			<cfset setParameter("authPassword", CreateUUID()) />
-		</cfif>		
-		
+		</cfif>
+
 		<cfset setAuthUsername(getParameter("authUsername")) />
 		<cfset setAuthPassword(getParameter("authPassword")) />
-		
+
 		<cfif IsStruct(getParameter("taskEnabled"))>
 			<cfset setEnabled(resolveValueByEnvironment(getParameter("taskEnabled"), true)) />
 		<cfelse>
 			<cfset setEnabled(getParameter("taskEnabled", true)) />
 		</cfif>
-		
+
 		<!--- Setup authentication services --->
 		<cfset variables.authentication = CreateObject("component", "MachII.security.http.basic.Authentication").init(application.applicationName & "Scheduled Tasks") />
 		<cfset variables.authentication.setCredentials(buildAuthCredentials()) />
-		
+
 		<!--- Get a CFML engine API engine adapter --->
 		<cfset variables.adminApi = getUtils().createAdminApiAdapter() />
-		
+
 		<!--- Setup the endpoint --->
 		<cfset setupTaskMethods() />
 		<cfset manageTasks() />
@@ -194,7 +194,7 @@ Custom Configuration:
 				message="Bad credentials." />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="handleRequest" access="public" returntype="void" output="true"
 		hint="Executes the scheduled task method. Do not override this method.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
@@ -206,14 +206,14 @@ Custom Configuration:
 
 		<!--- Setup basic required request args --->
 		<cfset arguments.event.setArg("retryOnFailureCount", 0) />
-	
+
 		<!--- Check for a task that accepts requests from the outside (always check variables.tasks for security reasons) --->
 		<cfif StructKeyExists(variables.tasks, taskName)>
 			<cfset task = variables.tasks[taskName] />
-			
+
 			<!--- Set the request timeout for this task --->
 			<cfsetting requesttimeout="#task.requestTimeout#" />
-			
+
 			<!--- Handle allow concurrent execution --->
 			<cfif NOT task.allowConcurrentExecutions>
 				<cflock name="_MachIITaskEndpoint_#getTaskNamePrefix()##taskName#" type="exclusive" timeout="1" throwontimeout="false">
@@ -229,21 +229,21 @@ Custom Configuration:
 			<cfelse>
 				<cfset output = invokeTask(task, arguments.event) />
 			</cfif>
-			
-			<cfsetting enablecfoutputonly="false" /><cfoutput>#output#</cfoutput><cfsetting enablecfoutputonly="true" />		
+
+			<cfsetting enablecfoutputonly="false" /><cfoutput>#output#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<cfelse>
 			<!--- Ultimately this will be processed by the AbstractEndpoint base onException() --->
 			<cfthrow type="MachII.endpoints.EndpointNotDefined"
 				message="Cannot find a task named '#taskName#' in '#getParameter("name")#' endpoint." />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="onException" access="public" returntype="void" output="true"
 		hint="Runs when an exception occurs in the endpoint. Override to provide custom functionality and call super.onException(arguments.event, arguments.exception) last.">
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="exception" type="MachII.util.Exception" required="true"
 			hint="The Exception that was thrown/caught by the endpoint request processor." />
-		
+
 		<!--- Handle notAuthorized --->
 		<cfif arguments.exception.getType() EQ "MachII.endpoints.task.notAuthorized">
 			<cfset addHTTPHeaderByStatus(401) />
@@ -253,26 +253,26 @@ Custom Configuration:
 		<cfelseif arguments.exception.getType() EQ "MachII.endpoints.task.noConcurrentExecution">
 			<cfset addHTTPHeaderByStatus(409) />
 			<cfset addHTTPHeaderByName("machii.endpoint.error", arguments.exception.getMessage()) />
-			<cfsetting enablecfoutputonly="false" /><cfoutput>409 Conflict - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />		
+			<cfsetting enablecfoutputonly="false" /><cfoutput>409 Conflict - #arguments.exception.getMessage()#</cfoutput><cfsetting enablecfoutputonly="true" />
 		<!--- Default exception handling --->
 		<cfelse>
 			<cfset super.onException(arguments.event, arguments.exception) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="buildEndpointUrl" access="public" returntype="string" output="false"
 		hint="Builds an Url specific to this endpoint. We use query string URLs because it does not matter for scheduled tasks.">
 		<cfargument name="task" type="string" required="true"
 			hint="The name of the task." />
-			
+
 		<cfset var builtUrl = getUrlBase() & "?" />
-		
+
 		<cfset builtUrl = builtUrl & "endpoint=" & getParameter("name") />
 		<cfset builtUrl = ListAppend(builtUrl, "task=" & arguments.task, "&") />
-		
+
 		<cfreturn builtUrl />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -281,10 +281,10 @@ Custom Configuration:
 		<cfargument name="task" type="struct" required="true"
 			hint="The internal task metadata struct." />
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
-		
+
 		<cfset var output = "" />
 		<cfset var startTick = getTickCount() />
-			
+
 		<cftry>
 			<cfinvoke component="#this#" method="#arguments.task.name#" returnvariable="output">
 				<cfinvokeargument name="event" value="#arguments.event#" />
@@ -301,14 +301,14 @@ Custom Configuration:
 				</cfif>
 			</cfcatch>
 		</cftry>
-		
+
 		<cfif IsDefined("output")>
 			<cfreturn output />
 		<cfelse>
 			<cfreturn "Task '#task.name#' has completed execution in #getTickCount() - startTick#ms." />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="setupTaskMethods" access="private" returntype="void" output="false"
 		hint="Setups all task related methods by introspection the metadata. This method is recursive and looks through all the object hierarchy until the stop class.">
 		<cfargument name="taskMethodMetadata" type="array" required="false"
@@ -319,7 +319,7 @@ Custom Configuration:
 		<cfset var currFunction = "" />
 		<cfset var taskMetadata = "" />
 		<cfset var i = 0 />
-		
+
 		<cfif ArrayLen(arguments.taskMethodMetadata)>
 			<cfset currMetadata = arguments.taskMethodMetadata[1] />
 
@@ -327,7 +327,7 @@ Custom Configuration:
 				<cfloop from="1" to="#ArrayLen(currMetadata.functions)#" index="i">
 					<!--- Iterate through found methods and look for required TASK:INTERVAL annotation which is required for a tasks --->
 					<cfset currFunction = currMetadata.functions[i] />
-					
+
 					<!---
 					Add the task if the required TASK:INTERVAL is defined and the task name is not already defined.
 					We need to check for already defined tasks due to object inheritance. We loop through the top level
@@ -335,12 +335,12 @@ Custom Configuration:
 					--->
 					<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_INTERVAL)
 						AND NOT StructKeyExists(variables.tasks, currFunction.name)>
-						
+
 						<cfset taskMetadata = StructNew() />
-						
+
 						<cfset taskMetadata.name = currFunction.name />
 						<cfset taskMetadata.interval = currFunction[variables.ANNOTATION_TASK_INTERVAL] />
-						
+
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_STARTDATE)>
 							<cfset taskMetadata.startDate = currFunction[variables.ANNOTATION_TASK_STARTDATE] />
 						<cfelse>
@@ -352,13 +352,13 @@ Custom Configuration:
 						<cfelse>
 							<cfset taskMetadata.endDate = 0 />
 						</cfif>
-						
+
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_TIMEPERIOD)>
 							<cfset taskMetadata.timePeriod = currFunction[variables.ANNOTATION_TASK_TIMEPERIOD] />
 						<cfelse>
 							<cfset taskMetadata.timePeriod = "00:00" />
 						</cfif>
-						
+
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_REQUESTTIMEOUT)>
 							<cfset taskMetadata.requestTimeout = currFunction[variables.ANNOTATION_TASK_REQUESTTIMEOUT] />
 						<cfelse>
@@ -370,13 +370,13 @@ Custom Configuration:
 						<cfelse>
 							<cfset taskMetadata.allowConcurrentExecutions = false />
 						</cfif>
-						
+
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_RETRYONFAILURE)>
 							<cfset taskMetadata.retryOnFailure = currFunction[variables.ANNOTATION_TASK_RETRYONFAILURE] />
 						<cfelse>
 							<cfset taskMetadata.retryOnFailure = 0 />
 						</cfif>
-						
+
 						<cfif StructKeyExists(currFunction, variables.ANNOTATION_TASK_ENABLED)>
 							<cfset taskMetadata.enabled = resolveEnabledByEnvironments(currFunction[variables.ANNOTATION_TASK_ENABLED]) />
 						<cfelse>
@@ -387,10 +387,10 @@ Custom Configuration:
 					</cfif>
 				</cfloop>
 			</cfif>
-			
+
 			<!--- Pop off the current level of metadata and recurse until the stop class if required --->
 			<cfset ArrayDeleteAt(arguments.taskMethodMetadata, 1) />
-			
+
 			<cfif ArrayLen(arguments.taskMethodMetadata)>
 				<cfset setupTaskMethods(arguments.taskMethodMetadata) />
 			</cfif>
@@ -399,18 +399,18 @@ Custom Configuration:
 
 	<cffunction name="manageTasks" access="private" returntype="void" output="false"
 		hint="Manages tasks that belong to this endpoint.">
-		
+
 		<cfset var key = "" />
 		<cfset var task = "" />
-		
+
 		<!--- Remove all tasks by prefix --->
 		<cfset variables.adminApi.deleteTasks(getTaskNamePrefix() & "*") />
-		
+
 		<!--- Add all defined tasks if enabled--->
 		<cfif isEnabled()>
 			<cfloop collection="#variables.tasks#" item="key">
 				<cfset task = variables.tasks[key] />
-				
+
 				<!--- Only define tasks that are enabled --->
 				<cfif task.enabled>
 					<cfset variables.adminApi.addTask(getTaskNamePrefix() & task.name
@@ -426,49 +426,49 @@ Custom Configuration:
 			</cfloop>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="buildAuthCredentials" access="private" returntype="struct" output="false"
 		hint="Builds the authentication credentials maps for injection into the basic HTTP access authenticate module.">
-		
+
 		<cfset var credentials = StructNew() />
-		
+
 		<cfset credentials[getAuthUsername()] = Hash(getAuthPassword(), "sha") />
-		
+
 		<cfreturn credentials />
 	</cffunction>
-	
+
 	<cffunction name="resolveEnabledByEnvironments" access="private" returntype="boolean" output="false"
 		hint="Resolves">
 		<cfargument name="enabledRaw" type="any" required="true"
 			hint="Accepts boolean, struct of environment groups/names or string ('group:development=false|group:production,staging=true')."/>
-		
+
 		<cfset var resolvedEnabled = true />
 		<cfset var enabledArray = "" />
 		<cfset var environmentValues = StructNew() />
 		<cfset var i = 0 />
-		
+
 		<!--- Boolean --->
 		<cfif IsBoolean(arguments.enabledRaw)>
 			<cfset resolvedEnabled = arguments.enabledRaw />
-			
+
 		<!--- String to Struct --->
 		<cfelseif IsSimpleValue(arguments.enabledRaw)>
 			<!--- Format 'group:development=false|group:production,staging=true' into struct--->
 			<cfset enabledArray = ListToArray(arguments.enabledRaw, "|") />
-			
+
 			<cfloop from="1" to="#ArrayLen(enabledArray)#" index="i">
 				<cfset environmentValues[ListFirst(enabledArray[i], "=")] = ListLast(enabledArray[i], "=") />
 			</cfloop>
-			
+
 			<cfset resolvedEnabled = resolveValueByEnvironment(environmentValues, true) />
 		<!--- Struct --->
 		<cfelse>
 			<cfset resolvedEnabled = resolveValueByEnvironment(arguments.enabledRaw, true) />
 		</cfif>
-		
+
 		<cfreturn resolvedEnabled />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -479,7 +479,7 @@ Custom Configuration:
 	<cffunction name="isEnabled" access="public" returntype="boolean" output="false">
 		<cfreturn variables.enabled />
 	</cffunction>
-	
+
 	<cffunction name="setTaskNamePrefix" access="public" returntype="void" output="false">
 		<cfargument name="taskNamePrefix" type="string" required="true" />
 		<cfset variables.taskNamePrefix = arguments.taskNamePrefix />
@@ -487,7 +487,7 @@ Custom Configuration:
 	<cffunction name="getTaskNamePrefix" access="public" returntype="string" output="false">
 		<cfreturn variables.taskNamePrefix />
 	</cffunction>
-	
+
 	<cffunction name="setUrlBase" access="public" returntype="void" output="false">
 		<cfargument name="urlBase" type="string" required="true" />
 		<cfset variables.urlBase = arguments.urlBase />
@@ -495,10 +495,10 @@ Custom Configuration:
 	<cffunction name="getUrlBase" access="public" returntype="string" output="false">
 		<cfreturn variables.urlBase />
 	</cffunction>
-	
+
 	<cffunction name="setServer" access="public" returntype="void" output="false">
 		<cfargument name="server" type="string" required="true" />
-		
+
 		<!--- Only set the server if url base does not have a full URL with server and protocal in it --->
 		<cfif NOT getUrlBase().startsWith("http://") OR NOT getUrlBase().startsWith("https://")>
 			<!--- Ensure an absolute path if to route bootstrapper file --->
@@ -511,7 +511,7 @@ Custom Configuration:
 	<cffunction name="getServer" access="public" returntype="string" output="false">
 		<cfreturn variables.server />
 	</cffunction>
-	
+
 	<cffunction name="setAuthUsername" access="public" returntype="void" output="false">
 		<cfargument name="authUsername" type="string" required="true" />
 		<cfset variables.authUsername = arguments.authUsername />

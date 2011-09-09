@@ -113,10 +113,10 @@ is en_US.
 		<cfset globalizationManager.setDebuggingEnabled(decideDebuggingEnabled(getParameter("debuggingEnabled", "false"))) />
 		<cfset globalizationManager.setDebugPrefix(getParameter("debugPrefix", "**")) />
 		<cfset globalizationManager.setDebugSuffix(getParameter("debugSuffix", "**")) />
-		
+
 		<cfset globalizationManager.setLocaleUrlParam(getParameter("localeUrlParam", "_locale")) />
 		<cfset globalizationManager.setLocalePersistenceClass(getParameter("localePersistenceClass", "MachII.globalization.persistence.SessionPersistenceMethod")) />
-		
+
 		<cfif IsSimpleValue(bundles)>
 			<cfset bundles = ListToArray(bundles) />
 		</cfif>
@@ -127,7 +127,7 @@ is en_US.
 				<cfset tempBundle = StructNew() />
 				<cfset tempBundle.bundle = bundles[i] />
 				<cfset tempBundle.charset = defaultCharset />
-				
+
 				<cfset modifiedBundles[i] = tempBundle />
 			<cfelse>
 				<cfset modifiedBundles[i] = bundle[i] />
@@ -136,22 +136,22 @@ is en_US.
 
 		<cfset globalizationManager.appendBasenames(modifiedBundles) />
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" output="false" returntype="void"
 		hint="Deconfigures the property.">
 		<!--- Does nothing --->
 	</cffunction>
-	
+
 	<!---
 	PROTECTED METHODS
 	--->
 	<cffunction name="decideDebuggingEnabled" access="private" returntype="boolean" output="false"
 		hint="Decides if debugging is enabled.">
 		<cfargument name="debuggingEnabled" type="any" required="true" />
-		
+
 		<cfset var result = false />
-		
-		<cfset getAssert().isTrue(IsBoolean(arguments.debuggingEnabled) 
+
+		<cfset getAssert().isTrue(IsBoolean(arguments.debuggingEnabled)
 			OR IsStruct(arguments.debuggingEnabled), "The 'debuggingEnabled' parameter for 'GlobalizationLoaderProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
 
 		<!--- Load caching enabled since this is a simple value (no environment names / group) --->
@@ -161,8 +161,8 @@ is en_US.
 		<cfelse>
 			<cfset result = resolveValueByEnvironment(arguments.debuggingEnabled, false) />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 </cfcomponent>
