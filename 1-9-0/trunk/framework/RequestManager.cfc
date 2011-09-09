@@ -44,7 +44,7 @@ Author: Peter J. Farrell (peter@mach-ii.com)
 $Id$
 
 Created version: 1.5.0
-Updated version: 1.8.0
+Updated version: 1.9.0
 
 Notes:
 --->
@@ -123,7 +123,7 @@ Notes:
 		<cfset setMaxEvents(getPropertyManager().getProperty("maxEvents")) />
 		<cfset setModuleNames(getAppManager().getModuleManager().getModuleNames()) />
 
-		<!--- TODO:Check if the urlBase and urlSecureBase need to be dynamic server names --->
+		<!--- TODO: Check if the urlBase and urlSecureBase need to be dynamic server names --->
 
 		<cfif NOT getPropertyManager().isPropertyDefined("urlSecureBase")>
 			<cfset temp =  getPropertyManager().getProperty("urlBase") />
