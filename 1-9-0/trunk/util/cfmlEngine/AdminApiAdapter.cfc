@@ -47,7 +47,8 @@ Created version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="AdminApiAdapter"
+<cfcomponent
+	displayname="AdminApiAdapter"
 	output="false"
 	hint="Abstract API that adapters a CFML engine API.">
 
@@ -55,7 +56,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.matcher = CreateObject("component", "MachII.util.matching.SimplePatternMatcher").init() />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -63,7 +64,7 @@ Notes:
 		hint="Initializes the adapter.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -74,21 +75,21 @@ Notes:
 			hint="Allows you to filter by task name using simple patern matching syntax." />
 		<cfabort showerror="This method is abstract and must be overriden." />
 	</cffunction>
-	
+
 	<cffunction name="deleteTasks" access="public" returntype="void" output="false"
 		hint="Deletes all scheduled tasks by filter pattern.">
 		<cfargument name="searchPattern" type="string" required="false"
 			default="*"
 			hint="Allows you to filter by task name using simple patern matching syntax." />
-		
+
 		<cfset var tasks = getScheduledTasks(arguments.searchPattern) />
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#tasks#" item="key">
 			<cfschedule action="delete" task="#key#" />
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="addTask" access="public" returntype="void" output="false"
 		hint="Adds a scheduled task.">
 		<cfargument name="task" type="string" required="true"
@@ -115,24 +116,24 @@ Notes:
 		<cfif REFindNoCase("([0-9]+,){3}([0-9]+)", arguments.interval)>
 			<cfset arguments.interval = convertTimespanStringToSeconds(arguments.interval) />
 		</cfif>
-		
+
 		<!--- Convert the dates OpenBD requires dates to be in the mm/dd/yyyy where ACF is more forgiving --->
 		<cfset arguments.startDate = DateFormat(arguments.startDate, "mm/dd/yyyy") />
-				
+
 		<!--- Use "text" comparison since this could be 0 or a date --->
 		<cfif StructKeyExists(arguments, "endDate") AND arguments.endDate IS "0">
 			<cfset StructDelete(arguments, "endDate", false) />
 		<cfelseif StructKeyExists(arguments, "endDate") AND arguments.endDate.toLowerCase().startsWith("ts {'")>
 			<cfset arguments.endDate = DateFormat(arguments.endDate, "mm/dd/yyyy") />
 		</cfif>
-		
+
 		<!--- Convert time period into start/EndTime keys (if required) --->
 		<cfif StructKeyExists(arguments, "timePeriod")>
 			<cfif REFindNoCase("[0-9]{1,2}:[0-9]{2}(-[0-9]{1,2}:[0-9]{2})?", arguments.timePeriod)>
 				<cfset arguments.startTime = ListFirst(arguments.timePeriod, "-") />
 				<cfif ListLen(arguments.timePeriod, "-") EQ 2>
 					<cfset arguments.endTime = ListLast(arguments.timePeriod, "-") />
-				</cfif>			
+				</cfif>
 			<cfelse>
 				<cfthrow type="MachII.util.cfmlEngine.InvalidTimePeriodFormat" />
 			</cfif>
@@ -140,13 +141,13 @@ Notes:
 			<cfset arguments.startTime = "00:00:00" />
 			<cfset arguments.endTime = "23:59:00" />
 		</cfif>
-		
+
 		<cfif StructKeyExists(arguments, "endDate")>
-			<cfschedule action="update" 
-				task="#arguments.task#" 
+			<cfschedule action="update"
+				task="#arguments.task#"
 				interval="#arguments.interval#"
-				operation="HTTPRequest" 
-				url="#arguments.url#" 
+				operation="HTTPRequest"
+				url="#arguments.url#"
 				startDate="#arguments.startDate#"
 				startTime="#arguments.startTime#"
 				endDate="#arguments.endDate#"
@@ -155,11 +156,11 @@ Notes:
 				password="#arguments.password#"
 				requestTimeout="#arguments.requestTimeout#" />
 		<cfelse>
-			<cfschedule action="update" 
-				task="#arguments.task#" 
+			<cfschedule action="update"
+				task="#arguments.task#"
 				interval="#arguments.interval#"
-				operation="HTTPRequest" 
-				url="#arguments.url#" 
+				operation="HTTPRequest"
+				url="#arguments.url#"
 				startDate="#arguments.startDate#"
 				startTime="#arguments.startTime#"
 				username="#arguments.username#"
@@ -167,7 +168,7 @@ Notes:
 				requestTimeout="#arguments.requestTimeout#" />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -175,10 +176,10 @@ Notes:
 		hint="Converts a timespan string (e.g. 0,0,0,0) into seconds.">
 		<cfargument name="timespanString" type="string" required="true"
 			hint="The input timespan string." />
-		
+
 		<cfset var timespan = CreateTimespan(ListGetAt(arguments.timespanString, 1), ListGetAt(arguments.timespanString, 2), ListGetAt(arguments.timespanString, 3), ListGetAt(arguments.timespanString, 4)) />
 
 		<cfreturn Round((timespan * 60) / 0.000694444444444) />
 	</cffunction>
-	
+
 </cfcomponent>

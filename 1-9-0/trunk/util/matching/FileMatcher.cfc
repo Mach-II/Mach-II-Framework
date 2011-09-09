@@ -61,7 +61,7 @@ Notes:
 	<cfset variables.utils = "" />
 	<cfset variables.engineInfo = "" />
 	<cfset variables.isGAE = false />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -71,12 +71,12 @@ Notes:
 			hint="The path separator to use. Defaults to '/'."/>
 		<cfargument name="useListInfo" type="boolean" required="false"
 			hint="Allows you to indicate if you want to use the listInfo attribute of cfdirectory for faster performance. listInfo does not return file size or date last modified." />
-		
+
 		<cfset var temp = "" />
-		
+
 		<cfset variables.utils = CreateObject("component", "MachII.util.Utils").init("false") />
 		<cfset variables.engineInfo = variables.utils.getCfmlEngineInfo() />
-		
+
 		<!--- Determine if _queryDeleteRow_java should be used and reassign to common function --->
 		<cftry>
 			<cfset temp = QueryNew("name", "VarChar") />
@@ -85,12 +85,12 @@ Notes:
 			<cfset QuerySetCell(temp, "name", "Mach-II", 1) />
 			<cfset QuerySetCell(temp, "name", "Framework", 2) />
 			<cfset QueryDeleteRow(temp, 1) />
-			
+
 			<cfcatch type="any">
 				<cfset variables.queryDeleteRow = variables._queryDeleteRow_java />
 			</cfcatch>
 		</cftry>
-		
+
 		<!--- Determine if we should use cfdirectory listInfo --->
 		<cfif StructKeyExists(arguments, "useListInfo")>
 			<cfset variables.useListInfo = arguments.useListInfo />
@@ -102,16 +102,16 @@ Notes:
 				<cfset variables.useListInfo = true />
 			</cfif>
 		</cfif>
-		
+
 		<cfif FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.productLevel EQ "Google App Engine">
 			<cfset variables.isGAE = true />
 		</cfif>
-		
+
 		<cfset super.init(argumentCollection=arguments) />
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -119,13 +119,13 @@ Notes:
 		hint="Matches the passed path against the pattern according to the matching strategy.">
 		<cfargument name="pattern" type="string" required="true"
 			hint="The pattern to use for the matching. Must be a full absolute path or use './' to be relative from the value in the path argument." />
-		<cfargument name="path" type="string" required="true" 
+		<cfargument name="path" type="string" required="true"
 			hint="The base path directory to run a cfdirectory call against. This path cannot have any patterns in it." />
-		<cfargument name="removeRootPath" type="string" required="false" default="" 
+		<cfargument name="removeRootPath" type="string" required="false" default=""
 			hint="A path to remove from the computed results. This is most useful when looking for .cfm files to be used with cfincludes as those paths cannot be absolute paths." />
-		<cfargument name="excludePatterns" type="array" required="false" default="#ArrayNew(1)#" 
+		<cfargument name="excludePatterns" type="array" required="false" default="#ArrayNew(1)#"
 			hint="An array of patterns to exclude from the final results. This is useful if you want to cast a wide net with your pattern and filter those results further." />
-		
+
 		<cfset var pathResults = "" />
 		<cfset var pathResultsRecordCount = 0 />
 		<cfset var i = 0 />
@@ -135,25 +135,25 @@ Notes:
 		<cfset arguments.path = pathClean(arguments.path) />
 		<cfset arguments.removeRootPath = pathClean(arguments.removeRootPath) />
 		<cfset arguments.pattern = pathClean(arguments.pattern) />
-		 
+
 		<cfif variables.useListInfo>
 			<cfset pathResults = findFilesWithListInfo(arguments.pattern, arguments.path, arguments.removeRootPath) />
 		<cfelse>
 			<cfset pathResults = findFiles(arguments.pattern, arguments.path, arguments.removeRootPath) />
 		</cfif>
-		
+
 		<!--- N.B. At this point, all paths use "/" as the path separator regardless of OS --->
-		
-		<!--- Remove page view paths that match exclude paths or patterns 
+
+		<!--- Remove page view paths that match exclude paths or patterns
 			(except go in reverse because we may delete from the query)--->
 		<cfif ArrayLen(arguments.excludePatterns)>
 			<cfset arguments.excludePatterns = cleanExcludePatterns(arguments.excludePatterns) />
-			
+
 			<cfloop from="#pathResults.recordcount#" to="1" index="i" step="-1">
 				<cfloop from="1" to="#ArrayLen(arguments.excludePatterns)#" index="j">
 					<!--- If pattern and pattern matches or if exact path --->
 					<cfif arguments.excludePatterns[j] EQ pathResults.modifiedPath[i]
-						OR (isPattern(arguments.excludePatterns[j]) 
+						OR (isPattern(arguments.excludePatterns[j])
 						AND super.match(arguments.excludePatterns[j], pathResults.modifiedPath[i]))>
 						<!---
 						If a pattern is found, delete and break out of the inner loop (short-circuit)
@@ -165,9 +165,9 @@ Notes:
 				</cfloop>
 			</cfloop>
 		</cfif>
-		
+
 		<cfset pathResultsRecordCount = pathResults.recordcount />
-		
+
 		<!---
 			Looks for all the results that match the input pattern
 			Loop from last to row 2 since we have to get around a QueryDeleteRow() bug in OpenBD 1.3
@@ -180,7 +180,7 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<!--- Get around a QueryDeleteRow() bug in OpenBD 1.3 when only one row of data remains in the query. --->
 		<cfif pathResults.recordCount GTE 1 AND NOT super.match(arguments.pattern, pathResults.modifiedPath[1])>
 			<cfif pathResults.recordCount EQ 1>
@@ -189,7 +189,7 @@ Notes:
 				<cfset queryDeleteRow(pathResults, 1) />
 			</cfif>
 		</cfif>
-		
+
 		<cfreturn pathResults />
 	</cffunction>
 
@@ -204,34 +204,34 @@ Notes:
 			hint="The path to clean and convert to an uniform path separator."/>
 		<cfreturn REReplaceNoCase(arguments.path, "(\\{1,}|\/{1,})", "/", "all") />
 	</cffunction>
-	
+
 	<cffunction name="extractPathWithoutPattern" access="public" returntype="string" output="false"
 		hint="Extract the path base (the part before the pattern starts) from a string and automatically cleans the path via pathClean().">
 		<cfargument name="path" type="string" required="true"
 			hint="The path to remove a pattern from."/>
-		
+
 		<cfset var parts = "" />
 		<cfset var result = "" />
 		<cfset var i = 0 />
-		
+
 		<!--- Ensure that the path has a uniform path separate to work with --->
 		<cfset arguments.path = pathClean(arguments.path) />
 
 		<cfset parts = ListToArray(arguments.path, "/") />
-		
+
 		<cfloop from="1" to="#ArrayLen(parts)#" index="i">
 			<cfif NOT isPattern(parts[i])>
 				<cfset result = ListAppend(result, parts[i], "/") />
 			</cfif>
 		</cfloop>
-		
+
 		<cfif arguments.path.startsWith("/")>
 			<cfset result = "/" & result />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
@@ -242,48 +242,48 @@ Notes:
 		<!--- Query rows in the Java methods start at 0 so we need to offset the row number to delete --->
 		<cfset arguments.query.removeRows(arguments.rowNumber - 1,  1) />
 	</cffunction>
-	
+
 	<cffunction name="cleanExcludePatterns" access="private" returntype="array" output="false"
 		hint="Cleans the exclude pattern paths.">
 		<cfargument name="excludePatterns" type="array" required="true"
 			hint="The exclude patterns to clean." />
-			
+
 		<cfset var cleanedExcludePatterns = ArrayNew(1) />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(arguments.excludePatterns)#" index="i">
 			<cfset ArrayAppend(cleanedExcludePatterns, pathClean(arguments.excludePatterns[i])) />
 		</cfloop>
-		
+
 		<cfreturn cleanedExcludePatterns />
 	</cffunction>
-	
+
 	<cffunction name="findFiles" access="private" returntype="query" output="false"
 		hint="Finds all files by pattern without using 'listInfo'.">
 		<cfargument name="pattern" type="string" required="true" />
 		<cfargument name="path" type="string" required="true" />
 		<cfargument name="removeRootPath" type="string" required="true" />
-		
+
 		<cfset var pathResults = "" />
 		<cfset var i = "" />
 		<cfset var rootFix = "" />
-		
+
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
-		<cfdirectory name="pathResults" 
-			action="list" 
+		<cfdirectory name="pathResults"
+			action="list"
 			directory="#arguments.path#"
 			recurse="#FindNoCase("**", arguments.pattern)#" />
-		
+
 		<!--- Add modified path columns --->
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
 		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
-		
+
 		<cfif variables.isGAE>
 			<cfset rootFix = "/" />
 		</cfif>
-		
+
 		<!---
-		Build possible paths by removing the root path if requested. This option 
+		Build possible paths by removing the root path if requested. This option
 		is offered because cfinclude cannot use absolute file paths
 		I know two loop that are similar is harder to maintain, but it's better performance
 		--->
@@ -308,7 +308,7 @@ Notes:
 				</cfif>
 			</cfloop>
 		</cfif>
-		
+
 		<cfreturn pathResults />
 	</cffunction>
 
@@ -317,14 +317,14 @@ Notes:
 		<cfargument name="pattern" type="string" required="true" />
 		<cfargument name="path" type="string" required="true" />
 		<cfargument name="removeRootPath" type="string" required="true" />
-		
+
 		<cfset var pathResults = "" />
 		<cfset var i = "" />
 		<cfset var rootFix = "" />
-		
+
 		<!--- Find possible candidates and only recurse if there is a ** in the pattern to save on performance --->
-		<cfdirectory name="pathResults" 
-			action="list" 
+		<cfdirectory name="pathResults"
+			action="list"
 			directory="#arguments.path#"
 			listInfo="name"
 			type="file"
@@ -344,7 +344,7 @@ Notes:
 		</cfif>
 
 		<!---
-		Build possible paths by removing the root path if requested. This option 
+		Build possible paths by removing the root path if requested. This option
 		is offered because cfinclude cannot use absolute file paths
 		I know two loop that are similar is harder to maintain, but it's better performance
 		--->
@@ -363,7 +363,7 @@ Notes:
 				<cfset pathResults.modifiedPath[i] = pathResults.fullPath[i] />
 			</cfloop>
 		</cfif>
-		
+
 		<cfreturn pathResults />
 	</cffunction>
 

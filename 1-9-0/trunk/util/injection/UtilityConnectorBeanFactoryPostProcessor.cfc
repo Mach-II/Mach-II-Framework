@@ -53,11 +53,11 @@ Notes:
 	output="false"
 	extends="coldspring.beans.factory.config.BeanFactoryPostProcessor"
 	hint="Used to wire in the correct AppManager into any UtilityConnector definitions">
-	
+
 	<!---
 	PROPERTIES
 	--->
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -65,7 +65,7 @@ Notes:
 		hint="Initializes the post processor.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->

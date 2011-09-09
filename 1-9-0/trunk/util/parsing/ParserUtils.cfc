@@ -56,7 +56,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -76,7 +76,7 @@ Notes:
 			hint="Parameter to set if UrlDecode is run on the body key and value. Only required for application/x-www-form-urlencoded content-type." />
 		<cfargument name="decodeEncoding" type="string" required="false" default="#GetEncoding("form")#"
 			hint="The encoding type to use with UrlDecode. Defaults to the encoding set for the 'form' scope." />
-		
+
 		<cfset var parameters = StructNew() />
 		<cfset var token = "" />
 		<cfset var key = "" />
@@ -84,11 +84,11 @@ Notes:
 		<cfset var i = 0 />
 
 		<cfloop array="#ListToArray(arguments.rawRequestBody, "&")#" index="token">
-		
+
 			<cfset i = token.indexOf("=") />
 			<cfset key = Left(token, i) />
 			<cfset value = Mid(token, i + 2, Len(token)) />
-			
+
 			<cfif arguments.decode>
 				<cfset parameters[UrlDecode(key, arguments.decodeEncoding)] = UrlDecode(value, arguments.decodeEncoding) />
 			<cfelse>

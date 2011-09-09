@@ -47,7 +47,8 @@ Created version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="AdminApiAdapterRA"
+<cfcomponent
+	displayname="AdminApiAdapterRA"
 	extends="AdminApiAdapter"
 	output="false"
 	hint="Abstract API that adapters a CFML engine API for Railo.">
@@ -55,7 +56,7 @@ Notes:
 	<!---
 	PROPERTIES
 	--->
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -63,7 +64,7 @@ Notes:
 		hint="Initializes the adapter.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -74,9 +75,9 @@ Notes:
 			hint="Allows you to filter by task name using simple patern matching syntax." />
 		<cfabort showerror="This method is abstract and must be overriden." />
 	</cffunction>
-	
+
 	<!--- deleteTasks is inherited --->
-	
+
 	<!--- addTask is inherited --->
-	
+
 </cfcomponent>

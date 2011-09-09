@@ -95,7 +95,7 @@ Notes:
 
 				<cfinvoke component="#thread.collection.component#"
 					method="#thread.collection.method#"
-					returnVariable="#thread.collection.returnVariable#" 
+					returnVariable="#thread.collection.returnVariable#"
 					argumentcollection="#thread.collection.argumentCollection#" />
 
 				<cfif IsDefined("thread.resultData")>
@@ -125,7 +125,7 @@ Notes:
 		<cfset var name = "" />
 		<cfset var results = StructNew() />
 		<cfset var i = "" />
-		
+
 		<!--- Convert the thread ids into a list --->
 		<cfif IsStruct(arguments.threadIds)>
 			<cfset name = StructKeyList(arguments.threadIds) />
@@ -136,7 +136,7 @@ Notes:
 		</cfif>
 
 		<!--- ResultArgs are automatically put into the event so we just have to wait for all threads --->
-		<cfthread action="join" 
+		<cfthread action="join"
 			name="#name#"
 			timeout="#convertSecondsToMilliseconds(arguments.timeout)#" />
 

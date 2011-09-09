@@ -93,7 +93,9 @@ This CFC *cannot* be used as a singleton and therefore is not thread-safe.
 	<cfset variables.line = 1 />
 	<cfset variables.column = 0 />
 
-	<!--- "Static" --->
+	<!---
+	CONSTANTS
+	--->
 	<cfset variables.EOF = -1 />
 
 	<!---

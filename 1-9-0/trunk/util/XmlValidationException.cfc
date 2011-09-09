@@ -87,7 +87,7 @@ Notes:
 
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="getFormattedMessage" access="public" returntype="string" output="false"
 		hint="Gets a message from the errors/warnings for display.">
 		<cfargument name="rawMessage" type="string" required="false" default="#findMostSevereMessage()#"
@@ -98,7 +98,7 @@ Notes:
 
 		<cfif getXmlPath() NEQ ''>
 			<cfset formattedMessage = formattedMessage & getXmlPath() & ": " />
-		</cfif>		
+		</cfif>
 
 		<cfset formattedMessage = formattedMessage & "Line " & partedMessage.line & ", " />
 		<cfset formattedMessage = formattedMessage & "Column " & partedMessage.column />
@@ -111,14 +111,14 @@ Notes:
 
 		<cfreturn formattedMessage />
 	</cffunction>
-	
+
 	<cffunction name="getPartedMessage" access="public" returntype="struct" output="false"
 		hint="Takes a message breaks it into a parted message struct.">
 		<cfargument name="rawMessage" type="string" required="false" default="#findMostSevereMessage()#"
 			hint="A raw message or this method will select the most severe message available." />
 
 		<cfset var partedMessage = StructNew() />
-		
+
 		<!---
 			ACF stupidly uses ":" for list when namespaces are being used.
 			This causes issues because ";" is the list delim. Change all:
@@ -127,14 +127,14 @@ Notes:
 			Then we convert back.
 		--->
 		<cfset arguments.rawMessage = REReplaceNoCase(arguments.rawMessage, "\'\{(""|.*):(.*?)}", "'{\1;;;;\2?}", "all") />
-		
+
 		<cfset partedMessage.line = "" />
 		<cfset partedMessage.column = "" />
 		<cfset partedMessage.message = "" />
 		<cfset partedMessage.detail = "" />
-		
+
 		<cfset partedMessage.severity = REReplaceNoCase(ListGetAt(arguments.rawMessage, 1, ":"), "\[(.*)\]", "\1", "all") />
-		
+
 		<cfif ListLen(arguments.rawMessage, ":") GTE 2>
 			<cfset partedMessage.line = ListGetAt(arguments.rawMessage, 2, ':') />
 		</cfif>
@@ -147,16 +147,16 @@ Notes:
 		<cfif ListLen(arguments.rawMessage, ":") GTE 5>
 			<cfset partedMessage.detail = REReplaceNoCase(Trim(ListGetAt(arguments.rawMessage, 5, ':')), "\'\{(""|.*?);;;;(.*?)}", "'{\1:.\2}", "all") />
 		</cfif>
-		
+
 		<cfreturn partedMessage />
 	</cffunction>
 
 	<cffunction name="findMostSevereMessage" access="public" returntype="string" output="false"
 		hint="Find most severe message available by the provided position.">
 		<cfargument name="position" type="numeric" required="false" default="1" />
-		
-		<cfset var exceptionStack = getOrderedMessages() />		
-		
+
+		<cfset var exceptionStack = getOrderedMessages() />
+
 		<cfif arguments.position LTE ArrayLen(exceptionStack)>
 			<cfreturn exceptionStack[arguments.position] />
 		<cfelse>
@@ -164,20 +164,20 @@ Notes:
 				message="There are no XML validation error messages defined that are located in position '#arguments.position#'. There are '#ArrayLen(exceptionStack)#' items in the exception array." />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="getOrderedMessages" access="public" returntype="array" output="false"
 		hint="Gets a stack of messages.">
-		
+
 		<cfset var exceptionStack = ArrayNew(1) />
 
 		<!--- Display error messages in order of important: fatal, error and warning --->
 		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.fatalErrors) />
 		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.errors) />
 		<cfset exceptionStack = variables.arrayConcat(exceptionStack, variables.warnings) />
-		
+
 		<cfreturn exceptionStack />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->

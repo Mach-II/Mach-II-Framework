@@ -47,7 +47,8 @@ Created version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="AdminApiAdapterCF"
+<cfcomponent
+	displayname="AdminApiAdapterCF"
 	extends="AdminApiAdapter"
 	output="false"
 	hint="Abstract API that adapters a CFML engine API for Adobe ColdFusion.">
@@ -56,7 +57,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.serviceFactory = CreateObject("java", "coldfusion.server.ServiceFactory") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -64,7 +65,7 @@ Notes:
 		hint="Initializes the adapter.">
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -73,24 +74,24 @@ Notes:
 		<cfargument name="searchPattern" type="string" required="false"
 			default="*"
 			hint="Allows you to filter by task name using simple patern matching syntax." />
-	
+
 		<cfset var rawTasks = variables.serviceFactory.CronService.listAll() />
 		<cfset var results = StructNew() />
 		<cfset var taskName = "" />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to="#ArrayLen(rawTasks)#" index="i">
 			<cfset taskName = rawTasks[i].task />
 			<cfif variables.matcher.match(arguments.searchPattern, taskName)>
 				<cfset results[taskName] = rawTasks[i] />
 			</cfif>
 		</cfloop>
-		
+
 		<cfreturn results />
 	</cffunction>
-	
+
 	<!--- deleteTasks is inherited --->
-	
+
 	<!--- addTask is inherited --->
-	
+
 </cfcomponent>

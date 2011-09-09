@@ -46,7 +46,8 @@ Created version: 1.9.0
 
 Notes:
 --->
-<cfcomponent displayname="AdminApiAdapterBD"
+<cfcomponent
+	displayname="AdminApiAdapterBD"
 	extends="AdminApiAdapter"
 	output="false"
 	hint="Abstract API that adapters a CFML engine API for Open BlueDragon.">
@@ -55,20 +56,20 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.admin = createObject("component", "bluedragon.adminapi.Administrator") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="AdminApiAdapter" output="false"
 		hint="Initializes the adapter.">
-		
+
 		<cfset session.auth.loggedIn = true/>
 		<cfset session.auth.password = createObject("java", "com.naryx.tagfusion.cfm.engine.cfEngine").getConfig().getCFMLData().server.system.password />
 		<cfset variables.admin.login(session.auth.password) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -83,16 +84,16 @@ Notes:
 		<cfset var results = StructNew() />
 		<cfset var taskName = "" />
 		<cfset var i = 0 />
-		
+
 		<cftry>
 			<cfset rawTasks = scheduleTaskService.getScheduledTasks() />
-			
+
 			<cfloop from="1" to="#ArrayLen(rawTasks)#" index="i">
 				<cfset taskName = rawTasks[i].name />
-	
+
 				<cfif variables.matcher.match(arguments.searchPattern, taskName)>
 					<cfset results[taskName] = rawTasks[i] />
-	
+
 					<!--- Normalize task name into key "task" --->
 					<cfset results[taskName].task = rawTasks[i].name />
 					<cfset results[taskName].url = rawTasks[i].urlToUse />
@@ -102,12 +103,12 @@ Notes:
 				<!--- Catch exception where there is no scheduled tasks --->
 			</cfcatch>
 		</cftry>
-		
+
 		<cfreturn results />
 	</cffunction>
-	
+
 	<!--- deleteTasks is inherited --->
-	
+
 	<!--- addTask is inherited --->
-	
+
 </cfcomponent>
