@@ -48,9 +48,9 @@ Updated version: 1.9.0
 Notes:
 This file provides the 'plugin' for the open source Mura CMS (http://getmura.com/).
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="MuraPlugin"
-	extends="mura.cfobject" 
+	extends="mura.cfobject"
 	output="false"
 	hint="This CFC represents the requirements to install, update and deleta a Mura plugin.">
 
@@ -58,17 +58,17 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 	PROPERTIES
 	--->
 	<cfset variables.pluginConfig = "" />
-	
+
 	<!---
 	INIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="void" output="false"
 		hint="Initializes the plugin for Mura CMS.">
 		<cfargument name="pluginConfig"  type="any" required="true" />
-		
+
 		<cfset variables.pluginConfig = arguments.pluginConfig />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -76,19 +76,19 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 		hint="Executed by the Mura PluginManager when the plugin is installed.">
 
 		<cfset var moduleId = variables.pluginConfig.getModuleId() />
-		
+
 		<cfif getInstallationCount() NEQ 1>
 			<cfset variables.pluginConfig.getPluginManager().deletePlugin(moduleId) />
 		</cfif>
 
 		<cfset application.appInitialized = false />
 	</cffunction>
-	
+
 	<cffunction name="update" access="public" returntype="void" output="false"
 		hint="Executed by the Mura PluginManager when the plugin is updated.">
 		<cfset application.appInitialized = false />
 	</cffunction>
-	
+
 	<cffunction name="delete" access="public returntype="void"" output="false"
 		hint="Execute by the Mura PluginManager when the plugin is delete.">
 		<cfset application.appInitialized = false />

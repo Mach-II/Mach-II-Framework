@@ -127,7 +127,7 @@ PUBLIC FUNCTIONS
 			</cfif>
 		</cflock>
 	</cfif>
-	
+
 	<!--- Use the loaded value from the xml otherwise default to value in Application.cfc --->
 	<cfset configMode = getProperty("machii:configMode", MACHII_CONFIG_MODE) />
 
@@ -156,7 +156,7 @@ PUBLIC FUNCTIONS
 	hint="Handles a Mach-II request. Recommend to call in onRequestStart() event.">
 	<cfargument name="eventArgs" type="struct" required="false"
 		hint="The event args to be used or the framework will automatically use the results from getRequestEventArgs()." />
-			
+
 	<cfset ensureLoadedFramework() />
 
 	<!---

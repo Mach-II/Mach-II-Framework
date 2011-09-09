@@ -53,7 +53,7 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 	extends="mura.plugin.pluginGenericEventHandler"
 	output="false"
 	hint="This CFC represents the events that integrate Mach-II as a plugin into Mura.">
-		
+
 	<!---
 	PROPERTIES
 	--->
@@ -62,49 +62,49 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 	 * variables.pluginConfig
 	 * variables.configBean
 	--->
-	
+
 	<cfset variables.eventParameter = "" />
 	<cfset variables.moduleDelimiter = "" />
-	
+
 	<!--- Disable resetting the response buffer at the beginning of the request --->
 	<cfset MACHII_ONREQUESTSTART_CONTENT_RESET = false />
-	
+
 	<cfinclude template="/MachII/bootstrapper/common.cfm" />
-	
+
 	<!---
 	INITIALIZATION / CONFIGRUATION
 	--->
 	<!--- init() in the super class --->
-	
+
 	<!---
 	PUBLIC FUNCTIONS - MURA SPECIFIC EVENTS
 	--->
 	<cffunction name="onApplicationLoad" access="public" returntype="void" output="false"
 		hint="Loads the Mach-II application when Mura loads up.">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
-		
+
 		<!--- Set the bootstrapper settings --->
-		
-		
+
+
 		<!--- Load the Mach-II application up --->
 		<cfset loadFramework() />
-		
+
 		<!--- Get framework specific settings --->
 		<cfset variables.eventParameter = getProperty("eventParameter") />
 		<cfset variables.moduleDelimiter = getProperty("moduleDelimiter") />
-		
+
 		<!--- Add this event handler to this Mura instance --->
 		<cfset variables.pluginConfig.addEventHandler(this) />
 	</cffunction>
-	
-	<!--- 
+
+	<!---
 	An onApplicationUnload() method is not currently supported in Mura, but has been requested:
 	http://www.getmura.com/forum/messages.cfm?threadid=292D1591-93B5-47BD-A5905DCF36625EC0
-	
+
 	<cffunction name="onApplicationUnload" access="public" returntype="void" output="false"
 		hint="Unloads the Mach-II application when Mura unloads.">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
 
 		<!--- Access to the application and session scopes are in the Mura scope in so you cannot use 'getAppManager()' --->
@@ -116,7 +116,7 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 
 	<cffunction name="onSiteRequestStart" access="public" returntype="void" output="false"
 		hint="Sets a reference to this Mach-II application into the Mura scope for use. Such as $.{muraScopeNamespace}.methodName(argumentCollection=args)">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
 
 		<cfset arguments.$[variables.pluginConfig.getSetting("muraScopeNamespace")] = this />
@@ -124,24 +124,24 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 
 	<cffunction name="onRenderStart" access="public" returntype="void" output="false"
 		hint="Sets a reference to this Mach-II application into the Mura scope for use. Such as $.{muraScopeNamespace}.methodName(argumentCollection=args)">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
 
 		<cfset arguments.$[variables.pluginConfig.getSetting("muraScopeNamespace")] = this />
 	</cffunction>
-	
+
 	<cffunction name="onGlobalSessionStart" access="public" returntype="void" output="false"
 		hint="Calls the onSessionStart Mach-II plugin points when a Mura session starts.">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
-		
+
 		<cfset ensureLoadedFramework() />
 		<cfset getAppManager().onSessionStart() />
 	</cffunction>
-	
+
 	<cffunction name="onGlobalSessionEnd" access="public" returntype="void" output="false"
 		hint="Calls the onSessionEnd Mach-II plugin points when a Mura session starts.">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
 
 		<!--- Access to the application and session scopes are in the Mura scope in so you cannot use 'getAppManager()' --->
@@ -155,7 +155,7 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 	--->
 	<cffunction name="handleRequest" access="public" returntype="string" output="false"
 		hint="Handles a request to the Mach-II application.">
-		<cfargument name="$" type="any" required="true" 
+		<cfargument name="$" type="any" required="true"
 			hint="Contains the Mura event." />
 		<cfargument name="moduleName" type="string" required="true"
 			hint="The name of the Mach-II module. Use '' for base module." />
@@ -163,10 +163,10 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 			hint="The name of the Mach-II event." />
 		<cfargument name="eventArgs" type="struct" required="false" default="#StructNew()#"
 			hint="Additional event-args to append to standard event-args that is build by this plugin." />
-		
+
 		<cfset var result = "" />
 		<cfset var args = StructNew() />
-		
+
 		<!--- Build up initial Mach-II event args --->
 		<cfset args["mura"] = arguments.$ />
 		<cfset args["$"] = arguments.$ />
@@ -182,7 +182,7 @@ This file provides the 'plugin' for the open source Mura CMS (http://getmura.com
 
 		<!--- Run the Mach-II request and save the output for Mura --->
 		<cfsavecontent variable="result"><cfset handleRequest(args) /></cfsavecontent>
-		
+
 		<cfreturn result />
 	</cffunction>
 
