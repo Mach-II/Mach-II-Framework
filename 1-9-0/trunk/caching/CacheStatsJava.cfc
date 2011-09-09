@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -47,18 +47,18 @@ Created version: 1.6.0
 Updated version: 1.8.0
 
 Notes:
-Stats on a particular cache's performance may be tracked by a Mach-II provided CFC 
-that exposes several metrics. One potential use of these metrics is to display them 
-inside a dashboard that can be monitored while the application is running. The metrics 
+Stats on a particular cache's performance may be tracked by a Mach-II provided CFC
+that exposes several metrics. One potential use of these metrics is to display them
+inside a dashboard that can be monitored while the application is running. The metrics
 tracked by Mach-II are as follows:
- 
+
 * Cache hits
 * Cache misses
 * Cache active element count
 * Cache total element count
-* Cache evictions - number of elements that the cache removed to make room for new elements 
+* Cache evictions - number of elements that the cache removed to make room for new elements
 
-N.B. CacheStats method is not synchronized and therefore not completely thread-safe. This 
+N.B. CacheStats method is not synchronized and therefore not completely thread-safe. This
 could lead to "slightly" inaccurate counts due to collision in which a counter is incremented
 or decremented concurrently. We could ensure complete thread-safety of the counters by wrapping
 each method in a cflock, but that would lead to degraded performance. Since CacheStats merely
@@ -79,7 +79,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<cfset variables.activeElements = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 	<cfset variables.totalElements = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
 	<cfset variables.evictions = CreateObject("java", "java.util.concurrent.atomic.AtomicLong") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -88,13 +88,13 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 		<cfset super.init() />
 		<cfreturn this />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
 	<cffunction name="incrementCacheHits" access="public" returntype="void" output="false"
 		hint="Increments the number of hits by the default of 1 or by the amount passed.">
-		<cfargument name="amount" type="numeric" required="false" default="1" />	
+		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfif arguments.amount EQ 1>
 			<cfset variables.cacheHits.incrementAndGet() />
 		<cfelse>
@@ -132,7 +132,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<cffunction name="getCacheMisses" access="public" returntype="numeric" output="false">
 		<cfreturn variables.cacheMisses.get() />
 	</cffunction>
-	
+
 	<cffunction name="incrementEvictions" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfif arguments.amount EQ 1>
@@ -148,7 +148,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<cffunction name="getEvictions" access="public" returntype="numeric" output="false">
 		<cfreturn variables.evictions.get() />
 	</cffunction>
-	
+
 	<cffunction name="incrementTotalElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfif arguments.amount EQ 1>
@@ -172,7 +172,7 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<cffunction name="getTotalElements" access="public" returntype="numeric" output="false">
 		<cfreturn variables.totalElements.get() />
 	</cffunction>
-	
+
 	<cffunction name="incrementActiveElements" access="public" returntype="void" output="false">
 		<cfargument name="amount" type="numeric" required="false" default="1" />
 		<cfif arguments.amount EQ 1>
@@ -196,5 +196,5 @@ gives an "idea"" of the counts, Team Mach-II felt that 100% accuracy was not war
 	<cffunction name="getActiveElements" access="public" returntype="numeric" output="false">
 		<cfreturn variables.activeElements.get() />
 	</cffunction>
-	
+
 </cfcomponent>

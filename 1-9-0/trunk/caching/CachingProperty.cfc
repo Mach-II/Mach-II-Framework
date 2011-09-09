@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Kurt Wiersma (kurt@mach-ii.com)
@@ -51,13 +51,13 @@ Simple configuration that uses the timespan strategy with its' default parameter
 as the basic strategy:
 <property name="Caching" type="MachII.caching.CachingProperty"/>
 
-This will cache data for a timespan of 1 hour by using the 
+This will cache data for a timespan of 1 hour by using the
 MachII.caching.strategies.TimeSpanCache
 
 Example configuration of multiple caching strategires:
 <property name="Caching" type="MachII.caching.CachingProperty">
       <parameters>
-            <!-- Naming a default cache name is not required, but required if you do not want 
+            <!-- Naming a default cache name is not required, but required if you do not want
                  to specify the 'name' attribute in the cache command -->
 			<parameter name="cachingEnabled" value="true" />
 			- OR -
@@ -93,7 +93,7 @@ See individual caching strategies for more information on configuration.
 	extends="MachII.framework.Property"
 	output="false"
 	hint="Allows you to configure the Mach-II caching features.">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -101,13 +101,13 @@ See individual caching strategies for more information on configuration.
 	<cfset variables.defaultCacheName = "Default" />
 	<cfset variables.defaultCacheType = "MachII.caching.strategies.TimeSpanCache" />
 	<cfset variables.cachingEnabled = true />
-	
+
 	<!---
 	INITALIZATION / CONFIGURATION
 	--->
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the property.">
-		
+
 		<cfset var cacheStrategyManager = getAppManager().getCacheManager().getCacheStrategyManager() />
 		<cfset var params = getParameters() />
 		<cfset var defaultCacheParameters = StructNew() />
@@ -115,7 +115,7 @@ See individual caching strategies for more information on configuration.
 
 		<!--- Set the "global" caching enabled directive --->
 		<cfset setCachingEnabled(getParameter("cachingEnabled", true)) />
-		
+
 		<!--- Load defined cache strategies --->
 		<cfloop collection="#params#" item="key">
 			<cfif key NEQ "cachingEnabled" AND IsStruct(params[key])>
@@ -123,7 +123,7 @@ See individual caching strategies for more information on configuration.
 			</cfif>
 		</cfloop>
 
-		<!--- Configure the default strategy if no strategies were set --->		
+		<!--- Configure the default strategy if no strategies were set --->
 		<cfif NOT StructCount(cacheStrategyManager.getCacheStrategies())>
 			<cfset defaultCacheParameters.type = variables.defaultCacheType />
 			<cfset configureStrategy(variables.defaultCacheName, defaultCacheParameters) />
@@ -136,12 +136,12 @@ See individual caching strategies for more information on configuration.
 		<cfelseif StructCount(cacheStrategyManager.getCacheStrategies()) EQ 1>
 			<cfset setDefaultCacheName(ListGetAt(StructKeyList(cacheStrategyManager.getCacheStrategies()), 1)) />
 		</cfif>
-		
-		<!--- Set the default cache strategy name (this must be done only after all strategies 
+
+		<!--- Set the default cache strategy name (this must be done only after all strategies
 			have been added)--->
 		<cfset getAppManager().getCacheManager().setDefaultCacheName(getDefaultCacheName()) />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -153,7 +153,7 @@ See individual caching strategies for more information on configuration.
 		hint="Enables caching. Same as calling getAppManager().getCacheManager().enableCaching()">
 		<cfset getAppManager().getCacheManager().enableCaching() />
 	</cffunction>
-	
+
 	<cffunction name="configureStrategy" access="public" returntype="void" output="false"
 		hint="Configures a strategy.">
 		<cfargument name="cacheName" type="string" required="true"
@@ -164,7 +164,7 @@ See individual caching strategies for more information on configuration.
 		<cfset var cacheStrategyManager = getAppManager().getCacheManager().getCacheStrategyManager() />
 		<cfset var moduleName = getAppManager().getModuleName() />
 		<cfset var key = "" />
-		
+
 		<!--- Check and make sure the type is available otherwise there is not an adapter to create --->
 		<cfif NOT StructKeyExists(arguments.parameters, "type")>
 			<cfthrow type="MachII.caching.MissingCacheStrategyType"
@@ -173,12 +173,12 @@ See individual caching strategies for more information on configuration.
 
 		<!--- Generated a scopeKey as a parameter --->
 		<cfset arguments.parameters.generatedScopeKey = cacheStrategyManager.generateScopeKey(arguments.cacheName, getAppManager().getAppKey(), moduleName) />
-		
+
 		<!--- Bind values in parameters struct since Mach-II only binds parameters at the root level --->
 		<cfloop collection="#arguments.parameters#" item="key">
 			<cfset arguments.parameters[key] = bindValue(key, arguments.parameters[key]) />
 		</cfloop>
-		
+
 		<!--- Decide the "local" caching enabled mode --->
 		<cfif StructKeyExists(arguments.parameters, "cachingEnabled")>
 			<cftry>
@@ -196,23 +196,23 @@ See individual caching strategies for more information on configuration.
 		<cfelse>
 			<cfset arguments.parameters["cachingEnabled"] = isCachingEnabled() />
 		</cfif>
-		
+
 		<!--- Load the strategy  --->
 		<cfset cacheStrategyManager.loadStrategy(arguments.cacheName, arguments.parameters.type, arguments.parameters) />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
 	<cffunction name="decidedCachingEnabled" access="private" returntype="boolean" output="false"
 		hint="Decides if the caching is enabled.">
 		<cfargument name="cachingEnabled" type="any" required="true" />
-		
+
 		<cfset var result = true />
-		
+
 		<cfset getAssert().isTrue(IsBoolean(arguments.cachingEnabled) OR IsStruct(arguments.cachingEnabled)
 				, "The 'cachingEnabled' parameter for 'CachingProperty' in module '#getAppManager().getModuleName()#' must be boolean or a struct of environment names / groups.") />
-		
+
 		<!--- Load caching enabled since this is a simple value (no environment names / group) --->
 		<cfif IsBoolean(arguments.cachingEnabled)>
 			<cfset result = arguments.cachingEnabled />
@@ -220,10 +220,10 @@ See individual caching strategies for more information on configuration.
 		<cfelse>
 			<cfset result = resolveValueByEnvironment(arguments.cachingEnabled, true) />
 		</cfif>
-		
+
 		<cfreturn result />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -234,11 +234,11 @@ See individual caching strategies for more information on configuration.
 	<cffunction name="getDefaultCacheName" access="public" returntype="string" output="false">
 		<cfreturn variables.defaultCacheName />
 	</cffunction>
-	
+
 	<cffunction name="setCachingEnabled" access="public" returntype="void" output="false"
 		hint="Sets if caching is enabled.">
 		<cfargument name="cachingEnabled" type="any" required="true" />
-		
+
 		<cftry>
 			<cfset variables.cachingEnabled = decidedCachingEnabled(arguments.cachingEnabled) />
 			<cfcatch type="MachII.util.IllegalArgument">
@@ -248,12 +248,12 @@ See individual caching strategies for more information on configuration.
 			</cfcatch>
 			<cfcatch type="any">
 				<cfrethrow />
-			</cfcatch>			
+			</cfcatch>
 		</cftry>
 	</cffunction>
 	<cffunction name="isCachingEnabled" access="public" returntype="boolean" output="false"
 		hint="Gets the value if caching is enabled.">
 		<cfreturn variables.cachingEnabled />
 	</cffunction>
-	
+
 </cfcomponent>

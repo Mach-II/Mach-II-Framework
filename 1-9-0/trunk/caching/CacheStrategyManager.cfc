@@ -138,7 +138,7 @@ Notes:
 			<cfset variables.cacheStrategies[arguments.cacheStrategyName] = arguments.cacheStrategy />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="removeCacheStrategy" access="public" returntype="void" output="false"
 		hint="Removes a cache strategy with the specified name.">
 		<cfargument name="cacheStrategyName" type="string" required="true"
