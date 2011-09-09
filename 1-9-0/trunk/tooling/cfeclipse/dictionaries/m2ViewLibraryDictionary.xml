@@ -50,181 +50,613 @@ Notes:
 -->
 <dictionary xmlns="http://www.cfeclipse.org/version1/dictionary"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.cfeclipse.org/version1/dictionary.xsd http://cfeclipse.tigris.org/version1/dictionary/dictionary.xsd"
+	xsi:schemaLocation="http://www.cfeclipse.org/version1/dictionary http://cfeclipse.tigris.org/version1/dictionary/dictionary.xsd"
 >
-			
+
 	<tags>
 			
-		<tag creator="8" name="view:img" single="true" xmlstyle="true">
+		<tag creator="8" name="view:img" single="false" xmlstyle="true">
 			<help><![CDATA[
+				This tag is used to generate an HTML img tag with an asset 
+				timestamp. The end result is no different from a hand-coded HTML 
+				img tag accept you get the added powerfulness of asset timestamps.
 				
+				All attributes applicable to img tags are acceptable. 
 			]]></help>
-			<parameter name="width" type="string" required="false">
+			<parameter name="src" type="String" required="true">
 				<help><![CDATA[
-					
+					A path to a web accessible image file. Shortcut paths are allowed, 
+					however file name extensions cannot be omitted as in the view:style tag 
+					and must be specified. When using external image assets, use the 
+					'external:' keyword (ex. external:http://www.example.com/img/coolpeeps.jpg).
 				]]></help>
-				<values default="" />
 			</parameter>
-			<parameter name="height" type="string" required="false">
-
+			<parameter name="width" type="String" required="false">
 				<help><![CDATA[
-					
+					The width of the image in pixels or percentage if a percent sign % is 
+					defined. A value of '-1' will cause this attribute to be omitted from 
+					the generated code. Providing a zero-length string (i.e. "") will have 
+					the image dimensions read from the image file (only works with GIF, PNG 
+					and JPG image types). 
 				]]></help>
-				<values default="" />
 			</parameter>
-			<parameter name="alt" type="string" required="false">
+			<parameter name="height" type="String" required="false">
 				<help><![CDATA[
-					
+					The height of the image in pixels or percentage if a percent sign % is 
+					defined. A value of '-1' will cause this attribute to be omitted from 
+					the generated code. Providing a zero-length string (i.e. "") will have 
+					the image dimensions read from the image file (only works with GIF, PNG 
+					and JPG image types). 
 				]]></help>
-				<values default="" />
+			</parameter>
+			<parameter name="alt" type="String" required="false">
+				<help><![CDATA[
+					The text for the 'alt' attribute and automatically HTMLEditFormats the 
+					value. If not defined, the value of alt="" will be used as this attribute 
+					is required by the W3C specification. 
+				]]></help>
+			</parameter>
+			<parameter name="attributes" type="Any" required="false">
+				<help><![CDATA[
+					A struct or string (param1=value1|param2=value2) of name/value pairs 
+					of additional attributes. 
+				]]></help>
 			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:link" single="true" xmlstyle="true">
-
 			<help><![CDATA[
-				
+				This tag is used to output HTML links into the HTML head section 
+				such as rss feeds or icons links. This feature auto-selects the 
+				type, rel and title attributes depending on the value passed in 
+				the type argument of this method. We support type shortcuts for 
+				icon, rss, atom, html and canonical, otherwise a complete MIME 
+				type is required. 
 			]]></help>
-			<parameter name="outputType" type="string" required="false">
+			<parameter name="type" type="String" required="true">
 				<help><![CDATA[
-					
+					The type of link. Supports type shortcuts icon, rss, atom and 
+					html, otherwise a complete MIME type is required. Shortcut types 
+					will automatically set the rel attribute. 
 				]]></help>
-				<values default="head" />
+				<values>
+					<value option="icon" />
+					<value option="rss" />
+					<value option="atom" />
+					<value option="html" />
+				</values>
+			</parameter>
+			<parameter name="type" type="String" required="true">
+				<help><![CDATA[
+					A the path to a web accessible location of the link file. 
+				]]></help>
+			</parameter>
+			<parameter name="attributes" type="Any" required="false">
+				<help><![CDATA[
+					A struct or string (param1=value1|param2=value2) of name/value pairs 
+					of additional attributes. 
+				]]></help>
+			</parameter>
+			<parameter name="outputType" type="String" required="false" default="head">
+				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
+					
+						* head (default)
+						* body (OpenBD only)
+						* inline
+				]]></help>
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
 			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:asset" single="true" xmlstyle="true">
 			<help><![CDATA[
-				
+				Asset packages are a group of assets (javascript and/or CSS files) 
+				that are to be processed as a group. An asset package is useful for 
+				javascript libraries that use multiple JS files and/or CSS files.
 			]]></help>
-			<parameter name="outputType" type="string" required="false">
-
+			<parameter name="outputType" type="Any" required="true">
 				<help><![CDATA[
-					
+					A list or array of asset package names to add.
 				]]></help>
-				<values default="head" />
+			</parameter>
+			<parameter name="outputType" type="String" required="false" default="head">
+				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
+					
+						* head (default)
+						* body (OpenBD only)
+						* inline
+				]]></help>
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
 			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:a" single="true" xmlstyle="true">
 			<help><![CDATA[
+				The a tag is a quick way to create a HTML <a> tag with built-in 
+				functionality to build a URL, route or endpoint.
 				
+				You can use the "p" namespace for URL paramaeters:
+					p:arg="value"
+				
+				You can use the "q" namespace for query string parameters
+				(use for "routes"):
+					q:arg="value"
+				
+				You can use the "x" namespace for non-standard tag attributes:
+					x:autocomplete="false" 
 			]]></help>
+			<parameter name="event" type="String" required="false">
+				<help><![CDATA[
+					The event name to build the URL with (cannot be used with 
+					route or useCurrentUrl).
+				]]></help>	
+			</parameter>
+			<parameter name="module" type="String" required="false">
+				<help><![CDATA[
+					The module name to build the URL with (not valid with route 
+					or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="route" type="String" required="false">
+				<help><![CDATA[
+					The route name to build the URL with (cannot be used with 
+					event or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="useCurrentUrl" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Indicates to use the current URL as a basis to build the link 
+					(cannot be used with event or route or endpoint)/
+				]]></help>	
+				<values>
+					<value option="false" />
+					<value option="true" />
+				</values>
+			</parameter>
+			<parameter name="endpoint" type="String" required="false">
+				<help><![CDATA[
+					The endpoint name to build the URL with (cannot be used with event 
+					or useCurrentUrl or route).
+				]]></help>	
+			</parameter>
+			<parameter name="p" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of URL parameters to build the 
+					URL with. Can contain EL syntax for values.
+				]]></help>	
+			</parameter>
+			<parameter name="q" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of query string parameters to 
+					append to the end of a route (only valid with route). Can contain 
+					EL syntax for values.
+				]]></help>	
+			</parameter>
+			<parameter name="x" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of additional non-standard attribute 
+					to insert into the rendered tag output.
+				]]></help>	
+			</parameter>
+			<parameter name="label" type="String" required="false">
+				<help><![CDATA[
+					The value between the start and closing <a> tags if using a self-closing 
+					tag. Any value provided in this attribute will automatically be 
+					HTMLEditFormatted.
+				]]></help>	
+			</parameter>
+			<parameter name="href" type="String" required="false">
+				<help><![CDATA[
+					Used for complete external URLs only. Does not work with event,
+					module, route, useCurrentUrl, endpoint, p, and q attributes.
+				]]></help>
+			</parameter> 	 
 		</tag>
 			
 		<tag creator="8" name="view:style" single="true" xmlstyle="true">
 			<help><![CDATA[
-				
+				The script tag takes any nested CSS code and wraps the code 
+				with an HTML style tag and CDATA the code to XTHML standards. 
+				If the href attribute is defined, it takes the data and create 
+				the appropriate HTML link tag code for the external stylesheet. 
+				Either way, the tag then adds the code block or optionally outputs 
+				the code block inline. If both ad-hoc nested CSS code and href 
+				attribute is defined, the tag creates the HTML link tag first 
+				before creating the style tag for the ad-hoc CSS. 
 			]]></help>
-
-			<parameter name="outputType" type="string" required="false">
+			<parameter name="href" type="Any" required="false">
 				<help><![CDATA[
-					
+					A single string, comma-delimited list or array of web accessible 
+					hrefs to .css files.
 				]]></help>
-				<values default="head" />
 			</parameter>
-			<parameter name="forIEVersion" type="string" required="false">
+			<parameter name="outputType" type="String" required="false" default="head">
 				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
 					
+						* head (default)
+						* body (OpenBD only)
+						* inline
 				]]></help>
-				<values default="" />
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
+			</parameter>
+			<parameter name="forIEVersion" type="String" required="false">
+				<help><![CDATA[
+					Optionally wraps the code output in an IE conditional.
+					
+						* Use a numeric to indicate a specific version
+						Ex. "7" for IE7 only
+					
+						* Use a operator (gte, lt, etc.) plus a version number
+						Ex. "lte 7" indicates for IE7 and lower
+				]]></help>
+			</parameter>
+			<parameter name="event" type="String" required="false">
+				<help><![CDATA[
+					The event name to build the URL with (cannot be used with 
+					route or useCurrentUrl).
+				]]></help>	
+			</parameter>
+			<parameter name="module" type="String" required="false">
+				<help><![CDATA[
+					The module name to build the URL with (not valid with route 
+					or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="route" type="String" required="false">
+				<help><![CDATA[
+					The route name to build the URL with (cannot be used with 
+					event or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="useCurrentUrl" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Indicates to use the current URL as a basis to build the link 
+					(cannot be used with event or route or endpoint)/
+				]]></help>	
+				<values>
+					<value option="false" />
+					<value option="true" />
+				</values>
+			</parameter>
+			<parameter name="endpoint" type="String" required="false">
+				<help><![CDATA[
+					The endpoint name to build the URL with (cannot be used with event 
+					or useCurrentUrl or route).
+				]]></help>	
+			</parameter>
+			<parameter name="p" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of URL parameters to build the 
+					URL with. Can contain EL syntax for values.
+				]]></help>	
+			</parameter>
+			<parameter name="q" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of query string parameters to 
+					append to the end of a route (only valid with route). Can contain 
+					EL syntax for values.
+				]]></help>	
 			</parameter>
 		</tag>
-
 			
 		<tag creator="8" name="view:message" single="true" xmlstyle="true">
 			<help><![CDATA[
-				
+				Used to output an i18n message based on the locale.
 			]]></help>
-			<parameter name="argumentSeparator" type="string" required="false">
+			<parameter name="key" type="String" required="true">
 				<help><![CDATA[
-					
+					The key for a specific globalization message as declared in a 
+					.properties file.
 				]]></help>
-				<values default="," />
 			</parameter>
-			<parameter name="text" type="string" required="false">
+			<parameter name="argumentSeparator" type="String" required="false">
 				<help><![CDATA[
-					
+					The delimiter for the arguments attribute if not using an array. 
+					Defaults to ",".
 				]]></help>
-				<values default="" />
-
 			</parameter>
-			<parameter name="var" type="string" required="false">
+			<parameter name="text" type="String" required="false">
 				<help><![CDATA[
-					
+					The text that will be displayed if the key attribute doesn't exist 
+					in the resource bundle.
 				]]></help>
-				<values default="" />
+			</parameter>
+			<parameter name="var" type="String" required="false">
+				<help><![CDATA[
+					If specified, the local variable to which the rendered message will 
+					be assigned.
+				]]></help>
 			</parameter>
 			<parameter name="display" type="boolean" required="false">
 				<help><![CDATA[
+					Whether to display the rendered message. True if var isn't used; 
+					false otherwise.
 					
+					I.e. attributes.var EQ '' 	
 				]]></help>
-				<values default="#attributes.var EQ &apos;&apos;#" />
+				<values>
+					<value option="false" />
+					<value option="true" />
+				</values>
 			</parameter>
-
-			<parameter name="arguments" type="any" required="false">
+			<parameter name="arguments" type="Any" required="false">
 				<help><![CDATA[
-					
+					An array or delimited list of arguments to be used during a 
+					parameterized globalization message rendering.
 				]]></help>
-				<values default="#ArrayNew(1)#" />
 			</parameter>
-		</tag>
-			
+		</tag> 
+
 		<tag creator="8" name="view:script" single="true" xmlstyle="true">
 			<help><![CDATA[
-				
-			]]></help>
-			<parameter name="outputType" type="string" required="false">
-				<help><![CDATA[
-					
-				]]></help>
+				This tag takes a web-accessible path to a .js file and adds this 
+				file using valid HTML syntax to the head element at the end of 
+				the request. It would also check to see if that element was 
+				already added to head so duplicates are not added in case the 
+				.js file was added the head earlier in the request. The path 
+				argument would take a string (single path), list (multiple js 
+				files) or an array. The outputType argument would either output 
+				the values directly or if false it would use the Mach-II method 
+				addHTMLHeadElement() (which basically wraps <cfhtmlhead>) to output 
+				the values at the end of the request. By default, the output is 
+				appended to the HTML head area.
 
-				<values default="head" />
-			</parameter>
-			<parameter name="forIEVersion" type="string" required="false">
+				Adding an entire library could be as easy as providing a list/array 
+				of full paths or names. By default if you do not pass a full path 
+				(i.e. /js/prototype.js), the helper will automatically look for the 
+				javascript file in the jsBasePath location as defined in the 
+				configuration of the helper. Also, it is not required to provided 
+				a file extension in which the helper will append .js to any javascript 
+				asset that does not have a file extension.
+			]]></help>
+			<parameter name="outputType" type="String" required="false" default="head">
 				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
 					
+						* head (default)
+						* body (OpenBD only)
+						* inline
 				]]></help>
-				<values default="" />
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
+			</parameter>
+			<parameter name="forIEVersion" type="String" required="false">
+				<help><![CDATA[
+					Optionally wraps the code output in an IE conditional.
+					
+						* Use a numeric to indicate a specific version
+						Ex. "7" for IE7 only
+					
+						* Use a operator (gte, lt, etc.) plus a version number
+						Ex. "lte 7" indicates for IE7 and lower
+				]]></help>
+			</parameter>
+			<parameter name="event" type="String" required="false">
+				<help><![CDATA[
+					The event name to build the URL with (cannot be used with 
+					route or useCurrentUrl).
+				]]></help>	
+			</parameter>
+			<parameter name="module" type="String" required="false">
+				<help><![CDATA[
+					The module name to build the URL with (not valid with route 
+					or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="route" type="String" required="false">
+				<help><![CDATA[
+					The route name to build the URL with (cannot be used with 
+					event or useCurrentUrl or endpoint).
+				]]></help>	
+			</parameter>
+			<parameter name="useCurrentUrl" type="boolean" required="false" default="false">
+				<help><![CDATA[
+					Indicates to use the current URL as a basis to build the link 
+					(cannot be used with event or route or endpoint)/
+				]]></help>	
+				<values>
+					<value option="false" />
+					<value option="true" />
+				</values>
+			</parameter>
+			<parameter name="endpoint" type="String" required="false">
+				<help><![CDATA[
+					The endpoint name to build the URL with (cannot be used with event 
+					or useCurrentUrl or route).
+				]]></help>	
+			</parameter>
+			<parameter name="p" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of URL parameters to build the 
+					URL with. Can contain EL syntax for values.
+				]]></help>	
+			</parameter>
+			<parameter name="q" type="String" required="false">
+				<help><![CDATA[
+					Name / value pair list or struct of query string parameters to 
+					append to the end of a route (only valid with route). Can contain 
+					EL syntax for values.
+				]]></help>	
 			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:meta" single="true" xmlstyle="true">
 			<help><![CDATA[
-				
+				This tag adds an HTML meta tag into the HTML head section and 
+				auto-selects if the HTML meta tag should use the name or http-equiv 
+				attribute depending on the value passed in type argument.
 			]]></help>
-
-			<parameter name="outputType" type="string" required="false">
+			<parameter name="type" type="String" required="true">
 				<help><![CDATA[
-					
+					The type of the meta tag (this method auto-selects if value is a 
+					meta type of http-equiv or name). You can force the usages of 
+					http-equiv or name by using type="http-equiv:value" or 
+					type="name:value".
 				]]></help>
-				<values default="head" />
+				<values>
+					<value option="head" />
+					<value option="allow" />
+					<value option="content-encoding" />
+					<value option="content-language" />
+					<value option="content-length" />
+					<value option="content-type" />
+					<value option="date" />
+					<value option="expires" />
+					<value option="last-modified" />
+					<value option="location" />
+					<value option="refresh" />
+					<value option="set-cookie" />
+					<value option="www-authenticate" />
+					<value option="author" />
+					<value option="copyright" />
+					<value option="description" />
+					<value option="distribution" />
+					<value option="generator" />
+					<value option="keywords" />
+					<value option="progid" />
+					<value option="rating" />
+					<value option="resource-type" />
+					<value option="revisit-after" />
+					<value option="robots" />
+					<value option="others" />
+				</values>
+			</parameter>
+			<parameter name="content" type="String" required="true">
+				<help><![CDATA[
+					The content of the meta tag. 
+				]]></help>
+			</parameter>
+			<parameter name="outputType" type="String" required="false" default="head">
+				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
+					
+						* head (default)
+						* body (OpenBD only)
+						* inline
+				]]></help>
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
 			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:doctype" single="true" xmlstyle="true">
 			<help><![CDATA[
+				Adds a doctype to the document:
 				
+					* xhtml-1.0-strict 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+					* xhtml-1.0-trans 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+					* xhtml-1.0-frame 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+					* xhtml-1.1 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+					* html-4.0-strict 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+					* html-4.0-trans 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+					* html-4.0-frame 	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+					* html-5.0 			<!DOCTYPE HTML>
+					* xhtml+rdfa-1.0 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
 			]]></help>
+			<parameter name="type" type="String" required="false" default="html-5.0">
+				<help><![CDATA[
+					The doctype to use.
+				]]></help>
+				<values>
+					<value option="xhtml-1.0-strict" />
+					<value option="xhtml-1.0-trans" />
+					<value option="xhtml-1.0-frame" />
+					<value option="xhtml-1.1" />
+					<value option="html-4.0-strict" />
+					<value option="html-4.0-trans" />
+					<value option="html-4.0-frame" />
+					<value option="html-5.0" />
+					<value option="xhtml+rdfa-1.0" /> 
+				</values>
+			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:charset" single="true" xmlstyle="true">
-
 			<help><![CDATA[
+				This tag adds a HTML meta tag with a http-equiv that will 
+				indicate the character set of the document.
 				
+				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			]]></help>
+			<parameter name="charset" type="String" required="false" default="utf-8">
+				<help><![CDATA[
+					Sets the document charset. Defaults to utf-8.
+				]]></help>
+			</parameter>
+			<parameter name="outputType" type="String" required="false" default="head">
+				<help><![CDATA[
+					Where to output the generated code to. Head will output 
+					to the HTML head area, body to the bottom of the HTML body area,
+					and inline will return the code to be returned.
+					
+						* head (default)
+						* body (OpenBD only)
+						* inline
+				]]></help>
+				<values>
+					<value option="head" />
+					<value option="body" />
+					<value option="inline" />
+				</values>
+			</parameter>
 		</tag>
 			
 		<tag creator="8" name="view:flip" single="true" xmlstyle="true">
 			<help><![CDATA[
+				The flip tag simplifies the process of "candy-striping" or "zebra-lining" rows 
+				of table data. Most people only stripe between two colors or classes using MOD, 
+				however the flip tag will accommodate alternating between as many of items you 
+				want. Since the flip tag needs to alternate between at least two items, if only 
+				one item is passed into the tag, the tag will alternate between that one item 
+				and a zero-length string.
 				
+				Ex.
+				<tr class="<view:flip value="#currentRow#" items="shadeLight,shadeMedium,shadeDark" />">
 			]]></help>
+			<parameter name="value" type="String" required="true">
+				<help><![CDATA[
+					A numeric value that indicates the current row number or loop iteration.
+				]]></help>
+			</parameter>
+			<parameter name="items" type="String" required="false" default="utf-8">
+				<help><![CDATA[
+					A comma-delimited list or array of items to alternative between. If only 
+					one item element is specified, the tag will alternative between the one 
+					element and a zero-length string. 
+				]]></help>
+			</parameter>
 		</tag>
 	</tags>
-			
-	<functions>
-	</functions>
-	<scopes>
-
-	</scopes>
+	
 </dictionary>

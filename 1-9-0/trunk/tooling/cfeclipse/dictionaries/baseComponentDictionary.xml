@@ -707,6 +707,12 @@ Notes:
 				Gets the components AppManager instance.
 			]]></help>
 		</function>
+
+		<function creator="8" name="getLog" returns="Object">
+			<help><![CDATA[
+				Gets the components Log instance.
+			]]></help>
+		</function>
 	
 	</functions>
 
