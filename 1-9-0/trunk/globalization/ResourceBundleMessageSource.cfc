@@ -188,7 +188,7 @@ Created version: 1.9.0
 
 				<cfreturn bundle />
 			<cfelse>
-				<cfset getLog().warn("Resource bundle '#arguments.basename#' and '#arguments.locale.toString()#' not found. Please check that you have the correct basename.", cfcatch) />
+				<cfset getLog().warn("Resource bundle '#arguments.basename#' and '#arguments.locale.toString()#' not found. Please check that you have the correct basename.") />
 			</cfif>
 		</cflock>
 
