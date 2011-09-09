@@ -111,7 +111,7 @@ framework to be loaded as they interact with framework components:
 	</cffunction>
 
 	<cffunction name="onSessionStart" access="public" returntype="void" output="false"
-		hint="Handles on session start event if sessions are enabled for this application.">		
+		hint="Handles on session start event if sessions are enabled for this application.">
 		<cfset ensureLoadedFramework() />
 		<cfset getAppManager().onSessionStart() />
 	</cffunction>
