@@ -16,29 +16,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -68,9 +68,9 @@ PUBLIC FUNCTIONS
 
 	<cfset var appManager = request.eventContext.getAppManager() />
 	<cfset var expressionEvaluator = appManager.getExpressionEvaluator() />
-	<cfset var event = request.event />	
+	<cfset var event = request.event />
 	<cfset var propertyManager = appManager.getPropertyManager() />
-	
+
 	<cfset request._MachIIFormLib.bind = event />
 
 	<cfif StructKeyExists(arguments, "target")>
@@ -100,7 +100,7 @@ PUBLIC FUNCTIONS
 <cffunction name="setFirstElementId" access="public" returntype="void" output="false"
 	hint="Sets the first form element id if not already defined.">
 	<cfargument name="id" type="string" required="true" />
-	
+
 	<cfif NOT IsDefined("request._MachIIFormLib.firstElementId") OR NOT Len(request._MachIIFormLib.firstElementId)>
 		<cfset request._MachIIFormLib.firstElementId = arguments.id />
 	</cfif>
@@ -108,7 +108,7 @@ PUBLIC FUNCTIONS
 
 <cffunction name="ensurePathOrName" access="public" returntype="void" output="false"
 	hint="Ensures a path or name is available in the attributes.">
-	<cfif NOT StructKeyExists(attributes, "path") 
+	<cfif NOT StructKeyExists(attributes, "path")
 		AND NOT StructKeyExists(attributes, "name")>
 		<cfthrow type="MachII.customtags.form.#variables.tagType#.noPath"
 			message="This '#variables.tagType#' tag must have an attribute named 'path' or 'name' or both." />
@@ -119,9 +119,9 @@ PUBLIC FUNCTIONS
 	hint="Wraps the 'resolvePath' method so we can provide good exceptions if needed.">
 	<cfargument name="path" type="string" required="true" />
 	<cfargument name="bind" type="any" required="false" />
-	
+
 	<cfset var result = "" />
-	
+
 	<cftry>
 		<cfset result = resolvePath(argumentCollection=arguments) />
 
@@ -131,24 +131,24 @@ PUBLIC FUNCTIONS
 				detail="#cfcatch.message# || #cfcatch.detail#" />
 		</cfcatch>
 	</cftry>
-	
+
 	<cfif NOT IsSimpleValue(result)>
 		<cfthrow type="MachII.customtags.form.#getTagType()#.unableToBindToPath"
 			message="Unable to bind to path '#arguments.path#' since the path resolved to a non-simple value."
-			detail="All resolved paths must be a simple value and the end resolution cannot be a struct, array or component." />	
+			detail="All resolved paths must be a simple value and the end resolution cannot be a struct, array or component." />
 	</cfif>
-	
-	<cfreturn result />	
+
+	<cfreturn result />
 </cffunction>
 
 <cffunction name="resolvePath" access="public" returntype="any" output="false"
 	hint="Resolves a path and returns a value.">
 	<cfargument name="path" type="string" required="true" />
 	<cfargument name="bind" type="any" required="false" default="#request._MachIIFormLib.bind#" />
-	
+
 	<cfset var value = "" />
 	<cfset var key = ListFirst(arguments.path, ".") />
-	
+
 	<cfif IsObject(arguments.bind)>
 		<cfif getMetaData(arguments.bind).name NEQ "MachII.framework.Event">
 			<cfinvoke component="#arguments.bind#"
@@ -169,35 +169,35 @@ PUBLIC FUNCTIONS
 	<cfelseif IsStruct(arguments.bind)>
 		<cfset value = arguments.bind[key] />
 	</cfif>
-	
+
 	<cfset arguments.path = ListDeleteAt(arguments.path, 1, ".") />
 
 	<cfif ListLen(arguments.path, ".")>
 		<cfset value = resolvePath(arguments.path, value) />
 	</cfif>
-	
+
 	<cfreturn value />
 </cffunction>
 
 <cffunction name="resolveName" access="public" returntype="string" output="false"
 	hint="Resolves a name with option prefix as well.">
-	
+
 	<cfset var name = "" />
 	<cfset var prefix = "" />
-	
+
 	<!--- Resolve the prefix --->
 	<cfif StructKeyExists(attributes, "prefix")>
 		<cfset prefix = attributes.prefix />
 	<cfelseif IsDefined("request._MachIIFormLib.prefix")>
 		<cfset prefix = request._MachIIFormLib.prefix />
 	</cfif>
-	
+
 	<cfif StructKeyExists(attributes, "name")>
 		<cfset name = prefix & attributes.name />
 	<cfelse>
 		<cfset name = prefix & attributes.path />
 	</cfif>
-	
+
 	<cfreturn name />
 </cffunction>
 
@@ -210,12 +210,12 @@ PUBLIC FUNCTIONS
 	<cfargument name="checkValueDelimiter" type="any" required="false" default=","
 		hint="The delimiter to use when translating the checkValue into a list." />
 
-	<!--- checkValue can be a list, array, or struct, but ultimately 
+	<!--- checkValue can be a list, array, or struct, but ultimately
 			we'll use a list to do the comparisons as we build the output --->
 	<cfset var checkValues = "" />
 	<cfset var i = "" />
 	<cfset var item = "" />
-	
+
 	<cfif IsSimpleValue(arguments.checkValue)>
 		<cfset checkValues = arguments.checkValue />
 	<cfelseif IsArray(arguments.checkValue) AND IsSimpleValue(arguments.checkValue[1])>
@@ -233,11 +233,11 @@ PUBLIC FUNCTIONS
 			<cfset checkValues = ListAppend(checkValues, arguments.checkValue[arguments.checkValueCol], arguments.checkValueDelimiter) />
 		</cfloop>
 	<cfelse>
-		<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype" 
-				message="Unsupported Data Type for Check Value Attribute" 
+		<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedCheckValueDatatype"
+				message="Unsupported Data Type for Check Value Attribute"
 				detail="The '#getTagType()#' form tag only supports lists, one-dimensional arrays, queries and structs for the check value attribute." />
 	</cfif>
-	
+
 	<cfreturn checkValues />
 </cffunction>
 
@@ -246,7 +246,7 @@ PUBLIC FUNCTIONS
 	<cfargument name="items" type="struct" required="true" />
 	<cfargument name="displayOrder" type="any" required="true"
 		hint="Takes a list or array of display order elements." />
-	
+
 	<cfset var modifiedItems = StructCopy(arguments.items) />
 	<cfset var sortedKeys = ArrayNew(1) />
 	<cfset var insertAt = 1 />
@@ -254,13 +254,13 @@ PUBLIC FUNCTIONS
 	<cfset var hasStarOccurred = false />
 	<cfset var element = "" />
 	<cfset var i = "" />
-	
+
 	<cfif NOT IsArray(arguments.displayOrder)>
 		<cfset arguments.displayOrder = ListToArray(arguments.displayOrder) />
 	</cfif>
-	
+
 	<cfif ArrayLen(arguments.displayOrder)>
-		
+
 		<!--- Remove display order keys that do not exist --->
 		<cfloop from="#ArrayLen(arguments.displayOrder)#" to="1" step="-1" index="i">
 			<cfset element = arguments.displayOrder[i] />
@@ -270,16 +270,16 @@ PUBLIC FUNCTIONS
 				<cfset hasStar = true />
 			</cfif>
 		</cfloop>
-		
+
 		<!--- We now of a valid display order list with references to keys that exists in the items --->
-		
+
 		<!--- Remove keys from modified items --->
 		<cfloop from="1" to="#ArrayLen(arguments.displayOrder)#" index="i">
 			<cfset StructDelete(modifiedItems, arguments.displayOrder[i], false) />
 		</cfloop>
-		
+
 		<!---
-			Create the sorted keys for the "*" part which doesn't have any other display 
+			Create the sorted keys for the "*" part which doesn't have any other display
 			order keys because the modified items structs have had those keys removed
 		--->
 		<cfif hasStar>
@@ -298,7 +298,7 @@ PUBLIC FUNCTIONS
 						<cfset ArrayAppend(sortedKeys, arguments.displayOrder[i])>
 					</cfif>
 				</cfif>
-	
+
 			</cfloop>
 		<!--- There is no "*" so we can just use the displayOrder array straight up with a twist of lemon (or lime if you prefer) --->
 		<cfelse>

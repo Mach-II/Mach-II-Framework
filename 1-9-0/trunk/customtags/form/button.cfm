@@ -16,29 +16,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Matt Woodward (matt@mach-ii.com)
@@ -63,49 +63,49 @@ Notes:
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("input", true) />
 
-	<!--- if there's a src attribute provided and the type is anything other than 
+	<!--- if there's a src attribute provided and the type is anything other than
 			submit, throw an error --->
 	<cfif StructKeyExists(attributes, "src")>
-		<cfif StructKeyExists(attributes, "type") AND 
+		<cfif StructKeyExists(attributes, "type") AND
 				CompareNoCase(attributes.type, "submit") neq 0>
-			<cfthrow type="MachII.customtags.form.button" 
-					message="The 'src' attribute may only be used with a button of type 'submit'" 
+			<cfthrow type="MachII.customtags.form.button"
+					message="The 'src' attribute may only be used with a button of type 'submit'"
 					detail="When using the 'src' attribute to provide an image to be used as a button, the button must be a submit button. Types of 'button' and 'reset' are not supported with an image input." />
 		<cfelse>
 			<cfset attributes.type = "image" />
 		</cfif>
-		
+
 		<!--- Translate the src path and append timestamp using the HtmlHelper if available --->
 		<cfif isHtmlHelperAvailable()>
 			<cfset attributes.src = locateHtmlHelper().computeAssetPath("img", attributes.src) />
 		</cfif>
 	</cfif>
-	
+
 	<!--- Resolve path if defined--->
 	<cfif StructKeyExists(attributes, "path")>
-		<cfparam name="attributes.value" type="string" 
+		<cfparam name="attributes.value" type="string"
 			default="#wrapResolvePath(attributes.path)#" />
 	<cfelse>
 		<cfset attributes.path = "submit" />
 	</cfif>
-	
+
 	<!--- Set defaults --->
 	<cfset attributes.name = resolveName() />
-	<cfparam name="attributes.id" type="string" 
+	<cfparam name="attributes.id" type="string"
 		default="#attributes.name#" />
-	<cfparam name="attributes.value" type="string" 
+	<cfparam name="attributes.value" type="string"
 		default="submit" />
-	<cfparam name="attributes.type" type="string" 
+	<cfparam name="attributes.type" type="string"
 		default="submit" />
-		
+
 	<cfset setFirstElementId(attributes.id) />
-			
-	<!--- if this is an image input and they don't provide an alt attribute, 
+
+	<!--- if this is an image input and they don't provide an alt attribute,
 			use value as alt --->
 	<cfif attributes.type eq "image" and NOT StructKeyExists(attributes, "alt")>
 		<cfset attributes.alt = attributes.value />
 	</cfif>
-	
+
 	<!--- Set required attributes--->
 	<cfset setAttribute("name") />
 	<cfset setAttribute("value") />
@@ -115,13 +115,13 @@ Notes:
 	<cfset setAttributeIfDefined("src") />
 	<cfset setAttributeIfDefined("type") />
 	<cfset setAttributeIfDefinedAndTrue("disabled", "disabled") />
-	
+
 	<!--- Set standard and event attributes --->
 	<cfset setStandardAttributes() />
 	<cfset setNonStandardAttributes() />
 	<cfset setEventAttributes() />
 
-<cfelse>	
+<cfelse>
 	<cfset thisTag.generatedContent = doStartTag() />
 </cfif>
 </cfsilent><cfsetting enablecfoutputonly="false" />

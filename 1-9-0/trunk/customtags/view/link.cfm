@@ -16,29 +16,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -53,29 +53,29 @@ Notes:
 	href		= The href of the link tag.
 - OPTIONAL ATTRIBUTES
 	outputType	= Indicates the output type for the generated HTML code ('head', 'body', 'inline'). Link tags must be in the HTML head section according to W3C specification. Use the value of inline with caution.
-	
+
 N.B. Links to CSS files should use the <style> tag's "src" attribute.
 --->
 <cfif thisTag.ExecutionMode IS "start">
-	
+
 	<!--- Setup the tag --->
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("link", true) />
-	
+
 	<!--- Setup required --->
 	<!--- This tag requires one of these attributes: 'src', 'event'or  'route'
 		or an exception will be thrown. ensureOneByList() is not used for performance. --->
-	
+
 	<!--- If the href is not present, then make an URL using event/module/route --->
 	<cfif NOT StructKeyExists(attributes, "href")>
 		<cfset attributes.href = makeUrl() />
 	</cfif>
 	<cfset ensureByName("type") />
-	
+
 	<!--- Setup optional --->
-	<cfparam name="attributes.outputType" type="string" 
+	<cfparam name="attributes.outputType" type="string"
 		default="head" />
-		
+
 	<!---
 		Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes
 		Normalized namespaced attributes have already been removed.
@@ -92,7 +92,7 @@ N.B. Links to CSS files should use the <style> tag's "src" attribute.
 	<cfset StructDelete(variables.additionalAttributes, "endpoint", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "p", "false") />
 	<cfset StructDelete(variables.additionalAttributes, "q", "false") />
-	
+
 <cfelse>
 	<cfset thisTag.GeneratedContent = locateHtmlHelper().addLink(attributes.type, attributes.href, variables.additionalAttributes, attributes.outputType) />
 </cfif>

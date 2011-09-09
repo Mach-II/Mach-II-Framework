@@ -514,7 +514,7 @@ PUBLIC FUNCTIONS - UTIL
 				<cfif StructKeyExists(attributes, arguments.attributeNameForUrlParametersToRemove)>
 					<cfset urlParametersToRemove = attributes[arguments.attributeNameForUrlParametersToRemove] />
 				</cfif>
-				
+
 				<cfif StructKeyExists(attributes, arguments.attributeNameForModule)>
 					<cfset builtUrl = request.eventContext.getAppManager().getRequestManager().buildCurrentUrl(attributes[arguments.attributeNameForModule], urlParameters, urlParametersToRemove) />
 				<cfelse>

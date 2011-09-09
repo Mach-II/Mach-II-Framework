@@ -55,7 +55,6 @@ Notes:
 	<cfinclude template="/MachII/customtags/view/helper/viewTagBuilder.cfm" />
 	<cfset setupTag("formattime", false) />
 
-
 	<!--- Setup defaults --->
 	<cfparam name="attributes.pattern" type="string" 
 		default="SHORT" />

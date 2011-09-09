@@ -22,23 +22,23 @@
     conditions of the GNU General Public License cover the whole
     combination.
 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Matt Woodward (matt@mach-ii.com)
@@ -144,7 +144,7 @@ Notes:
 		<cfif attributes.items.getDimension() EQ 1>
 			<cfif IsSimpleValue(attributes.items[1])>
 				<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1])) />
-			
+
 				<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 					<cfset variables.value = attributes.items[i] />
 
@@ -165,21 +165,21 @@ Notes:
 				<!--- each array node contains a struct of elements, determine if the proper struct keys exist --->
 				<cfif StructKeyExists(attributes.items[1], attributes.valueKey) AND StructKeyExists(attributes.items[1], attributes.labelKey)>
 					<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[1][attributes.valueKey])) />
-					
+
 					<cfloop from="1" to="#ArrayLen(attributes.items)#" index="i">
 						<cfset variables.value = attributes.items[i][attributes.valueKey] />
-	
+
 						<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 							<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 						<cfelse>
 							<cfset variables.finalOutput = variables.radioTemplate />
 						</cfif>
-	
+
 						<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[i][attributes.labelKey]) />
 						<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(LCase(variables.value)), "all") />
-	
+
 						<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 					</cfloop>
 				<cfelse>
@@ -201,7 +201,7 @@ Notes:
 	<cfelseif IsStruct(attributes.items)>
 		<cfset variables.sortedKeys = sortStructByDisplayOrder(attributes.items, attributes.displayOrder) />
 		<cfset setFirstElementId(attributes.name & "_" & createCleanId(LCase(variables.sortedKeys[1]))) />
-		
+
 		<!--- struct key is value, struct value is label --->
 		<cfloop index="i" from="1" to="#ArrayLen(variables.sortedKeys)#">
 			<cfset variables.value = variables.sortedKeys[i] />
@@ -221,22 +221,22 @@ Notes:
 		</cfloop>
 	<cfelseif IsQuery(attributes.items)>
 		<cfset setFirstElementId(attributes.name & "_" & createCleanId(attributes.items[attributes.valueCol][attributes.items.CurrentRow])) />
-		
+
 		<cftry>
 			<cfloop query="attributes.items">
 				<cfset variables.value = attributes.items[attributes.valueCol][attributes.items.CurrentRow] />
-	
+
 				<cfif StructKeyExists(attributes, "checkValue") AND attributes.checkValue EQ variables.value>
 					<cfset variables.finalOutput = ReplaceNoCase(variables.radioTemplate, "/>", ' checked="checked"/>') />
 				<cfelse>
 					<cfset variables.finalOutput = variables.radioTemplate />
 				</cfif>
-	
+
 				<cfset variables.finalOutput = ReplaceNoCase(variables.originalGeneratedContent, "${output.radio}", variables.finalOutput) />
 				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.value}", variables.value) />
 				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.label}", attributes.items[attributes.labelCol][attributes.items.CurrentRow]) />
 				<cfset variables.finalOutput = ReplaceNoCase(variables.finalOutput, "${output.id}", createCleanId(variables.value), "all") />
-	
+
 				<cfset variables.outputBuffer.content.append(variables.finalOutput) />
 			</cfloop>
 			<cfcatch type="any">
@@ -248,7 +248,7 @@ Notes:
 				<cfelseif NOT ListFindNoCase(attributes.items.columnList, attributes.labelCol)>
 					<cfthrow type="MachII.customtags.form.#getTagType()#.unsupportedItemsLabelCol"
 							message="The query passed to the #getTagType()# Tag does not have a labelCol named '#attributes.labelCol#'."
-							detail="Available columns: #attributes.items.columnList#." />				
+							detail="Available columns: #attributes.items.columnList#." />
 				<cfelse>
 					<cfrethrow />
 				</cfif>

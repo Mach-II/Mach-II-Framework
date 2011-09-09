@@ -91,19 +91,19 @@ Notes:
 		<cfset attributes.href = "external:" & makeUrl() />
 	</cfif>
 
-  <!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
-  <cfset variables.additionalAttributes = StructNew() />
-  <cfset StructAppend(variables.additionalAttributes, attributes) />
-  <cfset StructDelete(variables.additionalAttributes, "href", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "forIEVersion", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "output", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "outputType", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "event", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "module", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "route", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "endpoint", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "p", "false") />
-  <cfset StructDelete(variables.additionalAttributes, "q", "false") />
+	<!--- Cleanup additional tag attributes so additional attributes is not polluted with duplicate attributes --->
+	<cfset variables.additionalAttributes = StructNew() />
+	<cfset StructAppend(variables.additionalAttributes, attributes) />
+	<cfset StructDelete(variables.additionalAttributes, "href", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "forIEVersion", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "output", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "outputType", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "event", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "module", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "route", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "endpoint", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "p", "false") />
+	<cfset StructDelete(variables.additionalAttributes, "q", "false") />
 
 	<!--- For external files --->
 	<cfif StructKeyExists(attributes, "href")>
