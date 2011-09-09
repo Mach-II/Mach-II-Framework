@@ -21,23 +21,23 @@
     conditions of the GNU General Public License cover the whole
     combination.
 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell(peter@mach-ii.com)
@@ -79,12 +79,12 @@ Notes:
 		<cfset var node = "" />
 		<cfset var bean = CreateObject("component", "MachII.tests.dummy.User").init() />
 		<cfset var event = variables.appManager.getRequestManager().getRequestHandler().getEventContext().getCurrentEvent() />
-	
+
 		<!--- Add data to the the bean and set to the event so we can do binding --->
 		<cfset bean.setFavoriteColor("red") />
 		<cfset bean.setLastName("Farrell") />
 		<cfset event.setArg("user", bean) />
-	
+
 		<cfsavecontent variable="output">
 			<root>
 				<form:form actionEvent="something" bind="${event.user}">
@@ -93,12 +93,12 @@ Notes:
 				</form:form>
 			</root>
 		</cfsavecontent>
-	
+
 		<cfset xml = XmlParse(output) />
 		<cfset debug(output) />
-	
+
 		<cfset node = assertXPath('/root/form/input[@type="text" and @value="red" and @id="favoriteColor"]', xml) />
 		<cfset node = assertXPath('/root/form/input[@type="text" and @value="Farrell" and @id="lastName"]', xml) />
 	</cffunction>
-	
+
 </cfcomponent>

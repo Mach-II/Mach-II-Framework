@@ -90,10 +90,10 @@ Notes:
 
 		<!--- Assert we got a strategy back --->
 		<cfset assertTrue(IsObject(strategy)) />
-		
+
 		<!--- Remove the strategy --->
 		<cfset variables.cacheStrategyManager.removeCacheStrategy("default") />
-		
+
 		<!--- Assert the the strategy has been removed --->
 		<cfset assertFalse(variables.cacheStrategyManager.isCacheStrategyDefined("defined")) />
 	</cffunction>
