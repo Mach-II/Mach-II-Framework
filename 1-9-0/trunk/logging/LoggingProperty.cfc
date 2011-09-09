@@ -159,6 +159,11 @@ will bind to root parameter values.
 	hint="Allows you to configure the Mach-II logging features.">
 
 	<!---
+	CONSTANTS
+	--->
+	<cfset variables.LOGGER_MANAGER_PROPERTY_NAME = "_LoggingProperty.loggerManager" />
+
+	<!---
 	PROPERTIES
 	--->
 	<cfset variables.defaultLoggerName = "MachII" />
@@ -166,8 +171,6 @@ will bind to root parameter values.
 	<cfset variables.loggerManager = "" />
 	<cfset variables.localLoggerNames = ArrayNew(1) />
 	<cfset variables.loggingEnabled = true />
-
-	<cfset variables.LOGGER_MANAGER_PROPERTY_NAME = "_LoggingProperty.loggerManager" />
 
 	<!---
 	INITALIZATION / CONFIGURATION
@@ -196,11 +199,11 @@ will bind to root parameter values.
 			<cfelse>
 				<cfset variables.loggerManager = CreateObject("component", "MachII.logging.LoggerManager").init(getAppManager().getLogFactory()) />
 			</cfif>
-			
+
 			<cfset setProperty(variables.LOGGER_MANAGER_PROPERTY_NAME, variables.loggerManager) />
-		
+
 		<!---
-			Otherwise pull the LoggerManager that another instance of the LoggingProperty in the 
+			Otherwise pull the LoggerManager that another instance of the LoggingProperty in the
 			module / base app has already instantiated
 		--->
 		<cfelse>
@@ -230,7 +233,7 @@ will bind to root parameter values.
 
 		<cfloop collection="#thisInstanceLoggers#" item="key">
 			<cfset currentLogger = thisInstanceLoggers[key] />
-			
+
 			<!--- Add a callback to the RequestManager if there is onRequestEnd method --->
 			<cfif currentLogger.isOnRequestEndAvailable()>
 				<cfset requestManager.addOnRequestEndCallback(currentLogger, "onRequestEnd") />
@@ -301,17 +304,17 @@ will bind to root parameter values.
 		hint="Gets all the registered loggers from the LoggerManager.">
 		<cfreturn getLoggerManager().getLoggers() />
 	</cffunction>
-	
+
 	<cffunction name="getLocalLoggers" access="public" returntype="struct" output="false"
 		hint="Gets all the loggers registered by this instance of the LoggingProperty from the LoggerManager.">
-		
+
 		<cfset var localLoggers = StructNew() />
 		<cfset var i = 0 />
-		
+
 		<cfloop from="1" to ="#ArrayLen(variables.localLoggerNames)#" index="i">
 			<cfset localLoggers[variables.localLoggerNames[i]] = getLoggerManager().getLoggerByName(variables.localLoggerNames[i]) />
 		</cfloop>
-			
+
 		<cfreturn localLoggers />
 	</cffunction>
 

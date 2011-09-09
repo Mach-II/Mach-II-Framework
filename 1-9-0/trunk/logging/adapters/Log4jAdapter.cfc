@@ -97,7 +97,7 @@ Updated version: 1.9.0
 				<cfelseif getConfigFile().toLowerCase().endsWith(".xml")>
 					<cfset configurator = CreateObject("java", "org.apache.log4j.xml.DOMConfigurator") />
 				<cfelse>
-					<cfthrow type="MachII.logging.adapters.Log4jAdapter" 
+					<cfthrow type="MachII.logging.adapters.Log4jAdapter"
 						message="Config file must end in either '.properties' or '.xml'" />
 				</cfif>
 				<cfset configurator.configure(getConfigFile()) />

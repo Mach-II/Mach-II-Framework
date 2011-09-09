@@ -54,9 +54,8 @@ Notes:
 	hint="A logging adapter. This is abstract and must be extend by a concrete adapter implementation.">
 
 	<!---
-	PROPERTIES
+	CONSTANTS
 	--->
-
 	<cfset variables.LOG_LEVEL_TRACE = 1 />
 	<cfset variables.LOG_LEVEL_DEBUG = 2 />
 	<cfset variables.LOG_LEVEL_INFO = 3 />
@@ -66,6 +65,9 @@ Notes:
 	<cfset variables.LOG_LEVEL_ALL = 0 />
 	<cfset variables.LOG_LEVEL_OFF = 7 />
 
+	<!---
+	PROPERTIES
+	--->
 	<cfset variables.instance = StructNew() />
 	<cfset variables.instance.loggingEnabled = true />
 

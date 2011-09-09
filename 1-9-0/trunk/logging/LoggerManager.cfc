@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
@@ -53,7 +53,15 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	displayname="LoggerManager"
 	output="false"
 	hint="A manager that handles loggers.">
-	
+
+	<!---
+	CONSTANTS
+	--->
+	<cfset variables.LOGGER_SHORTCUTS = StructNew() />
+	<cfset variables.LOGGER_SHORTCUTS["CFLogLogger"] = "MachII.logging.loggers.CFLog.Logger" />
+	<cfset variables.LOGGER_SHORTCUTS["EmailLogger"] = "MachII.logging.loggers.EmailLog.Logger" />
+	<cfset variables.LOGGER_SHORTCUTS["MachIILogger"] = "MachII.logging.loggers.MachIILog.Logger" />
+
 	<!---
 	PROPERTIES
 	--->
@@ -61,55 +69,50 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	<cfset variables.logFactory = "" />
 	<cfset variables.loggers = StructNew() />
 
-	<cfset variables.LOGGER_SHORTCUTS = StructNew() />
-	<cfset variables.LOGGER_SHORTCUTS["CFLogLogger"] = "MachII.logging.loggers.CFLog.Logger" />
-	<cfset variables.LOGGER_SHORTCUTS["EmailLogger"] = "MachII.logging.loggers.EmailLog.Logger" />
-	<cfset variables.LOGGER_SHORTCUTS["MachIILogger"] = "MachII.logging.loggers.MachIILog.Logger" />
-	
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
-	<cffunction name="init" access="public" returntype="LoggerManager" output="false" 
+	<cffunction name="init" access="public" returntype="LoggerManager" output="false"
 		hint="Initializes the manager.">
 		<cfargument name="logFactory" type="MachII.logging.LogFactory" required="false"
 			default="#CreateObject("component", "MachII.logging.LogFactory").init()#"
 			hint="A log factory instance to use. Otherwise it will create its own instance." />
 		<cfargument name="parentLoggerManager" type="MachII.logging.LoggerManager" required="false"
 			hint="The parent LoggerManager. Used in hierarchical circumstances like Mach-II modules." />
-		
+
 		<!--- Set the log factory use the default of an external one is not provided  --->
 		<cfset setLogFactory(arguments.logFactory) />
-		
+
 		<!--- Set optional arguments if they exist --->
 		<cfif StructKeyExists(arguments, "parentLoggerManager")>
 			<cfset setParent(arguments.parentLoggerManager) />
 		</cfif>
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures all the loggers (or ones passed in).">
 		<cfargument name="loggers" type="struct" required="false" default="#getLoggers()#"
 			hint="A struct of loggers to configure or defaults to all loggers registered in the manager." />
-		
+
 		<cfset var logFactory = getLogFactory() />
 		<cfset var thisLogger = "" />
 		<cfset var key = "" />
-		
+
 		<cfloop collection="#loggers#" item="key">
 			<cfset thisLogger = arguments.loggers[key] />
-			
+
 			<cfset thisLogger.configure() />
 			<cfset logFactory.addLogAdapter(thisLogger.getLogAdapter()) />
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="deconfigure" access="public" returntype="void" output="false"
 		hint="Deconfigures all the loggers (or ones passed in).">
 		<cfargument name="loggers" type="struct" required="false" default="#getLoggers()#"
 			hint="A struct of loggers to deconfigure or defaults to all loggers registered in the manager."/>
-		
+
 		<cfset var logFactory = getLogFactory() />
 		<cfset var thisLogger = "" />
 		<cfset var key = "" />
@@ -117,18 +120,18 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		<!---
 		We need to remove the LogAdapter from the LogFactory before deconfiguring it
 		as the process needs to be in reverse over of the configure() process
-		--->		
+		--->
 		<cfloop collection="#arguments.loggers#" item="key">
 			<cfset thisLogger = arguments.loggers[key] />
-			
+
 			<cfset logFactory.removeLogAdapter(thisLogger.getLogAdapter()) />
 			<cfset thisLogger.deconfigure() />
-			
+
 			<!--- Once we've deconfigued a logger, we need to remove it from the LoggerManager --->
 			<cfset removeLoggerByName(key) />
 		</cfloop>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
@@ -137,13 +140,13 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		<cfargument name="loggerName" type="string" required="true" />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Flag to check parent logger manager." />
-		
+
 		<cfif isLoggerDefined(arguments.loggerName)>
 			<cfreturn variables.loggers[arguments.loggerName] />
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isLoggerDefined(arguments.loggerName)>
 			<cfreturn getParent().getLoggerByName(arguments.loggerName, arguments.checkParent) />
 		<cfelse>
-			<cfthrow type="MachII.logging.LoggerNotDefined" 
+			<cfthrow type="MachII.logging.LoggerNotDefined"
 				message="Logger with name '#arguments.loggerName#' is not defined."
 				detail="Available loggers: '#ArrayToList(getLoggerNames())#'" />
 		</cfif>
@@ -154,7 +157,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		<cfargument name="loggerName" type="string" required="true" />
 		<cfargument name="logger" type="MachII.logging.loggers.AbstractLogger" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
-		
+
 		<cfif NOT arguments.overrideCheck AND isLoggerDefined(arguments.LoggerName)>
 			<cfthrow type="MachII.logging.LoggerAlreadyDefined"
 				message="A logger with name '#arguments.loggerName#' is already registered." />
@@ -166,12 +169,12 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	<cffunction name="removeLoggerByName" access="public" returntype="void" output="false"
 		hint="Removes a logger with the specified name. Does NOT remove from parent.">
 		<cfargument name="loggerName" type="string" required="true" />
-		
+
 		<cftry>
 			<cfset StructDelete(variables.loggers, arguments.loggerName, true) />
 			<cfcatch type="any">
 				<cfthrow type="MachII.logging.LoggerNotRemove"
-					message="A logger with name '#arguments.loggerName#' cannot be found and therefore it was not removed." /> 
+					message="A logger with name '#arguments.loggerName#' cannot be found and therefore it was not removed." />
 			</cfcatch>
 		</cftry>
 	</cffunction>
@@ -182,7 +185,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 			hint="Name of logger to check if defined." />
 		<cfargument name="checkParent" type="boolean" required="false" default="false"
 			hint="Flag to check parent logger manager." />
-		
+
 		<cfif StructKeyExists(variables.Loggers, arguments.LoggerName)>
 			<cfreturn true />
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isLoggerDefined(arguments.LoggerName)>
@@ -205,14 +208,14 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 			hint="Dot path to the logger." />
 		<cfargument name="loggerParameters" type="struct" required="false" default="#StructNew()#"
 			hint="Configuration parameters for the logger." />
-		
+
 		<cfset var logger = "" />
-		
+
 		<!--- Resolve if a shortcut --->
 		<cfset arguments.loggerType = resolveLoggerTypeShortcut(arguments.loggerType) />
 		<!--- Ensure type is correct in parameters (where it is duplicated) --->
 		<cfset arguments.loggerParameters.type = arguments.loggerType />
-		
+
 		<!--- Create the logger --->
 		<cftry>
 			<cfset logger = CreateObject("component", arguments.LoggerType).init(arguments.loggerId, arguments.LoggerParameters) />
@@ -235,7 +238,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		hint="Resolves a logger type shorcut and returns the passed value if no match is found.">
 		<cfargument name="loggerType" type="string" required="true"
 			hint="Dot path to the logger strategy." />
-		
+
 		<cfif StructKeyExists(variables.LOGGER_SHORTCUTS, arguments.loggerType)>
 			<cfreturn variables.LOGGER_SHORTCUTS[arguments.loggerType] />
 		<cfelse>
@@ -252,7 +255,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 		hint="Returns an array of logger names for this manager. Does NOT get logger names from a parent manager.">
 		<cfreturn StructKeyArray(variables.Loggers) />
 	</cffunction>
-	
+
 	<cffunction name="containsLoggers" access="public" returntype="boolean" output="false"
 		hint="Returns a boolean of on whether or not there are any registered loggers.">
 		<cfreturn StructCount(variables.Loggers) />
@@ -268,7 +271,7 @@ Mach-II Logging is heavily based on Apache Commons Logging interface.
 	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false">
 		<cfreturn variables.logFactory />
 	</cffunction>
-	
+
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent LoggerManager instance this LoggerManager belongs to.">
 		<cfargument name="parentLoggerManager" type="MachII.logging.LoggerManager" required="true" />

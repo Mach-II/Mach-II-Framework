@@ -164,7 +164,7 @@ See that file header for configuration of filter criteria.
 		</cfif>
 
 		<cfset setOutputType(decideOutputType()) />
-		
+
 		<cftry>
 			<cfset ArrayConcat(ArrayNew(1), ArrayNew(1)) />
 			<cfcatch type="any">
