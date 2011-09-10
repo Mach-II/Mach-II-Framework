@@ -57,6 +57,7 @@ Created version: 1.9.0
 	<cfset variables.parent = "" />
 	<cfset variables.log = "" />
 	<cfset variables.uniqueId = createRandomKey() />
+	<cfset variables.noArgsJavaCastArray = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -69,6 +70,20 @@ Created version: 1.9.0
 		<cfif StructKeyExists(arguments, "parentMessageSource")>
 			<cfset setParent(arguments.parentMessageSource) />
 		</cfif>
+
+		<!--- Test for native JavaCast() with array usage --->
+		<cftry>
+			<!--- This breaks on OpenBD 1.4 and lower --->
+			<cfset JavaCast("java.lang.Object[]", ArrayNew(1)) />
+
+			<cfset variables.javaCastArray = variables.javaCastArray_native />
+
+			<cfcatch type="any">
+				<cfset variables.javaCastArray = variables.javaCastArray_cfml />
+			</cfcatch>
+		</cftry>
+
+		<cfset variables.noArgsJavaCastArray = javaCastArray("java.lang.Object", ArrayNew(1)) />
 
 		<cfreturn this />
 	</cffunction>
@@ -137,14 +152,11 @@ Created version: 1.9.0
 			hint="The locale of the message to retrieve." />
 
 		<cfset var messageFormat = "" />
-		<cfset var argsToUse = "" />
 		<cfset var localeArray = "" />
 
 		<cfif NOT IsArray(arguments.args)>
 			<cfset arguments.args = ListToArray(arguments.args) />
 		</cfif>
-
-		<cfset argsToUse = JavaCast("string[]", arguments.args) />
 
 		<cfif NOT Len(arguments.code)>
 			<cfset getLog().trace("No code given, returning empty string") />
@@ -168,7 +180,7 @@ Created version: 1.9.0
 			<cflock name="_MachIIResourceBundleMessageSource_messageFormat_#variables.uniqueId#" type="readonly" timeout="30">
 				<cfset getLog().trace("MessageFormat object found and resolving.") />
 
-				<cfreturn messageFormat.format(argsToUse) />
+				<cfreturn messageFormat.format(javaCastArray("java.lang.Object", arguments.args)) />
 			</cflock>
 		</cfif>
 
@@ -193,7 +205,7 @@ Created version: 1.9.0
 		<cfif IsObject(messageFormat)>
 			<cflock name="_MachIIResourceBundleMessageSource_messageFormat_#variables.uniqueId#" type="readonly" timeout="30">
 				<cfset getLog().trace("MessageFormat object found and  resolving.") />
-				<cfreturn messageFormat.format(JavaCast("string[]", ArrayNew(1))) />
+				<cfreturn messageFormat.format(variables.noArgsJavaCastArray) />
 			</cflock>
 		</cfif>
 
@@ -202,13 +214,38 @@ Created version: 1.9.0
 		<cfreturn "" />
 	</cffunction>
 
-	<cffunction name="createMessageFormat" access="private" returntype="any" output="false">
+	<cffunction name="createMessageFormat" access="private" returntype="any" output="false"
+		hint="Creates a message format based on the message and locale.">
 		<cfargument name="message" type="string" required="true" />
 		<cfargument name="locale" type="any" required="true" />
 
 		<cfset getLog().trace("Creating MessageFormat object for message '#arguments.message#', locale '#arguments.locale.toString()#'") />
 
 		<cfreturn CreateObject("java", "java.text.MessageFormat").init(arguments.message, arguments.locale) />
+	</cffunction>
+
+	<cffunction name="JavaCastArray_native" access="private" returntype="any" output="false"
+		hint="Java casts an array to the correct type using native JavaCast().">
+		<cfargument name="class" type="string" required="true" />
+		<cfargument name="data" type="array" required="true" />
+		<cfreturn JavaCast("java.lang.Object[]", arguments.data) />
+	</cffunction>
+
+	<cffunction name="JavaCastArray_cfml" access="private" returntype="any" output="false"
+		hint="Java casts an array to the correct type using Java reflection.">
+		<cfargument name="class" type="string" required="true" />
+		<cfargument name="data" type="array" required="true" />
+
+		<cfset var javaClass = CreateObject("java", arguments.class) />
+	 	<cfset var reflectArray = CreateObject("java", "java.lang.reflect.Array") />
+	 	<cfset var javaArray = reflectArray.newInstance(javaClass.getClass(), ArrayLen(arguments.data)) />
+		<cfset var i = 0 />
+
+		<cfloop from="1" to="#ArrayLen(arguments.data)#" index="i">
+			<cfset reflectArray.set(javaArray, JavaCast("int", (i - 1)), arguments.data[i]) />
+		</cfloop>
+
+		<cfreturn javaArray />
 	</cffunction>
 
 	<!---
