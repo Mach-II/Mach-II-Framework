@@ -116,7 +116,7 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<!--- Add any path parts that have a wildcarded pattern part --->
 		<cfloop from="1" to="#ArrayLen(patternParts)#" index="i">
 			<cfset part = patternParts[i] />
-			<cfif (Find("*", part) OR Find("?", part)) AND ArrayLen(pathParts) GTE i>
+			<cfif (FindNoCase("*", part) OR FindNoCase("?", part)) AND ArrayLen(pathParts) GTE i>
 				<cfif puts GT 0 OR (i EQ 1 AND NOT Left(arguments.pattern, 1) EQ pathSeparator)>
 					<cfset result.append(pathSeparator) />
 				</cfif>
@@ -334,16 +334,16 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 		<!--- We typically try not to shortcircuit using returns in the
 			middle of a method, but here it's much easier --->
 
-		<!--- Check for any '*'s in the pattern --->
-		<cfloop from="1" to="#ArrayLen(patternArray)#" index="i">
-			<cfif patternArray[i] EQ "*">
-				<cfset containsStar = true />
-				<cfbreak />
-			</cfif>
-		</cfloop>
+		<!--- Pattern contains only '*', which matches anything so fast fail--->
+		<cfif arguments.pattern IS "*">
+			<cfreturn true />
+		</cfif>
 
+		<!--- Check for any '*'s in the pattern --->
+		<cfif FindNoCase("*", arguments.pattern)>
+			<cfset containsStar = true />
 		<!--- No stars so check to see if '?' match against the string --->
-		<cfif NOT containsStar>
+		<cfelse>
 			<!--- No '*'s, so we make a shortcut --->
 			<cfif patternEnd NEQ stringEnd>
 				<!--- a pattern  with only '?'s will have the same size as string --->
@@ -359,11 +359,6 @@ Ant (http://ant.apache.org) and the Spring Framework (http://www.springframework
 			</cfloop>
 
 			<!--- String matches against pattern --->
-			<cfreturn true />
-		</cfif>
-
-		<!--- Pattern contains only '*', which matches anything --->
-		<cfif arguments.pattern IS "*">
 			<cfreturn true />
 		</cfif>
 
