@@ -402,7 +402,7 @@ Notes:
 			AND NOT getAppManager().getModuleManager().isModuleDefined(arguments.mappingModuleName)>
 
 			<cfif log.isErrorEnabled()>
-				<cfset log.error("Cannot create an event-mapping on event '#arguments.eventMapping#' because the mapping '#arguments.mappingName#' in module '#arguments.mappingModuleName#' cannot be found.") />
+				<cfset log.error("Cannot create an event-mapping on event '#arguments.eventName#' because the mapping '#arguments.mappingName#' in module '#arguments.mappingModuleName#' cannot be found.") />
 			</cfif>
 
 			<cfthrow type="MachII.framework.eventMappingModuleNotDefined"

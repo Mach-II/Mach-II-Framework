@@ -463,6 +463,7 @@ Notes:
 		</cfif>
 
 		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(eventName, mappingName, mappingModule) />
+		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 
 		<cfreturn command />
 	</cffunction>

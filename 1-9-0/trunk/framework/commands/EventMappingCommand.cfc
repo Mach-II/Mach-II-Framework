@@ -86,7 +86,25 @@ Notes:
 		<cfargument name="event" type="MachII.framework.Event" required="true" />
 		<cfargument name="eventContext" type="MachII.framework.EventContext" required="true" />
 
-		<cfset arguments.eventContext.setEventMapping(getEventName(), getMappingName(), getMappingModule()) />
+		<cfset var propertyManager = arguments.eventContext.getAppManager().getPropertyManager() />
+		<cfset var eventName = getEventName() />
+		<cfset var mappingName = getMappingName() />
+		<cfset var mappingModule = getMappingModule() />
+		<cfset var expressionEvaluator = getExpressionEvaluator() />
+
+		<cfif len(eventName) and expressionEvaluator.isExpression(eventName)>
+			<cfset eventName = expressionEvaluator.evaluateExpression(eventName, arguments.event, propertyManager) />
+		</cfif>
+
+		<cfif len(mappingName) and expressionEvaluator.isExpression(mappingName)>
+			<cfset mappingName = expressionEvaluator.evaluateExpression(mappingName, arguments.event, propertyManager) />
+		</cfif>
+
+		<cfif len(mappingModule) and expressionEvaluator.isExpression(mappingModule)>
+			<cfset mappingModule = expressionEvaluator.evaluateExpression(mappingModule, arguments.event, propertyManager) />
+		</cfif>
+
+		<cfset arguments.eventContext.setEventMapping(eventName, mappingName, mappingModule) />
 
 		<cfreturn true />
 	</cffunction>
