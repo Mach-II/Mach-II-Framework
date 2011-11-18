@@ -239,7 +239,7 @@ Notes:
 		<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 8>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
 		<!--- OpenBD 1.3+ (BlueDragon 7+ threading engine is not currently compatible) --->
-		<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND engineInfo.majorVersion GTE 1 AND engineInfo.minorVersion GTE 3>
+		<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND ((engineInfo.majorVersion EQ 1 AND engineInfo.minorVersion GTE 3) OR engineInfo.majorVersion GTE 2)>
 			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
 		<!--- Railo 3 --->
 		<cfelseif FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3>
