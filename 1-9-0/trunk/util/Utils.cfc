@@ -283,7 +283,7 @@ Notes:
 		<cfif NOT IsObject(adminApiAdapter)>
 			<cfthrow type="MachII.utils.NoAdminApiAdapterAvailable"
 				message="Cannot create an admin API adapter for the target system. No compatible adapter available."
-				detail="Engine Name: '#engineInfo.Name#', Major Version: '#engineInfo.majorVersion#', Minor Version: '#engineInfo.minorVersion#', Product Level: '#engineInfo.productLeve#'" />
+				detail="Engine Name: '#engineInfo.Name#', Major Version: '#engineInfo.majorVersion#', Minor Version: '#engineInfo.minorVersion#', Product Level: '#engineInfo.productLevel#'" />
 		</cfif>
 
 		<cfreturn adminApiAdapter />
