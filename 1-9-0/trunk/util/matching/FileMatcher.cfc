@@ -96,7 +96,7 @@ Notes:
 			<cfset variables.useListInfo = arguments.useListInfo />
 		<cfelse>
 			<cfif ((FindNoCase("ColdFusion", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 7)
-				OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 1 AND variables.engineInfo.minorVersion GTE 4 AND variables.engineInfo.productLevel EQ "GPL")
+				OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.productLevel EQ "GPL" AND ((variables.engineInfo.majorVersion EQ 1 AND variables.engineInfo.minorVersion GTE 4) OR variables.engineInfo.majorVersion GTE 2))
 				OR (FindNoCase("Railo", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 3)
 				)>
 				<cfset variables.useListInfo = true />
