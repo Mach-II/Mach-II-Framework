@@ -909,7 +909,8 @@ Notes:
 			<cfreturn variables.routes[variables.routeAliases[arguments.routeNameOrUrlAlias]] />
 		<cfelse>
 			<cfthrow type="MachII.RequestManager.NoRouteConfigured"
-				message="No named route or route url alias of '#arguments.routeNameOrUrlAlias#' could be found." />
+				message="No named route or route url alias of '#arguments.routeNameOrUrlAlias#' could be found."
+				detail="Please check that a ROUTE is defined." />
 		</cfif>
 	</cffunction>
 	<cffunction name="getRoutes" access="public" returntype="struct" output="false"
