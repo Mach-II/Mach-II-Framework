@@ -44,7 +44,7 @@ Author: Kurt Wiersma (kurt@mach-ii.com)
 $Id$
 
 Created version: 1.6.0
-Updated version: 1.8.1
+Updated version: 1.9.0
 
 Notes:
 
@@ -174,7 +174,7 @@ via reap() which is run every 3 minutes.
 
 		<!--- Setup the cache by running a flush() --->
 		<cfif getParameter("enableInitialFlush", true)>
-			<cfset flush() />
+			<cfset this.flush() />
 		<cfelse>
 			<cfset getStorage() />
 		</cfif>
