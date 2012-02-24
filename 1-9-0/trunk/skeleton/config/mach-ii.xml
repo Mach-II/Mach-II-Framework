@@ -1,29 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.6.0//EN"
-	"http://www.mach-ii.com/dtds/mach-ii_1_6_0.dtd" >
+<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.9.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_9_0.dtd" >
 
-<mach-ii version="1.6">
+<mach-ii version="1.9">
+	
 	<!-- INCLUDES -->
 	<includes>
 		<!-- <include file="./mach-ii_coldspringProperty.xml" /> -->
 	</includes>
+
+	<!-- MODULES -->
+	<modules>
+		<!-- The Dashboard module is included as part of the base Mach-II 1.9 download -->
+		<module name="dashboard" file="/MachII/dashboard/config/mach-ii_dashboard.xml">
+			<mach-ii>
+				<properties>
+					<property name="password" value="%DASHBOARDPASSWORD%" />
+				</properties>
+			</mach-ii>
+		</module>
+	</modules>
 	
 	<!-- PROPERTIES -->
 	<properties>
-		<property name="applicationRoot" value="/CHANGEME" />
+		<property name="applicationRoot" value="%APPROOTPATH%" />
 		<property name="defaultEvent" value="home" />
-		<property name="eventParameter" value="event" />
+		<property name="eventParameter" value="%EVENTPARAMETER%" />
 		<property name="parameterPrecedence" value="form" />
 		<property name="maxEvents" value="10" />
 		<property name="exceptionEvent" value="exception" />
 		
 		<!-- CACHING RELATED -->
-		<!-- this will create an unnamed cache that caches data for 1 hour in the application scope -->
-		<!-- <property name="caching" type="MachII.caching.CachingProperty" /> -->
+		<!-- This will create an unnamed cache that caches data for 1 hour in the application scope -->
+		<property name="caching" type="MachII.caching.CachingProperty" />
 		
 		<!-- LOGGING RELATED -->
-		<!-- this will log to the screen -->
+		<!-- This will log to the screen -->
 		<!-- <property name="logging" type="MachII.logging.LoggingProperty" /> -->
 	</properties>
 
@@ -74,8 +87,8 @@
 	<!-- EVENT-HANDLERS -->
 	<event-handlers>
 		<event-handler event="home" access="public">
-			<!-- <notify listener="SomeListener" method="doSomething" resultArg="resultOfSomething" />  -->
-			<view-page name="home" />
+			<view-page name="home" contentArg="layout.content"/>
+			<execute subroutine="layout.main"/>
 		</event-handler>
 		
 		<!-- sample event handler that uses caching and the default cache (data cached for 1 hour in application scope) -->
@@ -95,12 +108,19 @@
 		-->
 	
 		<event-handler event="exception" access="private">
-			<view-page name="exception" />
+			<view-page name="exception" contentArg="layout.content"/>
+			<execute subroutine="layout.main"/>
 		</event-handler>
 	</event-handlers>
 	
 	<!-- SUBROUTINES -->
 	<subroutines>
+		<subroutine name="layout.main">
+			<view-page name="header" contentArg="layout.header"/>
+			<view-page name="footer" contentArg="layout.footer"/>
+			<view-page name="wrapper"/>
+		</subroutine>
+		
 		<!--
 		<subroutine name="yourSubroutineName">
 		</subroutine>
@@ -109,8 +129,16 @@
 	
 	<!-- PAGE-VIEWS -->
 	<page-views>
-		<page-view name="home" page="/views/home.cfm" />
-		<page-view name="exception" page="/views/exception.cfm" />
+		<!--
+		This loads all pages which match /views/**/*.cfm, so a page-view called home would 
+		translate to /views/home.cfm and page-view called aboutUs.index would translate to 
+		/views/aboutUs/index.cfm 
+		-->
+		<view-loader type="PatternViewLoader" />
+		
+		<!-- You can specify additional views not handled by the View Loaders in the following 
+		format: <page-view name="viewName" page="/views/someView.cfm"/> 
+		-->
 	</page-views>
 	
 </mach-ii>

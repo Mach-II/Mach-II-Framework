@@ -103,6 +103,17 @@ Notes:
 				<parameter name="cssBasePath" value=""/>
 			</parameters>
 		</property>
+		<!-- 
+		<property name="globalization" type="GlobalizationLoaderProperty">
+			<parameters>
+				<parameter name="bundles">
+					<array>
+						<element value="/MachII/dashboard/resources/globalization/dashboard" />
+					</array>
+				</parameter>
+			</parameters>
+		</property>
+		 -->
 		
 		<!-- Auto Update Settings -->
 		<property name="autoUpdateReleaseTypes">

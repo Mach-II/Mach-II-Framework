@@ -1,12 +1,69 @@
-This is the skeleton for the final release of Mach-II 1.6. This skeleton is intended
-to give you a jumpstart on building Mach-II applications by providing a basic 
-template for Mach-II applications.
+------------------------------------------------
+    __  ___           __          ________
+   /  |/  /___ ______/ /_        /  _/  _/
+  / /|_/ / __ `/ ___/ __ \______ / / / /  
+ / /  / / /_/ / /__/ / / /_____// /_/ /   
+/_/  /_/\__,_/\___/_/ /_/     /___/___/  
 
-In addition you may use this skeleton to test your Mach-II and ColdSpring installations 
-by calling the showHome event (http://server[/path]/index.cfm?event=showHome), which 
-will display a page giving you basic feedback on whether or not Mach-II and ColdSpring 
-are configured correctly.
+$Id: README 2789 2011-06-06 19:01:38Z peterjfarrell $
+------------------------------------------------
+___                                
+ | ._ _|_ ._ _  _|    _ _|_ o _ ._ 
+_|_| | |_ | (_)(_||_|(_  |_ |(_)| |
+------------------------------------------------
 
-Please note that beyond this simple test page, this skeleton is not a running application 
-and doesn't "do" much of anything. It's provided strictly as an empty shell of a Mach-II 
-application into which you put your code.
+This is the skeleton for the final release of Mach-II 1.9. 
+
+This skeleton is intended to give you a jumpstart on building 
+Mach-II applications by providing a basic template for Mach-II 
+applications.
+
+N.B. Please note that the skeleton is not a fully running application 
+and doesn't "do" much of anything. It's provided strictly as an 
+empty shell of a Mach-II application into which to start developing
+your new Mach-II application in.
+
+------------------------------------------------
+___                            
+ | ._  _ _|_ _.|| _._|_ o _ ._ 
+_|_| |_>  |_(_|||(_| |_ |(_)| |
+------------------------------------------------
+
+N.B. If you are using ColdFusion Builder, then use the MachBuilder
+plugin which is included in in 
+
+1. Copy the files in the /MachII/skeleton folder to a directory of 
+   your choosing. Be sure to mentally note the path on your drive.
+
+2. You will need to set a few parameters/values in the mach-ii.xml
+   file which you can find in the /config directory where you placed
+   your copy of the skeleton files:
+
+	a. %DASHBOARDPASSWORD%
+	   Change this value to the password you want to use to access 
+	   the dashboard. Your password cannot start or end with a '%'.
+	
+	b. %APPROOTPATH%
+	    1)	If you unzipped the skeleton in the webroot, then change 
+	        the value of %APPROOTPATH% to "/".
+    	2)	If you unzipped the the skeleton in a sub-directory of your 
+    		webroot, then change the value of %APPROOTPATH% to "/[path]" 
+    		where [path] is the directory off your webroot.
+    		
+    		For example, if you put the skeleton in a directory called 
+    		"/myapp" (i.e.  http://localhost/myapp) then the value should 
+    		be "/myapp".
+
+    c. %EVENTPARAMETER%
+       Change this to the value you want to use for an event parameter.
+       The common standard is to use "event" or "go".
+
+3. Save your changes to the mach-ii.xml file. 
+
+
+4. Test Mach-II and your skeleton installation calling the showHome event:
+
+   http://server[/path]/index.cfm?event=showHome 
+
+   This event will display a page giving you basic feedback on whether or not 
+   Mach-II and ColdSpring are configured correctly.

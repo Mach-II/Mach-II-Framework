@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.6.0//EN"
-	"http://www.mach-ii.com/dtds/mach-ii_1_6_0.dtd" >
+<!DOCTYPE mach-ii PUBLIC "-//Mach-II//DTD Mach-II Configuration 1.9.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_9_0.dtd" >
 <!-- 
 The [beanFactoryPropertyName] parameter value is the name of the Mach-II property name 
 that will hold a reference to the ColdSpring beanFactory. This parameter 
@@ -91,7 +91,7 @@ same beanFactoryPropertyName, an application scope namespace conflict would occu
 the Property appends the module name to the end. This factory would be located in 
 application.serviceFactory_account variable.
 -->
-<mach-ii version="1.6">
+<mach-ii version="1.9">
     <properties>
 		<property name="coldspringProperty" type="MachII.properties.ColdspringProperty">
 			<parameters>

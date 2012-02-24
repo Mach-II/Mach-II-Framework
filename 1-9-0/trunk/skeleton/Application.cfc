@@ -27,4 +27,5 @@
 		* onApplicationStart(): this must call loadFramework()
 		* onRequestStart(): this must call handleRequest()
 	--->
+
 </cfcomponent>

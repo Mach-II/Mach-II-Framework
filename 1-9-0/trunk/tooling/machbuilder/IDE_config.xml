@@ -1,9 +1,10 @@
 <application> 
-    <name>Mach II Builder Extension</name> 
+    <name>MachBuilder Extension</name> 
     <author>Team Mach II</author> 
     <version>1.0</version> 
     <email>team@mach-ii.com</email> 
-    <description>Handy tools to help you build Mach II applications with CF Builder. 
+    <description>
+    	Handy tools to help you build Mach II applications with ColdFusion Builder. 
     	Includes the ability to create a new Mach II app using a configurable application skeleton.
     	This extension also integrates with the Mach II dashboard to provide handy access to all your Mach II components as well
     	as allowing you to reload them.

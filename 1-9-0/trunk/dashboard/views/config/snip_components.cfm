@@ -69,6 +69,7 @@ Notes:
 	</tr>
 	<tr>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.listeners)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.listeners)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -93,8 +94,12 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.filters)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.filters)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -116,8 +121,12 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.plugins)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.plugins)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -139,6 +148,9 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 	</tr>
 	<tr>
@@ -148,6 +160,7 @@ Notes:
 	</tr>
 	<tr>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.properties)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.properties)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -169,8 +182,12 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.endpoints)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.endpoints)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -192,8 +209,12 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 		<td style="padding:0;">
+		<cfif ArrayLen(variables.baseComponentData.viewLoaders)>
 			<cfloop from="1" to="#ArrayLen(variables.baseComponentData.viewLoaders)#" index="i">
 			<table>
 				<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -215,6 +236,9 @@ Notes:
 				</tr>
 			</table>
 			</cfloop>
+		<cfelse>
+			<p>None</p>
+		</cfif>
 		</td>
 	</tr>
 </table>
@@ -229,7 +253,7 @@ Notes:
 			<tr>
 				<th><h3>Module is not loaded and/or enabled.</h3></th>
 			</tr>
-		</table>	
+		</table>
 	<cfelse>
 		<table>
 			<tr>
@@ -239,6 +263,7 @@ Notes:
 			</tr>
 			<tr>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].listeners)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -260,8 +285,12 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].filters)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -283,8 +312,12 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].plugins)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -306,6 +339,9 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 			</tr>
 			<tr>
@@ -315,6 +351,7 @@ Notes:
 			</tr>
 			<tr>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].properties)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -336,8 +373,12 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].endpoints)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -359,8 +400,12 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 				<td style="padding:0;">
+				<cfif ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders)>
 					<cfloop from="1" to="#ArrayLen(variables.moduleComponentData[variables.moduleOrder[j]].viewLoaders)#" index="i">
 					<table>
 						<tr <cfif i MOD 2>class="shade"</cfif>>
@@ -382,6 +427,9 @@ Notes:
 						</tr>
 					</table>
 					</cfloop>
+				<cfelse>
+					<p>None</p>
+				</cfif>
 				</td>
 			</tr>
 		</table>
