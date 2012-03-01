@@ -62,6 +62,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.parentMessageManager = "" />
 	<cfset variables.messageHandlerlog = "" />
+	<cfset variables.messageHandlerTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -81,6 +82,7 @@ Notes:
 
 		<!--- Quick reference for performance reasons --->
 		<cfset variables.messageHandlerlog = getAppManager().getLogFactory().getLog("MachII.framework.MessageHandler") />
+		<cfset variables.messageHandlerTarget = CreateObject("component", "MachII.framework.MessageHandler") />
 
 		<cfset super.init() />
 
@@ -161,7 +163,7 @@ Notes:
 				</cfif>
 
 				<!--- Setup the Message Handler --->
-				<cfset messageHandler = CreateObject("component", "MachII.framework.MessageHandler").init(messageName, messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
+				<cfset messageHandler = Duplicate(variables.messageHandlerTarget).init(messageName, messageMultithreaded, messageWaitForThreads, messageTimeout, getThreadingAdapter()) />
 				<cfset messageHandler.setLog(variables.messageHandlerlog) />
 				<cfset messageHandler.setUtils(getAppManager().getUtils()) />
 
