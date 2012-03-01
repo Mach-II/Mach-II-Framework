@@ -60,6 +60,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.parentSubroutineManager = "" />
 	<cfset variables.handlers = StructNew() />
+	<cfset variables.subroutineHandlerTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -75,6 +76,9 @@ Notes:
 		</cfif>
 
 		<cfset super.init() />
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.subroutineHandlerTarget = CreateObject("component",  "MachII.framework.SubroutineHandler") />
 
 		<cfreturn this />
 	</cffunction>
@@ -129,7 +133,7 @@ Notes:
 				</cfif>
 			<!--- General XML setup --->
 			<cfelse>
-				<cfset subroutineHandler = CreateObject("component", "MachII.framework.SubroutineHandler").init() />
+				<cfset subroutineHandler = Duplicate(variables.subroutineHandlerTarget).init() />
 
 				<cfloop from="1" to="#ArrayLen(subroutineNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = subroutineNodes[i].XMLChildren[j] />

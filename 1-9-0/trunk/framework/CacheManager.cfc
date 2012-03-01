@@ -67,6 +67,7 @@ Notes:
 	<cfset variables.handlersBySubroutineName = StructNew() />
 	<cfset variables.cacheEnabled = true />
 	<cfset variables.cacheHandlerlog = "" />
+	<cfset variables.cacheHandlerTarget = "" />
 	<cfset variables.moduleName = "" />
 	<cfset variables.log = "" />
 
@@ -94,6 +95,7 @@ Notes:
 
 		<!--- Quick reference for performance reasons --->
 		<cfset variables.cacheHandlerlog = getAppManager().getLogFactory().getLog("MachII.framework.CacheHandler") />
+		<cfset variables.cacheHandlerTarget = CreateObject("component", "MachII.framework.CacheHandler") />
 
 		<cfset super.init() />
 
@@ -134,7 +136,7 @@ Notes:
 		</cfif>
 
 		<!--- Build cache handler --->
-		<cfset cacheHandler = CreateObject("component", "MachII.framework.CacheHandler").init(
+		<cfset cacheHandler = Duplicate(variables.cacheHandlerTarget).init(
 			id, aliases, strategyName, criteria, arguments.parentHandlerName, arguments.parentHandlerType) />
 		<cfset cacheHandler.setLog(variables.cacheHandlerlog) />
 		<cfset cacheHandler.setAppManager(getAppManager()) />

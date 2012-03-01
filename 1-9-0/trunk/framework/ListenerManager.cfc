@@ -60,6 +60,7 @@ Notes:
 	<cfset variables.parentListenerManager = "" />
 	<cfset variables.defaultInvoker = "" />
 	<cfset variables.listenerProxies = StructNew() />
+	<cfset variables.baseProxyTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -76,6 +77,9 @@ Notes:
 		<cfelse>
 			<cfset setDefaultInvoker(CreateObject("component", "MachII.framework.invokers.EventInvoker").init()) />
 		</cfif>
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.baseProxyTarget = CreateObject("component",  "MachII.framework.BaseProxy") />
 
 		<cfreturn this />
 	</cffunction>
@@ -213,7 +217,7 @@ Notes:
 				<!--- Continue setup on the Listener --->
 				<cfset listener.setInvoker(invoker) />
 
-				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(listener, listenerType, listenerParams) />
+				<cfset baseProxy = Duplicate(variables.baseProxyTarget).init(listener, listenerType, listenerParams) />
 				<cfset listener.setProxy(baseProxy) />
 
 				<!--- Add the Listener to the manager --->

@@ -58,6 +58,7 @@ Notes:
 	<cfset variables.appManager = "" />
 	<cfset variables.parentFilterManager = "" />
 	<cfset variables.filterProxies = StructNew() />
+	<cfset variables.baseProxyTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -71,6 +72,9 @@ Notes:
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getFilterManager()) />
 		</cfif>
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.baseProxyTarget = CreateObject("component",  "MachII.framework.BaseProxy") />
 
 		<cfreturn this />
 	</cffunction>
@@ -172,7 +176,7 @@ Notes:
 					</cfcatch>
 				</cftry>
 
-				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(filter, filterType, filterParams) />
+				<cfset baseProxy = Duplicate(variables.baseProxyTarget).init(filter, filterType, filterParams) />
 				<cfset filter.setProxy(baseProxy) />
 
 				<cfset addFilter(filterName, filter, arguments.override) />

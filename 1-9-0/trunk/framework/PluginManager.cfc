@@ -83,6 +83,7 @@ Notes:
 	<cfset variables.pluginPointArray = ListToArray("preProcess,preEvent,postEvent,preView,postView,postProcess,onSessionStart,onSessionEnd,handleException") />
 	<cfset variables.runParent = "" />
 	<cfset variables.introspector = CreateObject("component", "MachII.util.metadata.Introspector").init() />
+	<cfset variables.baseProxyTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -96,6 +97,9 @@ Notes:
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getPluginManager()) />
 		</cfif>
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.baseProxyTarget = CreateObject("component",  "MachII.framework.BaseProxy") />
 
 		<cfreturn this />
 	</cffunction>
@@ -202,7 +206,7 @@ Notes:
 					</cfcatch>
 				</cftry>
 
-				<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(plugin, pluginType, pluginParams) />
+				<cfset baseProxy = Duplicate(variables.baseProxyTarget).init(plugin, pluginType, pluginParams) />
 				<cfset plugin.setProxy(baseProxy) />
 
 				<cfset addPlugin(pluginName, plugin, arguments.override) />
