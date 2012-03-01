@@ -91,6 +91,7 @@ index.cfm/product/A12345/fancy/
 	<cfset variables.dummyEvent = CreateObject("component", "MachII.framework.Event").init() />
 	<cfset variables.rewriteConfigFile = "" />
 	<cfset variables.rewriteBaseFileName = "index.cfm" />
+	<cfset variables.urlRouteTarget = "" />
 
 	<cfset variables.RESERVED_PARAMETER_NAMES = "rewriteConfigFile,urlParameterFormatters,rewriteBaseFileName" />
 	<cfset variables.OWNER_ID = "_" & Hash(getTickCount() & RandRange(0, 100000) & RandRange(0, 100000)) />
@@ -107,6 +108,9 @@ index.cfm/product/A12345/fancy/
 		<cfset var i = 0 />
 		<cfset var route = 0 />
 		<cfset var currentModuleName = getAppManager().getModuleName() />
+
+		<!--- Setup objects for duplicate for performance --->
+		<cfset variables.urlRouteTarget = CreateObject("component", "MachII.framework.url.UrlRoute") />
 
 		<!--- Use StructAppend() we don't delete directly from the parameters --->
 		<cfset StructAppend(parameters, getParameters()) />
@@ -234,7 +238,7 @@ index.cfm/product/A12345/fancy/
 		<cfargument name="optionalParameters" type="any" required="false"
 			hint="An array or comma-delimited list of optional parameters." />
 
-		<cfset var route = CreateObject("component", "MachII.framework.url.UrlRoute").init(arguments.routeName) />
+		<cfset var route = Duplicate(variables.urlRouteTarget).init(arguments.routeName) />
 
 		<cfset route.setEventName(arguments.event) />
 		<cfset route.setUrlParameterFormatters(getUrlParameterFormatters()) />

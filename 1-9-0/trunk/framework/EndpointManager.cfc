@@ -64,6 +64,7 @@ Notes:
 	<cfset variables.endpoints = StructNew() />
 	<cfset variables.endpointContextPathMap = StructNew() />
 	<cfset variables.localEndpointNames = StructNew() />
+	<cfset variables.baseProxyTarget = "" />
 
 	<!---
 	CONSTANTS
@@ -92,6 +93,9 @@ Notes:
 
 		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.baseProxyTarget = CreateObject("component",  "MachII.framework.BaseProxy") />
 
 		<cfreturn this />
 	</cffunction>
@@ -344,7 +348,7 @@ Notes:
 		hint="Removes a endpoint with the specified name.">
 		<cfargument name="endpointName" type="string" required="true"
 			hint="The name of the endpoint to get." />
-		
+
 		<cfif isEndpointDefined(arguments.endpointName)>
 			<cfset StructDelete(variables.endpointContextPathMap, getEndpointByName(arguments.endpointName).getParameter("contextPath")) />
 			<cfset StructDelete(variables.endpoints, arguments.endpointName, false) />
@@ -406,7 +410,7 @@ Notes:
 		<cfset endpoint.setIsOnAuthenticateDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="onAuthenticate"', true, variables.ENDPOINT_STOP_CLASS))) />
 		<cfset endpoint.setIsAuthenticationRequiredDefined(ArrayLen(variables.introspector.getFunctionDefinitions(endpoint, 'name="isAuthenticationRequired"', true, variables.ENDPOINT_STOP_CLASS))) />
 
-		<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(endpoint, arguments.endpointType, arguments.endpointParameters) />
+		<cfset baseProxy = Duplicate(variables.baseProxyTarget).init(endpoint, arguments.endpointType, arguments.endpointParameters) />
 		<cfset endpoint.setProxy(baseProxy) />
 
 		<cfset addEndpoint(arguments.endpointName, endpoint, arguments.overrideCheck) />

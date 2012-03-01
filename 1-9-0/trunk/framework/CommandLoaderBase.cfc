@@ -67,6 +67,20 @@ Notes:
 	<cfset variables.eventBeanCommandLog = "" />
 	<cfset variables.redirectCommandlog = "" />
 	<cfset variables.defaultCommandlog = "" />
+	<cfset variables.announceCommandTarget = "" />
+	<cfset variables.cacheClearCommandTarget = "" />
+	<cfset variables.cacheCommandTarget = "" />
+	<cfset variables.callMethodCommandTarget = "" />
+	<cfset variables.eventArgCommandTarget = "" />
+	<cfset variables.eventBeanCommandTarget = "" />
+	<cfset variables.eventMappingCommandTarget = "" />
+	<cfset variables.executeCommandTarget = "" />
+	<cfset variables.filterCommandTarget = "" />
+	<cfset variables.notifyCommandTarget = "" />
+	<cfset variables.publishCommandTarget = "" />
+	<cfset variables.redirectCommandTarget = "" />
+	<cfset variables.viewPageCommandTarget = "" />
+	<cfset variables.beanInfoTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -86,6 +100,22 @@ Notes:
 		<cfset variables.eventBeanCommandLog = getAppManager().getLogFactory().getLog("MachII.framework.commands.EventBeanCommand") />
 		<cfset variables.redirectCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.RedirectCommand") />
 		<cfset variables.defaultCommandlog = getAppManager().getLogFactory().getLog("MachII.framework.commands.DefaultCommand") />
+
+		<!--- Set objects to duplicate for performance --->
+		<cfset variables.announceCommandTarget = CreateObject("component", "MachII.framework.commands.AnnounceCommand") />
+		<cfset variables.cacheClearCommandTarget = CreateObject("component", "MachII.framework.commands.CacheClearCommand") />
+		<cfset variables.cacheCommandTarget = CreateObject("component", "MachII.framework.commands.CacheCommand") />
+		<cfset variables.callMethodCommandTarget = CreateObject("component", "MachII.framework.commands.CallMethodCommand") />
+		<cfset variables.eventArgCommandTarget = CreateObject("component", "MachII.framework.commands.EventArgCommand") />
+		<cfset variables.eventBeanCommandTarget = CreateObject("component", "MachII.framework.commands.EventBeanCommand") />
+		<cfset variables.eventMappingCommandTarget = CreateObject("component", "MachII.framework.commands.EventMappingCommand") />
+		<cfset variables.executeCommandTarget = CreateObject("component", "MachII.framework.commands.ExecuteCommand") />
+		<cfset variables.filterCommandTarget = CreateObject("component", "MachII.framework.commands.FilterCommand") />
+		<cfset variables.notifyCommandTarget = CreateObject("component", "MachII.framework.commands.NotifyCommand") />
+		<cfset variables.publishCommandTarget = CreateObject("component", "MachII.framework.commands.PublishCommand") />
+		<cfset variables.redirectCommandTarget = CreateObject("component", "MachII.framework.commands.RedirectCommand") />
+		<cfset variables.viewPageCommandTarget = CreateObject("component", "MachII.framework.commands.ViewPageCommand") />
+		<cfset variables.beanInfoTarget = CreateObject("component", "MachII.util.BeanInfo").init() />
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -192,7 +222,7 @@ Notes:
 			</cfif>
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheCommand").init(handlerId, name, aliases, criteria) />
+		<cfset command = Duplicate(variables.cacheCommandTarget).init(handlerId, name, aliases, criteria) />
 		<cfset command.setLog(variables.cacheCommandLog) />
 		<cfset command.setParentHandlerName(arguments.parentHandlerName) />
 		<cfset command.setParentHandlerType(arguments.parentHandlerType) />
@@ -274,7 +304,7 @@ Notes:
 			</cfif>
 		</cfloop>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CacheClearCommand").init(
+		<cfset command = Duplicate(variables.cacheClearCommandTarget).init(
 			ids, aliases, strategyNames, criteria
 			, criteriaCollectionName, criteriaCollection, condition) />
 		<cfset command.setLog(variables.cacheClearCommandLog) />
@@ -311,7 +341,7 @@ Notes:
 			<cfset args = variables.utils.trimList(arguments.commandNode.xmlAttributes["args"]) />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.CallMethodCommand").init(bean, method, args, resultArg, overwrite) />
+		<cfset command = Duplicate(variables.callMethodCommandTarget).init(bean, method, args, resultArg, overwrite) />
 		<cfset command.setLog(variables.callMethodCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.ExpressionEvaluator) />
 		<cfset command.setUtils(variables.utils) />
@@ -383,7 +413,7 @@ Notes:
 			<cfset prependContent = arguments.commandNode.xmlAttributes["prepend"] />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.ViewPageCommand").init(viewName, contentKey, contentArg, appendContent, prependContent) />
+		<cfset command = Duplicate(variables.viewPageCommandTarget).init(viewName, contentKey, contentArg, appendContent, prependContent) />
 
 		<cfreturn command />
 	</cffunction>
@@ -406,7 +436,7 @@ Notes:
 			<cfset notifyResultArg = arguments.commandNode.xmlAttributes["resultArg"] />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.NotifyCommand").init(listenerProxy, notifyMethod, notifyResultKey, notifyResultArg) />
+		<cfset command = Duplicate(variables.notifyCommandTarget).init(listenerProxy, notifyMethod, notifyResultKey, notifyResultArg) />
 
 		<cfreturn command />
 	</cffunction>
@@ -419,7 +449,7 @@ Notes:
 		<cfset var message = arguments.commandNode.xmlAttributes["message"] />
 		<cfset var messageHandler = getAppManager().getMessageManager().getMessageHandler(message) />
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.PublishCommand").init(message, messageHandler) />
+		<cfset command = Duplicate(variables.publishCommandTarget).init(message, messageHandler) />
 
 		<cfreturn command />
 	</cffunction>
@@ -442,7 +472,7 @@ Notes:
 			<cfset moduleName = getAppManager().getModuleName() />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.AnnounceCommand").init(eventName, copyEventArgs, moduleName) />
+		<cfset command = Duplicate(variables.announceCommandTarget).init(eventName, copyEventArgs, moduleName) />
 
 		<cfreturn command />
 	</cffunction>
@@ -462,7 +492,7 @@ Notes:
 			<cfset mappingModule = getAppManager().getModuleName() />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventMappingCommand").init(eventName, mappingName, mappingModule) />
+		<cfset command = Duplicate(variables.eventMappingCommandTarget).init(eventName, mappingName, mappingModule) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 
 		<cfreturn command />
@@ -475,7 +505,7 @@ Notes:
 		<cfset var command = "" />
 		<cfset var subroutine = arguments.commandNode.xmlAttributes["subroutine"] />
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.ExecuteCommand").init(subroutine) />
+		<cfset command = Duplicate(variables.executeCommandTarget).init(subroutine) />
 
 		<cfreturn command />
 	</cffunction>
@@ -503,13 +533,13 @@ Notes:
 			</cfif>
 			<cfset filterParams[paramName] = paramValue />
 		</cfloop>
-		
+
 		<!--- Check if the runtime parameters need to be parsed for M2EL expressions at runtime --->
 		<cfif REFindNoCase("\${(.)*?}", paramNodes.toString())>
 			<cfset parseFilterParams = true />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.FilterCommand").init(filterProxy, filterParams, parseFilterParams) />
+		<cfset command = Duplicate(variables.filterCommandTarget).init(filterProxy, filterParams, parseFilterParams) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setUtils(variables.utils) />
 
@@ -556,7 +586,7 @@ Notes:
 			<cfset reinit = arguments.commandNode.xmlAttributes["reinit"] />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventBeanCommand").init(
+		<cfset command = Duplicate(variables.eventBeanCommandTarget).init(
 			beanName, beanType, beanFields, ignoreFields, reinit, variables.beanUtil, autoPopulate) />
 
 		<cfset command.setLog(variables.eventBeanCommandLog) />
@@ -566,7 +596,7 @@ Notes:
 		<cfloop from="1" to="#arrayLen(arguments.commandNode.xmlChildren)#" index="i">
 			<cfif arguments.commandNode.xmlChildren[i].xmlName eq "inner-bean">
 
-				<cfset innerBean = CreateObject("component", "MachII.util.BeanInfo").init() />
+				<cfset innerBean = Duplicate(variables.beanInfoTarget).init() />
 
 				<cfif StructKeyExists(arguments.commandNode.xmlChildren[i].xmlAttributes, "name")>
 					<cfset innerBean.setName(arguments.commandNode.xmlChildren[i].xmlAttributes["name"]) />
@@ -739,7 +769,7 @@ Notes:
 			</cfif>
 		</cfloop>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.RedirectCommand").init(eventName, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore, routeName) />
+		<cfset command = Duplicate(variables.redirectCommandTarget).init(eventName, moduleName, redirectUrl, args, persist, persistArgs, statusType, persistArgsIgnore, routeName) />
 
 		<cfset command.setLog(variables.redirectCommandLog) />
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
@@ -759,7 +789,7 @@ Notes:
 		<cfset var overwrite = true />
 		<cfset var argName = arguments.commandNode.xmlAttributes["name"] />
 		<cfset var parse = false />
-		
+
 
 		<cfif NOT StructKeyExists(arguments.commandNode.xmlAttributes, "value")>
 			<cfset argValue = variables.utils.recurseComplexValues(arguments.commandNode) />
@@ -770,7 +800,7 @@ Notes:
 			</cfif>
 		<cfelse>
 			<cfset argValue = arguments.commandNode.xmlAttributes["value"] />
-			
+
 			<!--- Check if the arg need to be parsed for M2EL expressions at runtime --->
 			<cfif REFindNoCase("\${(.)*?}", argValue)>
 				<cfset parse = true />
@@ -783,7 +813,7 @@ Notes:
 			<cfset overwrite = arguments.commandNode.xmlAttributes["overwrite"] />
 		</cfif>
 
-		<cfset command = CreateObject("component", "MachII.framework.commands.EventArgCommand").init(argName, argValue, argVariable, overwrite, parse) />
+		<cfset command = Duplicate(variables.eventArgCommandTarget).init(argName, argValue, argVariable, overwrite, parse) />
 
 		<cfset command.setExpressionEvaluator(variables.expressionEvaluator) />
 		<cfset command.setUtils(variables.utils) />

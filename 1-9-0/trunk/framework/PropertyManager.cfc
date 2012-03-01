@@ -78,6 +78,7 @@ Notes:
 	<cfset variables.configurablePropertyNames = ArrayNew(1) />
 	<cfset variables.anonymousPropertyNames = StructNew() />
 	<cfset variables.parentPropertyManager = "" />
+	<cfset variables.baseProxyTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -94,6 +95,9 @@ Notes:
 
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory()) />
+
+		<!--- Setup for duplicate for performance --->
+		<cfset variables.baseProxyTarget = CreateObject("component",  "MachII.framework.BaseProxy") />
 
 		<cfreturn this />
 	</cffunction>
@@ -217,7 +221,7 @@ Notes:
 					</cftry>
 
 					<!--- Continue setup on the property --->
-					<cfset baseProxy = CreateObject("component",  "MachII.framework.BaseProxy").init(propertyValue, propertyType, propertyParams) />
+					<cfset baseProxy = Duplicate(variables.baseProxyTarget).init(propertyValue, propertyType, propertyParams) />
 					<cfset propertyValue.setProxy(baseProxy) />
 
 					<!---

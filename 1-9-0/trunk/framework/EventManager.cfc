@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Ben Edwards (ben@ben-edwards.com)
@@ -48,42 +48,46 @@ Updated version: 1.8.0
 
 Notes:
 --->
-<cfcomponent 
+<cfcomponent
 	displayname="EventManager"
-	extends="MachII.framework.CommandLoaderBase"	
+	extends="MachII.framework.CommandLoaderBase"
 	output="false"
 	hint="Manages registered EventHandlers for the framework.">
-	
+
 	<!---
 	PROPERTIES
 	--->
 	<cfset variables.appManager = "" />
 	<cfset variables.parentEventManager = "" />
 	<cfset variables.handlers = StructNew() />
-	
+	<cfset variables.eventHandlerTarget = "" />
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
 	<cffunction name="init" access="public" returntype="EventManager" output="false"
 		hint="Initialization function called by the framework.">
-		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />	
-				
+		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
+
 		<cfset setAppManager(arguments.appManager) />
-		
+
 		<cfif getAppManager().inModule()>
 			<cfset setParent(getAppManager().getParent().getEventManager()) />
 		</cfif>
-		
+
 		<cfset super.init() />
-		
+
+		<!--- Setup duplicate objects for performance --->
+		<cfset variables.eventHandlerTarget = CreateObject("component", "MachII.framework.EventHandler") />
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="loadXml" access="public" returntype="void" output="false"
 		hint="Loads xml for the manager.">
 		<cfargument name="configXML" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="false" default="false" />
-		
+
 		<cfset var baseEventNodes = ArrayNew(1) />
 		<cfset var baseSecureDefault = "" />
 		<cfset var i = 0 />
@@ -94,7 +98,7 @@ Notes:
 		<cfelse>
 			<cfset baseEventNodes = XMLSearch(arguments.configXML, ".//event-handlers") />
 		</cfif>
-		
+
 		<!--- Setup each event handler --->
 		<cfloop from="1" to="#ArrayLen(baseEventNodes)#" index="i">
 			<cfif StructKeyExists(baseEventNodes[i].xmlAttributes, "secureDefault")>
@@ -102,7 +106,7 @@ Notes:
 			<cfelse>
 				<cfset baseSecureDefault = "none" />
 			</cfif>
-			
+
 			<cfset loadEventHandlersXml(baseEventNodes[i].xmlChildren, baseSecureDefault, arguments.override) />
 		</cfloop>
 	</cffunction>
@@ -112,24 +116,24 @@ Notes:
 		<cfargument name="eventNodes" type="array" required="true" />
 		<cfargument name="baseSecureDefault" type="string" required="true" />
 		<cfargument name="override" type="boolean" required="true" />
-		
+
 		<cfset var eventHandler = "" />
 		<cfset var eventAccess = "" />
 		<cfset var eventSecure = "" />
 		<cfset var eventName = "" />
-		
+
 		<cfset var commandNode = "" />
 		<cfset var command = "" />
-		
+
 		<cfset var hasParent = IsObject(getParent()) />
 		<cfset var mapping = "" />
 		<cfset var i = 0 />
 		<cfset var j = 0 />
-		
+
 		<!--- Setup each event handler --->
 		<cfloop from="1" to="#ArrayLen(arguments.eventNodes)#" index="i">
 			<cfset eventName = arguments.eventNodes[i].xmlAttributes["event"] />
-			
+
 			<!--- Override XML for Modules --->
 			<cfif hasParent AND arguments.override AND StructKeyExists(arguments.eventNodes[i].xmlAttributes, "overrideAction")>
 				<cfif arguments.eventNodes[i].xmlAttributes["overrideAction"] EQ "useParent">
@@ -141,13 +145,13 @@ Notes:
 					<cfelse>
 						<cfset mapping = eventName />
 					</cfif>
-					
+
 					<!--- Check if parent has event handler with the mapping name --->
 					<cfif NOT getParent().isEventDefined(mapping)>
 						<cfthrow type="MachII.framework.overrideEventHandlerNotDefined"
 							message="An event-handler named '#mapping#' cannot be found in the parent event manager for the override named '#eventName#' in module '#getAppManager().getModuleName()#'." />
 					</cfif>
-					
+
 					<cfset addEventHandler(eventName, getParent().getEventHandler(mapping), arguments.override) />
 				</cfif>
 			<!--- General XML setup --->
@@ -157,48 +161,48 @@ Notes:
 				<cfelse>
 					<cfset eventAccess = "public" />
 				</cfif>
-				
+
 				<cfif StructKeyExists(arguments.eventNodes[i].xmlAttributes, "secure")>
 					<cfset eventSecure = arguments.eventNodes[i].xmlAttributes["secure"]>
 				<cfelse>
 					<cfset eventSecure = arguments.baseSecureDefault />
 				</cfif>
-				
-				<cfset eventHandler = CreateObject("component", "MachII.framework.EventHandler").init(eventAccess, eventSecure) />
-		  
+
+				<cfset eventHandler = Duplicate(variables.eventHandlerTarget).init(eventAccess, eventSecure) />
+
 				<cfloop from="1" to="#ArrayLen(arguments.eventNodes[i].XMLChildren)#" index="j">
 				    <cfset commandNode = arguments.eventNodes[i].XMLChildren[j] />
 					<cfset command = createCommand(commandNode, eventName, "event", arguments.override) />
 					<cfset eventHandler.addCommand(command) />
 				</cfloop>
-				
+
 				<cfset addEventHandler(eventName, eventHandler, arguments.override) />
 			</cfif>
 		</cfloop>
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the EventManager and checks if default and exception are defined as required.">
-		
+
 		<cfset var propertyManager = getAppManager().getPropertyManager() />
 		<cfset var defaultEvent = "" />
 		<cfset var exceptionEvent = "" />
-		
+
 		<!--- Make sure a default and exception event is defined for parent--->
 		<cfif NOT IsObject(getAppManager().getParent())>
 			<cfset defaultEvent = propertyManager.getProperty("defaultEvent") />
 			<cfif NOT isEventDefined(defaultEvent, false)>
 				<cfthrow type="MachII.framework.noDefaultEvent"
-					message="A default event named '#defaultEvent#' has been not defined in the base app, but is required. Please create one." />				
+					message="A default event named '#defaultEvent#' has been not defined in the base app, but is required. Please create one." />
 			</cfif>
-			
+
 			<!--- No need to check for exceptionModule because it defaults to th current module / base app if not defined--->
 			<cfset exceptionEvent = propertyManager.getProperty("exceptionEvent") />
 			<cfif NOT isEventDefined(exceptionEvent, false)>
 				<cfthrow type="MachII.framework.noExceptionEvent"
 					message="A exception event named '#exceptionEvent#' has been not defined in the base app, but is required. Please create one." />
 			</cfif>
-		<!--- Make sure a default and exception event is defined for modules is they are 
+		<!--- Make sure a default and exception event is defined for modules is they are
 			specified otherwise they default to the parent --->
 		<cfelse>
 			<cfif propertyManager.isPropertyDefined("defaultEvent")>
@@ -216,10 +220,10 @@ Notes:
 				</cfif>
 			</cfif>
 		</cfif>
-		
+
 		<cfset super.configure() />
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - GENERAL
 	--->
@@ -228,7 +232,7 @@ Notes:
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="eventHandler" type="MachII.framework.EventHandler" required="true" />
 		<cfargument name="overrideCheck" type="boolean" required="false" default="false" />
-		
+
 		<cfif NOT arguments.overrideCheck>
 			<cftry>
 				<cfset StructInsert(variables.handlers, arguments.eventName, arguments.eventHandler, false) />
@@ -241,7 +245,7 @@ Notes:
 			<cfset variables.handlers[arguments.eventName] = arguments.eventHandler />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="createEvent" access="public" returntype="MachII.framework.Event" output="false"
 		hint="Creates an Event instance.">
 		<cfargument name="moduleName" type="string" required="true" />
@@ -250,28 +254,28 @@ Notes:
 		<cfargument name="requestName" type="string" required="false" default="" />
 		<cfargument name="requestModuleName" type="string" required="false" default="" />
 		<cfargument name="checkIfEventDefined" type="boolean" required="false" default="true" />
-		
+
 		<cfset var event = "" />
-		
+
 		<cfif NOT arguments.checkIfEventDefined OR isEventDefined(arguments.eventName, true, arguments.moduleName)>
 			<cfset event = CreateObject("component", "MachII.framework.Event").init(arguments.eventName, arguments.eventArgs, arguments.requestName, arguments.requestModuleName, arguments.moduleName) />
 		<cfelse>
-			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
+			<cfthrow type="MachII.framework.EventHandlerNotDefined"
 				message="EventHandler for event '#arguments.eventName#' in module '#arguments.moduleName#' is not defined." />
 		</cfif>
-		
+
 		<cfreturn event />
 	</cffunction>
-	
+
 	<cffunction name="getEventHandler" access="public" returntype="MachII.framework.EventHandler" output="false"
 		hint="Returns the EventHandler for the named Event.">
 		<cfargument name="eventName" type="string" required="true"
 			hint="The name of the Event to handle." />
 		<cfargument name="moduleName" type="string" required="false" default="" />
-		
+
 		<cfset var moduleEventManager = 0 />
 		<cfset var moduleManager = 0 />
-		
+
 		<cfif arguments.moduleName neq "">
 			<cfif NOT IsObject(getAppManager().getParent())>
 				<cfset moduleManager = getAppManager().getModuleManager() />
@@ -285,7 +289,7 @@ Notes:
 		<cfelseif IsObject(getParent())>
 			<cfreturn getParent().getEventHandler(arguments.eventName) />
 		<cfelse>
-			<cfthrow type="MachII.framework.EventHandlerNotDefined" 
+			<cfthrow type="MachII.framework.EventHandlerNotDefined"
 				message="EventHandler for event '#arguments.eventName#' is not defined." />
 		</cfif>
 	</cffunction>
@@ -296,7 +300,7 @@ Notes:
 			hint="The name of the Event to handle." />
 		<cfset StructDelete(variables.handlers, arguments.eventName, false) />
 	</cffunction>
-	
+
 	<cffunction name="isEventDefined" access="public" returntype="boolean" output="false"
 		hint="Returns true if an EventHandler for the named Event is defined; otherwise false.">
 		<cfargument name="eventName" type="string" required="true"
@@ -305,10 +309,10 @@ Notes:
 			hint="Allows you to check the parent to see if the event is in there" />
 		<cfargument name="moduleName" type="string" required="false" default=""
 			hint="Allows you to check in a specific module for an event" />
-		
+
 		<cfset var moduleManager = "" />
 		<cfset var moduleEventManager = "" />
-		
+
 		<cfif arguments.moduleName neq "">
 			<cfif NOT IsObject(getAppManager().getParent())>
 				<cfset moduleManager = getAppManager().getModuleManager() />
@@ -335,14 +339,14 @@ Notes:
 			</cfif>
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="isEventPublic" access="public" returntype="boolean" output="false"
 		hint="Returns true if the EventHandler for the named Event is publicly accessible; otherwise false.">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="checkParent" type="boolean" required="false" default="false" />
-		
+
 		<cfset var eventHandler = "" />
-		
+
 		<cfif isEventDefined(arguments.eventName)>
 			<cfset eventHandler = getEventHandler(arguments.eventName) />
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
@@ -350,17 +354,17 @@ Notes:
 		<cfelse>
 			<cfreturn false />
 		</cfif>
-		
+
 		<cfreturn eventHandler.getAccess() EQ "public" />
 	</cffunction>
-	
+
 	<cffunction name="getEventSecureType" access="public" returntype="numeric" output="false"
 		hint="Check the secure type of the EventHandler for the named Event (1 for secure, 0 for unsecure, -1 for unknown).">
 		<cfargument name="eventName" type="string" required="true" />
 		<cfargument name="checkParent" type="boolean" required="false" default="false" />
-		
+
 		<cfset var secure = -1 />
-		
+
 		<cfif isEventDefined(arguments.eventName)>
 			<cfset secure = getEventHandler(arguments.eventName).getSecure() />
 		<cfelseif arguments.checkParent AND IsObject(getParent()) AND getParent().isEventDefined(arguments.eventName)>
@@ -369,17 +373,17 @@ Notes:
 			<!--- Unknown --->
 			<cfreturn -1 />
 		</cfif>
-		
+
 		<cfif secure EQ "true">
 			<cfreturn 1>
 		<cfelseif secure EQ "false">
 			<cfreturn 0 />
 		<cfelse>
 			<!--- Unknown --->
-			<cfreturn -1 />		
+			<cfreturn -1 />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS - UTILS
 	--->
@@ -387,7 +391,7 @@ Notes:
 		hint="Returns an array of event-handler names.">
 		<cfreturn StructKeyArray(variables.handlers) />
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
@@ -398,7 +402,7 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 	<cffunction name="setParent" access="public" returntype="void" output="false"
 		hint="Returns the parent EventManager instance this EventManager belongs to.">
 		<cfargument name="parentEventManager" type="MachII.framework.EventManager" required="true" />
@@ -408,5 +412,5 @@ Notes:
 		hint="Sets the parent EventManager instance this EventManager belongs to. It will return empty string if no parent is defined.">
 		<cfreturn variables.parentEventManager />
 	</cffunction>
-	
+
 </cfcomponent>
