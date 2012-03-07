@@ -735,8 +735,8 @@ Notes:
 		hint="Saves persisted event data and returns the persistId.">
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="A struct of event-args to persist." />
-		<cfargument name="data" type="struct" required="true"
-			hint="A struct of data to persist." />
+		<cfargument name="data" type="struct" required="false" default="#StructNew()#"
+			hint="A struct of data to persist. Creates a new struct if not passed." />
 
 		<cfset var persistId = "" />
 
