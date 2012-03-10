@@ -267,7 +267,7 @@ Notes:
 
 		<cfset var viewData = getView(arguments.viewName) />
 
-		<cfreturn viewData.appRoot & viewData.page />
+		<cfreturn ReplaceNoCase(viewData.appRoot & viewData.page, "//", "/") />
 	</cffunction>
 
 	<cffunction name="getUnresolvedViewPath" access="public" returntype="string" output="false"
@@ -311,14 +311,14 @@ Notes:
 		hint="Gets all view loader for this context.">
 		<cfreturn variables.viewLoaders />
 	</cffunction>
-	
+
 	<cffunction name="reloadViewLoader" access="public" returntype="void" output="false"
 		hint="Reloads a view-loader.">
 		<cfargument name="viewLoaderName" type="string" required="true"
 			hint="Name of view-loader to reload." />
 		<cfset variables.viewLoaders[arguments.viewLoaderName].discoverViews() />
 	</cffunction>
-	
+
 	<!---
 	PROTECTED FUNCTIONS
 	--->
