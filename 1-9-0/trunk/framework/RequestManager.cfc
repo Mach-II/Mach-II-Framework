@@ -1066,6 +1066,16 @@ Notes:
 
 		<cfset var data = StructNew() />
 		<cfset var i = 0 />
+		<cfset var eventContext = getRequestHandler().getEventContext() />
+		<cfset var currentEvent = "" />
+
+		<cfif eventContext.hasCurrentEvent()>
+			<cfset currentEvent = eventContext.getCurrentEvent() />
+		<cfelseif eventContext.hasNextEvent()>
+			<cfset currentEvent = eventContext.getNextEvent() />
+		<cfelse>
+			<cfset currentEvent = CreateObject("component", "MachII.framework.Event") />
+		</cfif>
 
 		<cfloop from="1" to="#ArrayLen(variables.preRedirectCallbacks)#" index="i">
 			<cfinvoke component="#variables.preRedirectCallbacks[i].callback#"
@@ -1073,7 +1083,7 @@ Notes:
 				<cfinvokeargument name="data" value="#data#" />
 				<cfinvokeargument name="persist" value="#arguments.persist#" />
 				<cfinvokeargument name="appManager" value="#getAppManager()#" />
-				<cfinvokeargument name="event" value="#getRequestHandler().getEventContext().getCurrentEvent()#" />
+				<cfinvokeargument name="event" value="#currentEvent#" />
 			</cfinvoke>
 		</cfloop>
 
