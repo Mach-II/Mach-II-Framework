@@ -71,6 +71,7 @@ first [Hash(UCase(arguments.channell))]
 	<cfset variables.logCache = StructNew() />
 	<cfset variables.utils = "" />
 	<cfset variables.uniqueId = createRandomKey() />
+	<cfset variables.logTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -79,6 +80,9 @@ first [Hash(UCase(arguments.channell))]
 		hint="Initializes the factory.">
 
 		<cfset setUtils(CreateObject("component", "MachII.util.Utils").init()) />
+
+		<!--- Quick reference for performance reasons --->
+		<cfset variables.logTarget = CreateObject("component", "MachII.logging.Log") />
 
 		<cfreturn this />
 	</cffunction>
@@ -95,7 +99,7 @@ first [Hash(UCase(arguments.channell))]
 
 		<!--- It is not necessary to lock since a few extra logs will not hurt memory as much as a lock hurts performance --->
 		<cfif NOT StructKeyExists(variables.logCache, channelHash)>
-			<cfset variables.logCache[channelHash] = CreateObject("component", "MachII.logging.Log").init(arguments.channel, variables.logAdapters) />
+			<cfset variables.logCache[channelHash] = Duplicate(variables.logTarget).init(arguments.channel, variables.logAdapters) />
 		</cfif>
 
 		<cfreturn variables.logCache[channelHash] />

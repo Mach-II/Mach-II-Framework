@@ -155,6 +155,7 @@ To Test it out, do the following:
 	<cfset variables.enforceSecure = false />
 	<cfset variables.jsonpArgName = "jsonp" />
 	<cfset variables.parseRequestBodyParametersMethods = "" />
+	<cfset variables.uriTarget = "" />
 
 	<cfset variables.exceptionTypes = StructNew() />
 	<cfset variables.exceptionTypes["InvalidProtocol"] = "MachII.endpoints.rest.InvalidProtocol" />
@@ -172,6 +173,9 @@ To Test it out, do the following:
 
 		<cfset var secure = getParameter("secure", false) />
 		<cfset var enforceSecure = getParameter("enforceSecure", getParameter("secure", false)) />
+
+		<!--- Quick reference for performance reasons --->
+		<cfset variables.uriTarget = CreateObject("component", "MachII.framework.url.Uri") />
 
 		<!--- Configure any parameters --->
 		<cfif IsStruct(secure)>
@@ -633,7 +637,7 @@ To Test it out, do the following:
 
 						<cfloop from="1" to="#ArrayLen(currHttpMethods)#" index="j">
 							<!--- Create instance of Uri and add it to the UriCollection. --->
-							<cfset currRestUri = CreateObject("component", "MachII.framework.url.Uri").init(
+							<cfset currRestUri = Duplicate(variables.uriTarget).init(
 									currFunction[variables.ANNOTATION_REST_URI]
 									, currHttpMethods[j]
 									, currFunction.name

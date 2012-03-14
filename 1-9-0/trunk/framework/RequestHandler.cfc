@@ -73,6 +73,9 @@ Notes:
 	<cfset variables.currentRouteParams = StructNew() />
 	<cfset variables.currentSESParams = StructNew() />
 	<cfset variables.currentRouteName = "" />
+	<cfset variables.eventQueueTarget = "" />
+	<cfset variables.eventContextTarget = "" />
+	<cfset variables.viewContextTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -85,6 +88,9 @@ Notes:
 		<cfargument name="moduleDelimiter" type="string" required="true" />
 		<cfargument name="maxEvents" type="numeric" required="true" />
 		<cfargument name="onRequestEndCallbacks" type="any" required="true" />
+		<cfargument name="eventQueueTarget" type="MachII.util.SizedQueue" required="true" />
+		<cfargument name="eventContextTarget" type="MachII.framework.EventContext" required="true" />
+		<cfargument name="viewContextTarget" type="MachII.framework.ViewContext" required="true" />
 
 		<cfset setAppManager(arguments.appManager) />
 		<cfset setEventParameter(arguments.eventParameter) />
@@ -98,6 +104,11 @@ Notes:
 
 		<!--- Setup the log --->
 		<cfset setLog(getAppManager().getLogFactory().getLog("MachII.framework.RequestHandler")) />
+
+		<!--- Set objects to duplicate for performance --->
+		<cfset variables.eventQueueTarget = arguments.eventQueueTarget />
+		<cfset variables.eventContextTarget = arguments.eventContextTarget />
+		<cfset variables.viewContextTarget = arguments.viewContextTarget />
 
 		<cfreturn this />
 	</cffunction>
@@ -141,10 +152,10 @@ Notes:
 		<cfset var log = getLog() />
 
 		<!--- Setup the EventQueue --->
-		<cfset setEventQueue(CreateObject("component", "MachII.util.SizedQueue").init(getMaxEvents())) />
+		<cfset setEventQueue(Duplicate(variables.eventQueueTarget).init(getMaxEvents())) />
 
 		<!--- Setup the EventContext --->
-		<cfset setEventContext(CreateObject("component", "MachII.framework.EventContext").init(this, getEventQueue())) />
+		<cfset setEventContext(Duplicate(variables.eventContextTarget).init(this, getEventQueue(), Duplicate(variables.viewContextTarget))) />
 
 		<!--- Set the EventContext into the request scope for backwards compatibility --->
 		<cfset request.eventContext = getEventContext() />
@@ -317,7 +328,7 @@ Notes:
 	<cffunction name="setWorkingLocale" access="private" returntype="void" output="false"
 		hint="Sets the current Locale for this request (and session).">
 		<cfargument name="locale" type="any" required="true" />
-		
+
 		<cfset getAppManager().getGlobalizationManager().persistLocale(arguments.locale) />
 
 		<cfset getLog().debug("Current locale set to #arguments.locale#") />
@@ -552,7 +563,7 @@ Notes:
 			<cfset setCurrentLocale(locale) />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	ACCESSORS
 	--->
