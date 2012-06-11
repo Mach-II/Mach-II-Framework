@@ -60,7 +60,6 @@ Notes:
 	<cfset variables.useListInfo = false />
 	<cfset variables.utils = "" />
 	<cfset variables.engineInfo = "" />
-	<cfset variables.isGAE = false />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -101,10 +100,6 @@ Notes:
 				)>
 				<cfset variables.useListInfo = true />
 			</cfif>
-		</cfif>
-
-		<cfif FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.productLevel EQ "Google App Engine">
-			<cfset variables.isGAE = true />
 		</cfif>
 
 		<cfset super.init(argumentCollection=arguments) />
@@ -278,10 +273,6 @@ Notes:
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
 		<cfset QueryAddColumn(pathResults, "fullPath", "VarChar", ArrayNew(1)) />
 
-		<cfif variables.isGAE>
-			<cfset rootFix = "/" />
-		</cfif>
-
 		<!---
 		Build possible paths by removing the root path if requested. This option
 		is offered because cfinclude cannot use absolute file paths
@@ -329,10 +320,6 @@ Notes:
 			listInfo="name"
 			type="file"
 			recurse="#FindNoCase("**", arguments.pattern)#" />
-
-		<cfif variables.isGAE>
-			<cfset rootFix = "/" />
-		</cfif>
 
 		<!--- Add modified path columns --->
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />

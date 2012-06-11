@@ -64,7 +64,7 @@ Notes:
 	<cfset variables.messageSubscribers = StructNew() />
 	<cfset variables.log = "" />
 	<cfset variables.utils = "" />
-	<cfset variables.system = CreateObject("java", "java.lang.System") />
+	<cfset variables.system = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -83,6 +83,9 @@ Notes:
 		<cfset setWaitForThreads(arguments.waitForThreads) />
 		<cfset setTimeout(arguments.timeout) />
 		<cfset setThreadingAdapter(arguments.threadingAdapter) />
+
+		<!--- This needs to be done in the init method not the psuedo constructor --->
+		<cfset variables.system = CreateObject("java", "java.lang.System") />
 
 		<cfreturn this />
  	</cffunction>
@@ -140,7 +143,7 @@ Notes:
 						<cfloop from="1" to="#ArrayLen(results.errors)#" index="i">
 							<cfset builtMessage = getUtils().buildMessageFromCfCatch(results[results.errors[i]].error) />
 							<cfset builtMessages = builtMessages & "***" &  i & ".*** " & builtMessage & " || " />
-							
+
 							<cfset log.error(builtMessage, results[results.errors[i]].error) />
 						</cfloop>
 

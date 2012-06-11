@@ -41,7 +41,7 @@
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id$
+$Id: $
 
 Created version: 1.5.0
 Updated version: 1.9.0
@@ -87,6 +87,10 @@ Notes:
 	<cfset variables.trackCurrentThreads = false />
 	<cfset variables.thread = CreateObject("java", "java.lang.Thread") />
 	<cfset variables.id = CreateUUID() />
+	<cfset variables.requestHandlerTarget = "" />
+	<cfset variables.eventQueueTarget = "" />
+	<cfset variables.eventContextTarget = "" />
+	<cfset variables.viewContextTarget = "" />
 
 	<!---
 	INITIALIZATION / CONFIGURATION
@@ -100,6 +104,12 @@ Notes:
 		<cfset setPropertyManager(arguments.appManager.getPropertyManager()) />
 		<cfset setUtils(arguments.appManager.getUtils()) />
 		<cfset setLog(arguments.appManager.getLogFactory()) />
+
+		<!--- Set objects to duplicate for performance --->
+		<cfset variables.requestHandlerTarget = CreateObject("component", "MachII.framework.RequestHandler") />
+		<cfset variables.eventQueueTarget = CreateObject("component", "MachII.util.SizedQueue") />
+		<cfset variables.eventContextTarget = CreateObject("component", "MachII.framework.EventContext") />
+		<cfset variables.viewContextTarget = CreateObject("component", "MachII.framework.ViewContext") />
 
 		<cfreturn this />
 	</cffunction>
@@ -184,7 +194,7 @@ Notes:
 			</cfif>
 
 			<cfset request["_MachIIRequestHandler_" & appKey] =
-					CreateObject("component", "MachII.framework.RequestHandler").init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents(), getOnRequestEndCallbacks()) />
+					Duplicate(variables.requestHandlerTarget).init(getAppManager(), getEventParameter(), getParameterPrecedence(), getModuleDelimiter(), getMaxEvents(), getOnRequestEndCallbacks(), variables.eventQueueTarget, variables.eventContextTarget, variables.viewContextTarget) />
 		</cfif>
 
 		<cfreturn request["_MachIIRequestHandler_" & appKey]  />
