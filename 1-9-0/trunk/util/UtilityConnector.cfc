@@ -41,7 +41,7 @@
 	interfaces).
 
 Author: Peter J. Farrell (peter@mach-ii.com)
-$Id$
+$Id: $
 
 Created version: 1.6.0
 Updated version: 1.8.0
@@ -96,7 +96,15 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 	</cffunction>
 
 	<!---
-	PUBLIC FUNCTIONS
+	PUBLIC FUNCTIONS - THREADING
+	--->
+	<cffunction name="getThreadingAdapter" access="public" returntype="MachII.util.Threading.ThreadingAdapter" output="false"
+		hint="Gets the threading adapter.">
+		<cfreturn getAppManager().getUtils().createThreadingAdapter() />
+	</cffunction>
+
+	<!---
+	PUBLIC FUNCTIONS - ENVIRONMENT
 	--->
 	<cffunction name="getEnvironmentName" access="public" returntype="string" output="false"
 		hint="Gets the environment name.">
@@ -122,6 +130,9 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getAppManager().inEnvironmentName(arguments.environmentName) />
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - LOG
+	--->
 	<cffunction name="getLogFactory" access="public" returntype="MachII.logging.LogFactory" output="false"
 		hint="Gets the LogFactory.">
 		<cfreturn getAppManager().getLogFactory() />
@@ -134,6 +145,9 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getLogFactory().getLog(arguments.channelName) />
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - CACHE
+	--->
 	<cffunction name="getCacheStrategyManager" access="public" returntype="MachII.caching.CacheStrategyManager" output="false"
 		hint="Gets the CacheStrategyManager.">
 		<cfreturn getAppManager().getCacheManager().getCacheStrategyManager() />
@@ -148,6 +162,9 @@ Do not inject the UtilityConnector into beans, use the 'factory' like methods in
 		<cfreturn getCacheStrategyManager().getCacheStrategyByName(arguments.name, arguments.checkParent) />
 	</cffunction>
 
+	<!---
+	PUBLIC FUNCTIONS - URL
+	--->
 	<cffunction name="buildUrl" access="public" returntype="string" output="false"
 		hint="Builds a framework specific url.">
 		<cfargument name="moduleName" type="string" required="true"

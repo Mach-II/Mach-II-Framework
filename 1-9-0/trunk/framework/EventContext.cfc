@@ -78,10 +78,11 @@ Notes:
 		hint="Initalizes the event-context.">
 		<cfargument name="requestHandler" type="MachII.framework.RequestHandler" required="true" />
 		<cfargument name="eventQueue" type="MachII.util.SizedQueue" required="true" />
+		<cfargument name="viewContext" type="MachII.framework.ViewContext" required="true" />
 
 		<cfset setRequestHandler(arguments.requestHandler) />
 		<cfset setEventQueue(arguments.eventQueue) />
-		<cfset setViewContext(CreateObject("component", "MachII.framework.ViewContext")) />
+		<cfset setViewContext(arguments.viewContext) />
 
 		<cfreturn this />
 	</cffunction>
@@ -98,7 +99,7 @@ Notes:
 		<cfif IsObject(arguments.currentEvent)>
 			<cfset setCurrentEvent(arguments.currentEvent) />
 		</cfif>
-		
+
 		<!--- (re)init the ViewContext. --->
 		<cfset getViewContext().init(getAppManager()) />
 
@@ -503,7 +504,7 @@ Notes:
 			--->
 			<cfif appManager.inModule() AND appManager.getPropertyManager().isPropertyDefined("exceptionEvent")>
 				<cfset result.eventName = appManager.getPropertyManager().getProperty("exceptionEvent") />
-				
+
 				<!--- Use the exceptionModule property if defined otherwise fall back to the module name --->
 				<cfif appManager.getPropertyManager().isPropertyDefined("exceptionModule")>
 					<cfset result.moduleName = appManager.getPropertyManager().getProperty("exceptionModule") />
@@ -515,7 +516,7 @@ Notes:
 				<cfset result.moduleName = appManager.getPropertyManager().getProperty("exceptionModule") />
 			</cfif>
 
-			<!--- Check for an event-mapping. --->			
+			<!--- Check for an event-mapping. --->
 			<cfif isEventMappingDefined(result.eventName)>
 				<cfset result = getEventMapping(exceptionEventName) />
 				<cfif Len(result.moduleName)>
@@ -815,7 +816,7 @@ Notes:
 		hint="Wrapper for CFFILE action=upload to better integrate uploading files">
 		<cfargument name="fileField" type="string" required="true"
 			hint="The name of the field in the 'form' scope. This cannot be the name in the Event object due to how CFFILE works on CFML engines." />
-		<cfargument name="destination" type="string" required="true" 
+		<cfargument name="destination" type="string" required="true"
 			hint="The full destination path to store the uploaded file. This must be a full path." />
 		<cfargument name="nameConflict" type="string" required="false" default="error"
 			hint="The action to take if there is a file name conflict (error, skip, override, makeUnique)." />
@@ -835,45 +836,45 @@ Notes:
 			and the other on Windows they could potentially provide both, so we better
 			account for that. This can be replaced with attributeCollection when all engines support it.
 		--->
-		
+
 		<!--- Windows and *nix --->
 		<cfif StructKeyExists(arguments, "fileAttributes") and StructKeyExists(arguments, "mode")>
-			<cffile action="upload" 
-				filefield="#arguments.fileField#" 
+			<cffile action="upload"
+				filefield="#arguments.fileField#"
 				destination="#arguments.destination#"
-				nameconflict="#arguments.nameConflict#" 
+				nameconflict="#arguments.nameConflict#"
 				accept="#arguments.accept#"
-				mode="#arguments.mode#" 
+				mode="#arguments.mode#"
 				attributes="#arguments.fileAttributes#"
 				result="uploadResult" />
-		
+
 		<!--- *nix only --->
 		<cfelseif StructKeyExists(arguments, "mode")>
-			<cffile action="upload" 
-				filefield="#arguments.fileField#" 
+			<cffile action="upload"
+				filefield="#arguments.fileField#"
 				destination="#arguments.destination#"
-				nameconflict="#arguments.nameConflict#" 
-				accept="#aconvertedAccept#" 
+				nameconflict="#arguments.nameConflict#"
+				accept="#aconvertedAccept#"
 				mode="#arguments.mode#"
 				result="uploadResult" />
-		
+
 		<!--- Windows only --->
 		<cfelseif StructKeyExists(arguments, "fileAttributes")>
-			<cffile action="upload" 
-				filefield="#arguments.fileField#" 
+			<cffile action="upload"
+				filefield="#arguments.fileField#"
 				destination="#arguments.destination#"
-				nameconflict="#arguments.nameConflict#" 
+				nameconflict="#arguments.nameConflict#"
 				accept="#convertedAccept#"
-				attributes="#arguments.fileAttributes#" 
+				attributes="#arguments.fileAttributes#"
 				result="uploadResult" />
-		
+
 		<!--- Generic --->
 		<cfelse>
-			<cffile action="upload" 
-				filefield="#arguments.fileField#" 
+			<cffile action="upload"
+				filefield="#arguments.fileField#"
 				destination="#arguments.destination#"
-				nameconflict="#arguments.nameConflict#" 
-				accept="#convertedAccept#" 
+				nameconflict="#arguments.nameConflict#"
+				accept="#convertedAccept#"
 				result="uploadResult" />
 		</cfif>
 

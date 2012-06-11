@@ -144,7 +144,7 @@ from the parent application.
 	<!---
 	CONSTANTS
 	--->
-	<!--- Some CFML engines such as OpenBD on GAE do not support java.awt.* package --->
+	<!--- Some CFML engines do not support java.awt.* package --->
 	<cfset variables.AWT_TOOLKIT = "" />
 	<!--- Do not use these locators as they may change in future versions --->
 	<cfset variables.HTML_HELPER_PROPERTY_NAME = "_HTMLHelper" />
@@ -179,12 +179,6 @@ from the parent application.
 
 		<!--- Configure auto-dimensions for addImage() --->
 		<cftry>
-			<!--- OpenBD on GAE do not support java.awt.* package so replace with mock function --->
-			<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
-				<!--- We must explicitly throw an exception because the GAE version silently fails --->
-				<cfthrow type="MachII.framework.AWTNotSupportedOnThisEngine" />
-			</cfif>
-
 			<cfset variables.AWT_TOOLKIT = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
 
 			<!---
