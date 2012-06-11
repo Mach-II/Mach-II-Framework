@@ -50,32 +50,26 @@ Notes:
 --->
 	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 	<view:meta type="title" content="Information" />
-	
+
 	<cfset variables.sysProperties = createObject("java", "java.lang.System").getProperties() />
-	
+
 	<cfif StructKeyExists(variables.sysProperties, "jrun.server.name")>
 		<cfset variables.instanceName = variables.sysProperties["jrun.server.name"] />
 	<cfelse>
 		<cfset variables.instanceName = "n/a" />
 	</cfif>
-	
+
 	<cfset variables.engineInfo = getAppManager().getUtils().getCfmlEngineInfo() />
-	
+
 	<cftry>
-		<!--- OpenBD on GAE do not support java.awt.* package so replace with mock function --->
-		<cfif FindNoCase("BlueDragon", engineInfo.Name) AND engineInfo.productLevel EQ "Google App Engine">
-			<!--- We must explicitly throw an exception because the GAE version silently fails --->
-			<cfthrow type="MachII.framework.AWTNotSupportedOnThisEngine" />
-		</cfif>
-		
 		<cfset variables.awtToolkit = CreateObject("java", "java.awt.Toolkit").getDefaultToolkit() />
 		<cfset variables.awtToolkitAvailable = true />
-		
+
 		<cfcatch type="any">
 			<cfset variables.awtToolkitAvailable = false />
 		</cfcatch>
 	</cftry>
-	
+
 	<view:script endpoint="dashboard.serveAsset" p:file="/js/handler/info.js">
 		<cfoutput>
 			myInfoHandler = new InfoHandler('#BuildUnescapedUrl("js.info.suggestGarbageCollection")#', '#BuildUnescapedUrl("js.info.snip_memoryInformation")#');
@@ -83,7 +77,7 @@ Notes:
 	</view:script>
 </cfsilent>
 <cfoutput>
-	
+
 <div id="messageBox" style="display:none;">
 <div class="info">
 	<p id="messageBoxText"></p>
@@ -199,7 +193,7 @@ Notes:
 				<td><p>#getAppManager().getAppKey()#</p></td>
 			</tr>
 		</table>
-		
+
 		<table style="margin-top:24px;">
 			<tr>
 				<th colspan="2"><h3>Mach-II Information</h3></th>
