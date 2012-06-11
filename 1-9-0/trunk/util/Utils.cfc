@@ -57,6 +57,7 @@ Notes:
 	PROPERTIES
 	--->
 	<cfset variables.system = CreateObject("java", "java.lang.System") />
+	<cfset variables.threadingAdapter = "" />
 	<cfset variables.statusCodeShortcutMap = StructNew() />
 	<cfset variables.mimeTypeMap = StructNew() />
 
@@ -231,35 +232,39 @@ Notes:
 	<cffunction name="createThreadingAdapter" access="public" returntype="MachII.util.threading.ThreadingAdapter" output="false"
 		hint="Creates a threading adapter if the CFML engine has threading capabilities.">
 
-		<cfset var threadingAdapter = "" />
 		<cfset var threadingAvailable = false />
-		<cfset var engineInfo = getCfmlEngineInfo() />
+		<cfset var engineInfo = "" />
 
-		<!--- Adobe ColdFusion 8+ --->
-		<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 8>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
-		<!--- OpenBD 1.3+ (BlueDragon 7+ threading engine is not currently compatible) --->
-		<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND ((engineInfo.majorVersion EQ 1 AND engineInfo.minorVersion GTE 3) OR engineInfo.majorVersion GTE 2)>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
-		<!--- Railo 3 --->
-		<cfelseif FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
+		<!--- Short-circuit and use the cache version if already loaded --->
+		<cfif NOT IsObject(variables.threadingAdapter)>
+			<cfset engineInfo = getCfmlEngineInfo() />
+
+			<!--- Adobe ColdFusion 8+ --->
+			<cfif FindNoCase("ColdFusion", engineInfo.Name) AND engineInfo.majorVersion GTE 8>
+				<cfset variables.threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterCF").init() />
+			<!--- OpenBD 1.3+ (BlueDragon 7+ threading engine is not currently compatible) --->
+			<cfelseif FindNoCase("BlueDragon", engineInfo.Name) AND  engineInfo.productLevel EQ "GPL" AND ((engineInfo.majorVersion EQ 1 AND engineInfo.minorVersion GTE 3) OR engineInfo.majorVersion GTE 2)>
+				<cfset variables.threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterBD").init() />
+			<!--- Railo 3 --->
+			<cfelseif FindNoCase("Railo", engineInfo.Name) AND engineInfo.majorVersion GTE 3>
+				<cfset variables.threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapterRA").init() />
+			</cfif>
+
+			<!--- Test for threading availability --->
+			<cfif IsObject(threadingAdapter)>
+				<cfset threadingAvailable = threadingAdapter.testIfThreadingAvailable() />
+			</cfif>
+
+			<!---
+				Default theading adapter used to check if threading is implemented on this engine or
+				threading is disabled on target system due to security sandbox
+			--->
+			<cfif NOT IsObject(variables.threadingAdapter) OR NOT threadingAvailable>
+				<cfset variables.threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapter").init() />
+			</cfif>
 		</cfif>
 
-		<!--- Test for threading availability --->
-		<cfif IsObject(threadingAdapter)>
-			<cfset threadingAvailable = threadingAdapter.testIfThreadingAvailable() />
-		</cfif>
-
-		<!---
-			Default theading adapter used to check if threading is implemented on this engine or
-			threading is disabled on target system due to security sandbox
-		--->
-		<cfif NOT IsObject(threadingAdapter) OR NOT threadingAvailable>
-			<cfset threadingAdapter = CreateObject("component", "MachII.util.threading.ThreadingAdapter").init() />
-		</cfif>
-
-		<cfreturn threadingAdapter />
+		<cfreturn variables.threadingAdapter />
 	</cffunction>
 
 	<cffunction name="createAdminApiAdapter" access="public" returntype="MachII.util.cfmlEngine.AdminApiAdapter" output="false"
