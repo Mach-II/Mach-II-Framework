@@ -39,7 +39,7 @@
 <ul>
 	<li>Add and edit any event-handlers.
 		<ul>
-			<li>Note: The current defaultEvent property is <code>#getProperty("defaultEvent")#<code>.</li>
+			<li>Note: The current defaultEvent property is <code>#getProperty("defaultEvent")#</code>.</li>
 			<li>Note: The <code>#getProperty("defaultEvent")#</code> event-handler simply calls the <code>home</code> view. This view is found at <code>/views/home.cfm</code></li>
 		</ul>
 	</li>
