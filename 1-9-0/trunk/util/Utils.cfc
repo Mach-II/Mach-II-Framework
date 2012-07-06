@@ -144,11 +144,17 @@ Notes:
 		<cfset var resolvedPath = "" />
 		<cfset var hits = ArrayNew(1) />
 		<cfset var offset = 0 />
+		<cfset var isUNC = false />
 		<cfset var i = 0 />
 
+		<!--- Check if UNC path --->
+		<cfif arguments.filePath.startsWith("\\")>
+			<cfset isUNC = true />
+		</cfif>
+
 		<!--- Unified slashes due to operating system differences and convert ./ to / --->
-		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "\", "/", "all") />
-		<cfset combinedWorkingPath = Replace(combinedWorkingPath, "/./", "/", "all") />
+		<cfset combinedWorkingPath = ReplaceNoCase(combinedWorkingPath, "\", "/", "all") />
+		<cfset combinedWorkingPath = ReplaceNoCase(combinedWorkingPath, "/./", "/", "all") />
 		<cfset pathCollection = ListToArray(combinedWorkingPath, "/") />
 
 		<!--- Check how many directories we need to move up using the ../ syntax --->
@@ -166,8 +172,11 @@ Notes:
 		<!--- Rebuild the path from the collection --->
 		<cfset resolvedPath = ArrayToList(pathCollection, "/") />
 
+		<!--- Reinsert UNC if that type of path --->
+		<cfif isUNC>
+			<cfset resolvedPath = "\\" & resolvedPath />
 		<!--- Reinsert the leading slash if *nix system --->
-		<cfif arguments.baseDirectory.startsWith("/")>
+		<cfelseif arguments.baseDirectory.startsWith("/")>
 			<cfset resolvedPath = "/" & resolvedPath />
 		</cfif>
 
@@ -741,7 +750,14 @@ Notes:
 			hint="The 'dirty' file path to be cleaned."/>
 
 		<cfset var fileParts = "" />
+		<cfset var cleanedFilePath = "" />
 		<cfset var i = 0 />
+		<cfset var isUNC = false />
+
+		<!--- Check if UNC path --->
+		<cfif arguments.filePath.startsWith("\\")>
+			<cfset isUNC = true />
+		</cfif>
 
 		<!---
 		Convert any "\" to  "/" which will work on any OS which allows us to not worry
@@ -764,11 +780,17 @@ Notes:
 			</cfif>
 		</cfloop>
 
-		<cfif arguments.filePath.startsWith("/")>
-			<cfreturn "/" & ArrayToList(fileParts, "/") />
+		<!--- Reinsert UNC if that was the in the original path --->
+		<cfif isUNC>
+			<cfset cleanedFilePath = "\\" & ArrayToList(fileParts, "/") />
+		<!--- Reinsert the initial slash if in the original path --->
+		<cfelseif arguments.filePath.startsWith("/")>
+			<cfset cleanedFilePath = "/" & ArrayToList(fileParts, "/") />
 		<cfelse>
-			<cfreturn ArrayToList(fileParts, "/") />
+			<cfset cleanedFilePath = ArrayToList(fileParts, "/") />
 		</cfif>
+
+		<cfreturn cleanedFilePath />
 	</cffunction>
 
 </cfcomponent>
