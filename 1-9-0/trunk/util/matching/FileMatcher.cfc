@@ -95,7 +95,6 @@ Notes:
 			<cfset variables.useListInfo = arguments.useListInfo />
 		<cfelse>
 			<cfif ((FindNoCase("ColdFusion", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 7)
-				OR (FindNoCase("BlueDragon", variables.engineInfo.Name) AND variables.engineInfo.productLevel EQ "GPL" AND ((variables.engineInfo.majorVersion EQ 1 AND variables.engineInfo.minorVersion GTE 4) OR variables.engineInfo.majorVersion GTE 2))
 				OR (FindNoCase("Railo", variables.engineInfo.Name) AND variables.engineInfo.majorVersion GTE 3)
 				)>
 				<cfset variables.useListInfo = true />
@@ -319,7 +318,7 @@ Notes:
 			directory="#arguments.path#"
 			listInfo="name"
 			type="file"
-			recurse="#FindNoCase("**", arguments.pattern)#" />
+			recurse="true" />
 
 		<!--- Add modified path columns --->
 		<cfset QueryAddColumn(pathResults, "modifiedPath", "VarChar", ArrayNew(1)) />
