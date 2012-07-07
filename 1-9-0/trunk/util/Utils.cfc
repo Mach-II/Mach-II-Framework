@@ -148,7 +148,7 @@ Notes:
 		<cfset var i = 0 />
 
 		<!--- Check if UNC path --->
-		<cfif arguments.filePath.startsWith("\\")>
+		<cfif arguments.baseDirectory.startsWith("\\")>
 			<cfset isUNC = true />
 		</cfif>
 
