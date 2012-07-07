@@ -80,7 +80,14 @@ Notes:
 				* UNNECESSARY
 			--->
 			<cfset variables.rounder = CreateObject("java", "java.math.RoundingMode") />
-			<cfset variables.formatter.setRoundingMode(variables.rounder[UCase(attributes.roundingMode)]) />
+			<cftry>
+				<cfset variables.formatter.setRoundingMode(variables.rounder[UCase(attributes.roundingMode)]) />
+				<cfcatch type="any">
+					<cfthrow type="MachII.customtags.view.formatnumber.invalidRoundingModeValue"
+						message="The 'roundingMode' attribute is an invalid value."
+						detail="Use 'up', 'down', 'ceiling', 'floor', 'half_up', half_down', 'half_even' or 'unecessary' as a value." />
+				</cfcatch>
+			</cftry>
 		</cfif>
 
 	<cfelse>

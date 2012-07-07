@@ -98,6 +98,15 @@ Notes:
 	<cfparam name="attributes.type" type="string"
 		default="submit" />
 
+	<!--- Setup g11n values for gValueKey--->
+	<cfif StructKeyExists(attributes, "gValuelKey")>
+
+		<cfparam name="attributes.gArguments" default="#ArrayNew(1)#" />
+		<cfparam name="attributes.gLocale" default="#getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()#" />
+
+		<cfset attributes.value = getAppManager().getGlobalizationManager().getString(attributes.gValueKey, attributes.gLocale, attributes.gArguments, "NOT FOUND") />
+	</cfif>
+
 	<cfset setFirstElementId(attributes.id) />
 
 	<!--- if this is an image input and they don't provide an alt attribute,
