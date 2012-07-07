@@ -76,6 +76,8 @@ Notes:
 		default="#NOT Len(attributes.var)#" />
 	<cfparam name="attributes.arguments" type="any"
 		default="#ArrayNew(1)#" />
+	<cfparam name="attributes.locale" type="string"
+		default="#getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()#">
 
 	<!--- Convert to array if list is passed --->
 	<cfif IsSimpleValue(attributes.arguments)>
@@ -83,7 +85,7 @@ Notes:
 	</cfif>
 
 <cfelse>
-	<cfset variables.output = getAppManager().getGlobalizationManager().getString(attributes.key, getAppManager().getRequestManager().getRequestHandler().getCurrentLocale(), attributes.arguments, attributes.text) />
+	<cfset variables.output = getAppManager().getGlobalizationManager().getString(attributes.key, attributes.locale, attributes.arguments, attributes.text) />
 
 	<!--- Store the output to whatever variable 'var' is pointing to --->
 	<cfif Len(attributes.var)>

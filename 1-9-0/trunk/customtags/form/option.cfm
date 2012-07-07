@@ -67,6 +67,15 @@ Notes:
 	<cfset variables.checkValue = request._MachIIFormLib.selectCheckValue />
 	<cfset variables.checkValueDelimiter = request._MachIIFormLib.selectCheckValueDelimiter />
 
+	<!--- Setup g11n values for gLabelKey--->
+	<cfif StructKeyExists(attributes, "gLabelKey")>
+
+		<cfparam name="attributes.gArguments" default="#ArrayNew(1)#" />
+		<cfparam name="attributes.gLocale" default="#getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()#" />
+
+		<cfset attributes.value = getAppManager().getGlobalizationManager().getString(attributes.gLabelKey, attributes.gLocale, attributes.gArguments, "NOT FOUND") />
+	</cfif>
+
 	<!--- Set defaults --->
 	<cfparam name="attributes.value" type="string"
 		default="" />

@@ -15,29 +15,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Linking this library statically or dynamically with other modules is
     making a combined work based on this library.  Thus, the terms and
     conditions of the GNU General Public License cover the whole
     combination.
- 
-	As a special exception, the copyright holders of this library give you 
-	permission to link this library with independent modules to produce an 
-	executable, regardless of the license terms of these independent 
-	modules, and to copy and distribute the resultant executable under 
-	the terms of your choice, provided that you also meet, for each linked 
+
+	As a special exception, the copyright holders of this library give you
+	permission to link this library with independent modules to produce an
+	executable, regardless of the license terms of these independent
+	modules, and to copy and distribute the resultant executable under
+	the terms of your choice, provided that you also meet, for each linked
 	independent module, the terms and conditions of the license of that
-	module.  An independent module is a module which is not derived from 
-	or based on this library and communicates with Mach-II solely through 
-	the public interfaces* (see definition below). If you modify this library, 
-	but you may extend this exception to your version of the library, 
-	but you are not obligated to do so. If you do not wish to do so, 
+	module.  An independent module is a module which is not derived from
+	or based on this library and communicates with Mach-II solely through
+	the public interfaces* (see definition below). If you modify this library,
+	but you may extend this exception to your version of the library,
+	but you are not obligated to do so. If you do not wish to do so,
 	delete this exception statement from your version.
 
 
-	* An independent module is a module which not derived from or based on 
-	this library with the exception of independent module components that 
-	extend certain Mach-II public interfaces (see README for list of public 
+	* An independent module is a module which not derived from or based on
+	this library with the exception of independent module components that
+	extend certain Mach-II public interfaces (see README for list of public
 	interfaces).
 
 Author: Mike Rogers (mike@mach-ii.com)
@@ -51,7 +51,7 @@ Notes:
 	displayname="GlobalizationManager"
 	output="false"
 	hint="Manages globalization for the framework">
-	
+
 	<!---
 	PROPERTIES
 	--->
@@ -66,7 +66,7 @@ Notes:
 	<cfset variables.localePersistenceClass = "MachII.globalization.persistence.SessionPersistenceMethod" />
 	<cfset variables.numberFormatter = CreateObject("java", "java.text.NumberFormat") />
 	<cfset variables.dateFormatter = CreateObject("java", "java.text.DateFormat") />
-	
+
 	<!---
 	INITIALIZATION / CONFIGURATION
 	--->
@@ -75,7 +75,7 @@ Notes:
 		<cfargument name="appManager" type="MachII.framework.AppManager" required="true" />
 
 		<cfset var localePersistenceObject = "" />
-		
+
 		<cfset setAppManager(arguments.appManager) />
 
 		<cfif getAppManager().inModule()>
@@ -84,7 +84,7 @@ Notes:
 			<cfset localePersistenceObject = getParent().getLocalePersistenceObject() />
 			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init(getParent().getMessageSource()) />
 		<cfelse>
-			<cftry>			
+			<cftry>
 				<cfset localePersistenceObject = CreateObject("component", getLocalePersistenceClass()).init(arguments.appManager) />
 
 				<cfcatch type="any">
@@ -96,12 +96,12 @@ Notes:
 
 			<cfset variables.messageSource = CreateObject("component", "MachII.globalization.ResourceBundleMessageSource").init() />
 		</cfif>
-		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />		
+		<cfset variables.messageSource.setLog(getAppManager().getLogFactory()) />
 		<cfset setLocalePersistenceObject(localePersistenceObject) />
-		
+
 		<cfreturn this />
 	</cffunction>
-	
+
 	<cffunction name="configure" access="public" returntype="void" output="false"
 		hint="Configures the manager and related functionality.">
 
@@ -117,42 +117,42 @@ Notes:
 			<cfset getLocalePersistenceObject().deconfigure() />
 		</cfif>
 	</cffunction>
-	
+
 	<!---
 	PUBLIC FUNCTIONS
 	--->
 	<cffunction name="getString" access="public" returntype="string" output="false"
-		hint="">
+		hint="Gets an i18n string by key/code.">
 		<cfargument name="code" type="string" required="true" />
 		<cfargument name="locale" type="any" required="true" />
 		<cfargument name="args" type="array" required="true" />
 		<cfargument name="defaultString" type="string" required="true" />
-		
+
 		<cfset var currentLocale = arguments.locale />
-		
+
 		<!--- If the user doesn't specify a locale, use the one for the current request --->
 		<cfif NOT IsObject(currentLocale) AND NOT Len(currentLocale)>
 			<cfset currentLocale = getAppManager().getRequestManager().getRequestHandler().getCurrentLocale() />
 		</cfif>
-		
-		<cfif isDebuggingEnabled()>	
+
+		<cfif isDebuggingEnabled()>
 			<cfreturn getDebugPrefix() & getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) & getDebugSuffix() />
 		<cfelse>
 			<cfreturn getMessageSource().getMessage(arguments.code, arguments.args, currentLocale, arguments.defaultString) />
 		</cfif>
 	</cffunction>
-	
+
 	<cffunction name="persistLocale" access="public" returntype="void" output="false"
 		hint="Persists the passed locale as the user's current locale for this 'session'.">
 		<cfargument name="locale" type="string" required="true" />
 		<cfset getLocalePersistenceObject().storeLocale(arguments.locale) />
 	</cffunction>
-	
+
 	<cffunction name="retrieveLocale" access="public" returntype="string" output="false"
 		hint="Retrieves the current locale as set by the user.">
 		<cfreturn getLocalePersistenceObject().retrieveLocale() />
 	</cffunction>
-	
+
 	<cffunction name="appendBasenames" access="public" returntype="void" output="false"
 		hint="Appends base names to the message source.">
 		<cfargument name="basenames" type="array" required="true" />
@@ -162,25 +162,25 @@ Notes:
 	<cffunction name="getFormatNumberInstance" access="public" returntype="any" output="false"
 		hint="Gets a number instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
 
-		<cfreturn variables.numberFormatter.getNumberInstance(arguments.locale) />	
+		<cfreturn variables.numberFormatter.getNumberInstance(arguments.locale) />
 	</cffunction>
 
 	<cffunction name="getFormatDecimalInstance" access="public" returntype="any" output="false"
 		hint="Gets a number instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
 		<cfargument name="pattern" type="string" required="true" />
-		
+
 		<cfset var formatter = "" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
-		
+
 		<!--- Set the pattern --->
 		<cfif Len(arguments.pattern)>
 			<cfset formatter = CreateObject("java", "java.text.DecimalFormat").init(arguments.pattern, CreateObject("java", "java.text.DecimalFormatSymbols").init(arguments.locale)) />
@@ -189,60 +189,61 @@ Notes:
 			<cfset formatter = CreateObject("java", "java.text.DecimalFormat").init() />
 			<cfset formatter.setDecimalFormatSymbols(CreateObject("java", "java.text.DecimalFormatSymbols").init(arguments.locale)) />
 		</cfif>
-		
+
 		<cfreturn formatter />
 	</cffunction>
 
 	<cffunction name="getFormatPercentInstance" access="public" returntype="any" output="false"
 		hint="Gets a percent instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
-		
-		<cfreturn variables.numberFormatter.getPercentInstance(arguments.locale) />	
+
+		<cfreturn variables.numberFormatter.getPercentInstance(arguments.locale) />
 	</cffunction>
 
 	<cffunction name="getFormatCurrencyInstance" access="public" returntype="any" output="false"
 		hint="Gets a currency instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
-		
-		<cfreturn variables.numberFormatter.getCurrencyInstance(arguments.locale) />	
+
+		<cfreturn variables.numberFormatter.getCurrencyInstance(arguments.locale) />
 	</cffunction>
 
 	<cffunction name="getFormatDateTimeInstance" access="public" returntype="any" output="false"
 		hint="Gets a date/time instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
-		<cfargument name="pattern" type="any" required="true" />
-		
+		<cfargument name="pattern" type="any" required="true"
+			hint="Takes an list (date,time positions) or 2-item array." />
+
 		<cfset var formatter = "" />
 		<cfset var patterns = "" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
-		
+
 		<cfif ListFindNoCase("SHORT,MEDIUM,LONG,FULL", arguments.pattern)>
 			<!--- Convert pattern into an array for easier use --->
 			<cfif NOT IsArray(arguments.pattern)>
-				<cfset arguments.pattern = ListToArray(arguments.pattern) />
+				<cfset patterns = ListToArray(arguments.pattern) />
 			</cfif>
-			
-			<!--- If only only pattern in the array, use the same pattern for for the time as the date--->
-			<cfif ArrayLen(arguments.pattern) EQ 1>
-				<cfset arguments.pattern[2] = arguments.pattern[1] />
+
+			<!--- If only only pattern in the array, use the same pattern for for the time as the date --->
+			<cfif ArrayLen(patterns) EQ 1>
+				<cfset arguments.patterns[2] = arguments.patterns[1] />
 			</cfif>
-			
-			<cfset formatter = variables.dateFormatter.getDateTimeInstance(variables.dateFormatter[arguments.pattern[1]], variables.dateFormatter[arguments.pattern[2]], arguments.locale) />
+
+			<cfset formatter = variables.dateFormatter.getDateTimeInstance(variables.dateFormatter[UCase(arguments.patterns[1])], variables.dateFormatter[UCase(arguments.patterns[2])], arguments.locale) />
 		<cfelse>
 			<cfset formatter = CreateObject("java", "java.text.SimpleDateFormatter").init(arguments.pattern, arguments.locale) />
 		</cfif>
-		
+
 		<cfreturn formatter />
 	</cffunction>
 
@@ -250,19 +251,19 @@ Notes:
 		hint="Gets a date instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
 		<cfargument name="pattern" type="string" required="true" />
-		
+
 		<cfset var formatter = "" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
-		
+
 		<cfif ListFindNoCase("SHORT,MEDIUM,LONG,FULL", arguments.pattern)>
 			<cfset formatter = variables.dateFormatter.getDateInstance(variables.dateFormatter[arguments.pattern], arguments.locale) />
 		<cfelse>
 			<cfset formatter = CreateObject("java", "java.text.SimpleDateFormatter").init(arguments.pattern, arguments.locale) />
 		</cfif>
-		
+
 		<cfreturn formatter />
 	</cffunction>
 
@@ -270,15 +271,15 @@ Notes:
 		hint="Gets a time instance based off the passed locale.">
 		<cfargument name="locale" type="any" required="true" />
 		<cfargument name="pattern" type="string" required="true" />
-		
+
 		<cfset var formatter = "" />
-		
+
 		<cfif NOT IsObject(arguments.locale)>
 			<cfset arguments.locale = getMessageSource().resolveLocaleStringToLocaleObject(arguments.locale) />
 		</cfif>
 
 		<cfset formatter = variables.dateFormatter.getTimeInstance(variables.dateFormatter[arguments.pattern], arguments.locale) />
-		
+
 		<cfreturn formatter />
 	</cffunction>
 
@@ -292,7 +293,7 @@ Notes:
 	<cffunction name="getAppManager" access="public" returntype="MachII.framework.AppManager" output="false">
 		<cfreturn variables.appManager />
 	</cffunction>
-	
+
 	<cffunction name="setParent" access="public" returntype="void" output="false">
 		<cfargument name="parentManager" type="MachII.framework.GlobalizationManager" required="true" />
 		<cfset variables.parentGlobalizationManager = arguments.parentManager />
@@ -300,7 +301,7 @@ Notes:
 	<cffunction name="getParent" access="public" returntype="any" output="false">
 		<cfreturn variables.parentGlobalizationManager />
 	</cffunction>
-	
+
 	<cffunction name="setLocalePersistenceObject" access="public" returntype="void" output="false">
 		<cfargument name="localePersistenceObject" type="MachII.globalization.persistence.AbstractPersistenceMethod" required="true" />
 		<cfset variables.localePersistenceObject = arguments.localePersistenceObject />
@@ -340,7 +341,7 @@ Notes:
 	<cffunction name="getMessageSource" access="public" returntype="MachII.globalization.BaseMessageSource"  output="false">
 		<cfreturn variables.messageSource />
 	</cffunction>
-	
+
 	<cffunction name="setLocaleUrlParam" access="public" returntype="void" output="false">
 		<cfargument name="localeUrlParam" type="string" required="true"/>
 		<cfset variables.localeUrlParam = arguments.localeUrlParam />
@@ -348,7 +349,7 @@ Notes:
 	<cffunction name="getLocaleUrlParam" access="public" returntype="string" output="false">
 		<cfreturn variables.localeUrlParam />
 	</cffunction>
-	
+
 	<cffunction name="setLocalePersistenceClass" access="public" returntype="void" output="false">
 		<cfargument name="localePersistenceClass" type="string" required="true"/>
 		<cfset variables.localePersistenceClass = arguments.localePersistenceClass />

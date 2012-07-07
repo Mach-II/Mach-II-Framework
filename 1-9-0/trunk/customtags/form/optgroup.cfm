@@ -63,6 +63,15 @@ Notes:
 	<cfinclude template="/MachII/customtags/form/helper/formTagBuilder.cfm" />
 	<cfset setupTag("optgroup", false) />
 
+	<!--- Setup g11n values for gLabelKey--->
+	<cfif StructKeyExists(attributes, "gLabelKey")>
+
+		<cfparam name="attributes.gArguments" default="#ArrayNew(1)#" />
+		<cfparam name="attributes.gLocale" default="#getAppManager().getRequestManager().getRequestHandler().getCurrentLocale()#" />
+
+		<cfset attributes.label = getAppManager().getGlobalizationManager().getString(attributes.gLabelKey, attributes.gLocale, attributes.gArguments, "NOT FOUND") />
+	</cfif>
+
 	<!--- Ensure certain attributes are defined --->
 	<cfset ensureByName("label") />
 

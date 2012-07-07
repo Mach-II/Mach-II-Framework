@@ -139,6 +139,16 @@ https://trac.mach-ii.com/machii/ticket/546
 ------------------------------------------------
 Improvements / Enhancements
 ------------------------------------------------
+* Use Duplicate() instead of CreateObject on common transient objects
+
+This speeds up common object creation significantly.
+
+Special thanks to Mark Drew's CFML Throwdown presentation.
+
+For more information see:
+https://github.com/Mach-II/Mach-II-Framework/issues/11
+(2012-07-07 peterjfarrell)
+
 * Allow Url Parameters in View Tag Library Style and Script Tags
 
 Special thanks to Brian Fitzgerald for suggeting this issue.
