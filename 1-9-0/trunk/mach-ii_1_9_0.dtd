@@ -120,6 +120,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 		[type] - the type of the property if defining a property CFC (fully qualified CFC dot path) 
 		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
 		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+		[loadPriority] - used to precipitate default property loading priorities
 -->
 <!ELEMENT property (parameters?, array?, struct?, value?)>
 <!ATTLIST property 
@@ -128,6 +129,7 @@ following DOCTYPE elements at the beginning (after the "xml" declaration):
 	type CDATA #IMPLIED
 	overrideAction (useParent|addFromParent) #IMPLIED
 	mapping CDATA #IMPLIED
+	loadPriority CDATA #IMPLIED
 >
 
 <!--

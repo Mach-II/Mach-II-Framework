@@ -168,6 +168,14 @@ Notes:
 					<cfelse>
 						<cfset propertyName = resolveAnonymousPropertyName(propertyType) />
 					</cfif>
+					
+					<cfif structKeyExists(propertyNodes[i].xmlAttributes, "loadPriority")>
+						<cfif propertyNodes[i].xmlAttributes["loadPriority"] LTE listLen(variables.PROPERTY_LOAD_ORDER)>
+							<cfset variables.PROPERTY_LOAD_ORDER = listInsertAt(variables.PROPERTY_LOAD_ORDER, propertyNodes[i].xmlAttributes["loadPriority"], propertyNodes[i].xmlAttributes["name"]) />
+						<cfelse>
+							<cfset variables.PROPERTY_LOAD_ORDER = listAppend(variables.PROPERTY_LOAD_ORDER, propertyNodes[i].xmlAttributes["name"]) />
+						</cfif>
+					</cfif>
 
 					<!---
 						Ensure the configurable property CFC is not already defined if override is not allowed.
@@ -427,8 +435,17 @@ Notes:
 					<cfbreak />
 				<cfelse>
 					<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
-					<cfif ListFindNoCase(variables.PROPERTY_LOAD_ORDER, GetMetaData(aConfigurableProperty).name) >
+					<cfif ListFindNoCase(variables.PROPERTY_LOAD_ORDER, GetMetaData(aConfigurableProperty).name)>
 						<cfset insertAt++ />
+					<cfelseif ListFindNoCase(variables.PROPERTY_LOAD_ORDER, arguments.configurablePropertyType)>
+						<cfset insertAt = ListFindNoCase(variables.PROPERTY_LOAD_ORDER, arguments.configurablePropertyType) />
+						
+						<cfif insertAt GT arrayLen(variables.configurablePropertyNames)>
+							<cfset arrayAppend(variables.configurablePropertyNames, arguments.configurablePropertyName) />
+						<cfelse>
+							<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
+						</cfif>
+						<cfbreak />
 					<cfelseif insertAt GTE i>
 						<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
 						<cfbreak />
@@ -677,4 +694,4 @@ Notes:
 		<cfreturn variables.log />
 	</cffunction>
 
-</cfcomponent>
+</cfcomponent>nent>
