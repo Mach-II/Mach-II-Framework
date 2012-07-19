@@ -529,21 +529,37 @@ application.serviceFactory_account variable.
 
 		<!--- Look for autowirable collaborators for any setters --->
 		<cfset var targetMetadata = GetMetadata(arguments.targetObject) />
+		<cfset var extendsMetadata = GetMetadata(arguments.targetObject) />
 
 		<!--- If target object is a command --->
-		<cfif StructKeyExists(targetMetadata, "extends")
-			AND targetMetadata.extends.name EQ "MachII.framework.Command">
-			<!--- Autowire by value from bean id method --->
-			<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
-		<cfelse>
-			<!--- Only resolve if dependency resolution is on --->
-			<cfif getParameter("resolveMachIIDependencies", false)>
-				<!--- Autowire by dynamic method generation --->
-				<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+		<cfif StructKeyExists(targetMetadata, "extends") AND targetMetadata.extends.name EQ "MachII.framework.Command">
 
-				<!--- Autowire by defined setters --->
-				<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
+		<!--- Autowire by value from bean id method --->
+		<cfset autowireByBeanIdValue(arguments.targetObject, targetMetadata) />
+
+		<!--- Only resolve if dependency resolution is on --->
+		<cfelseif getParameter("resolveMachIIDependencies", false)>
+
+			<cfif NOT structKeyExists(targetMetadata, "depends")>
+				<cfset targetMetadata.depends = "" />
 			</cfif>
+
+			<!--- Loop through all extended objects looking for injection targets --->
+			<cfloop condition="structKeyExists(extendsMetadata, 'extends') AND isStruct(extendsMetadata.extends)">
+				<cfset extendsMetadata = extendsMetadata.extends />
+
+				<!--- Must make sure dependant isn't already defined at the top level --->
+				<cfif structKeyExists(extendsMetadata, "depends") AND len(extendsMetadata.depends) AND NOT listFindNoCase(targetMetadata.depends, extendsMetadata.depends)>
+					<!--- Add dependants to top level metadata for later rendering --->
+					<cfset targetMetadata.depends = listAppend(targetMetadata.depends, extendsMetadata.depends) />
+				</cfif>
+			</cfloop>
+
+			<!--- Autowire by dynamic method generation --->
+			<cfset autowireByDynamicMethodGeneration(arguments.targetObject, targetMetadata, getAutowireAttributeName()) />
+
+			<!--- Autowire by defined setters --->
+			<cfset autowireByDefinedSetters(arguments.targetObject, targetMetadata) />
 		</cfif>
 	</cffunction>
 
@@ -667,6 +683,11 @@ application.serviceFactory_account variable.
 		<cfset var beanName = "" />
 		<cfset var access = "" />
 		<cfset var i = 0 />
+
+		<!--- If this object extends another, fetch sub-injection targets first --->
+		<cfif structKeyExists(targetObjMetadata, "extends") and isStruct(targetObjMetadata.extends)>
+			<cfset autowireByDefinedSetters(arguments.targetObj, targetObjMetadata.extends) />
+		</cfif>
 
 		<!--- Autowire by concrete setters (dynamically injected setters do not show up in the metadata) --->
 		<cfif StructKeyExists(arguments.targetObjMetadata, "functions")>
