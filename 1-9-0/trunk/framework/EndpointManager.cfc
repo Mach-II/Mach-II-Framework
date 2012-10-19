@@ -210,23 +210,34 @@ Notes:
 		<cfargument name="eventArgs" type="struct" required="true"
 			hint="The incoming event args.">
 
-		<cfset var firstUrlItem = ListFirst(cgi.PATH_INFO, "/") />
+		<cfset var urlSegment = ListFirst(cgi.PATH_INFO, "/") />
 
 		<cfif StructKeyExists(variables.endpointContextPathMap, cgi.PATH_INFO)>
 			<!--- The entire path info matched one of the endpoint contextPath parameters. --->
 			<cfset arguments.eventArgs[getEndpointParameter()] = variables.endpointContextPathMap[cgi.PATH_INFO] />
 			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched path '#cgi.PATH_INFO#' to endpoint.", arguments.eventArgs) />
 			<cfreturn true />
-		<cfelseif StructKeyExists(variables.endpoints, firstUrlItem)>
+		<cfelseif StructKeyExists(variables.endpoints, urlSegment)>
 			<!--- The first part of the URI matched an endpoint name. --->
-			<cfset arguments.eventArgs[getEndpointParameter()] = firstUrlItem />
-			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched first URL item '#firstUrlItem#' to endpoint.", arguments.eventArgs) />
+			<cfset arguments.eventArgs[getEndpointParameter()] = urlSegment />
+			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched first URL item '#urlSegment#' to endpoint.", arguments.eventArgs) />
 			<cfreturn true />
 		<cfelseif StructKeyExists(arguments.eventArgs, getEndpointParameter())>
 			<!--- The URL contains the endpoint parameter. --->
 			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Endpoint parameter provided in URL.", arguments.eventArgs) />
 			<cfreturn true />
 		<cfelse>
+			<!--- Endpoint reverse lookup for complex named endpoints --->
+			<cfloop index="endpoint" list="#structKeyList(variables.endpoints)#">
+				<cfset urlSegment = left(removeChars(cgi.PATH_INFO, 1, 1), len(endpoint)) />
+				
+				<cfif urlSegment EQ endpoint>
+					<cfset arguments.eventArgs[getEndpointParameter()] = urlSegment />
+					<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched first URL item '#urlSegment#' to endpoint.", arguments.eventArgs) />
+					<cfreturn true />
+				</cfif>
+			</cfloop>
+
 			<cfreturn false />
 		</cfif>
 	</cffunction>

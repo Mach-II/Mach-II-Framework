@@ -112,6 +112,7 @@ Notes:
 		<cfset var propertyValue = "" />
 		<cfset var propertyType = "" />
 		<cfset var propertyParams = "" />
+		<cfset var propertyLoadOrder = ArrayNew(1) />
 
 		<cfset var paramsNodes = ArrayNew(1) />
 		<cfset var paramName = "" />
@@ -127,8 +128,14 @@ Notes:
 		<!--- Search for properties --->
 		<cfif NOT arguments.override>
 			<cfset propertyNodes = XMLSearch(arguments.configXML, "mach-ii/properties/property") />
+			<cfset propertyLoadOrder = XMLSearch(arguments.configXML, "mach-ii/properties/@loadPriority") />
 		<cfelse>
 			<cfset propertyNodes = XMLSearch(arguments.configXML, ".//properties/property") />
+			<cfset propertyLoadOrder = XMLSearch(arguments.configXML, ".//properties/@loadPriority") />
+		</cfif>
+
+		<cfif arrayLen(propertyLoadOrder)>
+			<cfset variables.PROPERTY_LOAD_ORDER = propertyLoadOrder[1].XmlValue />
 		</cfif>
 
 		<!--- Set the properties from the XML file. --->
@@ -230,7 +237,7 @@ Notes:
 						method to be called twice.
 					--->
 					<cfif NOT isPropertyDefined(propertyName)>
-						<cfset addConfigurableProperty(propertyName, propertyType) />
+						<cfset arrayAppend(variables.configurablePropertyNames, propertyName)>
 					</cfif>
 				<!--- Setup if name/value pair, struct or array --->
 				<cfelse>
@@ -249,6 +256,10 @@ Notes:
 				<cfset setProperty(propertyName, propertyValue) />
 			</cfif>
 		</cfloop>
+		
+		<cfif listLen(variables.PROPERTY_LOAD_ORDER)>
+			<cfset sortConfigurableProperties() />
+		</cfif>
 	</cffunction>
 
 	<cffunction name="configure" access="public" returntype="void" output="false"
@@ -408,37 +419,24 @@ Notes:
 		<cfreturn variables.VERSION_MAJOR &  "." & minorVersion />
 	</cffunction>
 
-	<cffunction name="addConfigurableProperty" access="private" returntype="void" output="false"
-		hint="Adds a property name that we can call a configure() method on.">
-		<cfargument name="configurablePropertyName" type="string" required="true" />
-		<cfargument name="configurablePropertyType" type="string" required="true" />
+	<cffunction name="sortConfigurableProperties" access="private" returntype="void" output="false"
+		hint="Sorts Configurable Properties By Load Priority.">
 
 		<cfset var i = 0 />
 		<cfset var pos = 1 />
-		<cfset var insertAt = 1 />
-		<cfset var propertyName = "" />
-		<cfset var aConfigurableProperty = "" />
+		<cfset var sortTable = structNew() />
 
-		<cfset pos = ListContainsNoCase(variables.PROPERTY_LOAD_ORDER, arguments.configurablePropertyType)>
-		<cfif pos GT 0 AND ArrayLen(variables.configurablePropertyNames) GT 0>
-			<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
-				<cfif i EQ pos>
-					<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
-					<cfbreak />
-				<cfelse>
-					<cfset aConfigurableProperty = getProperty(variables.configurablePropertyNames[i]) />
-					<cfif ListFindNoCase(variables.PROPERTY_LOAD_ORDER, GetMetaData(aConfigurableProperty).name) >
-						<cfset insertAt++ />
-					<cfelseif insertAt GTE i>
-						<cfset ArrayInsertAt(variables.configurablePropertyNames, insertAt, arguments.configurablePropertyName)>
-						<cfbreak />
-					</cfif>
-				</cfif>
-			</cfloop>
-		<cfelse>
-			<cfset ArrayAppend(variables.configurablePropertyNames, arguments.configurablePropertyName)>
-		</cfif>
+		<cfloop from="1" to="#ArrayLen(variables.configurablePropertyNames)#" index="i">
+			<cfset pos = ListContainsNoCase(variables.PROPERTY_LOAD_ORDER, variables.configurablePropertyNames[i])>
 
+			<cfif pos EQ 0>
+				<cfset pos = listLen(variables.PROPERTY_LOAD_ORDER) + i />
+			</cfif>
+
+			<cfset sortTable[variables.configurablePropertyNames[i]] = pos />
+		</cfloop>
+
+		<cfset variables.configurablePropertyNames = structSort(sortTable, "numeric") />
 	</cffunction>
 
 	<cffunction name="getConfigurablePropertyNames" access="public" returntype="array" output="false"

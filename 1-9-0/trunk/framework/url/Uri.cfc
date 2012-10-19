@@ -244,7 +244,7 @@ For example, a uriPattern like "/service/doit/{value}"
 		</cfloop>
 
 		<!--- If first element is URI prefix, add it --->
-		<cfif NOT urlElements[1] EQ variables.uriPrefix>
+		<cfif NOT urlElements[1] EQ listFirst(variables.uriPrefix, "/")>
 			<cfset ArrayInsertAt(urlElements, 1, variables.uriPrefix) />
 		</cfif>
 
