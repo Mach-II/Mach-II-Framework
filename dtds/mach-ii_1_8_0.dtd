@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Mach-II - A framework for object oriented MVC web applications in CFML
+    Copyright (C) 2003-2009 GreatBizTools, LLC
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Linking this library statically or dynamically with other modules is
+    making a combined work based on this library.  Thus, the terms and
+    conditions of the GNU General Public License cover the whole
+    combination.
+ 
+    As a special exception, the copyright holders of this library give you
+    permission to link this library with independent modules to produce an
+    executable, regardless of the license terms of these independent
+    modules, and to copy and distribute the resulting executable under
+    terms of your choice, provided that you also meet, for each linked
+    independent module, the terms and conditions of the license of that
+    module.  An independent module is a module which is not derived from
+    or based on this library.  If you modify this library, you may extend
+    this exception to your version of the library, but you are not
+    obligated to do so.  If you do not wish to do so, delete this
+    exception statement from your version.
+
+$Id: mach-ii_1_8_0.dtd 2101 2010-02-09 21:54:40Z peterfarrell $
+
+Created version: 1.0.0
+Updated version: 1.8.0
+
+Notes:
+The DTD for the Mach-II Application Configuration File, Version 1.8.0.
+
+To support validation of the configuration file, include one of the
+following DOCTYPE elements at the beginning (after the "xml" declaration):
+
+<!DOCTYPE mach-ii PUBLIC
+	"-//Mach-II//DTD Mach-II Configuration 1.8.0//EN"
+	"http://www.mach-ii.com/dtds/mach-ii_1_8_0.dtd">
+
+<!DOCTYPE mach-ii SYSTEM
+	"http://localhost:8500/MachII/mach-ii_1_8_0.dtd">
+	
+<!DOCTYPE mach-ii SYSTEM
+	"http://pathToMachII/mach-ii_1_8_0.dtd">
+-->
+
+<!--
+	"mach-ii"
+		version - the version of the DTD being used for configuration
+-->
+<!ELEMENT mach-ii ((includes?, modules?, properties?, listeners?, message-subscribers?, event-filters?, event-handlers?, subroutines?, page-views?, plugins?)|(includes?, modules?, properties?, listeners?, message-subscribers?, event-filters?, plugins?, event-handlers?, subroutines?, page-views?))>
+<!ATTLIST mach-ii 
+	version CDATA #IMPLIED
+>
+
+<!--
+	The "includes" element defines includes you get inserted into that document before Mach II parses
+	and validates the xml file.
+		file - the path relative to app root where the include file is located
+		[override] - whether or not the include should override any conflicts when applied to the base configuration
+-->
+
+<!ELEMENT includes (include*)>
+<!ELEMENT include EMPTY>
+<!ATTLIST include 
+	file CDATA #REQUIRED
+	override (true|false) "false"
+>
+
+<!--
+	"module" element defines Mach-II modules (sub-applications) and validates the xml file.
+		name - the name of the module that this node defines
+		file - the path relative to app root where the module config file is located
+-->
+
+<!ELEMENT modules (module*)>
+<!ELEMENT module (mach-ii?)>
+<!ATTLIST module 
+	name CDATA #REQUIRED
+	file CDATA #IMPLIED
+>
+
+<!--
+	The "properties" element defines properties to configure the Mach-II application framework.
+	Several properties are recommended to be defined for every project.
+	Properties are referenced by name.
+	
+	Properties that should be defined:
+		defaultEvent - the event for the framework to handle if one is not specified in a new request
+		exceptionEvent - the event to announce if there's an unhandled exception
+		maxEvents - the maximum number of events to process for a single request
+		eventParameter - the name of the request parameter that will define the event (defaults to 'event')
+		applicationRoot - the path to the application's folder relative to the web-server root (i.e. '/SampleApp')
+		parameterPrecedence - form | url : which to favor for conflicting request parameters
+-->
+<!ELEMENT properties (property*)>
+<!--
+	"property"
+		name - the name of the property
+		[value] - the value of the property
+		[type] - the type of the property if defining a property CFC (fully qualified CFC dot path) 
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT property (parameters?, array?, struct?, value?)>
+<!ATTLIST property 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	type CDATA #IMPLIED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+
+<!--
+	The "listeners" element defines all of the listeners to be registered with the framework.
+	Listeners are the components that contain application logic.
+	Listeners are referenced by name.
+-->
+<!ELEMENT listeners (listener*)>
+<!--
+	"listener"
+		name - the name of the listener
+		type - the type of the listener (fully qualified CFC dot path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT listener (invoker?, parameters?)>
+<!ATTLIST listener 
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+<!--
+	"invoker"
+		type - the type of the invoker (fully qualified CFC dot path)
+-->
+<!ELEMENT invoker EMPTY>
+<!ATTLIST invoker 
+	type CDATA #REQUIRED
+>
+
+<!--
+	The "message-subscribers" element defines all of the message-subscribers to be registered with
+	the framework. Message-subscribers respond to publish commands.
+	Message-subscribers are references by message name.
+-->
+<!ELEMENT message-subscribers (message*)>
+<!--
+	"message"
+		name - the name of the message
+		[multithreaded] - whether or not the subscribers should be run in multiple threads (automatically downgrades when not supported by the CFML engine)
+		[timeout] - the number of seconds to wait to join threads before throwing an exception (0 = wait until request timeout is exceed)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT message (subscribe*)>
+<!ATTLIST message
+	name CDATA #REQUIRED
+	multithreaded (true|false) "true"
+	waitForThreads (true|false) "true"
+	timeout CDATA "0"
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+<!ELEMENT subscribe (arg*)>
+<!ATTLIST subscribe
+	listener CDATA #IMPLIED
+	bean CDATA #IMPLIED
+	method CDATA #REQUIRED
+	args CDATA #IMPLIED
+	resultArg CDATA #IMPLIED
+>
+
+<!--
+	The "event-filters" element defines all of the event-filters to be registered with the framework.
+	Event-filters can manipulate events and can abort/continue event processing.
+	Event-filters are referenced by name.
+-->
+<!ELEMENT event-filters (event-filter*)>
+<!--
+	"event-filter"
+		name - the name of the event-filter
+		type - the type of the event-filter (fully qualified path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT event-filter (parameters?)>
+<!ATTLIST event-filter 
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+
+<!--
+	The "event-handlers" element defines all of the logical elements for handling an event.
+	Event-handlers are referenced by the event property (target event name).	
+-->
+<!ELEMENT event-handlers (event-handler*)>
+<!--
+	"event-handler"
+		event - the name of the event to handle
+		access - the access attribute of the event handler (public|private)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT event-handler (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish | cache | cache-clear | call-method)*>
+<!ATTLIST event-handler 
+	event CDATA #REQUIRED 
+	access (public|private) "public"
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+
+<!--
+	The "subroutine-handlers" element defines all of the logical elements for handling an subroutine.
+	Subroutine-handlers are referenced by the subroutine property (target subroutine name).
+-->
+<!ELEMENT subroutines (subroutine*)>
+<!--
+	"subroutine-handler"
+		subroutine - the name of the subroutine to handle
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT subroutine (filter | notify | event-arg | event-mapping | view-page | announce | event-bean | redirect | execute | publish |cache | cache-clear | call-method)*>
+<!ATTLIST subroutine 
+	name CDATA #REQUIRED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+
+<!--
+	The "page-views" element defines all of the views to be registered with the framework.
+	Views are referenced by name.
+-->
+<!ELEMENT page-views (page-view | view-loader)*>
+<!--
+	"page-view"
+		name - the name of the view
+		page - relative path to the view file
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+		[useParentAppRoot] - defined if the parernt's app root should be substituted for the app root instead of the app root defined in the module
+-->
+<!ELEMENT page-view EMPTY>
+<!ATTLIST page-view 
+	name CDATA #REQUIRED
+	page CDATA #IMPLIED
+	overrideAction (useParent|addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+	useParentAppRoot (true|false) #IMPLIED
+>
+<!--
+	"view-loader"
+		type - the type of the view-loader (fully qualified path)
+-->
+<!ELEMENT view-loader (parameters?)>
+<!ATTLIST view-loader
+	type CDATA #REQUIRED
+>
+
+<!--
+	The "plugins" element defines all of the plugins to be registered with the framework.
+	Plugins are referenced by name.
+		[runParent] - a directive on when to run parent plugins when in a module (defaults to 'after')
+-->
+<!ELEMENT plugins (plugin*)>
+<!ATTLIST plugins
+	runParent (none|after|before) #IMPLIED
+>
+
+<!--
+	A "plugin" element to be registered that contains plugin points that will be executed at specified points in a request.
+		name - the name of the plugin
+		type - the type of the plugin (fully qualified CFC dot path)
+		[overrideAction] - use in override XML for module declarations to override elements that exists in the parent
+		[mapping] - used in conjunction with the overrideAction to map a differently named parent element to declaration
+-->
+<!ELEMENT plugin (parameters?)>
+<!ATTLIST plugin 
+	name CDATA #REQUIRED
+	type CDATA #IMPLIED
+	overrideAction (addFromParent) #IMPLIED
+	mapping CDATA #IMPLIED
+>
+
+
+<!--
+	Event-Handler commands.
+-->
+<!--
+	A "filter" element will apply an event-filter to the current event being handled.
+		name - the name of the filter being referenced
+-->
+<!ELEMENT filter (parameter*)>
+<!ATTLIST filter 
+	name CDATA #REQUIRED
+>
+
+<!--
+	An "notify" element will invoke a listener's method using the event and its arguments.
+		listener - the name of the listener being referenced
+		method - the name of the listener method to invoke
+		[resultKey] - the key to store the result of the method call in
+		[resultArg] - the event arg to store the result of the method call in
+-->
+<!ELEMENT notify EMPTY>
+<!ATTLIST notify 
+	listener CDATA #REQUIRED
+	method CDATA #REQUIRED
+	resultKey CDATA #IMPLIED
+	resultArg CDATA #IMPLIED
+>
+
+<!--
+	An "event-arg" element will set an argument in the current event being handled.
+	Either value or variable should be defined.
+		name - the name of the arg to set in the event
+		value - the value of the arg to set in the event
+		[variable] - a variable to set as the value in the event
+-->
+<!ELEMENT event-arg (array?, struct?)>
+<!ATTLIST event-arg 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	variable CDATA #IMPLIED
+	overwrite (true|false) "true"
+>
+
+<!--
+	An "event-mapping" element will set a temporary mapping in the framework that
+	will map one event (if announced) to another.
+		event - the name of the event to map
+		mapping - the name of the event to map to
+		[module] - the name of the module of the event to map to
+-->
+<!ELEMENT event-mapping EMPTY>
+<!ATTLIST event-mapping 
+	event CDATA #REQUIRED
+	mapping CDATA #REQUIRED
+	mappingModule CDATA #IMPLIED
+>
+
+<!--
+	A "view-page" element will invoke a view and optionally store the generated 
+	content instead of outputting it.
+		name - the name of the view being referenced
+		[contentKey] - the key to store the content produced in (instead of outputting directly)
+		[contentArg] - the event arg to store the content produced in (instead of outputting directly)
+		[append] - whether to append content to the content key (or overwrite it)
+-->
+<!ELEMENT view-page EMPTY>
+<!ATTLIST view-page 
+	name CDATA #REQUIRED
+	contentKey CDATA #IMPLIED
+	contentArg CDATA #IMPLIED
+	append (true|false) "false"
+>
+
+<!--
+	An "announce" element will broadcast an event to registered listeners.
+		event - the event name to announce
+		[module] - the module name to announce
+		[copyEventArgs] - whether or not to copy the event args of the current event into the event being announced
+-->
+<!ELEMENT announce EMPTY>
+<!ATTLIST announce
+	event CDATA #REQUIRED
+	module CDATA #IMPLIED
+	copyEventArgs (true|false) "true"
+>
+
+<!--
+	An "event-bean" element will create a bean in the event and populate the
+	bean with properties from the event.
+		name - the name of the bean in the event
+		type - the type of the bean to create
+		[fields] - the fields in the event to set in the bean
+		[reinit] - allows you to reuse and repopulate the bean if it is available in the Event object
+		[autopopulate] - sets up all bean fields and inner-beans to be populated automatically
+-->
+<!ELEMENT event-bean (field|inner-bean)*>
+<!ATTLIST event-bean
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+	fields CDATA #IMPLIED
+	reinit (true|false) "true"
+	autopopulate CDATA #IMPLIED
+>
+
+<!ELEMENT inner-bean (field|inner-bean)*>
+<!ATTLIST inner-bean
+	name CDATA #REQUIRED
+	fields CDATA #IMPLIED
+	prefix CDATA #IMPLIED
+>
+
+<!--
+	"field"
+		name - the name of the field
+		[value] - the value of the field
+		[ignore] - used to ignore the field if it comes in via an event arg, defaults to false
+-->
+<!ELEMENT field (value?)>
+<!ATTLIST field
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	ignore (true|false) "true"
+>
+
+<!--
+	A "redirect" element will send a redirect.
+		[event] - the event the redirect will relocate to
+		[module] - the module the redirect will relocate to
+		[url] - the url to redirect to
+		[args] - a comma-delimited list of event args to attach to the redirect url
+		[persist] - a boolean that allows you to persist complex event arguments across a redirect
+		[persistArgs] - a list of event args to persist across a redirect (if empty quotes or not defined - entire event is persisted)
+		[persistArgsIgnore] - a list of event args to ignore to persist across a redirect
+		[statusType] - the HTTP status code to that is sent on the redirect (permanent = 301, temporary = 302 [default], prg [post-redirect-get] = 303)
+		[route] - the url route to redirect to
+-->
+<!ELEMENT redirect (arg|persist-arg)*>
+<!ATTLIST redirect
+	event CDATA #IMPLIED
+	module CDATA #IMPLIED
+	url CDATA #IMPLIED
+	args CDATA #IMPLIED
+	persist (true|false) "false"
+	persistArgs CDATA #IMPLIED
+	persistArgsIgnore CDATA #IMPLIED
+	statusType (permanent|temporary|prg) "temporary"
+	route CDATA #IMPLIED
+>
+
+<!--
+	"persistArg"
+		name - the name of the argument
+		value - the value of the argument		
+-->
+<!ELEMENT persist-arg (value?, struct?, array?)>
+<!ATTLIST persist-arg
+	name CDATA #IMPLIED
+	value CDATA #IMPLIED
+>
+
+<!--
+	A "execute" element will execute a subroutine.
+		name - the name of the subroutine being referenced
+-->
+<!ELEMENT execute (parameter*)>
+<!ATTLIST execute 
+	subroutine CDATA #REQUIRED
+>
+
+<!--
+	A "publish" element will publish a message for listener subscriber.
+		message - the name of message to be published
+-->
+<!ELEMENT publish EMPTY>
+<!ATTLIST publish 
+	message CDATA #REQUIRED
+>
+
+<!--
+	A "cache" element stores the result of a block of commands which put data in the event object or output data.
+		[id] - an unique id for this cache block
+		[strategyName] - the name of the cache strategy to be used for this cache block (this should match a strategy specified in a CacheProperty)
+		[aliases] - the alias or list of aliases that reference this cache block
+		[criteria] - a comma delimited list of event arguments that form the cache key.
+-->
+<!ELEMENT cache (filter | notify | event-arg | view-page | event-bean | execute | publish | cache-clear | call-method)*>
+<!ATTLIST cache 
+	id CDATA #IMPLIED
+	strategyName CDATA #IMPLIED
+	aliases CDATA #IMPLIED
+	criteria CDATA #IMPLIED
+>
+
+<!--
+	A "cache-clear" element causes a cache to be completely cleared or clears a specific cache key through the use of the criteria attribute.
+		[ids] - the id or list of ids of the cache block(s) to clear
+		[aliases] - the alias or list of aliases of the cache block(s) to clear
+		[strategyNames] - the name or list of names of the cache being referenced, this name should match a cache name specified in a CacheProperty (defaults to default cache if not defined)
+		[criteria] - a comma delimited list of event arguments that form the cache key.
+		[condition] - a boolean expression that determines if the cache should be cleared
+-->
+<!ELEMENT cache-clear (criterion*)>
+<!ATTLIST cache-clear
+	ids CDATA #IMPLIED
+	aliases CDATA #IMPLIED
+	strategyNames CDATA #IMPLIED
+	criteria CDATA #IMPLIED
+	condition CDATA #IMPLIED
+>
+<!ELEMENT criterion EMPTY>
+<!ATTLIST criterion
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+	collection CDATA #IMPLIED
+>
+
+<!--
+	A "call-method" element calls a method on a object defined in the ColdSpring config that is part of the ColdSpringProperty.
+		[bean] - the object from the ColdSpring config on which the method should be called
+		[method] - the name of the method to call
+		[args] - A comma delimited list of arguments to pass in. The arguments can contain expressions like a=${event.foobar}
+		[resultArgs] - event argument to store the result of the method call
+-->
+<!ELEMENT call-method (arg*)>
+<!ATTLIST call-method
+	bean CDATA #REQUIRED
+	method CDATA #REQUIRED
+	args CDATA #IMPLIED
+	resultArg CDATA #IMPLIED
+	overwrite CDATA #IMPLIED
+>
+
+<!--
+	Broadly used tags.
+-->
+<!--
+	"arg"
+		name - the name of the argument
+		value - the value of the argument		
+-->
+<!ELEMENT arg (value?, struct?, array?)>
+<!ATTLIST arg
+	name CDATA #IMPLIED
+	value CDATA #IMPLIED
+>
+
+<!--
+	"parameters"
+		name - the name of the parameter
+		value - the value of the parameter
+-->
+<!ELEMENT parameters (parameter*)>
+<!ELEMENT parameter (value?, struct?, array?)>
+<!ATTLIST parameter 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+>
+
+<!--
+	Builds a "struct" via XML
+		name - the name of the struct key
+		[value] - the value of the struct key
+-->
+<!ELEMENT struct (key*)>
+<!ELEMENT key (value?, struct?, array?)>
+<!ATTLIST key 
+	name CDATA #REQUIRED
+	value CDATA #IMPLIED
+>
+
+<!--
+	Builds a "array" via XML
+		value - the value of the array element
+-->
+<!ELEMENT array (element*)>
+<!ELEMENT element (value?, struct?, array?)>
+<!ATTLIST element 
+	value CDATA #IMPLIED
+>
+
+<!ELEMENT value (#PCDATA)>
