@@ -226,20 +226,20 @@ Notes:
 			<!--- The URL contains the endpoint parameter. --->
 			<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Endpoint parameter provided in URL.", arguments.eventArgs) />
 			<cfreturn true />
-		<cfelse>
+		<cfelseif len(cgi.PATH_INFO)>
 			<!--- Endpoint reverse lookup for complex named endpoints --->
 			<cfloop index="endpoint" list="#structKeyList(variables.endpoints)#">
 				<cfset urlSegment = left(removeChars(cgi.PATH_INFO, 1, 1), len(endpoint)) />
-				
+
 				<cfif urlSegment EQ endpoint>
 					<cfset arguments.eventArgs[getEndpointParameter()] = urlSegment />
 					<cfset variables.log.debug("EndpointManager.isEndpointRequest(): Matched first URL item '#urlSegment#' to endpoint.", arguments.eventArgs) />
 					<cfreturn true />
 				</cfif>
 			</cfloop>
-
-			<cfreturn false />
 		</cfif>
+		
+		<cfreturn false />
 	</cffunction>
 
 	<cffunction name="handleEndpointRequest" access="public" returntype="void" output="true"
