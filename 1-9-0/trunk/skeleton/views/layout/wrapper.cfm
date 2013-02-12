@@ -1,5 +1,5 @@
 <cfsilent>
-	<cfimport prefix="view" path="/MachII/customtags/view" />
+	<cfimport prefix="view" taglib="/MachII/customtags/view" />
 
 </cfsilent>
 <cfoutput>
@@ -32,7 +32,7 @@
 		}
 		.success { color:##33FF00; }
 		.warn { color:##FF0000; }
-	</style>
+	</view:style>
 </head>
 
 <body>
