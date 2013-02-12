@@ -38,6 +38,9 @@
 		<!-- LOGGING RELATED -->
 		<!-- This will log to the screen -->
 		<!-- <property name="logging" type="MachII.logging.LoggingProperty" /> -->
+		
+		<!--  HTML HELPER PROPERTY -->
+		<property name="html" type="MachII.properties.HtmlHelperProperty" />
 	</properties>
 
 	<!-- LISTENERS -->
@@ -116,9 +119,9 @@
 	<!-- SUBROUTINES -->
 	<subroutines>
 		<subroutine name="layout.main">
-			<view-page name="header" contentArg="layout.header"/>
-			<view-page name="footer" contentArg="layout.footer"/>
-			<view-page name="wrapper"/>
+			<view-page name="layout.header" contentArg="layout.header"/>
+			<view-page name="layout.footer" contentArg="layout.footer"/>
+			<view-page name="layout.wrapper"/>
 		</subroutine>
 		
 		<!--
