@@ -74,7 +74,7 @@ Usage:
 	    		</element>
 	  		</array>
 		</parameter>
-		<parameter name="bundleCharset" value="ISO-8859-1" />
+		<parameter name="defaultCharset" value="ISO-8859-1" />
 	</parameters>
 </property>
 
@@ -130,7 +130,7 @@ is en_US.
 
 				<cfset modifiedBundles[i] = tempBundle />
 			<cfelse>
-				<cfset modifiedBundles[i] = bundle[i] />
+				<cfset modifiedBundles[i] = bundles[i] />
 			</cfif>
 		</cfloop>
 
