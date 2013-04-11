@@ -31,4 +31,5 @@
 			Return FALSE to abort the current event handler.
 			Return TRUE to continue the current event handler. --->
 	</cffunction>
+	
 </cfcomponent>
