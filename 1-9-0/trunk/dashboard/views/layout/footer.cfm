@@ -54,9 +54,9 @@ Notes:
 <div>
 	<p class="right">
 		<view:img endpoint="dashboard.serveAsset" p:file="/img/icons/help.png" width="16" height="16" alt="Help" title="Help" />
-		<view:a href="http://trac.mach-ii.com/machii">Help - Wiki, Documentation &amp; Bug Tracker</view:a>
+		<view:a href="https://github.com/Mach-II/Mach-II-Framework/wiki">Help - Wiki, Documentation &amp; Bug Tracker</view:a>
 	</p>
-	<p><view:a href="http://trac.mach-ii.com/machii/wiki/Dashboard" title="Dashboard Wiki Home">Mach-II Dashboard</view:a></p>
+	<p><view:a href="https://github.com/Mach-II/Mach-II-Framework/wiki/Dashboard" title="Dashboard Wiki Home">Mach-II Dashboard</view:a></p>
 <cfif NOT getProperty("enableLogin")>
 	<p class="red">Login has been disabled. No security is being used for the Dashboard.</p> 
 </cfif>
