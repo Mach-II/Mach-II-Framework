@@ -192,7 +192,9 @@ Notes:
 			hint="You can pass in either a struct of items or a list of event args to persist." />
 		<cfargument name="statusType" type="string" required="false" default=""
 			hint="The HTTP status type to use for the redirect (temporary, permanent or PRG)." />
-
+		<cfargument name="url" type="string" required="false" default=""
+			hint="The url to redirect to." />
+			
 		<cfset var mapping = "" />
 		<cfset var nextEvent = "" />
 		<cfset var nextModuleName = arguments.moduleName />
@@ -283,7 +285,9 @@ Notes:
 				, nextModuleName
 				, arguments.persist
 				, argsToPersist
-				, arguments.statusType) />
+				, arguments.statusType
+				, arguments.url
+				) />
 	</cffunction>
 
 	<cffunction name="redirectRoute" access="public" returntype="void" output="false"
