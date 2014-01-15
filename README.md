@@ -33,5 +33,5 @@ on new versions of Mach-II, to major code contributions - were all vital to the 
 years. To all Mach-II users and contributors, our deepest and sincerest thanks.
 
 Happy Hacking!
+Spetember 3rd, 2013
 
-Peter, Kurt, and Matt
